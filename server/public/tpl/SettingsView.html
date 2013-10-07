@@ -1,0 +1,94 @@
+<div class="row-fluid">
+    <div class="span8 ">
+        <div class="row-fluid">
+            <div class="span6 well">
+                <h4>Application settings</h4>
+                <p>
+                    <a href="#" role="button" id="reset" class="btn pull-left">Reset all settings.</a>
+                </p>
+            </div>
+            <div class="span6 well">
+                <p>Serial port name:</p>
+                <div class="input-append"><input id="serialport" name="serialPort" value="<%= serialPort %>" type="text"><button type="button" class="btn" id="serialPortSet"><i class="icon-check"></i>                    </button></div>
+            </div>
+        </div>
+        
+        <!--
+        <div class="row-fluid">
+            <div class="span12"><h4>Backup and restore</h4></div>
+        </div>
+        <div class="row-fluid">
+            <div class="span6 well">
+                <p>Backup all settings in a backup file (.tbz): <a href="/backup" role="button" class="do-backup btn">Backup</a>
+            </div>
+            <div class="span6 well">                
+            <p>Drop a backup file on the box below to restore your settings:</p>
+                <div style="width:120px; height:107px; position:relative;margin: 0px auto;">
+                        <div style="position:absolute; bottom:0;"><img id="restore-area" width="120" src="img/package-open.png"/></div>
+                </div>
+            </div>
+        </div>
+        -->
+        <div class="row-fluid">
+            <div class="span12"><h4>User interface</h4></div>
+        </div>        
+        <div class="row-fluid">
+            <div class="span4 well">
+                <p>Display time in:</p>
+                <select style="width:65%" name="timezone" >
+                    <option value="UTC" <%= timezone == "GMT" ? 'selected="selected"'  : '' %>>GMT</option>
+                    <option value="browser" <%= timezone == "browser" ? 'selected="selected"'  : '' %>>Browser timezone</option>
+                </select>
+            </div>
+            <div class="span3 well">
+                <% var palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ] %>
+                Graph color: <span id="currentcpmcolor" class="badge" style="background:<%=palette[cpmcolor]%>;width:20%;">&nbsp;</span>
+                <div class="btn-group">
+                    <a class="btn dropdown-toggle"data-toggle="dropdown">
+                        
+                        <span class="caret"></span>
+                    </a>
+                    <ul name="cpmcolor" class="dropdown-menu" role="menu">
+                        <li><a class="cpmcolor" role="menuitem"><span title="0" class="badge" style="background:#e27c48;width:100%;">&nbsp;</span></a></li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="1" class="badge" style="background:#5a3037;width:100%;">&nbsp;</span></a></li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="2" class="badge" style="background:#f1ca4f;width:100%;">&nbsp;</span></a></li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="3" class="badge" style="background:#acbe80;width:100%;">&nbsp;</span></a></li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="4" class="badge" style="background:#77b1a7;width:100%;">&nbsp;</span></a></li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="5" class="badge" style="background:#858485;width:100%;">&nbsp;</span></a></li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="6" class="badge" style="background:#d9c7ad;width:100%;">&nbsp;</span></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="span3 well">
+                Default CPM Scale:
+                <select style="width:65%" name="cpmscale" >
+                    <option value="linear" <%= cpmscale == "linear" ? 'selected="selected"'  : '' %>>Linear</option>
+                    <option value="log" <%= cpmscale == "log" ? 'selected="selected"'  : '' %>>Logarithmic</option>
+                </select>
+            </div>
+            <div class="span2 well">
+                &nbsp;
+            </div>
+        </div>
+    </div>
+    
+    <div class="span4">
+        <p>
+            Debug:
+        </p>
+        <ul>
+            <li>Serial port: <%= serialPort %></li>
+                <li>Timezone: <%= timezone %></li>
+            <li>Graph color: <%= cpmcolor %></li>
+            <li>CPM Scale: <%= cpmscale %></li>
+        </ul>
+    </div>
+</div>
+
+<div class="row-fluid status-bar">
+    <div class="span12">
+        <div class="alert alert-success" style="display: none">
+            <b>Success!</b> generic message.
+        </div>
+    </div>
+</div>

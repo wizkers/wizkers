@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="E. Lafargue, edouard@lafargue.name">
+
+    <!-- Le styles -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/bootstrap-lightbox.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap-progressbar.css" rel="stylesheet"/>
+    <link href="css/bootstrap-spinedit.css" rel="stylesheet"/>
+    <link href="css/styles.css" rel="stylesheet"> <!-- Apply my own styles last ! -->
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="img/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="img/ico/favicon.png">
+  </head>
+
+  <body>
+
+<!-- Header contents loaded by the application (menubar) -->
+<div class="header"></div>
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <!-- The div below is where the application runs -->
+        <div id="content" class="span12>">
+            
+            <p style="text-align:center;">Viewer v0.1</p>
+            <div class="spinner circles">
+                 <div></div>
+                 <div></div>
+                 <div></div>
+                 <div></div>
+                 <div></div>
+                 <div></div>
+                 <div></div>
+                 <div></div>
+            </div>
+                    
+            <p style="text-align:center;">Loading...</p>
+        
+        </div>
+    </div>
+
+<hr>
+      <footer>
+        <p>&copy; E. Lafargue 2013</p>
+      </footer>
+
+</div><!--/.fluid-container-->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="lib/date.format.js"></script>
+    <script src="lib/jquery-1.9.1.js"></script>
+    <script src="lib/underscore-min.js"></script>
+    <script src="lib/backbone-min.js"></script>
+    <script src="lib/backbone.localStorage-min.js"></script>
+    <script src="lib/bootstrap.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+	<script src="lib/flot/jquery.flot.js"></script>
+    <script src="lib/flot/jquery.flot.resize.js"></script>
+    <script src="lib/flot/jquery.flot.time.js"></script>
+    <script src="lib/flot/jquery.flot.selection.js"></script>
+
+    <script src="js/utils.js"></script>
+    <script src="js/linkmanager.js"></script>
+    <script src="js/models/settings.js"></script>
+    <script src="js/models/geigerlog.js"></script>
+    <script src="js/models/onyx.js"></script>
+    <script src="js/models/instrument.js"></script>
+    <script src="js/models/workspace.js"></script>
+    <script src="js/views/home.js"></script>
+    <script src="js/views/header.js"></script>
+    <script src="js/views/settings.js"></script>
+    <script src="js/views/about.js"></script>
+    <script src="js/views/paginator.js"></script>
+    <script src="js/views/diagnostics.js"></script>
+    <script src="js/views/logmanagement.js"></script>
+    <script src="js/views/instrument/instrumentlist.js"></script>
+    <script src="js/views/instrument/instrumentdetails.js"></script>
+    <script src="js/views/workspace/workspacelist.js"></script>
+      <!-- All our instrument drivers -->
+    <script src="js/instruments/manager.js"></script>
+  <script src="js/instruments/onyx/onyx.js"></script>
+  <script src="js/instruments/onyx/settings.js"></script>
+  <script src="js/instruments/onyx/display_live.js"></script>
+  <script src="js/instruments/onyx/linkmanager.js"></script>
+  <script src="js/instruments/fluke289/fluke.js"></script>
+  <script src="js/instruments/fluke289/display_live.js"></script>
+  <script src="js/instruments/fluke289/linkmanager.js"></script>
+  <script src="js/instruments/friedcircuits_oled/fcoled.js"></script>
+  <script src="js/instruments/friedcircuits_oled/display_live.js"></script>
+  <script src="js/instruments/friedcircuits_oled/linkmanager.js"></script>
+      
+      
+      <!-- Start the app -->
+    <script src="js/main.js"></script>
+  </body>
+</html>

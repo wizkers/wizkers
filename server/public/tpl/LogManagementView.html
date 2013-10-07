@@ -1,0 +1,108 @@
+<div class="row-fluid">
+<div class="span10">
+  <div class="row-fluid">
+      <div class="span6">
+        <p>Select device:&nbsp;<select id="currentDevice" name="device" >
+            <% _.each(devices,function(device) { %>
+                    <option <%= device.guid == selected.device ? 'selected':'' %> value="<%=device.guid%>"><%= device.devicetag %></option>
+                <% }) %>
+                </select>
+         </p>
+      </div>
+        <div class="span6">
+              <a href="#" download="onyxdata.json" role="button" class="btn btn-info ctrl-save">Save displayed log to computer</a>
+        </div>
+
+  </div> <!-- row-fluid -->
+  <div class="row-fluid">
+    <div class="span2">
+        <div class="row-fluid">
+            <div class="span12 thumbnail">
+                <p>Data points: <span id="log_size">0</span></p>
+                <p>Log start:<br><small><span id="log_start">0</span></small></p>
+                <p>Log end:<br><small><span id="log_end">0</span></small></p>
+                <!-- <p>User cal: <span id="usercal">0</span></p> -->
+            </div>
+        </div><br>
+        <div class="row-fluid">
+            <div class="span12 thumbnail">
+                <div style="float:right;"><a href="#" role="button" class="resetZoom btn btn-mini">Reset Zoom</a></div>
+                <h6>Overiew</h6>
+                <div id="overview" class="chart" style="position: relative; height:150px;cursor:crosshair;"></div>
+            </div>
+        </div><br>
+        <div class="row-fluid">
+            <div class="span12 thumbnail">
+                <p><label class="checkbox"><input id="cpmscale" type="checkbox">Log scale</label></p>
+            </div>
+        </div>
+    </div>
+    <div class="span10">
+        <div class="thumbnail">
+            <div class="locochart chart" style="position: relative; height:600px;cursor:crosshair;"></div>
+        </div>
+        <p>&nbsp;</p>
+    </div>   
+  </div>
+
+          <!--
+    <div class="row-fluid">
+        <div class="span6">
+        <p><select id="currentLog" name="session" >
+            <% _.each(deviceLogs,function(log) { %>
+                    <option <%= log.id == selected.session ? 'selected':'' %> value="<%=log.id%>"><%= log.id %></option>
+                <% }) %>            
+                    <option value="device2">Session 2</option>
+                </select>
+         </p>
+      </div>
+  </div> -->
+          <!-- row-fluid -->
+            
+    <div class="row-fluid">
+    <div class="span12">
+        
+        <table class="table table-striped table-condensed">
+            <thead>
+                <tr>
+                    <th>Display</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Name</th>
+                    <th>Data points</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% _.each(deviceLogs,function(log) { %>
+                <tr>
+                    <td><input class="logcheckbox" type="checkbox" <%= selected.sessions.indexOf(log.id) > -1  ? 'checked':'' %> value="<%=log.id%>" ></td>
+                    <td><%= new Date(log.startstamp).toUTCString() %></td>
+                    <td><%= new Date(log.stopstamp).toUTCString() %></td>
+                    <td><%= log.name %></td>
+                    <td><%= log.datapoints %></td>
+                        <td><i class="icon-remove" title="Delete"></i></td>
+                </tr>
+                <% }) %>            
+                
+                
+            </tbody>
+        </table>
+    </div>
+  </div>
+
+            
+    
+</div><!--/span-->
+
+  <div class="span2">
+      <div class="well" id="help-area">
+        <!--<img src="img/safecast_unboxed.png" width="60" style="float:right;">-->
+        <h3>Log Management</h3>
+          <p>
+              This is where you can manage the device logs - supports multiple devices, multiple log sessions.
+          </p>
+          
+      </div><!--/.well -->
+   </div><!--/span-->
+</div><!--/row-->

@@ -1,0 +1,1 @@
+https://github.com/jamesp/node-nmea

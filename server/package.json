@@ -1,0 +1,16 @@
+{
+    "name": "Viewer",
+    "description": "A web interface for Measurement instruments",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "express": "3.x",
+        "mongoose" : "3.x",
+        "socket.io": "0.9.x",
+        "serialport": "https://github.com/voodootikigod/node-serialport/tarball/master"
+    },
+    "engines": {
+        "node": "0.8.4",
+        "npm": "1.1.49"
+    }
+}

@@ -1,0 +1,73 @@
+<!-- this is added within a span9 area -->
+<div class="row-fluid">
+    <div class="span2">
+        <div class="row-fluid">
+            <div class="span12 thumbnail">
+                <p>Device tag:<br><span id="devicetag"></span>
+            </div>
+        </div><br>
+        <div class="row-fluid">
+            <br>
+        </div><br>
+        <div class="row-fluid">
+            <div class="span12 thumbnail">
+                <p><label class="checkbox"><input id="cpmscale" type="checkbox">Log scale</label></p>
+                <p><label class="checkbox"><input id="plotavg" disabled checked type="checkbox">Moving average</label></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="span10">
+        <div class="thumbnail">
+            <div class="locochart chart" style="position: relative; height:300px;"></div>
+        </div>
+        <p>&nbsp;</p>
+    </div>   
+</div>
+    
+<div class="row-fluid">
+    <div class="span12">
+        <div class="well">
+            <h6>Raw data stream</h6>
+            <textarea id="input" style="height:50px; width:98%;"></textarea>
+        </div>
+    </div>
+</div>
+
+<!-- Below are two modal dialogs, these start hidden -->
+
+<div id="dtModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <h3 id="myModalLabel">Set device tag</h3>
+  </div>
+  <div class="modal-body">
+      <p>The Device tag is not set for this Onyx. Choose a unique name below. It will be used as a nickname for the device everywhere in this application.</p>
+      <p>Device tag: <input  id="devicetagfield" value="" type="text" maxlength="32"></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" id="setdevicetag">Save</button>
+  </div>
+</div>
+
+
+<div id="dlModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="myDlModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <h3 id="myDlModalLabel">Downloading data...</h3>
+  </div>
+  <div class="modal-body">
+            <div class="spinner circles">
+                 <div></div>
+                 <div></div>
+                 <div></div>
+                 <div></div>
+                 <div></div>
+                 <div></div>
+                 <div></div>
+                 <div></div>
+            </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    <button class="btn" id="dlDismissOK" data-dismiss="modal" disabled="true" aria-hidden="true">OK</button>
+  </div>
+</div>

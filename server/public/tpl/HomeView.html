@@ -1,0 +1,34 @@
+<div class="row-fluid">
+<div class="span9">
+  <div class="row-fluid">
+      <div class="span6" id="control-area">
+        <p>
+          <a href="#" role="button" class="ctrl-connect btn btn-warning"><i class="icon-off"></i>&nbsp;Connect to Instrument</a>
+          <a href="#diagnostics" disabled role="button" class="ctrl-diag btn btn-enable-connected btn-info">Device setup</a>
+         </p>
+      </div>
+      <div class="span6">
+
+      </div>
+  </div> <!-- row-fluid -->
+<div id="liveview">
+  <div class="row-fluid">
+    <div class="span12">
+        <h2>Welcome to Viz App</h2>
+        <p>You currently have no measurment instrument selected, either because you reset your settings, or because you have no instrument defined.</p>
+        <p>Go to the "Intruments" screen by clicking on the menu link above, and either select or create an instrument. Then come back.</p>
+        <p>Current instrument ID is <%= currentInstrument %> </p>
+    </div>   
+  </div>
+</div>    
+</div><!--/span-->
+
+    <div class="span3">
+      <div class="well" id="live-area">
+          <h4>Where the live reading values will go</h4>                    
+      </div><!--/.well -->
+   </div><!--/span-->
+
+
+</div><!--/row-->
+
