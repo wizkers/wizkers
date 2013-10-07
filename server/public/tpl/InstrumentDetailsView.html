@@ -35,6 +35,21 @@
                             <span class="help-inline"></span>
                         </div>
                     </div>
+                                
+                    <div class="control-group">
+                        <label for="port" class="control-label">Port:</label>
+                        <div class="controls">
+                        <input type="text" id="port" name="port" value="<%= port %>"/>
+                            <select id="otherports" name="otherports" onChange="$('#port').val($('select#otherports').val());">
+                                <option>New port...</option>
+                                <% for(var i=0; i < ports.length; i++) { %>
+                                <option
+                                    <%= port == ports[i] ? 'selected':'' %>
+                                    value="<%= ports[i] %>"><%= ports[i] %></option>
+                                <% } %>
+                            </select>
+                        </div>  
+                    </div>
 
                     <div class="control-group">
                         <label for="description" class="control-label">Notes:</label>

@@ -47,6 +47,9 @@ deviceTypes.push(Fluke289);
 var Onyx = require('./parsers/safecast_onyx.js');
 deviceTypes.push(Onyx);
 
+var FCOled = require('./parsers/fried_usb_tester.js');
+deviceTypes.push(FCOled);
+
 /**
  * Debug: get a list of available serial
  * ports on the server - we'll use this later
@@ -72,11 +75,6 @@ require('./db.js');
  */
 var express = require('express'),
     instruments = require('./routes/instruments.js'),
-//    cars = require('./routes/cars.js'),
-    logbook = require('./routes/logbooks.js'),
-//    controllers = require('./routes/controllers.js'),
-//    accessories = require('./routes/accessories.js'),
-//    layouts = require('./routes/layouts.js'),
     settings = require('./routes/settings.js'),
     backup = require('./routes/backup.js');
 
@@ -110,12 +108,13 @@ app.delete('/instruments/:id', instruments.deleteInstrument);
  * Interface for managing instrument logbooks
  *
  */
+/**
 app.get('/locos/:id/logbook', logbook.findByLocoId);
 app.post('/logbooks', logbook.addEntry);
 app.get('/logbooks/', logbook.findAll);
 app.put('/logbooks/:id', logbook.updateEntry);
 app.delete('/logbooks/:id', logbook.deleteEntry);
-
+**/
 
 /**
  * Interface for managing the cars
@@ -285,17 +284,37 @@ io.sockets.on('connection', function (socket) {
         if (myPort)
             myPort.write(driver.output(data));
     });
-    
+
+    // Return a list of serial ports available on the
+    // server    
+    socket.on('ports', function() {
+        console.log('Request for a list of serial ports');
+        serialport.list(function (err, ports) {
+            var portlist = [];
+            for (var i=0; i < ports.length; i++) {
+                portlist.push(ports[i].comName);
+            }
+            socket.emit('ports', portlist);
+        });
+     });
+
     socket.on('driver', function(data) {
         console.log('Request to update our serial driver to ' + data);
         
         // Close the serial port if it is open:
-        //if (myPort) {
-        //    myPort.close();
-        //    portOpen = false;
-        //}
+        if (myPort) {
+            myPort.close();
+            portOpen = false;
+        }
+        
+        socket.emit('status', {portopen: portOpen});
         
         // For now, we have only a few drivers, so let's just hardcode...
+        if (data == "onyx") {
+            driver = Onyx;
+        } else if ( data == "fcoledv1" ) {
+            driver = FCOled;
+        }
         
     });
     

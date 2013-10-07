@@ -37,14 +37,13 @@ var Schema   = mongoose.Schema;
  */
 var InstrumentSchema = new Schema({
     
-        name: String,             // Used for display
-        type: String,                  // Will correspond to parsers known on the server side
-        tag: String,                           // Asset tag for the instrument (if supported)
-        uuid: String,                          // Serial number or unique ID (if supported)
-        port: String,          // Name of the port on server side
-        comment: String,  // Simple comments
-        icon: String,                          // TbD: either user-selectable, or served by server-side (linked to type)
-
+        name: String,           // Used for display
+        type: String,           // Will correspond to parsers known on the server side
+        tag: String,            // Asset tag for the instrument (if supported)
+        uuid: String,           // Serial number or unique ID (if supported)
+        port: String,           // Name of the port on server side
+        comment: String,        // Simple comments
+        icon: String,           // TbD: either user-selectable, or served by server-side (linked to type)
 });
  
 // Compile the schema by issuing the below:

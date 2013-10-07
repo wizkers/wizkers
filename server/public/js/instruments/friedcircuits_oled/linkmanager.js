@@ -18,7 +18,7 @@ var FCOledLinkManager = function(linkManager) {
     // All link managers need this function:
     //////
     this.setBackendDriver = function() {
-        lm.socket.emit('driver','onyx');
+        lm.socket.emit('driver','fcoledv1');
     }
 
     // This instrument always streams its data!

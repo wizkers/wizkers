@@ -4,15 +4,18 @@ window.InstrumentDetailsView = Backbone.View.extend({
         
         console.log(this.options.im.supportedInstruments);
         
-        // Now get a list of supported instrument names to select
-        // in the instrument type dropdown:
+        this.linkManager = this.options.lm;
         
         
     },
 
     render: function () {
+        var self = this;
         console.log("Render instrument details");
-        $(this.el).html(this.template(_.extend(this.model.toJSON(), {instypes: this.options.im.supportedInstruments})));
+        this.linkManager.getPorts();
+        this.linkManager.once('ports', function(portlist) {
+            $(self.el).html(self.template(_.extend(self.model.toJSON(), {instypes: self.options.im.supportedInstruments, ports: portlist})));
+        });
 
         return this;
     },
@@ -20,14 +23,20 @@ window.InstrumentDetailsView = Backbone.View.extend({
     
     events: {
         "change"        : "change",
+        "change #otherports" : "selectPort",
         "click .save"   : "beforeSave",
         "click .delete" : "deleteInstrument",
         "dragover #icon"     : "dragOver",
         "dragleave #icon"     : "dragLeave",
         "drop #icon" : "dropHandler"
     },
+    
+    selectPort: function(event) {
+        this.model.set({port: event.target.value});
+    },
 
     change: function (event) {
+        console.log("Instrument settings change");
         // Remove any existing alert message
         utils.hideAlert();
 
@@ -89,6 +98,7 @@ window.InstrumentDetailsView = Backbone.View.extend({
         
         this.model.save(null, {
             success: function (model) {
+                utils.showAlert('Success', 'Configuration saved', 'alert-success');
             },
             error: function () {
                 console.log('Instrument: error saving');

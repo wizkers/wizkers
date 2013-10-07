@@ -9,6 +9,11 @@ window.HomeView = Backbone.View.extend({
         this.settings = this.model;
         this.linkManager = this.options.lm;
         this.linkManager.on('status', this.updatestatus, this);  
+        
+        // Keep a reference to our instrument views to close
+        // them properly when we close
+        this.instrumentLiveView = null;
+        
     },
     
     events: {
@@ -28,9 +33,9 @@ window.HomeView = Backbone.View.extend({
                 // We have the instrument, get the correct view for it:
                 var type = ins.get('type');
                 console.log('Ins type: ' + type );
-                var liveView = self.manager.getInstrumentType(type).getLiveDisplay({model: self.settings, lm: self.linkManager});
-                $('#liveview').html(liveView.el);
-                liveView.render();
+                self.instrumentLiveView = self.manager.getInstrumentType(type).getLiveDisplay({model: self.settings, lm: self.linkManager});
+                $('#liveview').html(self.instrumentLiveView.el);
+                self.instrumentLiveView.render();
             }});
         }
         
@@ -44,6 +49,9 @@ window.HomeView = Backbone.View.extend({
         
         this.linkManager.off('status', this.updatestatus);
         this.linkManager.off('input', this.showInput);
+        
+        if (typeof(this.instrumentLiveView) != undefined)
+            this.instrumentLiveView.onClose();
 
         // Restore the settings since we don't want them to be saved when changed from
         // the home screen

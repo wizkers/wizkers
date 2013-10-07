@@ -5,19 +5,19 @@
 var AppRouter = Backbone.Router.extend({
 
     routes: {
-        ""                  : "home",
+        ""                      : "home",
         "instruments"           : "listInstruments",
         "instruments/page/:page": "listInstruments",
         "instruments/add"       : "addInstrument",
         "instruments/:id"       : "instrumentDetails",
-        "workspaces"           : "listWorkspaces",
-        "workspaces/page/:page": "listWorkspaces",
-        "workspaces/add"       : "addWorkspace",
-        "workspaces/:id"       : "workspaceDetails",
-        "logmgt"            : "logmanagement",
-        "settings"          : "settings",
-        "diagnostics"       : "diagnostics",
-        "about"             : "about",
+        "workspaces"            : "listWorkspaces",
+        "workspaces/page/:page" : "listWorkspaces",
+        "workspaces/add"        : "addWorkspace",
+        "workspaces/:id"        : "workspaceDetails",
+        "logmgt"                : "logmanagement",
+        "settings"              : "settings",
+        "diagnostics"           : "diagnostics",
+        "about"                 : "about",
     },
     
     currentView: null,
@@ -177,7 +177,8 @@ var AppRouter = Backbone.Router.extend({
 
 
 utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'DiagnosticsView', 'SettingsView', 'LogManagementView', 'InstrumentDetailsView',
-                    'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView',
+                    'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView', 'instruments/FCOledLiveView',
+                    
                    ], function() {
     app = new AppRouter();
     

@@ -4,7 +4,7 @@
 
 window.Settings = Backbone.Model.extend({
 
-    localStorage: new Backbone.LocalStorage("org.aerodynes.onyxdisplay.Settings"), // Unique name within your app.
+    localStorage: new Backbone.LocalStorage("org.aerodynes.vizapp.Settings"), // Unique name within your app.
 
     initialize: function () {
     },

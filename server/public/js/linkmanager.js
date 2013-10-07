@@ -19,11 +19,17 @@ var linkManager = function() {
     this.setDriver = function(driver) {
         this.driver = driver;
         
-        // Todo: we need to set the backend driver there too
         this.driver.setBackendDriver();
+          this.socket.emit('ports','');
         
         console.log('Link manager: updated link manager driver for current instrument');
-    }
+    };
+    
+    this.initConnection = function() {
+        if (typeof(this.driver) != undefined) {
+            this.driver.setBackendDriver();
+        }
+    };
     
     // Careful: in those functions, "this" is the socket.io context,
     // hence the use of self.
@@ -41,12 +47,20 @@ var linkManager = function() {
         // Tell anyone who would be listening that status is updated
         self.trigger('status', data);
     }
+    
+    this.processPorts = function(data) {
+        self.trigger('ports',data);
+    }
         
     this.controllerCommandResponse = function() {
     }
     
     this.requestStatus = function(data) {
         this.socket.emit('portstatus','');
+    }
+    
+    this.getPorts = function() {
+        this.socket.emit('ports','');        
     }
     
     this.openPort = function(port) {
@@ -80,6 +94,8 @@ var linkManager = function() {
     // Initialization code:
     this.socket.on('serialEvent', this.processInput);
     this.socket.on('status', this.processStatus);
+    this.socket.on('connection', this.initConnection);
+    this.socket.on('ports', this.processPorts);
     // Initialize connexion status on the remote controller
     this.socket.emit('portstatus','');
     // Start a 3-seconds interval watchdog to listen for input:

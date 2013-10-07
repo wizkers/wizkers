@@ -54,6 +54,8 @@ window.InstrumentListItemView = Backbone.View.extend({
         var theID = this.model.id;
         // Now store the instrument ID in our settings:
         this.options.settings.set({currentInstrument:theID});
+        // Update our settings to use the correct port: 
+        this.options.settings.set({ serialPort: this.model.get('port')});
         this.options.settings.save();
         app.navigate('/', true);
         return false;
