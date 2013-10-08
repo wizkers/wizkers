@@ -138,32 +138,6 @@ h5 {
 
 
 
-/**
- * Power controller styling
- */
-.power {
-    border-width: 1px;  
-    border-style: solid;  
-    border-color: #333 #333 #777 #333;  
-    min-width: 40px;
-    background-image: -moz-linear-gradient(left, #f5f5f5, #f9f9f9);
-    background-image: -webkit-gradient(linear, 0 0, 100% 0, from(#f5f5f5), to(#f9f9f9));
-    background-image: -webkit-linear-gradient(left, #f5f5f5, #f9f9f9);
-    background-image: -o-linear-gradient(left, #f5f5f5, #f9f9f9);
-    background-image: linear-gradient(to right, #f5f5f5, #f9f9f9);
-    background-repeat: repeat-x;
-    box-shadow: inset 0 1px 5px 0px rgba(0, 0, 0, .5),   
-                 0 1px 0 0px rgba(250, 250, 250, .5);
-    cursor: pointer;
-}
-
-.power[disabled="disabled"] {
-    background-color:#eeeeee;
-    background-image: none;
-    box-shadow: none;
-    border-color: #cccccc;
-    cursor: default;
-}
 
 /**
  * Flot charts styling
@@ -231,6 +205,7 @@ h5 {
     font-size: 24px;
     font-weight: bold;
     float: right;
+}
 
 .well h3 {
     margin-top: 0px;
@@ -242,6 +217,46 @@ h5 {
   -webkit-box-shadow: 0px 0px 20px rgba(0,136,204,0.8);
   -moz-box-shadow: 0px 0px 20px rgba(0,136,204,0.8);
   box-shadow: 0px 0px 20px rgba(0,136,204,0.8);
+}
+    
+    
+    
+/**
+ * My battery icon (original work by E. Lafargue.
+ * 
+ */
+
+.battery {
+        min-width:  30px;
+        min-height: 13px;
+        max-width: 150px;
+        max-height: 66px;
+        background-size: cover;
+        background-repeat: no-repeat;    
+}
+
+.battery-100 {
+        background-image: url(../img/battery-full.png);
+}
+
+.battery-80 {
+        background-image: url(../img/battery-80.png);
+}
+
+.battery-60 {
+        background-image: url(../img/battery-60.png);
+}
+
+.battery-40 {
+        background-image: url(../img/battery-40.png);
+}
+
+.battery-20 {
+        background-image: url(../img/battery-20.png);
+}
+
+.battery-0 {
+        background-image: url(../img/battery-empty.png);
 }
 
 /* From: http://www.verious.com/tutorial/how-to-create-loading-spinners-using-css3-animations/ */

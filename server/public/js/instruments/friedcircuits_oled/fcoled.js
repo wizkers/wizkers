@@ -16,6 +16,14 @@ var FCOledInstrument = function() {
         return new FCOledLiveView(arg);
     };
     
+        // This is a Backbone view
+    // This is a numeric display
+    this.getNumDisplay = function(arg) {
+        return new FCOledNumView(arg);
+    };
+    
+
+    
     // A smaller widget (just a graph)
     this.getLiveWidget = function(arg) {
         return new FCOledLiveWidget(arg);

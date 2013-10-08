@@ -17,9 +17,6 @@ window.OnyxLiveView = Backbone.View.extend({
         this.livepoints = 300; // 5 minutes @ 1 Hz
         this.livedata = [];
         
-        this.sessionStartStamp = new Date().getTime();
-        this.maxreading = 0;
-        this.minreading = -1;
         
         // Keep another array for moving average over the last X samples
         // In Live view, we fix this at 1 minute. In log management, we will
@@ -93,7 +90,7 @@ window.OnyxLiveView = Backbone.View.extend({
     },
     
     onClose: function() {
-        console.log("Home view closing...");
+        console.log("Onyx live view closing...");
         
         this.linkManager.off('status', this.updatestatus);
         this.linkManager.off('input', this.showInput);
@@ -182,6 +179,7 @@ window.OnyxLiveView = Backbone.View.extend({
                     // Show the device tag set dialog
                     $('#dtModal',this.el).modal('show');
                 } else {
+                    $('#devicetag',this.el).html(data.devicetag);
                     this.linkManager.startLiveStream();
                     this.deviceinitdone = true;
                 }

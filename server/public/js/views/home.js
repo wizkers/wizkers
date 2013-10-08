@@ -13,6 +13,7 @@ window.HomeView = Backbone.View.extend({
         // Keep a reference to our instrument views to close
         // them properly when we close
         this.instrumentLiveView = null;
+        this.instrumentNumericView = null;
         
     },
     
@@ -36,6 +37,14 @@ window.HomeView = Backbone.View.extend({
                 self.instrumentLiveView = self.manager.getInstrumentType(type).getLiveDisplay({model: self.settings, lm: self.linkManager});
                 $('#liveview').html(self.instrumentLiveView.el);
                 self.instrumentLiveView.render();
+                
+                // Now start the numeric display (the one on the right)
+                self.instrumentNumericView = self.manager.getInstrumentType(type).getNumDisplay({model: self.settings, lm: self.linkManager});
+                if (self.instrumentNumericView != null) {
+                    $('#numview').html(self.instrumentNumericView.el);
+                    self.instrumentNumericView.render();
+                }
+
             }});
         }
         
@@ -52,6 +61,9 @@ window.HomeView = Backbone.View.extend({
         
         if (typeof(this.instrumentLiveView) != undefined)
             this.instrumentLiveView.onClose();
+        
+        if (typeof(this.instrumentNumericView) != undefined)
+            this.instrumentNumericView.onClose();
 
         // Restore the settings since we don't want them to be saved when changed from
         // the home screen

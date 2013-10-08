@@ -10,17 +10,27 @@ var serialport = require('serialport'),
 
 module.exports = {
 
-    // Should be a parser that is compliant with the type of parsers
-    // expected by serialport.    
-    parser:  serialport.parsers.readline('\n'),
-    
+    // How the device is connected on the serial port            
+    portSettings: {
+            baudRate: 115200,
+            dataBits: 8,
+            parity: 'none',
+            stopBits: 1,
+            flowControl: false,
+            // simply pass each line to our JSON streaming parser
+            // Note: the Onyx outputs json with \n at the end, so
+            // the default readline parser works fine (it separates on \r)
+            parser: serialport.parsers.readline('\n'),
+    },
+        
     // format should return a JSON structure.
     format: function(data) {
-        console.log('FC Oled Backpack - format output');
+        // console.log('FC Oled Backpack - format output');
         // Remove any carriage return
         data = data.replace('\n','');
         var fields = data.split(':');
-        // Format is :V:A:
+        // Format is :Vbus:Abus:Vload:Aload:
+        // We only return the load values:
         return { "v": fields[3], "a": fields[4] };
     },
     

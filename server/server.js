@@ -229,15 +229,7 @@ io.sockets.on('connection', function (socket) {
         //  This opens the serial port:
         if (myPort)
             myPort.close();
-        myPort = new SerialPort(data, {
-            baudRate: 115200,
-            dataBits: 8,
-            parity: 'none',
-            stopBits: 1,
-            flowControl: false,
-            // look for return, newline and ">" at the end of each data packet:
-            parser: Onyx.parser
-        });
+        myPort = new SerialPort(data, driver.portSettings);
         myPort.flush();
         console.log('Result of port open attempt: ' + myPort);
         
@@ -248,6 +240,7 @@ io.sockets.on('connection', function (socket) {
            socket.emit('status', {portopen: portOpen});
            // listen for new serial data:
            myPort.on('data', function (data) {
+               console.log(data);
                // Pass this data to our driver before sending it on the wire
                if (Debug) console.log('Raw input:\n' + Hexdump.dump(data));
                formattedData = driver.format(data);
@@ -314,6 +307,8 @@ io.sockets.on('connection', function (socket) {
             driver = Onyx;
         } else if ( data == "fcoledv1" ) {
             driver = FCOled;
+        } else if ( data == "fluke28x") {
+            driver = Fluke289;
         }
         
     });

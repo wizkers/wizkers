@@ -96,20 +96,7 @@ window.FCOledLiveView = Backbone.View.extend({
     // We get there whenever we receive something from the serial port
     showInput: function(data) {
         var self = this;
-        
-        // Update our raw data monitor
-        /**
-        var i = $('#input',this.el);
-        var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-        // Keep max 50 lines:
-        if (scroll.length > 50) {
-            scroll = scroll.slice(scroll.length-50);
-        }
-        i.val(scroll.join('\n'));
-        // Autoscroll:
-        i.scrollTop(i[0].scrollHeight - i.height());
-        **/
-        
+                
         if (data.v != undefined && data.a != undefined) {
             var v = parseFloat(data.v);
             var a = parseFloat(data.a);

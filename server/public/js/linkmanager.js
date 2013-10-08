@@ -80,11 +80,19 @@ var linkManager = function() {
     }
     
     this.startLiveStream = function() {
-        this.driver.startLiveStream();
+        if (!this.streaming) {
+            console.log("Start live stream");
+            this.driver.startLiveStream();
+            this.streaming = true;
+        }
     }
 
     this.stopLiveStream = function() {
-        this.driver.stopLiveStream();
+        if (this.streaming) {
+            console.log("Stop live stream");
+            this.driver.stopLiveStream();
+            this.streaming = false;
+        }
     }
     
     this.manualCommand = function(cmd) {

@@ -25,9 +25,11 @@ var OnyxLinkManager = function(linkManager) {
     }
 
     this.startLiveStream = function() {
-        console.log("Starting live data stream for Onyx");
-        this.livePoller = setInterval(this.getCPM, 1000);
-        this.streaming = true;
+        if (!this.streaming) {
+            console.log("Starting live data stream for Onyx");
+            this.livePoller = setInterval(this.getCPM, 1000);
+            this.streaming = true;
+        }
 
     }
     

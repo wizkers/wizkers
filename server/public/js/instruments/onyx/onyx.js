@@ -11,9 +11,15 @@ var OnyxInstrument = function() {
     };
     
     // This has to be a Backbone view
-    // This is the full screen live view (not a small widget)
+    // This is the full screen live view graph (not a small widget)
     this.getLiveDisplay = function(arg) {
         return new OnyxLiveView(arg);
+    };
+    
+    // This is a Backbone view
+    // This is a numeric display
+    this.getNumDisplay = function(arg) {
+        return new OnyxNumView(arg);
     };
     
     // A smaller widget (just a graph)
