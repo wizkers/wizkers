@@ -259,6 +259,14 @@ h5 {
         background-image: url(../img/battery-empty.png);
 }
 
+.small-list li {
+    font-size: smaller;
+}
+
+.keyboard {
+    margin: 4px;
+}
+
 /* From: http://www.verious.com/tutorial/how-to-create-loading-spinners-using-css3-animations/ */
 /* ==========================================================
  * Spinner

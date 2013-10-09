@@ -1,0 +1,120 @@
+<div class="row-fluid">
+<div class="span9">
+<div class="row-fluid">
+  <div class="well" id="diags-area">
+      <div class="row-fluid">
+          <div class="span12">
+    <button class="btn comlink" type="button" style="float:right;">Link active</button>
+    <h2>Diagnostics <button class="btn btn-info refresh" title="Refresh" type="button" ><i class="icon-refresh"></i></button>
+</h2>
+</div></div>
+      <div class="row-fluid">
+          <div class="span8">
+    <h4>Meter info</h4>
+      <ul class="small-list">
+          <li>Model: <span id="model"></span></li>
+          <li>Device Serial number: <span id="serial">n.a.</span></li>          
+          <li>Firmware version: <span id="version">n.a.</span> / <span id="mspversion"></span></li>
+          <li>Calibration date:</li>
+          <li>Calibration counter: <span id="calcounter"></span></li>
+          <li>Board ID: <span id="boardid"></span></li>
+          <li>ARM Bootloader Version:</li>
+          <li>MSP Bootloader version:</li>
+          <li>Calibration version:<span id="calversion"></span></li>
+
+      </ul>
+      </div>
+          <div class="span4  thumbnail">
+
+              <h4>Asset information:</h4>
+              
+              <div class="input-append"><span class="add-on" style="width:80px;">Operator</span><input class="span12" id="operator" value="" type="text" maxlength="32"></div>
+              <div class="input-append"><span class="add-on" style="width:80px;">Company</span><input class="span12" id="company" value="" type="text" maxlength="32"></div>
+              <div class="input-append"><span class="add-on" style="width:80px;">Site</span><input class="span12" id="site" value="" type="text" maxlength="32"></div>
+              <div class="input-append"><span class="add-on" style="width:80px;">Contact</span><input class="span12" id="contact" value="" type="text" maxlength="32"></div><br/>
+              <button class="btn setassetinfo" type="button">Update</button>
+               
+          </div>
+          </div>
+          
+      <h4>Device diagnostics</h4>
+      <p><button class="btn disptest" type="button">Display test</button>
+         <button class="btn setrtc" type="button">Sync device time</button>
+          <div class="input-append"><span class="add-on">Manual Command</span><input class="span12" id="manualcmd" value="" type="text" maxlength="32"><button type="button" class="btn" id="cmdsend"><i class="icon-check"></i></button></div>
+      </p>
+
+
+      
+  </div>
+    </div>
+    <div class="row-fluid">
+    <div class="well">
+        <textarea id="input" style="height:200px; width:98%;"></textarea>
+        </div>
+    </div>
+</div><!--/span9-->
+
+  <div class="span3">
+  <div class="well" id="port-diags">
+      <h4>Remote control</h4>
+      
+      <p>Insert screenshot here...</p>
+      
+      <div class="row-fluid">
+          <div class="span3">
+              <button class="btn keyboard" value="F1" type="button">F1</button>
+          </div>
+          <div class="span3">
+              <button class="btn keyboard" value="F2" type="button">F2</button>
+          </div>
+          <div class="span3">
+              <button class="btn keyboard" value="F3" type="button">F3</button>
+          </div>
+          <div class="span3">
+              <button class="btn keyboard" value="F4" type="button">F4</button>
+          </div>
+      </div>
+      <div class="row-fluid">
+        <div class="span3">
+            <div class="row-fluid">
+              <button class="btn keyboard" value="HOLD" type="button">HOLD</button>
+            </div>
+            <div class="row-fluid">
+              <button class="btn keyboard" value="MINMAX" type="button"><span style="font-size:smaller;">MIN MAX</span></button>
+            </div>
+        </div>
+        <div class="span2">
+              <button class="btn keyboard" value="LEFT" type="button">&lt;</button>
+        </div>  
+        <div class="span2">
+            <div class="row-fluid">
+              <button class="btn keyboard" value="UP" type="button">^</button>
+            </div>
+            <div class="row-fluid">
+              <button class="btn keyboard" value="DOWN" type="button">v</button>
+            </div>
+        </div>  
+        <div class="span2">
+              <button class="btn keyboard" value="RIGHT" type="button">&gt;</button>
+        </div>  
+        <div class="span3">
+            <div class="row-fluid">
+              <button class="btn keyboard" value="RANGE" type="button">RANGE</button>
+            </div>
+            <div class="row-fluid">
+              <button class="btn keyboard" value="INFO" type="button">INFO</button>
+            </div>
+        </div>      
+      </div>
+      <div class="row-fluid">
+            <div class="span6">
+              <button class="btn keyboard" value="ONOFF" type="button">On/Off</button>
+            </div>
+            <div class="span6">
+              <button class="btn keyboard" value="BACKLIGHT" type="button">Backlight</button>
+            </div>
+          </div>
+      
+  </div><!--/.well -->
+</div><!--/span-->
+</div><!--/row-->

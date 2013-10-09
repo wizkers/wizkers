@@ -7,6 +7,12 @@ var serialport = require('serialport'),
     SerialPort  = serialport.SerialPort;
 
 module.exports = {
+    
+    // Set a reference to the socket.io socket, used for the command
+    // queue.
+    setPortRef: function(s) {
+    },
+
         
     // How the device is connected on the serial port            
     portSettings: {

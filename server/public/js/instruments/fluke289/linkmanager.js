@@ -51,7 +51,9 @@ var Fluke289LinkManager = function(linkManager) {
     
     // Query meter for software version & serial number
     this.version = function() {
-        self.socket.emit('controllerCommand', 'ID');
+        self.socket.emit('controllerCommand', 'IM');
+        self.socket.emit('controllerCommand', 'QCCV');
+        self.socket.emit('controllerCommand', 'QCVN');
     }
     
     this.queryMeasurement = function() {
@@ -60,6 +62,21 @@ var Fluke289LinkManager = function(linkManager) {
             self.socket.emit('controllerCommand', 'QBL');
 
         self.socket.emit('controllerCommand', 'QM');
+    }
+    
+    this.getDevInfo = function() {
+        var callQueue = [ 'QMPQ operator', 'QMPQ company', 'QMPQ site', 'QMPQ contact' ];
+        var idx = 0;
+        var caller = function() {
+            self.socket.emit('controllerCommand', callQueue[idx++]);
+            if (idx < callQueue.length)
+                setTimeout(caller,50);
+        }
+        caller();    
+    }
+    
+    this.sendKeypress = function(key) {
+        self.socket.emit('controllerCommand', 'PRESS ' + key);
     }
     
     // Helper methods to format output:

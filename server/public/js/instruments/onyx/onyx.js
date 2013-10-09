@@ -27,6 +27,13 @@ var OnyxInstrument = function() {
         return new OnyxLiveWidget(arg);
     };
     
+    // A diagnostics/device setup screen
+    this.getDiagDisplay = function(arg) {
+        return null;
+        return new OnyxDiagView(arg);
+    };
+
+    
     // This has to be a link manager
     this.getLinkManager = function(arg) {
         return new OnyxLinkManager(arg);

@@ -19,6 +19,7 @@ window.HomeView = Backbone.View.extend({
     
     events: {
         "click .ctrl-connect":  "ctrlConnect",
+
     },
     
     render:function () {
@@ -56,8 +57,8 @@ window.HomeView = Backbone.View.extend({
     onClose: function() {
         console.log("Home view closing...");
         
-        this.linkManager.off('status', this.updatestatus);
-        this.linkManager.off('input', this.showInput);
+        this.linkManager.off('status', this.updatestatus, this);
+        this.linkManager.off('input', this.showInput, this);
         
         if (typeof(this.instrumentLiveView) != undefined)
             this.instrumentLiveView.onClose();
@@ -84,8 +85,6 @@ window.HomeView = Backbone.View.extend({
 
         }
     },
-
-    
 
 
     ctrlConnect: function() {

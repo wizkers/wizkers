@@ -22,6 +22,11 @@ var FCOledInstrument = function() {
         return new FCOledNumView(arg);
     };
     
+    // A diagnostics/device setup screen
+    this.getDiagDisplay = function(arg) {
+        return null;
+        return new FCOledDiagView(arg);
+    };
 
     
     // A smaller widget (just a graph)

@@ -20,8 +20,12 @@ var Fluke289Instrument = function() {
         // This is a Backbone view
     // This is a numeric display
     this.getNumDisplay = function(arg) {
-        
         return new Fluke289NumView(arg);
+    };
+    
+    // A diagnostics/device setup screen
+    this.getDiagDisplay = function(arg) {
+        return new Fluke289DiagView(arg);
     };
     
     // This has to be a link manager

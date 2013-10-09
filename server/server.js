@@ -33,7 +33,7 @@ var serialport = require('serialport'),
 
 // Utility function to get a Hex dump
 var Hexdump = require('./hexdump.js');
-var Debug = true;
+var Debug = false;
 
 
 var deviceTypes = [];
@@ -82,7 +82,7 @@ var express = require('express'),
 
 var app = express(),
     server = require('http').createServer(app),
-    io = require('socket.io').listen(server);
+    io = require('socket.io').listen(server, { log: false });
 
 app.configure(function () {
     app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
@@ -237,15 +237,23 @@ io.sockets.on('connection', function (socket) {
        myPort.on("open", function () {
            console.log('Port open');
            portOpen = true;
+           driver.setPortRef(myPort); // We need this for drivers that manage a command queue...
            socket.emit('status', {portopen: portOpen});
            // listen for new serial data:
            myPort.on('data', function (data) {
-               console.log(data);
+               //console.log(data);
                // Pass this data to our driver before sending it on the wire
                if (Debug) console.log('Raw input:\n' + Hexdump.dump(data));
-               formattedData = driver.format(data);
-               if (formattedData)
-                   socket.emit('serialEvent', formattedData);               
+               var formattedData = driver.format(data);
+               if (formattedData[0])
+                   socket.emit('serialEvent', formattedData[0]);
+               // The second argument of formattedData is true if we still have data to process in the
+               // buffer:
+               while (formattedData[1]) {
+                   formattedData = driver.format();
+                   if (formattedData[0])
+                       socket.emit('serialEvent',formattedData[0]);
+               }
            });
        });
         

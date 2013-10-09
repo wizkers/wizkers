@@ -25,7 +25,7 @@ window.Fluke289NumView = Backbone.View.extend({
         
     onClose: function() {
         console.log("Fluke289 numeric view closing...");
-        this.linkManager.off('input', this.showInput);
+        this.linkManager.off('input', this.showInput, this);
     },
     
     showInput: function(data) {

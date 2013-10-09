@@ -96,9 +96,18 @@ var AppRouter = Backbone.Router.extend({
 
 
     diagnostics: function () {
-        //$("#content").html(new DiagnosticsView({model: this.settings, lm: this.linkManager}).el);
-        this.switchView(new DiagnosticsView({model: this.settings, lm: this.linkManager}));
-        this.headerView.selectMenuItem('home-menu');
+        var self = this;
+        if (this.linkManager.connected) {
+            console.log('Switching to the instrument diagnostics view');
+            var ins = new Instrument({_id: this.settings.get('currentInstrument')});
+            ins.fetch({success: function(){
+                // We have the instrument, get the correct view for it:
+                var type = ins.get('type');
+                self.switchView(self.instrumentManager.getInstrumentType(type).getDiagDisplay({model: self.settings, lm: self.linkManager}));
+                self.headerView.selectMenuItem('home-menu');
+                }
+            });    
+        }
     },
     
     logmanagement: function() {
@@ -178,7 +187,7 @@ var AppRouter = Backbone.Router.extend({
 
 utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'DiagnosticsView', 'SettingsView', 'LogManagementView', 'InstrumentDetailsView',
                     'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView', 'instruments/FCOledLiveView',
-                    'instruments/OnyxNumView', 'instruments/FCOledNumView', 'instruments/Fluke289NumView',
+                    'instruments/OnyxNumView', 'instruments/FCOledNumView', 'instruments/Fluke289NumView', 'instruments/Fluke289DiagView',
                    ], function() {
     app = new AppRouter();
     
