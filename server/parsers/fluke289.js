@@ -41,11 +41,11 @@ module.exports = {
     timeoutTimer: null,
     
     // Link state handling
-    currentLinkstate: 0,
+    currentLinkstate: 0,     // see linkstate above
     currentStatusByte: 0x00,
     
     // Binary buffer handling:
-    currentProtoState: 0,
+    currentProtoState: 0,          // see protostate above
     inputBuffer: new Buffer(2048),
     ibIdx:0,
     
@@ -102,20 +102,24 @@ module.exports = {
             data.copy(this.inputBuffer,this.ibIdx);
             this.ibIdx += data.length;
         }
-        console.log("--- input buffer is now:");
-        console.log(this.inputBuffer);
+        //console.log("--- input buffer is now:");
+        //console.log(this.inputBuffer);
         var start=-1, stop=-1;
         if (this.currentProtoState == this.protostate.stx) {
             start = this.sync(this.inputBuffer, this.ibIdx);      
-            console.log("Found STX: " + start);
-            this.currentProtoState = this.protostate.etx;
-            // Realign our buffer (we can copy over overlapping regions):
-            this.inputBuffer.copy(this.inputBuffer,0,start);
-            this.ibIdx -= start;
+            //console.log("Found STX: " + start);
+            if (start > -1) {
+                this.currentProtoState = this.protostate.etx;
+                // Realign our buffer (we can copy over overlapping regions):
+                this.inputBuffer.copy(this.inputBuffer,0,start);
+                this.ibIdx -= start;
+            } else {
+                return ['', false];
+            }
         }
         if (this.currentProtoState == this.protostate.etx) {
             stop = this.etx(this.inputBuffer, this.ibIdx);
-            console.log("Found ETX: " + stop);
+            //console.log("Found ETX: " + stop);
             this.currentProtoState = this.protostate.stx;
         }
         if (stop == -1) {
@@ -128,6 +132,9 @@ module.exports = {
         
         // Check for control byte value:
         switch(controlByte) {
+            case 0x05: // CRC Error
+                console.log("CRC Error on packet coming from computer");
+                break;
             case 0x07: // Response to link open request
                 console.log("Link open ***");
                 this.currentLinkstate = this.linkstate.open;
@@ -158,7 +165,6 @@ module.exports = {
             this.inputBuffer.copy(packet,0,3,stop-4);
             console.log("New packet ready:");
             console.log(packet);
-            console.log("We would process the payload here");
             response = this.processPacket(packet);
         }
 
@@ -353,7 +359,7 @@ module.exports = {
         
         //tmp = new Buffer("1002031003","hex");
         var crc = crcCalc.fluke_crc(tmp);
-        console.log('crc: ' + crc.toString(16));
+        //console.log('crc: ' + crc.toString(16));
         var finalBuffer = new Buffer(tmp.length+2);
         tmp.copy(finalBuffer,0);
         finalBuffer.writeUInt16LE(crc,finalBuffer.length-2);
