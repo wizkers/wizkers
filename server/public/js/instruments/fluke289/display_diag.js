@@ -23,6 +23,7 @@ window.Fluke289DiagView = Backbone.View.extend({
         "click #nameset": "setdevtag",
         "keypress input#devname": "setdevtag",
         "click .keyboard": "presskey",
+        "click .takeshot": "screenshot",
     },
     
     onClose: function() {
@@ -43,6 +44,7 @@ window.Fluke289DiagView = Backbone.View.extend({
         if (this.linkManager.connected) {
             this.linkManager.driver.getDevInfo();
             this.linkManager.driver.version();
+            this.linkManager.driver.takeScreenshot();
         }
     },
     
@@ -64,6 +66,10 @@ window.Fluke289DiagView = Backbone.View.extend({
         if ((event.target.id == "manualcmd" && event.keyCode==13) || (event.target.id != "manualcmd"))
             this.linkManager.manualCommand($('#manualcmd',this.el).val());
     },
+    
+    screenshot: function() {
+        this.linkManager.driver.takeScreenshot();
+    },
 
     setdevtag: function(event) {
         if ((event.target.id == "devname" && event.keyCode==13) || (event.target.id != "devname"))
@@ -79,6 +85,7 @@ window.Fluke289DiagView = Backbone.View.extend({
         i.scrollTop(i[0].scrollHeight - i.height());
         
         if (data.screenshot != undefined) {
+            // Incoming data from a screenshot
             var height = data.height;
             var width = data.width;
             var cnv = $('#screenshot')[0];
@@ -86,26 +93,18 @@ window.Fluke289DiagView = Backbone.View.extend({
             ctx.canvas.width = width;
             ctx.canvas.height = height;
             var imageData = ctx.createImageData(width,height);
-            
-            var hexToRgb = function(hex) {
-                var r = hex >> 16;
-                var g = hex >> 8 & 0xff;
-                var b = hex  & 0xff;
-                
-                // return [255,255,255,255];
-                return [r,g,b];
-            };
-            
+                        
             // Now fill the canvas using our B&W image:
             for (var y = 0; y < height; y++) {
                 for (var x = 0; x < width; x++) {
                     // Find pixel index in imageData:
                     var idx = (y * width + x) * 4;;
-                    var rgba = hexToRgb(Number(data.screenshot[y][x]));
-                    imageData.data[idx] = rgba[0];
-                    imageData.data[idx+1] = rgba[1];
-                    imageData.data[idx+2] = rgba[2];
-                    imageData.data[idx+3] = 255;
+                    if(Number(data.screenshot[y][x] == 1)) {
+                        imageData.data[idx] = 255;
+                        imageData.data[idx+1] = 255;
+                        imageData.data[idx+2] = 255;
+                    } // No need for ==0 because imageData.data is initialized at 0
+                   imageData.data[idx+3] = 255;
                 }
             }
             ctx.putImageData(imageData,0,0);

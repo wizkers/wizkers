@@ -1,10 +1,20 @@
 /*
  * Parser for the Fluke 289 multimeter
  *
- * Binary Protocol version.
+ * This parser implements the Fluke binary link layer protocol
+ * and is pretty robust. You send it data coming from the serial port
+ * by calling "format" and you send it commands to send to the serial port
+ * by calling "output".
+ *
+ * This driver is partially asynchronous, and it takes care or sending
+ * results on the socket after parsing incoming data. Results are output
+ * in json format.
+ *
+ * Due to the nature of the Fluke protocol, a lot of commands have to be
+ * explicitely defined and handled in this driver.
+ * 
  *
  */
-
 var serialport = require('serialport'),
     SerialPort  = serialport.SerialPort,
     crcCalc = require('../crc-calc.js'),
@@ -48,15 +58,16 @@ module.exports = {
     pendingCommand : "CMD",
     pendingCommandArgument: "",
     noReplyCommands: [ "LEDT", "PRESS"  ], // Some commands don't send a reply except the ACK code
-    timeoutTimer: null,
 
-    // We manage a command queue on the link:
+    // We manage a command queue on the link, as well as a
+    // command timeout:
     commandQueue: [],
+    timeoutTimer: null,
 
     // See 'state' above. This is session level
     currentState: 0,
 
-    // Pointer to the serial port, since we need to handle it directly for
+    // Pointer to the serial port & socket, since we need to handle it directly for
     // some protocol link layer operations and command queue management
     port: null,
     socket: null,
@@ -67,12 +78,13 @@ module.exports = {
     
     // Binary buffer handling:
     currentProtoState: 0,          // see protostate above
-    inputBuffer: new Buffer(2048),
+    inputBuffer: new Buffer(2048), // meter never sends more than 1024 bytes anyway
     ibIdx:0,
     
     // Special handling of the bitmap download case: we get the whole
-    // bitmap in two calls, so the variable below stores the 1st part
-    tmpBitmap: null,
+    // bitmap in several calls, so the variable below stores the parts
+    tmpBitmap: [],
+    tmpBitmapIndex: 0,
     
     // Set a reference to the serial port, used for the command
     // queue.
@@ -98,26 +110,25 @@ module.exports = {
             parity: 'none',
             stopBits: 1,
             flowControl: false,
-            // simply pass each line to our JSON streaming parser
-            // Note: the Onyx outputs json with \n at the end, so
-            // the default readline parser works fine (it separates on \r)
-            //parser: serialport.parsers.readline('\r'),
-            //parser: flukePacketParser(),
             parser: serialport.parsers.raw,
     },
     
     // Returns starting index of 0x10 0x02
      sync: function(buffer, maxIndex) {
         for (var i= 0; i < maxIndex-1; i++) {
+            if (buffer[i] == 0x10 && buffer[i+1] == 0x10)
+                i += 2;
             if (buffer[i] == 0x10 && buffer[i+1] == 0x02) {
                 return i;
             }
         }
         return -1;
     },
-        
-    etx : function(buffer, maxIndex) {
+
+    etx: function(buffer, maxIndex) {
         for (var i= 0; i < maxIndex-3; i++) {
+            if (buffer[i] == 0x10 && buffer[i+1] == 0x10)
+                i += 2;
             if (buffer[i] == 0x10 && buffer[i+1] == 0x03) {
                 return i+4; // Include CRC
             }
@@ -153,9 +164,9 @@ module.exports = {
     format: function(data, callback) {
         if (data) {
             // First of all, append the incoming data to our input buffer:
-            this.debug("--- received new data --- appended at index " + this.ibIdx);
-            this.debug(data);
-            this.debug("---");        
+            this.debug("--- Received new serial data --- appended at index " + this.ibIdx);
+            // this.debug(data);
+            // this.debug("---");        
             data.copy(this.inputBuffer,this.ibIdx);
             this.ibIdx += data.length;
         }
@@ -164,7 +175,7 @@ module.exports = {
         var start=-1, stop=-1;
         if (this.currentProtoState == this.protostate.stx) {
             start = this.sync(this.inputBuffer, this.ibIdx);      
-            console.log("Found STX: " + start);
+            this.debug("Found STX: " + start);
             if (start > -1) {
                 this.currentProtoState = this.protostate.etx;
                 // Realign our buffer (we can copy over overlapping regions):
@@ -177,7 +188,7 @@ module.exports = {
         }
         if (this.currentProtoState == this.protostate.etx) {
             stop = this.etx(this.inputBuffer, this.ibIdx);
-            console.log("Found ETX: " + stop);
+            this.debug("Found ETX: " + stop);
             this.currentProtoState = this.protostate.stx;
         }
         if (stop == -1) {
@@ -303,8 +314,8 @@ module.exports = {
                         // The meter only returns data in chunks of 1024 bytes
                         // so we need to request two QLCDBM commands to get
                         // everything
-                        if (this.pendingCommandArgument == "0") {
-                            this.tmpBitmap = buffer;
+                            this.debug("Processing screenshot part 1");
+                            this.tmpBitmap.push(buffer);
                             // Find start of data (after #0)
                             var idx = 0;
                             while(idx < buffer.length) {
@@ -312,13 +323,20 @@ module.exports = {
                                     break;
                                 idx++;
                             }
-                            var dataLength = buffer.length-(idx+2);
-                            this.commandQueue.push("QLCDBM " + dataLength);
-                        } else {
-                            // Bitmap processing is asynchronous...
-                            this.processBitmap(this.tmpBitmap, buffer);
-                            this.debug("Bitmap processing requested");
-                        }
+                            this.tmpBitmapIndex += buffer.length-(idx+2);
+                            this.debug("Received " + buffer.length + " bytes of Bitmap data");
+                            // if we got a full buffer (1024 bytes), then we are not at the end
+                            // of our bitmap
+                            if (buffer.length == 1024) {
+                                this.debug("Requesting more bitmap data");
+                                // Bitmap processing is asynchronous...
+                                this.commandQueue.push("QLCDBM " + this.tmpBitmapIndex);
+                            } else {
+                                // Got less than a full buffer, this means we have the
+                                // complete bitmap:
+                                this.processBitmap();
+                                this.debug("Bitmap processing requested");
+                            }
                         break;
                     default:
                         commandProcessed = false;
@@ -474,47 +492,52 @@ module.exports = {
     // We now have a gzipped BMP contained in those two buffers
     // we need to decompress it, turn it into a structure that is intelligible
     // to a browser.
-    processBitmap: function(buffer1, buffer2) {
+    processBitmap: function() {
         var self = this;
+        var bmBuffers = [];
         // First of all, we need to remove the remaining framing:
-        // Bitmaps start with "0\r0 #0" before the actual gzipped blob
-        var bmBuffer1 = new Buffer(buffer1.length-6);
-        buffer1.copy(bmBuffer1,0,6);
-        //this.debug("GZipped data buffer 1:");
-        //console.log(Hexdump.dump(bmBuffer1.toString("binary")));
+        for (var i=0; i < this.tmpBitmap.length; i++) {
+            // Find start of data (after #0)
+            var idx = 0;
+            while(idx < this.tmpBitmap[i].length) {
+                if (this.tmpBitmap[i][idx]== 0x23 && this.tmpBitmap[i][idx+1] == 0x30)
+                    break;
+                idx++;
+            }        
+            var bmBuffer = new Buffer(this.tmpBitmap[i].length-(idx+2));
+            this.tmpBitmap[i].copy(bmBuffer,0,idx+2);
+            bmBuffers.push(bmBuffer);
+            //this.debug("GZipped data buffer length is " + bmBuffer.length);
+            //this.debug(Hexdump.dump(bmBuffer2.toString("binary")));
+        }
 
-        // Find start of data (after #0)
-        var idx = 0;
-        while(idx < buffer2.length) {
-            if (buffer2[idx]== 0x23 && buffer2[idx+1] == 0x30)
-                break;
-            idx++;
-        }        
-        var bmBuffer2 = new Buffer(buffer2.length-(idx+2));
-        buffer2.copy(bmBuffer2,0,idx+2);
-        //this.debug("GZipped data buffer 2:");
-        //console.log(Hexdump.dump(bmBuffer2.toString("binary")));
+        // Flush our temp buffer
+        this.tmpBitmap = [];
+        this.tmpBitmapIndex = 0;
         
-        // Now assemble both buffers & dezip:
-        var bmBuffer = Buffer.concat([bmBuffer1, bmBuffer2]);
-        //this.debug("Result buffer: ");
+        // Now assemble buffers & dezip:
+        var bmBuffer = Buffer.concat(bmBuffers);
+        this.debug("Result buffer is " + bmBuffer.length + " bytes long.");
         //this.debug(Hexdump.dump(bmBuffer.toString("binary")));
-        var rgbData = null;
+        
         zlib.unzip(bmBuffer, function(err, buffer) {
             if (!err) {
-                //console.log(Hexdump.dump(buffer.toString("binary")));
-                // Dump the result to a temporary file:
+                // Also copy the result to a temporary file:
                 var stream = fs.createWriteStream('screenshot.bmp');
                 stream.write(buffer);
                 stream.end();
                 
-                // Package the BMP bitmap into an RGBA image to send
-                // to a canvas element:
-                var bm = new Bitmap(buffer);
-                bm.init();
-                var data =bm.getData();
-                self.debug("Bitmap data length:\n" + data.length);
-                self.sendData({screenshot: bm.getData(), width:bm.getWidth(), height: bm.getHeight()});
+                try {
+                    // Package the BMP bitmap into an RGBA image to send
+                    // to a canvas element:
+                    var bm = new Bitmap(buffer);
+                    bm.init();
+                    var data =bm.getData();
+                    self.debug("Bitmap data length:\n" + data.length);
+                    self.sendData({screenshot: data, width:bm.getWidth(), height: bm.getHeight()});
+                } catch (err) {
+                    self.debug("Something went wrong during bitmap decoding, data was probably corrupted ?");
+                }
             }           
         });
     },

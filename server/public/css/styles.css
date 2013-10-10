@@ -267,6 +267,10 @@ h5 {
     margin: 4px;
 }
 
+.keyboard-area div {
+    text-align: center;
+}
+
 /* From: http://www.verious.com/tutorial/how-to-create-loading-spinners-using-css3-animations/ */
 /* ==========================================================
  * Spinner

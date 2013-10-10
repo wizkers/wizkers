@@ -75,6 +75,10 @@ var Fluke289LinkManager = function(linkManager) {
         caller();    
     }
     
+    this.takeScreenshot = function() {
+        self.socket.emit('controllerCommand', 'QLCDBM 0');
+    }
+    
     this.sendKeypress = function(key) {
         self.socket.emit('controllerCommand', 'PRESS ' + key);
     }

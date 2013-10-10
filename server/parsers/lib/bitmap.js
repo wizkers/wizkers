@@ -100,7 +100,6 @@ Bitmap.prototype.getData = function (){
     line = ((line / 4) + 1) * 4;
   }
 
-  console.log("Bit count per pixel: " + bitCount);
     
   var rgbaData = [];
   var dataPos = this.dataPos;
@@ -562,9 +561,13 @@ Bitmap.prototype.mapColor = function(bmpBuf, bitCount){
       var bin = paletteValue.toString(2);
       bin = new Array(9 - bin.length).join('0') + bin;      
       for(var j = 0; j < bin.length; ++j){
+        // Speed up and compress output (E. Lafargue for my Viewer app)
+        '0' == bin.substring(j,j+1) ? colorData.push(0) : colorData.push(1);
+        /**
         var paletteIndex = parseInt(bin.substring(j, j + 1), 10);
         var palette = this.colorPalette[paletteIndex];
         colorData.push(this.mapRGBA(palette.rgbRed, palette.rgbGreen, palette.rgbBlue, -1));
+        **/
       }
     }
     return colorData;

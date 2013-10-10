@@ -55,12 +55,13 @@
 </div><!--/span9-->
 
   <div class="span3">
-  <div class="well" id="port-diags">
+  <div class="well keyboard-area" id="port-diags">
+      <button class="btn takeshot" type="button" style="float:right;"><i class="icon-refresh"></i></button>
       <h4>Remote control</h4>
-      
-      <canvas id="screenshot"></canvas>
-      
-      <div class="row-fluid">
+      <div class="row-fluid thumbnail">
+          <canvas id="screenshot" style="width:320px; height:240px;" class="takeshot"></canvas>
+      </div>
+      <div class="row-fluid keyboard-area">
           <div class="span3">
               <button class="btn keyboard" value="F1" type="button">F1</button>
           </div>
@@ -74,7 +75,7 @@
               <button class="btn keyboard" value="F4" type="button">F4</button>
           </div>
       </div>
-      <div class="row-fluid">
+      <div class="row-fluid keyboard-area">
         <div class="span3">
             <div class="row-fluid">
               <button class="btn keyboard" value="HOLD" type="button">HOLD</button>
@@ -106,7 +107,7 @@
             </div>
         </div>      
       </div>
-      <div class="row-fluid">
+      <div class="row-fluid keyboard-area">
             <div class="span6">
               <button class="btn keyboard" value="ONOFF" type="button">On/Off</button>
             </div>
