@@ -238,22 +238,24 @@ io.sockets.on('connection', function (socket) {
            console.log('Port open');
            portOpen = true;
            driver.setPortRef(myPort); // We need this for drivers that manage a command queue...
+           driver.setSocketRef(socket);
            socket.emit('status', {portopen: portOpen});
            // listen for new serial data:
            myPort.on('data', function (data) {
-               //console.log(data);
-               // Pass this data to our driver before sending it on the wire
+               // Pass this data to on our driver
                if (Debug) console.log('Raw input:\n' + Hexdump.dump(data));
-               var formattedData = driver.format(data);
-               if (formattedData[0])
-                   socket.emit('serialEvent', formattedData[0]);
+                driver.format(data);
+
+//               var formattedData = driver.format(data);
+//               if (formattedData[0])
+//                   socket.emit('serialEvent', formattedData[0]);
                // The second argument of formattedData is true if we still have data to process in the
                // buffer:
-               while (formattedData[1]) {
-                   formattedData = driver.format();
-                   if (formattedData[0])
-                       socket.emit('serialEvent',formattedData[0]);
-               }
+//               while (formattedData[1]) {
+//                   formattedData = driver.format();
+//                   if (formattedData[0])
+//                       socket.emit('serialEvent',formattedData[0]);
+//               }
            });
        });
         
