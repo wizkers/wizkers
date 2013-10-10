@@ -16,14 +16,12 @@ window.Fluke289DiagView = Backbone.View.extend({
     
     events: {
         "click .refresh": "refresh",
-        "click .disptest": "disptest",
         "click .setrtc": "setrtc",
         "click #cmdsend": "sendcmd",
         "keypress input#manualcmd": "sendcmd",
-        "click #nameset": "setdevtag",
-        "keypress input#devname": "setdevtag",
         "click .keyboard": "presskey",
         "click .takeshot": "screenshot",
+        "click .setassetinfo": "setassetinfo",
     },
     
     onClose: function() {
@@ -53,9 +51,6 @@ window.Fluke289DiagView = Backbone.View.extend({
         this.linkManager.driver.sendKeypress(val);
     },
     
-    disptest: function() {
-        this.linkManager.controllerCommand.displaytest();
-    },
 
     setrtc: function() {
         this.linkManager.controllerCommand.settime();
@@ -70,19 +65,31 @@ window.Fluke289DiagView = Backbone.View.extend({
     screenshot: function() {
         this.linkManager.driver.takeScreenshot();
     },
-
-    setdevtag: function(event) {
-        if ((event.target.id == "devname" && event.keyCode==13) || (event.target.id != "devname"))
-            this.linkManager.controllerCommand.setdevicetag($('#devname',this.el).val());
+    
+    setassetinfo: function() {
+        this.linkManager.driver.setDevInfo(
+            $('#operator').val(),
+            $('#company').val(),
+            $('#site').val(),
+            $('#contact').val()
+        );
     },
 
     showInput: function(data) {
         // Blink the indicator to show we're getting data
-        $('.comlink', this.el).toggleClass('btn-success');
+        //$('.comlink', this.el).toggleClass('btn-success');
         var i = $('#input',this.el);
         i.val(i.val() + JSON.stringify(data) + '\n');
         // Autoscroll:
         i.scrollTop(i[0].scrollHeight - i.height());
+        
+        if (!data.error) {
+            $('.commandstatus', this.el).html("<i class=\"icon-ok icon-white\"></i>&nbsp;Command OK")
+                .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
+        } else {
+            $('.commandstatus', this.el).html("<i class=\"icon-warning-sign icon-white\"></i>&nbsp;COMMAND ERROR")
+                .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
+        }
         
         if (data.screenshot != undefined) {
             // Incoming data from a screenshot

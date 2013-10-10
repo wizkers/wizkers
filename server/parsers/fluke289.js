@@ -55,9 +55,9 @@ module.exports = {
     
     // We keep track of the last sent command for which we are
     // expecting a response, to enable parsing of the response:
-    pendingCommand : "CMD",
+    pendingCommand : "",
     pendingCommandArgument: "",
-    noReplyCommands: [ "LEDT", "PRESS"  ], // Some commands don't send a reply except the ACK code
+    noReplyCommands: [ "LEDT", "PRESS", "MPQ"  ], // Some commands don't send a reply except the ACK code
 
     // We manage a command queue on the link, as well as a
     // command timeout:
@@ -96,6 +96,17 @@ module.exports = {
     setSocketRef: function(s) {
         console.log("Setting socket reference: " + s);
         this.socket = s;
+        
+        // The port & socket at set at startup, so we also
+        // reset the state of our driver here:
+        this.currentLinkstate = 0;
+        this.currentStatusByte = 0x00;
+        this.currentProtoState = 0;
+        this.ibIdx = 0;
+        this.tmpBitmapIndex = 0;
+        this.commandQueue = [];
+        this.currentState = 0;
+        this.pendingCommand = "";
     },
     
     sendData: function(data) {
@@ -161,7 +172,7 @@ module.exports = {
     
     // format should return a JSON structure.
     // data is a buffer. format handles LLP management
-    format: function(data, callback) {
+    format: function(data) {
         if (data) {
             // First of all, append the incoming data to our input buffer:
             this.debug("--- Received new serial data --- appended at index " + this.ibIdx);
@@ -183,7 +194,6 @@ module.exports = {
                 this.ibIdx -= start;
             } else {
                 return;
-                // return ['', false];
             }
         }
         if (this.currentProtoState == this.protostate.etx) {
@@ -194,7 +204,6 @@ module.exports = {
         if (stop == -1) {
             // We are receiving a packet but have not reached the end yet
             return;
-            // return ['', false];
         }
         // We have reached the end of the packet: copy the packet to a new buffer
         // for processing, and realign the input buffer:
@@ -403,10 +412,8 @@ module.exports = {
                 }
             }
             this.currentState = this.state.idle;     
-        } else {
-            this.currentState = this.state.idle;
-            response = { "error":true };
         }
+        
         // If we have more commands in the queue, now is the time to process them
         if (this.commandQueue.length && this.currentState == this.state.idle) {
             var cmd = this.commandQueue.pop();
@@ -418,6 +425,7 @@ module.exports = {
     
     waitTimeout: function(self) {
         self.debug("Timeout waiting for command response");
+        self.sendData({error:true});
         self.currentState = self.state.idle;
         // We timed out waiting for a command, process the next one in the queue if there is one
         if (self.commandQueue.length) {

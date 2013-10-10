@@ -67,6 +67,8 @@ var Fluke289LinkManager = function(linkManager) {
     this.getDevInfo = function() {
         var callQueue = [ 'QMPQ operator', 'QMPQ company', 'QMPQ site', 'QMPQ contact' ];
         var idx = 0;
+        // Be nice to the device and stage the queries (our driver manages a command queue, so it
+        // is not strictly necessary but hey, let's be cool).
         var caller = function() {
             self.socket.emit('controllerCommand', callQueue[idx++]);
             if (idx < callQueue.length)
@@ -74,6 +76,22 @@ var Fluke289LinkManager = function(linkManager) {
         }
         caller();    
     }
+    
+    this.setDevInfo = function(operator, company, site, contact) {
+        // Remove double quotes
+        operator = operator.replace(/"/g,'');
+        company = company.replace(/"/g,'');
+        site = site.replace(/"/g,'');
+        contact = contact.replace(/"/g,'');
+        if (operator != '')
+            self.socket.emit('controllerCommand', 'MPQ operator,"' + operator + '"');
+        if (company != '')
+            self.socket.emit('controllerCommand', 'MPQ company,"' + company + '"');
+        if (site != '')
+            self.socket.emit('controllerCommand', 'MPQ site,"' + site + '"');
+        if (contact != '')
+            self.socket.emit('controllerCommand', 'MPQ contact,"' + contact + '"');
+    };
     
     this.takeScreenshot = function() {
         self.socket.emit('controllerCommand', 'QLCDBM 0');

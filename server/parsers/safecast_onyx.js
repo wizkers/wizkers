@@ -8,9 +8,13 @@ var serialport = require('serialport'),
 
 module.exports = {
     
-    // Set a reference to the socket.io socket, used for the command
-    // queue.
+    // Set a reference to the socket.io socket and port
+    socket: null,
+    
     setPortRef: function(s) {
+    },
+    setSocketRef: function(s) {
+        this.socket = s;
     },
 
         
@@ -35,14 +39,14 @@ module.exports = {
            // and transfer as a log rather than raw:
            try {
                var log = JSON.parse(data.substring(cmd.length+3) );
-               return log;
+               this.socket.emit('serialEvent', log);
            } catch (err) {
                console.log("Could not parse log packet");
            }
         } else {
            // Some commands now return JSON
            try {
-                    return JSON.parse(data);
+                    this.socket.emit('serialEvent', JSON.parse(data));
            } catch (err) {
                console.log('Not able to parse JSON');
                // Not JSON, return it anway:

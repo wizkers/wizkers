@@ -4,7 +4,7 @@
   <div class="well" id="diags-area">
       <div class="row-fluid">
           <div class="span12">
-    <button class="btn comlink" type="button" style="float:right;">Link active</button>
+    <button class="btn commandstatus" type="button" style="float:right;">Idle...</button>
     <h2>Diagnostics <button class="btn btn-info refresh" title="Refresh" type="button" ><i class="icon-refresh"></i></button>
 </h2>
 </div></div>
@@ -32,14 +32,13 @@
               <div class="input-append"><span class="add-on" style="width:80px;">Company</span><input class="span12" id="company" value="" type="text" maxlength="32"></div>
               <div class="input-append"><span class="add-on" style="width:80px;">Site</span><input class="span12" id="site" value="" type="text" maxlength="32"></div>
               <div class="input-append"><span class="add-on" style="width:80px;">Contact</span><input class="span12" id="contact" value="" type="text" maxlength="32"></div><br/>
-              <button class="btn setassetinfo" type="button">Update</button>
+              <button class="btn setassetinfo" type="button" style="float:right;">Update</button>
                
           </div>
           </div>
           
       <h4>Device diagnostics</h4>
-      <p><button class="btn disptest" type="button">Display test</button>
-         <button class="btn setrtc" type="button">Sync device time</button>
+      <p><button class="btn setrtc" type="button">Sync device time</button>
           <div class="input-append"><span class="add-on">Manual Command</span><input class="span12" id="manualcmd" value="" type="text" maxlength="32"><button type="button" class="btn" id="cmdsend"><i class="icon-check"></i></button></div>
       </p>
 

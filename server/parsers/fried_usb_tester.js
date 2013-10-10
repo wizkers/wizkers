@@ -10,9 +10,13 @@ var serialport = require('serialport'),
 
 module.exports = {
     
-        // Set a reference to the socket.io socket, used for the command
-    // queue.
+    // Set a reference to the socket.io socket and port
+    socket: null,
+    
     setPortRef: function(s) {
+    },
+    setSocketRef: function(s) {
+        this.socket = s;
     },
 
 
@@ -37,7 +41,8 @@ module.exports = {
         var fields = data.split(':');
         // Format is :Vbus:Abus:Vload:Aload:
         // We only return the load values:
-        return { "v": fields[3], "a": fields[4] };
+        var res = { "v": fields[3], "a": fields[4] };
+        this.socket.emit('serialEvent',res);
     },
     
     // output should return a string, and is used to format
