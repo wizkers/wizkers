@@ -15,6 +15,7 @@ var Fluke289LinkManager = function(linkManager) {
     var streaming = false;
     var livePoller = null; // Reference to the timer for live streaming
     this.battCheck = 0;
+    this.ledState = "OFF";
 
 
     //////
@@ -40,6 +41,7 @@ var Fluke289LinkManager = function(linkManager) {
             this.streaming = false;
         }
     }
+    
     
     //////
     // End of standard API
@@ -96,6 +98,18 @@ var Fluke289LinkManager = function(linkManager) {
     this.takeScreenshot = function() {
         self.socket.emit('controllerCommand', 'QLCDBM 0');
     }
+    
+    this.toggleLed = function() {
+        (self.ledState == "OFF") ? self.ledState="ON":self.ledState="OFF";
+        self.socket.emit('controllerCommand', 'LEDT ' + self.ledState);
+        if (self.ledState == "ON")
+            return true;
+        return false;
+    }
+    
+    this.off = function() {
+        self.socket.emit('controllerCommand', 'OFF');
+    }                                        
     
     this.sendKeypress = function(key) {
         self.socket.emit('controllerCommand', 'PRESS ' + key);

@@ -117,9 +117,9 @@ window.Fluke289LiveView = Backbone.View.extend({
                     this.linkManager.startLiveStream();
                     this.deviceinitdone = true;
                 }
-                this.linkManager.driver.owner();
+                // this.linkManager.driver.owner();
             } else {
-                this.linkManager.driver.owner();
+                // this.linkManager.driver.owner();
             }
             
         } else {

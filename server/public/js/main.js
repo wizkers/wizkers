@@ -185,7 +185,7 @@ var AppRouter = Backbone.Router.extend({
 });
 
 
-utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'DiagnosticsView', 'SettingsView', 'LogManagementView', 'InstrumentDetailsView',
+utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogManagementView', 'InstrumentDetailsView',
                     'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView', 'instruments/FCOledLiveView',
                     'instruments/OnyxNumView', 'instruments/FCOledNumView', 'instruments/Fluke289NumView', 'instruments/Fluke289DiagView',
                    ], function() {

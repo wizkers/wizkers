@@ -545,6 +545,8 @@ Bitmap.prototype.initDataPos = function(){
   }
 };
 
+// VizApp : this BMP library is modified to return optimized
+// black and white bitmap data packed as 32bit integers.
 // TODO: discards alpha every time...
 Bitmap.prototype.mapRGBA = function(r, g, b, a){
     return (r << 16) | (g << 8) | b;
@@ -556,19 +558,15 @@ Bitmap.prototype.mapColor = function(bmpBuf, bitCount){
   var colorData = [];
 
   if(this.BITCOUNT_2 == bitCount){
-    for(var i = 0; i < length; ++i){
-      var paletteValue = bmpBuf[i];
-      var bin = paletteValue.toString(2);
-      bin = new Array(9 - bin.length).join('0') + bin;      
-      for(var j = 0; j < bin.length; ++j){
+    for(var i = 0; i < length; i ++){
+       colorData.push(bmpBuf[i++] << 24 | bmpBuf[i++] << 16 | bmpBuf[i++] << 8 | bmpBuf[i]);
+      //var paletteValue = bmpBuf[i];
+      //var bin = paletteValue.toString(2);
+      //bin = new Array(9 - bin.length).join('0') + bin;      
+      //for(var j = 0; j < bin.length; ++j){
         // Speed up and compress output (E. Lafargue for my Viewer app)
-        '0' == bin.substring(j,j+1) ? colorData.push(0) : colorData.push(1);
-        /**
-        var paletteIndex = parseInt(bin.substring(j, j + 1), 10);
-        var palette = this.colorPalette[paletteIndex];
-        colorData.push(this.mapRGBA(palette.rgbRed, palette.rgbGreen, palette.rgbBlue, -1));
-        **/
-      }
+      //  '0' == bin.substring(j,j+1) ? colorData.push(0) : colorData.push(1);
+      //}
     }
     return colorData;
   }

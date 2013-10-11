@@ -8,12 +8,20 @@ window.HomeView = Backbone.View.extend({
         this.manager = this.options.im;
         this.settings = this.model;
         this.linkManager = this.options.lm;
-        this.linkManager.on('status', this.updatestatus, this);  
+        this.linkManager.on('status', this.updatestatus, this); 
+        this.linkManager.on('uniqueID', this.updateUID, this);
         
         // Keep a reference to our instrument views to close
         // them properly when we close
         this.instrumentLiveView = null;
         this.instrumentNumericView = null;
+        
+        // We manage the instrument UniqueID and storage of its
+        // properties in the home view (this is common across all
+        // instrument types in the application)
+        this.instrumentUniqueID = null;
+        
+        this.instrument = null;
         
     },
     
@@ -30,10 +38,10 @@ window.HomeView = Backbone.View.extend({
         // If we have a selected instrument, then instanciate its liveview here
         if (this.settings.get('currentInstrument') != null) {
             console.log('Create the instrument live view');
-            var ins = new Instrument({_id: this.settings.get('currentInstrument')});
-            ins.fetch({success: function(){
+            this.instrument = new Instrument({_id: this.settings.get('currentInstrument')});
+            this.instrument.fetch({success: function(){
                 // We have the instrument, get the correct view for it:
-                var type = ins.get('type');
+                var type = self.instrument.get('type');
                 console.log('Ins type: ' + type );
                 self.instrumentLiveView = self.manager.getInstrumentType(type).getLiveDisplay({model: self.settings, lm: self.linkManager});
                 $('#liveview').html(self.instrumentLiveView.el);
@@ -45,6 +53,9 @@ window.HomeView = Backbone.View.extend({
                     $('#numview').html(self.instrumentNumericView.el);
                     self.instrumentNumericView.render();
                 }
+                
+                // Enable the "Connect" button now that we are ready
+                $('.ctrl-connect', this.el).removeAttr('disabled');
 
             }});
         }
@@ -58,7 +69,8 @@ window.HomeView = Backbone.View.extend({
         console.log("Home view closing...");
         
         this.linkManager.off('status', this.updatestatus, this);
-        this.linkManager.off('input', this.showInput, this);
+        this.linkManager.off('uniqueID', this.updateUID, this);
+
         
         if (typeof(this.instrumentLiveView) != undefined)
             this.instrumentLiveView.onClose();
@@ -70,6 +82,21 @@ window.HomeView = Backbone.View.extend({
         // the home screen
         this.model.fetch();
     },
+        
+    updateUID: function(uid) {
+        console.log('Received a uniqueID for this instrument: ' + uid);
+        var savedUID = this.instrument.get('uuid');
+        console.log('Our instrument type is ' + this.instrument.get('type'));
+        if (savedUID == "") {
+            this.instrument.set('uuid',uid);
+            this.instrument.save();
+        } else
+        if (savedUID != uid) {
+            alert("Oops, this is a new instrument of the same model, please create another entry in the instruments screen");
+        }
+        // Now, we are sure our instrument is linked to a UID, so we are able to save logs
+        // in our backend database, that are uniquely linked to this instrument.
+    },
 
     updatestatus: function(data) {
         // Depending on port status, update our controller
@@ -78,6 +105,10 @@ window.HomeView = Backbone.View.extend({
             $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Disconnect instrument")
                 .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
             $('.btn-enable-connected', this.el).removeAttr('disabled');
+            
+            if (this.instrumentUniqueID == null) {
+                this.linkManager.getUniqueID();
+            }
         } else {
             $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Connect to instrument")
                 .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
@@ -91,13 +122,14 @@ window.HomeView = Backbone.View.extend({
         var self = this;
         if ($('.ctrl-connect', this.el).attr('disabled'))
             return;
-        $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Connecting...").addClass('btn-warning').removeClass('btn-success')
-                                   .removeClass('btn-danger').attr('disabled', true);
+        $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Connecting...").addClass('btn-warning')
+                                   .removeClass('btn-success').removeClass('btn-danger').attr('disabled', true);
         // First, get serial port settings (assume Serial for now)
         var port = this.model.get('serialPort');
         console.log('Opening serial on port ' + port);
         if (port != null ) {
                 if (!self.linkManager.connected) {
+                    self.instrumentUniqueID = null; // Just in case we change the instrrument
                     self.linkManager.openPort(port);
                 } else {
                     self.linkManager.closePort(port);

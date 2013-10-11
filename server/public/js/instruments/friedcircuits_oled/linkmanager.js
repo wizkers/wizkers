@@ -30,6 +30,7 @@ var FCOledLinkManager = function(linkManager) {
         return false;
     }
     
+    
     //////
     // End of standard API
     //////

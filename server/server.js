@@ -245,17 +245,6 @@ io.sockets.on('connection', function (socket) {
                // Pass this data to on our driver
                if (Debug) console.log('Raw input:\n' + Hexdump.dump(data));
                 driver.format(data);
-
-//               var formattedData = driver.format(data);
-//               if (formattedData[0])
-//                   socket.emit('serialEvent', formattedData[0]);
-               // The second argument of formattedData is true if we still have data to process in the
-               // buffer:
-//               while (formattedData[1]) {
-//                   formattedData = driver.format();
-//                   if (formattedData[0])
-//                       socket.emit('serialEvent',formattedData[0]);
-//               }
            });
        });
         
@@ -286,6 +275,12 @@ io.sockets.on('connection', function (socket) {
         console.log('Controller command: ' + data);
         if (myPort)
             myPort.write(driver.output(data));
+    });
+    
+    // Request a unique identifier to our driver
+    socket.on('uniqueID', function() {
+        console.log("Unique ID requested by HTML app");
+        driver.sendUniqueID();
     });
 
     // Return a list of serial ports available on the

@@ -38,6 +38,10 @@ var linkManager = function() {
         self.lastInput = new Date().getTime();
     };
     
+    this.sendUniqueID = function(uid) {
+        self.trigger('uniqueID', uid);
+    }
+    
     this.processStatus = function(data) {
         if (data.portopen) {
             self.connected = true;
@@ -72,6 +76,16 @@ var linkManager = function() {
         this.socket.emit('closeport',port);
     }
     
+    // This needs to return some sort of unique identifier for the device,
+    // if supported. Device type + this uniqueID are used to uniquely identify
+    // instruments in the application.
+    //
+    // Implementation mainly occurs at the backend driver level, which is required
+    // to emit a "uniqueID" message when this method is called:
+    this.getUniqueID = function() {
+        self.socket.emit('uniqueID');
+    }
+
     
     this.wdCall = function() {
         var ts = new Date().getTime();
@@ -104,6 +118,7 @@ var linkManager = function() {
     this.socket.on('status', this.processStatus);
     this.socket.on('connection', this.initConnection);
     this.socket.on('ports', this.processPorts);
+    this.socket.on('uniqueID', this.sendUniqueID);
     // Initialize connexion status on the remote controller
     this.socket.emit('portstatus','');
     // Start a 3-seconds interval watchdog to listen for input:

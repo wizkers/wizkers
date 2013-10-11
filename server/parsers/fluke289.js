@@ -11,7 +11,7 @@
  * in json format.
  *
  * Due to the nature of the Fluke protocol, a lot of commands have to be
- * explicitely defined and handled in this driver.
+ * explicitly defined and handled within the driver.
  * 
  *
  */
@@ -57,7 +57,7 @@ module.exports = {
     // expecting a response, to enable parsing of the response:
     pendingCommand : "",
     pendingCommandArgument: "",
-    noReplyCommands: [ "LEDT", "PRESS", "MPQ"  ], // Some commands don't send a reply except the ACK code
+    noReplyCommands: [ "LEDT", "PRESS", "MPQ", "SAVNAME", "MP" ], // Some commands don't send a reply except the ACK code
 
     // We manage a command queue on the link, as well as a
     // command timeout:
@@ -71,6 +71,7 @@ module.exports = {
     // some protocol link layer operations and command queue management
     port: null,
     socket: null,
+    uidrequested: false,
     
     // Link state handling
     currentLinkstate: 0,     // see linkstate above
@@ -99,6 +100,10 @@ module.exports = {
         
         // The port & socket at set at startup, so we also
         // reset the state of our driver here:
+        this.resetState();
+    },
+    
+    resetState: function() {
         this.currentLinkstate = 0;
         this.currentStatusByte = 0x00;
         this.currentProtoState = 0;
@@ -166,23 +171,37 @@ module.exports = {
     },
     
     debug: function(data) {
+        
         console.log(data);
     },
-
     
-    // format should return a JSON structure.
-    // data is a buffer. format handles LLP management
+
+    // Called when the HTML app needs a unique identifier.
+    // this is a standardized call across all drivers.
+    // For the Fluke, the UID is the serial number, so this is
+    // what we will request, but we will return it inside a special
+    // message.
+    sendUniqueID: function() {
+        this.debug("Fluke289: Asking for serial number for UID request");
+        this.uidrequested = true;
+        // TODO: handle port write within this.output
+        this.port.write(this.output("QSN"));
+    },
+    
+    
+    // Link layer protocol management: receives raw data from
+    // the serial port, saves it and as soon as a complete data packet
+    // is received, forward it to the upper layer.
+    //
+    // data is a buffer
     format: function(data) {
-        if (data) {
+        if (data) { // we sometimes get called without data, to further process the
+                    // existing buffer
             // First of all, append the incoming data to our input buffer:
-            this.debug("--- Received new serial data --- appended at index " + this.ibIdx);
-            // this.debug(data);
-            // this.debug("---");        
+            this.debug("LLP: Received new serial data, appended at index " + this.ibIdx);
             data.copy(this.inputBuffer,this.ibIdx);
             this.ibIdx += data.length;
         }
-        //console.log("--- input buffer is now:");
-        //console.log(this.inputBuffer);
         var start=-1, stop=-1;
         if (this.currentProtoState == this.protostate.stx) {
             start = this.sync(this.inputBuffer, this.ibIdx);      
@@ -211,31 +230,35 @@ module.exports = {
         this.debug("Control byte: " + controlByte.toString(16));
         
         // Check for control byte value:
+        // I was not able to fully understand the logic of this byte...
         switch(controlByte) {
             case 0x05: // CRC Error
-                this.debug("CRC Error on packet coming from computer");
+                this.debug("LLP: CRC Error on packet coming from computer");
                 break;
             case 0x07: // Response to link open request
-                this.debug("Link open ***");
+                this.debug("LLP: Link open");
                 this.currentLinkstate = this.linkstate.open;
                 break;
             case 0x0b: // Error (?)
-                this.debug("Link closed - error **");
+                this.debug("LLP: Link closed - error (resetting LLP)");
+                this.resetState(); // Reset our state, we have lost our sync...
                 this.currentLinkstate = this.linkstate.closed;
                 break;
             case 0x01: // Command reception acknowledge
             case 0x41:
-                this.debug("Command ACK received...");
+                this.debug("LLP: Command ACK received");
                 break;
             case 0x20: // Need to send an Acknowledge
                 // Send packet with 0x21
                 // - just send the prepackaged data...
+                this.debug("LLP: Sending ACK");
                 this.port.write(Buffer("10022110032138","hex"));
                 this.currentStatusByte = 0x40;
                 break;
             case 0x60:
                 // Send packet with 0x61
                 // - just send the prepackaged data...
+                this.debug("LLP: Sending ACK");
                 this.port.write(Buffer("1002611003573e","hex"));
                 this.currentStatusByte = 0x00;
                 break;
@@ -247,10 +270,10 @@ module.exports = {
             var escapedPacket = new Buffer(stop-7);
             this.inputBuffer.copy(escapedPacket,0,3,stop-4);
             // One last thing before the packet is ready: 0x10 is escaped,
-            // so we need to replace any instance of 0x10 0x10 by a single
-            // 0x10
+            // so we need to replace any instance of 0x10 0x10 in the buffer
+            // by a single 0x10
             var packet = this.unescape(escapedPacket);
-            this.debug("New packet ready:");
+            this.debug("LLP: New packet ready:");
             this.debug(packet);
             response = this.processPacket(packet);
         }
@@ -267,17 +290,21 @@ module.exports = {
         this.sendData(response);
     },
         
+    // processPacket is called by format once a packet is received, for actual
+    // processing and sending over the socket.io pipe
     processPacket: function(buffer) {    
-        this.debug('Fluke 289 - Packet received - ');
+        this.debug('Fluke 289 - Packet received - execting it to be a response to ' + this.pendingCommand);
         if (this.timeoutTimer) { // Disarm watchdog
             clearTimeout(this.timeoutTimer);
             this.timeoutTimer = null;
         }
         
-        
-        // Fluke 289 ASCII protocol is CSV separated.
-        // We use the previous command name to undserstand what
-        // we should be expecting.
+        // We process in two stages:
+        // 1. Check the response code
+        // 2. Parse the response data
+        //  Response data parsing is split in two:
+        //    2.1 If expected response is binary, parse it
+        //    2.2 If expected response is ASCII, parse it        
         var response = {};
         if (this.currentState == this.state.wait_ack) {            
             // Get the response code from the buffer: in case the response
@@ -287,6 +314,7 @@ module.exports = {
             switch (data[0]) {
                 case "0": // OK
                     // Some commands don't return anything else than an ACK, identify them here
+                    // for performance reasons (skips all the processing below...)
                     if (this.noReplyCommands.indexOf(this.pendingCommand) != -1) {
                         this.currentState = this.state.idle;
                     } else {
@@ -316,7 +344,9 @@ module.exports = {
         
         if (this.currentState == this.state.wait_response) {
             var commandProcessed = false;
+            //////////////////
             // First, process binary replies
+            //////////////////
             switch(this.pendingCommand) {
                     case "QLCDBM":
                         commandProcessed = true;
@@ -352,7 +382,10 @@ module.exports = {
                         break;
             }
 
-            if (!commandProcessed) {            
+            //////////////////
+            // Then process ASCII replies
+            //////////////////
+            if (!commandProcessed && ! (data[1] == undefined)) {
                 // Below are ASCII replies, so it's time to
                 // do the split on CSV fields:
                 var fields = data[1].split(',');
@@ -404,12 +437,37 @@ module.exports = {
                                         break;
                             }
                             break;
+                        case "QMEMLEVEL":
+                            response.memlevel = data[1];
+                            break;
+                        case "QSN":
+                            response.serial = data[1];
+                            if (this.uidrequested) {
+                                console.log("Sending uniqueID message");
+                                this.socket.emit('uniqueID','' + data[1]);
+                                this.uidrequested = false;
+                            }
+                            break;
+                        case "QSAVNAME":
+                            response.savname = { id: this.pendingCommandArgument, value:data[1] };
+                            break;
+                        case "QSLS": // TODO: confirm this ?
+                            response.savedlogs = {
+                                record: fields[0],  // This is a log session
+                                minmax: fields[1],
+                                peak: fields[2],
+                                measurement: fields[3]
+                            };
+                            break;
                         default:
                             // We don't know what we received, just
                             // pass it on:
                             response.raw = data[1];
                             break;
                 }
+            }
+            if (data[1] == undefined) {
+                    console.log("WARNING: no return value for " + this.pendingCommand + ", you should add it to the noReplyCommands list");
             }
             this.currentState = this.state.idle;     
         }
@@ -420,6 +478,9 @@ module.exports = {
             this.debug("Command queue: dequeuing command " + cmd );
             this.port.write(this.output(cmd));
         }
+        this.debug("Sending response ");
+        this.debug(response);
+        // TODO: move sending on socket in here
         return response;
     },
     
@@ -450,6 +511,7 @@ module.exports = {
             this.currentLinkstate = this.linkstate.wantconnect;
             var buf = new Buffer("1002031003a28e","hex");
             self.commandQueue.push(data);
+            this.debug("Link closed: requested link open, queued command (" + data + ")");
             return buf;
         }
         if (this.currentLinkstate == this.linkstate.wantconnect) {
@@ -525,7 +587,7 @@ module.exports = {
         
         // Now assemble buffers & dezip:
         var bmBuffer = Buffer.concat(bmBuffers);
-        this.debug("Result buffer is " + bmBuffer.length + " bytes long.");
+        this.debug("Compressed bitmap data is " + bmBuffer.length + " bytes long.");
         //this.debug(Hexdump.dump(bmBuffer.toString("binary")));
         
         zlib.unzip(bmBuffer, function(err, buffer) {
@@ -534,17 +596,18 @@ module.exports = {
                 var stream = fs.createWriteStream('screenshot.bmp');
                 stream.write(buffer);
                 stream.end();
-                
+                self.debug("Decompress successful, bitmap data length is " + buffer.length);
                 try {
                     // Package the BMP bitmap into an RGBA image to send
                     // to a canvas element:
                     var bm = new Bitmap(buffer);
                     bm.init();
-                    var data =bm.getData();
-                    self.debug("Bitmap data length:\n" + data.length);
+                    var data = bm.getData();
+                    self.debug("Sending bitmap to application");
+                    self.debug(data);
                     self.sendData({screenshot: data, width:bm.getWidth(), height: bm.getHeight()});
                 } catch (err) {
-                    self.debug("Something went wrong during bitmap decoding, data was probably corrupted ?");
+                    self.debug("Something went wrong during bitmap decoding, data was probably corrupted ?\n" +err);
                 }
             }           
         });

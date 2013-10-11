@@ -32,6 +32,15 @@ module.exports = {
             // the default readline parser works fine (it separates on \r)
             parser: serialport.parsers.readline('\n'),
     },
+    
+    // Called when the HTML app needs a unique identifier.
+    // this is a standardized call across all drivers.
+    // This particular device does not support this concept, so we
+    // always return the same
+    sendUniqueID: function() {
+        this.socket.emit('uniqueID','00000000 (n.a.)');
+    },
+
         
     // format should return a JSON structure.
     format: function(data) {

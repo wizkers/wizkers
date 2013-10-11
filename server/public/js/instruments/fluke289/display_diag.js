@@ -22,6 +22,8 @@ window.Fluke289DiagView = Backbone.View.extend({
         "click .keyboard": "presskey",
         "click .takeshot": "screenshot",
         "click .setassetinfo": "setassetinfo",
+        "click .toggleled": "toggleled",
+        "click .switchoff": "switchoff",
     },
     
     onClose: function() {
@@ -49,6 +51,19 @@ window.Fluke289DiagView = Backbone.View.extend({
     presskey: function(event) {
         var val = event.currentTarget.value;
         this.linkManager.driver.sendKeypress(val);
+        setTimeout(this.linkManager.driver.takeScreenshot,150);
+    },
+    
+    toggleled: function() {
+        if (this.linkManager.driver.toggleLed()) {
+            $('.toggleled', this.el).addClass('btn-success');
+        } else {
+            $('.toggleled', this.el).removeClass('btn-success');
+        }
+    },
+    
+    switchoff: function() {
+        this.linkManager.driver.off();
     },
     
 
@@ -102,11 +117,13 @@ window.Fluke289DiagView = Backbone.View.extend({
             var imageData = ctx.createImageData(width,height);
                         
             // Now fill the canvas using our B&W image:
+            // Our data is a 320x40 array of 32bit integers that store 32 pixels
+            // each. (32*40 = 240)
             for (var y = 0; y < height; y++) {
                 for (var x = 0; x < width; x++) {
                     // Find pixel index in imageData:
                     var idx = (y * width + x) * 4;;
-                    if(Number(data.screenshot[y][x] == 1)) {
+                    if (data.screenshot[y][Math.floor(x/32)] & (1 << ((31-x)%32))) {
                         imageData.data[idx] = 255;
                         imageData.data[idx+1] = 255;
                         imageData.data[idx+2] = 255;

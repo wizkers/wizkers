@@ -1,6 +1,9 @@
 // Log management.
 // 
 // Our model is the settings object.
+//
+//  This needs to turn into a dispatcher that displays log management
+// for the currently selected device type.
 
 window.LogManagementView = Backbone.View.extend({
 

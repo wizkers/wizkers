@@ -55,11 +55,18 @@
                         <label for="description" class="control-label">Notes:</label>
 
                         <div class="controls">
-                            <textarea id="description" name="description" style="width: 90%;" rows="6"><%= comment %></textarea>
+                            <textarea id="comment" name="comment" style="width: 90%;" rows="6"><%= comment %></textarea>
                         </div>
                     </div>
-                </div>    
+                <div class="control-group">
+                    <label></label>
+                    <div class="controls">
+                        <h4>Instrument information</h4>
+                    <p>Unique ID: <span id="uniqueid"><%= uuid %></span></p>
+                        </div>
+                </div>
 
+                </div>
                 
 
                 <div class="span4">

@@ -43,12 +43,14 @@ window.Instrument = Backbone.Model.extend({
 
     defaults: {
         name: "Friendly name",             // Used for display
-        type: "Fluke289",                  // Will correspond to parsers known on the server side
+        type: "Fluke289",                  // Corresponds to parsers known on the server side as well
         tag: "",                           // Asset tag for the instrument (if supported)
         uuid: "",                          // Serial number or unique ID (if supported)
         port: "/dev/tty.usb1234",          // Name of the port on server side
         comment: "enter your notes here",  // Simple comments
         icon: "",                          // TbD: either user-selectable, or served by server-side (linked to type)
+        liveviewspan: 600,                 // Width of live view
+        liveviewlogscale: false,                // Should live view display as a log scale by default ?
     }
 });
 

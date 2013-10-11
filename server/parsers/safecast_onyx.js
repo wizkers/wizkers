@@ -10,8 +10,11 @@ module.exports = {
     
     // Set a reference to the socket.io socket and port
     socket: null,
+    port: null,
+    uidrequested: false,
     
     setPortRef: function(s) {
+        this.port = s;
     },
     setSocketRef: function(s) {
         this.socket = s;
@@ -31,6 +34,16 @@ module.exports = {
             parser: serialport.parsers.readline(),
     },
     
+    // Called when the HTML app needs a unique identifier.
+    // this is a standardized call across all drivers.
+    // This particular device does not support this concept, so we
+    // always return the same
+    sendUniqueID: function() {
+        this.uidrequested = true;
+        this.port.write(this.output('{ "get": "guid" }'));
+    },
+
+    
     format: function(data) {
         //console.log('Onyx - format output');
         var cmd = data.split('\n\r\n')[0];
@@ -46,14 +59,13 @@ module.exports = {
         } else {
            // Some commands now return JSON
            try {
-                    this.socket.emit('serialEvent', JSON.parse(data));
+               var response = JSON.parse(data);
+               if (this.uidrequested && response.guid != undefined) {
+                   this.socket.emit('uniqueID',response.guid);
+               }
+                    this.socket.emit('serialEvent', response);
            } catch (err) {
                console.log('Not able to parse JSON');
-               // Not JSON, return it anway:
-               // var rawdata = data.substring(cmd.length+3);
-               //rawdata  = rawdata.replace(/\r\n$/gm,'');
-               //var raw = { cmd: cmd, raw: rawdata };
-               //socket.emit('serialEvent', raw);
            }
         }
     },
