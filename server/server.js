@@ -75,6 +75,7 @@ require('./db.js');
  */
 var express = require('express'),
     instruments = require('./routes/instruments.js'),
+    deviceLogs = require('./routes/logs.js');
     settings = require('./routes/settings.js'),
     backup = require('./routes/backup.js');
 
@@ -105,16 +106,15 @@ app.put('/instruments/:id', instruments.updateInstrument);
 app.delete('/instruments/:id', instruments.deleteInstrument);
 
 /**
- * Interface for managing instrument logbooks
+ * Interface for managing instrument logs
  *
  */
-/**
-app.get('/locos/:id/logbook', logbook.findByLocoId);
-app.post('/logbooks', logbook.addEntry);
-app.get('/logbooks/', logbook.findAll);
-app.put('/logbooks/:id', logbook.updateEntry);
-app.delete('/logbooks/:id', logbook.deleteEntry);
-**/
+app.get('/instruments/:id/logs', deviceLogs.findByInstrumentId);
+app.post('/instruments/:id/logs', deviceLogs.addEntry);
+app.get('/logs/', deviceLogs.findAll);
+app.put('/instruments/:iid/logs/:id', deviceLogs.updateEntry);
+app.delete('/instruments/:idd/logs/:id', deviceLogs.deleteEntry);
+
 
 /**
  * Interface for managing the cars

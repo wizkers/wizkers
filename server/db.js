@@ -81,6 +81,35 @@ var LogbookSchema = new Schema({
 
 mongoose.model('Logbook', LogbookSchema);
 
+
+/**
+ *  Device logs
+ *  Device logs manage generic log entries (using 'data' which can be anything)
+ */
+var DeviceLogEntrySchema = new Schema({
+    logsessionid: {type: Schema.Types.ObjectId, ref:'LogSession', default:null}, // Should match the ID of a log session model (see below)
+    timestamp: Number,    // Javascript timestamp for that entry (milliseconds since 1970)
+    comment: String,     // We will one day support commenting any data point in a log...
+    data: Schema.Types.Mixed       // Will be an object that depends on the device type
+});
+mongoose.model('DeviceLogEntry', DeviceLogEntrySchema);
+
+var LogSession = new Schema({
+       instrumentid: {type: Schema.Types.ObjectId, ref:'Instrument', default:null},
+                            // Device model
+       logtype: String,     // To be used by the device driver, in case the device supports different
+                            // kinds of logs.
+       guid: String,        // Device UUID for this log session
+       swversion: String,   // Keep track of firmware version for the log session (traceability)
+       name: String,        // Let user name logging session if necessary
+       description: String, // Likewise, let user describe the session there too.
+       startstamp: Date,
+       endstamp : Date,
+       datapoints: Number,
+});
+mongoose.model('LogSession', LogSession);
+
+
 var uri = 'mongodb://localhost/traindb';
 var connectDB = function() {
     mongoose.connect(uri, function (err) {
@@ -93,5 +122,7 @@ var connectDB = function() {
         }
     })
 };
+
+
 
 connectDB();

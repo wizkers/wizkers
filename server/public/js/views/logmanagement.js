@@ -10,31 +10,13 @@ window.LogManagementView = Backbone.View.extend({
     initialize:function () {
         this.settings = this.options.settings;        
         
-        // TODO: surely there is a better way than just retrieve
-        // everything in memory???
-        this.allDeviceLogs = new logSessions();
-        this.allDeviceLogs.fetch();
-        
-        this.allLogEntries = new geigerLog();
-        this.allLogEntries.fetch();
-        
-        // Upon init, we pre-select the 1st device in the list and preload its
-        // sessions
-        this.currentDevice = this.collection.at(0);
-        this.deviceLogs = this.allDeviceLogs.byGUID(this.currentDevice.get('guid'));
+        this.deviceLogs = this.collection;
         // TODO: refresh some of the properties of the log sessions (surely there must
         // be a better way to do this??
         for (var i = 0; i < this.deviceLogs.length; i++) {
-            this.deviceLogs.at(i).refreshDataPoints();
+            //this.deviceLogs.at(i).refreshDataPoints();
         }
         
-        this.onyxlog = null;
-        if (this.deviceLogs.length > 0) {
-            // And select the default logging session:
-            this.onyxlog = this.allLogEntries.byLogSession(this.deviceLogs.at(0).id);
-        }
-            
-        // TODO: save color palette in settings ?
         // My own nice color palette:
         this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ],
 
@@ -81,15 +63,17 @@ window.LogManagementView = Backbone.View.extend({
             if (entry.checked)
                 entries.push(entry.value);
         });
-        this.onyxlog = this.allLogEntries.byLogSessions(entries);
+        //this.onyxlog = this.allLogEntries.byLogSessions(entries);
         this.render();
     },
     
+    // TODO: not needed
     deviceDropdownSelected: function(event) {
         var target = event.target;
         this.selectDevice(target.value);
     },
     
+    // TODO: not needed
     selectDevice: function(newGuid) {
         this.currentDevice = this.collection.where({guid: newGuid})[0];
         this.deviceLogs = this.allDeviceLogs.byGUID(this.currentDevice.get('guid'));
@@ -138,7 +122,7 @@ window.LogManagementView = Backbone.View.extend({
         } else {
             selectedStuff.sessions = [];
         }
-        $(this.el).html(this.template({devices: this.collection.toJSON(), deviceLogs: this.deviceLogs.toJSON(), selected: selectedStuff}));
+        $(this.el).html(this.template({ deviceLogs: this.collection.toJSON(), selected: selectedStuff}));
         if (this.settings.get("cpmscale") == "log")
             $("#cpmscale",this.el).attr("checked",true);
         if (this.settings.get('cpmscale')=="log") {
@@ -155,7 +139,7 @@ window.LogManagementView = Backbone.View.extend({
             delete this.plotOptions.yaxis.inverseTransform;
         }
             
-            this.addPlot();
+//            this.addPlot();
 
         return this;
     },

@@ -22,11 +22,15 @@ window.HomeView = Backbone.View.extend({
         this.instrumentUniqueID = null;
         
         this.instrument = null;
+        this.recording = false;
+        this.currentLogSession = null;
         
     },
     
     events: {
         "click .ctrl-connect":  "ctrlConnect",
+        "click .ctrl-record": "ctrlRecord",
+        "click .start-record": "startRecord",
 
     },
     
@@ -70,6 +74,7 @@ window.HomeView = Backbone.View.extend({
         
         this.linkManager.off('status', this.updatestatus, this);
         this.linkManager.off('uniqueID', this.updateUID, this);
+        this.linkManager.off('serialEvent', this.recordStream, this);
 
         
         if (typeof(this.instrumentLiveView) != undefined)
@@ -118,7 +123,7 @@ window.HomeView = Backbone.View.extend({
     },
 
 
-    ctrlConnect: function() {
+    ctrlConnect: function(event) {
         var self = this;
         if ($('.ctrl-connect', this.el).attr('disabled'))
             return;
@@ -136,5 +141,80 @@ window.HomeView = Backbone.View.extend({
                 }
         }
     },
+
+    ctrlRecord: function() {
+        var self = this;
+        if ($('.ctrl-record', this.el).attr('disabled')){
+                return;
+        }
+        if (!this.recording) {
+            $('#RecordModal').modal();
+        } else {
+            $('.ctrl-record', this.el).html('<i class="icon-download"></i>&nbsp;Record session').addClass('btn-danger')
+                       .removeClass('btn-success');
+            this.linkManager.off('input', this.recordStream, this);
+            this.currentLogSession.set('endstamp', new Date().getTime());
+            this.currentLogSession.save({
+                success: function() {
+                    // TODO: show modal telling us session is recorded
+                }
+            });
+
+            this.recording = false;
+        }        
+    },
+    
+    startRecord: function() {
+        var self = this;
+        $('#RecordModal').modal('hide');
         
+        // Validate entries
+
+        // Retrieve the log sessions
+        var myLogSessions = new LogSessions([], {instrumentid: this.instrument.id});
+        myLogSessions.fetch({
+            success: function() {
+                self.currentLogSession = new LogSession();
+                self.currentLogSession.set('name', $('#recordingname',this.el).val());
+                self.currentLogSession.set('startstamp', new Date().getTime());
+                self.currentLogSession.set('logtype', 'live');
+                // No need to set instrument ID, it is updated when creating the
+                // log session
+                myLogSessions.add(self.currentLogSession);
+                self.currentLogSession.save();
+            }
+        });
+        
+/*
+// Create the logging session, get its ID
+        var sessionID = 0;
+
+        // Phase Ib: ask the user to input additional data on the log session
+        // and update the session stats (timestamp etc)
+        currentLogSession.set('guid', this.currentDevice.get('guid'));
+        currentLogSession.set('startstamp', new Date(points[0].time).getTime());
+        currentLogSession.set('stopstamp', new Date(points[points.length-1].time).getTime());                                      
+        currentLogSession.save();
+        // Now se have an ID:
+        var sessionID = currentLogSession.id;
+*/                
+        
+        /**             *******   ******** *******                 **/
+        
+        $('.ctrl-record', this.el).html("<i class=\"icon-white icon-pause\"></i>&nbsp;Recording...").addClass('btn-success')
+                   .removeClass('btn-danger').attr('disabled', false);
+        this.recording = true;
+        this.linkManager.on('input', this.recordStream, this);
+    },
+    
+    
+    // Note: this is _very_ inefficient, since we are sending data to the HTML app and then
+    // back to the recorder!
+    // TODO: refactor the whole thing, so have data stored directly on the backend with no network
+    //       activity.
+    recordStream: function(data) {
+        //console.log("Would record the stream here...");
+        
+    },
+
 });

@@ -2,12 +2,6 @@
 <div class="span10">
   <div class="row-fluid">
       <div class="span6">
-        <p>Select device:&nbsp;<select id="currentDevice" name="device" >
-            <% _.each(devices,function(device) { %>
-                    <option <%= device.guid == selected.device ? 'selected':'' %> value="<%=device.guid%>"><%= device.devicetag %></option>
-                <% }) %>
-                </select>
-         </p>
       </div>
         <div class="span6">
               <a href="#" download="onyxdata.json" role="button" class="btn btn-info ctrl-save">Save displayed log to computer</a>
@@ -76,12 +70,12 @@
             <tbody>
             <% _.each(deviceLogs,function(log) { %>
                 <tr>
-                    <td><input class="logcheckbox" type="checkbox" <%= selected.sessions.indexOf(log.id) > -1  ? 'checked':'' %> value="<%=log.id%>" ></td>
+                    <td><input class="logcheckbox" type="checkbox" <%= selected.sessions.indexOf(log.id) > -1  ? 'checked':'' %> value="<%=log._id%>" ></td>
                     <td><%= new Date(log.startstamp).toUTCString() %></td>
-                    <td><%= new Date(log.stopstamp).toUTCString() %></td>
+                    <td><%= new Date(log.endstamp).toUTCString() %></td>
                     <td><%= log.name %></td>
                     <td><%= log.datapoints %></td>
-                        <td><i class="icon-remove" title="Delete"></i></td>
+                        <td><i class="icon-remove delete_log" data-id="<%=log._id%>" title="Delete"></i></td>
                 </tr>
                 <% }) %>            
                 

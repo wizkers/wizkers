@@ -8,7 +8,7 @@
          </p>
       </div>
       <div class="span6">
-          <a href="#" role="button" disabled class="ctrl-record btn-enable-connected btn btn-danger"><i class="icon-download"></i>&nbsp;Record session</a>
+          <a href="#"  role="button" disabled class="ctrl-record btn btn-enable-connected btn-danger"><i class="icon-download"></i>&nbsp;Record session</a>
       </div>
   </div> <!-- row-fluid -->
 <div id="liveview">
@@ -28,8 +28,24 @@
           <h4>Where the live reading values will go</h4>                    
       </div><!--/.well -->
    </div><!--/span-->
-
-
 </div><!--/row-->
+
+<!-- The "Record" modal -->
+<div id="RecordModal" class="modal hide" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Session record</h3>
+  </div>
+  <div class="modal-body">
+      <div class="horizontal">
+          <span>Recording name:&nbsp;</span><input id="recordingname" name="recordingname" type="text" />
+      </div>
+</div>
+  <div class="modal-footer">
+<!--    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button> -->
+    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    <button class="btn start-record btn-primary">Start recording</button>
+  </div>
+</div>
 
 

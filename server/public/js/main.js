@@ -111,10 +111,14 @@ var AppRouter = Backbone.Router.extend({
     },
     
     logmanagement: function() {
-        var devices = new OnyxCollection();
-        devices.fetch({async:false});
-        this.switchView(new LogManagementView({collection: devices, settings: this.settings}));
-        this.headerView.selectMenuItem('management-menu');
+        var self = this;
+        // Initialize with the list of logs for the current device:
+        var logs = new LogSessions([],{instrumentid:this.settings.get('currentInstrument')});
+        logs.fetch({
+            success:function() {
+                self.switchView(new LogManagementView({collection: logs, settings: self.settings}));
+                self.headerView.selectMenuItem('management-menu');
+            }});
     },
     
     // Instrument management
