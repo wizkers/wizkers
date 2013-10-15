@@ -93,10 +93,10 @@ var linkManager = function() {
             this.requestStatus();
     }
     
-    this.startLiveStream = function() {
+    this.startLiveStream = function(arg) {
         if (!this.streaming) {
             console.log("Start live stream");
-            this.driver.startLiveStream();
+            this.driver.startLiveStream(arg);
             this.streaming = true;
         }
     }

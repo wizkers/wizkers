@@ -43,7 +43,7 @@ window.HomeView = Backbone.View.extend({
                 // We have the instrument, get the correct view for it:
                 var type = self.instrument.get('type');
                 console.log('Ins type: ' + type );
-                self.instrumentLiveView = self.manager.getInstrumentType(type).getLiveDisplay({model: self.settings, lm: self.linkManager});
+                self.instrumentLiveView = self.manager.getInstrumentType(type).getLiveDisplay({model: self.instrument, lm: self.linkManager});
                 $('#liveview').html(self.instrumentLiveView.el);
                 self.instrumentLiveView.render();
                 
@@ -102,7 +102,7 @@ window.HomeView = Backbone.View.extend({
         // Depending on port status, update our controller
         // connect button:
         if (this.linkManager.connected) {
-            $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Disconnect instrument")
+            $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Disconnect " + this.instrument.get('name'))
                 .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
             $('.btn-enable-connected', this.el).removeAttr('disabled');
             
@@ -110,7 +110,7 @@ window.HomeView = Backbone.View.extend({
                 this.linkManager.getUniqueID();
             }
         } else {
-            $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Connect to instrument")
+            $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Connect to " + this.instrument.get('name'))
                 .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
             $('.btn-enable-connected', this.el).attr('disabled', true);
 

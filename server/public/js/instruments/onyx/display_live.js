@@ -75,7 +75,7 @@ window.OnyxLiveView = Backbone.View.extend({
             delete this.plotOptions.yaxis.inverseTransform;
         }
             
-        this.color = parseInt(this.settings.get('cpmcolor'));
+        this.color = 1;
 
         this.addPlot();
 
@@ -180,7 +180,7 @@ window.OnyxLiveView = Backbone.View.extend({
                     $('#dtModal',this.el).modal('show');
                 } else {
                     $('#devicetag',this.el).html(data.devicetag);
-                    this.linkManager.startLiveStream();
+                    this.linkManager.startLiveStream(this.settings.get('liveviewperiod'));
                     this.deviceinitdone = true;
                 }
             } else {

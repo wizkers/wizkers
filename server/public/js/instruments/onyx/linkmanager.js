@@ -24,10 +24,10 @@ var OnyxLinkManager = function(linkManager) {
         lm.socket.emit('driver','onyx');
     }
 
-    this.startLiveStream = function() {
+    this.startLiveStream = function(period) {
         if (!this.streaming) {
             console.log("Starting live data stream for Onyx");
-            this.livePoller = setInterval(this.getCPM, 1000);
+            this.livePoller = setInterval(this.getCPM, (period) ? period*1000: 1000);
             this.streaming = true;
         }
 

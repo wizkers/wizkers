@@ -29,6 +29,12 @@ window.Fluke289NumView = Backbone.View.extend({
     },
     
     showInput: function(data) {
+        if (!data.error) {
+            $('.commandstatus', this.el).removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning');
+        } else {
+            $('.commandstatus', this.el).addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning');
+        }
+
         if (typeof(data.value) != 'undefined') {
             $('#livereading', this.el).html(data.value + "&nbsp;" + this.linkManager.driver.mapUnit(data.unit));
         }
@@ -39,15 +45,22 @@ window.Fluke289NumView = Backbone.View.extend({
             $('#live').empty();
             $('#primary').empty();
             $('#seconary').empty();
-            $('#offset').empty();
+            $('#temp_offset').empty();
             $('#minimum').empty();
             $('#average').empty();
             $('#maximum').empty();
+            
+            if (data.reading.minMaxStartTime == 0) {
+                $('#minmax').hide();
+            } else {
+                $('#minmax').show();
+            }
+            
             for (var i = 0; i < readings.length; i++) {
                 var reading = readings[i];
                 if (reading.readingState == "NORMAL") {
                     // There are several areas where we can draw:
-                    var location = "primary";
+                    var location = "";
                     switch (reading.readingID) {
                             case "LIVE":
                                 location="live"
@@ -73,6 +86,9 @@ window.Fluke289NumView = Backbone.View.extend({
                             case "AVERAGE":
                                 location = "average";
                                 reading.readingValue = "Average: " + reading.readingValue;
+                                break;
+                            case "REL_LIVE":
+                                
                                 break;
                     }
                     $('#' + location).html(reading.readingValue + "&nbsp;" + this.linkManager.driver.mapUnit(reading.baseUnit));

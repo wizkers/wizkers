@@ -171,7 +171,7 @@ module.exports = {
     },
     
     debug: function(data) {
-        
+        return;
         console.log(data);
     },
     

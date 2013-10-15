@@ -57,7 +57,7 @@ window.FCOledLiveView = Backbone.View.extend({
         $(this.el).html(this.template());
         this.linkManager.requestStatus();
             
-        this.color = parseInt(this.settings.get('cpmcolor'));
+        this.color = 1;
 
         this.addPlot();
 

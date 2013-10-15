@@ -44,6 +44,10 @@ var InstrumentSchema = new Schema({
         port: String,           // Name of the port on server side
         comment: String,        // Simple comments
         icon: String,           // TbD: either user-selectable, or served by server-side (linked to type)
+        liveviewspan: String,                 // Width of live view in seconds
+        liveviewperiod: String,                 // Period of polling if supported
+        liveviewlogscale: Boolean,                // Should live view display as a log scale by default ?
+
 });
  
 // Compile the schema by issuing the below:

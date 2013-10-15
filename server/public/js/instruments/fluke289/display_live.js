@@ -1,6 +1,6 @@
 // Live view for the Fluke 289
 // 
-// Our model is the settings object.
+// Our model is the instrument object.
 
 window.Fluke289LiveView = Backbone.View.extend({
 
@@ -11,7 +11,9 @@ window.Fluke289LiveView = Backbone.View.extend({
         this.deviceinitdone = false;
         this.plotavg = false;
         
-        this.livepoints = 300; // 5 minutes @ 1 Hz
+        
+        
+        this.livepoints = Math.floor(Number(this.settings.get('liveviewspan'))/Number(this.settings.get('liveviewperiod')));
         // livedata is now an array of live data readings, because we can graph everything
         // the meter returns
         this.livedata = [[]];
@@ -116,7 +118,7 @@ window.Fluke289LiveView = Backbone.View.extend({
                     $('#dtModal',this.el).modal('show');
                 } else {
                     $('#fwversion',this.el).html(data.version);
-                    this.linkManager.startLiveStream();
+                    this.linkManager.startLiveStream(this.settings.get('liveviewperiod'));
                     this.deviceinitdone = true;
                 }
                 // this.linkManager.driver.owner();
@@ -195,7 +197,7 @@ window.Fluke289LiveView = Backbone.View.extend({
                                                 new Date().getTime()-tzOffset: reading.timeStamp,reading.readingValue]);
                         var unit = this.linkManager.driver.mapUnit(reading.baseUnit) + " - " + reading.readingID;
                         // Now find out whether the user wants us to plot this:
-                        var unitnosp = unit.replace(/\s/g,'_');
+                        var unitnosp = reading.baseUnit + reading.readingID.replace(/\s/g,'_');
                         var toggle = $('#linestoggle ul',this.el).find('.' + unitnosp);
                         if (toggle.length == 0) {
                             // This is a new unit, we gotta add this to the toggle list
