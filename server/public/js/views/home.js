@@ -154,9 +154,10 @@ window.HomeView = Backbone.View.extend({
                        .removeClass('btn-success');
             this.linkManager.off('input', this.recordStream, this);
             this.currentLogSession.set('endstamp', new Date().getTime());
-            this.currentLogSession.save({
+            this.currentLogSession.save(null,{
                 success: function() {
-                    // TODO: show modal telling us session is recorded
+                    $.get('/stoprecording');
+                    // TODO: show modal telling us session is finished recording
                 }
             });
 
@@ -181,24 +182,14 @@ window.HomeView = Backbone.View.extend({
                 // No need to set instrument ID, it is updated when creating the
                 // log session
                 myLogSessions.add(self.currentLogSession);
-                self.currentLogSession.save();
+                self.currentLogSession.save(null,{
+                    success: function() {
+                        $.get('/startrecording/' + self.currentLogSession.id); // Tell our backend to start recording.
+                      }}
+                      );
             }
         });
-        
-/*
-// Create the logging session, get its ID
-        var sessionID = 0;
-
-        // Phase Ib: ask the user to input additional data on the log session
-        // and update the session stats (timestamp etc)
-        currentLogSession.set('guid', this.currentDevice.get('guid'));
-        currentLogSession.set('startstamp', new Date(points[0].time).getTime());
-        currentLogSession.set('stopstamp', new Date(points[points.length-1].time).getTime());                                      
-        currentLogSession.save();
-        // Now se have an ID:
-        var sessionID = currentLogSession.id;
-*/                
-        
+                
         /**             *******   ******** *******                 **/
         
         $('.ctrl-record', this.el).html("<i class=\"icon-white icon-pause\"></i>&nbsp;Recording...").addClass('btn-success')

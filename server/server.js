@@ -117,52 +117,6 @@ app.delete('/instruments/:idd/logs/:id', deviceLogs.deleteEntry);
 
 
 /**
- * Interface for managing the cars
- */
-/*
-app.get('/cars', cars.findAll);
-app.get('/cars/:id', cars.findById);
-app.post('/cars', cars.addCar);
-app.post('/cars/:id/picture', cars.uploadPic);
-app.put('/cars/:id', cars.updateCar);
-app.delete('/cars/:id', cars.deleteCar);
-*/
-
-/**
- * Interface for managing the layouts
- */
-/*
-app.get('/layouts', layouts.findAll);
-app.get('/layouts/:id', layouts.findById);
-app.post('/layouts', layouts.addLayout);
-app.put('/layouts/:id', layouts.updateLayout);
-app.post('/layouts/:id/picture', layouts.uploadPic);
-app.delete('/layouts/:id', layouts.deleteLayout);
-*/
-
-/**
- * Interface for managing controllers
- */
-/*
-app.get('/controllers', controllers.findAll);
-app.get('/controllers/:id', controllers.findById);
-app.post('/controllers', controllers.addController);
-app.put('/controllers/:id', controllers.updateController);
-app.delete('/controllers/:id', controllers.deleteController);
-*/
-
-/**
- * Interface for managing accessories
- */
-/*
-app.get('/accessories', accessories.findAll);
-app.get('/accessories/:id', accessories.findById);
-app.post('/accessories', accessories.addAccessory);
-app.put('/accessories/:id', accessories.updateAccessory);
-app.delete('/accessories/:id', accessories.deleteAccessory);
-*/
-
-/**
  * Interface for our settings. Only one settings object,
  * so no getting by ID here
  */
@@ -200,6 +154,27 @@ var portOpen = false;
 
 var driver = Onyx;
 
+//
+// Backend logging: we want to let the backend record stuff into
+// the database by itself, so we keep a global variable for doing this
+
+var startRecording = function(req,res) {
+    console.log("*** Start recording for session ID "  + req.params.id);
+    recording = true;
+};
+
+var stopRecording = function() {
+    console.log("*** Stop recording");
+    recording = false;
+}
+
+
+var recording = false;
+var recordingSessionId = 0; // Is set by the front-end when pressing the 'Record' button.
+app.get('/startrecording/:id', startRecording);
+app.get('/stoprecording', stopRecording);
+
+
 
 
 // listen for new socket.io connections:
@@ -211,7 +186,9 @@ io.sockets.on('connection', function (socket) {
     }
 
     // if the client disconnects, we close the 
-    // connection to the controller:
+    // connection to the controller.
+    // TODO: actually... we should just remain open in case we are
+    // recording...
     socket.on('disconnect', function () {
         console.log('User disconnected');
         console.log('Closing port');
