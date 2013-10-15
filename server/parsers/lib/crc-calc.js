@@ -129,8 +129,6 @@ module.exports = {
         var crc = crc_init();
         crc = crc_update(crc, data);
         crc =crc_finalize(crc);
-        // Last: reverse output byte order:
-        //return (crc >> 8 | (crc & 0xff)<<8);
         return crc;
     }
     

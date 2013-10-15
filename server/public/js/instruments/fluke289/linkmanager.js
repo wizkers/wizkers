@@ -28,7 +28,7 @@ var Fluke289LinkManager = function(linkManager) {
 
     this.startLiveStream = function() {
         console.log("Starting live data stream for Fluke289");
-        this.livePoller = setInterval(this.queryMeasurement, 1000);
+        this.livePoller = setInterval(this.queryMeasurementFull, 1000);
         this.streaming = true;
 
     }
@@ -64,6 +64,14 @@ var Fluke289LinkManager = function(linkManager) {
             self.socket.emit('controllerCommand', 'QBL');
 
         self.socket.emit('controllerCommand', 'QM');
+    }
+    
+    this.queryMeasurementFull = function() {
+        self.battCheck = (self.battCheck+1)%10;
+        if (self.battCheck == 0)
+            self.socket.emit('controllerCommand', 'QBL');
+
+        self.socket.emit('controllerCommand', 'QDDA');
     }
     
     this.getDevInfo = function() {

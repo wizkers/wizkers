@@ -17,7 +17,7 @@
  */
 var serialport = require('serialport'),
     SerialPort  = serialport.SerialPort,
-    crcCalc = require('../crc-calc.js'),
+    crcCalc = require('./lib/crc-calc.js'),
     zlib = require('zlib');
 
 Hexdump = require('../hexdump.js');
@@ -407,7 +407,7 @@ module.exports = {
                         case "QM": // Query Measurement: READING_VALUE, UNIT, STATE, ATTRIBUTE 
                             response.value = Number(fields[0]);
                             response.unit = fields[1];
-                            response.state = fields[2];
+                            response.readingState = fields[2];
                             response.attribute = fields[3];
                             break;
                         case "QCCV": // Calibration counter
@@ -459,6 +459,9 @@ module.exports = {
                                 measurement: fields[3]
                             };
                             break;
+                        case "QDDA": // Extended version of meter value reading
+                            response = this.processQDDA(data[1]);
+                            //break;
                         default:
                             // We don't know what we received, just
                             // pass it on:
@@ -483,6 +486,68 @@ module.exports = {
         // TODO: move sending on socket in here
         return response;
     },
+    
+    
+    // Sends back a JSON-formatted structure describing the complete meter reading.
+    // This is also what can/should be recorded in logs
+    // { primaryFunction:   ,
+    //   secondaryFunction: ,
+    //   rangeData: { autoRangeState:,
+    //                baseUnit: ,
+    //                rangeNumber: ,
+    //                rangeMultiplier:
+    //              },
+    //    lightningBold: boolean,
+    //    minMaxStartTime: number of milliseconds since January 1 1970
+    //    measurementModes: [ 'measurementMode' ],  // Array of measurement modes, can be empty
+    //    readingData: [
+    //           reading1
+    //           ...
+    //           readingN
+    //           ],
+    //   }
+    processQDDA: function(data) {
+        var fields = data.split(',');
+        var res = {};
+        res.primaryFunction = fields[0];
+        res.secondaryFunction = fields[1];
+        res.rangeData = { autoRangeState: fields[2],
+                          baseUnit: fields[3],
+                          rangeNumber: Number(fields[4]),
+                          rangeMultiplier: Number(fields[5])
+                        };
+        res.lightningBolt = (fields[6] == "OFF") ? false: true;
+        res.minMaxStartTime = fields[7]*1000;
+        res.measurementModes = [];
+        var i = 0;
+        while (i < fields[8]) {
+            res.measurementModes.push(fields[9+i++]);
+        }
+        // Now decode the readings:
+        var numberOfReadings = fields[9+i];
+        res.readings = [];
+        var j = 0;
+        while (j < numberOfReadings) {
+            res.readings.push(this.decodeReading(fields.slice(10+i+j*9, 19+i+j*9)));
+            j++;
+        }
+        return { reading:res };
+    },
+    
+    decodeReading: function(reading) {
+        var res = {};
+        res.readingID = reading[0];
+        res.readingValue = Number(reading[1]);
+        res.baseUnit = reading[2];
+        res.unitMultiplier = Number(reading[3]);
+        res.decimalPlaces = Number(reading[4]);
+        res.displayDigits = Number(reading[5]);
+        res.readingState = reading[6];
+        res.readingAttribute = reading[7];
+        res.timeStamp = reading[8]*1000;
+        return res;
+    },
+    
     
     waitTimeout: function(self) {
         self.debug("Timeout waiting for command response");

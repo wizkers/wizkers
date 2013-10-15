@@ -12,8 +12,11 @@ window.Fluke289LiveView = Backbone.View.extend({
         this.plotavg = false;
         
         this.livepoints = 300; // 5 minutes @ 1 Hz
-        this.livedata = [];
-                
+        // livedata is now an array of live data readings, because we can graph everything
+        // the meter returns
+        this.livedata = [[]];
+        this.plotData = [];
+        
         // Keep another array for moving average over the last X samples
         // In Live view, we fix this at 1 minute. In log management, we will
         // make this configurable
@@ -27,7 +30,6 @@ window.Fluke289LiveView = Backbone.View.extend({
         
         this.plotOptions = {
             xaxes: [{ mode: "time", show:true, timezone: this.model.get("timezone") },
-                    { mode: "time", show:false, timezone: this.model.get("timezone") }
                    ],
             grid: {
 				hoverable: true,
@@ -152,17 +154,12 @@ window.Fluke289LiveView = Backbone.View.extend({
                 $('#battery').addClass('battery-'+cl);
             }
             if (data.value != undefined) {
-                if (data.state == "NORMAL") {
-                    if (this.livedata.length >= this.livepoints)
-                        this.livedata = this.livedata.slice(1);
-                    this.livedata.push([new Date().getTime(), data.value]);
-    //                this.movingAvgData = this.movingAverager(this.livedata,this.movingAvgPoints, this.movingAvgData);
-                    
-                    // Remap data.unit to something more pleasant, using a helper located in our
-                    // link manager driver
+                if (data.readingState == "NORMAL") {
+                    this.trimLiveData(0);
+                    this.livedata[0].push([new Date().getTime(), data.value]);
                     var unit = this.linkManager.driver.mapUnit(data.unit);
                     
-                    this.plot.setData([ { data:this.livedata, label: unit, color: this.color },
+                    this.plot.setData([ { data:this.livedata[0], label: unit, color: this.color },
                                         ]);
                     this.plot.setupGrid(); // Time plots require this.
                     this.plot.draw();
@@ -172,19 +169,57 @@ window.Fluke289LiveView = Backbone.View.extend({
                 var sessionDuration = (new Date().getTime() - this.sessionStartStamp)/1000;
                 $('#sessionlength',this.el).html(utils.hms(sessionDuration));
 
-                                       /*
-                if (cpm > this.maxreading) {
-                    this.maxreading = cpm;
-                    $('#maxreading', this.el).html(cpm);
-                }
-                if (cpm < this.minreading || this.minreading == -1) {
-                    this.minreading = cpm;
-                    $('#minreading', this.el).html(cpm);
-                }
-                */
-
             }
+            if (data.reading != undefined) {
+                // This is a complete reading, we have to get all readings from it
+                // and graph them.
+                var readings = data.reading.readings;
+                if (this.livedata.length != readings.length) {
+                    // We need to reset our livedata structure, because the number
+                    // of readings has changed.
+                    this.livedata = []; // We could also use this.livedata.length = 0, it seems but that looks dodgy to me
+                    while (this.livedata.length < readings.length)
+                        this.livedata.push([]);
+                    $('#linestoggle ul',this.el).empty();
+                }
+                var plotData = [];
+                for (var i = 0; i < readings.length; i++) {
+                    var reading = readings[i];
+                    if (reading.readingState == "NORMAL") {
+                        this.trimLiveData(i);
+                        // In some instances, the reading timestamp is zero (when it is not
+                        // related to a particular time, such as a thermocouple temperature
+                        // offset: this this case, we set it to the current timestamp
+                        var tzOffset = new Date().getTimezoneOffset()*60000;
+                        this.livedata[i].push([(reading.timeStamp == 0) ?
+                                                new Date().getTime()-tzOffset: reading.timeStamp,reading.readingValue]);
+                        var unit = this.linkManager.driver.mapUnit(reading.baseUnit) + " - " + reading.readingID;
+                        // Now find out whether the user wants us to plot this:
+                        var unitnosp = unit.replace(/\s/g,'_');
+                        var toggle = $('#linestoggle ul',this.el).find('.' + unitnosp);
+                        if (toggle.length == 0) {
+                            // This is a new unit, we gotta add this to the toggle list
+                            $('#linestoggle ul').append('<li class="'+unitnosp+'"><input type="checkbox" checked>&nbsp'+unit+'</li>');
+                        } else if (toggle.find('input').is(':checked') ) {
+                            plotData.push( { data: this.livedata[i],
+                                            label: unit} );
+                        }
+                    }
+                }
+                // Now update our plot
+                this.plot.setData(plotData);
+                this.plot.setupGrid();
+                this.plot.draw();
+           }
+
         } 
+    },
+        
+                            
+    trimLiveData: function(idx) {
+        if (this.livedata[idx].length >= this.livepoints) {
+                this.livedata[idx] = this.livedata[idx].slice(1);
+        }
     },
 
     
