@@ -20,7 +20,9 @@
 
 var mongoose = require('mongoose');
 var LogSession = mongoose.model('LogSession');
+var DeviceLogEntry = mongoose.model('DeviceLogEntry');
 
+// Get all log sessions for a given instrument
 exports.findByInstrumentId = function(req, res) {
     var id = req.params.id;
     console.log('Retrieving Log session entries for Instrument ID: ' + id);
@@ -29,12 +31,32 @@ exports.findByInstrumentId = function(req, res) {
     });
 };
 
+// Get a log session
+exports.findById = function(req, res) {
+    var id = req.params.id;
+    console.log('Retrieving Log session ID: ' + id);
+    LogSession.findById(id, function(err,item) {
+        res.send(item);
+    });
+}
+
+// Get all entries for a log session
+exports.getLogEntries = function(req, res) {
+    // Empty for now...
+    var id = req.params.id;
+    console.log("Retrieving contents of log ID: " + id);
+    DeviceLogEntry.find({logsessionid: id}, function(err,items) {
+                         res.send(items);
+                        });
+}
+
 exports.findAll = function(req, res) {
     LogSession.find({}, function(err, items) {
         res.send(items);
     });
 };
 
+// Add a new log session entry
 exports.addEntry = function(req, res) {
     var entry = req.body;
     delete entry._id;       // _id is sent from Backbone and is null, we
@@ -53,6 +75,7 @@ exports.addEntry = function(req, res) {
     
 };
 
+// Update the contents of a log session
 exports.updateEntry = function(req, res) {
     var id = req.params.id;
     var iid = req.params.iid;
@@ -60,16 +83,17 @@ exports.updateEntry = function(req, res) {
     delete entry._id;
     console.log('Updating log session entry: ' + id + ' for instrument ' + iid);
     console.log(JSON.stringify(entry));
+    
     LogSession.findByIdAndUpdate(id, entry, {safe:true}, function(err, result) {
-            if (err) {
-                console.log('Error updating log session entry: ' + err);
-                res.send({'error':'An error has occurred'});
-            } else {
-                console.log('' + result + ' document(s) updated');
-                res.send(entry);
-            }
-    });    
-}
+                    if (err) {
+                        console.log('Error updating log session entry: ' + err);
+                        res.send({'error':'An error has occurred'});
+                    } else {
+                        res.send(result);
+                    }
+                }
+                                );
+};
 
 
 exports.deleteEntry = function(req, res) {

@@ -1,36 +1,71 @@
-// Log management.
+// Log view for the Onyx.
 // 
-// Our model is the settings object.
-//
-//  This needs to turn into a dispatcher that displays log management
-// for the currently selected device type.
+// Our model is a collection of log sessions.
 
-window.LogManagementView = Backbone.View.extend({
+window.OnyxLogView = Backbone.View.extend({
 
     initialize:function () {
-        this.settings = this.options.settings;    
-        this.instrumentManager = this.options.im;
+        this.settings = this.options.settings;        
+        this.allDeviceLogs = this.options.allDeviceLogs;
+        this.allLogEntries = this.options.allLogEntries;
         
-        this.deviceLogs = this.collection;
+        // Upon init, we pre-select the 1st device in the list and preload its
+        // sessions
+        this.currentDevice = this.collection.at(0);
         
-        this.selectedLogs = [];        
+        
+        this.deviceLogs = this.allDeviceLogs.byGUID(this.currentDevice.get('guid'));
+        // TODO: refresh some of the properties of the log sessions (surely there must
+        // be a better way to do this??
+        for (var i = 0; i < this.deviceLogs.length; i++) {
+            this.deviceLogs.at(i).refreshDataPoints();
+        }
+        
+        this.onyxlog = null;
+        if (this.deviceLogs.length > 0) {
+            // And select the default logging session:
+            this.onyxlog = this.allLogEntries.byLogSession(this.deviceLogs.at(0).id);
+        }
+            
+        // TODO: save color palette in settings ?
+        // My own nice color palette:
+        this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ],
+
+            
+        this.plotOptions = {
+            xaxis: { mode: "time", show:true,
+                    timezone: this.settings.get("timezone"),                  
+                   },
+            grid: {
+				hoverable: true,
+				clickable: true
+			},
+            legend: { position: "ne" },
+            selection: {
+				mode: "xy"
+			},
+            
+            colors: this.palette,
+        };        
+        
+        this.overviewOptions = {
+			legend: { show: false },
+			xaxis: { mode: "time", show:false, ticks:4 },
+			yaxis: { ticks:4 },
+			selection: { mode: "xy" },
+            colors: this.palette,
+		};  
+        
     },
     
     events: {
-        "click a": "handleaclicks",
         "click .resetZoom": "resetZoom",
+        "click #cpmscale": "cpmScaleToggle",
+        "change #currentDevice": "deviceDropdownSelected",
+        "change #currentLog": "logDropdownSelected",
         "change .logcheckbox": "refreshLogList",
-        "click .displaylog": "displayLog",
     },
     
-    /* Nice way to disable an anchor button when it is disabled */
-    handleaclicks: function(event) {
-        if ($(event.currentTarget).attr('disabled'))
-            event.preventDefault();
-    },
-    
-    
-    // Called when a checkbox is clicked
     refreshLogList: function() {
         var list = $('.logcheckbox',this.el);
         // Create a list of all checked entry IDs
@@ -39,15 +74,24 @@ window.LogManagementView = Backbone.View.extend({
             if (entry.checked)
                 entries.push(entry.value);
         });
-        this.selectedLogs = entries;
+        this.onyxlog = this.allLogEntries.byLogSessions(entries);
+        this.render();
+    },
+        
+    deviceDropdownSelected: function(event) {
+        var target = event.target;
+        this.selectDevice(target.value);
+    },
+    
+    selectDevice: function(newGuid) {
+        this.currentDevice = this.collection.where({guid: newGuid})[0];
+        this.deviceLogs = this.allDeviceLogs.byGUID(this.currentDevice.get('guid'));
         this.render();
     },
     
-    displayLog: function() {
-        if ($('.displaylog', this.el).attr('disabled'))
-            return false;
-        app.navigate('displaylogs/' + this.settings.get('currentInstrument') + '/' + this.selectedLogs.join(','),true);
-        return false;
+    logDropdownSelected: function(event) {
+        var target = event.target;
+        this.selectLog(target.value);
     },
     
     selectLog: function (logSessionID) {
@@ -61,22 +105,51 @@ window.LogManagementView = Backbone.View.extend({
         return false;
     },
 
+    cpmScaleToggle: function(event) {
+        var change = {};
+        if (event.target.checked) {
+            change["cpmscale"]="log";
+        } else {
+            change["cpmscale"]="linear";
+        }
+        this.settings.set(change);
+        this.render();
+        this.addPlot();
+        
+    },
+
     
     render:function () {
         var self = this;
         console.log('Main render of Log management view');
+        var selectedStuff = { device: null, sessions: null };
+        if (this.currentDevice != null) {
+            selectedStuff.device = this.currentDevice.get('guid');
+        }
+        if (this.onyxlog != null && this.onyxlog.length) {
+            selectedStuff.sessions = this.onyxlog.getSessions();
+        } else {
+            selectedStuff.sessions = [];
+        }
+        $(this.el).html(this.template({devices: this.collection.toJSON(), deviceLogs: this.deviceLogs.toJSON(), selected: selectedStuff}));
+        if (this.settings.get("cpmscale") == "log")
+            $("#cpmscale",this.el).attr("checked",true);
+        if (this.settings.get('cpmscale')=="log") {
+            this.plotOptions.yaxis = {
+                        min:1,
+                        //ticks: [1,10,30,50,100,500,1000,1500],
+                        transform: function (v) { return Math.log(v+10); },
+                        inverseTransform: function (v) { return Math.exp(v)-10;}
+                    };
+            this.overviewOptions.yaxis = this.plotOptions.yaxis;
+        } else if ('yaxis' in this.plotOptions){
+            delete this.plotOptions.yaxis.min;
+            delete this.plotOptions.yaxis.transform;
+            delete this.plotOptions.yaxis.inverseTransform;
+        }
+            
+            this.addPlot();
 
-        $(this.el).html(this.template({ deviceLogs: this.collection.toJSON(), selected: this.selectedLogs}));
-
-        // Depending on device capabilities, enable/disable "device logs" button
-        var ins = new Instrument({_id: this.settings.get('currentInstrument')});
-        ins.fetch({success: function(){
-            // We have the instrument, get the correct view for it:
-            var type = ins.get('type');
-            if (self.instrumentManager.getInstrumentType(type).getLogManagementView() == null) {
-                $('.devicelogs',self.el).attr('disabled', true);
-            }
-        }});
         return this;
     },
     
@@ -106,6 +179,9 @@ window.LogManagementView = Backbone.View.extend({
     // attached to the DOM, so this function has to be called from the home view.
     addPlot: function() {
         var self=this;
+        
+        if (this.onyxlog == null)
+            return;
         
         $('#log_size',this.el).html(this.onyxlog.length);
         $('#log_start',this.el).html(new Date(this.onyxlog.getLogStart()).toString());

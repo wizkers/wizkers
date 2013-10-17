@@ -29,10 +29,18 @@ window.HomeView = Backbone.View.extend({
     
     events: {
         "click .ctrl-connect":  "ctrlConnect",
+        "click .ctrl-diag": "ctrlDiag",
         "click .ctrl-record": "ctrlRecord",
         "click .start-record": "startRecord",
-
+        "click a": "handleaclicks",
     },
+    
+    /* Nice way to disable an anchor button when it is disabled */
+    handleaclicks: function(event) {
+        if ($(event.currentTarget).attr('disabled'))
+            event.preventDefault();
+    },
+
     
     render:function () {
         var self = this;
@@ -74,13 +82,12 @@ window.HomeView = Backbone.View.extend({
         
         this.linkManager.off('status', this.updatestatus, this);
         this.linkManager.off('uniqueID', this.updateUID, this);
-        this.linkManager.off('serialEvent', this.recordStream, this);
 
         
-        if (typeof(this.instrumentLiveView) != undefined)
+        if (this.instrumentLiveView != null)
             this.instrumentLiveView.onClose();
         
-        if (typeof(this.instrumentNumericView) != undefined)
+        if (this.instrumentNumericView != null)
             this.instrumentNumericView.onClose();
 
         // Restore the settings since we don't want them to be saved when changed from
@@ -102,6 +109,10 @@ window.HomeView = Backbone.View.extend({
         // Now, we are sure our instrument is linked to a UID, so we are able to save logs
         // in our backend database, that are uniquely linked to this instrument.
     },
+    
+    ctrlDiag: function() {
+        app.navigate('diagnostics/' + this.instrument.id, true);
+    },
 
     updatestatus: function(data) {
         // Depending on port status, update our controller
@@ -120,6 +131,12 @@ window.HomeView = Backbone.View.extend({
             $('.btn-enable-connected', this.el).attr('disabled', true);
 
         }
+        if (data.recording) {
+            $('.ctrl-record', this.el).html("<i class=\"icon-white icon-pause\"></i>&nbsp;Recording...").addClass('btn-success')
+                   .removeClass('btn-danger').attr('disabled', false);
+            this.recording = true;
+        }
+
     },
 
 
@@ -153,14 +170,7 @@ window.HomeView = Backbone.View.extend({
             $('.ctrl-record', this.el).html('<i class="icon-download"></i>&nbsp;Record session').addClass('btn-danger')
                        .removeClass('btn-success');
             this.linkManager.off('input', this.recordStream, this);
-            this.currentLogSession.set('endstamp', new Date().getTime());
-            this.currentLogSession.save(null,{
-                success: function() {
-                    $.get('/stoprecording');
-                    // TODO: show modal telling us session is finished recording
-                }
-            });
-
+            $.get('/stoprecording');
             this.recording = false;
         }        
     },
@@ -177,7 +187,7 @@ window.HomeView = Backbone.View.extend({
             success: function() {
                 self.currentLogSession = new LogSession();
                 self.currentLogSession.set('name', $('#recordingname',this.el).val());
-                self.currentLogSession.set('startstamp', new Date().getTime());
+                self.currentLogSession.set('description', $('#description', this.el).val());
                 self.currentLogSession.set('logtype', 'live');
                 // No need to set instrument ID, it is updated when creating the
                 // log session
@@ -198,14 +208,4 @@ window.HomeView = Backbone.View.extend({
         this.linkManager.on('input', this.recordStream, this);
     },
     
-    
-    // Note: this is _very_ inefficient, since we are sending data to the HTML app and then
-    // back to the recorder!
-    // TODO: refactor the whole thing, so have data stored directly on the backend with no network
-    //       activity.
-    recordStream: function(data) {
-        //console.log("Would record the stream here...");
-        
-    },
-
 });

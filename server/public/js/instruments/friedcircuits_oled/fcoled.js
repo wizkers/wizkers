@@ -39,5 +39,19 @@ var FCOledInstrument = function() {
         return new FCOledLinkManager(arg);
     };
     
+    // Return a Backbone view which is a mini graph
+    this.getMiniLogview = function(arg) {
+        return null;
+    };
     
+    // Return a device log management view
+    this.getLogManagementView = function(arg) {
+        return null;
+    }
+    
+    // Render a log (or list of logs) for the device.
+    this.getLogView = function(arg) {
+        return null;
+    }
+
 };

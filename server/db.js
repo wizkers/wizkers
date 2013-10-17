@@ -110,7 +110,7 @@ var LogSession = new Schema({
 mongoose.model('LogSession', LogSession);
 
 
-var uri = 'mongodb://localhost/traindb';
+var uri = 'mongodb://localhost/vizappdb';
 var connectDB = function() {
     mongoose.connect(uri, function (err) {
         // if we failed to connect, retry

@@ -63,6 +63,7 @@ var linkManager = function() {
         this.socket.emit('portstatus','');
     }
     
+    
     this.getPorts = function() {
         this.socket.emit('ports','');        
     }
@@ -112,6 +113,7 @@ var linkManager = function() {
     this.manualCommand = function(cmd) {
         this.socket.emit('controllerCommand', cmd);
     }
+    
     
     // Initialization code:
     this.socket.on('serialEvent', this.processInput);

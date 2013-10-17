@@ -71,7 +71,9 @@ module.exports = {
     // some protocol link layer operations and command queue management
     port: null,
     socket: null,
+    recorder: null,
     uidrequested: false,
+    recording: false,     // to call the main app in case we need to record readings
     
     // Link state handling
     currentLinkstate: 0,     // see linkstate above
@@ -90,17 +92,22 @@ module.exports = {
     // Set a reference to the serial port, used for the command
     // queue.
     setPortRef: function(s) {
-        console.log("Setting port reference: " + s);
+        this.debug("Setting port reference.");
         this.port = s;
     },
 
     setSocketRef: function(s) {
-        console.log("Setting socket reference: " + s);
+        this.debug("Setting socket reference.");
         this.socket = s;
         
         // The port & socket at set at startup, so we also
         // reset the state of our driver here:
         this.resetState();
+    },
+    
+    setRecorderRef: function(s) {
+        this.debug("Setting recorder reference.");
+        this.recorder = s;
     },
     
     resetState: function() {
@@ -115,8 +122,10 @@ module.exports = {
     },
     
     sendData: function(data) {
-        if (data)
+        if (data) {
             this.socket.emit('serialEvent',data);
+            this.recorder.record(data);
+        }
     },
     
     // How the device is connected on the serial port            
@@ -185,7 +194,11 @@ module.exports = {
         this.debug("Fluke289: Asking for serial number for UID request");
         this.uidrequested = true;
         // TODO: handle port write within this.output
-        this.port.write(this.output("QSN"));
+        try {
+            this.port.write(this.output("QSN"));
+        } catch (err) {
+            console.log("Error on serial port while requesting UID : " + err);
+        }
     },
     
     
@@ -195,6 +208,7 @@ module.exports = {
     //
     // data is a buffer
     format: function(data) {
+        
         if (data) { // we sometimes get called without data, to further process the
                     // existing buffer
             // First of all, append the incoming data to our input buffer:
@@ -252,14 +266,18 @@ module.exports = {
                 // Send packet with 0x21
                 // - just send the prepackaged data...
                 this.debug("LLP: Sending ACK");
-                this.port.write(Buffer("10022110032138","hex"));
+                try {this.port.write(Buffer("10022110032138","hex")); }catch (err) {
+                        console.log("Error on serial port while writing : " + err);
+                }
                 this.currentStatusByte = 0x40;
                 break;
             case 0x60:
                 // Send packet with 0x61
                 // - just send the prepackaged data...
                 this.debug("LLP: Sending ACK");
-                this.port.write(Buffer("1002611003573e","hex"));
+                try { this.port.write(Buffer("1002611003573e","hex")); }catch (err) {
+                        console.log("Error on serial port while writing : " + err);
+                }
                 this.currentStatusByte = 0x00;
                 break;
         }
@@ -461,7 +479,8 @@ module.exports = {
                             break;
                         case "QDDA": // Extended version of meter value reading
                             response = this.processQDDA(data[1]);
-                            //break;
+                            response.error = false;
+                            break;
                         default:
                             // We don't know what we received, just
                             // pass it on:
@@ -479,7 +498,9 @@ module.exports = {
         if (this.commandQueue.length && this.currentState == this.state.idle) {
             var cmd = this.commandQueue.pop();
             this.debug("Command queue: dequeuing command " + cmd );
-            this.port.write(this.output(cmd));
+            try { this.port.write(this.output(cmd)); } catch (err) {
+                        console.log("Error on serial port while writing : " + err);
+            }
         }
         this.debug("Sending response ");
         this.debug(response);
@@ -557,7 +578,9 @@ module.exports = {
         if (self.commandQueue.length) {
             var cmd = self.commandQueue.pop();
             self.debug("Command queue: dequeuing command " + cmd );
-            self.port.write(self.output(cmd, self));
+            try { self.port.write(self.output(cmd, self)); }catch (err) {
+                        console.log("Error on serial port while writing : " + err);
+                }
         }
         
     },

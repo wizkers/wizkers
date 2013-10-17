@@ -11,6 +11,7 @@ module.exports = {
     // Set a reference to the socket.io socket and port
     socket: null,
     port: null,
+    recorder: null,
     uidrequested: false,
     
     setPortRef: function(s) {
@@ -19,6 +20,11 @@ module.exports = {
     setSocketRef: function(s) {
         this.socket = s;
     },
+    setRecorderRef: function(s) {
+        console.log("Setting recorder reference.");
+        this.recorder = s;
+    },
+
 
         
     // How the device is connected on the serial port            
@@ -44,7 +50,7 @@ module.exports = {
     },
 
     
-    format: function(data) {
+    format: function(data, recording) {
         //console.log('Onyx - format output');
         var cmd = data.split('\n\r\n')[0];
        if (cmd == "LOGXFER") {
@@ -62,8 +68,12 @@ module.exports = {
                var response = JSON.parse(data);
                if (this.uidrequested && response.guid != undefined) {
                    this.socket.emit('uniqueID',response.guid);
+                   this.uidrequested = false;
+               } else {
+                   this.socket.emit('serialEvent', response);
+                   this.recorder.record(response);
                }
-                    this.socket.emit('serialEvent', response);
+               
            } catch (err) {
                console.log('Not able to parse JSON');
            }

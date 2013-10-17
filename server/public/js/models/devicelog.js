@@ -19,15 +19,26 @@ window.DeviceLogEntry = Backbone.Model.extend({
 });
 
 
+/**
+ * A device log is a collection of log entries that go together because
+ * they all have the same logsessionid
+ */
 window.deviceLog = Backbone.Collection.extend({
 
-    urlRoot: "/log",
+    logsessionid: null,
+    
+    initialize: function(models, options) {
+        this.logsessionid = options.logsessionid;
+    },
+
+    
+    url: function() {
+        return "/logs/" + this.logsessionid + "/entries";
+    },
 
     idAttribute: "_id",
 
     model: DeviceLogEntry,
-
-    // localStorage: new Backbone.LocalStorage("org.aerodynes.onyxdisplay.GeigerLog"), // Unique name within your app.
     
     // Maintain our collection in order automatically by adding a comparator:
     comparator: 'timestamp',
@@ -117,13 +128,6 @@ window.LogSession = Backbone.Model.extend({
        datapoints: 0,
    },
     
-   refreshDataPoints: function() {
-       // Return the number of datapoints for this session
-        var allLogEntries = new deviceLog();
-        allLogEntries.fetch();
-        this.set('datapoints',allLogEntries.byLogSession(this.id).models.length);
-   }
-
 });
 
 
@@ -142,19 +146,27 @@ window.LogSessions = Backbone.Collection.extend({
     },
     
     url: function() {
-        return "/instruments/" + this.instrumentid + "/logs"
+        if (this.instrumentid) {
+            return "/instruments/" + this.instrumentid + "/logs";
+        } else {
+            return "/logs";
+        }
     },
     
-    
-    /*
-    byInstrumentID: function(iid) {
-        // Get all the log sessions for one specific device:
+    // Create a new collection for only some log sessions
+    getLogSessions: function(logSessionIDs) {
         var extract = this.filter(function(logSession) {
-                    return (logSession.get('iid') == guid)
-                        });
-        return new logSessions(extract);
+            var idx = logSessionIDs.indexOf(logSession.id);
+            if (idx > -1) {
+                return true;
+            } else { 
+                return false;
+            }
+        });
+        return new LogSessions(extract, {instrumentid: this.instrumentid});
     },
-    */
+
+        
 });
 
     

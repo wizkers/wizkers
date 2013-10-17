@@ -1,7 +1,7 @@
-onyxviewer
+VizApp
 ============
 
-Web-based display and config utility for the Safecast Onyx device.
+Web-based display, log managemetn, recording and config application for measurement instruments.
 
 Displays the content of the logs, synchronises the internal clock with the computer, and
 displays a few additional infos.

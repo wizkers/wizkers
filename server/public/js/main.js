@@ -15,8 +15,9 @@ var AppRouter = Backbone.Router.extend({
         "workspaces/add"        : "addWorkspace",
         "workspaces/:id"        : "workspaceDetails",
         "logmgt"                : "logmanagement",
+        "displaylogs/:ins/:loglist"  : "displaylogs",
         "settings"              : "settings",
-        "diagnostics"           : "diagnostics",
+        "diagnostics/:id"       : "diagnostics",
         "about"                 : "about",
     },
     
@@ -95,11 +96,11 @@ var AppRouter = Backbone.Router.extend({
     },
 
 
-    diagnostics: function () {
+    diagnostics: function (id) {
         var self = this;
         if (this.linkManager.connected) {
             console.log('Switching to the instrument diagnostics view');
-            var ins = new Instrument({_id: this.settings.get('currentInstrument')});
+            var ins = new Instrument({_id: id});
             ins.fetch({success: function(){
                 // We have the instrument, get the correct view for it:
                 var type = ins.get('type');
@@ -116,9 +117,25 @@ var AppRouter = Backbone.Router.extend({
         var logs = new LogSessions([],{instrumentid:this.settings.get('currentInstrument')});
         logs.fetch({
             success:function() {
-                self.switchView(new LogManagementView({collection: logs, settings: self.settings}));
+                self.switchView(new LogManagementView({collection: logs, settings: self.settings,
+                                                      lm: self.linkManager, im: self.instrumentManager}));
                 self.headerView.selectMenuItem('management-menu');
             }});
+    },
+    
+    displaylogs: function(id,loglist) {
+        var self=this;
+        // Loglist is a comma-separated list of log IDs
+        var logarray = loglist.split(",");
+        var ins = new Instrument({_id: id});
+        ins.fetch({success: function(){
+            var type = ins.get('type');
+            var allLogs = new LogSessions([],{instrumentid:id});
+            allLogs.fetch({success:function(){
+                var myLogs = allLogs.getLogSessions(logarray);
+                self.switchView(self.instrumentManager.getInstrumentType(type).getLogView({collection:myLogs}));
+                                               }});
+        }});
     },
     
     // Instrument management

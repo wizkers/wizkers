@@ -4,7 +4,7 @@
       <div class="span6" id="control-area">
         <p>
           <a href="#" role="button" disabled class="ctrl-connect btn btn-warning"><i class="icon-off"></i>&nbsp;Connect to Instrument</a>
-          <a href="#diagnostics" disabled role="button" class="ctrl-diag btn btn-enable-connected btn-info">Device setup</a>
+          <button disabled role="button" class="ctrl-diag btn btn-enable-connected btn-info">Device setup</button>
          </p>
       </div>
       <div class="span6">
@@ -39,6 +39,9 @@
   <div class="modal-body">
       <div class="horizontal">
           <span>Recording name:&nbsp;</span><input id="recordingname" name="recordingname" type="text" />
+      </div>
+      <div>Description:
+         <textarea id="description" name="description" style="width: 90%;" rows="6"></textarea>
       </div>
 </div>
   <div class="modal-footer">

@@ -106,12 +106,14 @@ app.put('/instruments/:id', instruments.updateInstrument);
 app.delete('/instruments/:id', instruments.deleteInstrument);
 
 /**
- * Interface for managing instrument logs
+ * Interface for managing instrument logs (summary)
  *
  */
 app.get('/instruments/:id/logs', deviceLogs.findByInstrumentId);
 app.post('/instruments/:id/logs', deviceLogs.addEntry);
 app.get('/logs/', deviceLogs.findAll);
+app.get('/logs/:id', deviceLogs.findById);
+app.get('/logs/:id/entries', deviceLogs.getLogEntries);
 app.put('/instruments/:iid/logs/:id', deviceLogs.updateEntry);
 app.delete('/instruments/:idd/logs/:id', deviceLogs.deleteEntry);
 
@@ -157,22 +159,11 @@ var driver = Onyx;
 //
 // Backend logging: we want to let the backend record stuff into
 // the database by itself, so we keep a global variable for doing this
+var recorder = require('./recorder.js');
 
-var startRecording = function(req,res) {
-    console.log("*** Start recording for session ID "  + req.params.id);
-    recording = true;
-};
-
-var stopRecording = function() {
-    console.log("*** Stop recording");
-    recording = false;
-}
-
-
-var recording = false;
 var recordingSessionId = 0; // Is set by the front-end when pressing the 'Record' button.
-app.get('/startrecording/:id', startRecording);
-app.get('/stoprecording', stopRecording);
+app.get('/startrecording/:id', recorder.startRecording);
+app.get('/stoprecording', recorder.stopRecording);
 
 
 
@@ -216,6 +207,7 @@ io.sockets.on('connection', function (socket) {
            portOpen = true;
            driver.setPortRef(myPort); // We need this for drivers that manage a command queue...
            driver.setSocketRef(socket);
+           driver.setRecorderRef(recorder);
            socket.emit('status', {portopen: portOpen});
            // listen for new serial data:
            myPort.on('data', function (data) {
@@ -244,7 +236,8 @@ io.sockets.on('connection', function (socket) {
     });
     
     socket.on('portstatus', function() {
-        socket.emit('status', {portopen: portOpen});
+        socket.emit('status', {portopen: portOpen,
+                               recording: recorder.isRecording()});
     });
         
     socket.on('controllerCommand', function(data) {

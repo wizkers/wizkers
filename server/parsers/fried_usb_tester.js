@@ -12,11 +12,16 @@ module.exports = {
     
     // Set a reference to the socket.io socket and port
     socket: null,
+    recorder: null,
     
     setPortRef: function(s) {
     },
     setSocketRef: function(s) {
         this.socket = s;
+    },
+    setRecorderRef: function(s) {
+        this.debug("Setting recorder reference.");
+        this.recorder = s;
     },
 
 
@@ -43,7 +48,7 @@ module.exports = {
 
         
     // format should return a JSON structure.
-    format: function(data) {
+    format: function(data, recording) {
         // console.log('FC Oled Backpack - format output');
         // Remove any carriage return
         data = data.replace('\n','');
@@ -52,6 +57,7 @@ module.exports = {
         // We only return the load values:
         var res = { "v": fields[3], "a": fields[4] };
         this.socket.emit('serialEvent',res);
+        this.recorder.record(res);
     },
     
     // output should return a string, and is used to format

@@ -43,7 +43,7 @@ window.Instrument = Backbone.Model.extend({
 
     defaults: {
         name: "Friendly name",             // Used for display
-        type: "Fluke289",                  // Corresponds to parsers known on the server side as well
+        type: "onyx",                      // Corresponds to parsers known on the server side as well
         tag: "",                           // Asset tag for the instrument (if supported)
         uuid: "",                          // Serial number or unique ID (if supported)
         port: "/dev/tty.usb1234",          // Name of the port on server side
