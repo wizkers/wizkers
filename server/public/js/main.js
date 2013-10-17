@@ -40,56 +40,29 @@ var AppRouter = Backbone.Router.extend({
         console.log("Initializing application");
         this.headerView = new HeaderView();
         $('.header').html(this.headerView.el);
-        // Get our settings here, and
-        // share them afterwards, rather than requesting it
-        // everytime...
-        this.settings = new Settings({id: 1 });
-        // We need to be sure the settings are fetched before moving
-        // further, so we add the Ajax option "async" below.
-        this.settings.fetch({async:false});
+
         
         // When the current instrument model changes, we need to update
         // the link manager type:
-        this.settings.on('change:currentInstrument', function(model, insId) {
+        settings.on('change:currentInstrument', function(model, insId) {
             console.log('New instrument ID, updating the link manager type');
             var ins = new Instrument({_id: insId});
             ins.fetch({success: function(){
-                // We have the instrument, get the correct link manager for it:
                 var type = ins.get('type');
-                console.log('Ins type: ' + type );
-                self.linkManager.closePort();  // Stop former link manager
-                self.linkManager.setDriver(self.instrumentManager.getLinkManager(type, self.linkManager));
+                console.log('New instrument type: ' + type );
+                // Now update our Instrument manager:
+                instrumentManager.setInstrument(ins);
+                linkManager.closePort();  // Stop former link manager
+                linkManager.setDriver(instrumentManager.getLinkManager(linkManager));
             }});
-
         });
         
-        
-        // Create our instrument manager: in charge of creating/deleting
-        // instruments as necessary, as well as providing a list of
-        // instruments to other parts who need those
-        this.instrumentManager = new instrumentManager();
-
-        // Create our link manager: it is in charge of talking
-        // to the server-side controller interface through a socket.io
-        // web socket. It is passed to all views who need it.
-        this.linkManager =  new linkManager();
-        var insId = this.settings.get('currentInstrument');
-        if (insId != null) {
-            var ins = new Instrument({_id: insId});
-            ins.fetch({success: function(){
-                // We have the instrument, get the correct link manager for it:
-                var type = ins.get('type');
-                console.log('Load link manager driver for type: ' + type );
-                self.linkManager.setDriver(self.instrumentManager.getLinkManager(type ,self.linkManager));
-            }});
-        }
-
         
     },
 
     home: function (id) {
         console.log("Switching to home view");
-        var homeView = new HomeView({model: this.settings, lm: this.linkManager, im: this.instrumentManager});
+        var homeView = new HomeView({model:settings});
         this.switchView(homeView);
         // homeView.addPlot();
         this.headerView.selectMenuItem('home-menu');
@@ -98,27 +71,23 @@ var AppRouter = Backbone.Router.extend({
 
     diagnostics: function (id) {
         var self = this;
-        if (this.linkManager.connected) {
+        if (linkManager.connected) {
             console.log('Switching to the instrument diagnostics view');
-            var ins = new Instrument({_id: id});
-            ins.fetch({success: function(){
-                // We have the instrument, get the correct view for it:
-                var type = ins.get('type');
-                self.switchView(self.instrumentManager.getInstrumentType(type).getDiagDisplay({model: self.settings, lm: self.linkManager}));
-                self.headerView.selectMenuItem('home-menu');
-                }
-            });    
+            self.switchView(instrumentManager.getDiagDisplay({model: settings, lm: linkManager}));
+            self.headerView.selectMenuItem('home-menu');    
+        } else {
+            app.navigate('/',true);
         }
     },
     
     logmanagement: function() {
         var self = this;
         // Initialize with the list of logs for the current device:
-        var logs = new LogSessions([],{instrumentid:this.settings.get('currentInstrument')});
+        var logs = new LogSessions([],{instrumentid:settings.get('currentInstrument')});
         logs.fetch({
             success:function() {
-                self.switchView(new LogManagementView({collection: logs, settings: self.settings,
-                                                      lm: self.linkManager, im: self.instrumentManager}));
+                self.switchView(new LogManagementView({collection: logs, settings: settings,
+                                                      lm: linkManager, im: instrumentManager}));
                 self.headerView.selectMenuItem('management-menu');
             }});
     },
@@ -145,7 +114,7 @@ var AppRouter = Backbone.Router.extend({
         var p = page ? parseInt(page, 10) : 1;
         var instrumentList = new InstrumentCollection();
         instrumentList.fetch({success: function(){
-            self.switchView(new InstrumentListView({model: instrumentList, settings: self.settings, page: p}));
+            self.switchView(new InstrumentListView({model: instrumentList, settings: settings, page: p}));
         }});
         this.headerView.selectMenuItem('instrument-menu');
         
@@ -154,7 +123,7 @@ var AppRouter = Backbone.Router.extend({
     addInstrument: function() {
         var self = this;
         var instrument = new Instrument();
-        this.switchView(new InstrumentDetailsView({model: instrument, lm:self.linkManager, im:self.instrumentManager}));
+        this.switchView(new InstrumentDetailsView({model: instrument, lm:linkManager, im:instrumentManager}));
         this.headerView.selectMenuItem('instrument-menu');
         
     },
@@ -163,7 +132,7 @@ var AppRouter = Backbone.Router.extend({
         var self = this;
         var instrument = new Instrument({_id: id});
         instrument.fetch({success: function(){
-            self.switchView(new InstrumentDetailsView({model: instrument, lm:self.linkManager, im:self.instrumentManager}));
+            self.switchView(new InstrumentDetailsView({model: instrument, lm:linkManager, im:instrumentManager}));
         }});
         this.headerView.selectMenuItem('instrument-menu');
 
@@ -176,7 +145,7 @@ var AppRouter = Backbone.Router.extend({
         var p = page ? parseInt(page, 10) : 1;
         var workspaceList = new WorkspaceCollection();
         workspaceList.fetch({success: function(){
-            self.switchView(new WorkspaceListView({model: workspaceList, settings: self.settings, page: p}));
+            self.switchView(new WorkspaceListView({model: workspaceList, settings: settings, page: p}));
         }});
         this.headerView.selectMenuItem('workspace-menu');
         
@@ -185,7 +154,7 @@ var AppRouter = Backbone.Router.extend({
     addWorkspace: function() {
         // TODO: pop up a modal to select an instrument type, and create the instrument
         var workspace = new Workspace();
-        this.switchView(new WorkspaceView({model: workspace, lm:self.linkManager}));
+        this.switchView(new WorkspaceView({model: workspace, lm:linkManager}));
         this.headerView.selectMenuItem('workspace-menu');
         
     },
@@ -198,7 +167,7 @@ var AppRouter = Backbone.Router.extend({
     },
     
     settings: function () {
-        var settingsView = new SettingsView({model: this.settings});
+        var settingsView = new SettingsView({model: settings});
         this.switchView(settingsView);
         this.headerView.selectMenuItem('settings-menu');
     },
@@ -209,10 +178,40 @@ var AppRouter = Backbone.Router.extend({
 utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogManagementView', 'InstrumentDetailsView',
                     'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView', 'instruments/FCOledLiveView',
                     'instruments/OnyxNumView', 'instruments/FCOledNumView', 'instruments/Fluke289NumView', 'instruments/Fluke289DiagView',
-                   ], function() {
-    app = new AppRouter();
-    
-    // Now register all known intrument types in the app's intsrument manager
+                   ],
+    function() {
+        
+        // Get our settings here, and
+        // share them afterwards, rather than requesting it
+        // everytime...
+        settings = new Settings({id: 1 });
+        // We need to be sure the settings are fetched before moving
+        // further, so we add the Ajax option "async" below.
+        settings.fetch({async:false});
+
+        // Now create our instrument manager & link manager (todo: have only one object ?)
+
+        // Create our instrument manager: in charge of creating/deleting
+        // instruments as necessary, as well as providing a list of
+        // instruments to other parts who need those
+        instrumentManager = new InstrumentManager();
                        
-    Backbone.history.start();
+        // Create our link manager: it is in charge of talking
+        // to the server-side controller interface through a socket.io
+        // web socket. It is passed to all views that need it.
+        linkManager =  new LinkManager();
+        var insId = settings.get('currentInstrument');
+        if (insId != null) {
+            var ins = new Instrument({_id: insId});
+            ins.fetch({success: function(){
+                // We have the instrument, get the correct link manager for it:
+                var type = ins.get('type');
+                console.log('Load link manager driver for type: ' + type );
+                instrumentManager.setInstrument(ins);
+                linkManager.setDriver(instrumentManager.getLinkManager(linkManager));
+
+                app = new AppRouter();
+                Backbone.history.start();
+            }});
+        }
 });

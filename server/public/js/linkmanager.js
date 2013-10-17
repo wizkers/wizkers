@@ -5,7 +5,7 @@
  */
 
 
-var linkManager = function() {
+var LinkManager = function() {
 
     var self = this;
     this.socket = io.connect(); // (we connect on same host, we don't need a URL)
@@ -129,4 +129,4 @@ var linkManager = function() {
 }
 
 // Add event management to our link manager, from the Backbone.Events class:
-_.extend(linkManager.prototype, Backbone.Events);
+_.extend(LinkManager.prototype, Backbone.Events);

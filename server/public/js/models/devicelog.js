@@ -142,7 +142,9 @@ window.LogSessions = Backbone.Collection.extend({
     model: LogSession,
     
     initialize: function(models, options) {
-        this.instrumentid = options.instrumentid;
+        // TODO: remove this once we use only references from the instrument.
+        if (options)
+            this.instrumentid = options.instrumentid;
     },
     
     url: function() {
@@ -153,7 +155,7 @@ window.LogSessions = Backbone.Collection.extend({
         }
     },
     
-    // Create a new collection for only some log sessions
+    // Create a new subset collection of only some log sessions
     getLogSessions: function(logSessionIDs) {
         var extract = this.filter(function(logSession) {
             var idx = logSessionIDs.indexOf(logSession.id);
