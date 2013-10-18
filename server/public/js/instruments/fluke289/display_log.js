@@ -18,6 +18,9 @@ window.Fluke289LogView = Backbone.View.extend({
 
         this.deviceLogs = this.collection;
         
+        this.packedData = null;
+        this.selectedData = null;
+        
         // Need this to make sure "render" will always be bound to our context.
         // -> required for the _.after below.
         _.bindAll(this,"render");
@@ -63,8 +66,18 @@ window.Fluke289LogView = Backbone.View.extend({
     events: {
         "click .resetZoom": "resetZoom",
         "click #cpmscale": "cpmScaleToggle",
+        "change #linestoggle input": "refreshGraphs",
     },
-            
+    
+    refreshGraphs: function(event) {
+        var boxes = $('#linestoggle ul').find("li")
+        for (var i=0; i< boxes.length; i++) {
+            this.packedData[i].vizapp_show = $(boxes[i]).find("input").is(':checked');
+        }
+        this.selectedData = this.selectData();
+
+        this.addPlot();
+    },
         
     resetZoom: function() {
         delete this.ranges;
@@ -106,6 +119,15 @@ window.Fluke289LogView = Backbone.View.extend({
             delete this.plotOptions.yaxis.transform;
             delete this.plotOptions.yaxis.inverseTransform;
         }
+        
+        if (this.deviceLogs == null || this.deviceLogs.length == 0)
+            return;
+
+        // Pack our data
+        if (this.packedData == null || this.packedData.length == 0)
+            this.packedData = this.packData();
+        
+        this.selectedData = this.selectData();
             
         this.addPlot();
 
@@ -139,10 +161,7 @@ window.Fluke289LogView = Backbone.View.extend({
     // attached to the DOM, so this function has to be called from the home view.
     addPlot: function() {
         var self=this;
-        
-        if (this.deviceLogs == null || this.deviceLogs.length == 0)
-            return;
-        
+                
         // TODO: only valid for 1st log, not the whole set
         $('#log_size',this.el).html(this.deviceLogs.getOverallLength());
         $('#log_start',this.el).html(new Date(this.deviceLogs.getLogsStart()).toString());
@@ -150,11 +169,11 @@ window.Fluke289LogView = Backbone.View.extend({
 
         
         // Now initialize the plot area:
-        console.log('Geiger chart size: ' + this.$('.locochart').width());
+        
         
         // Restore current zoom level if it exists:
         if (this.ranges) {
-            this.plot = $.plot($(".locochart",this.el), this.packData(),
+            this.plot = $.plot($(".locochart",this.el), this.selectedData,
                 $.extend(true, {}, this.plotOptions, {
                     xaxis: { min: this.ranges.xaxis.from, max: this.ranges.xaxis.to },
                     yaxis: { min: this.ranges.yaxis.from, max: this.ranges.yaxis.to }
@@ -162,7 +181,7 @@ window.Fluke289LogView = Backbone.View.extend({
              );
 
         } else {
-            this.plot = $.plot($(".locochart", this.el), this.packData(), this.plotOptions);
+            this.plot = $.plot($(".locochart", this.el), this.selectedData, this.plotOptions);
         };
             
         $(".locochart", this.el).bind("plothover", function (event, pos, item) {
@@ -186,7 +205,7 @@ window.Fluke289LogView = Backbone.View.extend({
         });
 
         // Create the overview chart:
-        this.overview = $.plot($("#overview",this.el), this.packData(), this.overviewOptions);
+        this.overview = $.plot($("#overview",this.el), this.selectedData, this.overviewOptions);
         
         // Connect overview and main charts
         $(".locochart",this.el).bind("plotselected", function (event, ranges) {
@@ -206,7 +225,7 @@ window.Fluke289LogView = Backbone.View.extend({
             self.ranges = ranges;
 
             // do the zooming
-            this.plot = $.plot($(".locochart",this.el), self.packData(),
+            this.plot = $.plot($(".locochart",this.el), self.selectedData,
                 $.extend(true, {}, self.plotOptions, {
                     xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
                     yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
@@ -253,16 +272,24 @@ window.Fluke289LogView = Backbone.View.extend({
                             // Get the unit of this reading: if we already have it in the data
                             // table, then append it. Otherwise we have to add a new entry in our
                             // data table:
-                            var idx = dataunits.indexOf(reading.readingID + " - " + reading.baseUnit);
+                            var unit = linkManager.driver.mapUnit(reading.baseUnit) + " - " + reading.readingID;
+                            var idx = dataunits.indexOf(unit);
+                            
+                            // Now find out whether the user wants us to plot this:
+                            var unitnosp = reading.baseUnit + reading.readingID.replace(/\s/g,'_');
+                            var toggle = $('#linestoggle ul',this.el).find('.' + unitnosp);
+                            if (toggle.length == 0) {
+                                    // This is a new unit, we gotta add this to the toggle list
+                                    $('#linestoggle ul').append('<li class="'+unitnosp+'"><input type="checkbox" checked>&nbsp'+unit+'</li>');
+                            }
                             if (idx > -1) {
                                 // If the reading's timestamp is zero, then we gotta use the timestamp
                                 // of the log entry instead
                                 data[idx].push([(reading.timeStamp == 0) ?
-                                       entry.get('timestamp')-tzOffset : reading.timeStamp,reading.readingValue]);
-
+                                                entry.get('timestamp')-tzOffset : reading.timeStamp,reading.readingValue]);
                             } else {
                                 // This is a new unit, create another entry:
-                                dataunits.push(reading.readingID + " - " + reading.baseUnit);
+                                dataunits.push(unit);
                                 data.push([
                                     [(reading.timeStamp == 0) ?
                                                 entry.get('timestamp')-tzOffset : reading.timeStamp,reading.readingValue]
@@ -277,9 +304,19 @@ window.Fluke289LogView = Backbone.View.extend({
        // repack it into a list of data/units for the plot:
        var plotData = [];
        for (var i=0; i < data.length; i++) {
-            plotData.push({ data: data[i], label: linkManager.driver.mapUnit(dataunits[i])});
+            plotData.push({ data: data[i], label: linkManager.driver.mapUnit(dataunits[i]), vizapp_show: true});
         }
         return plotData;
+    },
+    
+    // Return only data that we want to display
+    selectData: function() {
+        var dataSelected = [];
+        for (var i=0; i< this.packedData.length; i++) {
+            if (this.packedData[i].vizapp_show)
+                dataSelected.push(this.packedData[i]);
+        }
+        return dataSelected;
     },
     
     // Ugly at this stage, just to make it work (from flotcharts.org examples)
