@@ -51,6 +51,13 @@ window.HomeView = Backbone.View.extend({
         console.log('Main render of Home view');
         $(this.el).html(this.template(this.model.toJSON()));
         
+        if (this.instrumentLiveView != null)
+            this.instrumentLiveView.onClose();
+        
+        if (this.instrumentNumericView != null)
+            this.instrumentNumericView.onClose();
+
+        
         // If we have a selected instrument, then instanciate its liveview here
         if (settings.get('currentInstrument') != null) {
             console.log('Create the instrument live view');

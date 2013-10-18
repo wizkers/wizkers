@@ -104,6 +104,15 @@ window.Fluke289LogView = Backbone.View.extend({
         console.log('Main render of Log management view');
 
         $(this.el).html(this.template());
+        
+        // Pack our data
+        if (this.packedData == null || this.packedData.length == 0)
+            this.packedData = this.packData();
+        
+        this.selectedData = this.selectData();
+        if (this.selectedData.length == 0)
+            return;
+
         if (settings.get("cpmscale") == "log")
             $("#cpmscale",this.el).attr("checked",true);
         if (settings.get('cpmscale')=="log") {
@@ -123,11 +132,6 @@ window.Fluke289LogView = Backbone.View.extend({
         if (this.deviceLogs == null || this.deviceLogs.length == 0)
             return;
 
-        // Pack our data
-        if (this.packedData == null || this.packedData.length == 0)
-            this.packedData = this.packData();
-        
-        this.selectedData = this.selectData();
             
         this.addPlot();
 

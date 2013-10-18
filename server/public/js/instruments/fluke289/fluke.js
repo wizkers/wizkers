@@ -40,7 +40,7 @@ var Fluke289Instrument = function() {
     
     // Return a device log management view
     this.getLogManagementView = function(arg) {
-        return null;
+        return new Fluke289LogManagementView(arg);
     }
     
     // Render a log (or list of logs) for the device.

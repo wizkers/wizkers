@@ -395,6 +395,19 @@ module.exports = {
                                 this.debug("Bitmap processing requested");
                             }
                         break;
+                    case "QSMR":
+                        // Query Saved Measurement Reading
+                        console.log(Hexdump.dump(buffer.toString('binary')));
+                        break;
+                    case "QRSI":
+                        // Query Recording Summary Information
+                        commandProcessed = true;
+                        this.processRecordingSummary(buffer);
+                        break;
+                    case "QSRR":
+                        // Query Saved Recording Record (??? :) )
+                        console.log(Hexdump.dump(buffer.toString('binary')));
+                        break;
                     default:
                         commandProcessed = false;
                         break;
@@ -699,6 +712,77 @@ module.exports = {
                 }
             }           
         });
+    },
+    
+    processRecordingSummary: function(buffer) {
+        
+        // Find start of data (after #0)
+        var idx = 0;
+        while(idx < buffer.length) {
+            if (buffer[idx]==0x23 && buffer[idx+1] == 0x30)
+                break;
+            idx++;
+        }
+        idx += 2; // Now idx is at the start of our data:
+        
+        var summary = {
+            address0:  buffer.readUInt32LE(idx),
+            startTime: Math.floor(this.decodeFloat(buffer,idx +=4)*1000),
+            endTime: Math.floor(this.decodeFloat(buffer,idx += 8)*1000),
+            unk_1 : this.decodeFloat(buffer,idx +=8),
+            evtThreshold: this.decodeFloat(buffer,idx +=8),
+            recordingAddress: buffer.readUInt32LE(idx +=8),
+            samplesNumber: buffer.readUInt32LE(idx +=4),
+            unk_2: buffer.slice(idx +=4, idx + 8),
+            range: this.decodeFloat(buffer, idx += 8),
+            unk_3: buffer.slice(idx +=8, idx + 16),
+            numberOfReadings: buffer.readUInt16LE( idx +=16),    
+        };
+        
+        idx += 2;
+        
+        var readings = [];
+        for (var i = 0; i < summary.numberOfReadings; i++) {
+            readings.push(this.decodeBinaryReading(buffer,idx));
+            idx += 30;
+        }
+        summary.readings = readings;
+        
+        summary.recordingName = buffer.toString('ascii',idx);
+        
+        this.debug(summary);
+        this.sendData({readingSummary: summary});        
+    },
+    
+    // Decode a reading located at offset idx in the buffer
+    decodeBinaryReading: function(buffer,idx) {
+        var reading = {
+            readingID:  buffer.readUInt16LE(idx),
+            readingValue: this.decodeFloat(buffer, idx += 2),
+            baseUnit: buffer.readUInt16LE(idx +=8),
+            unitMultiplier: buffer.readUInt16LE(idx +=2),
+            decimalPlaces: buffer.readUInt16LE(idx +=2),
+            displayDigits: buffer.readUInt16LE(idx +=2),
+            readingState: buffer.readUInt16LE(idx +=2),
+            readingAttribute: buffer.readUInt16LE(idx +=2),
+            timeStamp: Math.floor(this.decodeFloat(buffer,idx+=2)*1000)
+        };
+        console.log(reading);
+        return reading;
+    },
+    
+    decodeFloat: function(buffer,idx) {
+        // Unless I missed something, data is packed as 32bit little endian
+        // integers, so the 64bit floats have to be reassembled as two separate
+        // reversed buffers to be put back in order. Strange...
+        var b2 = new Buffer(8);
+        var v1 = buffer.readUInt32LE(idx+0);
+        var v2 = buffer.readUInt32LE(idx+4);
+        b2.writeUInt32BE(v1,0);
+        b2.writeUInt32BE(v2,4);
+        //console.log(b2);
+        return b2.readDoubleBE(0);
+        
     },
                    
     

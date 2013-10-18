@@ -15,6 +15,7 @@ var AppRouter = Backbone.Router.extend({
         "workspaces/add"        : "addWorkspace",
         "workspaces/:id"        : "workspaceDetails",
         "logmgt"                : "logmanagement",
+        "devicelogs/:id"        : "devicelogmanagement",
         "displaylogs/:ins/:loglist"  : "displaylogs",
         "settings"              : "settings",
         "diagnostics/:id"       : "diagnostics",
@@ -103,6 +104,13 @@ var AppRouter = Backbone.Router.extend({
         }});
     },
     
+    devicelogmanagement: function(id) {
+        var self = this;
+        this.switchView(instrumentManager.getLogManagementView());
+        self.headerView.selectMenuItem('management-menu');
+        
+    },
+    
     // Instrument management
     
     listInstruments: function(page) {
@@ -174,7 +182,7 @@ var AppRouter = Backbone.Router.extend({
 utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogManagementView', 'InstrumentDetailsView',
                     'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView', 'instruments/FCOledLiveView',
                     'instruments/OnyxNumView', 'instruments/FCOledNumView', 'instruments/Fluke289NumView', 'instruments/Fluke289DiagView',
-                    'instruments/OnyxLogView', 'instruments/Fluke289LogView'
+                    'instruments/OnyxLogView', 'instruments/Fluke289LogView', 'instruments/Fluke289LogManagementView'
                    ],
     function() {
         

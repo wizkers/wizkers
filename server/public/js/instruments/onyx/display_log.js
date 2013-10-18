@@ -8,6 +8,7 @@ window.OnyxLogView = Backbone.View.extend({
         var self = this;
 
         this.deviceLogs = this.collection;
+        this.packedData = null;
         
         // Need this to make sure "render" will always be bound to our context.
         // -> required for the _.after below.
@@ -82,6 +83,14 @@ window.OnyxLogView = Backbone.View.extend({
         console.log('Main render of Log management view');
 
         $(this.el).html(this.template());
+        
+        if (this.packedData == null || this.packedData.length==0)
+            this.packedData = this.packData();
+        
+        if (this.packedData.length == 0)
+            return;
+        
+        
         if (settings.get("cpmscale") == "log")
             $("#cpmscale",this.el).attr("checked",true);
         if (settings.get('cpmscale')=="log") {
@@ -145,7 +154,7 @@ window.OnyxLogView = Backbone.View.extend({
         
         // Restore current zoom level if it exists:
         if (this.ranges) {
-            this.plot = $.plot($(".locochart",this.el), this.getData(this.ranges.xaxis.from, this.ranges.xaxis.to),
+            this.plot = $.plot($(".locochart",this.el), this.packedData,
                 $.extend(true, {}, this.plotOptions, {
                     xaxis: { min: this.ranges.xaxis.from, max: this.ranges.xaxis.to },
                     yaxis: { min: this.ranges.yaxis.from, max: this.ranges.yaxis.to }
@@ -153,7 +162,7 @@ window.OnyxLogView = Backbone.View.extend({
              );
 
         } else {
-            this.plot = $.plot($(".locochart", this.el), this.packData(this.onyxlog), this.plotOptions);
+            this.plot = $.plot($(".locochart", this.el), this.packedData, this.plotOptions);
         };
             
         $(".locochart", this.el).bind("plothover", function (event, pos, item) {
@@ -177,7 +186,7 @@ window.OnyxLogView = Backbone.View.extend({
         });
 
         // Create the overview chart:
-        this.overview = $.plot($("#overview",this.el), this.packData(), this.overviewOptions);
+        this.overview = $.plot($("#overview",this.el), this.packedData, this.overviewOptions);
         
         // Connect overview and main charts
         $(".locochart",this.el).bind("plotselected", function (event, ranges) {
@@ -197,7 +206,7 @@ window.OnyxLogView = Backbone.View.extend({
             self.ranges = ranges;
 
             // do the zooming
-            this.plot = $.plot($(".locochart",this.el), self.packData(),
+            this.plot = $.plot($(".locochart",this.el), self.packedData,
                 $.extend(true, {}, self.plotOptions, {
                     xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
                     yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
@@ -236,7 +245,8 @@ window.OnyxLogView = Backbone.View.extend({
                     ret.push([entry.get('timestamp'), entry.get('data').cpm.value]);
                 }
             }
-            data.push({ data:ret, label:"CPM"});
+            if (ret.length)
+                data.push({ data:ret, label:"CPM"});
         }
         return data;
     },
