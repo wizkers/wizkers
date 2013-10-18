@@ -25,7 +25,27 @@ var DeviceLogEntry = mongoose.model('DeviceLogEntry');
 // Get all log sessions for a given instrument
 exports.findByInstrumentId = function(req, res) {
     var id = req.params.id;
-    console.log('Retrieving Log session entries for Instrument ID: ' + id);
+    console.log('Retrieving Logs for Instrument ID: ' + id);
+    // Background check for logs that have zero datapoints. Won't fix the issue
+    // immediately if logs are broken, but at next display. Hey, better than nothing,
+    // this is a last resort attempt to fix records...
+    LogSession.find({ instrumentid:id, datapoints:0}, function(err,logstofix) {
+        var fixEntries = function(log,index,array) {
+            DeviceLogEntry.count({logsessionid: log.id}, function(err,count) {
+                if (err) {
+                    console.log('Error updating log session entry: ' + err);
+                } else {
+                    log.datapoints = count;
+                    console.log("This log has " + count + " datapoints.");
+                    log.save(function(err) {
+                        if (err) console.log("[logs / findInstrumentByID] Error fixing datapoint count for logs");
+                    });
+                }
+            });
+        };
+        logstofix.forEach(fixEntries);        
+    });
+    
     LogSession.find({ instrumentid: id} , function(err,item) {
         res.send(item);
     });
@@ -44,7 +64,7 @@ exports.findById = function(req, res) {
 exports.getLogEntries = function(req, res) {
     // Empty for now...
     var id = req.params.id;
-    console.log("Retrieving contents of log ID: " + id);
+    console.log("Retrieving entries of log ID: " + id);
     DeviceLogEntry.find({logsessionid: id}, function(err,items) {
                          res.send(items);
                         });

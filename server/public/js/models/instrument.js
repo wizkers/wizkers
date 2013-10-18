@@ -21,7 +21,7 @@ window.Instrument = Backbone.Model.extend({
         this.logs.url = "/instruments/" + this.id + "/logs";
         
     },
-
+    
     validateItem: function (key) {
         return (this.validators[key]) ? this.validators[key](this.get(key)) : {isValid: true};
     },

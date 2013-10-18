@@ -45,7 +45,7 @@ var Fluke289Instrument = function() {
     
     // Render a log (or list of logs) for the device.
     this.getLogView = function(arg) {
-        return null;
+        return new Fluke289LogView(arg);
     }
     
     

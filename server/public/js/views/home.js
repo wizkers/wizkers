@@ -21,7 +21,6 @@ window.HomeView = Backbone.View.extend({
         
         this.instrument = instrumentManager.getInstrument();
         this.recording = false;
-        this.currentLogSession = null;
         
     },
     
@@ -178,26 +177,18 @@ window.HomeView = Backbone.View.extend({
         var self = this;
         $('#RecordModal').modal('hide');
         
-        // Validate entries
-
-        // Retrieve the log sessions
-        var myLogSessions = new LogSessions([], {instrumentid: this.instrument.id});
-        myLogSessions.fetch({
-            success: function() {
-                self.currentLogSession = new LogSession();
-                self.currentLogSession.set('name', $('#recordingname',this.el).val());
-                self.currentLogSession.set('description', $('#description', this.el).val());
-                self.currentLogSession.set('logtype', 'live');
-                // No need to set instrument ID, it is updated when creating the
-                // log session
-                myLogSessions.add(self.currentLogSession);
-                self.currentLogSession.save(null,{
-                    success: function() {
-                        $.get('/startrecording/' + self.currentLogSession.id); // Tell our backend to start recording.
-                      }}
-                      );
-            }
-        });
+        var currentLogSession = new Log();
+        currentLogSession.set('name', $('#recordingname',this.el).val());
+        currentLogSession.set('description', $('#description', this.el).val());
+        currentLogSession.set('logtype', 'live');
+        // No need to set instrument ID, it is updated when creating the
+        // log session
+        this.instrument.logs.add(currentLogSession);
+        currentLogSession.save(null,{
+                success: function() {
+                        $.get('/startrecording/' + currentLogSession.id); // Tell our backend to start recording.
+                  }}
+          );
 
         $('.ctrl-record', this.el).html("<i class=\"icon-white icon-pause\"></i>&nbsp;Recording...").addClass('btn-success')
                    .removeClass('btn-danger').attr('disabled', false);

@@ -1,8 +1,17 @@
-// Log view for the Onyx.
+// Log view for the Fluke 289.
 // 
 // Our model is a collection of Logs
+//
+// Eventually, will manage (dispatch?) all sort of log types:
+//
+//   - Live recording
+//   - Trendview logs
+//   - Min-Max logs
+//   - Peak logs
+//
+// Current status: - Live recording display
 
-window.OnyxLogView = Backbone.View.extend({
+window.Fluke289LogView = Backbone.View.extend({
 
     initialize:function () {
         var self = this;
@@ -145,7 +154,7 @@ window.OnyxLogView = Backbone.View.extend({
         
         // Restore current zoom level if it exists:
         if (this.ranges) {
-            this.plot = $.plot($(".locochart",this.el), this.getData(this.ranges.xaxis.from, this.ranges.xaxis.to),
+            this.plot = $.plot($(".locochart",this.el), this.packData(),
                 $.extend(true, {}, this.plotOptions, {
                     xaxis: { min: this.ranges.xaxis.from, max: this.ranges.xaxis.to },
                     yaxis: { min: this.ranges.yaxis.from, max: this.ranges.yaxis.to }
@@ -153,7 +162,7 @@ window.OnyxLogView = Backbone.View.extend({
              );
 
         } else {
-            this.plot = $.plot($(".locochart", this.el), this.packData(this.onyxlog), this.plotOptions);
+            this.plot = $.plot($(".locochart", this.el), this.packData(), this.plotOptions);
         };
             
         $(".locochart", this.el).bind("plothover", function (event, pos, item) {
@@ -220,25 +229,57 @@ window.OnyxLogView = Backbone.View.extend({
     
     // TODO: depending on log type, we need to pack our data differently...
     packData: function() {
-        var self=this;
+        
         // Create a table of Y values with the x values from our collection
-        var data = [];
+        var data = []; // data is an array of arrays
+        var dataunits = []; // dataunits is sync'ed with data, and returns the unit string of the data
+        var tzOffset = new Date().getTimezoneOffset()*60000;
+
         var logs = this.deviceLogs;
         // At this stage we know the logs are already fetched, btw
         for (var j=0; j<logs.length; j++) {
-            var ret = [];
-            var value = logs.at(j).entries;
-            for (var i=0; i < value.length; i++) {
-                var entry = value.at(i);
-                // Be sure we only plot CPM entries (we might have anything in the
-                // log...
-                if (entry.get('data').cpm != undefined) {   
-                    ret.push([entry.get('timestamp'), entry.get('data').cpm.value]);
+            var entries = logs.at(j).entries;
+            for (var i=0; i < entries.length; i++) {
+                // On the Fluke, we get a timestap from the device itself, this is the one we use.
+                // The trick here is that we never know what sort of data we're gonna get in the log,
+                // as there can be many readings in each entry...
+                var entry = entries.at(i);
+                if (entry.get('data').reading != undefined) {
+                    // Go through every reading contained here:
+                    var readings = entry.get('data').reading.readings;
+                    for (var k=0; k < readings.length; k++) {
+                        var reading = readings[k];
+                        if (reading.readingState == "NORMAL") {
+                            // Get the unit of this reading: if we already have it in the data
+                            // table, then append it. Otherwise we have to add a new entry in our
+                            // data table:
+                            var idx = dataunits.indexOf(reading.readingID + " - " + reading.baseUnit);
+                            if (idx > -1) {
+                                // If the reading's timestamp is zero, then we gotta use the timestamp
+                                // of the log entry instead
+                                data[idx].push([(reading.timeStamp == 0) ?
+                                       entry.get('timestamp')-tzOffset : reading.timeStamp,reading.readingValue]);
+
+                            } else {
+                                // This is a new unit, create another entry:
+                                dataunits.push(reading.readingID + " - " + reading.baseUnit);
+                                data.push([
+                                    [(reading.timeStamp == 0) ?
+                                                entry.get('timestamp')-tzOffset : reading.timeStamp,reading.readingValue]
+                                ]);
+                            }                            
+                        }
+                    }
                 }
             }
-            data.push({ data:ret, label:"CPM"});
         }
-        return data;
+       // We now have a big data array that contains all our readings, we gotta
+       // repack it into a list of data/units for the plot:
+       var plotData = [];
+       for (var i=0; i < data.length; i++) {
+            plotData.push({ data: data[i], label: linkManager.driver.mapUnit(dataunits[i])});
+        }
+        return plotData;
     },
     
     // Ugly at this stage, just to make it work (from flotcharts.org examples)
