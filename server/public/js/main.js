@@ -73,21 +73,21 @@ var AppRouter = Backbone.Router.extend({
         var self = this;
         if (linkManager.connected) {
             console.log('Switching to the instrument diagnostics view');
-            self.switchView(instrumentManager.getDiagDisplay({model: settings, lm: linkManager}));
+            self.switchView(instrumentManager.getDiagDisplay({model: settings}));
             self.headerView.selectMenuItem('home-menu');    
         } else {
             app.navigate('/',true);
         }
     },
     
+    // Display all logs known for the current instrument
     logmanagement: function() {
         var self = this;
         // Initialize with the list of logs for the current device:
-        var logs = new LogSessions([],{instrumentid:settings.get('currentInstrument')});
+        var logs = instrumentManager.getInstrument().logs;
         logs.fetch({
             success:function() {
-                self.switchView(new LogManagementView({collection: logs, settings: settings,
-                                                      lm: linkManager, im: instrumentManager}));
+                self.switchView(new LogManagementView({collection: logs}));
                 self.headerView.selectMenuItem('management-menu');
             }});
     },
@@ -96,14 +96,10 @@ var AppRouter = Backbone.Router.extend({
         var self=this;
         // Loglist is a comma-separated list of log IDs
         var logarray = loglist.split(",");
-        var ins = new Instrument({_id: id});
-        ins.fetch({success: function(){
-            var type = ins.get('type');
-            var allLogs = new LogSessions([],{instrumentid:id});
-            allLogs.fetch({success:function(){
-                var myLogs = allLogs.getLogSessions(logarray);
-                self.switchView(self.instrumentManager.getInstrumentType(type).getLogView({collection:myLogs}));
-                                               }});
+        var allLogs = instrumentManager.getInstrument().logs;
+        allLogs.fetch({success:function(){
+            var myLogs = allLogs.getLogSubset(logarray);
+            self.switchView(instrumentManager.getLogView({collection:myLogs}));
         }});
     },
     
@@ -178,6 +174,7 @@ var AppRouter = Backbone.Router.extend({
 utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogManagementView', 'InstrumentDetailsView',
                     'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView', 'instruments/FCOledLiveView',
                     'instruments/OnyxNumView', 'instruments/FCOledNumView', 'instruments/Fluke289NumView', 'instruments/Fluke289DiagView',
+                    'instruments/OnyxLogView'
                    ],
     function() {
         

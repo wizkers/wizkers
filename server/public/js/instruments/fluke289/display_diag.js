@@ -3,7 +3,8 @@
 window.Fluke289DiagView = Backbone.View.extend({
 
     initialize:function (options) {
-        this.linkManager = this.options.lm;        
+        // TODO: just refer to the global linkmanager and remove this.
+        this.linkManager = linkManager;
         
         if (this.linkManager.streaming) {
             this.linkManager.stopLiveStream();

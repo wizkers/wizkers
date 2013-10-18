@@ -6,7 +6,6 @@
 window.Instrument = Backbone.Model.extend({
 
     urlRoot: "/instruments",
-
     idAttribute: "_id",
     
     type: null,
@@ -18,7 +17,7 @@ window.Instrument = Backbone.Model.extend({
         };
 
         // Create a reference to my logs:
-        this.logs = new LogSessions();
+        this.logs = new Logs();
         this.logs.url = "/instruments/" + this.id + "/logs";
         
     },
@@ -61,7 +60,6 @@ window.Instrument = Backbone.Model.extend({
 window.InstrumentCollection = Backbone.Collection.extend({
 
     model: Instrument,
-
     url: "/instruments"
 
 });

@@ -8,17 +8,13 @@
 window.LogManagementView = Backbone.View.extend({
 
     initialize:function () {
-        this.settings = this.options.settings;    
-        this.instrumentManager = this.options.im;
         
         this.deviceLogs = this.collection;
-        
         this.selectedLogs = [];        
     },
     
     events: {
         "click a": "handleaclicks",
-        "click .resetZoom": "resetZoom",
         "change .logcheckbox": "refreshLogList",
         "click .displaylog": "displayLog",
     },
@@ -46,21 +42,9 @@ window.LogManagementView = Backbone.View.extend({
     displayLog: function() {
         if ($('.displaylog', this.el).attr('disabled'))
             return false;
-        app.navigate('displaylogs/' + this.settings.get('currentInstrument') + '/' + this.selectedLogs.join(','),true);
+        app.navigate('displaylogs/' + settings.get('currentInstrument') + '/' + this.selectedLogs.join(','),true);
         return false;
     },
-    
-    selectLog: function (logSessionID) {
-        this.onyxlog = this.allLogEntries.byLogSession(logSessionID);
-        this.render();
-    },
-    
-    resetZoom: function() {
-        delete this.ranges;
-        this.addPlot();
-        return false;
-    },
-
     
     render:function () {
         var self = this;
@@ -69,14 +53,9 @@ window.LogManagementView = Backbone.View.extend({
         $(this.el).html(this.template({ deviceLogs: this.collection.toJSON(), selected: this.selectedLogs}));
 
         // Depending on device capabilities, enable/disable "device logs" button
-        var ins = new Instrument({_id: this.settings.get('currentInstrument')});
-        ins.fetch({success: function(){
-            // We have the instrument, get the correct view for it:
-            var type = ins.get('type');
-            if (self.instrumentManager.getInstrumentType(type).getLogManagementView() == null) {
+        if (instrumentManager.getLogManagementView() == null) {
                 $('.devicelogs',self.el).attr('disabled', true);
-            }
-        }});
+        }
         return this;
     },
     
@@ -85,7 +64,7 @@ window.LogManagementView = Backbone.View.extend({
         
         // Restore the settings since we don't want them to be saved when changed from
         // the home screen
-        this.settings.fetch();
+        settings.fetch();
     },
         
     // Generate a "blob:"  URL to download (all) the data;

@@ -1,30 +1,23 @@
 // Log view for the Onyx.
 // 
-// Our model is a collection of log sessions.
+// Our model is a collection of Logs
 
 window.OnyxLogView = Backbone.View.extend({
 
     initialize:function () {
-        this.settings = this.options.settings;        
-        this.allDeviceLogs = this.options.allDeviceLogs;
-        this.allLogEntries = this.options.allLogEntries;
+        var self = this;
         
-        // Upon init, we pre-select the 1st device in the list and preload its
-        // sessions
-        this.currentDevice = this.collection.at(0);
-        
-        
-        this.deviceLogs = this.allDeviceLogs.byGUID(this.currentDevice.get('guid'));
-        // TODO: refresh some of the properties of the log sessions (surely there must
-        // be a better way to do this??
-        for (var i = 0; i < this.deviceLogs.length; i++) {
-            this.deviceLogs.at(i).refreshDataPoints();
-        }
-        
+        // Need this to make sure "render" will always be bound to our context.
+        _.bindAll(this,"render");
+        this.deviceLogs = this.collection;
+        this.selectedLogIDs = [this.deviceLogs.at(0).id];
         this.onyxlog = null;
         if (this.deviceLogs.length > 0) {
             // And select the default logging session:
-            this.onyxlog = this.allLogEntries.byLogSession(this.deviceLogs.at(0).id);
+            this.onyxlog = this.deviceLogs.at(0).entries;
+            this.onyxlog.fetch({success:function() {
+                self.render();
+            }});
         }
             
         // TODO: save color palette in settings ?
@@ -34,7 +27,7 @@ window.OnyxLogView = Backbone.View.extend({
             
         this.plotOptions = {
             xaxis: { mode: "time", show:true,
-                    timezone: this.settings.get("timezone"),                  
+                    timezone: settings.get("timezone"),                  
                    },
             grid: {
 				hoverable: true,
@@ -67,6 +60,7 @@ window.OnyxLogView = Backbone.View.extend({
     },
     
     refreshLogList: function() {
+        var self=this;
         var list = $('.logcheckbox',this.el);
         // Create a list of all checked entry IDs
         var entries=[];
@@ -74,8 +68,16 @@ window.OnyxLogView = Backbone.View.extend({
             if (entry.checked)
                 entries.push(entry.value);
         });
-        this.onyxlog = this.allLogEntries.byLogSessions(entries);
-        this.render();
+
+        this.selectedLogIDs = entries;
+        var selectedLogs = this.deviceLogs.filter(function(log) {
+            return (self.selectedLogIDs.indexOf(log.id) > -1);
+        });
+        // Now trigger a rendering
+        var renderGraph = _.after(selectedLogs.length, this.render);
+        _.each(selectedLogs,function(log) {
+            log.entries.fetch({success: renderGraph});
+        });        
     },
         
     deviceDropdownSelected: function(event) {
@@ -112,7 +114,7 @@ window.OnyxLogView = Backbone.View.extend({
         } else {
             change["cpmscale"]="linear";
         }
-        this.settings.set(change);
+        settings.set(change);
         this.render();
         this.addPlot();
         
@@ -123,18 +125,12 @@ window.OnyxLogView = Backbone.View.extend({
         var self = this;
         console.log('Main render of Log management view');
         var selectedStuff = { device: null, sessions: null };
-        if (this.currentDevice != null) {
-            selectedStuff.device = this.currentDevice.get('guid');
-        }
-        if (this.onyxlog != null && this.onyxlog.length) {
-            selectedStuff.sessions = this.onyxlog.getSessions();
-        } else {
-            selectedStuff.sessions = [];
-        }
+
+        selectedStuff.sessions = this.selectedLogIDs;
         $(this.el).html(this.template({devices: this.collection.toJSON(), deviceLogs: this.deviceLogs.toJSON(), selected: selectedStuff}));
-        if (this.settings.get("cpmscale") == "log")
+        if (settings.get("cpmscale") == "log")
             $("#cpmscale",this.el).attr("checked",true);
-        if (this.settings.get('cpmscale')=="log") {
+        if (settings.get('cpmscale')=="log") {
             this.plotOptions.yaxis = {
                         min:1,
                         //ticks: [1,10,30,50,100,500,1000,1500],
@@ -148,7 +144,7 @@ window.OnyxLogView = Backbone.View.extend({
             delete this.plotOptions.yaxis.inverseTransform;
         }
             
-            this.addPlot();
+        this.addPlot();
 
         return this;
     },
@@ -158,7 +154,7 @@ window.OnyxLogView = Backbone.View.extend({
         
         // Restore the settings since we don't want them to be saved when changed from
         // the home screen
-        this.settings.fetch();
+        settings.fetch();
     },
         
     // Generate a "blob:"  URL to download (all) the data;
@@ -180,9 +176,10 @@ window.OnyxLogView = Backbone.View.extend({
     addPlot: function() {
         var self=this;
         
-        if (this.onyxlog == null)
+        if (this.onyxlog == null || this.onyxlog.length == 0)
             return;
         
+        // TODO: only valid for 1st log, not the whole set
         $('#log_size',this.el).html(this.onyxlog.length);
         $('#log_start',this.el).html(new Date(this.onyxlog.getLogStart()).toString());
         $('#log_end',this.el).html(new Date(this.onyxlog.getLogEnd()).toString());
@@ -214,7 +211,7 @@ window.OnyxLogView = Backbone.View.extend({
                     y = item.datapoint[1];
 
                     self.showTooltip(item.pageX, item.pageY,
-                        "<small>" + ((self.settings.get('timezone') === 'UTC') ? 
+                        "<small>" + ((settings.get('timezone') === 'UTC') ? 
                                         new Date(x).toUTCString() :
                                         new Date(x).toString()) + "</small><br>" + item.series.label + ": <strong>" + y + "</strong>");
                 }
@@ -265,17 +262,24 @@ window.OnyxLogView = Backbone.View.extend({
 
     },
 
+    
+    // TODO: depending on log type, we need to pack our data differently...
     packData: function(values) {
+        var self=this;
         // Create a table of Y values with the x values from our collection
         var data = [];
         // Split by Session ID:
-        var logs = values.splitByLogSessions();
+        var logs = this.deviceLogs.filter(function(log) {
+            return (self.selectedLogIDs.indexOf(log.id) > -1);
+        });
+        
+        // At this stage we know the logs are already fetched, btw
         for (var j=0; j<logs.length; j++) {
             var ret = [];
-            var value = logs[j];
+            var value = logs[j].entries;
             for (var i=0; i < value.length; i++) {
                 var entry = value.at(i);
-                ret.push([entry.get('timestamp'), entry.get('cpm')]);
+                ret.push([entry.get('timestamp'), entry.get('data').cpm.value]);
             }
             data.push({ data:ret, label:"CPM"});
         }

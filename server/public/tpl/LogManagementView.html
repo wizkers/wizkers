@@ -38,7 +38,7 @@
             %>
                 <tr>
                     <td><input class="logcheckbox" type="checkbox" <%= selected.indexOf(log._id) > -1  ? 'checked':''%>
-                        <%= (log.logtype != selectedType) ? 'disabled':'' %>
+                        <%= (log.logtype != selectedType && selectedType != "") ? 'disabled':'' %>
                         value="<%=log._id%>" ></td>
                     <td><%= new Date(log.startstamp).toUTCString() %></td>
                     <td><%= new Date(log.endstamp).toUTCString() %></td>

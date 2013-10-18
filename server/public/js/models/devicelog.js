@@ -2,7 +2,7 @@
  * Where we define the device log data
  */
 
-window.DeviceLogEntry = Backbone.Model.extend({
+window.LogEntry = Backbone.Model.extend({
     
     idAttribute: "_id",
 
@@ -20,25 +20,23 @@ window.DeviceLogEntry = Backbone.Model.extend({
 
 
 /**
- * A device log is a collection of log entries that go together because
+ * A collection of log entries that go together because
  * they all have the same logsessionid
  */
-window.deviceLog = Backbone.Collection.extend({
+window.LogEntries = Backbone.Collection.extend({
 
     logsessionid: null,
     
     initialize: function(models, options) {
-        this.logsessionid = options.logsessionid;
     },
 
     
-    url: function() {
-        return "/logs/" + this.logsessionid + "/entries";
-    },
+    //url:   is not defined by default, LogEntries is
+    // nested inside of Log
 
     idAttribute: "_id",
 
-    model: DeviceLogEntry,
+    model: LogEntry,
     
     // Maintain our collection in order automatically by adding a comparator:
     comparator: 'timestamp',
@@ -49,7 +47,7 @@ window.deviceLog = Backbone.Collection.extend({
         var extract = this.filter(function(logEntry) {
             return (logEntry.get('timestamp') > x1) && (logEntry.get('timestamp') < x2);
         });
-        return new deviceLog(extract); // Return as a new collection, this way we can chain calls
+        return new LogEntries(extract); // Return as a new collection, this way we can chain calls
     },
         
     // Get all sessions in a log (there can be several...)
@@ -69,7 +67,7 @@ window.deviceLog = Backbone.Collection.extend({
         var extract = this.filter(function(logEntry) {
             return (logEntry.get('logsessionid') == logSessionID);
         });
-        return new deviceLog(extract);
+        return new LogEntries(extract);
     },
         
     // Get multiple log sessions in one geigerLog collection:
@@ -82,7 +80,7 @@ window.deviceLog = Backbone.Collection.extend({
                 return false;
             }
         });
-        return new deviceLog(extract);
+        return new LogEntries(extract);
     },
 
         
@@ -109,11 +107,15 @@ window.deviceLog = Backbone.Collection.extend({
 });
 
 // A log session references a series of log entries for one device.
-window.LogSession = Backbone.Model.extend({
+window.Log = Backbone.Model.extend({
     
     idAttribute: "_id",
 
     initialize: function() {
+        // A lot contains... entries (surprising, eh?). Nest
+        // the collection here:
+        this.entries = new LogEntries();
+        this.entries.url = "/logs/" + this.id + "/entries";
     },
     
    defaults: {
@@ -133,30 +135,21 @@ window.LogSession = Backbone.Model.extend({
 
 /**
  * We only ever request log sessions linked to a specific Instrument ID,
- * therefore we have to set instrumentid when creating a log session by
- * passing it in the options: new logSession([],{instrumentid: ID})
+ * so this collection is normally instanciated from within the "Instrument" model,
+ * see the corresponding instrument.js
  */
-window.LogSessions = Backbone.Collection.extend({
+window.Logs = Backbone.Collection.extend({
     
     idAttribute: "_id",
-    model: LogSession,
+    model: Log,
     
     initialize: function(models, options) {
-        // TODO: remove this once we use only references from the instrument.
-        if (options)
-            this.instrumentid = options.instrumentid;
     },
     
-    url: function() {
-        if (this.instrumentid) {
-            return "/instruments/" + this.instrumentid + "/logs";
-        } else {
-            return "/logs";
-        }
-    },
+    url: "/logs",
     
     // Create a new subset collection of only some log sessions
-    getLogSessions: function(logSessionIDs) {
+    getLogSubset: function(logSessionIDs) {
         var extract = this.filter(function(logSession) {
             var idx = logSessionIDs.indexOf(logSession.id);
             if (idx > -1) {
@@ -165,7 +158,7 @@ window.LogSessions = Backbone.Collection.extend({
                 return false;
             }
         });
-        return new LogSessions(extract, {instrumentid: this.instrumentid});
+        return new Logs(extract, {instrumentid: this.instrumentid});
     },
 
         
