@@ -58,6 +58,8 @@ module.exports = {
     mapUnit: [],
     mapState: [],
     mapAttribute: [],
+    mapRecordType: [],
+    mapIsStableFlag: [],
     
     // We keep track of the last sent command for which we are
     // expecting a response, to enable parsing of the response:
@@ -265,6 +267,8 @@ module.exports = {
                 this.commandQueue.push("QEMAP state");
                 this.commandQueue.push("QEMAP unit");
                 this.commandQueue.push("QEMAP attribute");
+                this.commandQueue.push("QEMAP recordType");
+                this.commandQueue.push("QEMAP isStableFlag");
                 break;
             case 0x0b: // Error (?)
                 this.debug("LLP: Link closed - error (resetting LLP)");
@@ -412,17 +416,20 @@ module.exports = {
                             }
                         break;
                     case "QSMR":
+                        commandProcessed = true;
                         // Query Saved Measurement Reading
                         console.log(Hexdump.dump(buffer.toString('binary')));
                         break;
                     case "QRSI":
+                        commandProcessed = true;
                         // Query Recording Summary Information
                         commandProcessed = true;
                         this.processRecordingSummary(buffer);
                         break;
                     case "QSRR":
+                        commandProcessed = true;
                         // Query Saved Recording Record (??? :) )
-                        console.log(Hexdump.dump(buffer.toString('binary')));
+                        this.processRecordingEntry(buffer);                    
                         break;
                     default:
                         commandProcessed = false;
@@ -754,7 +761,7 @@ module.exports = {
             unk_1 : this.decodeFloat(buffer,idx +=8),
             evtThreshold: this.decodeFloat(buffer,idx +=8),
             recordingAddress: buffer.readUInt32LE(idx +=8),
-            samplesNumber: buffer.readUInt32LE(idx +=4),
+            numberOfRecords: buffer.readUInt32LE(idx +=4),
             unk_2: buffer.slice(idx +=4, idx + 8),
             range: this.decodeFloat(buffer, idx += 8),
             unk_3: buffer.slice(idx +=8, idx + 16),
@@ -789,7 +796,7 @@ module.exports = {
             readingAttribute: this.mapAttribute[buffer.readUInt16LE(idx +=2)],
             timeStamp: Math.floor(this.decodeFloat(buffer,idx+=2)*1000)
         };
-        console.log(reading);
+        //console.log(reading);
         return reading;
     },
     
@@ -806,6 +813,36 @@ module.exports = {
         return b2.readDoubleBE(0);
         
     },
+    
+    processRecordingEntry: function(buffer) {
+        console.log(Hexdump.dump(buffer.toString('binary')));
+
+        // Find start of data (after #0)
+        var idx = 0;
+        while(idx < buffer.length) {
+            if (buffer[idx]==0x23 && buffer[idx+1] == 0x30)
+                break;
+            idx++;
+        }
+        idx += 2; // Now idx is at the start of our data:
+        
+        var record = {
+            startStamp: Math.floor(this.decodeFloat(buffer,idx)*1000),
+            endStamp: Math.floor(this.decodeFloat(buffer,idx +=8)*1000),
+            maxReading: this.decodeBinaryReading(buffer, idx +=8),
+            minReading: this.decodeBinaryReading(buffer, idx +=30),
+            averageReading: this.decodeBinaryReading(buffer, idx +=30),
+            averageSamples: buffer.readUInt32LE(idx +=30),
+            primaryReading: this.decodeBinaryReading(buffer, idx +=4),
+            recordType: this.mapRecordType[buffer.readUInt16LE(idx +=30)],
+            isStableFlag: this.mapIsStableFlag[buffer.readUInt16LE(idx +=2)],
+            otherFlag: buffer.readUInt16LE(idx +=2),
+        };
+        
+        console.log(record);
+
+    },
+    
     
     // Transform a comma-separated list of props into a JSON object
     processEmap: function(data) {
@@ -829,6 +866,12 @@ module.exports = {
                     break;
                 case "attribute":
                     this.mapAttribute = emap;
+                    break;
+                case "isStableFlag":
+                    this.mapIsStableFlag = emap;
+                    break;
+                case "recordType":
+                    this.mapRecordType = emap;
                     break;
         }
         return { emap : {id: this.pendingCommandArgument, props: emap }};
