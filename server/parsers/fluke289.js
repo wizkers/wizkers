@@ -53,6 +53,12 @@ module.exports = {
                   open: 2         // Link open
                },
     
+    // Tables that contain the mapping of various fields in binary structures:
+    mapReadingID : [],
+    mapUnit: [],
+    mapState: [],
+    mapAttribute: [],
+    
     // We keep track of the last sent command for which we are
     // expecting a response, to enable parsing of the response:
     pendingCommand : "",
@@ -180,7 +186,7 @@ module.exports = {
     },
     
     debug: function(data) {
-        return;
+        //return;
         console.log(data);
     },
     
@@ -252,6 +258,13 @@ module.exports = {
             case 0x07: // Response to link open request
                 this.debug("LLP: Link open");
                 this.currentLinkstate = this.linkstate.open;
+                // Now that our link is open, request a few basic infos that
+                // we will need to decode binary logs:
+                this.commandQueue.push("QEMAP readingId");
+                this.commandQueue.push("QEMAP primFunction");
+                this.commandQueue.push("QEMAP state");
+                this.commandQueue.push("QEMAP unit");
+                this.commandQueue.push("QEMAP attribute");
                 break;
             case 0x0b: // Error (?)
                 this.debug("LLP: Link closed - error (resetting LLP)");
@@ -283,7 +296,7 @@ module.exports = {
         }
 
         var response = '';
-        // Placeholder: process the packet if it contains a payload
+        // Process the packet if it contains a payload
         if (stop > 7) {
             var escapedPacket = new Buffer(stop-7);
             this.inputBuffer.copy(escapedPacket,0,3,stop-4);
@@ -294,7 +307,10 @@ module.exports = {
             this.debug("LLP: New packet ready:");
             this.debug(packet);
             response = this.processPacket(packet);
+        } else if (controlByte == 0x07) {
+            response = this.processPacket();
         }
+        
 
         this.inputBuffer.copy(this.inputBuffer,0,stop);
         this.ibIdx -= stop;
@@ -492,6 +508,11 @@ module.exports = {
                             break;
                         case "QDDA": // Extended version of meter value reading
                             response = this.processQDDA(data[1]);
+                            response.error = false;
+                            break;
+                        
+                        case "QEMAP": // Property mapping
+                            response = this.processEmap(data[1]);
                             response.error = false;
                             break;
                         default:
@@ -727,6 +748,7 @@ module.exports = {
         
         var summary = {
             address0:  buffer.readUInt32LE(idx),
+            // We use Unix timestamps for our stamps:
             startTime: Math.floor(this.decodeFloat(buffer,idx +=4)*1000),
             endTime: Math.floor(this.decodeFloat(buffer,idx += 8)*1000),
             unk_1 : this.decodeFloat(buffer,idx +=8),
@@ -757,14 +779,14 @@ module.exports = {
     // Decode a reading located at offset idx in the buffer
     decodeBinaryReading: function(buffer,idx) {
         var reading = {
-            readingID:  buffer.readUInt16LE(idx),
+            readingID: this.mapReadingID[buffer.readUInt16LE(idx)],
             readingValue: this.decodeFloat(buffer, idx += 2),
-            baseUnit: buffer.readUInt16LE(idx +=8),
-            unitMultiplier: buffer.readUInt16LE(idx +=2),
+            baseUnit: this.mapUnit[buffer.readUInt16LE(idx +=8)],
+            unitMultiplier: buffer.readInt16LE(idx +=2),
             decimalPlaces: buffer.readUInt16LE(idx +=2),
             displayDigits: buffer.readUInt16LE(idx +=2),
-            readingState: buffer.readUInt16LE(idx +=2),
-            readingAttribute: buffer.readUInt16LE(idx +=2),
+            readingState: this.mapState[buffer.readUInt16LE(idx +=2)],
+            readingAttribute: this.mapAttribute[buffer.readUInt16LE(idx +=2)],
             timeStamp: Math.floor(this.decodeFloat(buffer,idx+=2)*1000)
         };
         console.log(reading);
@@ -783,6 +805,33 @@ module.exports = {
         //console.log(b2);
         return b2.readDoubleBE(0);
         
+    },
+    
+    // Transform a comma-separated list of props into a JSON object
+    processEmap: function(data) {
+        var fields = data.split(',');
+        this.debug(fields);
+        var emap = [];
+        for (var i=1; i < fields.length; i++) {
+            // Note: some prop fields have very high indexes, but...
+            emap[fields[i++]] = fields[i];
+        }
+        this.debug(emap);
+        switch (this.pendingCommandArgument) {
+                case "unit":
+                    this.mapUnit = emap;
+                    break;
+                case "readingId":
+                    this.mapReadingID = emap;
+                    break;
+                case "state":
+                    this.mapState = emap;
+                    break;
+                case "attribute":
+                    this.mapAttribute = emap;
+                    break;
+        }
+        return { emap : {id: this.pendingCommandArgument, props: emap }};
     },
                    
     
