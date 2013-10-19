@@ -91,6 +91,7 @@ window.Fluke289LiveView = Backbone.View.extend({
     
     // We get there whenever we receive something from the serial port
     showInput: function(data) {
+
         var self = this;
         
         // Update our raw data monitor

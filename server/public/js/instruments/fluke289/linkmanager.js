@@ -1,6 +1,6 @@
 /**
- * The controller communication manager:
- *  - manages the socket.io link
+ * The controller communication driver:
+ *
  *  - provides API to the backend device to use by views
  *
  */
@@ -58,6 +58,8 @@ var Fluke289LinkManager = function(linkManager) {
         self.socket.emit('controllerCommand', 'QCVN');
     }
     
+    // Queries the primary measurement only. Adds battery check
+    // every 10 queries as a bonus.
     this.queryMeasurement = function() {
         self.battCheck = (self.battCheck+1)%10;
         if (self.battCheck == 0)
@@ -66,6 +68,8 @@ var Fluke289LinkManager = function(linkManager) {
         self.socket.emit('controllerCommand', 'QM');
     }
     
+    // Extended version, queries all currently displayed
+    // measurements on the meter.
     this.queryMeasurementFull = function() {
         self.battCheck = (self.battCheck+1)%10;
         if (self.battCheck == 0)
@@ -121,6 +125,14 @@ var Fluke289LinkManager = function(linkManager) {
     
     this.sendKeypress = function(key) {
         self.socket.emit('controllerCommand', 'PRESS ' + key);
+    }
+    
+    
+    // Sends several queries related to memory level.
+    // Note: will fail if the meter is recording something.
+    this.getMemInfo = function() {
+        self.socket.emit('controllerCommand', 'QMEMLEVEL');
+        self.socket.emit('controllerCommand', 'QSLS');
     }
     
     // Helper methods to format output:

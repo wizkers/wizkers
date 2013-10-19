@@ -106,9 +106,13 @@ var AppRouter = Backbone.Router.extend({
     
     devicelogmanagement: function(id) {
         var self = this;
-        this.switchView(instrumentManager.getLogManagementView());
-        self.headerView.selectMenuItem('management-menu');
-        
+        if (linkManager.connected) {
+            this.switchView(instrumentManager.getLogManagementView());
+            self.headerView.selectMenuItem('management-menu');
+        } else {
+            app.navigate('/',true);
+        }
+                         
     },
     
     // Instrument management

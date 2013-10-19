@@ -4,7 +4,7 @@
 //
 // Eventually, will manage (dispatch?) all sort of log types:
 //
-//   - Live recording
+//   - Live recording - done
 //   - Trendview logs
 //   - Min-Max logs
 //   - Peak logs

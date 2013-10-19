@@ -53,7 +53,7 @@ window.LogManagementView = Backbone.View.extend({
         $(this.el).html(this.template({ deviceLogs: this.collection.toJSON(), selected: this.selectedLogs}));
 
         // Depending on device capabilities, enable/disable "device logs" button
-        if (instrumentManager.getLogManagementView() == null) {
+        if (instrumentManager.getCaps().indexOf("LogManagementView") == -1 || ! linkManager.connected) {
                 $('.devicelogs',self.el).attr('disabled', true);
         }
         return this;

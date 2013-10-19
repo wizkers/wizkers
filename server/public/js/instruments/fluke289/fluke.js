@@ -6,6 +6,12 @@
 
 
 var Fluke289Instrument = function() {
+
+    // Helper function: get driver capabilites.
+    // returns a simple array of capabilities    
+    this.getCaps = function() {
+        return ["LiveDisplay", "LogManagementView", "NumDisplay", "DiagDisplay", "LogView"];
+    };
     
     // This has to be a backbone view
     this.getSettings = function(arg) {

@@ -262,7 +262,7 @@ module.exports = {
                 this.currentLinkstate = this.linkstate.open;
                 // Now that our link is open, request a few basic infos that
                 // we will need to decode binary logs:
-                this.commandQueue.push("QEMAP readingId");
+                this.commandQueue.push("QEMAP readingID");
                 this.commandQueue.push("QEMAP primFunction");
                 this.commandQueue.push("QEMAP state");
                 this.commandQueue.push("QEMAP unit");
@@ -424,12 +424,17 @@ module.exports = {
                         commandProcessed = true;
                         // Query Recording Summary Information
                         commandProcessed = true;
-                        this.processRecordingSummary(buffer);
+                        response = this.processRecordingSummary(buffer);
+                        response.recordingID = this.pendingCommandArgument;
                         break;
                     case "QSRR":
                         commandProcessed = true;
                         // Query Saved Recording Record (??? :) )
                         this.processRecordingEntry(buffer);                    
+                        break;
+                    case "QMMSI":
+                        commandProcessed = true;
+                        console.log(Hexdump.dump(buffer.toString('binary')));
                         break;
                     default:
                         commandProcessed = false;
@@ -780,7 +785,7 @@ module.exports = {
         summary.recordingName = buffer.toString('ascii',idx);
         
         this.debug(summary);
-        this.sendData({readingSummary: summary});        
+        return summary;
     },
     
     // Decode a reading located at offset idx in the buffer
@@ -858,7 +863,7 @@ module.exports = {
                 case "unit":
                     this.mapUnit = emap;
                     break;
-                case "readingId":
+                case "readingID":
                     this.mapReadingID = emap;
                     break;
                 case "state":

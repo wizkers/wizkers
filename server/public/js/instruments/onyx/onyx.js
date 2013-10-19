@@ -5,6 +5,12 @@
 
 var OnyxInstrument = function() {
     
+        // Helper function: get driver capabilites.
+    // returns a simple array of capabilities    
+    this.getCaps = function() {
+        return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView"];
+    };
+
     // This has to be a backbone view
     this.getSettings = function(arg) {
         return new OnyxSettings(arg);

@@ -95,6 +95,8 @@ window.HomeView = Backbone.View.extend({
         
         if (this.instrumentNumericView != null)
             this.instrumentNumericView.onClose();
+        
+        linkManager.stopLiveStream();
 
         // Restore the settings since we don't want them to be saved when changed from
         // the home screen
