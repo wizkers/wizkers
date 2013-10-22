@@ -42,3 +42,26 @@
   </div>
 
 </div><!--/row-->
+    
+<!-- Log download modal -->
+<div id="logModal" class="modal hide" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Log download</h3>
+  </div>
+  <div class="modal-body">
+      <div class="horizontal">
+          <span>Log name:&nbsp;</span><input id="logname" name="recordingname" type="text" />
+      </div>
+      <div>Description:
+         <textarea id="description" name="description" style="width: 90%;" rows="6"></textarea>
+      </div>
+</div>
+  <div class="modal-footer">
+<!--    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button> -->
+    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    <button class="btn start-download btn-primary">Start download</button>
+  </div>
+</div>
+
+

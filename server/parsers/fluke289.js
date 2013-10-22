@@ -439,7 +439,8 @@ module.exports = {
                     case "QSRR":
                         commandProcessed = true;
                         // Query Saved Recording Record (??? :) )
-                        this.processRecordingEntry(buffer);                    
+                        response = this.processRecordingEntry(buffer);
+                        response.recordingID = this.pendingCommandArgument;
                         break;
                     case "QMMSI":
                         commandProcessed = true;
@@ -815,7 +816,7 @@ module.exports = {
             // We use Unix timestamps for our stamps:
             startTime: Math.floor(this.decodeFloat(buffer,idx +=4)*1000),
             endTime: Math.floor(this.decodeFloat(buffer,idx += 8)*1000),
-            unk_1 : this.decodeFloat(buffer,idx +=8),
+            interval : this.decodeFloat(buffer,idx +=8),
             evtThreshold: this.decodeFloat(buffer,idx +=8),
             recordingAddress: buffer.readUInt32LE(idx +=8),
             numberOfRecords: buffer.readUInt32LE(idx +=4),
@@ -900,6 +901,7 @@ module.exports = {
         
     },
     
+    // Decode a Trendlog entry:
     processRecordingEntry: function(buffer) {
         console.log(Hexdump.dump(buffer.toString('binary')));
 
@@ -907,8 +909,8 @@ module.exports = {
         var idx =  this.syncBuffer(buffer);
         
         var record = {
-            startStamp: Math.floor(this.decodeFloat(buffer,idx)*1000),
-            endStamp: Math.floor(this.decodeFloat(buffer,idx +=8)*1000),
+            startTime: Math.floor(this.decodeFloat(buffer,idx)*1000),
+            endTime: Math.floor(this.decodeFloat(buffer,idx +=8)*1000),
             maxReading: this.decodeBinaryReadingId(buffer, idx +=8),
             minReading: this.decodeBinaryReadingId(buffer, idx +=30),
             averageReading: this.decodeBinaryReadingId(buffer, idx +=30),
@@ -920,6 +922,9 @@ module.exports = {
         };
         
         console.log(record);
+        
+        // Now package the trendlog record
+        return { record: record};
 
     },
     

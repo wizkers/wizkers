@@ -7,7 +7,9 @@ window.Fluke289LogManagementView = Backbone.View.extend({
 
     initialize:function (options) {
         
-        linkManager.on('input', this.showInput, this);        
+        linkManager.on('input', this.showInput, this);
+        
+        this.logIDToDownload = -1;
 
     },
     
@@ -25,6 +27,10 @@ window.Fluke289LogManagementView = Backbone.View.extend({
         //linkManager.off('input', this.showInput, this);
         linkManager.off(null,null,this);
     
+    },
+    
+    events: {
+        "click .trendlog": "dlTrendlog",
     },
     
     showInput: function(data) {
@@ -59,7 +65,13 @@ window.Fluke289LogManagementView = Backbone.View.extend({
         
         if (data.recordingID) {  // recordingID means Trendlog recording
             // This is a trendlog recording sumary: add a summary card for it
-            var card = _.template('<li><div class="thumbnail glowthumbnail thumbnail-larger select" style="text-align: center;"><h4><%=recordingName%></div></li>');
+            var card = _.template('<li><div class="thumbnail glowthumbnail thumbnail-larger select" style="text-align: center;"><h4><%=recordingName%></h4>' +
+                                  '<small>Start&nbsp;time:</small><%= new Date(startTime) %><br>Duration:<%= utils.hms(Math.floor((endTime-startTime)/1000+0.5)) %><br>' +
+                                  'Records: <%= numberOfRecords %>' +
+                                  '<div style="text-align:left;">Type: <%= reading.primaryFunction %> / <%= reading.secondaryFunction %><br>' +
+                                  'Event threshold: <%= (evtThreshold*100).toFixed(1) %>%<br>' +
+                                  'Interval sample: <%= interval %>&nbsp;s'+
+                                  '</div><div><a class="btn btn-mini download trendlog" data-name="<%= recordingName %>" data-id="<%=recordingID%>" href="#">Download</a></div></li>');
             $('#records',this.el).append(card(data));            
         }
         
@@ -70,6 +82,12 @@ window.Fluke289LogManagementView = Backbone.View.extend({
         }
         
     
+    },
+    
+    dlTrendlog: function(event) {
+        $('#logname').val($(event.currentTarget).data('name'));
+        $('#logModal').modal('show');
+        return false;
     },
     
 });
