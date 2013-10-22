@@ -45,20 +45,30 @@ window.Fluke289LogManagementView = Backbone.View.extend({
             _.each(data.savedlogs, function(value,key) {
                 $('#mem'+key,this.el).html(value);
                 // Then query information about each of those logs
+                    var i=0;
                 if (key == "record") {
-                    for (var i=0; i < value; i++)
-                        linkManager.manualCommand('QRSI ' + i);
+                    while(i < value)
+                        linkManager.manualCommand('QRSI ' + i++);
+                } else if (key == "minmax") {
+                    while(i < value)
+                        linkManager.manualCommand('QMMSI ' + i++);
                 }
 
             });   
         }
         
-        if (data.recordingID) {
+        if (data.recordingID) {  // recordingID means Trendlog recording
             // This is a trendlog recording sumary: add a summary card for it
             var card = _.template('<li><div class="thumbnail glowthumbnail thumbnail-larger select" style="text-align: center;"><h4><%=recordingName%></div></li>');
-            $('#records',this.el).append(card(data));
-            
+            $('#records',this.el).append(card(data));            
         }
+        
+        if (data.minmaxRecordingID) {  // recordingID means Trendlog recording
+            // This is a MinMax sumary: add a summary card for it
+            var card = _.template('<li><div class="thumbnail glowthumbnail thumbnail-larger select" style="text-align: center;"><h4><%=recordingName%></div></li>');
+            $('#minmaxs',this.el).append(card(data));            
+        }
+        
     
     },
     

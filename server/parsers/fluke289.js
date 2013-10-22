@@ -60,6 +60,11 @@ module.exports = {
     mapAttribute: [],
     mapRecordType: [],
     mapIsStableFlag: [],
+    mapPrimFunction: [],
+    mapSecFunction: [],
+    mapAutoRange: [],
+    mapBolt: [],
+    mapMode: [],
     
     // We keep track of the last sent command for which we are
     // expecting a response, to enable parsing of the response:
@@ -264,11 +269,15 @@ module.exports = {
                 // we will need to decode binary logs:
                 this.commandQueue.push("QEMAP readingID");
                 this.commandQueue.push("QEMAP primFunction");
+                this.commandQueue.push("QEMAP secFunction");
+                this.commandQueue.push("QEMAP autoRange");
                 this.commandQueue.push("QEMAP state");
                 this.commandQueue.push("QEMAP unit");
                 this.commandQueue.push("QEMAP attribute");
                 this.commandQueue.push("QEMAP recordType");
                 this.commandQueue.push("QEMAP isStableFlag");
+                this.commandQueue.push("QEMAP bolt");
+                this.commandQueue.push("QEMAP mode");
                 break;
             case 0x0b: // Error (?)
                 this.debug("LLP: Link closed - error (resetting LLP)");
@@ -433,6 +442,12 @@ module.exports = {
                         this.processRecordingEntry(buffer);                    
                         break;
                     case "QMMSI":
+                        commandProcessed = true;
+                        response = this.processMinMaxRecording(buffer);
+                        response.minmaxRecordingID = this.pendingCommandArgument;
+                        console.log(Hexdump.dump(buffer.toString('binary')));
+                        break;
+                    case "QPSI":
                         commandProcessed = true;
                         console.log(Hexdump.dump(buffer.toString('binary')));
                         break;
@@ -747,16 +762,53 @@ module.exports = {
         });
     },
     
-    processRecordingSummary: function(buffer) {
-        
-        // Find start of data (after #0)
+    syncBuffer: function(buffer) {
         var idx = 0;
+
         while(idx < buffer.length) {
             if (buffer[idx]==0x23 && buffer[idx+1] == 0x30)
                 break;
             idx++;
         }
         idx += 2; // Now idx is at the start of our data:
+        
+        return idx;
+        
+    },
+    
+    processMinMaxRecording: function(buffer) {
+        // Find start of data (after #0)
+        var idx = this.syncBuffer(buffer);
+
+        summary = {
+            address0:  buffer.readUInt32LE(idx),
+            // We use Unix timestamps for our stamps:
+            startTime: Math.floor(this.decodeFloat(buffer,idx +=4)*1000),
+            endTime: Math.floor(this.decodeFloat(buffer,idx += 8)*1000),            
+        };
+        
+        var ret = this.decodeBinaryReading(buffer, idx += 8);
+        summary.reading = ret[0];
+        idx = ret[1];
+        
+        summary.recordingName = buffer.toString('ascii',idx);
+        
+
+        return summary;
+        
+    },
+    
+    processMeasurementRecording: function(buffer) {
+        
+        
+    },
+
+    
+    // Decode a Trendlog recording summary
+    processRecordingSummary: function(buffer) {
+        
+        // Find start of data (after #0)
+        var idx =  this.syncBuffer(buffer);
         
         var summary = {
             address0:  buffer.readUInt32LE(idx),
@@ -767,20 +819,11 @@ module.exports = {
             evtThreshold: this.decodeFloat(buffer,idx +=8),
             recordingAddress: buffer.readUInt32LE(idx +=8),
             numberOfRecords: buffer.readUInt32LE(idx +=4),
-            unk_2: buffer.slice(idx +=4, idx + 8),
-            range: this.decodeFloat(buffer, idx += 8),
-            unk_3: buffer.slice(idx +=8, idx + 16),
-            numberOfReadings: buffer.readUInt16LE( idx +=16),    
         };
-        
-        idx += 2;
-        
-        var readings = [];
-        for (var i = 0; i < summary.numberOfReadings; i++) {
-            readings.push(this.decodeBinaryReading(buffer,idx));
-            idx += 30;
-        }
-        summary.readings = readings;
+
+        var ret = this.decodeBinaryReading(buffer, idx +=4);
+        summary.reading = ret[0];
+        idx = ret[1];
         
         summary.recordingName = buffer.toString('ascii',idx);
         
@@ -788,8 +831,46 @@ module.exports = {
         return summary;
     },
     
-    // Decode a reading located at offset idx in the buffer
-    decodeBinaryReading: function(buffer,idx) {
+    
+    // A Reading contains range info and primary/secondary functions,
+    // then all the readingIDs.
+    // idx needs to be the starting offset of the structure
+    // returns an object containing the decoded reading + the updated index.
+    decodeBinaryReading: function(buffer, idx) {
+        
+        reading = {
+            primaryFunction: this.mapPrimFunction[buffer.readUInt16LE(idx)],
+            secondaryFunction: this.mapSecFunction[buffer.readUInt16LE(idx += 2)] ,
+            rangeData: {
+                autoRangeState: this.mapAutoRange[buffer.readUInt16LE(idx += 2)],
+                baseUnit: this.mapUnit[buffer.readUInt16LE(idx += 2)],
+                rangeNumber: this.decodeFloat(buffer, idx +=2),
+                rangeMultiplier: buffer.readInt16LE(idx +=8)
+            },
+            lightningBolt: this.mapBolt[buffer.readUInt16LE(idx +=2)],
+            minMaxStartTime: Math.floor(this.decodeFloat(buffer, idx += 2)*1000),
+            // TODO: not 100% sure about the below !
+            measurementMode1: this.mapMode[buffer.readUInt16LE(idx +=8)],
+            measurementMode2: buffer.readUInt16LE(idx +=2),
+        };
+        
+        var numberOfReadings = buffer.readUInt16LE( idx +=2);
+        // Now decode the readings:
+        idx += 2;
+        
+        var readings = [];
+        for (var i = 0; i < numberOfReadings; i++) {
+            readings.push(this.decodeBinaryReadingId(buffer,idx));
+            idx += 30;
+        }
+        reading.readings = readings;
+        
+        return [reading, idx];
+    },
+    
+    
+    // Decode a readingId located at offset idx in the buffer
+    decodeBinaryReadingId: function(buffer,idx) {
         var reading = {
             readingID: this.mapReadingID[buffer.readUInt16LE(idx)],
             readingValue: this.decodeFloat(buffer, idx += 2),
@@ -823,22 +904,16 @@ module.exports = {
         console.log(Hexdump.dump(buffer.toString('binary')));
 
         // Find start of data (after #0)
-        var idx = 0;
-        while(idx < buffer.length) {
-            if (buffer[idx]==0x23 && buffer[idx+1] == 0x30)
-                break;
-            idx++;
-        }
-        idx += 2; // Now idx is at the start of our data:
+        var idx =  this.syncBuffer(buffer);
         
         var record = {
             startStamp: Math.floor(this.decodeFloat(buffer,idx)*1000),
             endStamp: Math.floor(this.decodeFloat(buffer,idx +=8)*1000),
-            maxReading: this.decodeBinaryReading(buffer, idx +=8),
-            minReading: this.decodeBinaryReading(buffer, idx +=30),
-            averageReading: this.decodeBinaryReading(buffer, idx +=30),
+            maxReading: this.decodeBinaryReadingId(buffer, idx +=8),
+            minReading: this.decodeBinaryReadingId(buffer, idx +=30),
+            averageReading: this.decodeBinaryReadingId(buffer, idx +=30),
             averageSamples: buffer.readUInt32LE(idx +=30),
-            primaryReading: this.decodeBinaryReading(buffer, idx +=4),
+            primaryReading: this.decodeBinaryReadingId(buffer, idx +=4),
             recordType: this.mapRecordType[buffer.readUInt16LE(idx +=30)],
             isStableFlag: this.mapIsStableFlag[buffer.readUInt16LE(idx +=2)],
             otherFlag: buffer.readUInt16LE(idx +=2),
@@ -850,6 +925,7 @@ module.exports = {
     
     
     // Transform a comma-separated list of props into a JSON object
+    // and also catches any interesting proplist for our own use.
     processEmap: function(data) {
         var fields = data.split(',');
         this.debug(fields);
@@ -877,6 +953,21 @@ module.exports = {
                     break;
                 case "recordType":
                     this.mapRecordType = emap;
+                    break;
+                case "primFunction":
+                    this.mapPrimFunction = emap;
+                    break;
+                case "secFunction":
+                    this.mapSecFunction = emap;
+                    break;
+                case "autoRange":
+                    this.mapAutoRange = emap;
+                    break;
+                case "bolt":
+                    this.mapBolt = emap;
+                    break;
+                case "mode":
+                    this.mapMode = emap;
                     break;
         }
         return { emap : {id: this.pendingCommandArgument, props: emap }};
