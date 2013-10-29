@@ -93,6 +93,8 @@ var AppRouter = Backbone.Router.extend({
             }});
     },
     
+    // Display all selected logs. The list of logs is passed as the
+    // view's collection
     displaylogs: function(id,loglist) {
         var self=this;
         // Loglist is a comma-separated list of log IDs
@@ -104,11 +106,17 @@ var AppRouter = Backbone.Router.extend({
         }});
     },
     
+    // Launch log management interface for the device. All existing logs
+    // are passed to the view, so that it can easily understand whether a log
+    // is already downloaded in the database or not.
     devicelogmanagement: function(id) {
         var self = this;
         if (linkManager.connected) {
-            this.switchView(instrumentManager.getLogManagementView());
-            self.headerView.selectMenuItem('management-menu');
+            var allLogs = instrumentManager.getInstrument().logs;
+            allLogs.fetch({success:function(){
+                self.switchView(instrumentManager.getLogManagementView({collection:allLogs}));
+                self.headerView.selectMenuItem('management-menu');
+            }});
         } else {
             app.navigate('/',true);
         }
@@ -116,7 +124,6 @@ var AppRouter = Backbone.Router.extend({
     },
     
     // Instrument management
-    
     listInstruments: function(page) {
         var self = this;
         var p = page ? parseInt(page, 10) : 1;
@@ -186,7 +193,8 @@ var AppRouter = Backbone.Router.extend({
 utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogManagementView', 'InstrumentDetailsView',
                     'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView', 'instruments/FCOledLiveView',
                     'instruments/OnyxNumView', 'instruments/FCOledNumView', 'instruments/Fluke289NumView', 'instruments/Fluke289DiagView',
-                    'instruments/OnyxLogView', 'instruments/Fluke289LogView', 'instruments/Fluke289LogManagementView'
+                    'instruments/OnyxLogView', 'instruments/Fluke289LogView', 'instruments/Fluke289LogManagementView', 'instruments/OnyxLogManagementView',
+                    'instruments/OnyxDiagView', 
                    ],
     function() {
         

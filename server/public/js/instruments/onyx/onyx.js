@@ -8,7 +8,9 @@ var OnyxInstrument = function() {
         // Helper function: get driver capabilites.
     // returns a simple array of capabilities    
     this.getCaps = function() {
-        return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView"];
+        return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView",
+                "LogManagementView",
+               ];
     };
 
     // This has to be a backbone view
@@ -35,7 +37,6 @@ var OnyxInstrument = function() {
     
     // A diagnostics/device setup screen
     this.getDiagDisplay = function(arg) {
-        return null;
         return new OnyxDiagView(arg);
     };
 
@@ -52,7 +53,7 @@ var OnyxInstrument = function() {
     
     // Return a device log management view
     this.getLogManagementView = function(arg) {
-        return null;
+        return new OnyxLogManagementView(arg);
     }
     
     // Render a log (or list of logs) for the device.

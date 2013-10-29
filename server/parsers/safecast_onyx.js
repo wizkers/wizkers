@@ -51,32 +51,23 @@ module.exports = {
 
     
     format: function(data, recording) {
-        //console.log('Onyx - format output');
-        var cmd = data.split('\n\r\n')[0];
-       if (cmd == "LOGXFER") {
-           // The result should be data in JSON format: attempt to parse right now
-           // and transfer as a log rather than raw:
-           try {
-               var log = JSON.parse(data.substring(cmd.length+3) );
-               this.socket.emit('serialEvent', log);
-           } catch (err) {
-               console.log("Could not parse log packet");
-           }
-        } else {
-           // Some commands now return JSON
-           try {
-               var response = JSON.parse(data);
-               if (this.uidrequested && response.guid != undefined) {
-                   this.socket.emit('uniqueID',response.guid);
-                   this.uidrequested = false;
-               } else {
-                   this.socket.emit('serialEvent', response);
-                   this.recorder.record(response);
-               }
-               
-           } catch (err) {
-               console.log('Not able to parse JSON');
-           }
+        // All commands now return JSON
+        try {
+            //console.log(Hexdump.dump(data.substr(0,5)));
+            if (data.substr(0,2) == "\n>")
+                return;
+            if (data.length < 2)
+                return;
+            var response = JSON.parse(data);
+            if (this.uidrequested && response.guid != undefined) {
+                this.socket.emit('uniqueID',response.guid);
+                this.uidrequested = false;
+            } else {
+                this.socket.emit('serialEvent', response);
+                this.recorder.record(response);
+            }
+        } catch (err) {
+            console.log('Not able to parse JSON response from device:\n' + data);
         }
     },
     

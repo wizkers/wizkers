@@ -10,7 +10,7 @@ window.LogEntry = Backbone.Model.extend({
     },
     
     defaults: {
-    logsessionid: 0, // Should match the ID of a log session model (see below)
+    logsessionid: 0, // Should match the ID of a log model (see below)
     timestamp: 0,    // Javascript timestamp for that entry (milliseconds since 1970)
     comment: "",     // We will one day support commenting any data point in a log...
     data: null       // Will be an object that depends on the device type
@@ -75,7 +75,7 @@ window.Log = Backbone.Model.extend({
     },
     
    defaults: {
-       instrumentid: 0,                // Instrument for this log
+       instrumentid: 0,                // Instrument for this log (not the instrument's serial number, but the ID in MongoDB)
        logtype: "",                    // To be used by the device driver, in case the device supports different
                                        // kinds of logs.
        swversion: 0,                   // Keep track of firmware version for the log session (traceability)
@@ -134,7 +134,6 @@ window.Logs = Backbone.Collection.extend({
         });
         return points;
     },
-    
         
     // Return the earliest start date of all logs in our collection
     // -> Will only work properly if our logs' log entries are fetched.

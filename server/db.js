@@ -69,18 +69,6 @@ var ApplicationSettingsSchema = new Schema({
 mongoose.model('Settings',ApplicationSettingsSchema);
 
 
-/**
- * Logbook entries
- */
-var LogbookSchema = new Schema({
-    locoid: {type: Schema.Types.ObjectId, ref:'Loco', default:null},
-    date: Date,
-    runtime: Number,
-    comment: String
-});
-
-mongoose.model('Logbook', LogbookSchema);
-
 
 /**
  *  Device logs
@@ -88,7 +76,7 @@ mongoose.model('Logbook', LogbookSchema);
  */
 var DeviceLogEntrySchema = new Schema({
     logsessionid: {type: Schema.Types.ObjectId, ref:'LogSession', default:null}, // Should match the ID of a log session model (see below)
-    timestamp: Number,    // Javascript timestamp for that entry (milliseconds since 1970)
+    timestamp: Date,    // Javascript timestamp for that entry (milliseconds since 1970)
     comment: String,     // We will one day support commenting any data point in a log...
     data: Schema.Types.Mixed       // Will be an object that depends on the device type
 });

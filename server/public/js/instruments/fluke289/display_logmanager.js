@@ -31,6 +31,7 @@ window.Fluke289LogManagementView = Backbone.View.extend({
     
     events: {
         "click .trendlog": "dlTrendlog",
+        "click .start-download": "startDownload",
     },
     
     showInput: function(data) {
@@ -86,8 +87,13 @@ window.Fluke289LogManagementView = Backbone.View.extend({
     
     dlTrendlog: function(event) {
         $('#logname').val($(event.currentTarget).data('name'));
+        this.logIDToDownload = $(event.currentTarget).data('id');
         $('#logModal').modal('show');
         return false;
+    },
+    
+    startDownload: function(event) {
+    
     },
     
 });

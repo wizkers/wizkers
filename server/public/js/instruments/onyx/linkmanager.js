@@ -80,6 +80,10 @@ var OnyxLinkManager = function(linkManager) {
             self.socket.emit('controllerCommand', '{ "get": "guid" }');
     };
     
+    this.logstatus = function() {
+        self.socket.emit('controllerCommand', '{ "get": "logstatus" }');
+    };
+    
     this.devicetag = function() {
             self.socket.emit('controllerCommand', '{ "get": "devicetag" }');
     };

@@ -227,7 +227,7 @@ window.OnyxLogView = Backbone.View.extend({
     },
 
     
-    // TODO: depending on log type, we need to pack our data differently...
+    // Depending on log type, we need to pack our data differently...
     packData: function() {
         var self=this;
         // Create a table of Y values with the x values from our collection
@@ -237,12 +237,15 @@ window.OnyxLogView = Backbone.View.extend({
         for (var j=0; j<logs.length; j++) {
             var ret = [];
             var value = logs.at(j).entries;
+            var type = logs.at(j).get('logtype');
             for (var i=0; i < value.length; i++) {
                 var entry = value.at(i);
                 // Be sure we only plot CPM entries (we might have anything in the
                 // log...
-                if (entry.get('data').cpm != undefined) {   
-                    ret.push([entry.get('timestamp'), entry.get('data').cpm.value]);
+                if (entry.get('data').cpm != undefined) {
+                    
+                    ret.push([new Date(entry.get('timestamp')).getTime(), 
+                              (type =='onyxlog') ? entry.get('data').cpm : entry.get('data').cpm.value]);
                 }
             }
             if (ret.length)

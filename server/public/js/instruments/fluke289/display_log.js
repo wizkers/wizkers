@@ -290,13 +290,13 @@ window.Fluke289LogView = Backbone.View.extend({
                                 // If the reading's timestamp is zero, then we gotta use the timestamp
                                 // of the log entry instead
                                 data[idx].push([(reading.timeStamp == 0) ?
-                                                entry.get('timestamp')-tzOffset : reading.timeStamp,reading.readingValue]);
+                                                new Date(entry.get('timestamp')).getTime()-tzOffset : reading.timeStamp,reading.readingValue]);
                             } else {
                                 // This is a new unit, create another entry:
                                 dataunits.push(unit);
                                 data.push([
                                     [(reading.timeStamp == 0) ?
-                                                entry.get('timestamp')-tzOffset : reading.timeStamp,reading.readingValue]
+                                                new Date(entry.get('timestamp')).getTime()-tzOffset : reading.timeStamp,reading.readingValue]
                                 ]);
                             }                            
                         }

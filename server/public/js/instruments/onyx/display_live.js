@@ -140,7 +140,7 @@ window.OnyxLiveView = Backbone.View.extend({
     
     setdevicetag: function() {
         var tag = $('#devicetagfield',this.el).val();
-        this.linkManager.controllerCommand.setdevicetag(tag);
+        this.linkManager.driver.setdevicetag(tag);
         $('#dtModal',this.el).modal('hide');
     },
     
