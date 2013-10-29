@@ -135,6 +135,10 @@ var Fluke289LinkManager = function(linkManager) {
         self.socket.emit('controllerCommand', 'QSLS');
     }
     
+    this.getTrendlogRecord = function(address,index) {
+        self.socket.emit('controllerCommand', 'QSRR ' + address + ',' + index);
+    }
+    
     // Helper methods to format output:
     this.units = {
         "CEL": "°C",

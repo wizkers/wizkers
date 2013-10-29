@@ -68,10 +68,20 @@ window.Log = Backbone.Model.extend({
     idAttribute: "_id",
 
     initialize: function() {
+        var self = this;
         // A lot contains... entries (surprising, eh?). Nest
         // the collection here:
         this.entries = new LogEntries();
-        this.entries.url = "/logs/" + this.id + "/entries";
+        this.entries.url =  "/logs/" + this.id + "/entries";
+        
+        // When we create a model, this.is is undefined: because of this, we listen to
+        // the "sync" event, and update the entries' URL upon it (sync is fired when the model is
+        // saved, therefore the ID is updated
+        this.on("sync", this.updateEntriesURL, this);
+    },
+    
+    updateEntriesURL: function() {
+        this.entries.url =  "/logs/" + this.id + "/entries";
     },
     
    defaults: {

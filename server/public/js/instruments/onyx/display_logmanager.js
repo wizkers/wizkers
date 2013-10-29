@@ -77,13 +77,15 @@ window.OnyxLogManagementView = Backbone.View.extend({
             // logs that are downloaded from the Onyx device
             currentLog.set('logtype', 'onyxlog'); 
         }
-        currentLog.set('endstamp', new Date(points[points.length-1].time).getTime());                                      
+        currentLog.set('endstamp', new Date(points[points.length-1].time).getTime());
         currentLog.save(null,{
             success: function() {
+                currentLog.updateEntriesURL(); // Somehow this is required ??
+
                 // We now gotta fetch all existing log entries for the log so that
                 // we don't create duplicates
                 currentLog.entries.fetch({
-                    success: function() {                    
+                    success: function() {
                         // Phase II: We now have our log ID, let's save all the log
                         // entries:
                         for (var i=0; i < points.length; i++) {
