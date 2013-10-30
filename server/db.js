@@ -91,9 +91,10 @@ var LogSession = new Schema({
        swversion: String,   // Keep track of firmware version for the log session (traceability)
        name: String,        // Let user name logging session if necessary
        description: String, // Likewise, let user describe the session there too.
-       startstamp: Date,
-       endstamp : Date,
-       datapoints: Number,
+       startstamp: Date,    // Start of the log. Should be the same as the date of the earliest point in the log
+       endstamp : Date,     // End of the log. Should be the same as the date of the last point in the log
+       datapoints: Number,  // Should be the count of log entries referencing this log.
+       metadata: Schema.Types.Mixed, // Can be anything, used to store log metadata if relevant to the plugin
 });
 mongoose.model('LogSession', LogSession);
 

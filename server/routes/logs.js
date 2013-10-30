@@ -141,6 +141,13 @@ exports.deleteEntry = function(req, res) {
                 res.send({'error':'An error has occurred - ' + err});
             } else {
                 console.log('' + result + ' document(s) deleted');
+                // Now, delete every entry that was linked to this log
+                // TODO: no error handling, not that we really should need it?
+                DeviceLogEntry.find({logsessionid: id}, function(err,items) {
+                        items.forEach(function(item) {
+                            item.remove();
+                        });
+                        });
                 res.send(req.body);
             }
     });    

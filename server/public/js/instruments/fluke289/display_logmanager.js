@@ -93,13 +93,15 @@ window.Fluke289LogManagementView = Backbone.View.extend({
                 // we already downloaded this log
                 data.alreadyThere = "<em>New log<sm>";
                 if (knownLog.length > 0)
-                    data.alreadyThere = "<strong>This log is already downloaded<strong>";
+                    data.alreadyThere = '<strong><a href="#displaylogs/' + knownLog[0].get('instrumentid') + '/' + knownLog[0].id  + '">This log is already downloaded</a><strong>';
                 
                 $('#records',this.el).append(card(data));
             } else {
                 // We just received a log entry for a Trendlog recording we are downloading: save it and request the
                 // next log entry
                 
+                // Update the progress bar:
+                $('#downloadbar', this.el).width(this.currentLogIndex/this.logtoDownloadData.records*100 + "%");
                 var stamp = data.record.startTime;
                 var logEntry = new LogEntry({
                                                 timestamp:stamp,
@@ -108,8 +110,11 @@ window.Fluke289LogManagementView = Backbone.View.extend({
                 this.currentLog.entries.add(logEntry);
                 logEntry.save(null, {
                     success:function() {
-                        if (self.currentLogIndex < self.logtoDownloadData.records)
+                        if (self.currentLogIndex < self.logtoDownloadData.records) {
                             linkManager.driver.getTrendlogRecord(self.logtoDownloadData.address, self.currentLogIndex++);
+                        } else {
+                            $('.start-download', this.el).html("Done&nbsp;!").attr('disabled');
+                        }
                     }
                 });
                 
@@ -128,6 +133,7 @@ window.Fluke289LogManagementView = Backbone.View.extend({
     dlTrendlog: function(event) {
         $('#logname').val($(event.currentTarget).data('name'));        
         this.logtoDownloadData= $(event.currentTarget).data();
+        $('.start-download', this.el).html("Start download").attr('disabled', false);
         $('#logModal').modal('show');
         return false;
     },

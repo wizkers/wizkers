@@ -180,7 +180,7 @@ window.Fluke289LogView = Backbone.View.extend({
             this.plot = $.plot($(".locochart",this.el), this.selectedData,
                 $.extend(true, {}, this.plotOptions, {
                     xaxis: { min: this.ranges.xaxis.from, max: this.ranges.xaxis.to },
-                    yaxis: { min: this.ranges.yaxis.from, max: this.ranges.yaxis.to }
+                    yaxis: { min: this.ranges.yaxis.from, max: this.ranges.yaxis.to },
                 })
              );
 
@@ -256,61 +256,112 @@ window.Fluke289LogView = Backbone.View.extend({
         // Create a table of Y values with the x values from our collection
         var data = []; // data is an array of arrays
         var dataunits = []; // dataunits is sync'ed with data, and returns the unit string of the data
-        var tzOffset = new Date().getTimezoneOffset()*60000;
 
         var logs = this.deviceLogs;
+        var type = logs.at(0).get('logtype'); // We only ever plot one type of log, we we can use the 1st one to get the type
         // At this stage we know the logs are already fetched, btw
         for (var j=0; j<logs.length; j++) {
             var entries = logs.at(j).entries;
+            console.log("Entries length: " + entries.length);
             for (var i=0; i < entries.length; i++) {
                 // On the Fluke, we get a timestap from the device itself, this is the one we use.
                 // The trick here is that we never know what sort of data we're gonna get in the log,
                 // as there can be many readings in each entry...
                 var entry = entries.at(i);
-                if (entry.get('data').reading != undefined) {
-                    // Go through every reading contained here:
-                    var readings = entry.get('data').reading.readings;
-                    for (var k=0; k < readings.length; k++) {
-                        var reading = readings[k];
-                        if (reading.readingState == "NORMAL") {
-                            // Get the unit of this reading: if we already have it in the data
-                            // table, then append it. Otherwise we have to add a new entry in our
-                            // data table:
-                            var unit = linkManager.driver.mapUnit(reading.baseUnit) + " - " + reading.readingID;
-                            var idx = dataunits.indexOf(unit);
-                            
-                            // Now find out whether the user wants us to plot this:
-                            var unitnosp = reading.baseUnit + reading.readingID.replace(/\s/g,'_');
-                            var toggle = $('#linestoggle ul',this.el).find('.' + unitnosp);
-                            if (toggle.length == 0) {
-                                    // This is a new unit, we gotta add this to the toggle list
-                                    $('#linestoggle ul').append('<li class="'+unitnosp+'"><input type="checkbox" checked>&nbsp'+unit+'</li>');
-                            }
-                            if (idx > -1) {
-                                // If the reading's timestamp is zero, then we gotta use the timestamp
-                                // of the log entry instead
-                                data[idx].push([(reading.timeStamp == 0) ?
-                                                new Date(entry.get('timestamp')).getTime()-tzOffset : reading.timeStamp,reading.readingValue]);
-                            } else {
-                                // This is a new unit, create another entry:
-                                dataunits.push(unit);
-                                data.push([
-                                    [(reading.timeStamp == 0) ?
-                                                new Date(entry.get('timestamp')).getTime()-tzOffset : reading.timeStamp,reading.readingValue]
-                                ]);
-                            }                            
-                        }
-                    }
+                if (type == 'live') {
+                    // Live recording
+                    this.packData_live(entry, data, dataunits);
+                } else
+                if (type == 'trendlog') {
+                    // Trendlog recording
+                    this.packData_trendlog(entry, data, dataunits);
                 }
             }
         }
        // We now have a big data array that contains all our readings, we gotta
        // repack it into a list of data/units for the plot:
        var plotData = [];
-       for (var i=0; i < data.length; i++) {
-            plotData.push({ data: data[i], label: linkManager.driver.mapUnit(dataunits[i]), vizapp_show: true});
+        
+       if (type == 'live') {
+           for (var i=0; i < data.length; i++) {
+               plotData.push({ data: data[i], label: linkManager.driver.mapUnit(dataunits[i]), vizapp_show: true});
+            }
+       } else
+        if (type == 'trendlog' && data.length > 0) {
+            plotData.push({ data: data[1], label: "Minimum", id: "min" , vizapp_show: true}); // Max reading
+            plotData.push({ data: data[0], label: "Maximum", lines: { show: true, fill: true }, fillBetween: "min", vizapp_show: true });
+            plotData.push({ data: data[2], label: dataunits[2], vizapp_show: true });
         }
         return plotData;
+    },
+    
+    /**
+     * Prepare data for Trendlog recording. Work in progress
+     *
+     * Create a filled area between min and max readings, and plots the primary reading as a line.
+     * Not quite sure what do do with the average so far. We'll find out.
+     */
+    packData_trendlog: function(entry,data,dataunits) {
+        var tzOffset = new Date().getTimezoneOffset()*60000;
+        var entry = entry.get('data')
+        if (entry.maxReading == undefined) {
+            alert('Bug: we have a log entry for Trendlog which does not contain the readings we expect');
+            return;
+        }
+        // Go through every reading contained here:
+        var readings = [ entry.maxReading, entry.minReading, entry.primaryReading];
+        data.push( [], [], [] );
+        // Populate the name of the dataunits table:
+        dataunits.push(linkManager.driver.mapUnit(readings[2].baseUnit) + " - " + readings[2].readingID);
+        for (var i=0; i < readings.length; i++) {
+            var reading = readings[i];
+            if (reading.readingState != "NORMAL")
+                continue;
+            data[i].push([reading.timeStamp, reading.readingValue]);        
+        }
+    },
+    
+    // Add all readings from an entry into the 'data' array
+    // Quick note to myself: arrays are passed by reference in Javascript, so "data" and "dataunits"
+    // are modified in the calling function too, no need to return those.
+    packData_live: function(entry, data, dataunits) {
+        var tzOffset = new Date().getTimezoneOffset()*60000;
+        // Go through every reading contained here:
+        var entrydata = entry.get('data');
+        if (entrydata.reading == undefined)
+            return;
+        var readings = entrydata.reading.readings;
+        for (var k=0; k < readings.length; k++) {
+            var reading = readings[k];
+            if (reading.readingState == "NORMAL") {
+                // Get the unit of this reading: if we already have it in the data
+                // table, then append it. Otherwise we have to add a new entry in our
+                // data table:
+                var unit = linkManager.driver.mapUnit(reading.baseUnit) + " - " + reading.readingID;
+                var idx = dataunits.indexOf(unit);
+                
+                // Now find out whether the user wants us to plot this:
+                var unitnosp = reading.baseUnit + reading.readingID.replace(/\s/g,'_');
+                var toggle = $('#linestoggle ul',this.el).find('.' + unitnosp);
+                if (toggle.length == 0) {
+                        // This is a new unit, we gotta add this to the toggle list
+                        $('#linestoggle ul').append('<li class="'+unitnosp+'"><input type="checkbox" checked>&nbsp'+unit+'</li>');
+                }
+                if (idx > -1) {
+                    // If the reading's timestamp is zero, then we gotta use the timestamp
+                    // of the log entry instead
+                    data[idx].push([(reading.timeStamp == 0) ?
+                                    new Date(entry.get('timestamp')).getTime()-tzOffset : reading.timeStamp,reading.readingValue]);
+                } else {
+                    // This is a new unit, create another entry:
+                    dataunits.push(unit);
+                    data.push([
+                        [(reading.timeStamp == 0) ?
+                                    new Date(entry.get('timestamp')).getTime()-tzOffset : reading.timeStamp,reading.readingValue]
+                    ]);
+                }                            
+            }
+        }
     },
     
     // Return only data that we want to display

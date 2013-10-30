@@ -17,6 +17,8 @@ window.LogManagementView = Backbone.View.extend({
         "click a": "handleaclicks",
         "change .logcheckbox": "refreshLogList",
         "click .displaylog": "displayLog",
+        "click .delete_log": "deleteLog",
+        "click #do-delete": "doDeleteLog",
     },
     
     /* Nice way to disable an anchor button when it is disabled */
@@ -44,6 +46,24 @@ window.LogManagementView = Backbone.View.extend({
             return false;
         app.navigate('displaylogs/' + settings.get('currentInstrument') + '/' + this.selectedLogs.join(','),true);
         return false;
+    },
+    
+    deleteLog: function(event) {
+        var data = $(event.currentTarget).data();
+        $('#do-delete', this.el).data('id',data.id);
+        $('#deleteConfirm',this.el).modal('show');
+
+    },
+    
+    doDeleteLog: function(event) {
+        var self = this;
+        var logToDelete = this.deviceLogs.where({_id: $(event.currentTarget).data('id')});
+        logToDelete[0].destroy(
+            {success: function(model, response) {
+                $('#deleteConfirm',this.el).modal('hide');
+                self.render();
+            }
+                               });
     },
     
     render:function () {
