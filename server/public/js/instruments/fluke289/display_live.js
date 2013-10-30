@@ -18,13 +18,7 @@ window.Fluke289LiveView = Backbone.View.extend({
         // the meter returns
         this.livedata = [[]];
         this.plotData = [];
-        
-        // Keep another array for moving average over the last X samples
-        // In Live view, we fix this at 1 minute. In log management, we will
-        // make this configurable
-        this.movingAvgPoints = 60;
-        this.movingAvgData = [];  // Note: used for the graph, this stores the result of the moving average
-        
+
         // TODO: save color palette in settings ?
         // My own nice color palette:
         this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ],
@@ -41,8 +35,6 @@ window.Fluke289LiveView = Backbone.View.extend({
             colors: this.palette,
         };        
         
-        this.prevStamp = 0;
-
         this.linkManager.on('status', this.updatestatus, this);
         this.linkManager.on('input', this.showInput, this);
 
@@ -57,7 +49,7 @@ window.Fluke289LiveView = Backbone.View.extend({
         console.log('Main render of Fluke289 live view');
         $(this.el).html(this.template());
         this.linkManager.requestStatus();
-            
+
         this.color = this.palette[0];
 
         this.addPlot();
@@ -217,14 +209,11 @@ window.Fluke289LiveView = Backbone.View.extend({
 
         } 
     },
-        
-                            
+
+
     trimLiveData: function(idx) {
         if (this.livedata[idx].length >= this.livepoints) {
                 this.livedata[idx] = this.livedata[idx].slice(1);
         }
     },
-
-    
-    
 });
