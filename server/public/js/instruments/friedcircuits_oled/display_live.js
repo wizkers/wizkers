@@ -1,4 +1,4 @@
-// Live view for the Fluke 289
+// Live view for the Fried Circuits OLED backpack
 // 
 // Our model is the settings object.
 

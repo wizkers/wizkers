@@ -69,6 +69,8 @@ window.LogManagementView = Backbone.View.extend({
     render:function () {
         var self = this;
         console.log('Main render of Log management view');
+        if (this.collection.length == 0)
+            return;
 
         $(this.el).html(this.template({ deviceLogs: this.collection.toJSON(), selected: this.selectedLogs}));
 

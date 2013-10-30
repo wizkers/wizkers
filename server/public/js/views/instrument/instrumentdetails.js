@@ -1,20 +1,15 @@
 window.InstrumentDetailsView = Backbone.View.extend({
 
-    initialize: function () {
-        
-        console.log(this.options.im.supportedInstruments);
-        
-        this.linkManager = this.options.lm;
-        
+    initialize: function () {        
         
     },
 
     render: function () {
         var self = this;
         console.log("Render instrument details");
-        this.linkManager.getPorts();
-        this.linkManager.once('ports', function(portlist) {
-            $(self.el).html(self.template(_.extend(self.model.toJSON(), {instypes: self.options.im.supportedInstruments, ports: portlist})));
+        linkManager.getPorts();
+        linkManager.once('ports', function(portlist) {
+            $(self.el).html(self.template(_.extend(self.model.toJSON(), {instypes: instrumentManager.supportedInstruments, ports: portlist})));
         });
 
         return this;

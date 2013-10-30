@@ -1,5 +1,13 @@
 // https://github.com/jamesp/node-nmea
-// A parser for the Fried Circuits OLED Backpack
+// A parser for the NMEA GPS units
+// the idea here is to display location on a map + the satellites on an
+// almanach view. Nothing super fancy, but useful nevertheless.
+
+//////////
+//
+//    WORK IN PROGRESS
+//
+//////////
 
 
 // This object contains two entries:
@@ -13,12 +21,18 @@ module.exports = {
     
     // Set a reference to the socket.io socket and port
     socket: null,
+    recorder: null,
     
     setPortRef: function(s) {
     },
     setSocketRef: function(s) {
         this.socket = s;
     },
+    setRecorderRef: function(s) {
+        this.debug("Setting recorder reference.");
+        this.recorder = s;
+    },
+
 
 
     // How the device is connected on the serial port            

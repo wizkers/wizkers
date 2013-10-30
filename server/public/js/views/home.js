@@ -105,6 +105,7 @@ window.HomeView = Backbone.View.extend({
         
     updateUID: function(uid) {
         console.log('Received a uniqueID for this instrument: ' + uid);
+        this.instrumentUniqueID = uid;
         var savedUID = this.instrument.get('uuid');
         console.log('Our instrument type is ' + this.instrument.get('type'));
         if (savedUID == "") {

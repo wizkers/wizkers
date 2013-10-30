@@ -47,7 +47,7 @@ var InstrumentSchema = new Schema({
         liveviewspan: String,                 // Width of live view in seconds
         liveviewperiod: String,                 // Period of polling if supported
         liveviewlogscale: Boolean,                // Should live view display as a log scale by default ?
-
+        metadata: Schema.Types.Mixed, // Depending on instrument type, this metadata can include additional settings
 });
  
 // Compile the schema by issuing the below:

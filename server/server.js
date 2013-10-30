@@ -50,6 +50,9 @@ deviceTypes.push(Onyx);
 var FCOled = require('./parsers/fried_usb_tester.js');
 deviceTypes.push(FCOled);
 
+var W433 = require('./parsers/w433.js');
+deviceTypes.push(W433);
+
 /**
  * Debug: get a list of available serial
  * ports on the server - we'll use this later
@@ -285,6 +288,8 @@ io.sockets.on('connection', function (socket) {
             driver = FCOled;
         } else if ( data == "fluke28x") {
             driver = Fluke289;
+        } else if ( data == "w433") {
+            driver = W433;
         }
         
     });

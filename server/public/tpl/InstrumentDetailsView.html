@@ -9,7 +9,7 @@
             <br/>
 
             <div class="row">
-                <div class="span8">
+                <div class="span5">
 
                     <div class="control-group">
                         <label for="name" class="control-label">Name:</label>
@@ -64,13 +64,6 @@
                         </div>
                     </div>
 
-                    <div class="control-group">
-                        <label for="description" class="control-label">Notes:</label>
-
-                        <div class="controls">
-                            <textarea id="comment" name="comment" style="width: 90%;" rows="6"><%= comment %></textarea>
-                        </div>
-                    </div>
                 <div class="control-group">
                     <label></label>
                     <div class="controls">
@@ -80,9 +73,23 @@
                 </div>
 
                 </div>
+            <div class="span4">
+                <div class="control-group">
+                    <label for="description" class="control-label">Notes:</label>
+                    <div class="controls">
+                            <textarea id="comment" name="comment" style="width: 90%;" rows="6"><%= comment %></textarea>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="metadata" class="control-label">Extra settings:</label>
+                    <div class="controls">
+                            <div id="metadata">This device types does not require extra settings.</div>
+                    </div>
+                </div>
+            </div>
                 
 
-                <div class="span4">
+                <div class="span3">
                     <div class="row-fluid"><div class="span12">
                         <div class="well" style="width: 180px;text-align: center;width:50%;margin: 0px auto;">
                             <p><img id="icon" width="180" src="<%= icon === '' ? 'pics/instruments/generic.png' : 'pics/instruments/' + icon %>"/></p>

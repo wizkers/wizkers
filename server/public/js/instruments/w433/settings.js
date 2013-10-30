@@ -4,6 +4,6 @@
  *  settings of the device.
  */
 
-window.Fluke289SettingsView = Backbone.View.extend({
+window.W433SettingsView = Backbone.View.extend({
     
 });

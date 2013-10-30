@@ -13,9 +13,10 @@ var InstrumentManager = function() {
     this.instrument = null; // A Backbone Model
     
     this.supportedInstruments = [
-        { shortname: "onyx",      name: "SafeCast Onyx", type: OnyxInstrument} ,
-        { shortname: "fluke28x",  name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument},
-        { shortname: "fcoledv1",  name: "Fried Circuits OLED backpack", type: FCOledInstrument },
+        { shortname: "onyx",      name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView} ,
+        { shortname: "fluke28x",  name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView},
+        { shortname: "fcoledv1",  name: "Fried Circuits OLED backpack", type: FCOledInstrument, settings: FCOledSettingsView },
+        { shortname: "w433",      name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView },
     ];
         
     this.setInstrument = function(instrument) {
@@ -36,17 +37,6 @@ var InstrumentManager = function() {
     this.getInstrument = function() {
         return this.instrument;
     }
-
-    // Returns a new link manager for this instrument type:
-/*    this.getLinkManager = function(parent) {
-        // var ins = this.getInstrumentType(insType);
-        return this.currentInstrument.getLinkManager(parent);
-    }
-    
-    this.getLiveDisplay = function(arg) {
-        return this.currentInstrument.getLiveDisplay(arg);
-    }
-*/
         
 };
 

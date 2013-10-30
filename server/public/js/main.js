@@ -194,7 +194,7 @@ utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogM
                     'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView', 'instruments/FCOledLiveView',
                     'instruments/OnyxNumView', 'instruments/FCOledNumView', 'instruments/Fluke289NumView', 'instruments/Fluke289DiagView',
                     'instruments/OnyxLogView', 'instruments/Fluke289LogView', 'instruments/Fluke289LogManagementView', 'instruments/OnyxLogManagementView',
-                    'instruments/OnyxDiagView', 
+                    'instruments/OnyxDiagView', 'instruments/W433LiveView',
                    ],
     function() {
         
