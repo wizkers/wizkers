@@ -5,6 +5,9 @@
  * This server does several things:
  *
  * - Handles call to the various instruments on the local serial port.
+ * - Parses instrument responses into JSON dta structures
+ * - Does the actual recording of live logs
+ * -
  *
  * (c) 2013 Edouard Lafargue, edouard@lafargue.name
  *
@@ -151,7 +154,7 @@ app.use(express.static(__dirname + '/public'));
 
 //
 // For now, we are supporting only one communication
-// port on the server, but in the future we could
+// port on the server, but in the future we need to
 // extend this to support multiple simultaneous
 // connections to several devices.
 var portsList = new Array();
@@ -169,7 +172,11 @@ var recordingSessionId = 0; // Is set by the front-end when pressing the 'Record
 app.get('/startrecording/:id', recorder.startRecording);
 app.get('/stoprecording', recorder.stopRecording);
 
-
+//
+// In order to be more flexible, we are also going to keep track globally of a few things
+// such as the currently selected instrument. At the moment there is no good way to know
+// server-side that an instrument is selected, unfortunately.
+var currentInstrument = null;
 
 
 // listen for new socket.io connections:
@@ -181,9 +188,11 @@ io.sockets.on('connection', function (socket) {
     }
 
     // if the client disconnects, we close the 
-    // connection to the controller.
+    // connection to the device.
     // TODO: actually... we should just remain open in case we are
     // recording...
+
+    /**
     socket.on('disconnect', function () {
         console.log('User disconnected');
         console.log('Closing port');
@@ -191,6 +200,14 @@ io.sockets.on('connection', function (socket) {
             myPort.close();
         connected = false;
         portOpen = false;
+    });
+    */
+    
+    
+    // Open a port by instrument ID: this way we can track which
+    // instrument is being used by the app.
+    socket.on('openinstrument', function(data) {
+        console.log('Instrument open request for instrument ID ' + data);
     });
     
     socket.on('openport', function(data) {
@@ -231,7 +248,7 @@ io.sockets.on('connection', function (socket) {
         // TODO: support multiple ports, right now we
         // discard 'data' completely.
         // I assume closing the port will remove
-        // the listeners ?? NOPE!
+        // the listeners ?? NOPE! To be checked.
         console.log('Closing port');
         if (myPort) {
             myPort.close();

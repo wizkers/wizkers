@@ -17,7 +17,7 @@ window.W433LiveView = Backbone.View.extend({
         
         // TODO: save color palette in settings ?
         // My own nice color palette:
-        this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ],
+        this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ];
 
         
         this.plotOptions = {
@@ -29,15 +29,9 @@ window.W433LiveView = Backbone.View.extend({
 			},
             legend: { position: "ne" },
             colors: this.palette,
-        };        
-
-
+        };
     },
-    
-    events: {
-
-    },
-    
+        
     render:function () {
         $(this.el).html(this.template());
         this.addPlot();
@@ -53,7 +47,8 @@ window.W433LiveView = Backbone.View.extend({
 
         
     onClose: function() {
-        linkManager.off('input', this.showInput);
+        console.log("W433 Live view closing");
+        linkManager.off('input', this.showInput, this);
     },
 
     
