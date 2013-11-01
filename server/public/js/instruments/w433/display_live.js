@@ -5,7 +5,7 @@
 window.W433LiveView = Backbone.View.extend({
 
     initialize:function (options) {
-        this.settings = this.model;        
+        this.settings = this.model;
 
         linkManager.on('input', this.showInput, this);
         
@@ -21,8 +21,7 @@ window.W433LiveView = Backbone.View.extend({
 
         
         this.plotOptions = {
-            xaxes: [{ mode: "time", show:true, timezone: this.model.get("timezone") },
-                   ],
+            xaxis: { mode: "time", show:true, timezone: this.model.get("timezone") },
             grid: {
 				hoverable: true,
 				clickable: true

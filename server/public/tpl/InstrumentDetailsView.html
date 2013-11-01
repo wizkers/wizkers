@@ -26,10 +26,10 @@
                         <div class="controls">
                             
                             <select name="type" >
-                                <% for(var i= 0; i < instypes.length; i++) { %>
+                                <% for(var ins in instypes) { %>
                                 <option
-                                <%= type == instypes[i].shortname ?'selected':'' %>
-                                value="<%= instypes[i].shortname %>"><%= instypes[i].name %></option>
+                                <%= type == ins ?'selected':'' %>
+                                value="<%= ins %>"><%= instypes[ins].name %></option>
                                 <% } %>                                
                             </select>
                             <span class="help-inline"></span>

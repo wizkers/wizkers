@@ -61,7 +61,7 @@ window.HomeView = Backbone.View.extend({
         // If we have a selected instrument, then instanciate its liveview here
         if (settings.get('currentInstrument') != null) {
             console.log('Create the instrument live view');
-            self.instrumentLiveView = instrumentManager.getLiveDisplay({model: self.instrument, lm: linkManager});
+            self.instrumentLiveView = instrumentManager.getLiveDisplay({model: settings, lm: linkManager});
             if (self.instrumentLiveView != null) {
                 $('#liveview').html(self.instrumentLiveView.el);
                 self.instrumentLiveView.render();
@@ -136,7 +136,7 @@ window.HomeView = Backbone.View.extend({
             }
             
             // Depending on device capabilities, enable/disable "Diag view" button
-        if (instrumentManager.getCaps().indexOf("DiagDislplay") == -1 || ! linkManager.connected) {
+        if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || ! linkManager.connected) {
                 $('.ctrl-diag',self.el).attr('disabled', true);
         }
 

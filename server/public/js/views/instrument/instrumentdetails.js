@@ -10,7 +10,16 @@ window.InstrumentDetailsView = Backbone.View.extend({
         linkManager.getPorts();
         linkManager.once('ports', function(portlist) {
             $(self.el).html(self.template(_.extend(self.model.toJSON(), {instypes: instrumentManager.supportedInstruments, ports: portlist})));
+            
+            // If the instrument type has got its own extra settings, then render it here:
+            var insSettingsView = instrumentManager.supportedInstruments[self.model.get('type')].settings;
+            if ( insSettingsView != null) {
+                var settingsView = new insSettingsView({model: self.model});
+                $('#metadata',self.el).html(settingsView.el);
+                settingsView.render();
+            }
         });
+        
 
         return this;
     },

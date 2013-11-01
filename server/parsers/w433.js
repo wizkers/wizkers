@@ -26,8 +26,9 @@ module.exports = {
     setRecorderRef: function(s) {
         this.recorder = s;
     },
-
-
+    
+    lastStamp: new Date().getTime(),
+    prevRes: null,
     
     sensor_types_tx3: ['temperature', '1', '2', '3', '4', '5', '6',
                         '7', '8', '9', '10', '11', '12', '13','humidity', '15'],
@@ -73,15 +74,25 @@ module.exports = {
                 res.sensor_address = parseInt(data.substr(4,2),16) & 0xFE;
                 switch (res.reading_type) {
                     case 'temperature':
-                        res.value = data.substr(6,3)/10-50;
+                        res.value = (data.substr(6,3)/10-50).toFixed(1);
                         break;
                     case 'humidity':
-                        res.value = data.substr(6,3)/10;
+                        res.value = (data.substr(6,3)/10).toFixed(0);
                         break;
                 }
             }
         }
+        // Sensors send data multiple times, so we are going to dedupe:
+        // if we got exactly the same reading less than one second ago, then
+        // discard it.
+        if ( (new Date().getTime()-this.prevStamp) < 1000 && (JSON.stringify(res) == JSON.stringify(this.prevRes)))
+            return;
+        
         console.log(res);
+        this.prevRes = res;
+        this.prevStamp = new Date().getTime();
+        
+        this.recorder.record(res);
         this.socket.emit('serialEvent',res);
     },
     
@@ -92,11 +103,41 @@ module.exports = {
         return data + '\n';
     },
     
+    
+    /**
+     * The following two subroutines check two things
+     * 1) Checksum OK (simple sum of bytes in packet)
+     * 2) Redundant information OK within packet (different in
+     *    TX3 and TX19 sensors)
+     **/
+    
     check_ok_tx3: function(data) {
+        var sum = 0;
+        var s = data.split('');
+        var chk = s.pop();
+        var add = function(element) {
+            sum += parseInt(element,16);
+        }
+        s.forEach(add);
+        console.log(chk + " - " + sum%16);
+        return (parseInt(chk,16) == sum%16) &&
+            (data.substr(6,2) == data.substr(9,2));
+        
         return true;
     },
     
     check_ok_tx19: function(data) {
+        /**
+           my $input = shift(@_);
+   my $sum = 0;
+   $chk = hex (chop $input);
+   for( split(//,$input) ) { $sum += hex($_);}
+   $sum=$sum%16;
+   $v1 = hex substr $input,8,2;
+   $v2 =  ~( hex substr $input,11,2) & 0xFF;
+   return ($sum==$chk) && ($v1==$v2);
+
+**/
         return true;
     },
 

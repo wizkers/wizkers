@@ -279,7 +279,6 @@ io.sockets.on('connection', function (socket) {
     });
     
     socket.on('portstatus', function() {
-        console.log("Port status: " + portOpen);
         socket.emit('status', {portopen: portOpen,
                                recording: recorder.isRecording()});
     });
