@@ -10,6 +10,8 @@ var serialport = require('serialport'),
 
 module.exports = {
     
+    name: "fcoledv1",
+    
     // Set a reference to the socket.io socket and port
     socket: null,
     recorder: null,

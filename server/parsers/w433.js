@@ -12,6 +12,8 @@ var serialport = require('serialport'),
 
 module.exports = {
     
+    name: "w433",
+    
     // Set a reference to the socket.io socket and port
     socket: null,
     recorder: null,

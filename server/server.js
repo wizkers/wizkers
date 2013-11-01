@@ -179,43 +179,11 @@ app.get('/stoprecording', recorder.stopRecording);
 var currentInstrument = null;
 
 
-// listen for new socket.io connections:
-io.sockets.on('connection', function (socket) {
-	// if the client connects:
-	if (!connected) {
-            console.log('User connected');
-            connected = true;
-    }
-
-    // if the client disconnects, we close the 
-    // connection to the device.
-    // TODO: actually... we should just remain open in case we are
-    // recording...
-
-    /**
-    socket.on('disconnect', function () {
-        console.log('User disconnected');
-        console.log('Closing port');
-        if (myPort)
-            myPort.close();
-        connected = false;
-        portOpen = false;
-    });
-    */
-    
-    
-    // Open a port by instrument ID: this way we can track which
-    // instrument is being used by the app.
-    socket.on('openinstrument', function(data) {
-        console.log('Instrument open request for instrument ID ' + data);
-    });
-    
-    socket.on('openport', function(data) {
-        console.log('Port open request for port name ' + data);
-        // data contains connection type: IP or Serial
-        // and the port name or IP address.
-        // It also contains the type of parser (TODO)
-        //  This opens the serial port:
+//////////////////
+// Port management
+//////////////////
+openPort = function(data, socket) {
+         //  This opens the serial port:
         if (myPort)
             myPort.close();
         myPort = new SerialPort(data, driver.portSettings);
@@ -242,6 +210,60 @@ io.sockets.on('connection', function (socket) {
             portOpen = false;
             socket.emit('status', {portopen: portOpen});
         });
+   
+}
+
+
+
+//////////////////
+// Socket management: supporting one client at a time for now
+//////////////////
+
+
+// listen for new socket.io connections:
+io.sockets.on('connection', function (socket) {
+	// if the client connects:
+	if (!connected) {
+            console.log('User connected');
+            connected = true;
+    }
+    
+    // If we have an existing open port, we need to update the socket
+    // reference for its driver:
+    if (portOpen && driver != null) {
+       driver.setSocketRef(socket);
+    }
+
+    // if the client disconnects, we close the 
+    // connection to the device.
+    // TODO: actually... we should just remain open in case we are
+    // recording...
+
+    /**
+    socket.on('disconnect', function () {
+        console.log('User disconnected');
+        console.log('Closing port');
+        if (myPort)
+            myPort.close();
+        connected = false;
+        portOpen = false;
+    });
+    */
+    
+    
+    // Open a port by instrument ID: this way we can track which
+    // instrument is being used by the app.
+    socket.on('openinstrument', function(data) {
+        console.log('Instrument open request for instrument ID ' + data);
+        Instrument.findById(data, function(err,item) {
+            var port = item.get()
+        });
+    });
+    
+    socket.on('openport', function(data) {
+        console.log('Port open request for port name ' + data);
+        // data contains the port name
+        openPort(data,socket);
     });
         
     socket.on('closeport', function(data) {
@@ -257,6 +279,7 @@ io.sockets.on('connection', function (socket) {
     });
     
     socket.on('portstatus', function() {
+        console.log("Port status: " + portOpen);
         socket.emit('status', {portopen: portOpen,
                                recording: recorder.isRecording()});
     });
@@ -290,8 +313,8 @@ io.sockets.on('connection', function (socket) {
     socket.on('driver', function(data) {
         console.log('Request to update our serial driver to ' + data);
         
-        // Close the serial port if it is open:
-        if (myPort) {
+        // Close the serial port if it is open and the driver has changed:
+        if (myPort && data != driver.name) {
             myPort.close();
             portOpen = false;
         }

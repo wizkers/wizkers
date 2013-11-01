@@ -26,6 +26,8 @@ fs = require('fs');
 
 
 module.exports = {
+    
+    name: "fluke28x",
 
     // We have a lot of internal variables to manage
     // the link protocol:
