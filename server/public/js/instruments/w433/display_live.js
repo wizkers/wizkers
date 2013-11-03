@@ -14,6 +14,7 @@ window.W433LiveView = Backbone.View.extend({
         this.livedata = [[]];
         this.sensors = [];
         this.plotData = [];
+        this.previousPoint = null;
         
         // TODO: save color palette in settings ?
         // My own nice color palette:
@@ -42,7 +43,38 @@ window.W433LiveView = Backbone.View.extend({
         var self=this;
         // Now initialize the plot area:
         this.plot = $.plot($(".datachart", this.el), [ {data:[], label:"??", color:this.color} ], this.plotOptions);
+        
+        $(".datachart", this.el).bind("plothover", function (event, pos, item) {
+            if (item) {
+                    $("#tooltip").remove();
+                    var x = item.datapoint[0],
+                        y = item.datapoint[1];
+
+                    self.showTooltip(item.pageX, item.pageY,
+                        "<small>" + ((settings.get('timezone') === 'UTC') ? 
+                                        new Date(x).toUTCString() :
+                                        new Date(x).toString()) + "</small><br>" + item.series.label + ": <strong>" + y + "</strong>");
+            } else {
+                $("#tooltip").remove();
+            }
+        });
+
+
     },
+    
+    // Ugly at this stage, just to make it work (from flotcharts.org examples)
+    showTooltip: function (x, y, contents) {
+			$("<div id='tooltip' class='well'>" + contents + "</div>").css({
+				position: "absolute",
+				display: "none",
+				top: y + 5,
+				left: x + 5,
+                padding: "3px",
+				opacity: 0.90
+			}).appendTo("body").fadeIn(200);
+    },
+    
+
 
         
     onClose: function() {
@@ -65,7 +97,7 @@ window.W433LiveView = Backbone.View.extend({
         i.scrollTop(i[0].scrollHeight - i.height());
         
         // Now add the current sensor
-        var sensor =data.sensor_address + " - " + data.reading_type;
+        var sensor =data.sensor_name + " - " + data.reading_type;
         if (this.sensors.indexOf(sensor) == -1) {
             this.sensors.push(sensor);
             this.livedata.push([]);

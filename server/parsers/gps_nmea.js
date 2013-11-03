@@ -32,6 +32,9 @@ module.exports = {
         this.debug("Setting recorder reference.");
         this.recorder = s;
     },
+    setInstrumentRef: function(i) {
+    },
+
 
 
 

@@ -164,14 +164,14 @@ window.HomeView = Backbone.View.extend({
         $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Connecting...").addClass('btn-warning')
                                    .removeClass('btn-success').removeClass('btn-danger').attr('disabled', true);
         // First, get serial port settings (assume Serial for now)
-        var port = settings.get('serialPort');
-        console.log('Opening serial on port ' + port);
-        if (port != null ) {
+        var id = instrumentManager.getInstrument().id;
+        console.log('Opening instrument ID ' + id);
+        if (id != null ) {
                 if (!linkManager.connected) {
                     self.instrumentUniqueID = null; // Just in case we change the instrument
-                    linkManager.openPort(port);
+                    linkManager.openInstrument(id);
                 } else {
-                    linkManager.closePort(port);
+                    linkManager.closeInstrument(id);
                 }
         }
     },

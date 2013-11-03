@@ -24,6 +24,9 @@ module.exports = {
     setRecorderRef: function(s) {
         this.recorder = s;
     },
+    setInstrumentRef: function(i) {
+    },
+
 
 
     // How the device is connected on the serial port            

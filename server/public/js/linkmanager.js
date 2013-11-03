@@ -68,15 +68,15 @@ var LinkManager = function() {
         this.socket.emit('ports','');        
     }
     
-    this.openPort = function(port) {
-        this.socket.emit('openport',port);
+    this.openInstrument = function(id) {
+        this.socket.emit('openinstrument', id);
     }
     
-    this.closePort = function(port) {
+    this.closeInstrument = function(id) {
         this.stopLiveStream();
-        this.socket.emit('closeport',port);
+        this.socket.emit('closeinstrument', id);
     }
-    
+        
     // This needs to return some sort of unique identifier for the device,
     // if supported. Device type + this uniqueID are used to uniquely identify
     // instruments in the application.

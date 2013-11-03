@@ -76,6 +76,9 @@ serialport.list(function (err, ports) {
 require('./db.js');
 
 
+var mongoose = require('mongoose');
+var Instrument = mongoose.model('Instrument');
+
 /**
  * Setup the HTTP server and routes
  */
@@ -256,28 +259,27 @@ io.sockets.on('connection', function (socket) {
     socket.on('openinstrument', function(data) {
         console.log('Instrument open request for instrument ID ' + data);
         Instrument.findById(data, function(err,item) {
-            var port = item.get()
+            currentInstrument = item;
+            driver.setInstrumentRef(currentInstrument);
+            openPort(item.port, socket);
         });
     });
     
-    socket.on('openport', function(data) {
-        console.log('Port open request for port name ' + data);
-        // data contains the port name
-        openPort(data,socket);
+    // TODO: support multiple ports, right now we
+    // discard 'data' completely.
+    // I assume closing the port will remove
+    // the listeners ?? NOPE! To be checked.
+    socket.on('closeinstrument', function(data) {
+        console.log('Instrument close request for instrument ID ' + data);
+        Instrument.findById(data, function(err,item) {
+            if(myPort) {
+                myPort.close();
+                portOpen = false;
+            }
+        });
+        
     });
         
-    socket.on('closeport', function(data) {
-        // TODO: support multiple ports, right now we
-        // discard 'data' completely.
-        // I assume closing the port will remove
-        // the listeners ?? NOPE! To be checked.
-        console.log('Closing port');
-        if (myPort) {
-            myPort.close();
-           portOpen = false;
-        }
-    });
-    
     socket.on('portstatus', function() {
         socket.emit('status', {portopen: portOpen,
                                recording: recorder.isRecording()});
@@ -314,6 +316,7 @@ io.sockets.on('connection', function (socket) {
         
         // Close the serial port if it is open and the driver has changed:
         if (myPort && data != driver.name) {
+            console.log("Driver changed! closing port");
             myPort.close();
             portOpen = false;
         }

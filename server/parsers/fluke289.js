@@ -125,6 +125,9 @@ module.exports = {
         this.recorder = s;
     },
     
+    setInstrumentRef: function(i) {
+    },
+    
     resetState: function() {
         this.currentLinkstate = 0;
         this.currentStatusByte = 0x00;

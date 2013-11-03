@@ -1,6 +1,8 @@
 //
 // A parser for my W433 Weather receiver. Totally custom design,
 // but very important to me.
+//
+// Supports the TX3 sensors.
 
 
 // This object contains two entries:
@@ -17,6 +19,7 @@ module.exports = {
     // Set a reference to the socket.io socket and port
     socket: null,
     recorder: null,
+    instrument: null,
     
     setPortRef: function(s) {
     },
@@ -26,6 +29,12 @@ module.exports = {
     setRecorderRef: function(s) {
         this.recorder = s;
     },
+    setInstrumentRef: function(i) {
+        this.instrument = i;
+        console.log("W433: instrument reference passed, instrument data is: ");
+        console.log(i.metadata);
+    },
+
     
     lastStamp: new Date().getTime(),
     prevRes: null,
@@ -65,32 +74,62 @@ module.exports = {
         // Remove any carriage return
         data = data.replace('\n','');
         var res = {};
+        var valid = false;
         
         res.raw = data;
 
         if (data.length == 12) {
             if (this.check_ok_tx3(data)) {
+                valid = true;
                 res.reading_type = this.sensor_types_tx3[parseInt(data.substr(3,1),16)];
                 res.sensor_address = parseInt(data.substr(4,2),16) & 0xFE;
                 switch (res.reading_type) {
                     case 'temperature':
-                        res.value = (data.substr(6,3)/10-50).toFixed(1);
+                        res.value = Math.round(data.substr(6,3)-500)/10;
                         break;
                     case 'humidity':
-                        res.value = (data.substr(6,3)/10).toFixed(0);
+                        res.value = Math.round((data.substr(6,3)/10));
                         break;
                 }
             }
         }
+        
+        if (!valid) return; // No need to waste time if our data was invalid!
+        
         // Sensors send data multiple times, so we are going to dedupe:
-        // if we got exactly the same reading less than one second ago, then
+        // if we got exactly the same reading less than 1.5 second ago, then
         // discard it.
-        if ( (new Date().getTime()-this.prevStamp) < 1000 && (JSON.stringify(res) == JSON.stringify(this.prevRes)))
+        if ( (new Date().getTime()-this.prevStamp) < 1000 &&
+              res.sensor_address == this.prevRes.sensor_address &&
+              res.sensor_type == this.prevRes.sensor_type &&
+              res.value == this.prevRes.value
+             )
             return;
         
-        console.log(res);
         this.prevRes = res;
         this.prevStamp = new Date().getTime();
+        
+        // Now: sensor addresses are all nice, but what we really want, is a sensor name: look up in our current
+        // instrument whether we have a name for the sensor. If no name, use the address as the name.
+        var name = this.instrument.metadata[res.sensor_address];
+        if (name != undefined) {
+            res.sensor_name = name;
+        } else {
+            this.instrument.metadata[res.sensor_address] = res.sensor_address;
+            this.instrument.markModified('metadata');
+            res.sensor_name = res.sensor_address;
+            this.instrument.save();
+        }
+        
+        // Last: smart detection of battery replacement. When a sensor gets a new battery, it will
+        // send its data every 10 seconds for a while, so we can detect this. In the mean time, we can
+        // also track a sensor that has gone stale for more than X minutes. If we have both a new sensor
+        // within the last 5 minutes, and a sensor we have not seen for more than 5 minutes, then we will assume
+        // that this sensor's battery got replaced, and we will rename it automatically.
+        // Note: there is a chance that the new sensor gets the address of an existing
+        // sensor, but there is nothing we can do about this, it is a shortcoming of the Lacross sensors.
+        
+        // TODO :-)
         
         this.recorder.record(res);
         this.socket.emit('serialEvent',res);
@@ -119,7 +158,7 @@ module.exports = {
             sum += parseInt(element,16);
         }
         s.forEach(add);
-        console.log(chk + " - " + sum%16);
+        // console.log(chk + " - " + sum%16);
         return (parseInt(chk,16) == sum%16) &&
             (data.substr(6,2) == data.substr(9,2));
         

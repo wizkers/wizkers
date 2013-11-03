@@ -53,7 +53,7 @@ var AppRouter = Backbone.Router.extend({
                 console.log('New instrument type: ' + type );
                 // Now update our Instrument manager:
                 instrumentManager.setInstrument(ins);
-                linkManager.closePort();  // Stop former link manager
+                linkManager.closeInstrument();  // Stop former link manager
                 linkManager.setDriver(instrumentManager.getLinkManager(linkManager));
             }});
         });
@@ -195,6 +195,7 @@ utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogM
                     'instruments/OnyxNumView', 'instruments/FCOledNumView', 'instruments/Fluke289NumView', 'instruments/Fluke289DiagView',
                     'instruments/OnyxLogView', 'instruments/Fluke289LogView', 'instruments/Fluke289LogManagementView', 'instruments/OnyxLogManagementView',
                     'instruments/OnyxDiagView', 'instruments/W433LiveView', 'instruments/W433NumView', 'instruments/W433SettingsView',
+                    'instruments/W433LogView', 
                    ],
     function() {
         
