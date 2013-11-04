@@ -235,6 +235,10 @@ h5 {
         background-repeat: no-repeat;    
 }
 
+.battery25-100 {
+        background-image: url(../img/battery25-full.png);
+}
+
 .battery-100 {
         background-image: url(../img/battery-full.png);
 }
@@ -243,12 +247,24 @@ h5 {
         background-image: url(../img/battery-80.png);
 }
 
+.battery-75 {
+        background-image: url(../img/battery25-75.png);
+}
+
 .battery-60 {
         background-image: url(../img/battery-60.png);
 }
 
+.battery-50 {
+        background-image: url(../img/battery25-50.png);
+}
+
 .battery-40 {
         background-image: url(../img/battery-40.png);
+}
+
+.battery-25 {
+        background-image: url(../img/battery25-25.png);
 }
 
 .battery-20 {

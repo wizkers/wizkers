@@ -130,22 +130,22 @@ window.Fluke289LiveView = Backbone.View.extend({
                             cl=100;
                            break;
                         case "PARTLY_EMPTY_3":
-                            cl=80;
+                            cl=75;
                             break;
                         case "PARTLY_EMPTY_2":
-                            cl = 60;
+                            cl = 50;
                             break;
                         case "PARTLY_EMPTY_1":
-                            cl = 40;
+                            cl = 25;
                             break;
                         case "ALMOST_EMPTY":
-                            cl = 20;
+                            cl = 0;
                             break;
-                        case "EMPTY":
+                        case "EMPTY": // Note: the DMM will normally not switch on at that level ?
                             cl = 0;
                             break;
                 }
-                $('#battery').removeClass('battery-100 battery-80 battery-60 battery-40 battery-20 battery-0');
+                $('#battery').removeClass('battery25-100 battery-75 battery-50 battery-25 battery-0');
                 $('#battery').addClass('battery-'+cl);
             }
             if (data.value != undefined) {
