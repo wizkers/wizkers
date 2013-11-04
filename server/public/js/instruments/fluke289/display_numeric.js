@@ -1,16 +1,13 @@
-// The main screen of our app.
+// Numeric view for the Fluke 289
 // 
-// Our model is the settings object.
 
 window.Fluke289NumView = Backbone.View.extend({
 
     initialize:function (options) {
-        this.linkManager = this.options.lm;
-        this.settings = this.model;
         
         this.sessionStartStamp = new Date().getTime();
 
-        this.linkManager.on('input', this.showInput, this);
+        linkManager.on('input', this.showInput, this);
     },
     
     events: {
@@ -25,7 +22,7 @@ window.Fluke289NumView = Backbone.View.extend({
         
     onClose: function() {
         console.log("Fluke289 numeric view closing...");
-        this.linkManager.off('input', this.showInput, this);
+        linkManager.off('input', this.showInput, this);
     },
     
     showInput: function(data) {
@@ -36,7 +33,7 @@ window.Fluke289NumView = Backbone.View.extend({
         }
 
         if (typeof(data.value) != 'undefined') {
-            $('#livereading', this.el).html(data.value + "&nbsp;" + this.linkManager.driver.mapUnit(data.unit));
+            $('#livereading', this.el).html(data.value + "&nbsp;" + linkManager.driver.mapUnit(data.unit));
         }
         
         if (data.reading != undefined) {
@@ -91,7 +88,7 @@ window.Fluke289NumView = Backbone.View.extend({
                                 
                                 break;
                     }
-                    $('#' + location).html(reading.readingValue + "&nbsp;" + this.linkManager.driver.mapUnit(reading.baseUnit));
+                    $('#' + location).html(reading.readingValue + "&nbsp;" + linkManager.driver.mapUnit(reading.baseUnit));
                 }
            }
         }

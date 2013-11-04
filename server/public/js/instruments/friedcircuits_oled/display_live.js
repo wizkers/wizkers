@@ -5,9 +5,6 @@
 window.FCOledLiveView = Backbone.View.extend({
 
     initialize:function (options) {
-        this.linkManager = this.options.lm;
-        this.settings = this.model;
-        
         
         this.currentDevice = null;
         
@@ -28,7 +25,7 @@ window.FCOledLiveView = Backbone.View.extend({
 
         
         this.plotOptions = {
-            xaxes: [{ mode: "time", show:true, timezone: this.model.get("timezone") },
+            xaxes: [{ mode: "time", show:true, timezone: settings.get("timezone") },
                    ],
             yaxes: [ {}, {position:"right", min:0} ],
             grid: {
@@ -41,8 +38,8 @@ window.FCOledLiveView = Backbone.View.extend({
         
         this.prevStamp = 0;
 
-        this.linkManager.on('status', this.updatestatus, this);
-        this.linkManager.on('input', this.showInput, this);
+        linkManager.on('status', this.updatestatus, this);
+        linkManager.on('input', this.showInput, this);
         
     },
     
@@ -55,7 +52,7 @@ window.FCOledLiveView = Backbone.View.extend({
         var self = this;
         console.log('Main render of OLED Backpack live view');
         $(this.el).html(this.template());
-        this.linkManager.requestStatus();
+        linkManager.requestStatus();
             
         this.color = 1;
 
@@ -76,15 +73,12 @@ window.FCOledLiveView = Backbone.View.extend({
     onClose: function() {
         console.log("OLED Backpack view closing...");
         
-        this.linkManager.off('status', this.updatestatus);
-        this.linkManager.off('input', this.showInput);
+        linkManager.off('status', this.updatestatus,this);
+        linkManager.off('input', this.showInput,this);
         
         // Stop the live stream before leaving
-        this.linkManager.stopLiveStream();
+        linkManager.stopLiveStream();
 
-        // Restore the settings since we don't want them to be saved when changed from
-        // the home screen
-        this.model.fetch();
     },
 
         

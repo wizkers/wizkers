@@ -1,12 +1,9 @@
-// The main screen of our app.
+//  Live view display of the output of the Onyx
 // 
-// Our model is the settings object.
-
 window.OnyxLiveView = Backbone.View.extend({
 
     initialize:function (options) {
         this.linkManager = this.options.lm;
-        this.settings = this.model;
         
         
         this.currentDevice = null;
@@ -98,9 +95,6 @@ window.OnyxLiveView = Backbone.View.extend({
         // Stop the live stream before leaving
         this.linkManager.stopLiveStream();
 
-        // Restore the settings since we don't want them to be saved when changed from
-        // the home screen
-        this.model.fetch();
     },
 
     cpmScaleToggle: function(event) {
@@ -180,7 +174,7 @@ window.OnyxLiveView = Backbone.View.extend({
                     $('#dtModal',this.el).modal('show');
                 } else {
                     $('#devicetag',this.el).html(data.devicetag);
-                    this.linkManager.startLiveStream(this.settings.get('liveviewperiod'));
+                    this.linkManager.startLiveStream(settings.get('liveviewperiod'));
                     this.deviceinitdone = true;
                 }
             } else {

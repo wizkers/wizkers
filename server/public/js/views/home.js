@@ -61,14 +61,14 @@ window.HomeView = Backbone.View.extend({
         // If we have a selected instrument, then instanciate its liveview here
         if (settings.get('currentInstrument') != null) {
             console.log('Create the instrument live view');
-            self.instrumentLiveView = instrumentManager.getLiveDisplay({model: settings, lm: linkManager});
+            self.instrumentLiveView = instrumentManager.getLiveDisplay({model: this.instrument});
             if (self.instrumentLiveView != null) {
                 $('#liveview').html(self.instrumentLiveView.el);
                 self.instrumentLiveView.render();
             }
             
             // Now start the numeric display (the one on the right)
-            self.instrumentNumericView = instrumentManager.getNumDisplay({model: settings, lm: linkManager});
+            self.instrumentNumericView = instrumentManager.getNumDisplay({model: this.instrument});
             if (self.instrumentNumericView != null) {
                 $('#numview').html(self.instrumentNumericView.el);
                 self.instrumentNumericView.render();

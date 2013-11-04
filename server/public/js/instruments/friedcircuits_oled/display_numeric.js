@@ -5,7 +5,6 @@
 window.FCOledNumView = Backbone.View.extend({
 
     initialize:function (options) {
-        this.linkManager = this.options.lm;
         this.settings = this.model;
         
         this.sessionStartStamp = new Date().getTime();
@@ -13,7 +12,7 @@ window.FCOledNumView = Backbone.View.extend({
         this.minreading = -1;
 
         
-        this.linkManager.on('input', this.showInput, this);
+        linkManager.on('input', this.showInput, this);
 
     },
     
@@ -29,8 +28,7 @@ window.FCOledNumView = Backbone.View.extend({
         
     onClose: function() {
         console.log("FC Oled Backpack numeric view closing...");
-        this.linkManager.off('status', this.updatestatus);
-        this.linkManager.off('input', this.showInput);
+        linkManager.off('input', this.showInput,this);
     },
     
     showInput: function(data) {
@@ -45,16 +43,6 @@ window.FCOledNumView = Backbone.View.extend({
         var sessionDuration = (new Date().getTime() - this.sessionStartStamp)/1000;
         $('#sessionlength',this.el).html(utils.hms(sessionDuration));
 
-/*        
-        if (cpm > this.maxreading) {
-            this.maxreading = cpm;
-            $('#maxreading', this.el).html(cpm);
-        }
-        if (cpm < this.minreading || this.minreading == -1) {
-            this.minreading = cpm;
-            $('#minreading', this.el).html(cpm);
-        }
-*/
     },
 
     

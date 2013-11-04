@@ -129,7 +129,7 @@ var AppRouter = Backbone.Router.extend({
         var p = page ? parseInt(page, 10) : 1;
         var instrumentList = new InstrumentCollection();
         instrumentList.fetch({success: function(){
-            self.switchView(new InstrumentListView({model: instrumentList, settings: settings, page: p}));
+            self.switchView(new InstrumentListView({model: instrumentList, page: p}));
         }});
         this.headerView.selectMenuItem('instrument-menu');
         
@@ -138,7 +138,7 @@ var AppRouter = Backbone.Router.extend({
     addInstrument: function() {
         var self = this;
         var instrument = new Instrument();
-        this.switchView(new InstrumentDetailsView({model: instrument, lm:linkManager, im:instrumentManager}));
+        this.switchView(new InstrumentDetailsView({model: instrument}));
         this.headerView.selectMenuItem('instrument-menu');
         
     },
@@ -147,7 +147,7 @@ var AppRouter = Backbone.Router.extend({
         var self = this;
         var instrument = new Instrument({_id: id});
         instrument.fetch({success: function(){
-            self.switchView(new InstrumentDetailsView({model: instrument, lm:linkManager, im:instrumentManager}));
+            self.switchView(new InstrumentDetailsView({model: instrument}));
         }});
         this.headerView.selectMenuItem('instrument-menu');
 
@@ -160,7 +160,7 @@ var AppRouter = Backbone.Router.extend({
         var p = page ? parseInt(page, 10) : 1;
         var workspaceList = new WorkspaceCollection();
         workspaceList.fetch({success: function(){
-            self.switchView(new WorkspaceListView({model: workspaceList, settings: settings, page: p}));
+            self.switchView(new WorkspaceListView({model: workspaceList, page: p}));
         }});
         this.headerView.selectMenuItem('workspace-menu');
         
@@ -169,7 +169,7 @@ var AppRouter = Backbone.Router.extend({
     addWorkspace: function() {
         // TODO: pop up a modal to select an instrument type, and create the instrument
         var workspace = new Workspace();
-        this.switchView(new WorkspaceView({model: workspace, lm:linkManager}));
+        this.switchView(new WorkspaceView({model: workspace}));
         this.headerView.selectMenuItem('workspace-menu');
         
     },

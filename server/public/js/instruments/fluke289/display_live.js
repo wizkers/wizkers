@@ -5,15 +5,13 @@
 window.Fluke289LiveView = Backbone.View.extend({
 
     initialize:function (options) {
-        this.linkManager = this.options.lm;
-        this.settings = this.model;
         
         this.deviceinitdone = false;
         this.plotavg = false;
         
         
         
-        this.livepoints = Math.floor(Number(this.settings.get('liveviewspan'))/Number(this.settings.get('liveviewperiod')));
+        this.livepoints = Math.floor(Number(this.model.get('liveviewspan'))/Number(this.model.get('liveviewperiod')));
         // livedata is now an array of live data readings, because we can graph everything
         // the meter returns
         this.livedata = [[]];
@@ -25,7 +23,7 @@ window.Fluke289LiveView = Backbone.View.extend({
 
         
         this.plotOptions = {
-            xaxes: [{ mode: "time", show:true, timezone: this.model.get("timezone") },
+            xaxes: [{ mode: "time", show:true, timezone: settings.get("timezone") },
                    ],
             grid: {
 				hoverable: true,
@@ -35,8 +33,8 @@ window.Fluke289LiveView = Backbone.View.extend({
             colors: this.palette,
         };        
         
-        this.linkManager.on('status', this.updatestatus, this);
-        this.linkManager.on('input', this.showInput, this);
+        linkManager.on('status', this.updatestatus, this);
+        linkManager.on('input', this.showInput, this);
 
     },
     
@@ -48,7 +46,7 @@ window.Fluke289LiveView = Backbone.View.extend({
         var self = this;
         console.log('Main render of Fluke289 live view');
         $(this.el).html(this.template());
-        this.linkManager.requestStatus();
+        linkManager.requestStatus();
 
         this.color = this.palette[0];
 
@@ -61,8 +59,8 @@ window.Fluke289LiveView = Backbone.View.extend({
         
     onClose: function() {
         console.log("Fluke289 live view closing...");        
-        this.linkManager.off('status', this.updatestatus, this);
-        this.linkManager.off('input', this.showInput, this);
+        linkManager.off('status', this.updatestatus, this);
+        linkManager.off('input', this.showInput, this);
     },
 
     addPlot: function() {
@@ -73,8 +71,8 @@ window.Fluke289LiveView = Backbone.View.extend({
 
     updatestatus: function(data) {
         console.log("Fluke 289 live display: serial status update");
-        if (this.linkManager.connected && !this.deviceinitdone) {
-            this.linkManager.driver.version();
+        if (linkManager.connected && !this.deviceinitdone) {
+            linkManager.driver.version();
         } else {
             this.deviceinitdone = false;
         }
@@ -102,7 +100,7 @@ window.Fluke289LiveView = Backbone.View.extend({
         if (!this.deviceinitdone) {
             if (data.owner != undefined) {
                 // TODO update owner info
-                this.linkManager.startLiveStream();
+                linkManager.startLiveStream();
                 this.deviceinitdone = true;                
             } else
             if (data.version != undefined) {
@@ -111,12 +109,12 @@ window.Fluke289LiveView = Backbone.View.extend({
                     $('#dtModal',this.el).modal('show');
                 } else {
                     $('#fwversion',this.el).html(data.version);
-                    this.linkManager.startLiveStream(this.settings.get('liveviewperiod'));
+                    linkManager.startLiveStream(this.model.get('liveviewperiod'));
                     this.deviceinitdone = true;
                 }
-                // this.linkManager.driver.owner();
+                // linkManager.driver.owner();
             } else {
-                // this.linkManager.driver.owner();
+                // linkManager.driver.owner();
             }
             
         } else {
@@ -152,7 +150,7 @@ window.Fluke289LiveView = Backbone.View.extend({
                 if (data.readingState == "NORMAL") {
                     this.trimLiveData(0);
                     this.livedata[0].push([new Date().getTime(), data.value]);
-                    var unit = this.linkManager.driver.mapUnit(data.unit);
+                    var unit = linkManager.driver.mapUnit(data.unit);
                     
                     this.plot.setData([ { data:this.livedata[0], label: unit, color: this.color },
                                         ]);
@@ -188,7 +186,7 @@ window.Fluke289LiveView = Backbone.View.extend({
                         var tzOffset = new Date().getTimezoneOffset()*60000;
                         this.livedata[i].push([(reading.timeStamp == 0) ?
                                                 new Date().getTime()-tzOffset: reading.timeStamp,reading.readingValue]);
-                        var unit = this.linkManager.driver.mapUnit(reading.baseUnit) + " - " + reading.readingID;
+                        var unit = linkManager.driver.mapUnit(reading.baseUnit) + " - " + reading.readingID;
                         // Now find out whether the user wants us to plot this:
                         var unitnosp = reading.baseUnit + reading.readingID.replace(/\s/g,'_');
                         var toggle = $('#linestoggle ul',this.el).find('.' + unitnosp);

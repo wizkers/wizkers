@@ -1,19 +1,16 @@
-// The main screen of our app.
+// Display output of Geiger counter in numeric format
 // 
-// Our model is the settings object.
 
 window.OnyxNumView = Backbone.View.extend({
 
     initialize:function (options) {
-        this.linkManager = this.options.lm;
-        this.settings = this.model;
         
         this.sessionStartStamp = new Date().getTime();
         this.maxreading = 0;
         this.minreading = -1;
 
         
-        this.linkManager.on('input', this.showInput, this);
+        linkManager.on('input', this.showInput, this);
 
     },
     
@@ -29,7 +26,7 @@ window.OnyxNumView = Backbone.View.extend({
         
     onClose: function() {
         console.log("Onyx numeric view closing...");
-        this.linkManager.off('input', this.showInput);
+        linkManager.off('input', this.showInput, this);
     },
     
     showInput: function(data) {

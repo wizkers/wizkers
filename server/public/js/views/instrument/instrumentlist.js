@@ -8,14 +8,14 @@ window.InstrumentListView = Backbone.View.extend({
         var instruments = this.model.models;
         var len = instruments.length;
         console.log("Instrument list: " + len + " instruments");
-        var items = parseInt(this.options.settings.get('itemsperpage'));
+        var items = parseInt(settings.get('itemsperpage'));
         var startPos = (this.options.page - 1) * items;
         var endPos = Math.min(startPos + items, len);
 
         $(this.el).html('<ul class="thumbnails"></ul>');
 
         for (var i = startPos; i < endPos; i++) {
-            $('.thumbnails', this.el).append(new InstrumentListItemView({model: instruments[i], settings: this.options.settings}).render().el);
+            $('.thumbnails', this.el).append(new InstrumentListItemView({model: instruments[i]}).render().el);
         }
 
         $(this.el).append(new Paginator({model: this.model, page: this.options.page, items: items}).render().el);

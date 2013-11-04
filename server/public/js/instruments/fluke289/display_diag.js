@@ -3,14 +3,12 @@
 window.Fluke289DiagView = Backbone.View.extend({
 
     initialize:function (options) {
-        // TODO: just refer to the global linkmanager and remove this.
-        this.linkManager = linkManager;
         
-        if (this.linkManager.streaming) {
-            this.linkManager.stopLiveStream();
+        if (linkManager.streaming) {
+            linkManager.stopLiveStream();
         }
         
-        this.linkManager.on('input', this.showInput, this);
+        linkManager.on('input', this.showInput, this);
         
         this.initialized = false;
     },
@@ -29,7 +27,7 @@ window.Fluke289DiagView = Backbone.View.extend({
     
     onClose: function() {
         console.log("Fluke289 diag view closing...");
-        this.linkManager.off('input', this.showInput, this);
+        linkManager.off('input', this.showInput, this);
     },
 
     render:function () {
@@ -42,21 +40,21 @@ window.Fluke289DiagView = Backbone.View.extend({
     refresh: function() {
         // Query DMM for various info:
         this.queriesDone = false;
-        if (this.linkManager.connected) {
-            this.linkManager.driver.getDevInfo();
-            this.linkManager.driver.version();
-            this.linkManager.driver.takeScreenshot();
+        if (linkManager.connected) {
+            linkManager.driver.getDevInfo();
+            linkManager.driver.version();
+            linkManager.driver.takeScreenshot();
         }
     },
     
     presskey: function(event) {
         var val = event.currentTarget.value;
-        this.linkManager.driver.sendKeypress(val);
-        setTimeout(this.linkManager.driver.takeScreenshot,150);
+        linkManager.driver.sendKeypress(val);
+        setTimeout(linkManager.driver.takeScreenshot,150);
     },
     
     toggleled: function() {
-        if (this.linkManager.driver.toggleLed()) {
+        if (linkManager.driver.toggleLed()) {
             $('.toggleled', this.el).addClass('btn-success');
         } else {
             $('.toggleled', this.el).removeClass('btn-success');
@@ -64,26 +62,26 @@ window.Fluke289DiagView = Backbone.View.extend({
     },
     
     switchoff: function() {
-        this.linkManager.driver.off();
+        linkManager.driver.off();
     },
     
 
     setrtc: function() {
-        this.linkManager.controllerCommand.settime();
+        linkManager.controllerCommand.settime();
     },
     
     sendcmd: function(event) {
         // We react both to button press & Enter key press
         if ((event.target.id == "manualcmd" && event.keyCode==13) || (event.target.id != "manualcmd"))
-            this.linkManager.manualCommand($('#manualcmd',this.el).val());
+            linkManager.manualCommand($('#manualcmd',this.el).val());
     },
     
     screenshot: function() {
-        this.linkManager.driver.takeScreenshot();
+        linkManager.driver.takeScreenshot();
     },
     
     setassetinfo: function() {
-        this.linkManager.driver.setDevInfo(
+        linkManager.driver.setDevInfo(
             $('#operator').val(),
             $('#company').val(),
             $('#site').val(),
