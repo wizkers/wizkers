@@ -3,8 +3,6 @@
 window.OnyxLiveView = Backbone.View.extend({
 
     initialize:function (options) {
-        this.linkManager = this.options.lm;
-        
         
         this.currentDevice = null;
         
@@ -40,8 +38,8 @@ window.OnyxLiveView = Backbone.View.extend({
         
         this.prevStamp = 0;
 
-        this.linkManager.on('status', this.updatestatus, this);
-        this.linkManager.on('input', this.showInput, this);
+        linkManager.on('status', this.updatestatus, this);
+        linkManager.on('input', this.showInput, this);
         
     },
     
@@ -56,7 +54,7 @@ window.OnyxLiveView = Backbone.View.extend({
         var self = this;
         console.log('Main render of Onyx live view');
         $(this.el).html(this.template());
-        this.linkManager.requestStatus();
+        linkManager.requestStatus();
         if (this.model.get("cpmscale") == "log")
             $("#cpmscale",this.el).attr("checked",true);
         if (this.model.get('cpmscale')=="log") {
@@ -89,11 +87,11 @@ window.OnyxLiveView = Backbone.View.extend({
     onClose: function() {
         console.log("Onyx live view closing...");
         
-        this.linkManager.off('status', this.updatestatus);
-        this.linkManager.off('input', this.showInput);
+        linkManager.off('status', this.updatestatus);
+        linkManager.off('input', this.showInput);
         
         // Stop the live stream before leaving
-        this.linkManager.stopLiveStream();
+        linkManager.stopLiveStream();
 
     },
 
@@ -134,15 +132,15 @@ window.OnyxLiveView = Backbone.View.extend({
     
     setdevicetag: function() {
         var tag = $('#devicetagfield',this.el).val();
-        this.linkManager.driver.setdevicetag(tag);
+        linkManager.driver.setdevicetag(tag);
         $('#dtModal',this.el).modal('hide');
     },
     
     
     updatestatus: function(data) {
         console.log("Onyx live display: serial status update");
-        if (this.linkManager.connected && !this.deviceinitdone) {
-            this.linkManager.driver.ping();
+        if (linkManager.connected && !this.deviceinitdone) {
+            linkManager.driver.ping();
         } else {
             this.deviceinitdone = false;
         }
@@ -167,18 +165,18 @@ window.OnyxLiveView = Backbone.View.extend({
         // Have we read all we need from the device?
         if (!this.deviceinitdone) {
             if (data.guid != undefined) {
-                this.linkManager.driver.devicetag();
+                linkManager.driver.devicetag();
             } else if (data.devicetag != undefined) {
                 if (data.devicetag == "No device tag set") {
                     // Show the device tag set dialog
                     $('#dtModal',this.el).modal('show');
                 } else {
                     $('#devicetag',this.el).html(data.devicetag);
-                    this.linkManager.startLiveStream(settings.get('liveviewperiod'));
+                    linkManager.startLiveStream(settings.get('liveviewperiod'));
                     this.deviceinitdone = true;
                 }
             } else {
-                this.linkManager.driver.guid();
+                linkManager.driver.guid();
             }
             
         } else {
