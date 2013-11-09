@@ -33,6 +33,8 @@ module.exports = {
         this.instrument = i;
         console.log("W433: instrument reference passed, instrument data is: ");
         console.log(i.metadata);
+	if (this.instrument.medata == null)
+		this.instrument.metadata = {};
     },
 
     

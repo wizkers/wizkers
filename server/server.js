@@ -36,7 +36,7 @@ var serialport = require('serialport'),
 
 // Utility function to get a Hex dump
 var Hexdump = require('./hexdump.js');
-var Debug = false;
+var Debug = true;
 
 
 var deviceTypes = [];
@@ -190,7 +190,7 @@ openPort = function(data, socket) {
         if (myPort)
             myPort.close();
         myPort = new SerialPort(data, driver.portSettings);
-        myPort.flush();
+        //myPort.flush();
         console.log('Result of port open attempt: ' + myPort);
         
         // Callback once the port is actually open: 

@@ -231,5 +231,8 @@ utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogM
                 app = new AppRouter();
                 Backbone.history.start();
             }});
-        }
+        } else {
+	   app = new AppRouter();
+	   Backbone.history.start();
+	}
 });
