@@ -187,8 +187,9 @@ var currentInstrument = null;
 //////////////////
 openPort = function(data, socket) {
          //  This opens the serial port:
-        if (myPort)
-            myPort.close();
+        if (myPort) {
+           try { myPort.close(); } catch (e) { console.log("Port close attempt error: " + e); }
+	}
         myPort = new SerialPort(data, driver.portSettings);
         //myPort.flush();
         console.log('Result of port open attempt: ' + myPort);
