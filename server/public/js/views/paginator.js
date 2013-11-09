@@ -1,6 +1,6 @@
 window.Paginator = Backbone.View.extend({
 
-    className: "pagination pagination-centered",
+    className: "container center",
 
     initialize:function () {
         this.model.bind("reset", this.render, this);
@@ -13,7 +13,7 @@ window.Paginator = Backbone.View.extend({
         var len = items.length;
         var pageCount = Math.ceil(len / this.options.items);
 
-        $(this.el).html('<ul />');
+        $(this.el).html('<ul class="pagination" />');
 
         for (var i=0; i < pageCount; i++) {
             $('ul', this.el).append("<li" + ((i + 1) === this.options.page ? " class='active'" : "") + "><a href='#locos/page/"+(i+1)+"'>" + (i+1) + "</a></li>");

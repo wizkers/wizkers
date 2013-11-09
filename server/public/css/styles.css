@@ -86,6 +86,13 @@ h5 {
 }
 
 /**
+ * Center the content of a div
+ */
+.center {
+    text-align: center;
+}
+
+/**
  * The little accessory items on the layout view
  */
 .accessoryitem {
