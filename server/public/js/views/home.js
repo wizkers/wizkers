@@ -127,7 +127,7 @@ window.HomeView = Backbone.View.extend({
         // Depending on port status, update our controller
         // connect button:
         if (linkManager.connected) {
-            $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Disconnect " + this.instrument.get('name'))
+            $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Disconnect ' + this.instrument.get('name'))
                 .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
             $('.btn-enable-connected', this.el).removeAttr('disabled');
             
@@ -143,7 +143,7 @@ window.HomeView = Backbone.View.extend({
             
             
         } else {
-            $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Connect to " + this.instrument.get('name'))
+            $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Connect to ' + this.instrument.get('name'))
                 .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
             $('.btn-enable-connected', this.el).attr('disabled', true);
 

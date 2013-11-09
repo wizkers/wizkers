@@ -12,7 +12,7 @@ window.InstrumentListView = Backbone.View.extend({
         var startPos = (this.options.page - 1) * items;
         var endPos = Math.min(startPos + items, len);
 
-        $(this.el).html('<ul class="thumbnails"></ul>');
+        $(this.el).html('<div class="row thumbnails"></div>');
 
         for (var i = startPos; i < endPos; i++) {
             $('.thumbnails', this.el).append(new InstrumentListItemView({model: instruments[i]}).render().el);
@@ -26,7 +26,8 @@ window.InstrumentListView = Backbone.View.extend({
 
 window.InstrumentListItemView = Backbone.View.extend({
 
-    tagName: "li",
+    tagName: "div",
+    className: "col-md-3",
 
     initialize: function () {
         this.model.bind("change", this.render, this);

@@ -1,15 +1,15 @@
-<div class="row-fluid">
-<div class="span9">
-<div class="row-fluid">
+<div class="row">
+<div class="col-md-9">
+<div class="row">
   <div class="well" id="diags-area">
-      <div class="row-fluid">
-          <div class="span12">
+      <div class="row">
+          <div class="col-md-12">
     <button class="btn commandstatus" type="button" style="float:right;">Idle...</button>
     <h2>Diagnostics <button class="btn btn-info refresh" title="Refresh" type="button" ><i class="icon-refresh"></i></button>
 </h2>
 </div></div>
-      <div class="row-fluid">
-          <div class="span8">
+      <div class="row">
+          <div class="col-md-8">
     <h4>Meter info</h4>
       <ul class="small-list">
           <li>Model: <span id="model"></span></li>
@@ -24,14 +24,14 @@
 
       </ul>
       </div>
-          <div class="span4  thumbnail">
+          <div class="col-md-4  thumbnail">
 
               <h4>Asset information:</h4>
               
-              <div class="input-append"><span class="add-on" style="width:80px;">Operator</span><input class="span12" id="operator" value="" type="text" maxlength="32"></div>
-              <div class="input-append"><span class="add-on" style="width:80px;">Company</span><input class="span12" id="company" value="" type="text" maxlength="32"></div>
-              <div class="input-append"><span class="add-on" style="width:80px;">Site</span><input class="span12" id="site" value="" type="text" maxlength="32"></div>
-              <div class="input-append"><span class="add-on" style="width:80px;">Contact</span><input class="span12" id="contact" value="" type="text" maxlength="32"></div><br/>
+              <div class="input-append"><span class="add-on" style="width:80px;">Operator</span><input class="col-md-12" id="operator" value="" type="text" maxlength="32"></div>
+              <div class="input-append"><span class="add-on" style="width:80px;">Company</span><input class="col-md-12" id="company" value="" type="text" maxlength="32"></div>
+              <div class="input-append"><span class="add-on" style="width:80px;">Site</span><input class="col-md-12" id="site" value="" type="text" maxlength="32"></div>
+              <div class="input-append"><span class="add-on" style="width:80px;">Contact</span><input class="col-md-12" id="contact" value="" type="text" maxlength="32"></div><br/>
               <button class="btn setassetinfo" type="button" style="float:right;">Update</button>
                
           </div>
@@ -39,94 +39,94 @@
           
       <h4>Device diagnostics</h4>
       <p><button class="btn setrtc" type="button">Sync device time</button>
-          <div class="input-append"><span class="add-on">Manual Command</span><input class="span12" id="manualcmd" value="" type="text" maxlength="32"><button type="button" class="btn" id="cmdsend"><i class="icon-check"></i></button></div>
+          <div class="input-append"><span class="add-on">Manual Command</span><input class="col-md-12" id="manualcmd" value="" type="text" maxlength="32"><button type="button" class="btn" id="cmdsend"><i class="icon-check"></i></button></div>
       </p>
 
 
       
   </div>
     </div>
-    <div class="row-fluid">
+    <div class="row">
     <div class="well">
         <textarea id="input" style="height:200px; width:98%;"></textarea>
         </div>
     </div>
-</div><!--/span9-->
+</div><!--/col-md-9-->
 
-  <div class="span3">
+  <div class="col-md-3">
   <div class="well keyboard-area" id="port-diags">
       <button class="btn takeshot" type="button" style="float:right;"><i class="icon-refresh"></i></button>
       <h4>Remote control</h4>
-      <div class="row-fluid thumbnail">
+      <div class="row thumbnail">
           <canvas id="screenshot" style="width:320px; height:240px;" class="takeshot"></canvas>
       </div>
-      <div class="row-fluid keyboard-area">
-          <div class="span3">
+      <div class="row keyboard-area">
+          <div class="col-md-3">
               <button class="btn keyboard" value="F1" type="button">F1</button>
           </div>
-          <div class="span3">
+          <div class="col-md-3">
               <button class="btn keyboard" value="F2" type="button">F2</button>
           </div>
-          <div class="span3">
+          <div class="col-md-3">
               <button class="btn keyboard" value="F3" type="button">F3</button>
           </div>
-          <div class="span3">
+          <div class="col-md-3">
               <button class="btn keyboard" value="F4" type="button">F4</button>
           </div>
       </div>
-      <div class="row-fluid keyboard-area">
-        <div class="span3">
-            <div class="row-fluid">
+      <div class="row keyboard-area">
+        <div class="col-md-3">
+            <div class="row">
               <button class="btn keyboard" value="HOLD" type="button">HOLD</button>
             </div>
-            <div class="row-fluid">
+            <div class="row">
               <button class="btn keyboard" value="MINMAX" type="button"><span style="font-size:smaller;">MIN MAX</span></button>
             </div>
         </div>
-        <div class="span2">
+        <div class="col-md-2">
               <button class="btn keyboard" value="LEFT" type="button"><i class="icon-arrow-left"></i></button>
         </div>  
-        <div class="span2">
-            <div class="row-fluid">
-                <div class="span12">
+        <div class="col-md-2">
+            <div class="row">
+                <div class="col-md-12">
                     <button class="btn keyboard" value="UP" type="button"><i class="icon-arrow-up"></i></button>
                 </div>
             </div>
-            <div class="row-fluid">
-                <div class="span12">
+            <div class="row">
+                <div class="col-md-12">
                     <button class="btn keyboard" value="DOWN" type="button"><i class="icon-arrow-down"></i></button>
                 </div>
             </div>
         </div>  
-        <div class="span2">
+        <div class="col-md-2">
               <button class="btn keyboard" value="RIGHT" type="button"><i class="icon-arrow-right"></i></button>
         </div>  
-        <div class="span3">
-            <div class="row-fluid">
+        <div class="col-md-3">
+            <div class="row">
               <button class="btn keyboard" value="RANGE" type="button">RANGE</button>
             </div>
-            <div class="row-fluid">
+            <div class="row">
               <button class="btn keyboard" value="INFO" type="button">INFO</button>
             </div>
         </div>      
       </div>
-      <div class="row-fluid keyboard-area">
-            <div class="span6">
+      <div class="row keyboard-area">
+            <div class="col-md-6">
               <button class="btn keyboard" value="ONOFF" type="button">On/Off</button>
             </div>
-            <div class="span6">
+            <div class="col-md-6">
               <button class="btn keyboard" value="BACKLIGHT" type="button">Backlight</button>
             </div>
       </div>
       <hr>
-      <div class="row-fluid thumbnail">
-          <div class="span4">
+      <div class="row thumbnail">
+          <div class="col-md-4">
               <button class="btn toggleled">Toggle LED</button>
           </div>
-          <div class="span4">
+          <div class="col-md-4">
               <button class="btn switchoff">OFF</button>
           </div>
       
   </div><!--/.well -->
-</div><!--/span-->
+</div><!--/col-md--->
 </div><!--/row-->

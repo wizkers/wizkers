@@ -1,33 +1,26 @@
-      <!-- Le Navbar of Le Application -->
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container-fluid">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+<header class="navbar navbar-inverse navbar-fixed-top vizapp-nav" role="banner">
+    <div class="container">
+        <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#vizapp-nav-collapse">
+            <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
-          </button>
-          <a class="brand" href="#">VizApp</a>
-          <div class="nav-collapse collapse">
-            <ul class="nav">
-                <!--
-              <li class="workspace-menu"><a href="#workspaces">Select Workspace</a></li>
-                   <li class="add-option workspace-menu-add" hidden=true><a href="#workspaces/add"><i class="icon-plus-sign icon-white"></i> Add Workspace</a></li>
-                -->
-
+        </button>
+            <a class="navbar-brand" href="#">VizApp</a>
+        </div>
+        
+        <nav class="collapse navbar-collapse" id="vizapp-nav-collapse" role="navigation">
+            <ul class="nav navbar-nav">
                 <li class="instrument-menu"><a href="#instruments">Manage instruments</a></li>
-                   <li class="add-option instrument-menu-add" hidden=true><a href="#instruments/add"><i class="icon-plus-sign icon-white"></i> Add Instrument</a></li>
-                
-                
+                   <li class="add-option instrument-menu-add" hidden=true><a href="#instruments/add"><span class="glyphicon glyphicon-plus-sign"></span>&nbsp;Add Instrument</a></li>
               <li class="management-menu"><a href="#logmgt">Log management</a></li>
-              <!-- <li class="live-menu"><a href="#live">Live view</a></li> -->
             </ul>
-              <ul class="nav pull-right">
-              <li class="settings-menu"><a href="#settings">Settings</a></li>
-              <li class="about-menu"><a href="#about">About</a></li>
+              <ul class="nav navbar-nav navbar-right">
+                <li class="settings-menu"><a href="#settings">Settings</a></li>
+                <li class="about-menu"><a href="#about">About</a></li>
                   
               </ul>
-          </div><!--/.nav-collapse -->
-        </div>
-      </div>
+        </nav><!--/.nav-collapse -->
     </div>
+</header>

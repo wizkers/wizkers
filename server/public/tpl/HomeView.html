@@ -1,19 +1,19 @@
-<div class="row-fluid">
-<div class="span9">
-  <div class="row-fluid">
-      <div class="span6" id="control-area">
+<!-- We are starting inside a "row" div -->
+<div class="col-md-9">
+  <div class="row">
+      <div class="col-md-6" id="control-area">
         <p>
-          <a href="#" role="button" disabled class="ctrl-connect btn btn-warning"><i class="icon-off"></i>&nbsp;Connect to Instrument</a>
+          <a href="#" role="button" disabled class="ctrl-connect btn btn-warning"><span class="glyphicon glyphicon-off"></span>&nbsp;Connect to Instrument</a>
           <button disabled role="button" class="ctrl-diag btn btn-enable-connected btn-info">Device setup</button>
          </p>
       </div>
-      <div class="span6">
+      <div class="col-md-6">
           <a href="#"  role="button" disabled class="ctrl-record btn btn-enable-connected btn-danger"><i class="icon-download"></i>&nbsp;Record session</a>
       </div>
   </div> <!-- row-fluid -->
 <div id="liveview">
   <div class="row-fluid">
-    <div class="span12">
+    <div class="col-md-12">
         <h2>Welcome to Viz App</h2>
         <p>You currently have no measurment instrument selected, either because you reset your settings, or because you have no instrument defined.</p>
         <p>Go to the "Intruments" screen by clicking on the menu link above, and either select or create an instrument. Then come back.</p>
@@ -21,14 +21,14 @@
     </div>   
   </div>
 </div>    
-</div><!--/span-->
+</div><!--/col-md--->
 
-    <div class="span3">
+    <div class="col-md-3">
       <div class="well" id="numview">
           <h4>Where the live reading values will go</h4>                    
       </div><!--/.well -->
-   </div><!--/span-->
-</div><!--/row-->
+   </div><!--/col-md--->
+
 
 <!-- The "Record" modal -->
 <div id="RecordModal" class="modal hide" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

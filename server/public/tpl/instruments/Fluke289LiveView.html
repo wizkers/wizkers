@@ -1,20 +1,20 @@
-<!-- this is added within a span9 area -->
-<div class="row-fluid">
-    <div class="span2">
-        <div class="row-fluid">
-            <div class="span12 thumbnail">
+<!-- this is added within a row area -->
+<div class="row">
+    <div class="col-md-2">
+        <div class="row">
+            <div class="col-md-12 thumbnail">
                 <p>FW Version:<br><span id="fwversion"></span>
                 <div class="battery battery-0" id="battery" style="width:50px;height:22px;"></div>
             </div>
         </div><br>
-        <div class="row-fluid">
+        <div class="row">
             <h4>Values to graph</h4>
             <div id="linestoggle">
             <ul></ul></div>
         </div><br>
     </div>
 
-    <div class="span10">
+    <div class="col-md-10">
         <div class="thumbnail">
             <div class="datachart chart" style="position: relative; height:400px;"></div>
         </div>
@@ -22,8 +22,8 @@
     </div>   
 </div>
     
-<div class="row-fluid">
-    <div class="span12">
+<div class="row">
+    <div class="col-md-12">
         <div class="well">
             <h6>Raw data stream</h6>
             <textarea id="input" style="height:50px; width:98%;"></textarea>

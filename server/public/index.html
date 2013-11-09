@@ -8,26 +8,12 @@
     <meta name="author" content="E. Lafargue, edouard@lafargue.name">
 
     <!-- Le styles -->
-    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap.css" rel="stylesheet" media="screen">
     <style type="text/css">
-      body {
-        padding-top: 60px;
-        padding-bottom: 40px;
-      }
-      .sidebar-nav {
-        padding: 9px 0;
-      }
+        
+    body { padding-top: 55px;} /* Required for fixed navbar */
 
-      @media (max-width: 980px) {
-        /* Enable use of floated navbar text */
-        .navbar-text.pull-right {
-          float: none;
-          padding-left: 5px;
-          padding-right: 5px;
-        }
-      }
     </style>
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
     <link href="css/bootstrap-lightbox.min.css" rel="stylesheet"/>
     <link href="css/bootstrap-progressbar.css" rel="stylesheet"/>
     <link href="css/bootstrap-spinedit.css" rel="stylesheet"/>
@@ -46,15 +32,15 @@
     <link rel="shortcut icon" href="img/ico/favicon.png">
   </head>
 
-  <body>
+<body>
 
 <!-- Header contents loaded by the application (menubar) -->
 <div class="header"></div>
 
-<div class="container-fluid">
-    <div class="row-fluid">
+<div style="padding: 0 15px; margin: 5px;"> <!-- Make the main content full screen -->
+    <div class="row" id="content">
         <!-- The div below is where the application runs -->
-        <div id="content" class="span12>">
+        
             
             <p style="text-align:center;">Viewer v0.1</p>
             <div class="spinner circles">
@@ -70,7 +56,6 @@
                     
             <p style="text-align:center;">Loading...</p>
         
-        </div>
     </div>
 
 <hr>
@@ -78,7 +63,7 @@
         <p>&copy; E. Lafargue 2013</p>
       </footer>
 
-</div><!--/.fluid-container-->
+</div>
 
     <!-- Le javascript
     ================================================== -->

@@ -1,23 +1,23 @@
 <!-- this is added within a span9 area -->
-<div class="row-fluid">
-    <div class="span2">
-        <div class="row-fluid">
-            <div class="span12 thumbnail">
+<div class="row">
+    <div class="col-md-2">
+        <div class="row">
+            <div class="col-md-12 thumbnail">
                 <p>Device tag:<br><span id="devicetag"></span>
             </div>
         </div><br>
-        <div class="row-fluid">
+        <div class="row">
             <br>
         </div><br>
-        <div class="row-fluid">
-            <div class="span12 thumbnail">
+        <div class="row">
+            <div class="col-md-12 thumbnail">
                 <p><label class="checkbox"><input id="cpmscale" type="checkbox">Log scale</label></p>
                 <p><label class="checkbox"><input id="plotavg" disabled checked type="checkbox">Moving average</label></p>
             </div>
         </div>
     </div>
 
-    <div class="span10">
+    <div class="col-md-10">
         <div class="thumbnail">
             <div class="locochart chart" style="position: relative; height:400px;"></div>
         </div>
@@ -25,8 +25,8 @@
     </div>   
 </div>
     
-<div class="row-fluid">
-    <div class="span12">
+<div class="row">
+    <div class="col-md-12">
         <div class="well">
             <h6>Raw data stream</h6>
             <textarea id="input" style="height:50px; width:98%;"></textarea>
