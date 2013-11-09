@@ -34,16 +34,16 @@ window.W433NumView = Backbone.View.extend({
     
     showInput: function(data) {
         var stamp = new Date().getTime();
-        // Get sensor info: if we know it, update the value & badge
+        // Get sensor info: if we know it, update the value & label
         // if we don't, add it
         var sensor =data.sensor_name + " - " + data.reading_type;
         var sensordata = this.sensors[sensor];
         if (sensordata == undefined) {
             $('#sensorlist',this.el).append('<li id="' + sensor.replace(/ /g, '_') + '">' +
-                                            '<span class="badge badge-success">&nbsp;</span>&nbsp;' +
+                                            '<span class="label label-success">&nbsp;</span>&nbsp;' +
                                             sensor + ':&nbsp;' + data.value + '</li>');
         } else {
-            $('#' + sensor.replace(/ /g, '_'), this.el).html('<span class="badge badge-success">&nbsp;</span>&nbsp;' +
+            $('#' + sensor.replace(/ /g, '_'), this.el).html('<span class="label label-success">&nbsp;</span>&nbsp;' +
                                             sensor + ':&nbsp;' + data.value);
         }
         this.sensors[sensor] = { stamp: stamp};
@@ -53,14 +53,14 @@ window.W433NumView = Backbone.View.extend({
     
     refreshSensors: function() {
         var self = this;
-        console.log("Refresh Sensor badges in num view");
+        console.log("Refresh Sensor labels in num view");
         var stamp = Date.now();
         _.each(this.sensors,function(value,key) {
             if (stamp - value.stamp > 300000) { // 5 minutes, lost
-                $('#' + key.replace(/ /g, '_'), self.el).find('.badge').removeClass('badge-warning').addClass('badge-important');
+                $('#' + key.replace(/ /g, '_'), self.el).find('.label').removeClass('label-warning').addClass('label-danger');
                 
             } else if (stamp - value.stamp > 180000) { // 3 minutes, stale
-                $('#' + key.replace(/ /g, '_'), self.el).find('.badge').removeClass('badge-success').addClass('badge-warning');
+                $('#' + key.replace(/ /g, '_'), self.el).find('.label').removeClass('label-success').addClass('label-warning');
             }
         });
     }
