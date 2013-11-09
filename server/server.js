@@ -192,7 +192,7 @@ openPort = function(data, socket) {
 	}
         myPort = new SerialPort(data, driver.portSettings);
         //myPort.flush();
-        console.log('Result of port open attempt: ' + myPort);
+        console.log('Result of port open attempt:'); console.log(myPort);
         
         // Callback once the port is actually open: 
        myPort.on("open", function () {
