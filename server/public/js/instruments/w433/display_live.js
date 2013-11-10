@@ -27,7 +27,7 @@ window.W433LiveView = Backbone.View.extend({
 				hoverable: true,
 				clickable: true
 			},
-            legend: { position: "ne" },
+            legend: { position: "ne", container: $('#legend') },
             colors: this.palette,
         };
     },
@@ -42,6 +42,7 @@ window.W433LiveView = Backbone.View.extend({
     addPlot: function() {
         var self=this;
         // Now initialize the plot area:
+	this.plotOptions.legend = { container: $('#legend',this.el) };
         this.plot = $.plot($(".datachart", this.el), [ {data:[], label:"??", color:this.color} ], this.plotOptions);
         
         $(".datachart", this.el).bind("plothover", function (event, pos, item) {
