@@ -34,8 +34,8 @@ window.FCOledNumView = Backbone.View.extend({
     showInput: function(data) {
         if (typeof(data.v) == 'undefined')
             return;
-        var v = parseFloat(data.v);
-        var a = parseFloat(data.a);
+        var v = parseFloat(data.v.avg);
+        var a = parseFloat(data.a.avg);
         $('#livev', this.el).html(v.toFixed(3) + "&nbsp;V");
         $('#livea', this.el).html(a.toFixed(3) + "&nbsp;mA");
 

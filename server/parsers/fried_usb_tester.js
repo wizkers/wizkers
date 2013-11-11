@@ -56,12 +56,14 @@ module.exports = {
         // console.log('FC Oled Backpack - format output');
         // Remove any carriage return
         data = data.replace('\n','');
-        var fields = data.split(':');
-        // Format is :Vbus:Abus:Vload:Aload:
-        // We only return the load values:
-        var res = { "v": fields[3], "a": fields[4] };
-        this.socket.emit('serialEvent',res);
-        this.recorder.record(res);
+        var fields = {};
+        try {
+            fields = JSON.parse(data);
+        } catch (e) {
+            console.log("Error: cannot parse logger data : " + e + " - " + data);
+        }
+        this.socket.emit('serialEvent',fields);
+        this.recorder.record(fields);
     },
     
     // output should return a string, and is used to format

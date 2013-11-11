@@ -12,7 +12,11 @@ window.FCOledLiveView = Backbone.View.extend({
         
         this.livepoints = 300; // 5 minutes @ 1 Hz
         this.livevolt = [];
+        this.livevolt_min = [];
+        this.livevolt_max = [];
         this.liveamp = [];
+        this.liveamp_min = [];
+        this.liveamp_max = [];
         
         this.sessionStartStamp = new Date().getTime();
         this.maxreading = 0;
@@ -23,11 +27,9 @@ window.FCOledLiveView = Backbone.View.extend({
         // My own nice color palette:
         this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ],
 
-        
         this.plotOptions = {
             xaxes: [{ mode: "time", show:true, timezone: settings.get("timezone") },
                    ],
-            yaxes: [ {}, {position:"right", min:0} ],
             grid: {
 				hoverable: true,
 				clickable: true
@@ -65,9 +67,15 @@ window.FCOledLiveView = Backbone.View.extend({
         var self=this;
         // Now initialize the plot area:
         console.log('Plot chart size: ' + this.$('.datachart').width());
-        this.plot = $.plot($(".datachart", this.el), [ {data:[], label:"V", color:this.color},
-                                                       {data:[], label:"mA"}
+        this.voltplot = $.plot($(".datachart", this.el), [ {data:[], label:"V", color:this.color},
+                                                       {data:[], label:"Vmin"},
+                                                       {data:[], label:"Vmax"},
                                                      ], this.plotOptions);
+        this.ampplot = $.plot($(".datachart2", this.el), [ {data:[], label:"mA", color:this.color},
+                                                       {data:[], label:"mAmin"},
+                                                       {data:[], label:"mAmax"}
+                                                     ], this.plotOptions);
+
     },
     
     onClose: function() {
@@ -92,19 +100,43 @@ window.FCOledLiveView = Backbone.View.extend({
         var self = this;
                 
         if (data.v != undefined && data.a != undefined) {
-            var v = parseFloat(data.v);
-            var a = parseFloat(data.a);
-            if (this.livevolt.length >= this.livepoints)
+            var v = parseFloat(data.v.avg);
+            var v_min = parseFloat(data.v.min);
+            var v_max = parseFloat(data.v.max);
+            var a = parseFloat(data.a.avg);
+            var a_min = parseFloat(data.a.min);
+            var a_max = parseFloat(data.a.max);
+            // All tables are updated at the same time, so we test only
+            // on the livevolt length
+            if (this.livevolt.length >= this.livepoints) {
                 this.livevolt = this.livevolt.slice(1);
-            if (this.liveamp.length >= this.livepoints)
+                this.livevolt_min = this.livevolt_min.slice(1);
+                this.livevolt_max = this.livevolt_max.slice(1);
                 this.liveamp = this.liveamp.slice(1);
-            this.livevolt.push([new Date().getTime(), v]);
-            this.liveamp.push([new Date().getTime(), a]);
-            this.plot.setData([ { data:this.livevolt, label: "V", color: this.color },
-                               { data:this.liveamp, label: "mA", yaxis: 2 },
+                this.liveamp_min = this.liveamp_min.slice(1);
+                this.liveamp_max = this.liveamp_max.slice(1);
+            }
+            var stamp = new Date().getTime();
+            this.livevolt.push([stamp, v]);
+            this.livevolt_min.push([stamp, v_min]);
+            this.livevolt_max.push([stamp, v_max]);
+            this.liveamp.push([stamp, a]);
+            this.liveamp_min.push([stamp, a_min]);
+            this.liveamp_max.push([stamp, a_max]);
+            this.voltplot.setData([
+                                { data:this.livevolt, label: "V", color: this.color },
+                                { data: this.livevolt_min, label: "Vmin", id: "vmin"},
+                                { data: this.livevolt_max, label: "Vmax", id: "vmax", lines: { show: true, fill: true }, fillBetween: "vmin"}
                                 ]);
-            this.plot.setupGrid(); // Time plots require this.
-            this.plot.draw();
+            this.ampplot.setData([
+                                { data:this.liveamp, label: "mA" },
+                                { data: this.liveamp_min, label: "Amin",id: "amin"},
+                                { data: this.liveamp_max, label: "Amax",id: "amax", lines: { show: true, fill: true }, fillBetween: "amin"}
+                                ]);
+            this.voltplot.setupGrid(); // Time plots require this.
+            this.voltplot.draw();
+            this.ampplot.setupGrid(); // Time plots require this.
+            this.ampplot.draw();
             }
 
         
