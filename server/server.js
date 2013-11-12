@@ -205,7 +205,9 @@ openPort = function(data, socket) {
            // listen for new serial data:
            myPort.on('data', function (data) {
                // Pass this data to on our driver
-               if (Debug) console.log('Raw input:\n' + Hexdump.dump(data));
+               if (Debug) { try {
+                    console.log('Raw input:\n' + Hexdump.dump(data));
+               } catch(e){}}
                 driver.format(data);
            });
        });

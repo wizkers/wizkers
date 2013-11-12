@@ -1,54 +1,61 @@
-<div class="row">
+<!-- we start inside a "row" -->
 <div class="col-md-9">
-<div class="row">
-  <div class="well" id="diags-area">
-      <div class="row">
-          <div class="col-md-12">
-    <button class="btn commandstatus" type="button" style="float:right;">Idle...</button>
-    <h2>Diagnostics <button class="btn btn-info refresh" title="Refresh" type="button" ><i class="icon-refresh"></i></button>
-</h2>
-</div></div>
-      <div class="row">
-          <div class="col-md-8">
-    <h4>Meter info</h4>
-      <ul class="small-list">
-          <li>Model: <span id="model"></span></li>
-          <li>Device Serial number: <span id="serial">n.a.</span></li>          
-          <li>Firmware version: <span id="version">n.a.</span> / <span id="mspversion"></span></li>
-          <li>Calibration date:</li>
-          <li>Calibration counter: <span id="calcounter"></span></li>
-          <li>Board ID: <span id="boardid"></span></li>
-          <li>ARM Bootloader Version:</li>
-          <li>MSP Bootloader version:</li>
-          <li>Calibration version:<span id="calversion"></span></li>
-
-      </ul>
-      </div>
-          <div class="col-md-4  thumbnail">
-
-              <h4>Asset information:</h4>
-              
-              <div class="input-append"><span class="add-on" style="width:80px;">Operator</span><input class="col-md-12" id="operator" value="" type="text" maxlength="32"></div>
-              <div class="input-append"><span class="add-on" style="width:80px;">Company</span><input class="col-md-12" id="company" value="" type="text" maxlength="32"></div>
-              <div class="input-append"><span class="add-on" style="width:80px;">Site</span><input class="col-md-12" id="site" value="" type="text" maxlength="32"></div>
-              <div class="input-append"><span class="add-on" style="width:80px;">Contact</span><input class="col-md-12" id="contact" value="" type="text" maxlength="32"></div><br/>
-              <button class="btn setassetinfo" type="button" style="float:right;">Update</button>
-               
-          </div>
-          </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="well" id="diags-area">
+                <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn commandstatus" type="button" style="float:right;">Idle...</button>
+                        <h2>Diagnostics <button class="btn btn-info refresh" title="Refresh" type="button" ><span class="glyphicon glyphicon-refresh"></span></button>
+                        </h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4>Meter info</h4>
+                          <ul class="small-list">
+                              <li>Model: <span id="model"></span></li>
+                              <li>Device Serial number: <span id="serial">n.a.</span></li>          
+                              <li>Firmware version: <span id="version">n.a.</span> / <span id="mspversion"></span></li>
+                              <li>Calibration date:</li>
+                              <li>Calibration counter: <span id="calcounter"></span></li>
+                              <li>Board ID: <span id="boardid"></span></li>
+                              <li>ARM Bootloader Version:</li>
+                              <li>MSP Bootloader version:</li>
+                              <li>Calibration version:<span id="calversion"></span></li>
+                    
+                          </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="thumbnail">
+                            <h4>Asset information:</h4>
+                              <div class="input-append"><span class="add-on" style="width:80px;">Operator</span>
+                                  <input id="operator" value="" type="text" maxlength="32">
+                              </div>
+                              <div class="input-append"><span class="add-on" style="width:80px;">Company</span><input class="col-md-12" id="company" value="" type="text" maxlength="32"></div>
+                              <div class="input-append"><span class="add-on" style="width:80px;">Site</span><input class="col-md-12" id="site" value="" type="text" maxlength="32"></div>
+                              <div class="input-append"><span class="add-on" style="width:80px;">Contact</span><input class="col-md-12" id="contact" value="" type="text" maxlength="32"></div>
+                                <button class="btn setassetinfo" type="button" style="float:right;">Update</button>
+                            <p>&nbsp;</p>
+                        </div>
+                    </div>
+                </div>
           
       <h4>Device diagnostics</h4>
       <p><button class="btn setrtc" type="button">Sync device time</button>
           <div class="input-append"><span class="add-on">Manual Command</span><input class="col-md-12" id="manualcmd" value="" type="text" maxlength="32"><button type="button" class="btn" id="cmdsend"><i class="icon-check"></i></button></div>
-      </p>
+      
 
 
       
   </div>
+                    </div>
     </div>
     <div class="row">
-    <div class="well">
-        <textarea id="input" style="height:200px; width:98%;"></textarea>
+        <div class="col-md-12">
+            <div class="well">
+                <textarea id="input" style="height:200px; width:98%;"></textarea>
+                </div>
         </div>
     </div>
 </div><!--/col-md-9-->
@@ -129,4 +136,3 @@
       
   </div><!--/.well -->
 </div><!--/col-md--->
-</div><!--/row-->
