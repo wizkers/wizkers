@@ -143,7 +143,6 @@ window.OnyxLogView = Backbone.View.extend({
         if (this.deviceLogs == null || this.deviceLogs.length == 0)
             return;
         
-        // TODO: only valid for 1st log, not the whole set
         $('#log_size',this.el).html(this.deviceLogs.getOverallLength());
         $('#log_start',this.el).html(new Date(this.deviceLogs.getLogsStart()).toString());
         $('#log_end',this.el).html(new Date(this.deviceLogs.getLogsEnd()).toString());
@@ -164,7 +163,7 @@ window.OnyxLogView = Backbone.View.extend({
         } else {
             this.plot = $.plot($(".locochart", this.el), this.packedData, this.plotOptions);
         };
-            
+
         $(".locochart", this.el).bind("plothover", function (event, pos, item) {
             if (item) {
                 if (previousPoint != item.dataIndex) {

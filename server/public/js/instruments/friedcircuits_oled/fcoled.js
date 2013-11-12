@@ -57,7 +57,7 @@ var FCOledInstrument = function() {
     
     // Render a log (or list of logs) for the device.
     this.getLogView = function(arg) {
-        return null;
+        return new FCOledLogView(arg);
     }
 
 };
