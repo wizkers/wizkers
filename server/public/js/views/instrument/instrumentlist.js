@@ -58,6 +58,13 @@ window.InstrumentListItemView = Backbone.View.extend({
         // Update our settings to use the correct port: 
         settings.set({ serialPort: this.model.get('port')});
         settings.save(null, {success: function() {
+            // We have to close the current instrument before getting to the main page:
+            try {
+                var id = instrumentManager.getInstrument().id;
+                linkManager.closeInstrument(id);
+            } catch (err) {
+                console.log("No current instrument selected, not closing it");
+            }
             app.navigate('/', true);
         }});
         return false;

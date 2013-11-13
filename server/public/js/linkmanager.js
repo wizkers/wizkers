@@ -75,6 +75,7 @@ var LinkManager = function() {
     this.closeInstrument = function(id) {
         this.stopLiveStream();
         this.socket.emit('closeinstrument', id);
+        this.connected = false;
     }
         
     // This needs to return some sort of unique identifier for the device,

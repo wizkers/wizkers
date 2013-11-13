@@ -31,6 +31,7 @@ window.FCOledLogView = Backbone.View.extend({
 				hoverable: true,
 				clickable: true
 			},
+            selection: { mode: "xy" },
             legend: { position: "ne" },
             colors: this.palette
         };
@@ -39,7 +40,7 @@ window.FCOledLogView = Backbone.View.extend({
 			legend: { show: false },
 			xaxis: { mode: "time", show:false, ticks:4 },
 			yaxis: { ticks:4 },
-			selection: { mode: "xy" },
+			selection: { mode: "x" },
             colors: this.palette,
 		};
         
@@ -87,24 +88,23 @@ window.FCOledLogView = Backbone.View.extend({
                     
         // Restore current zoom level if it exists:
         if (this.ranges) {
-            this.voltplot = $.plot($(".datachart",this.el), this.packedData.slice(0,2),
+            this.voltplot = $.plot($(".datachart",this.el), this.packedData.slice(0,3),
                 $.extend(true, {}, this.plotOptions, {
                     xaxis: { min: this.ranges.xaxis.from, max: this.ranges.xaxis.to },
-                    yaxis: { min: this.ranges.yaxis.from, max: this.ranges.yaxis.to }
                 })
              );
-            this.ampplot = $.plot($(".datachart2",this.el), this.packedData.slice(3,5),
+            this.ampplot = $.plot($(".datachart2",this.el), this.packedData.slice(3,6),
                 $.extend(true, {}, this.plotOptions, {
                     xaxis: { min: this.ranges.xaxis.from, max: this.ranges.xaxis.to },
-                    yaxis: { min: this.ranges.yaxis.from, max: this.ranges.yaxis.to }
                 })
              );
 
         } else {
-            this.voltplot = $.plot($(".datachart", this.el), this.packedData.slice(0,2), this.plotOptions);
-            this.ampplot = $.plot($(".datachart2", this.el), this.packedData.slice(3,5), this.plotOptions);
+            this.voltplot = $.plot($(".datachart", this.el), this.packedData.slice(0,3), this.plotOptions);
+            this.ampplot = $.plot($(".datachart2", this.el), this.packedData.slice(3,6), this.plotOptions);
         };
-            
+                    
+        // Create tooltips on hover:
         $(".datachart", this.el).bind("plothover", function (event, pos, item) {
             if (item) {
                 if (previousPoint != item.dataIndex) {
@@ -144,9 +144,71 @@ window.FCOledLogView = Backbone.View.extend({
             }
         });
 
+        // Create the overview chart (one for both V and A for now):
+        this.overview = $.plot($("#overview",this.el), [this.packedData[0], this.packedData[3]], this.overviewOptions);
 
-        // Create the overview chart:
-        this.overview = $.plot($("#overview",this.el), this.packedData, this.overviewOptions);
+        // Last, manage selection & linking to overview:
+        // Connect overview and main charts
+        $(".datachart",this.el).bind("plotselected", function (event, ranges) {
+
+            // clamp the zooming to prevent eternal zoom
+            if (ranges.xaxis.to - ranges.xaxis.from < 0.00001) {
+                ranges.xaxis.to = ranges.xaxis.from + 0.00001;
+            }
+
+            // Save the current range so that switching plot scale (log/linear)
+            // can preserve the zoom level:
+            self.ranges = ranges;
+
+            // do the zooming
+            this.voltplot = $.plot($(".datachart",this.el), self.packedData.slice(0,3),
+                $.extend(true, {}, self.plotOptions, {
+                    xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
+                    yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
+                })
+             );
+            this.ampplot = $.plot($(".datachart2",this.el), self.packedData.slice(3,6),
+                $.extend(true, {}, self.plotOptions, {
+                    xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }                    
+                })
+             );
+
+            // don't fire event on the overview to prevent eternal loop
+            self.overview.setSelection(ranges, true);
+        });
+
+        $(".datachart2",this.el).bind("plotselected", function (event, ranges) {
+
+            // clamp the zooming to prevent eternal zoom
+            if (ranges.xaxis.to - ranges.xaxis.from < 0.00001) {
+                ranges.xaxis.to = ranges.xaxis.from + 0.00001;
+            }
+
+            // Save the current range so that switching plot scale (log/linear)
+            // can preserve the zoom level:
+            self.ranges = ranges;
+
+            // do the zooming
+            this.voltplot = $.plot($(".datachart",this.el), self.packedData.slice(0,3),
+                $.extend(true, {}, self.plotOptions, {
+                    xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }                    
+                })
+             );
+            this.ampplot = $.plot($(".datachart2",this.el), self.packedData.slice(3,6),
+                $.extend(true, {}, self.plotOptions, {
+                    xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
+                    yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
+                })
+             );
+
+            // don't fire event on the overview to prevent eternal loop
+            self.overview.setSelection(ranges, true);
+        });
+
+        $("#overview",this.el).bind("plotselected", function (event, ranges) {
+             self.voltplot.setSelection(ranges);
+             self.ampplot.setSelection(ranges);
+          });
 
                     
         

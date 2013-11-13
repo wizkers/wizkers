@@ -186,37 +186,54 @@ var currentInstrument = null;
 // Port management
 //////////////////
 openPort = function(data, socket) {
-         //  This opens the serial port:
-        if (myPort) {
+     //  This opens the serial port:
+    if (myPort && portOpen) {
            try { myPort.close(); } catch (e) { console.log("Port close attempt error: " + e); }
 	}
-        myPort = new SerialPort(data, driver.portSettings);
-        //myPort.flush();
-        console.log('Result of port open attempt:'); console.log(myPort);
+    
+    
+    myPort = new SerialPort(data, driver.portSettings, true, 
+                            function(err, result) {
+                                if (err) {
+                                    console.log("Open attempt error: " + err);
+                                    socket.emit('status', {portopen: portOpen});
+                                }
+                                });    
+    console.log('Result of port open attempt:'); console.log(myPort);
         
-        // Callback once the port is actually open: 
-       myPort.on("open", function () {
-           console.log('Port open');
-           portOpen = true;
-           driver.setPortRef(myPort); // We need this for drivers that manage a command queue...
-           driver.setSocketRef(socket);
-           driver.setRecorderRef(recorder);
-           socket.emit('status', {portopen: portOpen});
-           // listen for new serial data:
-           myPort.on('data', function (data) {
-               // Pass this data to on our driver
-               if (Debug) { try {
-                    console.log('Raw input:\n' + Hexdump.dump(data));
-               } catch(e){}}
-                driver.format(data);
-           });
-       });
+    // Callback once the port is actually open: 
+   myPort.on("open", function () {
+       console.log('Port open');
+       myPort.flush(function(err,result){ console.log(err + " - " + result); });
+       portOpen = true;
+       driver.setPortRef(myPort); // We need this for drivers that manage a command queue...
+       driver.setSocketRef(socket);
+       driver.setRecorderRef(recorder);
+       socket.emit('status', {portopen: portOpen});
+   });
+
+    // listen for new serial data:
+   myPort.on('data', function (data) {
+       console.log('.');
+       // Pass this data to on our driver
+       if (Debug) { try {
+            console.log('Raw input:\n' + Hexdump.dump(data));
+       } catch(e){}}
+        driver.format(data);
+   });
+    
+    myPort.on('error', function(err) {
+        console.log("Serial port error: "  + err);
+        portOpen = false;
+        socket.emit('status', {portopen: portOpen});
+    });
         
-        myPort.on("close", function() {
-            portOpen = false;
-            socket.emit('status', {portopen: portOpen});
-        });
-   
+    myPort.on("close", function() {
+        console.log("Port closing");
+        console.log(myPort);
+        portOpen = false;
+        socket.emit('status', {portopen: portOpen});
+    });
 }
 
 
@@ -240,23 +257,6 @@ io.sockets.on('connection', function (socket) {
        driver.setSocketRef(socket);
     }
 
-    // if the client disconnects, we close the 
-    // connection to the device.
-    // TODO: actually... we should just remain open in case we are
-    // recording...
-
-    /**
-    socket.on('disconnect', function () {
-        console.log('User disconnected');
-        console.log('Closing port');
-        if (myPort)
-            myPort.close();
-        connected = false;
-        portOpen = false;
-    });
-    */
-    
-    
     // Open a port by instrument ID: this way we can track which
     // instrument is being used by the app.
     socket.on('openinstrument', function(data) {
@@ -275,7 +275,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('closeinstrument', function(data) {
         console.log('Instrument close request for instrument ID ' + data);
         Instrument.findById(data, function(err,item) {
-            if(myPort) {
+            if(portOpen) {
                 myPort.close();
                 portOpen = false;
             }
@@ -291,7 +291,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('controllerCommand', function(data) {
         // TODO: do a bit of sanity checking here
         console.log('Controller command: ' + data);
-        if (myPort)
+        if (portOpen)
             myPort.write(driver.output(data));
     });
     
@@ -318,10 +318,10 @@ io.sockets.on('connection', function (socket) {
         console.log('Request to update our serial driver to ' + data);
         
         // Close the serial port if it is open and the driver has changed:
-        if (myPort && data != driver.name) {
+        if (portOpen && data != driver.name) {
             console.log("Driver changed! closing port");
-            myPort.close();
             portOpen = false;
+            myPort.close();
         }
         
         socket.emit('status', {portopen: portOpen});

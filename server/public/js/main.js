@@ -52,8 +52,8 @@ var AppRouter = Backbone.Router.extend({
                 var type = ins.get('type');
                 console.log('New instrument type: ' + type );
                 // Now update our Instrument manager:
-                instrumentManager.setInstrument(ins);
                 linkManager.closeInstrument();  // Stop former link manager
+                instrumentManager.setInstrument(ins);
                 linkManager.setDriver(instrumentManager.getLinkManager(linkManager));
             }});
         });

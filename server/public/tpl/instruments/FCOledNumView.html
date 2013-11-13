@@ -1,15 +1,46 @@
 <h4 >Live reading</h4>
-<br>
 
-<span class="bigreading" id="livev">00.000 V</span><br><br>
+<span class="bigreading" id="livev">00.000 V</span><br>
 <span class="bigreading" id="livea">0.000 mA</span>
 
-<br>
 <h4>Sessions stats</h4>
 
-<p>Duration: <span id="sessionlength">00:00:00</span></p>
-        
 <ul>
-<li>Max:&nbsp;<span id="maxreading">00</span></li>
-<li>Min:&nbsp;<span id="minreading">00</span></li>
+    <li>Duration: <span id="sessionlength">00:00:00</span></li>
+    <li>mWh: <span id="mwh"></span></li>
+    <li>mAh: <span id="mah"></span></li>
+
 </ul>
+
+<div class="thumbnail">
+<h4>Device commands</h4>
+    <span style="float:left;">Screen:&nbsp;</span>
+    <div id="screen" class="btn-group-sm">
+      <button type="button" class="btn btn-default">1</button>
+      <button type="button" class="btn btn-default">2</button>
+      <button type="button" class="btn btn-default">3</button>
+      <button type="button" class="btn btn-default">4</button>
+      <button type="button" class="btn btn-default">5</button>
+      <button type="button" class="btn btn-default">6</button>
+    </div>
+    <br/>
+    
+  <div class="input-group">
+      <span class="input-group-addon">Refresh (ms)</span>
+      <input type="number" min="150" id="refresh" class="form-control" placeholder="1000">
+          <span class="input-group-btn">
+            <button class="btn btn-default" id="refresh-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+          </span>
+  </div><br>
+  <div class="input-group">
+      <span class="input-group-addon">Alarm (mA)</span>
+      <input type="number" min="0" id="alarm" class="form-control" placeholder="350">
+          <span class="input-group-btn">
+            <button class="btn btn-default" id="alarm-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+          </span>
+  </div>
+  <br>
+  <button type="button" id="raz" class="btn btn-danger">Reset energy readings</button>
+
+</div>
+

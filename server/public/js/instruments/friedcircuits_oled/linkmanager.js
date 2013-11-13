@@ -35,6 +35,22 @@ var FCOledLinkManager = function(linkManager) {
     // End of standard API
     //////
     
+    this.screen = function(n) {
+        lm.socket.emit('controllerCommand', 'S:' + n);
+    }
+
+    this.reset = function() {
+        lm.socket.emit('controllerCommand', 'Z:');
+    }
+    
+    this.rate = function(r) {
+        lm.socket.emit('controllerCommand', 'R:' + r);
+    }
+
+    this.alarm = function(r) {
+        lm.socket.emit('controllerCommand', 'W:' + r);
+    }
+    
     
     // All commands below are fully free and depend on
     // the instrument's capabilities

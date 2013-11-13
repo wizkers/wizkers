@@ -17,6 +17,40 @@ window.FCOledNumView = Backbone.View.extend({
     },
     
     events: {
+        "click #screen": "clickScreen",
+        "click #refresh-btn": "clickRefresh",
+        "click #raz": "clickRaz",
+        "click #alarm-btn": "clickAlarm",
+    },
+    
+    clickScreen: function(event) {
+        var screen = event.target.innerHTML;
+        if (screen != undefined) {
+            linkManager.driver.screen(screen);
+        }
+    },
+    
+    clickRefresh: function(event) {
+        var rate = $("#refresh",this.el).val();
+        if (rate < 150) {
+            rate = 150;
+            $("#refresh",this.el).val(150)
+        }
+        linkManager.driver.rate(rate);
+    },
+    
+    clickAlarm: function(event) {
+        var rate = $("#alarm",this.el).val();
+        if (alarm > 2000) {
+            rate = 2000;
+            $("#alarm",this.el).val(2000)
+        }
+        linkManager.driver.alarm(rate);
+    },
+
+    
+    clickRaz: function() {
+        linkManager.driver.reset();
     },
     
     render:function () {
@@ -38,7 +72,9 @@ window.FCOledNumView = Backbone.View.extend({
         var a = parseFloat(data.a.avg);
         $('#livev', this.el).html(v.toFixed(3) + "&nbsp;V");
         $('#livea', this.el).html(a.toFixed(3) + "&nbsp;mA");
-
+        $('#mwh',this.el).html(data.mwh);
+        $('#mah',this.el).html(data.mah);
+         
         // Update statistics:
         var sessionDuration = (new Date().getTime() - this.sessionStartStamp)/1000;
         $('#sessionlength',this.el).html(utils.hms(sessionDuration));
