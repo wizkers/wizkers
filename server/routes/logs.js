@@ -66,6 +66,7 @@ exports.getLogEntries = function(req, res) {
     var id = req.params.id;
     console.log("Retrieving entries of log ID: " + id);
     DeviceLogEntry.find({logsessionid: id}, function(err,items) {
+			 console.log("Entries retrieved");
                          res.send(items);
                         });
 }
