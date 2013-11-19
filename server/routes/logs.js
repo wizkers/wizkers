@@ -60,15 +60,29 @@ exports.findById = function(req, res) {
     });
 }
 
-// Get all entries for a log session
+// Get all entries for a log session. These can be very large,
+// so we have to stream the results back so that we don't get out
+// or memory
 exports.getLogEntries = function(req, res) {
     // Empty for now...
     var id = req.params.id;
     console.log("Retrieving entries of log ID: " + id);
-    DeviceLogEntry.find({logsessionid: id}, function(err,items) {
-			 console.log("Entries retrieved");
-                         res.send(items);
-                        });
+    var stream = DeviceLogEntry.find({logsessionid: id}).stream();
+    res.writeHead(200, {"Content-Type": "application/json"});
+    res.write("[");
+    var ok = false;
+    stream.on('data', function(item) {
+			             console.log("Data");
+                         if (ok) res.write(",");
+                         ok = true;
+                         res.write(JSON.stringify(item));
+                         console.log(item);
+                        }
+             ).on('error', function(err) {
+    }).on('close', function() {
+        res.write("]");
+        res.end();
+    });
 }
 
 // Add a new log entry for a log:
