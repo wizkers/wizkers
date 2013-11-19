@@ -16,7 +16,12 @@ window.W433LogView = Backbone.View.extend({
         // Now fetch all the contents, then render
         var renderGraph = _.after(this.deviceLogs.length, this.render);
         this.deviceLogs.each(function(log) {
-            log.entries.fetch({success: renderGraph});
+            log.entries.fetch({success: renderGraph,
+                              xhr: function() {
+                                    var xhr = $.ajaxSettings.xhr();
+                                    xhr.onprogress = self.handleProgress;
+                                    return xhr;
+                                }});
         });
 
             
@@ -50,6 +55,11 @@ window.W433LogView = Backbone.View.extend({
 		};  
         
     },
+    
+    handleProgress: function(e) {
+            $('#loadtext').html("Loaded: " + e.loaded + " bytes");
+    },
+
     
     events: {
         "click .resetZoom": "resetZoom",

@@ -72,11 +72,9 @@ exports.getLogEntries = function(req, res) {
     res.write("[");
     var ok = false;
     stream.on('data', function(item) {
-			             console.log("Data");
                          if (ok) res.write(",");
                          ok = true;
                          res.write(JSON.stringify(item));
-                         console.log(item);
                         }
              ).on('error', function(err) {
     }).on('close', function() {
