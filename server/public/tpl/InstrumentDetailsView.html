@@ -1,16 +1,11 @@
 <!-- Details view of a layout -->
-<div class="row">
-
-    <form class="form-horizontal col-md-12">
-
+<div class="col-md-12">
+    <form class="form-horizontal">
         <fieldset>
-
             <legend>Instrument Details</legend>
             <br/>
-
             <div class="row">
                 <div class="col-md-5">
-
                     <div class="control-group">
                         <label for="name" class="control-label">Name:</label>
 
@@ -19,12 +14,9 @@
                             <span class="help-inline"></span>
                         </div>
                     </div>
-
                     <div class="control-group">
                         <label for="name" class="control-label">Type:</label>
-
                         <div class="controls">
-                            
                             <select name="type" >
                                 <% for(var ins in instypes) { %>
                                 <option
@@ -48,9 +40,8 @@
                                     value="<%= ports[i] %>"><%= ports[i] %></option>
                                 <% } %>
                             </select>
-                        </div>  
-                    </div>
-                                
+                        </div>
+                    </div>      
                     <div class="control-group">
                         <label for="liveviewspan" class="control-label">Live view length:</label>
                         <div class="controls">
@@ -63,7 +54,6 @@
                             <input type="text" name="liveviewperiod" value="<%= liveviewperiod %>"</>&nbsp;seconds.
                         </div>
                     </div>
-
                 <div class="control-group">
                     <label></label>
                     <div class="controls">
@@ -72,7 +62,7 @@
                         </div>
                 </div>
 
-                </div>
+            </div>
             <div class="col-md-4">
                 <div class="control-group">
                     <label for="description" class="control-label">Notes:</label>
@@ -86,22 +76,19 @@
                             <div id="metadata">This device types does not require extra settings.</div>
                     </div>
                 </div>
-            </div>
-                
-
-                <div class="col-md-3">
-                    <div class="row"><div class="col-md-12">
-                        <div class="well" style="width: 180px;text-align: center;width:50%;margin: 0px auto;">
-                            <p><img id="icon" width="180" src="<%= icon === '' ? 'pics/instruments/generic.png' : 'pics/instruments/' + icon %>"/></p>
-                            <p style="color:#999;">To change the icon, drag a new picture from your computer onto the box above.</p>
-                        </div></div>
+            </div> 
+            <div class="col-md-3">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="well" style="text-align: center;margin: 0px auto;">
+                        <p><img id="icon" width="180" src="<%= icon === '' ? 'pics/instruments/generic.png' : 'pics/instruments/' + icon %>"/></p>
+                        <p style="color:#999;">To change the icon, drag a new picture from your computer onto the box above.</p>
+                        </div>
                     </div>
-                    <div class="row"><div class="col-md-12">
-                    </div></div>
                 </div>
             </div>
-
-        </fieldset>
+        </div> <!-- row -->
+    </fieldset>
 
         <div class="form-actions">
             <a href="#" class="btn btn-primary save">Save</a>

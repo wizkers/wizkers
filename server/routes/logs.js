@@ -62,7 +62,7 @@ exports.findById = function(req, res) {
 
 // Get all entries for a log session. These can be very large,
 // so we have to stream the results back so that we don't get out
-// or memory
+// of memory or let the client app hanging waiting for data
 exports.getLogEntries = function(req, res) {
     // Empty for now...
     var id = req.params.id;

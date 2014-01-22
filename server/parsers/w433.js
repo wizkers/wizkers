@@ -94,6 +94,71 @@ module.exports = {
                         break;
                 }
             }
+        } else if (data.length == 14) {
+            if (this.check_ok_tx19(data) ) {
+                valid = true;
+                res.reading_type = parseInt(data.substr(3,1),16);
+                res.sensor_address = parseInt(data.substr(4,2),16);
+                var sensor_model = parseInt(data.substr(2,1),16);
+
+                switch (res.reading_type) {
+                        case 0:
+                        case 4:
+                            // Temperature - TX19 Supposed to measure -29.9 to +69.9 according to the doc
+                            // Current formula is therefore possibly wrong...
+                            if (sensor_model == 6 ) { res.value = data.substr(8,3)/10-40; }
+                            if (sensor_model == 9 ) { res.value = data.substr(8,3)/10-30; }
+                            res.reading_type = 'temperature';
+                            break;
+                        case 1:
+                        case 5:
+                            //Humidity
+                            if (sensor_model == 6 ) { res.value = data.substr(8,3)/10; }
+                            if (sensor_model == 9 ) { res.value = data.substr(8,2); }
+                            res.reading_type = 'humidity';
+                        break;
+                        case 3:
+                        case 7:
+                            // Wind -> problem, we have two values here!
+                        /**
+                        
+                            $direction = (hex substr $i,10,1)*22.5;
+                            $type_txt = "wind-direction";
+                        
+                            $speed = (hex substr $i,8,2)/10;
+                            $type_txt = "wind-instant";
+                        **/
+                        
+                        break;
+                        case 0xb:
+                        case 0xf:
+                            // Wind - gust -> we have two values again
+                            /**
+                            $direction = (hex substr $i,10,1)*22.5;
+                            $type_txt = "wind-gust-dir";
+                            check_sensor_known($sensor_address,$type_txt);
+                            $updatesensor_query->execute($direction,$sensor_address,$type_txt);
+                            print $type_txt . ") - $direction";
+                            $speed = (hex substr $i,8,2)/10;
+                            $type_txt = "wind-gust";
+                            check_sensor_known($sensor_address,$type_txt);
+                            $updatesensor_query->execute($speed,$sensor_address,$type_txt);
+                            print " ( $type_txt ) - $speed";
+                            **/
+                        break;
+                        case 2:
+                        case 6:
+                            // Rain - Unit is still unknown, mm probably ?
+                            /**
+                            $mmrain = hex substr $i,8,3;
+                            $type_txt = "rain";
+                            check_sensor_known($sensor_address,$type_txt);
+                            $updatesensor_query->execute($mmrain,$sensor_address,$type_txt);
+                            print " ($type_txt) - $mmrain";
+                            **/
+                        break;
+                }                
+            }
         }
         
         if (!valid) return; // No need to waste time if our data was invalid!
@@ -162,24 +227,31 @@ module.exports = {
         s.forEach(add);
         // console.log(chk + " - " + sum%16);
         return (parseInt(chk,16) == sum%16) &&
-            (data.substr(6,2) == data.substr(9,2));
-        
-        return true;
+            (data.substr(6,2) == data.substr(9,2));        
     },
     
     check_ok_tx19: function(data) {
+        var sum = 0;
+        var s = data.split('');
+        var chk = s.pop();
+        var add = function(element) {
+            sum += parseInt(element,16);
+        }
+        s.forEach(add);
+        var v1 = data.substr(8,2);
+        var v2 = ~(data.substr(11,2))  & 0xff;
+        return (parseInt(chk,16) == sum%16) &&
+            (v1 == v2);
         /**
-           my $input = shift(@_);
-   my $sum = 0;
-   $chk = hex (chop $input);
-   for( split(//,$input) ) { $sum += hex($_);}
-   $sum=$sum%16;
-   $v1 = hex substr $input,8,2;
-   $v2 =  ~( hex substr $input,11,2) & 0xFF;
-   return ($sum==$chk) && ($v1==$v2);
-
-**/
-        return true;
+            my $input = shift(@_);
+            my $sum = 0;
+            $chk = hex (chop $input);
+            for( split(//,$input) ) { $sum += hex($_);}
+            $sum=$sum%16;
+            $v1 = hex substr $input,8,2;
+            $v2 =  ~( hex substr $input,11,2) & 0xFF;
+            return ($sum==$chk) && ($v1==$v2);
+        **/
     },
 
 };
