@@ -106,8 +106,8 @@ module.exports = {
                         case 4:
                             // Temperature - TX19 Supposed to measure -29.9 to +69.9 according to the doc
                             // Current formula is therefore possibly wrong...
-                            if (sensor_model == 6 ) { res.value = data.substr(8,3)/10-40; }
-                            if (sensor_model == 9 ) { res.value = data.substr(8,3)/10-30; }
+                            if (sensor_model == 6 ) { res.value = Math.round(data.substr(8,3)-400)/10; }
+                            if (sensor_model == 9 ) { res.value = Math.round(data.substr(8,3)-300)/10; }
                             res.reading_type = 'temperature';
                             break;
                         case 1:
@@ -242,16 +242,6 @@ module.exports = {
         var v2 = ~(parseInt(data.substr(11,2),16))  & 0xff;
         return (parseInt(chk,16) == sum%16) &&
             (v1 == v2);
-        /**
-            my $input = shift(@_);
-            my $sum = 0;
-            $chk = hex (chop $input);
-            for( split(//,$input) ) { $sum += hex($_);}
-            $sum=$sum%16;
-            $v1 = hex substr $input,8,2;
-            $v2 =  ~( hex substr $input,11,2) & 0xFF;
-            return ($sum==$chk) && ($v1==$v2);
-        **/
     },
 
 };
