@@ -238,8 +238,8 @@ module.exports = {
             sum += parseInt(element,16);
         }
         s.forEach(add);
-        var v1 = data.substr(8,2);
-        var v2 = ~(data.substr(11,2))  & 0xff;
+        var v1 = parseInt(data.substr(8,2),16);
+        var v2 = ~(parseInt(data.substr(11,2),16))  & 0xff;
         return (parseInt(chk,16) == sum%16) &&
             (v1 == v2);
         /**
