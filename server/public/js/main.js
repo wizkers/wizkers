@@ -17,6 +17,7 @@ var AppRouter = Backbone.Router.extend({
         "logmgt"                : "logmanagement",
         "devicelogs/:id"        : "devicelogmanagement",
         "displaylogs/:ins/:loglist"  : "displaylogs",
+        "editlogs/:ins/:loglist": "editlogs",
         "settings"              : "settings",
         "diagnostics/:id"       : "diagnostics",
         "about"                 : "about",
@@ -105,6 +106,19 @@ var AppRouter = Backbone.Router.extend({
             self.switchView(instrumentManager.getLogView({collection:myLogs}));
         }});
     },
+
+    // Edit all selected logs. The list of logs is passed as the
+    // view's collection
+    editlogs: function(id,loglist) {
+        var self=this;
+        // Loglist is a comma-separated list of log IDs
+        var logarray = loglist.split(",");
+        var allLogs = instrumentManager.getInstrument().logs;
+        allLogs.fetch({success:function(){
+            var myLogs = allLogs.getLogSubset(logarray);
+            self.switchView(instrumentManager.getLogEditView({collection:myLogs}));
+        }});
+    },
     
     // Launch log management interface for the device. All existing logs
     // are passed to the view, so that it can easily understand whether a log
@@ -191,7 +205,9 @@ var AppRouter = Backbone.Router.extend({
 
 
 utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogManagementView', 'InstrumentDetailsView',
-                    'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView', 'instruments/FCOledLiveView',
+                    'InstrumentListItemView', 'instruments/OnyxLiveView', 'instruments/Fluke289LiveView',
+                    'instruments/OnyxLogEditView',
+                    'instruments/FCOledLiveView',
                     'instruments/OnyxNumView', 'instruments/FCOledNumView', 'instruments/Fluke289NumView', 'instruments/Fluke289DiagView',
                     'instruments/OnyxLogView', 'instruments/Fluke289LogView', 'instruments/Fluke289LogManagementView', 'instruments/OnyxLogManagementView',
                     'instruments/OnyxDiagView', 'instruments/W433LiveView', 'instruments/W433NumView', 'instruments/W433SettingsView',

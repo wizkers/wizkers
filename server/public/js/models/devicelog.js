@@ -74,7 +74,7 @@ window.Log = Backbone.Model.extend({
         this.entries = new LogEntries();
         this.entries.url =  "/logs/" + this.id + "/entries";
         
-        // When we create a model, this.is is undefined: because of this, we listen to
+        // When we create a model, this.id is undefined: because of this, we listen to
         // the "sync" event, and update the entries' URL upon it (sync is fired when the model is
         // saved, therefore the ID is updated
         this.on("sync", this.updateEntriesURL, this);
@@ -165,11 +165,21 @@ window.Logs = Backbone.Collection.extend({
 
     // Get all points between date X1 and date X2 across all logs in the
     // collection (both don't have to exactly match a log record).
+    // TODO: IS THIS REALLY USED ???
     getDateInterval: function(x1, x2) {
         var extract = this.filter(function(logEntry) {
             return (logEntry.get('timestamp') > x1) && (logEntry.get('timestamp') < x2);
         });
         return new LogEntries(extract); // Return as a new collection, this way we can chain calls
+    },
+    
+    // Get a specific log entry inside one of the logs in this collection:
+    getEntry: function(entryId) {
+        for (var log in this.models) {
+            var entry = this.models[log].entries.get(entryId);
+            if (entry != null)
+                return entry;
+        }
     },
 
 

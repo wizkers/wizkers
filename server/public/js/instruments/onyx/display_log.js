@@ -64,6 +64,7 @@ window.OnyxLogView = Backbone.View.extend({
     events: {
         "click .resetZoom": "resetZoom",
         "click #cpmscale": "cpmScaleToggle",
+        "click .ctrl-edit": "editLog",
     },
             
         
@@ -84,6 +85,15 @@ window.OnyxLogView = Backbone.View.extend({
         this.render();
         this.addPlot();
         
+    },
+    
+    editLog: function() {
+        console.log('Edit Log');
+        var logIds = [];
+        _.each(this.deviceLogs.models, function(log) {
+            logIds.push(log.id);
+        });
+        app.navigate('editlogs/' + settings.get('currentInstrument') + '/' + logIds.join(','),true);
     },
 
     

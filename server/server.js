@@ -126,6 +126,7 @@ app.get('/logs/:id/entries', deviceLogs.getLogEntries);
 app.post('/logs/:id/entries', deviceLogs.addLogEntry);
 app.put('/instruments/:iid/logs/:id', deviceLogs.updateEntry);
 app.delete('/instruments/:idd/logs/:id', deviceLogs.deleteEntry);
+app.delete('/logs/:lid/entries/:id', deviceLogs.deleteLogEntry);
 
 
 /**

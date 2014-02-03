@@ -84,6 +84,8 @@ exports.getLogEntries = function(req, res) {
 }
 
 // Add a new log entry for a log:
+// TODO : create a library to store logs in a more sophisticated
+// manner - 1 hour granularity w/ 59 minute objects containing all measurements inside ? 
 exports.addLogEntry = function(req, res) {
     var logID = req.params.id;
     var entry = req.body;
@@ -145,7 +147,22 @@ exports.updateEntry = function(req, res) {
                                 );
 };
 
+// This deletes a LOG Entry
+exports.deleteLogEntry = function(req, res) {
+    var id = req.params.id;
+    console.log('Deleting log entry: ' + id);
+    DeviceLogEntry.findByIdAndRemove(id, {safe:true}, function(err,result) {
+            if (err) {
+                res.send({'error':'An error has occurred - ' + err});
+            } else {
+                console.log('' + result + ' document(s) deleted');
+                res.send(req.body);
+            }
+    });    
+}
 
+
+// This deletes a LOG Session (i.e. a collection of log entries)
 exports.deleteEntry = function(req, res) {
     var id = req.params.id;
     console.log('Deleting log session entry: ' + id);

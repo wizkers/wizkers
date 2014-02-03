@@ -2,7 +2,7 @@
 
     <div class="row">
       <div class="col-md-6">
-            <a href="#" role="button" <%= (selected.length) ? '':'disabled'%> title="Select one or more logs below and click here" class="btn btn-info displaylog">
+            <a role="button" <%= (selected.length) ? '':'disabled'%> title="Select one or more logs below and click here" class="btn btn-info displaylog">
                 Display Log</a>
             <% /* we can simply use deviceLogs[0] because all deviceLog entries have the same device ID */%>
             <a href="#devicelogs/<%=deviceLogs[0].instrumentid%>" role="button" class="btn btn-info devicelogs" 

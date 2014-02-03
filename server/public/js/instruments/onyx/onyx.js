@@ -60,6 +60,11 @@ var OnyxInstrument = function() {
     this.getLogView = function(arg) {
         return new OnyxLogView(arg);
     }
+    
+    // Render a log edit table for a log collection for the device
+    this.getLogEditView = function(arg) {
+        return new OnyxLogEditView(arg);
+    }
 
     
 };
