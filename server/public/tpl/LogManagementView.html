@@ -42,7 +42,7 @@
                     <td><%= log.name %></td>
                     <td><%= log.datapoints %></td>
                     <td><%= log.logtype %></td>
-                        <td><i class="icon-remove delete_log" data-id="<%=log._id%>" title="Delete"></i></td>
+                        <td><i class="glyphicon glyphicon-remove delete_log" data-id="<%=log._id%>" title="Delete"></i></td>
                 </tr>
                 <% }) %>
             </tbody>
@@ -78,6 +78,7 @@
           <p>
               The table on the left lists all logs stored in our database. Use "Manage Device Logs" if supported by your device, to download new device logs.
           </p>
+          <p>Note that "Manage Device Logs" will be disabled if your device is not connected.</p>
       </div><!--/.well -->
    </div><!--/row-->
 

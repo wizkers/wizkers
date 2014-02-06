@@ -72,10 +72,9 @@ window.Fluke289LogManagementView = Backbone.View.extend({
             var fields = data.recordingID.split(',');
             if (fields.length == 1) {
                 // This is a trendlog recording sumary: add a summary card for it
-                var card = _.template('<li>' +
-                                      '<div class="thumbnail glowthumbnail thumbnail-larger select" style="text-align: center;"><h4><%=recordingName%></h4>' +
-                                      '<small>Start&nbsp;time:</small><%= new Date(startTime) %>' +
-                                      'Duration:<%= utils.hms(Math.floor((endTime-startTime)/1000+0.5)) %><br>' +
+                var card = _.template('<div class="col-md-3"><div class="thumbnail glowthumbnail select" style="text-align: center;"><h4><%=recordingName%></h4>' +
+                                      '<small>Start&nbsp;time:</small><%= new Date(startTime) %><br>' +
+                                      '<small>Duration:</small><%= utils.hms(Math.floor((endTime-startTime)/1000+0.5)) %><br>' +
                                       'Records: <%= numberOfRecords %>' +
                                       '<div style="text-align:left;">Type: <%= reading.primaryFunction %> / <%= reading.secondaryFunction %><br>' +
                                       'Event threshold: <%= (evtThreshold*100).toFixed(1) %>%<br>' +
@@ -85,7 +84,7 @@ window.Fluke289LogManagementView = Backbone.View.extend({
                                       ' data-records="<%=numberOfRecords%>" href="#">Download</a>' +
                                       '</div><div>' +
                                       '<%= alreadyThere %>' +
-                                      '</div></li>');
+                                      '</div></div>');
                 var startStamp = new Date(data.startTime).toISOString();
                 var knownLog = this.deviceLogs.where({startstamp: startStamp});
                 // A given device can only record one log at a time, so if we already have a log for this device
@@ -123,7 +122,7 @@ window.Fluke289LogManagementView = Backbone.View.extend({
         
         if (data.minmaxRecordingID) {  // recordingID means Trendlog recording
             // This is a MinMax sumary: add a summary card for it
-            var card = _.template('<li><div class="thumbnail glowthumbnail thumbnail-larger select" style="text-align: center;"><h4><%=recordingName%></div></li>');
+            var card = _.template('<div class="col-md-3"><div class="thumbnail glowthumbnail select" style="text-align: center;"><h4><%=recordingName%></div></div>');
             $('#minmaxs',this.el).append(card(data));            
         }
         

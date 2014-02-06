@@ -41,7 +41,7 @@ window.OnyxLogManagementView = Backbone.View.extend({
             var used = data.logstatus.used;
             var total = data.logstatus.total;
             var interval = data.logstatus.interval;
-            $('#memlevel',this.el).html((used/total*100).toFixed(0) + "%");
+            $('#memdays',this.el).html((used/total*100).toFixed(0) + "%");
             $('#memused',this.el).html(used);
             $('#memtotal',this.el).html(total);
             $('#meminterval',this.el).html(interval + ' seconds');
