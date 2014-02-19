@@ -5,9 +5,12 @@
 window.ElecraftLiveView = Backbone.View.extend({
 
     initialize:function () {
+        this.deviceinitdone = false;
+
         //this.render();
         //_.bindAll(this,"handleKX3Button");
         
+        linkManager.on('status', this.updateStatus, this);
         linkManager.on('input', this.showInput, this);
 
     },
@@ -21,15 +24,17 @@ window.ElecraftLiveView = Backbone.View.extend({
                     self.handleKX3Button(e);
                 });
                 s.add(f);
-            s.attr({
-                width: 1000,
-                height: 400
-            });
+                // Set display constraints for the radio face:
+                s.attr({
+                    width: "100%",
+                    height: 500
+                });
         });
         return this;
     },
     
     onClose: function() {
+        linkManager.on('status', this.updatestatus, this);
         linkManager.off('input', this.showInput, this);
         console.log("Elecraft live view closing...");        
     },
@@ -49,6 +54,14 @@ window.ElecraftLiveView = Backbone.View.extend({
         if ((event.target.id == "manualcmd" && event.keyCode==13) || (event.target.id != "manualcmd"))
             linkManager.manualCommand($('#manualcmd',this.el).val());
     },
+    
+    updateStatus: function() {
+        if (linkManager.connected && !this.deviceinitdone) {
+            linkManager.startLiveStream();
+        } else {
+            this.deviceinitdone = false;
+        }
+    },
 
 
     showInput: function(data) {
@@ -62,6 +75,15 @@ window.ElecraftLiveView = Backbone.View.extend({
         i.val(scroll.join('\n'));
         // Autoscroll:
         i.scrollTop(i[0].scrollHeight - i.height());
+        
+        // Now update our display depending on the data we received:
+        var cmd = data.substr(0,2);
+        if (cmd == "DB") {
+            // VFO B Text
+            $("#kx3 #VFOB").html(data.substr(2));
+        } else if (cmd == "DS") {
+            
+        }
 
     },
 

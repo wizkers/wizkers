@@ -212,6 +212,7 @@ openPort = function(data, socket) {
    myPort.on("open", function () {
        console.log('Port open');
        myPort.flush(function(err,result){ console.log(err + " - " + result); });
+       myPort.resume();
        portOpen = true;
        driver.setPortRef(myPort); // We need this for drivers that manage a command queue...
        driver.setSocketRef(socket);

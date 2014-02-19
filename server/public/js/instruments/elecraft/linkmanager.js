@@ -11,6 +11,9 @@ var ElecraftLinkManager = function(linkManager) {
 
     var self = this;
     var lm = linkManager;
+    var streaming = false;
+    var livePoller = null; // Reference to the timer for live streaming
+
 
 
     //////
@@ -21,13 +24,22 @@ var ElecraftLinkManager = function(linkManager) {
         lm.socket.emit('driver','elecraft');
     }
 
-    // This instrument always streams its data!
+    // LiveStream polls the radio every 2 seconds for VFOA and VFOB data
     this.startLiveStream = function() {
+        console.log("Starting live data stream for Elecraft");
+        // Ignore settings and use a good fixed interval
+        this.livePoller = setInterval(this.queryRadio, 2000);
+        this.streaming = true;
         return true; 
     }
         
     this.stopLiveStream = function() {
-        return false;
+        if (typeof this.livePoller != 'undefined') {
+            console.log("Elecraft  - Stopping live data stream");
+            clearInterval(this.livePoller);
+            this.streaming = false;
+        }
+        return true;
     }
     
     
@@ -40,6 +52,10 @@ var ElecraftLinkManager = function(linkManager) {
     
     this.screen = function(n) {
         lm.socket.emit('controllerCommand', 'S:' + n);
+    }
+    
+    this.queryRadio = function() {
+        lm.socket.emit('controllerCommand', 'DB;');
     }
 
     
