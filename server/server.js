@@ -56,6 +56,10 @@ deviceTypes.push(FCOled);
 var W433 = require('./parsers/w433.js');
 deviceTypes.push(W433);
 
+var Elecraft = require('./parsers/elecraft.js');
+deviceTypes.push(Elecraft);
+
+
 /**
  * Debug: get a list of available serial
  * ports on the server - we'll use this later
@@ -193,7 +197,9 @@ openPort = function(data, socket) {
 	}
     
     
-    myPort = new SerialPort(data, driver.portSettings, true, 
+    myPort = new SerialPort(data,
+                            driver.portSettings,
+                            true, 
                             function(err, result) {
                                 if (err) {
                                     console.log("Open attempt error: " + err);
@@ -336,6 +342,8 @@ io.sockets.on('connection', function (socket) {
             driver = Fluke289;
         } else if ( data == "w433") {
             driver = W433;
+        } else if ( data == "elecraft") {
+            driver = Elecraft;
         }
         
     });

@@ -65,6 +65,7 @@ exports.stopRecording = function(req,res) {
     
 
 // Record is used for live recording only, so far.
+// TODO: smarter way of recording is needed...
 exports.record = function(data) {
     if (!recording || recordingID == null)
         return;

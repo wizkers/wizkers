@@ -1,4 +1,8 @@
-window.LiveView = Backbone.View.extend({
+/**
+ *  
+ */
+
+window.ElecraftNumView = Backbone.View.extend({
 
     initialize:function () {
         this.render();
@@ -10,7 +14,7 @@ window.LiveView = Backbone.View.extend({
     },
     
     onClose: function() {
-        console.log("Instrument live view closing...");        
+        console.log("Elecraft numeric view closing...");        
     },
 
 

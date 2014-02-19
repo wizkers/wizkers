@@ -79,9 +79,10 @@ window.Fluke289LogManagementView = Backbone.View.extend({
                                       '<div style="text-align:left;">Type: <%= reading.primaryFunction %> / <%= reading.secondaryFunction %><br>' +
                                       'Event threshold: <%= (evtThreshold*100).toFixed(1) %>%<br>' +
                                       'Interval sample: <%= interval %>&nbsp;s'+
-                                      '</div><div><a class="btn btn-mini download trendlog" data-type="trendlog" data-name="<%= recordingName %>" data-id="<%=recordingID%>" ' +
+                                      '</div><div><button type="button" class="btn btn-mini download trendlog" data-type="trendlog" ' +
+                                      'data-name="<%= recordingName %>" data-id="<%=recordingID%>" ' +
                                       ' data-start="<%=startTime%>" data-end="<%=endTime%>" data-address="<%=recordingAddress%>" ' +
-                                      ' data-records="<%=numberOfRecords%>" href="#">Download</a>' +
+                                      ' data-records="<%=numberOfRecords%>">Download</button>' +
                                       '</div><div>' +
                                       '<%= alreadyThere %>' +
                                       '</div></div>');

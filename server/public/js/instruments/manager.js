@@ -17,6 +17,7 @@ var InstrumentManager = function() {
         "fluke28x": {  name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView},
         "fcoledv1": {  name: "Fried Circuits OLED backpack", type: FCOledInstrument, settings: FCOledSettingsView },
         "w433": {      name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView },
+        "elecraft": { name: "Elecraft radios", type: ElecraftInstrument, settings:ElecraftSettingsView },
     };
         
     this.setInstrument = function(instrument) {
