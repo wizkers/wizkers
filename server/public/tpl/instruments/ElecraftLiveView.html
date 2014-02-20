@@ -1,16 +1,54 @@
 <!-- this is added within a row-->
 <div class="col-md-12">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-8">
             <div class="thumbnail">
                 <svg id="kx3"  viewBox="0 0 2325 991" preserveAspectRatio="xMaxYmax"></svg>
             </div>
-        </div>        
+        </div>
+        <div class="col-md-4">
+            <div class="thumbnail">
+                <h4>Direct Input</h4>
+                  <div class="input-group">
+                    <span class="input-group-addon">VFO A</span>
+                        <input  id="VFOA-Direct" class="form-control" placeholder="14.070">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" id="refresh-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                        </span>
+                   </div><br>
+                  <div class="input-group">
+                    <span class="input-group-addon">VFO B</span>
+                        <input  id="VFOB-Direct" class="form-control" placeholder="14.070">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" id="refresh-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                        </span>
+                   </div><br>
+                  <div class="input-group">
+                    <span class="input-group-addon">Power</span>
+                        <input  type="number" min="0" id="Power-Direct" class="form-control" placeholder="5">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" id="refresh-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                        </span>
+                   </div><br>
+                </div>
+        </div>
     </div>
     <div class="row">
         <div class="col-md-12">
             <div class="thumbnail">
-                 <div class="input-append"><span class="add-on">Manual Command</span><input class="col-md-12" id="manualcmd" value="" type="text" maxlength="32"><button type="button" class="btn" id="cmdsend"><i class="icon-check"></i></button></div>
+                <h4>Memory management</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="thumbnail">
+                 <div class="input-group">
+                     <span class="input-group-addon">Manual Command</span>
+                     <input id="manualcmd" class="form-control" value="" type="text" maxlength="32">
+                     <span class="input-group-btn"><button type="button" class="btn" id="cmdsend"><span class="glyphicon glyphicon-check"></span></button>
+                     </span></div>
             </div>
         </div>
     </div>

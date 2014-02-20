@@ -331,6 +331,17 @@ h5 {
           transform: rotate(0deg);
      }
 }
+
+/*===========
+ * KX3 Font
+ *===================*/
+@font-face {
+  font-family: "Let's Go Digital";
+  src: url('../fonts/lets-go-digital-regular.ttf') format('truetype');
+}
+
+
+
 /*=======================================================
  * Circles
  *======================================================*/

@@ -23,11 +23,13 @@ window.ElecraftLiveView = Backbone.View.extend({
                 f.select("#layer1").click(function (e) {
                     self.handleKX3Button(e);
                 });
+            // Initialize icon display:
+            f.select(".icon").attr({ visibility: 'hidden' });
                 s.add(f);
                 // Set display constraints for the radio face:
                 s.attr({
                     width: "100%",
-                    height: 500
+                    height: 350
                 });
         });
         return this;
@@ -46,6 +48,9 @@ window.ElecraftLiveView = Backbone.View.extend({
 
     handleKX3Button: function(e) {
         console.log(e.target.id);
+        $("#kx3 #filter-II").css("visibility", "visible");
+        $("#kx3 #VFOB").html("W6ELA");
+        $("#kx3 #VFOA").html("14.780.872");
         linkManager.manualCommand("IF;");
     },
     
