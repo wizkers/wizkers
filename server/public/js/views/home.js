@@ -134,14 +134,10 @@ window.HomeView = Backbone.View.extend({
             if (this.instrumentUniqueID == null) {
                 linkManager.getUniqueID();
             }
-            
             // Depending on device capabilities, enable/disable "Diag view" button
-        if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || ! linkManager.connected) {
-                $('.ctrl-diag',self.el).attr('disabled', true);
-        }
-
-            
-            
+            if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || ! linkManager.connected) {
+                    $('.ctrl-diag',self.el).attr('disabled', true);
+            }            
         } else {
             $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Connect to ' + this.instrument.get('name'))
                 .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');

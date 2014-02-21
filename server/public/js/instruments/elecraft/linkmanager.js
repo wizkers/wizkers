@@ -28,18 +28,20 @@ var ElecraftLinkManager = function(linkManager) {
     // LiveStream polls the radio every 2 seconds for VFOA and VFOB data
     this.startLiveStream = function() {
         console.log("Starting live data stream for Elecraft");
-        // Ignore settings and use a good fixed interval, i.e. 2 seconds
+        // Ignore settings and use a good fixed interval, i.e. 1 second
 
         // The radio can do live streaming to an extent, so we definitely gotta
         // take advantage:
         this.cc('AI2;FA;FB;');
 
-        this.livePoller = setInterval(this.queryRadio.bind(this), 2000);
+        this.livePoller = setInterval(this.queryRadio.bind(this), 1000);
         this.streaming = true;
         return true; 
     }
         
     this.stopLiveStream = function() {
+        if (!this.streaming)
+            return;
         if (typeof this.livePoller != 'undefined') {
             console.log("Elecraft  - Stopping live data stream");
             // Stop live streaming from the radio:
@@ -101,7 +103,7 @@ var ElecraftLinkManager = function(linkManager) {
         this.cc('BW;'); // Get filter bandwidth
         
         // And if we have an amp, then we can get a lot more data:
-        this.cc('^PI;^PF;^PV;');
+        this.cc('^PI;^PF;^PV;^TM;');
     }
 
     
