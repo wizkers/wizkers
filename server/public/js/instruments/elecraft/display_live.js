@@ -44,6 +44,27 @@ window.ElecraftLiveView = Backbone.View.extend({
     events: {
        "click #cmdsend": "sendcmd",
         "keypress input#manualcmd": "sendcmd",
+        "click #power-direct-btn": "setpower",
+        "keypress input#vfoa-direct": "setvfoa",
+        "keypress input#vfob-direct": "setvfob",
+        "click #vfoa-direct-btn": "setvfoa",
+        "click #vfob-direct-btn": "setvfob",
+    },
+    
+    setpower: function() {
+        linkManager.driver.setPower($("#power-direct").val());
+    },
+    
+    setvfoa: function() {
+        if ((event.target.id == "vfoa-direct" && event.keyCode==13) || (event.target.id != "vfoa-direct")) {
+            linkManager.driver.setVFO($("#vfoa-direct",this.el).val(),"a");
+        }
+    },
+
+    setvfob: function() {
+        if ((event.target.id == "vfob-direct" && event.keyCode==13) || (event.target.id != "vfob-direct")) {
+            linkManager.driver.setVFO($("#vfob-direct",this.el).val(),"b");
+        }
     },
 
     handleKX3Button: function(e) {
@@ -90,7 +111,7 @@ window.ElecraftLiveView = Backbone.View.extend({
         var val = data.substr(2);
         if (cmd == "DB") {
             // VFO B Text
-            $("#kx3 #VFOB").html(val + " ");
+            $("#kx3 #VFOB").html(val + "&nbsp;&nbsp;");
         } else if (cmd == "DS") {
             // VFO A Text, a bit more tricky:
             if (val.length < 8) {
@@ -109,11 +130,11 @@ window.ElecraftLiveView = Backbone.View.extend({
             }
             $("#kx3 #VFOA").html(txt);
         } else if (cmd == "PC") {
-            $("#Power-Direct").val(parseInt(val));
+            $("#power-direct").val(parseInt(val));
         } else if (cmd == "FA") {
-            $("#VFOA-Direct").val(parseInt(val)/1e6);
+            $("#vfoa-direct").val(parseInt(val)/1e6);
         } else if (cmd == "FB") {
-            $("#VFOB-Direct").val(parseInt(val)/1e6);
+            $("#vfob-direct").val(parseInt(val)/1e6);
         }    
 
     },

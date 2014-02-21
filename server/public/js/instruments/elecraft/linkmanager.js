@@ -69,7 +69,22 @@ var ElecraftLinkManager = function(linkManager) {
     this.getRequestedPower = function() {
         this.cc('PC;');
     }
-        
+    
+    this.setVFO = function(f, vfo) {
+        var freq = ("00000000000" + (parseInt(f*1e6).toString())).slice(-11); // Nifty, eh ?
+        if (freq.indexOf("N") > -1) { // detect "NaN" in the string
+            console.log("Invalid VFO spec");
+            this.cc((vfo == 'A' || vfo == 'a') ? 'FA;' : 'FB;');
+        } else {
+            console.log("VFO" + vfo + ": " + freq);
+            this.cc(((vfo == 'A' || vfo == 'a') ? 'FA' : 'FB') + freq + ';');
+        }
+    }    
+
+    this.setPower = function(p) {
+    }
+
+
     this.queryRadio = function() {
         
         // This is queried every 2 seconds - we stage our queries in order
@@ -86,7 +101,7 @@ var ElecraftLinkManager = function(linkManager) {
         this.cc('BW;'); // Get filter bandwidth
         
         // And if we have an amp, then we can get a lot more data:
-        
+        this.cc('^PI;^PF;^PV;');
     }
 
     
