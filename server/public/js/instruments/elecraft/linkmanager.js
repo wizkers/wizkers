@@ -13,7 +13,8 @@ var ElecraftLinkManager = function(linkManager) {
     var lm = linkManager;
     var streaming = false;
     var livePoller = null; // Reference to the timer for live streaming
-
+    
+    var kxpa100 = false; // Keep track of the presence of an amplifier
 
 
     //////
@@ -27,8 +28,13 @@ var ElecraftLinkManager = function(linkManager) {
     // LiveStream polls the radio every 2 seconds for VFOA and VFOB data
     this.startLiveStream = function() {
         console.log("Starting live data stream for Elecraft");
-        // Ignore settings and use a good fixed interval
-        this.livePoller = setInterval(this.queryRadio, 2000);
+        // Ignore settings and use a good fixed interval, i.e. 2 seconds
+
+        // The radio can do live streaming to an extent, so we definitely gotta
+        // take advantage:
+        this.cc('AI2;FA;FB;');
+
+        this.livePoller = setInterval(this.queryRadio.bind(this), 2000);
         this.streaming = true;
         return true; 
     }
@@ -36,12 +42,14 @@ var ElecraftLinkManager = function(linkManager) {
     this.stopLiveStream = function() {
         if (typeof this.livePoller != 'undefined') {
             console.log("Elecraft  - Stopping live data stream");
+            // Stop live streaming from the radio:
+            this.cc('AI0;');
+            
             clearInterval(this.livePoller);
             this.streaming = false;
         }
         return true;
     }
-    
     
     //////
     // End of standard API
@@ -50,12 +58,35 @@ var ElecraftLinkManager = function(linkManager) {
     // All commands below are fully free and depend on
     // the instrument's capabilities
     
+    this.cc = function(d) {
+        lm.socket.emit('controllerCommand',d);
+    }
+    
     this.screen = function(n) {
         lm.socket.emit('controllerCommand', 'S:' + n);
     }
     
+    this.getRequestedPower = function() {
+        this.cc('PC;');
+    }
+        
     this.queryRadio = function() {
-        lm.socket.emit('controllerCommand', 'DB;');
+        
+        // This is queried every 2 seconds - we stage our queries in order
+        // to avoid overloading the radio, not sure that is totally necessary, but
+        // this won't hurt
+        
+        // Query displays
+        this.cc('DB;'); // Query VFO B Display
+        this.cc('DS;'); // Query VFO A Display
+        this.cc('IC;'); // Query display icons
+        
+        // Then ask the radio for current figures:
+        this.cc('PO;'); // Query actual power output
+        this.cc('BW;'); // Get filter bandwidth
+        
+        // And if we have an amp, then we can get a lot more data:
+        
     }
 
     

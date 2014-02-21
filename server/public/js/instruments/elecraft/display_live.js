@@ -1,5 +1,5 @@
 /**
- *  
+ *  Elecraft Live Display view
  */
 
 window.ElecraftLiveView = Backbone.View.extend({
@@ -63,6 +63,10 @@ window.ElecraftLiveView = Backbone.View.extend({
     updateStatus: function() {
         if (linkManager.connected && !this.deviceinitdone) {
             linkManager.startLiveStream();
+            
+            // Ask the radio for a few additional things:
+            // Requested power:
+            linkManager.driver.getRequestedPower();
         } else {
             this.deviceinitdone = false;
         }
@@ -83,12 +87,34 @@ window.ElecraftLiveView = Backbone.View.extend({
         
         // Now update our display depending on the data we received:
         var cmd = data.substr(0,2);
+        var val = data.substr(2);
         if (cmd == "DB") {
             // VFO B Text
-            $("#kx3 #VFOB").html(data.substr(2));
+            $("#kx3 #VFOB").html(val + " ");
         } else if (cmd == "DS") {
-            
-        }
+            // VFO A Text, a bit more tricky:
+            if (val.length < 8) {
+                console.log("Error: VFO A buffer too short!");
+                return;
+            }
+            var txt = "";
+            for (var i=0; i < 8; i++) {
+                if (val.charCodeAt(i) & 0x80) // Dot on the left side of the character
+                    txt += ".";
+                var val2 = val.charCodeAt(i) & 0x7F;
+                // Do replacements:
+                if (val2 == 0x40)
+                        val2 = 0x20;
+                txt += String.fromCharCode(val2);
+            }
+            $("#kx3 #VFOA").html(txt);
+        } else if (cmd == "PC") {
+            $("#Power-Direct").val(parseInt(val));
+        } else if (cmd == "FA") {
+            $("#VFOA-Direct").val(parseInt(val)/1e6);
+        } else if (cmd == "FB") {
+            $("#VFOB-Direct").val(parseInt(val)/1e6);
+        }    
 
     },
 

@@ -217,12 +217,15 @@ openPort = function(data, socket) {
        driver.setPortRef(myPort); // We need this for drivers that manage a command queue...
        driver.setSocketRef(socket);
        driver.setRecorderRef(recorder);
+       if (driver.onOpen) {
+           driver.onOpen(true);
+       }
        socket.emit('status', {portopen: portOpen});
    });
 
     // listen for new serial data:
    myPort.on('data', function (data) {
-       console.log('.');
+       if (Debug) console.log('.');
        // Pass this data to on our driver
        if (Debug) { try {
             console.log('Raw input:\n' + Hexdump.dump(data));
@@ -298,7 +301,7 @@ io.sockets.on('connection', function (socket) {
         
     socket.on('controllerCommand', function(data) {
         // TODO: do a bit of sanity checking here
-        console.log('Controller command: ' + data);
+        if (Debug) console.log('Controller command: ' + data);
         if (portOpen)
             myPort.write(driver.output(data));
     });
