@@ -53,8 +53,12 @@ module.exports = {
     setInstrumentRef: function(i) {
     },
         
-    // How the device is connected on the serial port            
-    portSettings: {
+    // How the device is connected on the serial port.
+    // This HAS to be a function that returns a new port settings objet, and not
+    // a static object, otherwise multiple port open/close will fail because the portSettings
+    // object is changed by SerialPort and its reference become obsolete when closing/reopening...
+    portSettings:  function() {
+        return  {
             baudRate: 38400,
             dataBits: 8,
             parity: 'none',
@@ -65,6 +69,7 @@ module.exports = {
             // otherwise the parser will assume Unicode and mess up the
             // values.
             parser: serialport.parsers.readline(';','binary'),
+        }
     },
     
     // Called when the HTML app needs a unique identifier.
@@ -119,19 +124,27 @@ module.exports = {
     onOpen: function(success) {
         var self = this;
         console.log("Elecraft Driver: got a port open signal");
-        this.server = net.createServer(function(c) { //'connection' listener
-            console.log('server connected');
-            c.on('end', function() {
-                console.log('server disconnected');
+        if (this.server == null) {
+            this.server = net.createServer(function(c) { //'connection' listener
+                console.log('server connected');
+                c.on('end', function() {
+                    console.log('Server disconnected');
+                });
+                var rl = readline.createInterface(c,c);
+                rl.on('line', function(data) {
+                    self.rigctl_command(data,c);
+                });
             });
-            var rl = readline.createInterface(c,c);
-            rl.on('line', function(data) {
-                self.rigctl_command(data,c);
-            });
-        });
+        }
         this.server.listen(4532, function() { //'listening' listener
-            console.log('server bound');
+            console.log('server started');
         });
+    },
+    
+    onClose: function(success) {
+        console.log("Closing TCP rigctld emulation server");
+        if (this.server)
+            this.server.close();
     },
     
     // RIGCTLD Emulation - super light, but does the trick for fldigi...

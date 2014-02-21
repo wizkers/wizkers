@@ -193,19 +193,20 @@ var currentInstrument = null;
 openPort = function(data, socket) {
      //  This opens the serial port:
     if (myPort && portOpen) {
-           try { myPort.close(); } catch (e) { console.log("Port close attempt error: " + e); }
+           try { 
+               myPort.close();
+           } catch (e) { console.log("Port close attempt error: " + e); }
 	}
     
-    
     myPort = new SerialPort(data,
-                            driver.portSettings,
+                            driver.portSettings(),
                             true, 
                             function(err, result) {
                                 if (err) {
                                     console.log("Open attempt error: " + err);
                                     socket.emit('status', {portopen: portOpen});
                                 }
-                                });    
+                            });    
     console.log('Result of port open attempt:'); console.log(myPort);
         
     // Callback once the port is actually open: 
@@ -236,6 +237,9 @@ openPort = function(data, socket) {
     myPort.on('error', function(err) {
         console.log("Serial port error: "  + err);
         portOpen = false;
+       if (driver.onClose) {
+           driver.onClose(true);
+       }
         socket.emit('status', {portopen: portOpen});
     });
         
@@ -243,6 +247,12 @@ openPort = function(data, socket) {
         console.log("Port closing");
         console.log(myPort);
         portOpen = false;
+       driver.setPortRef(null);
+       driver.setSocketRef(null);
+       driver.setRecorderRef(null);
+       if (driver.onClose) {
+           driver.onClose(true);
+       }
         socket.emit('status', {portopen: portOpen});
     });
 }
