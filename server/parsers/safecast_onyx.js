@@ -33,7 +33,8 @@ module.exports = {
 
         
     // How the device is connected on the serial port            
-    portSettings: {
+    portSettings: function() {
+        return  {
             baudRate: 115200,
             dataBits: 8,
             parity: 'none',
@@ -43,6 +44,7 @@ module.exports = {
             // Note: the Onyx outputs json with \n at the end, so
             // the default readline parser works fine (it separates on \r)
             parser: serialport.parsers.readline(),
+        }
     },
     
     // Called when the HTML app needs a unique identifier.

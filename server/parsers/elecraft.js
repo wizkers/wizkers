@@ -34,7 +34,9 @@ module.exports = {
     vfoa_frequency: 0,
     vfob_frequency: 0,
     vfoa_bandwidth: 0,
-    tx_state: 0,
+    
+    // Do we have a TCP client connected ?
+    serverconnected: false,
         
     // Set a reference to the socket.io socket and port
     socket: null,
@@ -118,17 +120,27 @@ module.exports = {
     output: function(data) {
         return data;
     },
+        
+    // Status returns an object that is concatenated with the
+    // global server status
+    status: function() {
+        return { tcpserverconnect: this.serverconnected };
+    },
     
-    // We serve rigctld commands through a TCP socket too:
-    
+    // We serve rigctld commands through a TCP socket too:    
     onOpen: function(success) {
         var self = this;
         console.log("Elecraft Driver: got a port open signal");
         if (this.server == null) {
             this.server = net.createServer(function(c) { //'connection' listener
                 console.log('server connected');
+                self.socket.emit('status',{ tcpserverconnect: true });
+                self.serverconnected = true;
+                
                 c.on('end', function() {
                     console.log('Server disconnected');
+                    self.socket.emit('status',{ tcpserverconnect: false });
+                    self.serverconnected = false;
                 });
                 var rl = readline.createInterface(c,c);
                 rl.on('line', function(data) {
@@ -137,7 +149,7 @@ module.exports = {
             });
         }
         this.server.listen(4532, function() { //'listening' listener
-            console.log('server started');
+            console.log('Rigctld emulation server started');
         });
     },
     

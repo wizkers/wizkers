@@ -1,7 +1,7 @@
 window.InstrumentListView = Backbone.View.extend({
 
-    initialize: function () {
-        
+    initialize: function (options) {
+        this.options = options || {};
     },
 
     render: function () {

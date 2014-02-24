@@ -160,6 +160,35 @@ app.use(express.static(__dirname + '/public'));
 //app.get('/protocols', '');
 
 
+/////////
+// A small utility here (to be moved elswhere...)
+/////////
+//http://stackoverflow.com/questions/2454295/javascript-concatenate-properties-from-multiple-objects-associative-array
+ 
+function Collect(ob1, ob1) {
+    var ret = {},
+    len = arguments.length,
+    arg,
+    i = 0,
+    p;
+ 
+    for (i = 0; i < len; i++) {
+      arg = arguments[i];
+      if (typeof arg !== "object") {
+        continue;
+      }
+      for (p in arg) {
+        if (arg.hasOwnProperty(p)) {
+          ret[p] = arg[p];
+        }
+      }
+    }
+    return ret;
+}
+ 
+
+
+
 //
 // For now, we are supporting only one communication
 // port on the server, but in the future we need to
@@ -305,8 +334,11 @@ io.sockets.on('connection', function (socket) {
     });
         
     socket.on('portstatus', function() {
-        socket.emit('status', {portopen: portOpen,
-                               recording: recorder.isRecording()});
+        var s = {portopen: portOpen, recording: recorder.isRecording()};
+        var ds = {};
+        if (driver.status)
+            ds= driver.status();
+        socket.emit('status', Collect(s,ds));
     });
         
     socket.on('controllerCommand', function(data) {

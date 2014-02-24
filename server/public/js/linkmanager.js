@@ -43,12 +43,14 @@ var LinkManager = function() {
     }
     
     this.processStatus = function(data) {
-        if (data.portopen) {
-            self.connected = true;
-        } else {
-            self.connected = false;
-            if (self.driver)
-                self.driver.stopLiveStream();
+        if (typeof(data.portopen) != 'undefined') {
+            if (data.portopen) {
+                self.connected = true;
+            } else {
+                self.connected = false;
+                if (self.driver)
+                    self.driver.stopLiveStream();
+            }
         }
         // Tell anyone who would be listening that status is updated
         self.trigger('status', data);
@@ -119,7 +121,11 @@ var LinkManager = function() {
     
     
     // Initialization code:
+    
+    // Whenever data arrives on the backend serial port (the instrument, in other words)
     this.socket.on('serialEvent', this.processInput);
+    
+    // Updates from the backend on port (serial, server, other) status
     this.socket.on('status', this.processStatus);
     this.socket.on('connection', this.initConnection);
     this.socket.on('ports', this.processPorts);

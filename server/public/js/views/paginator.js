@@ -3,8 +3,8 @@ window.Paginator = Backbone.View.extend({
     className: "container center",
 
     initialize:function () {
+        this.options = options || {};
         this.model.bind("reset", this.render, this);
-        
     },
 
     render:function () {

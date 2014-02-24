@@ -84,6 +84,13 @@ var ElecraftLinkManager = function(linkManager) {
     }    
 
     this.setPower = function(p) {
+        var pwr = ("000" + (parseInt(p).toString())).slice(-3); // Nifty, eh ?
+        if (pwr.indexOf("N") > -1) { // detect "NaN" in the pwr
+            this.cc('PC;');
+        } else {
+            console.log('PC' + pwr + ';');
+            this.cc('PC'+ pwr + ';');
+        }
     }
 
 

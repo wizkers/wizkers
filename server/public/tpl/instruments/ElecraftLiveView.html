@@ -5,62 +5,81 @@
             <div class="thumbnail">
                 <svg id="kx3"  viewBox="0 0 2325 991" preserveAspectRatio="xMaxYmax"></svg>
             </div>
-        </div>
+        </div> <!-- radio -->
         <div class="col-md-4">
-            <div class="thumbnail">
-                <h4>Direct Input</h4>
-                  <div class="input-group">
-                    <span class="input-group-addon">VFO A</span>
-                        <input  id="vfoa-direct" class="form-control" placeholder="14.070">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" id="vfoa-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
-                        </span>
-                   </div><br>
-                  <div class="input-group">
-                    <span class="input-group-addon">VFO B</span>
-                        <input  id="vfob-direct" class="form-control" placeholder="14.070">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" id="vfob-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
-                        </span>
-                   </div><br>
-                  <div class="input-group">
-                    <span class="input-group-addon">Power</span>
-                        <input  type="number" min="0" id="power-direct" class="form-control" placeholder="5">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" id="power-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
-                        </span>
-                   </div><br>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h4>Direct Input</h4>
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">VFO A</span>
+                            <input  id="vfoa-direct" class="form-control" placeholder="14.070">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" id="vfoa-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                            </span>
+                       </div>
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">VFO B</span>
+                            <input  id="vfob-direct" class="form-control" placeholder="14.070">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" id="vfob-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                            </span>
+                       </div>
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">Power</span>
+                            <input  type="number" min="0" id="power-direct" class="form-control">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" id="power-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                            </span>
+                       </div>
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">AF</span>
+                        <div class="form-control">
+                          <input type="text" id="af-control" data-slider-value="0" data-slider-min="0" data-slider-max="60" data-slider-step="1">
+                        </div>
+                    </div>
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">RF</span>
+                        <div class="form-control">
+                          <input type="text" id="rf-control" data-slider-value="0" data-slider-min="-25" data-slider-max="0" data-slider-step="1">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">BPF</span>
+                        <div class="form-control">
+                          <input type="text" id="bpf-control" data-slider-value="0" data-slider-min="0" data-slider-max="4" data-slider-step=".1">
+                        </div>
+                    </div>
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">CT</span>
+                        <div class="form-control">
+                          <input type="text" id="ct-control" data-slider-value="0" data-slider-min="-150" data-slider-max="150" data-slider-step="10">
+                        </div>
+                    </div>
+
                 </div>
-        </div>
-    </div>
-    <div class="row">
+            </div>
+        </div> <!-- direct input -->
+    </div> <!-- radio and direct input -->
+    <div class="row"> 
         <div class="col-md-12">
-            <div class="thumbnail">
-                <h4>Memory management</h4>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default band-btn" >160m</button>
+                        <button type="button" class="btn btn-default band-btn">80m</button>
+                        <button type="button" class="btn btn-default band-btn">60m</button>
+                        <button type="button" class="btn btn-default band-btn">40m</button>
+                        <button type="button" class="btn btn-default band-btn">30m</button>
+                        <button type="button" class="btn btn-default band-btn">20m</button>
+                        <button type="button" class="btn btn-default band-btn">17m</button>
+                        <button type="button" class="btn btn-default band-btn">15m</button>
+                        <button type="button" class="btn btn-default band-btn">12m</button>
+                        <button type="button" class="btn btn-default band-btn">10m</button>
+                        <button type="button" class="btn btn-default band-btn">6m</button>
+                    </div>
+                </div>      
             </div>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="thumbnail">
-                 <div class="input-group">
-                     <span class="input-group-addon">Manual Command</span>
-                     <input id="manualcmd" class="form-control" value="" type="text" maxlength="32">
-                     <span class="input-group-btn"><button type="button" class="btn" id="cmdsend"><span class="glyphicon glyphicon-check"></span></button>
-                     </span></div>
-            </div>
-        </div>
-    </div>
-    
-<div class="row">
-    <div class="col-md-12">
-        <div class="well">
-            <h6>Raw data stream</h6>
-            <textarea id="input" style="height:50px; width:98%;"></textarea>
-        </div>
-    </div>
+    </div> <!-- Band buttons -->
 </div>
-
-    
-</div>   

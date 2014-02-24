@@ -32,6 +32,11 @@ window.ElecraftLiveView = Backbone.View.extend({
                     height: 350
                 });
         });
+        
+        $("#rf-control", this.el).slider();
+        $("#af-control", this.el).slider();
+        $("#bpf-control", this.el).slider();
+        $("#ct-control", this.el).slider();
         return this;
     },
     
@@ -42,17 +47,20 @@ window.ElecraftLiveView = Backbone.View.extend({
     },
     
     events: {
-       "click #cmdsend": "sendcmd",
-        "keypress input#manualcmd": "sendcmd",
         "click #power-direct-btn": "setpower",
+        "click input#power-direct": "setpower",
+        "keypress input#power-direct": "setpower",
         "keypress input#vfoa-direct": "setvfoa",
         "keypress input#vfob-direct": "setvfob",
         "click #vfoa-direct-btn": "setvfoa",
         "click #vfob-direct-btn": "setvfob",
     },
     
-    setpower: function() {
-        linkManager.driver.setPower($("#power-direct").val());
+    setpower: function(e) {
+        if ((event.target.id == "power-direct" && event.keyCode==13) || (event.target.id != "power-direct") || 
+             (event.type == "click")) {
+            linkManager.driver.setPower($("#power-direct").val());
+        }
     },
     
     setvfoa: function() {
@@ -66,22 +74,28 @@ window.ElecraftLiveView = Backbone.View.extend({
             linkManager.driver.setVFO($("#vfob-direct",this.el).val(),"b");
         }
     },
+    
+    buttonCodes: {
+        "B_BAND_PLUS": "T08",
+        "B_RCL": "H08",
+        "B_BAND_MINUS": "T41",
+        "B_STORE": "H41",
+        "B_DISP": "T09",
+        "B_PRE": "T19",
+        "B_ATTN": "T27",
+        "B_MODE": "T14",
+    },
 
     handleKX3Button: function(e) {
         console.log(e.target.id);
         $("#kx3 #filter-II").css("visibility", "visible");
-        $("#kx3 #VFOB").html("W6ELA");
-        $("#kx3 #VFOA").html("14.780.872");
-        linkManager.manualCommand("IF;");
+        var code = this.buttonCodes[e.target.id];
+        if (code != null) {
+            linkManager.manualCommand('SW' + code + ';');
+        }        
     },
     
-    sendcmd: function(event) {
-        // We react both to button press & Enter key press
-        if ((event.target.id == "manualcmd" && event.keyCode==13) || (event.target.id != "manualcmd"))
-            linkManager.manualCommand($('#manualcmd',this.el).val());
-    },
-    
-    updateStatus: function() {
+    updateStatus: function(data) {
         if (linkManager.connected && !this.deviceinitdone) {
             linkManager.startLiveStream();
             
@@ -90,22 +104,15 @@ window.ElecraftLiveView = Backbone.View.extend({
             linkManager.driver.getRequestedPower();
         } else {
             this.deviceinitdone = false;
-        }
+        }        
+    },
+    
+    setIcon: function(name, visible) {
+        $("#kx3 #" + name).css("visibility", (visible) ? "visible" : "hidden");
     },
 
 
     showInput: function(data) {
-        // Update our raw data monitor
-        var i = $('#input',this.el);
-        var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-        // Keep max 50 lines:
-        if (scroll.length > 50) {
-            scroll = scroll.slice(scroll.length-50);
-        }
-        i.val(scroll.join('\n'));
-        // Autoscroll:
-        i.scrollTop(i[0].scrollHeight - i.height());
-        
         // Now update our display depending on the data we received:
         var cmd = data.substr(0,2);
         var val = data.substr(2);
@@ -129,6 +136,11 @@ window.ElecraftLiveView = Backbone.View.extend({
                 txt += String.fromCharCode(val2);
             }
             $("#kx3 #VFOA").html(txt);
+            // Now, decode icon data:
+            var a = val.charCodeAt(8);
+            var f = val.charCodeAt(9);
+            
+            
         } else if (cmd == "PC") {
             $("#power-direct").val(parseInt(val));
         } else if (cmd == "FA") {

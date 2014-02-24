@@ -1,7 +1,3 @@
-.brand {
-    font-family: 'Arvo';
-}
-
 a.plain:link {
     color: #333;
     text-decoration: none;
@@ -49,6 +45,10 @@ h5 {
     margin-bottom: 4px;
 }
 
+.input-margin {
+    margin-bottom: 5px;
+}
+
 
 .thumbnail-larger {
     min-width: 260px;
@@ -91,58 +91,6 @@ h5 {
 .center {
     text-align: center;
 }
-
-/**
- * The little accessory items on the layout view
- */
-.accessoryitem {
-    padding: 1px;
-    position: absolute;
-    max-width: 50px;
-    max-height: 50px;
-    top:10px;
-    left: 10px;
-    text-align: center;
-    background:#ffffff;
-    opacity: 0.6;
-    z-index:10;
-}
-
-/* On smaller screens, just display the accessories
-    as a grid under the layout and discard location */
-@media only screen and ( max-width : 1250px ) {
-    .accessoryitem {
-        -webkit-user-drag: none;
-        position: relative;
-        left: 10px !important;
-        top: 20px !important;
-        float: left;
-        max-height: 80px;
-        max-width: 80px;
-        margin-bottom: 20px;
-        opacity: 1.0;
-    }
-}
-
-.accessoryitem:hover {
-    opacity: 1.0;
-}
-
-.accessorydiagitem {
-    padding: 5px;
-    margin: 5px;
-    display: inline-block;
-    max-width: 80px;
-    max-height: 80px;
-    top:10px;
-    left: 10px;
-    float: left;
-    text-align: center;
-    background:#ffffff;
-    z-index:10;
-}
-
-
 
 
 
@@ -294,6 +242,15 @@ h5 {
     text-align: center;
 }
 
+/*===========
+ * KX3 Font
+ *===================*/
+@font-face {
+  font-family: "Let's Go Digital";
+  src: url('../fonts/lets-go-digital-regular.ttf') format('truetype');
+}
+
+
 /* From: http://www.verious.com/tutorial/how-to-create-loading-spinners-using-css3-animations/ */
 /* ==========================================================
  * Spinner
@@ -331,16 +288,6 @@ h5 {
           transform: rotate(0deg);
      }
 }
-
-/*===========
- * KX3 Font
- *===================*/
-@font-face {
-  font-family: "Let's Go Digital";
-  src: url('../fonts/lets-go-digital-regular.ttf') format('truetype');
-}
-
-
 
 /*=======================================================
  * Circles

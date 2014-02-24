@@ -1,27 +1,22 @@
 
 
 <div class="row"><div class="col-md-12">
-    <a href="#"  role="button" disabled class="btn btn-enable-connected btn-danger">No TCP Client Connected</a>
+    <button disabled role="button" class="btn btn-xs btn-enable-connected btn-danger tcp-server" style="float:right;">No TCP Client</button>
+        <h4>KXPA100</h4>
     <h4 >Device monitoring</h4>
-    <p>
-        Will display the following graphs:</p>
-    <ul>
-    <li>Amp A & Voltage</li>
-    <li>Amp forward power & reflected power</li>
-    </ul>
     </div>
 </div>
 <div class="row">
     <div class="col-md-12">
+          <p>PA: <span id="kxpa-tm">0</span>°C.
         <div class="thumbnail">
-            <div class="powerchart chart" style="position: relative; height:200px;"></div>
+            <div class="tempchart chart" style="position: relative; height:200px;"></div>
         </div>
     </div>        
 </div>
 
 <div class="row">
     <div class="col-md-12">
-        <p>KXPA100:</p>
         <p>Input: <span id="kxpa-pi">0</span>W, Output: <span id="kxpa-pf">0</span>W, Reflected: <span id="kxpa-pv">0</span>W
         <div class="thumbnail">
             <div class="amppowerchart chart" style="position: relative; height:200px;"></div>
