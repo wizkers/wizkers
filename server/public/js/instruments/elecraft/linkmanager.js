@@ -32,7 +32,7 @@ var ElecraftLinkManager = function(linkManager) {
 
         // The radio can do live streaming to an extent, so we definitely gotta
         // take advantage:
-        this.cc('AI2;FA;FB;AG;RG;BW;');
+        this.cc('FA;FB;RG;BW;MG;IS;AI2;');
 
         this.livePoller = setInterval(this.queryRadio.bind(this), 1000);
         this.streaming = true;
@@ -97,7 +97,12 @@ var ElecraftLinkManager = function(linkManager) {
         var gain = ("000" + ag).slice(-3);
         this.cc('AG' + gain + ';');
     }
-    
+
+    this.setMG = function(mg) {
+        var gain = ("000" + mg).slice(-3);
+        this.cc('MG' + gain + ';');
+    }
+
     this.setRG = function(rg) {
         // Need to translate "-60 to 0" into "190 to 250"
         this.cc('RG' + (rg+250) + ';');
@@ -106,6 +111,20 @@ var ElecraftLinkManager = function(linkManager) {
     this.setBW = function(bw) { // Bandwidth in kHz (0 to 4.0)
         var bandwidth = ("0000" + Math.floor(bw*100)).slice(-4);
         this.cc('BW' + bandwidth + ';');
+    }
+
+    this.setCT = function(ct) { // Center frequency
+        var center = ("0000" + Math.floor(ct*1000)).slice(-4);
+        this.cc('IS ' + center + ';'); // Note the space!
+    }
+    
+    this.setBand = function(band) {
+        // We use a band number in meters (with a "m"), this function translates into the KX3 values:
+        var bands= { "160m":"00", "80m":"01", "60m":"02", "40m":"03", "30m":"04", "20m":"05", "17m":"06", "15m":"07", "12m":"08", "10m":"09", "6m":"10" };
+        var bandcode = bands[band];
+        if (typeof(bandcode) != 'undefined') {
+            this.cc('BN' + bandcode + ';');
+        }
     }
 
     this.queryRadio = function() {

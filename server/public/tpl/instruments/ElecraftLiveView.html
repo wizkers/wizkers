@@ -16,46 +16,56 @@
                             <span class="input-group-btn">
                                 <button class="btn btn-default" id="vfoa-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
                             </span>
-                       </div>
+                       </div> <!-- VFOA -->
                     <div class="input-group input-margin">
                         <span class="input-group-addon">VFO B</span>
                             <input  id="vfob-direct" class="form-control" placeholder="14.070">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" id="vfob-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
                             </span>
-                       </div>
+                    </div> <!-- VFOB -->
                     <div class="input-group input-margin">
                         <span class="input-group-addon">Power</span>
                             <input  type="number" min="0" id="power-direct" class="form-control">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" id="power-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
                             </span>
-                       </div>
+                       </div> <!-- Power -->
                     <div class="input-group input-margin">
                         <span class="input-group-addon">AF</span>
                         <div class="form-control slider-bg-info">
                           <input type="text" id="ag-control" data-slider-value="0" data-slider-min="0" data-slider-max="60" data-slider-step="1">
                         </div>
-                    </div>
+                    </div> <!-- AF -->
                     <div class="input-group input-margin">
                         <span class="input-group-addon">RF</span>
                         <div class="form-control slider-bg-info-rev">
                           <input type="text" id="rf-control" data-slider-value="0" data-slider-min="-60" data-slider-max="0" data-slider-step="1">
                         </div>
-                    </div>
+                    </div> <!-- RF -->
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">MIC</span>
+                        <div class="form-control slider-bg-info">
+                          <input type="text" id="mic-control" data-slider-value="0" data-slider-min="0" data-slider-max="80" data-slider-step="1">
+                        </div>
+                    </div> <!-- MG -->
                     <br>
                     <div class="input-group input-margin">
                         <span class="input-group-addon">BP</span>
                         <div class="form-control slider-bg-info">
                           <input type="text" id="bpf-control" data-slider-value="0" data-slider-min="0" data-slider-max="4" data-slider-step=".1">
                         </div>
-                    </div>
+                    </div> <!-- Bandpass -->
                     <div class="input-group input-margin">
                         <span class="input-group-addon">CT</span>
                         <div class="form-control">
-                          <input type="text" id="ct-control" data-slider-value="0" data-slider-min="-150" data-slider-max="150" data-slider-step="10">
+                          <input type="text" id="ct-control" data-slider-value="0" data-slider-min="0" data-slider-max="3" data-slider-step="0.01">
+                            
                         </div>
-                    </div>
+                        <span class="input-group-btn">
+                                <button class="btn btn-default" id="ct-center" type="button"><span class="glyphicon glyphicon-asterisk"></span></button>
+                            </span>
+                    </div> <!-- Center freq -->
 
                 </div>
             </div>

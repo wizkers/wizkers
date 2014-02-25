@@ -22,19 +22,20 @@
  * updates by E. Lafargue (c) 2014
  *  - Full width dynamic for the sliders (responsive-friendly)
  *  - Handle decimals gracefully up to 0.001
+ *  - Broke range sliders, but I don't use those anyway.
  */
 
 !function( $ ) {
 
 	var Slider = function(element, options) {
+        var self = this;
 		this.element = $(element);
 		this.picker = $('<div class="slider">'+
 							'<div class="slider-track">'+
 								'<div class="slider-selection"></div>'+
-								'<div class="slider-handle"></div>'+
+								'<div class="slider-handle slider-tooltip" data-toggle="tooltip" data-placement="top"></div>'+
 								'<div class="slider-handle"></div>'+
 							'</div>'+
-							'<div class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'+
 						'</div>')
 							.insertBefore(this.element)
 							.append(this.element);
@@ -47,11 +48,6 @@
 			this.touchCapable = true;
 		}
 
-		var tooltip = this.element.data('slider-tooltip')||options.tooltip;
-
-		this.tooltip = this.picker.find('.tooltip');
-		this.tooltipInner = this.tooltip.find('div.tooltip-inner');
-
 		this.orientation = this.element.data('slider-orientation')||options.orientation;
 		switch(this.orientation) {
 			case 'vertical':
@@ -59,7 +55,6 @@
 				this.stylePos = 'top';
 				this.mousePos = 'pageY';
 				this.sizePos = 'offsetHeight';
-				this.tooltip.addClass('right')[0].style.left = '100%';
 				break;
 			default:
 				this.picker
@@ -69,7 +64,6 @@
 				this.stylePos = 'left';
 				this.mousePos = 'pageX';
 				this.sizePos = 'offsetWidth';
-				this.tooltip.addClass('top')[0].style.top = -this.tooltip.outerHeight() - 14 + 'px';
 				break;
 		}
 
@@ -80,6 +74,9 @@
 		if (this.value[1]) {
 			this.range = true;
 		}
+        
+        this.tooltip = $('.slider-tooltip', this.picker);        
+        this.tooltip.tooltip({title: function() { return '' + self.formater(self.value[0]);}});
 
 		this.selection = this.element.data('slider-selection')||options.selection;
 		this.selectionEl = this.picker.find('.slider-selection');
@@ -143,14 +140,6 @@
 			});
 		}
 
-		if (tooltip === 'show') {
-			this.picker.on({
-				mouseenter: $.proxy(this.showTooltip, this),
-				mouseleave: $.proxy(this.hideTooltip, this)
-			});
-		} else {
-			this.tooltip.addClass('hide');
-		}
 	};
 
 	Slider.prototype = {
@@ -159,20 +148,6 @@
 		over: false,
 		inDrag: false,
 		
-		showTooltip: function(){
-			this.tooltip.addClass('in');
-			//var left = Math.round(this.percent*this.width);
-			//this.tooltip.css('left', left - this.tooltip.outerWidth()/2);
-			this.over = true;
-		},
-		
-		hideTooltip: function(){
-			if (this.inDrag === false) {
-				this.tooltip.removeClass('in');
-			}
-			this.over = false;
-		},
-
 		layout: function(){
 			this.handle1Stype[this.stylePos] = this.percentage[0]+'%';
 			this.handle2Stype[this.stylePos] = this.percentage[1]+'%';
@@ -182,19 +157,6 @@
 			} else {
 				this.selectionElStyle.left = Math.min(this.percentage[0], this.percentage[1]) +'%';
 				this.selectionElStyle.width = Math.abs(this.percentage[0] - this.percentage[1]) +'%';
-			}
-			if (this.range) {
-				this.tooltipInner.text(
-					this.formater(this.value[0]) + 
-					' : ' + 
-					this.formater(this.value[1])
-				);
-				this.tooltip[0].style[this.stylePos] = this.size * (this.percentage[0] + (this.percentage[1] - this.percentage[0])/2)/100 - (this.orientation === 'vertical' ? this.tooltip.outerHeight()/2 : this.tooltip.outerWidth()/2) +'px';
-			} else {
-				this.tooltipInner.text(
-					this.formater(this.value[0])
-				);
-				this.tooltip[0].style[this.stylePos] = this.size * this.percentage[0]/100 - (this.orientation === 'vertical' ? this.tooltip.outerHeight()/2 : this.tooltip.outerWidth()/2) +'px';
 			}
 		},
 
@@ -265,6 +227,7 @@
 			}
 			this.percentage[this.dragged] = percentage;
 			this.layout();
+            this.tooltip.tooltip('show'); // ELafargue: not ideal, because the tooltip flickers...
 			var val = this.calculateValue();
 			this.element
 				.trigger({
@@ -291,9 +254,6 @@
 			}
 
 			this.inDrag = false;
-			if (this.over == false) {
-				this.hideTooltip();
-			}
 			this.element;
 			var val = this.calculateValue();
 			this.element

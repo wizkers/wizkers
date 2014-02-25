@@ -651,23 +651,28 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="679.29669"
-     inkscape:cy="490.56397"
+     inkscape:zoom="2.8"
+     inkscape:cx="611.56774"
+     inkscape:cy="683.42111"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer4"
      showgrid="false"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="2006"
-     inkscape:window-height="1199"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-width="1778"
+     inkscape:window-height="1243"
+     inkscape:window-x="1047"
+     inkscape:window-y="638"
      inkscape:window-maximized="0"
      showguides="true"
-     inkscape:guide-bbox="true" />
+     inkscape:guide-bbox="true">
+    <sodipodi:guide
+       orientation="0,1"
+       position="585.26786,585"
+       id="guide3209" />
+  </sodipodi:namedview>
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -685,7 +690,8 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(428.21429,-236.86218)"
-     style="display:inline">
+     style="display:inline"
+     sodipodi:insensitive="true">
     <image
        y="236.86218"
        x="-428.21429"
@@ -1347,5 +1353,83 @@
        width="13"
        inkscape:label="#image3301"
        class="icon" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 593.92857,406 582.94643,360.64286 571.96428,406 z"
+       id="fl-bargraph-04"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <path
+       sodipodi:nodetypes="cccc"
+       inkscape:connector-curvature="0"
+       id="fl-bargraph-05"
+       d="M 605.92857,360.64286 594.94643,406 583.96428,360.643 z"
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       sodipodi:nodetypes="cccc"
+       inkscape:connector-curvature="0"
+       id="fl-bargraph-06"
+       d="M 617.92857,406 606.94643,360.64286 595.96428,406 z"
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 629.92857,360.64286 618.94643,406 607.96428,360.64286 z"
+       id="fl-bargraph-07"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 641.92857,406 630.94643,360.64286 619.96428,406 z"
+       id="fl-bargraph-08"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <path
+       sodipodi:nodetypes="cccc"
+       inkscape:connector-curvature="0"
+       id="fl-bargraph-09"
+       d="M 653.92857,360.64286 642.94643,406 631.96428,360.64286 z"
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       sodipodi:nodetypes="cccc"
+       inkscape:connector-curvature="0"
+       id="fl-bargraph-10"
+       d="M 665.92857,406 654.94643,360.64286 643.96428,406 z"
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 522.96813,406 -22.94643,0 11.25,-45.357 22.85715,0 z"
+       id="fl-bargraph-01"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       sodipodi:nodetypes="ccccc"
+       inkscape:connector-curvature="0"
+       id="fl-bargraph-02"
+       d="m 546.94511,406 -22.94643,0 11.25,-45.357 22.85715,0 z"
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 570.9375,406 -22.94643,0 11.25,-45.357 22.85715,0 z"
+       id="fl-bargraph-03"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       sodipodi:nodetypes="ccccc"
+       inkscape:connector-curvature="0"
+       id="fl-bargraph-11"
+       d="m 667.15179,406 22.94643,0 -11.25,-45.357 -22.85715,0 z"
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 691.15179,406 22.94643,0 -11.25,-45.357 -22.85715,0 z"
+       id="fl-bargraph-12"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       sodipodi:nodetypes="ccccc"
+       inkscape:connector-curvature="0"
+       id="fl-bargraph-13"
+       d="m 715.15179,406 22.94643,0 -11.25,-45.357 -22.85715,0 z"
+       style="fill:#000000;fill-opacity:1;stroke:#ffbf01;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
   </g>
 </svg>

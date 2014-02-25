@@ -37,6 +37,7 @@ window.ElecraftLiveView = Backbone.View.extend({
         $("#ag-control", this.el).slider();
         $("#bpf-control", this.el).slider();
         $("#ct-control", this.el).slider();
+        $("#mic-control",this.el).slider();
         return this;
     },
     
@@ -54,9 +55,13 @@ window.ElecraftLiveView = Backbone.View.extend({
         "keypress input#vfob-direct": "setvfob",
         "click #vfoa-direct-btn": "setvfoa",
         "click #vfob-direct-btn": "setvfob",
+        "click #ct-center": "centerCT",
         "slideStop #ag-control": "setAG",
+        "slideStop #mic-control": "setMG",
         "slideStop #rf-control": "setRG",
         "slideStop #bpf-control": "setBW",
+        "slideStop #ct-control": "setCT",
+        "click .band-btn": "setBand",
     },
     
     setpower: function(e) {
@@ -64,6 +69,11 @@ window.ElecraftLiveView = Backbone.View.extend({
              (event.type == "click")) {
             linkManager.driver.setPower($("#power-direct").val());
         }
+    },
+    
+    setBand: function(e) {
+        var band = e.target.innerHTML;
+        linkManager.driver.setBand(band);
     },
     
     setvfoa: function() {
@@ -81,6 +91,9 @@ window.ElecraftLiveView = Backbone.View.extend({
     setAG: function(e) {
         linkManager.driver.setAG(e.value);
     },
+    setMG: function(e) {
+        linkManager.driver.setMG(e.value);
+    },
     
     setRG: function(e) {
         // Note: on the slider we do -60 to 0, the driver converts into KX3 internal values
@@ -90,8 +103,16 @@ window.ElecraftLiveView = Backbone.View.extend({
     setBW: function(e) {
         linkManager.driver.setBW(e.value);
     },
+
+    setCT: function(e) {
+        linkManager.driver.setCT(e.value);
+    },
+    centerCT: function() {
+        linkManager.driver.setCT(9); // Special value for centering Passband
+    },
     
     buttonCodes: {
+        // The labels are the IDs of the areas on the KX3 front panel SVG:
         "B_BAND_PLUS": "T08", "B_RCL": "H08",
         "B_BAND_MINUS": "T41", "B_STORE": "H41",
         "B_FREQ_ENT": "T10", "B_SCAN": "H10",
@@ -181,6 +202,10 @@ window.ElecraftLiveView = Backbone.View.extend({
             $("#rf-control", this.el).slider('setValue',val-250);
         } else if (cmd =="BW") {
             $("#bpf-control", this.el).slider('setValue',val/100);
+        } else if(cmd =="MG") {
+            $("#mic-control", this.el).slider('setValue',val);
+        } else if (cmd == "IS") {
+            $("#ct-control", this.el).slider('setValue',parseInt(val)/1000);
         }
 
     },
