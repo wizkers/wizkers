@@ -32,7 +32,7 @@ var ElecraftLinkManager = function(linkManager) {
 
         // The radio can do live streaming to an extent, so we definitely gotta
         // take advantage:
-        this.cc('AI2;FA;FB;');
+        this.cc('AI2;FA;FB;AG;RG;BW;');
 
         this.livePoller = setInterval(this.queryRadio.bind(this), 1000);
         this.streaming = true;
@@ -92,7 +92,21 @@ var ElecraftLinkManager = function(linkManager) {
             this.cc('PC'+ pwr + ';');
         }
     }
-
+    
+    this.setAG = function(ag) {
+        var gain = ("000" + ag).slice(-3);
+        this.cc('AG' + gain + ';');
+    }
+    
+    this.setRG = function(rg) {
+        // Need to translate "-60 to 0" into "190 to 250"
+        this.cc('RG' + (rg+250) + ';');
+    }
+    
+    this.setBW = function(bw) { // Bandwidth in kHz (0 to 4.0)
+        var bandwidth = ("0000" + Math.floor(bw*100)).slice(-4);
+        this.cc('BW' + bandwidth + ';');
+    }
 
     this.queryRadio = function() {
         
@@ -101,13 +115,10 @@ var ElecraftLinkManager = function(linkManager) {
         // this won't hurt
         
         // Query displays
-        this.cc('DB;'); // Query VFO B Display
-        this.cc('DS;'); // Query VFO A Display
-        this.cc('IC;'); // Query display icons
+        this.cc('DB;DS;'); // Query VFO B and VFOA Display
         
         // Then ask the radio for current figures:
         this.cc('PO;'); // Query actual power output
-        this.cc('BW;'); // Get filter bandwidth
         
         // And if we have an amp, then we can get a lot more data:
         this.cc('^PI;^PF;^PV;^TM;');

@@ -10,7 +10,7 @@ var ElecraftInstrument = function() {
     // Helper function: get driver capabilites.
     // returns a simple array of capabilities    
     this.getCaps = function() {
-        return ["LiveDisplay", "NumDisplay"];
+        return ["LiveDisplay", "NumDisplay", "DiagDisplay"];
     };
         
     // This has to be a Backbone view

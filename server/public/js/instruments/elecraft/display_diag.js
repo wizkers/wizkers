@@ -1,6 +1,12 @@
 window.ElecraftDiagView = Backbone.View.extend({
 
     initialize:function () {
+        if (linkManager.streaming) {
+            linkManager.stopLiveStream();
+        }
+
+        linkManager.on('input', this.showInput, this);
+
         this.render();
     },
 
@@ -11,6 +17,8 @@ window.ElecraftDiagView = Backbone.View.extend({
     
     onClose: function() {
         console.log("Elecraft diagnostics view closing...");        
+        linkManager.off('input', this.showInput, this);
+
     },
     
     events: {

@@ -17,6 +17,13 @@
  * limitations under the License.
  * ========================================================= */
  
+
+/**
+ * updates by E. Lafargue (c) 2014
+ *  - Full width dynamic for the sliders (responsive-friendly)
+ *  - Handle decimals gracefully up to 0.001
+ */
+
 !function( $ ) {
 
 	var Slider = function(element, options) {
@@ -103,7 +110,7 @@
 			this.value[0] = Math.max(this.min, Math.min(this.max, this.value[0]));
 			this.value[1] = Math.max(this.min, Math.min(this.max, this.value[1]));
 		} else {
-			this.value = [ Math.max(this.min, Math.min(this.max, this.value))];
+			this.value = [ Math.floor(Math.max(this.min, Math.min(this.max, this.value))*1000)/1000];
 			this.handle2.addClass('hide');
 			if (this.selection == 'after') {
 				this.value[1] = this.max;
@@ -308,7 +315,7 @@
 				];
 				this.value = val;
 			} else {
-				val = (this.min + Math.round((this.diff * this.percentage[0]/100)/this.step)*this.step);
+				val = Math.floor((this.min + Math.round((this.diff * this.percentage[0]/100)/this.step)*this.step)*1000)/1000;
 				this.value = [val, this.value[1]];
 			}
 			return val;
