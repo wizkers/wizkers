@@ -23,15 +23,15 @@ window.ElecraftLiveView = Backbone.View.extend({
                 f.select("#layer1").click(function (e) {
                     self.handleKX3Button(e);
                 });
-            // Initialize icon display:
-            f.select(".icon").attr({ visibility: 'hidden' });
-                s.add(f);
+            s.add(f);
                 // Set display constraints for the radio face:
-                s.attr({
-                    width: "100%",
-                    height: 350
-                });
+            s.attr({
+                width: "100%",
+                height: 350,
+            });
         });
+        
+        $("#kx3 .icon").css('visibility', 'hidden');
         
         $("#rf-control", this.el).slider();
         $("#ag-control", this.el).slider();
@@ -137,7 +137,7 @@ window.ElecraftLiveView = Backbone.View.extend({
 
     handleKX3Button: function(e) {
         console.log(e.target.id);
-        $("#kx3 #filter-II").css("visibility", "visible");
+        //$("#kx3 #filter-II").css("visibility", "visible");
         var code = this.buttonCodes[e.target.id];
         if (code != null) {
             linkManager.manualCommand('SW' + code + ';');
@@ -157,7 +157,7 @@ window.ElecraftLiveView = Backbone.View.extend({
     },
     
     setIcon: function(name, visible) {
-        $("#kx3 #" + name).css("visibility", (visible) ? "visible" : "hidden");
+        $("#kx3 #icon_" + name).css("visibility", (visible) ? "visible" : "hidden");
     },
 
 
@@ -188,7 +188,13 @@ window.ElecraftLiveView = Backbone.View.extend({
             // Now, decode icon data:
             var a = val.charCodeAt(8);
             var f = val.charCodeAt(9);
+            this.setIcon("NB", (a & 0x40));
+            this.setIcon("ANT1",!(a&0x20));
+            this.setIcon("ANT2",(a&0x20));
+            this.setIcon("PRE",(a & 0x10));
+            this.setIcon("ATT",(a & 0x8));
             
+            this.setIcon("ATU",(f & 0x10));
             
         } else if (cmd == "PC") {
             $("#power-direct").val(parseInt(val));
@@ -202,6 +208,7 @@ window.ElecraftLiveView = Backbone.View.extend({
             $("#rf-control", this.el).slider('setValue',val-250);
         } else if (cmd =="BW") {
             $("#bpf-control", this.el).slider('setValue',val/100);
+            // TODO: update filter icons
         } else if(cmd =="MG") {
             $("#mic-control", this.el).slider('setValue',val);
         } else if (cmd == "IS") {
