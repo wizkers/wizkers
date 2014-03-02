@@ -1,4 +1,6 @@
-window.LiveView = Backbone.View.extend({
+
+// Model is the instrument
+window.SampleInstrumentLiveView = Backbone.View.extend({
 
     initialize:function () {
         this.render();

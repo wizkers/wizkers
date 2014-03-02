@@ -11,8 +11,6 @@
             </div><!-- radio -->
             <div class="row">
                 <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
                             <div class="btn-group">
                                 <button type="button" class="btn btn-default band-btn" >160m</button>
                                 <button type="button" class="btn btn-default band-btn">80m</button>
@@ -26,10 +24,31 @@
                                 <button type="button" class="btn btn-default band-btn">10m</button>
                                 <button type="button" class="btn btn-default band-btn">6m</button>
                             </div>
-                        </div>      
-                    </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-9">
+                <h4><span id="freq-slider-band">10m</span> frequencies</h4>
+            </div>
+            <div class="col-md-3">
+                <!-- Controls -->
+                <div class="pull-right hidden-xs">
+                    <a class="left btn btn-success" href="#frequency-selector"
+                        data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
+                    <a class="right btn btn-success" href="#frequency-selector"
+                            data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
+                </div>
+            </div>
+            </div> <!-- Frequency cards header -->
+            <!-- ********** -->
+            <div id="frequency-selector" class="frequency-carousel carousel slide" data-interval="false" > <!-- Note add data-ride="carousel" to autoplay it -->
+            <!-- Wrapper for slides -->
+                <div class="carousel-inner" id="frequency-selector-content">
+                </div>
+            </div>
+        
+        <!-- ******* -->
+
         </div> 
         <div class="col-md-4">
             <div class="panel panel-default">

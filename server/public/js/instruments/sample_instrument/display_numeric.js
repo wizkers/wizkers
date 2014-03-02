@@ -1,4 +1,6 @@
-window.InstrumentNumView = Backbone.View.extend({
+
+// Model is the instrument
+window.SampleInstrumentNumView = Backbone.View.extend({
 
     initialize:function () {
         this.render();

@@ -32,7 +32,10 @@ var ElecraftLinkManager = function(linkManager) {
 
         // The radio can do live streaming to an extent, so we definitely gotta
         // take advantage:
-        this.cc('FA;FB;RG;BW;MG;IS;AI2;');
+        // K31 enables extended values such as proper BPF reporting
+        // AI2 does not send an initial report, so we ask for the initial data
+        // before...
+        this.cc('K31;FA;FB;RG;FW;MG;IS;AI2;');
 
         this.livePoller = setInterval(this.queryRadio.bind(this), 1000);
         this.streaming = true;

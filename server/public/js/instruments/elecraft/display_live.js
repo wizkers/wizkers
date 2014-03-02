@@ -6,9 +6,22 @@ window.ElecraftLiveView = Backbone.View.extend({
 
     initialize:function () {
         this.deviceinitdone = false;
+        
+        // The server lets us specify free-form metadata for each instrument,
+        // we are using it for storing our frequencies, per band:
+        // { mem: {
+        //     "20m": {
+        //          "name": { freq: 14.070, mode: "psk31", comment: "This is a comment" }
+        //      },
+        //   }
+        //}
+        this.metadata = this.model.get('metadata');
+        if (this.mappings == null) {
+            this.mappings = {};
+            this.model.set('metadata', this.mappings);
+        }
 
-        //this.render();
-        //_.bindAll(this,"handleKX3Button");
+
         
         linkManager.on('status', this.updateStatus, this);
         linkManager.on('input', this.showInput, this);
@@ -38,6 +51,16 @@ window.ElecraftLiveView = Backbone.View.extend({
         $("#bpf-control", this.el).slider();
         $("#ct-control", this.el).slider();
         $("#mic-control",this.el).slider();
+        
+        
+        // Last, load the frequencies sub view:
+        this.ElecraftFrequencyListView = new ElecraftFrequencyListView({model: this.instrument});
+            if (this.ElecraftFrequencyListView != null) {
+                $('#frequency-selector').html(this.ElecraftFrequencyListView.el);
+                this.ElecraftFrequencyListView.render();
+            }
+        $('#frequency-selector').carousel();
+        
         return this;
     },
     
@@ -206,7 +229,7 @@ window.ElecraftLiveView = Backbone.View.extend({
             $("#ag-control", this.el).slider('setValue',val);
         } else if (cmd =="RG") {
             $("#rf-control", this.el).slider('setValue',val-250);
-        } else if (cmd =="BW") {
+        } else if (cmd =="FW") {
             $("#bpf-control", this.el).slider('setValue',val/100);
             // TODO: update filter icons
         } else if(cmd =="MG") {

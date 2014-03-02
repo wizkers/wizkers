@@ -212,7 +212,7 @@ utils.loadTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogM
                     'instruments/OnyxLogView', 'instruments/Fluke289LogView', 'instruments/Fluke289LogManagementView', 'instruments/OnyxLogManagementView',
                     'instruments/OnyxDiagView', 'instruments/W433LiveView', 'instruments/W433NumView', 'instruments/W433SettingsView',
                     'instruments/W433LogView',  'instruments/FCOledLogView', 'instruments/ElecraftLiveView', 'instruments/ElecraftNumView', 
-                    'instruments/ElecraftDiagView', 
+                    'instruments/ElecraftDiagView', 'instruments/ElecraftFrequencyItemView'
                    ],
     function() {
         

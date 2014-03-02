@@ -7,7 +7,7 @@
 
 
 // linkManager is a reference to the parent link manager
-var SampleLinkManager = function(linkManager) {
+var SampleInstrumentLinkManager = function(linkManager) {
 
     var self = this;
     var lm = linkManager;

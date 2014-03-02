@@ -1,0 +1,40 @@
+
+/* From http://bootsnipp.com/snippets/featured/carousel-product-cart-slider
+ */
+
+
+.frequency-carousel .panel-heading {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.frequency-carousel .panel-footer {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.frequency-carousel .panel-footer .btn-left {
+    width: 90%;
+    float: left;
+}
+
+.frequency-carousel .panel-footer .btn-edit {
+    width: 10%;
+    float: left;
+}
+
+.frequency-carousel .panel-footer p
+{
+    line-height: 20px;
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.frequency-carousel .panel:hover {
+    background-color: rgba(33, 159, 209, 0.49);
+}
+
+.clear-left
+{
+    clear: left;
+}
