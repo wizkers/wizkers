@@ -1,4 +1,4 @@
-// Live view for the Fluke 289
+// Live view for the W433 sensor
 // 
 // Our model is the settings object.
 

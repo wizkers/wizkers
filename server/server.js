@@ -36,7 +36,7 @@ var serialport = require('serialport'),
 
 // Utility function to get a Hex dump
 var Hexdump = require('./hexdump.js');
-var Debug = true;
+var Debug = false;
 
 
 var deviceTypes = [];

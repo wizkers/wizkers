@@ -7,26 +7,13 @@ window.ElecraftLiveView = Backbone.View.extend({
     initialize:function () {
         this.deviceinitdone = false;
         
-        // The server lets us specify free-form metadata for each instrument,
-        // we are using it for storing our frequencies, per band:
-        // { mem: {
-        //     "20m": {
-        //          "name": { freq: 14.070, mode: "psk31", comment: "This is a comment" }
-        //      },
-        //   }
-        //}
-        this.metadata = this.model.get('metadata');
-        if (this.mappings == null) {
-            this.mappings = {};
-            this.model.set('metadata', this.mappings);
-        }
-
-
-        
         linkManager.on('status', this.updateStatus, this);
         linkManager.on('input', this.showInput, this);
 
     },
+    
+    ElecraftFrequencyListView: null,
+    bands: [ "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m" ],
 
     render:function () {
         var self = this;
@@ -54,7 +41,7 @@ window.ElecraftLiveView = Backbone.View.extend({
         
         
         // Last, load the frequencies sub view:
-        this.ElecraftFrequencyListView = new ElecraftFrequencyListView({model: this.instrument});
+        this.ElecraftFrequencyListView = new ElecraftFrequencyListView({model: this.model});
             if (this.ElecraftFrequencyListView != null) {
                 $('#frequency-selector').html(this.ElecraftFrequencyListView.el);
                 this.ElecraftFrequencyListView.render();
@@ -67,6 +54,10 @@ window.ElecraftLiveView = Backbone.View.extend({
     onClose: function() {
         linkManager.off('status', this.updatestatus, this);
         linkManager.off('input', this.showInput, this);
+        
+        if (this.ElecraftFrequencyListView != null)
+            this.ElecraftFrequencyListView.onClose();
+        
         console.log("Elecraft live view closing...");        
     },
     
@@ -236,6 +227,8 @@ window.ElecraftLiveView = Backbone.View.extend({
             $("#mic-control", this.el).slider('setValue',val);
         } else if (cmd == "IS") {
             $("#ct-control", this.el).slider('setValue',parseInt(val)/1000);
+        }  else if (cmd == "BN") {
+            $("#freq-slider-band",this.el).html(this.bands[parseInt(val)]);
         }
 
     },

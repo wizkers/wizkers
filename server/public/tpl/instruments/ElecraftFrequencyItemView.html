@@ -1,17 +1,24 @@
 <div class="panel panel-default">
     <div class="panel-heading">
-        <b>14.070</b>
-        <small>14.100</small>
+        <div class="clear-left">
+            <p class="btn-vfoa">
+                <b><span class="freq-vfoa" data-disabled="true" data-type="text"><%= vfoa %></span></b>
+            </p>
+            <p class="btn-vfob">
+                <small><%= vfob %></small>
+            </p>
+        </div>
+        <div class="clearfix"></div>
     </div>
     <div class="panel-body">
-        PSK31 Standard frequency
+        <span class="freq-description" data-disabled="true" data-type="textarea" ><%= name %></span>
     </div>
     <div class="panel-footer">
         <div class="clear-left">
             <p class="btn-left">
-                <span class="label label-info">DATA A</span>
+                <span class="label label-info"><%= mode %></span>
             </p>
-            <p class="btn-edit">
+            <p class="btn-edit edit">
                 <span class="glyphicon glyphicon-edit"></span>
             </p>
         </div>

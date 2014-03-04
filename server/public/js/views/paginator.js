@@ -2,7 +2,7 @@ window.Paginator = Backbone.View.extend({
 
     className: "container center",
 
-    initialize:function () {
+    initialize:function (options) {
         this.options = options || {};
         this.model.bind("reset", this.render, this);
     },

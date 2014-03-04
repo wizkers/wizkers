@@ -2,6 +2,13 @@
 /* From http://bootsnipp.com/snippets/featured/carousel-product-cart-slider
  */
 
+/* Override Bootstrap overflow rules for carousel so that
+   we can use the "editable" plugin. at the cost of a bit of uglyness
+   when we scroll - I could fix bootstrap's style sheet though...
+ */
+.carousel-inner {
+    overflow: visible;
+}
 
 .frequency-carousel .panel-heading {
     padding-top: 5px;
@@ -20,6 +27,16 @@
 
 .frequency-carousel .panel-footer .btn-edit {
     width: 10%;
+    float: left;
+}
+
+.frequency-carousel .panel-heading .btn-vfoa {
+    width: 60%;
+    float: left;
+}
+.frequency-carousel .panel-heading .btn-vfob {
+    width: 40%;
+    text-align: right;
     float: left;
 }
 
