@@ -69,7 +69,7 @@ window.ElecraftFrequencyListView = Backbone.View.extend({
             if (screen) $(this.el).append('<div class="item other-'+screen+'"></div>');
             for (var i = screen*4; i < Math.min(len,screen*4+4); i++) {
                 $(screen ? '.other-'+screen : '.active', this.el).append(new ElecraftFrequencyItemView({model: this.model, band: this.current_band, 
-                                                                                                        frequency: i}).render().el);
+                                                                                                        frequency: i, listView: this}).render().el);
             }
         }
 
@@ -95,14 +95,21 @@ window.ElecraftFrequencyListView = Backbone.View.extend({
     
     // Called from our containing view to add a new frequency for this band.
     addfrequency: function() {
+        var self = this;
         console.log("Add new frequency card");
         var vfoa = $("#vfoa-direct").val();
         var vfob = $("#vfob-direct").val();
         this.frequencies[this.current_band].push( { "vfoa": vfoa, "vfob": vfob, "mode": "DATA A", "name": "Empty" });
         this.model.set('metadata', {"frequencies": this.frequencies} );
-        this.model.save();
-        this.render();
-        
+        this.model.save(null, { success: function() { self.render(); } } );
+    },
+    
+    removefrequency: function(index) {
+        var self = this;
+        this.frequencies[this.current_band].splice(index,1);
+        this.model.set('metadata', {"frequencies": this.frequencies} );
+        this.model.save(null, { success: function() { self.render(); } } );
+        // Now ask to re-render the upper level element
     },
     
 });
@@ -117,11 +124,14 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
     
     editing: false,
     frequency: 0,
+    band: "",
     allmems: null,
     mem: null,
+    listView: null,
 
     initialize: function (options) {
         console.log("Frequency item - rendering item " + options.frequency);
+        this.listView = options.listView;
         this.frequency = options.frequency; // What entry in the band memory
         this.band = options.band;           // The current band memory (string)
         this.allmems = this.model.get('metadata').frequencies;
@@ -167,6 +177,7 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
     events: {
         "click .panel" : "selectFrequency",
         "click .edit": "editFrequency",
+        "click .trash": "removeFrequency",
     },
 
     // End frequencies of each band. 4500 kHz is the 80 meter/60 meter transition for KX3. The K3 uses 4800 kHz.
@@ -214,7 +225,6 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
         this.allmems[this.band][this.frequency] = this.mem;
         this.model.set('metadata', {"frequencies": this.allmems} );
         this.model.save();
-        
     },
     
     editFrequency: function(event) {
@@ -233,6 +243,17 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
         linkManager.driver.setVFO(vfoa,"a");
         return true;
     },
+    
+    removeFrequency: function(event) {
+        var self = this;
+        // Use Bootbox for a quick OK/Cancel confirmation
+        bootbox.confirm("Are you sure you want to delete this card?<br>" + this.mem.vfoa + " MHz", function(result) {
+            if (result) {
+                self.listView.removefrequency(self.frequency);                
+            }
+        });
+        
+    }
     
 
 });
