@@ -21,13 +21,20 @@
 }
 
 .frequency-carousel .panel-footer .btn-left {
-    width: 90%;
+    width: 70%;
     float: left;
 }
 
-.frequency-carousel .panel-footer .btn-edit {
-    width: 10%;
+.frequency-carousel .panel-footer .btn-trash {
+    width: 15%;
     float: left;
+    text-align: left;
+}
+
+.frequency-carousel .panel-footer .btn-edit {
+    width: 15%;
+    float: left;
+    text-align: right;
 }
 
 .frequency-carousel .panel-heading .btn-vfoa {

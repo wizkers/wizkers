@@ -1,3 +1,7 @@
+/**
+ * Render a carousel of frequency memories, handle editing and updating.
+ */
+
 window.ElecraftFrequencyListView = Backbone.View.extend({
 
     tagName: "div",
@@ -86,13 +90,26 @@ window.ElecraftFrequencyListView = Backbone.View.extend({
             this.current_band = this.bands[parseInt(val)];
             console.log(this.current_band);
             this.render();
-        }
-
+        }    
+    },
+    
+    // Called from our containing view to add a new frequency for this band.
+    addfrequency: function() {
+        console.log("Add new frequency card");
+        var vfoa = $("#vfoa-direct").val();
+        var vfob = $("#vfob-direct").val();
+        this.frequencies[this.current_band].push( { "vfoa": vfoa, "vfob": vfob, "mode": "DATA A", "name": "Empty" });
+        this.model.set('metadata', {"frequencies": this.frequencies} );
+        this.model.save();
+        this.render();
         
     },
     
 });
 
+/**
+ * Model is the instrument
+ */
 window.ElecraftFrequencyItemView = Backbone.View.extend({
 
     tagName: "div",
@@ -100,23 +117,49 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
     
     editing: false,
     frequency: 0,
+    allmems: null,
+    mem: null,
 
     initialize: function (options) {
-        console.log("Frequency item - rending item " + options.frequency);
+        console.log("Frequency item - rendering item " + options.frequency);
         this.frequency = options.frequency; // What entry in the band memory
-        this.band = options.band;           // The current band memory
-        this.mem = this.model.get('metadata').frequencies[this.band][this.frequency]; // should always be defined
+        this.band = options.band;           // The current band memory (string)
+        this.allmems = this.model.get('metadata').frequencies;
+        this.mem = this.allmems[this.band][this.frequency]; // should always be defined
+        
+        _.bindAll(this,'checkFreqBoundaries');
+        _.bindAll(this,'changeEvent');
     },
 
     render: function () {
+        var self = this;
         // Extract the correct frequency memory from our model
         // (I kept using the model so that the frequency item can save it
         // upon edit, but it might not be optimal, I am a crap coder)
         
         
         $(this.el).html(this.template(this.mem));
-        $(".freq-description",this.el).editable();
-        $(".freq-vfoa",this.el).editable();
+        
+        // Now make the fields editable in-line, along with the right
+        // validation options - don't get out of the bands in particular -
+        // Also, update the memory values
+        $(".freq-description",this.el).editable({ success: function(response,newValue) {
+                                                            self.mem.name = newValue;
+                                                            self.changeEvent();
+                                                            }
+                                                });
+        $(".freq-vfoa",this.el).editable({validate: this.checkFreqBoundaries,
+                                           success: function(response,newValue) {
+                                                            self.mem.vfoa = newValue;
+                                                            self.changeEvent();
+                                                            }
+                                         });
+        $(".freq-vfob",this.el).editable({ validate: this.checkFreqBoundaries,
+                                            success: function(response,newValue) {
+                                                            self.mem.vfob = newValue;
+                                                            self.changeEvent();
+                                                            }
+                                         });
 
         return this;
     },
@@ -124,20 +167,60 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
     events: {
         "click .panel" : "selectFrequency",
         "click .edit": "editFrequency",
-        "change": "changeEvent",
+    },
+
+    // End frequencies of each band. 4500 kHz is the 80 meter/60 meter transition for KX3. The K3 uses 4800 kHz.
+
+    /* 0        <= BAND160  < 3000 kHz */
+    /* 3000     <= BAND80   < 4500 */
+    /* 4500     <= BAND60   < 6000 */
+    /* 6000     <= BAND40   < 9000 */
+    /* 9000     <= BAND30   < 13000 */
+    /* 13000    <= BAND20   < 17000 */
+    /* 17000    <= BAND17   < 19000 */
+    /* 19000    <= BAND15   < 23000 */
+    /* 23000    <= BAND12   < 26000 */
+    /* 26000    <= BAND10   < 38000 */
+    /* 38000    <= BAND6    < 54000 */
+    boundaries: {
+        "160m": {min: 0, max: 3000},
+        "80m": {min: 3000, max: 4500 },
+        "60m": {min: 4500, max:6000 },
+        "40m": {min:6000, max:9000 },
+        "30m": {min:9000, max:13000},
+        "20m": {min:13000, max:17000},
+        "17m": {min:17000, max:19000},
+        "15m": {min: 19000, max:23000},
+        "12m": {min:23000, max:26000},
+        "10m": {min:26000, max:38000},
+        "6m":  {min:38000, max:54000}
+    },
+
+    
+    checkFreqBoundaries: function(value) {
+        
+        console.log("Validate frequency: "+ value);
+        var val = parseFloat(value);
+        if (isNaN(val))
+            return "Please enter a number";
+        // We gotta do validation of the band boundaries
+        if ( (val*1000 <= this.boundaries[this.band].min) ||
+            (val*1000 > this.boundaries[this.band].max) )
+            return "Value outside of current band";
     },
     
-    changeEvent: function(event) {
-        // Every time one of our editable fields changes, we end up here
-        console.log(event);
-        // Update the model:
-        var vfoa = parseFloat($(".freq-vfoa",event.currentTarget).html());
-        var vfob = parseFloat($(".freq-vfob",event.currentTarget).html());
+    changeEvent: function() {
+        // Update the metadata and save:
+        this.allmems[this.band][this.frequency] = this.mem;
+        this.model.set('metadata', {"frequencies": this.allmems} );
+        this.model.save();
+        
     },
     
     editFrequency: function(event) {
         $(".freq-description",this.el).editable('toggleDisabled');
         $(".freq-vfoa",this.el).editable('toggleDisabled');
+        $(".freq-vfob",this.el).editable('toggleDisabled');
         this.editing = ! this.editing;
         return false; // stop propagation
     },

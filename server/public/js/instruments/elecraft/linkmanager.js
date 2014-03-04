@@ -84,6 +84,7 @@ var ElecraftLinkManager = function(linkManager) {
             console.log("VFO" + vfo + ": " + freq);
             this.cc(((vfo == 'A' || vfo == 'a') ? 'FA' : 'FB') + freq + ';');
         }
+        this.cc('BN;'); // Refresh band number (radio does not send it automatically)
     }    
 
     this.setPower = function(p) {

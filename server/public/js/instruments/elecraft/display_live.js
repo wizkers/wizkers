@@ -63,6 +63,7 @@ window.ElecraftLiveView = Backbone.View.extend({
     
     events: {
         "click #power-direct-btn": "setpower",
+        "click .store-frequency": "addfrequency",
         "click input#power-direct": "setpower",
         "keypress input#power-direct": "setpower",
         "keypress input#vfoa-direct": "setvfoa",
@@ -76,6 +77,10 @@ window.ElecraftLiveView = Backbone.View.extend({
         "slideStop #bpf-control": "setBW",
         "slideStop #ct-control": "setCT",
         "click .band-btn": "setBand",
+    },
+    
+    addfrequency: function() {
+        this.ElecraftFrequencyListView.addfrequency();
     },
     
     setpower: function(e) {
