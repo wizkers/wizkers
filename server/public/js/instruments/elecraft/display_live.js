@@ -247,6 +247,10 @@ window.ElecraftLiveView = Backbone.View.extend({
         } else if (cmd == "IF") {
             // IF messages are sent in some occasions, they contain tons of info:
             this.setModeIcon(val.substr(27,1));
+            var rit = parseInt(val.substr(21,1));
+            this.setIcon('RIT', rit);
+            var xit = parseInt(val.substr(22,1));
+            this.setIcon('XIT',xit);
         } else if (cmd == "MD") {
             this.setModeIcon(parseInt(val));
         }

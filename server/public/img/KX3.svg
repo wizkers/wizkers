@@ -651,9 +651,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="1295.0148"
-     inkscape:cy="647.70682"
+     inkscape:zoom="2.8"
+     inkscape:cx="1289.8363"
+     inkscape:cy="790.56397"
      inkscape:document-units="px"
      inkscape:current-layer="layer4"
      showgrid="false"
@@ -661,10 +661,10 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="2591"
-     inkscape:window-height="1287"
-     inkscape:window-x="644"
-     inkscape:window-y="734"
+     inkscape:window-width="1927"
+     inkscape:window-height="1076"
+     inkscape:window-x="1790"
+     inkscape:window-y="19"
      inkscape:window-maximized="0"
      showguides="true"
      inkscape:guide-bbox="true">
@@ -1733,6 +1733,70 @@
          style="font-size:27px;font-weight:bold;-inkscape-font-specification:Sans Bold"
          id="path3344"
          inkscape:connector-curvature="0" />
+    </g>
+    <g
+       id="icon_RIT"
+       class="icon">
+      <rect
+         ry="5.3571339"
+         rx="4.4886823"
+         y="286"
+         x="1207.3717"
+         height="38.57143"
+         width="70"
+         id="rect4142"
+         style="fill:none;stroke:#000000;stroke-width:5;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <g
+         id="text4144"
+         style="font-size:64px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans">
+        <path
+           id="path4162"
+           style="font-size:27px;font-weight:bold;-inkscape-font-specification:Sans Bold"
+           d="m 1226.2614,303.25873 c 1.0634,10e-6 1.8237,-0.19774 2.2807,-0.59326 0.4658,-0.3955 0.6987,-1.04589 0.6987,-1.95118 0,-0.89647 -0.2329,-1.53807 -0.6987,-1.9248 -0.457,-0.3867 -1.2173,-0.58006 -2.2807,-0.58008 l -2.1358,0 0,5.04932 2.1358,0 m -2.1358,3.50683 0,7.44873 -5.0757,0 0,-19.6831 7.752,0 c 2.5927,2e-5 4.4912,0.43508 5.6953,1.30517 1.2129,0.87014 1.8193,2.24563 1.8193,4.12647 0,1.30079 -0.3164,2.36866 -0.9492,3.20361 -0.624,0.83497 -1.5689,1.45021 -2.8345,1.84571 0.6944,0.15821 1.314,0.51856 1.8589,1.08105 0.5537,0.55372 1.1118,1.39747 1.6743,2.53125 l 2.7554,5.58984 -5.4053,0 -2.3994,-4.89111 c -0.4834,-0.98437 -0.9756,-1.65673 -1.4765,-2.01709 -0.4922,-0.36034 -1.1514,-0.54052 -1.9776,-0.54053 l -1.437,0"
+           inkscape:connector-curvature="0" />
+        <path
+           id="path4164"
+           style="font-size:27px;font-weight:bold;-inkscape-font-specification:Sans Bold"
+           d="m 1239.8273,294.53119 5.0757,0 0,19.6831 -5.0757,0 0,-19.6831"
+           inkscape:connector-curvature="0" />
+        <path
+           id="path4166"
+           style="font-size:27px;font-weight:bold;-inkscape-font-specification:Sans Bold"
+           d="m 1247.5529,294.53119 18.1406,0 0,3.83642 -6.5259,0 0,15.84668 -5.0757,0 0,-15.84668 -6.539,0 0,-3.83642"
+           inkscape:connector-curvature="0" />
+      </g>
+    </g>
+    <g
+       id="icon_XIT"
+       class="icon">
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:5;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         id="rect4148"
+         width="70"
+         height="38.57143"
+         x="1305.3717"
+         y="286"
+         rx="4.4886823"
+         ry="5.3571339" />
+      <g
+         id="text4150"
+         style="font-size:64px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans">
+        <path
+           id="path4155"
+           style="font-size:27px;font-weight:bold;-inkscape-font-specification:Sans Bold"
+           d="m 1328.0187,304.1684 6.8291,10.04589 -5.2866,0 -4.6011,-6.72363 -4.5615,6.72363 -5.313,0 6.8291,-10.04589 -6.5655,-9.63721 5.2998,0 4.3111,6.34131 4.2978,-6.34131 5.3262,0 -6.5654,9.63721"
+           inkscape:connector-curvature="0" />
+        <path
+           id="path4157"
+           style="font-size:27px;font-weight:bold;-inkscape-font-specification:Sans Bold"
+           d="m 1337.88,294.53119 5.0757,0 0,19.6831 -5.0757,0 0,-19.6831"
+           inkscape:connector-curvature="0" />
+        <path
+           id="path4159"
+           style="font-size:27px;font-weight:bold;-inkscape-font-specification:Sans Bold"
+           d="m 1345.6056,294.53119 18.1406,0 0,3.83642 -6.5259,0 0,15.84668 -5.0756,0 0,-15.84668 -6.5391,0 0,-3.83642"
+           inkscape:connector-curvature="0" />
+      </g>
     </g>
   </g>
 </svg>
