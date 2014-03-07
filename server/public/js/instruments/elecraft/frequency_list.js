@@ -76,6 +76,11 @@ window.ElecraftFrequencyListView = Backbone.View.extend({
         return this;
     },
     
+    refresh: function() {
+        var metadata = this.model.get('metadata');
+        this.frequencies = metadata.frequencies;
+    },
+    
     onClose: function() {
         console.log("Frequency list closing");
         linkManager.off('input', this.showInput, this);
@@ -225,6 +230,7 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
         this.allmems[this.band][this.frequency] = this.mem;
         this.model.set('metadata', {"frequencies": this.allmems} );
         this.model.save();
+        this.listView.refresh();
     },
     
     editFrequency: function(event) {
