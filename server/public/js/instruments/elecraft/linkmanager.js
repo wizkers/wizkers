@@ -35,7 +35,7 @@ var ElecraftLinkManager = function(linkManager) {
         // K31 enables extended values such as proper BPF reporting
         // AI2 does not send an initial report, so we ask for the initial data
         // before...
-        this.cc('K31;FA;FB;RG;FW;MG;IS;BN;AI2;');
+        this.cc('K31;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
 
         this.livePoller = setInterval(this.queryRadio.bind(this), 1000);
         this.streaming = true;

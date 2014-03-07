@@ -29,10 +29,12 @@ window.ElecraftLiveView = Backbone.View.extend({
                 width: "100%",
                 height: 350,
             });
+            $("#kx3 .icon").css('visibility', 'hidden');
+
         });
         
-        $("#kx3 .icon").css('visibility', 'hidden');
         
+        // Initialize our sliding controls:
         $("#rf-control", this.el).slider();
         $("#ag-control", this.el).slider();
         $("#bpf-control", this.el).slider();
@@ -178,6 +180,14 @@ window.ElecraftLiveView = Backbone.View.extend({
     setIcon: function(name, visible) {
         $("#kx3 #icon_" + name).css("visibility", (visible) ? "visible" : "hidden");
     },
+    
+    setModeIcon: function(mode) {
+        // We need to update all icons when moving from one mode to another, so
+        // I added this helper function
+        var modes = [ "LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV" ];
+        $("#kx3 .mode_icon").css('visibility', 'hidden');
+        $("#kx3 #icon_" + modes[mode-1]).css('visibility', 'visible');
+    },
 
 
     showInput: function(data) {
@@ -234,6 +244,11 @@ window.ElecraftLiveView = Backbone.View.extend({
             $("#ct-control", this.el).slider('setValue',parseInt(val)/1000);
         }  else if (cmd == "BN") {
             $("#freq-slider-band",this.el).html(this.bands[parseInt(val)]);
+        } else if (cmd == "IF") {
+            // IF messages are sent in some occasions, they contain tons of info:
+            this.setModeIcon(val.substr(27,1));
+        } else if (cmd == "MD") {
+            this.setModeIcon(parseInt(val));
         }
 
     },
