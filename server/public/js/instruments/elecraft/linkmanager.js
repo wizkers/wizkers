@@ -35,7 +35,7 @@ var ElecraftLinkManager = function(linkManager) {
         // K31 enables extended values such as proper BPF reporting
         // AI2 does not send an initial report, so we ask for the initial data
         // before...
-        this.cc('K31;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
+        this.cc('K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
 
         this.livePoller = setInterval(this.queryRadio.bind(this), 1000);
         this.streaming = true;
@@ -73,6 +73,10 @@ var ElecraftLinkManager = function(linkManager) {
     
     this.getRequestedPower = function() {
         this.cc('PC;');
+    }
+    
+    this.getMode = function() {
+        this.cc('MD;');
     }
     
     this.setVFO = function(f, vfo) {
@@ -133,7 +137,10 @@ var ElecraftLinkManager = function(linkManager) {
 
     this.queryRadio = function() {
         
-        // This is queried every 2 seconds - we stage our queries in order
+        // TODO: follow radio state over here, so that we only query power
+        // when the radio transmits, makes much more sense
+        
+        // This is queried every second - we stage our queries in order
         // to avoid overloading the radio, not sure that is totally necessary, but
         // this won't hurt
         

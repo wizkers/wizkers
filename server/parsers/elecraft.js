@@ -109,6 +109,12 @@ module.exports = {
                     this.vfoa_bandwidth = parseInt(data.substr(2));
                     break;
         }
+        var lcmd = data.substr(0,3);
+        if (cmd != "DB" && cmd != "DS" && cmd != "PO" && lcmd != "^PI" && lcmd != "^PF" && lcmd != "^TM" &&
+           lcmd != "^PV" ) {
+            // Additional output besides regular polling, print it
+            console.log("******  " + data);
+        }
         
         this.socket.emit('serialEvent',data);
         //this.recorder.record(fields);

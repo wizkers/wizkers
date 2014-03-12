@@ -150,7 +150,7 @@ window.ElecraftLiveView = Backbone.View.extend({
         "B_DATA": "T17", "B_TEXT": "H17",
         "B_RIT": "T18", "B_PF1": "H18",
         "B_RATE": "T12", "B_KHZ": "H12",
-        "B_A_SLASH_B": "T24", "B_REV": "H24",
+        "B_A_SLASH_B": "T24;MD;", "B_REV": "H24", // Request mode again when swapping VFO's
         "B_A_TO_B": "T25", "B_SPLIT": "H25",
         "B_XIT": "T26", "B_PF2": "H26",
         "B_DISP": "T09", "B_MENU": "H09"

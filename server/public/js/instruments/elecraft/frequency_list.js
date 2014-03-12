@@ -51,6 +51,10 @@ window.ElecraftFrequencyListView = Backbone.View.extend({
         
         this.current_band = "default";
         this.frequencies.default = [ {"vfoa":0, "vfob": 0, mode:"AM", name:"No Memory defined" } ];
+        this.modes = [ "LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV" ];
+        
+        this.addingFrequency = false;
+
         
         // TODO: get input and follow frequencies to track current band and re-render.
         linkManager.on('input', this.showInput, this);
@@ -95,16 +99,25 @@ window.ElecraftFrequencyListView = Backbone.View.extend({
             this.current_band = this.bands[parseInt(val)];
             console.log(this.current_band);
             this.render();
-        }    
+        } else if (cmd == "MD" && this.addingFrequency) {
+            this.addingFrequency = false;
+            this.modeCallback(val);
+        }
     },
     
     // Called from our containing view to add a new frequency for this band.
     addfrequency: function() {
-        var self = this;
         console.log("Add new frequency card");
+        // We need to query the radio for its current mode:
+        this.addingFrequency = true;
+        linkManager.driver.getMode();
+    },
+    
+    modeCallback: function(val) {
+        var self = this;
         var vfoa = $("#vfoa-direct").val();
         var vfob = $("#vfob-direct").val();
-        this.frequencies[this.current_band].push( { "vfoa": vfoa, "vfob": vfob, "mode": "DATA A", "name": "Empty" });
+        this.frequencies[this.current_band].push( { "vfoa": vfoa, "vfob": vfob, "mode": this.modes[parseInt(val)-1], "name": "Empty" });
         this.model.set('metadata', {"frequencies": this.frequencies} );
         this.model.save(null, { success: function() { self.render(); } } );
     },
