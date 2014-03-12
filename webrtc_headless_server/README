@@ -1,0 +1,4 @@
+To be placed in trunk/talk/examples as a replacement of the "peerconnection" example.
+
+Works fine now, need more work to select audio device, and support two-way audio, of course.
+
