@@ -108,7 +108,8 @@ window.ElecraftFrequencyListView = Backbone.View.extend({
     // Called from our containing view to add a new frequency for this band.
     addfrequency: function() {
         console.log("Add new frequency card");
-        // We need to query the radio for its current mode:
+        // We need to query the radio for its current mode, so we have to go
+        // through a callback once this data comes back:
         this.addingFrequency = true;
         linkManager.driver.getMode();
     },
@@ -126,14 +127,14 @@ window.ElecraftFrequencyListView = Backbone.View.extend({
         var self = this;
         this.frequencies[this.current_band].splice(index,1);
         this.model.set('metadata', {"frequencies": this.frequencies} );
+        // Save & ask to re-render the upper level element
         this.model.save(null, { success: function() { self.render(); } } );
-        // Now ask to re-render the upper level element
     },
     
 });
 
 /**
- * Model is the instrument
+ * Model is the instrument. This is a single frequency card: vfoa, vfob, description & mode.
  */
 window.ElecraftFrequencyItemView = Backbone.View.extend({
 
@@ -161,11 +162,7 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
 
     render: function () {
         var self = this;
-        // Extract the correct frequency memory from our model
-        // (I kept using the model so that the frequency item can save it
-        // upon edit, but it might not be optimal, I am a crap coder)
-        
-        
+        // Extract the correct frequency memory from our model        
         $(this.el).html(this.template(this.mem));
         
         // Now make the fields editable in-line, along with the right
@@ -193,9 +190,9 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
     },
     
     events: {
+        "click .trash": "removeFrequency",
         "click .panel" : "selectFrequency",
         "click .edit": "editFrequency",
-        "click .trash": "removeFrequency",
     },
 
     // End frequencies of each band. 4500 kHz is the 80 meter/60 meter transition for KX3. The K3 uses 4800 kHz.
@@ -259,7 +256,13 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
             return true;
         console.log('Frequency selected: ' + event);
         var vfoa = parseFloat($(".freq-vfoa",event.currentTarget).html());
+        var vfob = parseFloat($(".freq-vfob",event.currentTarget).html());
         linkManager.driver.setVFO(vfoa,"a");
+        linkManager.driver.setVFO(vfob,"b");
+        var mode = $('.freq-mode',event.currentTarget).html();
+        var modecode = this.listView.modes.indexOf(mode);
+        if (modecode == -1) modecode = 4;
+        linkManager.driver.setMode(modecode+1);
         return true;
     },
     
@@ -271,7 +274,7 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
                 self.listView.removefrequency(self.frequency);                
             }
         });
-        
+        return false; // stop propagation
     }
     
 

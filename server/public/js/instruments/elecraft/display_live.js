@@ -222,8 +222,13 @@ window.ElecraftLiveView = Backbone.View.extend({
             this.setIcon("ANT2",(a&0x20));
             this.setIcon("PRE",(a & 0x10));
             this.setIcon("ATT",(a & 0x8));
+            // Comment out the two operations below to
+            // gain time: an IF packet is sent when those change
+            // this.setIcon("RIT", (a& 0x2));
+            // this.setIcon("XIT", (a& 0x1));
             
             this.setIcon("ATU",(f & 0x10));
+            this.setIcon("NR", (f & 0x04));
             
         } else if (cmd == "PC") {
             $("#power-direct").val(parseInt(val));

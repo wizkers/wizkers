@@ -79,6 +79,11 @@ var ElecraftLinkManager = function(linkManager) {
         this.cc('MD;');
     }
     
+    this.setMode = function(code) {
+        this.cc('MD' + code + ';');
+    }
+
+    
     this.setVFO = function(f, vfo) {
         var freq = ("00000000000" + (parseInt(f*1e6).toString())).slice(-11); // Nifty, eh ?
         if (freq.indexOf("N") > -1) { // detect "NaN" in the string
