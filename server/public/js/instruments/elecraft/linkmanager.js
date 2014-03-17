@@ -12,7 +12,9 @@ var ElecraftLinkManager = function(linkManager) {
     var self = this;
     var lm = linkManager;
     var streaming = false;
+    var streamingText = false;
     var livePoller = null; // Reference to the timer for live streaming
+    var textPoller = null; // This is a poller to read from the radio TB buffer.
     
     var kxpa100 = false; // Keep track of the presence of an amplifier
 
@@ -62,6 +64,24 @@ var ElecraftLinkManager = function(linkManager) {
     
     // All commands below are fully free and depend on
     // the instrument's capabilities
+    
+    this.startTextStream = function() {
+//        this.streamingText = true;
+        this.textPoller = setInterval(this.queryTB.bind(this), 700);
+        return true;
+    }
+    
+    this.stopTextStream = function() {
+        if (typeof this.textPoller != 'undefined') {
+            clearInterval(this.textPoller);
+//            this.streamingText = false;
+        }
+        return true;
+    }
+    
+    this.queryTB = function() {
+        this.cc('TB;');
+    }
     
     this.cc = function(d) {
         lm.socket.emit('controllerCommand',d);
@@ -139,7 +159,7 @@ var ElecraftLinkManager = function(linkManager) {
             this.cc('BN' + bandcode + ';');
         }
     }
-
+    
     this.queryRadio = function() {
         
         // TODO: follow radio state over here, so that we only query power

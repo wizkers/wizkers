@@ -4,14 +4,14 @@
         <div class="col-md-8">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="thumbnail">
+                    <div>
                         <svg id="kx3"  viewBox="0 0 2325 991" preserveAspectRatio="xMidYMid"></svg>
                     </div>
                 </div>
             </div><!-- radio -->
             <div class="row">
                 <div class="col-md-12">
-                    <div style="text-align:center;">
+                    <div style="text-align:center; padding-bottom: 5px;">
                             <div class="btn-group">
                                 <button type="button" name="bands" class="btn btn-default band-btn">160m</button>
                                 <button type="button" name="bands" class="btn btn-default band-btn">80m</button>
@@ -29,26 +29,66 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-9">
-                <h4><span id="freq-slider-band">20m</span> frequencies</h4>
-            </div>
-            <div class="col-md-3">
-                <!-- Controls -->
-                <div style="margin-top: 3px; margin-bottom:3px;">
-                    <div class="pull-right">
-                        <button role="button" class="btn btn-info store-frequency"><span class="glyphicon glyphicon-plus"></span></button>
-                        <a class="left btn btn-success" href="#frequency-selector"
-                            data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
-                        <a class="right btn btn-success" href="#frequency-selector"
-                                data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#memories" data-toggle="tab">Memories</a></li>
+                        <li><a href="#data-term" data-toggle="tab">Data Terminal</a></li>
+                        <li><a href="#audio-settings" data-toggle="tab">Audio</a></li>
+                    </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                  <div class="tab-pane active" id="memories">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h4><span id="freq-slider-band">20m</span> frequencies</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <!-- Controls -->
+                            <div style="margin-top: 3px; margin-bottom:3px;">
+                                <div class="pull-right">
+                                    <button role="button" class="btn btn-info store-frequency"><span class="glyphicon glyphicon-plus"></span></button>
+                                    <a class="left btn btn-success" href="#frequency-selector"
+                                        data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
+                                    <a class="right btn btn-success" href="#frequency-selector"
+                                            data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- Frequency cards header -->
+                    <!-- ********** -->
+                    <div id="frequency-selector" class="frequency-carousel carousel slide" data-interval="false" > <!-- Note add data-ride="carousel" to autoplay it -->
+                    <!-- Wrapper for slides -->
+                        <div class="carousel-inner" id="frequency-selector-content">
+                        </div>
+                    </div>                    
+    
                     </div>
+                  <div class="tab-pane" id="data-term">
+                    <div class="row">
+                        <div class="col-md-12">
+                             <div class="input-group">
+                                 <span class="input-group-addon">Text:</span>
+                                 <input id="data-text-input" class="form-control" value="" type="text" maxlength="32">
+                                 <span class="input-group-btn"><button type="button" class="btn" id="cmdsend"><span class="glyphicon glyphicon-check"></span></button>
+                                 </span>
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <div style="float:right;"><button type="button" class="btn btn-default" id="data-stream-clear">Clear</button></div>
+                                <h6>Received text</h6>
+                                <textarea id="data-stream" style="height:200px; width:98%;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="tab-pane" id="audio-settings"><h4>Audio Settings</h4>
+                    We will have the following here:
+                    <ul><li>RX/TX EQ settings</li><li>AGC S/F settings</li></ul></div>
                 </div>
-            </div>
-            </div> <!-- Frequency cards header -->
-            <!-- ********** -->
-            <div id="frequency-selector" class="frequency-carousel carousel slide" data-interval="false" > <!-- Note add data-ride="carousel" to autoplay it -->
-            <!-- Wrapper for slides -->
-                <div class="carousel-inner" id="frequency-selector-content">
                 </div>
             </div>
         

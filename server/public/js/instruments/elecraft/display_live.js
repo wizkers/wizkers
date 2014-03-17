@@ -79,6 +79,22 @@ window.ElecraftLiveView = Backbone.View.extend({
         "slideStop #bpf-control": "setBW",
         "slideStop #ct-control": "setCT",
         "click .band-btn": "setBand",
+        "shown.bs.tab a[data-toggle='tab']": "tabChange",
+        "click #data-stream-clear": "clearDataStream",
+    },
+    
+    
+    tabChange: function(e) {
+        console.log("Change tab to: " + e.target);
+        if (e.target.text == "Data Terminal") {
+            linkManager.driver.startTextStream();
+        } else {
+            linkManager.driver.stopTextStream();
+        }
+    },
+    
+    clearDataStream: function() {
+        $('#data-stream',this.el).val("");
     },
     
     addfrequency: function() {
@@ -258,6 +274,16 @@ window.ElecraftLiveView = Backbone.View.extend({
             this.setIcon('XIT',xit);
         } else if (cmd == "MD") {
             this.setModeIcon(parseInt(val));
+        } else if (cmd == "TB") {
+            var l = parseInt(val.substr(1,2));
+            if (l > 0) {
+                var txt = val.substr(3);
+                var input = $('#data-stream',this.el);
+                var scroll = input.val() + txt;
+                input.val(scroll);
+                // Autoscroll:
+                //i.scrollTop(i[0].scrollHeight - i.height());
+               }
         }
 
     },
