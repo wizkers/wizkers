@@ -10,6 +10,7 @@ define(function(require) {
     
     var $       = require('jquery'),
         Backbone = require('backbone'),
+        _       = require('underscore'),
         HeaderView = require('app/views/header');
 
     return Backbone.Router.extend({
@@ -52,12 +53,16 @@ define(function(require) {
             console.log("Initializing application");
             this.headerView = new HeaderView();
             $('.header').html(this.headerView.el);
+            
+            _.bindAll(this,"switchView"); // switchView needs to be bound to this context when called from
+                                          // within a callback, otherwise the "onClose" methods will never
+                                          // be called.
 
 
             // When the current instrument model changes, we need to update
             // the link manager type:
             settings.on('change:currentInstrument', function(model, insId) {
-                console.log('New instrument ID, updating the link manager type');
+                console.log('New instrument ID, updating the link manager type and jumping to home screen');
                 require(['app/models/instrument'], function(model) {
                     var ins = new model.Instrument({_id: insId});
                     ins.fetch({success: function(){
@@ -67,6 +72,8 @@ define(function(require) {
                         linkManager.closeInstrument();  // Stop former link manager
                         instrumentManager.setInstrument(ins);
                         linkManager.setDriver(instrumentManager.getLinkManager(linkManager));
+                        // We need to jump to the main screen now:
+                        self.navigate('/', true);
                     }});
                 });
             });

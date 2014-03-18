@@ -5,46 +5,52 @@
 define(function(require) {
     "use strict";
 
+    var linkmanager = require('app/instruments/friedcircuits_oled/linkmanager');
+
     return function() {
     
-            // Helper function: get driver capabilites.
+        // Helper function: get driver capabilites.
         // returns a simple array of capabilities    
         this.getCaps = function() {
             return ["LiveDisplay",  "NumDisplay", ];
         };
 
         // This has to be a backbone view
-        this.getSettings = function(arg) {
-            return new FCOledSettings(arg);
+        this.getSettings = function(arg, callback) {
+            require(['app/instruments/friedcircuits_oled/settings'], function(view) {
+                callback(new view(arg));
+            });
         };
 
         // This has to be a Backbone view
         // This is the full screen live view (not a small widget)
-        this.getLiveDisplay = function(arg) {
-            return new FCOledLiveView(arg);
+        this.getLiveDisplay = function(arg, callback) {
+            require(['app/instruments/friedcircuits_oled/display_live'], function(view) {
+                callback(new view(arg));
+            });
         };
 
-            // This is a Backbone view
+        // This is a Backbone view
         // This is a numeric display
-        this.getNumDisplay = function(arg) {
-            return new FCOledNumView(arg);
+        this.getNumDisplay = function(arg, callback) {
+            require(['app/instruments/friedcircuits_oled/display_numeric'], function(view) {
+                callback(new view(arg));
+            });
         };
 
         // A diagnostics/device setup screen
-        this.getDiagDisplay = function(arg) {
+        this.getDiagDisplay = function(arg, callback) {
             return null;
-            return new FCOledDiagView(arg);
         };
 
-
         // A smaller widget (just a graph)
-        this.getLiveWidget = function(arg) {
-            return new FCOledLiveWidget(arg);
+        this.getLiveWidget = function(arg, callback) {
+            return null;
         };
 
         // This has to be a link manager
         this.getLinkManager = function(arg) {
-            return new FCOledLinkManager(arg);
+            return new linkmanager(arg);
         };
 
         // Return a Backbone view which is a mini graph
@@ -58,8 +64,10 @@ define(function(require) {
         }
 
         // Render a log (or list of logs) for the device.
-        this.getLogView = function(arg) {
-            return new FCOledLogView(arg);
+        this.getLogView = function(arg, callback) {
+            require(['app/instruments/friedcircuits_oled/display_log'], function(view) {
+                callback(new view(arg));
+            });
         }
 
     };

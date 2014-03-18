@@ -57,7 +57,11 @@ define(function(require) {
                     } catch (err) {
                         console.log("No current instrument selected, not closing it");
                     }
-                    router.navigate('/', true);
+                    // Disabled the navigate below: our router will trigger this once hte
+                    // new instrument is loaded, so that we don't get a double rendering, which is
+                    // super expensive (once of the old instrument, once of the new instrument)
+                    //router.navigate('/', true);
+                    return false;
                 }});
                 return false;
             },
