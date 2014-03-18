@@ -138,7 +138,7 @@ define(function(require) {
             },
 
             ctrlDiag: function() {
-                app.navigate('diagnostics/' + this.instrument.id, true);
+                router.navigate('diagnostics/' + this.instrument.id, true);
             },
 
             updatestatus: function(data) {

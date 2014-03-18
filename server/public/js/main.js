@@ -25,7 +25,9 @@ require.config({
         bootstrapeditable: 'bootstrap-editable',
         flot: 'flot-0.8.1/jquery.flot',
         flot_time: 'flot-0.8.1/jquery.flot.time',
-        
+        flot_resize: 'flot-0.8.1/jquery.flot.resize',
+        flot_selection: 'flot-0.8.1/jquery.flot.selection',
+        flot_fillbetween: 'flot-0.8.1/jquery.flot.fillbetween',
     },
     
     /*
@@ -66,8 +68,19 @@ require.config({
         'flot_time': {
             deps: ['flot']
         },
+        'flot_resize': {
+            deps: ['flot']
+        },
+        'flot_selection': {
+            deps: ['flot']
+        },
+        'flot_fillbetween': {
+            deps: ['flot']
+        },
     }
 });
+
+var router;
 
 require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instruments/instrumentmanager', 'app/linkmanager',
          'app/models/instrument'], function($, Backbone, Router, Settings,InstrumentManager, LinkManager, Instrument) {
@@ -104,7 +117,7 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
                 Backbone.history.start();
             }});
         } else {
-	   var router = new Router();
+	   router = new Router();
 	   Backbone.history.start();
 	}
 });

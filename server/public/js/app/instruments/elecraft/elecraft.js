@@ -33,8 +33,10 @@ define(function(require) {
         };
 
         // A diagnostics/device setup screen
-        this.getDiagDisplay = function(arg) {
-            return new ElecraftDiagView(arg);
+        this.getDiagDisplay = function(arg, callback) {
+            require(['app/instruments/elecraft/display_diag'], function(view) {
+                callback(new view(arg));
+            });
         };
 
         // This has to be a link manager
@@ -49,7 +51,7 @@ define(function(require) {
 
         // Render a log (or list of logs) for the device.
         this.getLogView = function(arg) {
-            return new ElecraftLogView(arg);
+            return null;
         }
 
     };

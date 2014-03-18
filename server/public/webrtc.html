@@ -27,6 +27,8 @@
     RTCIceCandidate = window.mozRTCIceCandidate || window.RTCIceCandidate;
     getUserMedia = navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
     URL = window.webkitURL || window.URL;
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    
     
     function createPeerConnection(peer_id) {
         try {
@@ -57,9 +59,13 @@
 
     function onRemoteStreamAdded(event) {
       console.log("Remote stream added:", URL.createObjectURL(event.stream));
-      var remoteVideoElement = document.getElementById('remote-video');
+      var remoteVideoElement = document.getElementById('remote-audio');
       remoteVideoElement.src = URL.createObjectURL(event.stream);
       remoteVideoElement.play();
+
+      // TODO: now that we have a remote stream (the radio), let's send out own audio:
+
+      // Create a local audio stream (use the microphone), and add it to the peer connection
     }
     
     function handlePeerMessage(peer_id, data) {
@@ -297,13 +303,20 @@
     function onRemoteSdpSucces() {
         console.log('onRemoteSdpSucces');
     } 
+        
 </script>
 </head>
 <body>
+    <div id="viz">
+        <canvas id="visualisation" width="750" height="250"></canvas><br>
+    </div>
     <div id="container">
         <div id="remote">
-            <video id="remote-video" width="50%" height="50%"></video>
+            <audio id="remote-audio" controls autoplay></audio>
         </div>
+    </div>
+    <div class='select'>
+        <label for='audioSource'>Audio source: </label><select id='audioSource'></select>
     </div>
     Server: <input type="text" id="server" value="http://localhost:8888" /><br>
     Your name: <input type="text" id="local" value="myclient"/>
@@ -314,5 +327,53 @@
     <pre id="debug"></pre>
     <br>
     <hr>
+    
+    <script>
+        var audioSelect = document.querySelector("select#audioSource");
+    
+    function gotSources(sourceInfos) {
+        for (var i = 0; i != sourceInfos.length; ++i) {
+            var sourceInfo = sourceInfos[i];
+            var option = document.createElement("option");
+            option.value = sourceInfo.id;
+            if (sourceInfo.kind === 'audio') {
+                option.text = sourceInfo.label || 'microphone ' + (audioSelect.length + 1);
+                audioSelect.appendChild(option);
+            } /* else if (sourceInfo.kind === 'video') {
+                option.text = sourceInfo.label || 'camera ' + (videoSelect.length + 1);
+                videoSelect.appendChild(option);
+            } */ else {
+                console.log('Some other kind of source: ', sourceInfo);
+            }
+        }
+    }
+    
+    if (typeof MediaStreamTrack === 'undefined'){
+        alert('This browser does not support MediaStreamTrack.\n\nTry Chrome Canary.');
+    } else {
+        MediaStreamTrack.getSources(gotSources);
+    }
+        
+    function startLocalAudio(){
+        // if (!!window.stream) {
+        //    videoElement.src = null;
+        //    window.stream.stop();
+        // }
+        var audioSource = audioSelect.value;
+        //var videoSource = videoSelect.value;
+        var constraints = {
+            audio: {
+                optional: [{sourceId: audioSource}]
+            },
+            video: false
+            //video: {
+            //    optional: [{sourceId: videoSource}]
+            //}
+        };
+        navigator.getUserMedia(constraints, successCallback, errorCallback);
+    }
+
+    
+</script>
 </body>
 </html>

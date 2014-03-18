@@ -1,5 +1,5 @@
 /**
- * The main application router
+ * The main application router.
  *
  * (c) 2014 Edouard Lafargue ed@lafargue.name
  */
@@ -58,15 +58,17 @@ define(function(require) {
             // the link manager type:
             settings.on('change:currentInstrument', function(model, insId) {
                 console.log('New instrument ID, updating the link manager type');
-                var ins = new Instrument({_id: insId});
-                ins.fetch({success: function(){
-                    var type = ins.get('type');
-                    console.log('New instrument type: ' + type );
-                    // Now update our Instrument manager:
-                    linkManager.closeInstrument();  // Stop former link manager
-                    instrumentManager.setInstrument(ins);
-                    linkManager.setDriver(instrumentManager.getLinkManager(linkManager));
-                }});
+                require(['app/models/instrument'], function(model) {
+                    var ins = new model.Instrument({_id: insId});
+                    ins.fetch({success: function(){
+                        var type = ins.get('type');
+                        console.log('New instrument type: ' + type );
+                        // Now update our Instrument manager:
+                        linkManager.closeInstrument();  // Stop former link manager
+                        instrumentManager.setInstrument(ins);
+                        linkManager.setDriver(instrumentManager.getLinkManager(linkManager));
+                    }});
+                });
             });
 
 
@@ -87,10 +89,12 @@ define(function(require) {
             var self = this;
             if (linkManager.connected) {
                 console.log('Switching to the instrument diagnostics view');
-                self.switchView(instrumentManager.getDiagDisplay({model: settings}));
-                self.headerView.selectMenuItem('home-menu');    
+                instrumentManager.getDiagDisplay({model: settings}, function(view) {
+                    self.switchView(view);
+                    self.headerView.selectMenuItem('home-menu');
+                });
             } else {
-                app.navigate('/',true);
+                this.navigate('/',true);
             }
         },
     
@@ -101,8 +105,10 @@ define(function(require) {
             var logs = instrumentManager.getInstrument().logs;
             logs.fetch({
                 success:function() {
-                    self.switchView(new LogManagementView({collection: logs}));
-                    self.headerView.selectMenuItem('management-menu');
+                    require(['app/views/logmanagement'], function(view) {
+                        self.switchView(new view({collection: logs}));
+                        self.headerView.selectMenuItem('management-menu');
+                    });
                 }});
         },
     
@@ -115,7 +121,9 @@ define(function(require) {
             var allLogs = instrumentManager.getInstrument().logs;
             allLogs.fetch({success:function(){
                 var myLogs = allLogs.getLogSubset(logarray);
-                self.switchView(instrumentManager.getLogView({collection:myLogs}));
+                instrumentManager.getLogView({collection:myLogs}, function(view) {
+                    self.switchView(view);
+                });
             }});
         },
 
@@ -153,11 +161,15 @@ define(function(require) {
         listInstruments: function(page) {
             var self = this;
             var p = page ? parseInt(page, 10) : 1;
-            var instrumentList = new InstrumentCollection();
-            instrumentList.fetch({success: function(){
-                self.switchView(new InstrumentListView({model: instrumentList, page: p}));
-            }});
-            this.headerView.selectMenuItem('instrument-menu');
+            
+            require(['app/models/instrument', 'app/views/instrument/instrumentlist'], function(model, view) {
+                var instrumentList = new model.InstrumentCollection();
+                instrumentList.fetch({success: function(){
+                    self.switchView(new view({model: instrumentList, page: p}));
+                }});
+                self.headerView.selectMenuItem('instrument-menu');                
+            });
+            
 
         },
 
@@ -171,11 +183,13 @@ define(function(require) {
 
         instrumentDetails: function(id) {
             var self = this;
-            var instrument = new Instrument({_id: id});
-            instrument.fetch({success: function(){
-                self.switchView(new InstrumentDetailsView({model: instrument}));
-            }});
-            this.headerView.selectMenuItem('instrument-menu');
+            require(['app/models/instrument', 'app/views/instrument/instrumentdetails'], function(model, view) {
+                var instrument = new model.Instrument({_id: id});
+                instrument.fetch({success: function(){
+                    self.switchView(new view({model: instrument}));
+                }});
+                self.headerView.selectMenuItem('instrument-menu');
+            });
 
         },
     
@@ -202,15 +216,21 @@ define(function(require) {
 
 
         about: function () {
-            var aboutView = new AboutView();
-            this.switchView(aboutView);
-            this.headerView.selectMenuItem('about-menu');
+            var self = this;
+            require(['app/views/about'], function(view) {
+                var aboutView = new view();
+                self.switchView(aboutView);
+                self.headerView.selectMenuItem('about-menu');
+            });
         },
 
         settings: function () {
-            var settingsView = new SettingsView({model: settings});
-            this.switchView(settingsView);
-            this.headerView.selectMenuItem('settings-menu');
+            var self = this;
+            require(['app/views/settings'], function(view) {
+                var settingsView = new view({model: settings});
+                self.switchView(settingsView);
+                self.headerView.selectMenuItem('settings-menu');
+            });
         },
 
     });
