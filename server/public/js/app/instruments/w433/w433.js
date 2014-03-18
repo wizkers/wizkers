@@ -8,6 +8,8 @@
 define(function(require) {
     "use strict";
     
+    var linkmanager = require('app/instruments/w433/linkmanager');
+    
     return function() {
 
         // Helper function: get driver capabilites.
@@ -17,36 +19,41 @@ define(function(require) {
         };
 
         // This has to be a Backbone view
-        this.getLiveDisplay = function(arg) {
-            return new W433LiveView(arg);
+        this.getLiveDisplay = function(arg, callback) {
+            require(['app/instruments/w433/display_live'], function(view) {
+                callback(new view(arg));
+            });
         };
 
             // This is a Backbone view
         // This is a numeric display
-        this.getNumDisplay = function(arg) {
-            return new W433NumView(arg);
+        this.getNumDisplay = function(arg, callback) {
+            require(['app/instruments/w433/display_numeric'], function(view) {
+                callback(new view(arg));
+            });
         };
 
         // A diagnostics/device setup screen
-        this.getDiagDisplay = function(arg) {
-            return new W433DiagView(arg);
+        this.getDiagDisplay = function(arg, callback) {
+            return null;
         };
 
         // This has to be a link manager
         this.getLinkManager = function(arg) {
-            return new W433LinkManager(arg);
+            return new linkmanager(arg);
         };
 
         // Return a Backbone view which is a mini graph
-        this.getMiniLogview = function(arg) {
+        this.getMiniLogview = function(arg, callback) {
             return null;
         };
 
         // Render a log (or list of logs) for the device.
-        this.getLogView = function(arg) {
-            return new W433LogView(arg);
+        this.getLogView = function(arg, callback) {
+            require(['app/instruments/w433/display_log'], function(view) {
+                callback(new view(arg));
+            });
         }
-
 
     };
 

@@ -8,7 +8,12 @@
 define(function(require) {
     "use strict";
     
-    var Backbone = require('backbone');
+    var $       = require('jquery'),
+        _       = require('underscore'),
+        Backbone = require('backbone'),
+        tpl     = require('text!tpl/instruments/W433SettingsView.html'),
+        
+        template = _.template(tpl);
     
     return Backbone.View.extend({
             initialize:function () {
@@ -23,7 +28,7 @@ define(function(require) {
             },
 
             render:function () {
-                $(this.el).html(this.template({mappings: this.mappings}));
+                $(this.el).html(template({mappings: this.mappings}));
                 return this;
             },
     

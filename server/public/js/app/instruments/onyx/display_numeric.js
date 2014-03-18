@@ -9,7 +9,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        tpl     = require('text!tpl/instruments/OnyxNumiew.html'),
+        tpl     = require('text!tpl/instruments/OnyxNumView.html'),
         
         template = _.template(tpl);
 
