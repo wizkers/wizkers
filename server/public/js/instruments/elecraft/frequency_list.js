@@ -139,7 +139,7 @@ window.ElecraftFrequencyListView = Backbone.View.extend({
 window.ElecraftFrequencyItemView = Backbone.View.extend({
 
     tagName: "div",
-    className: "col-md-3",
+    className: "col-md-3 col-sm-6 col-xs-6",
     
     editing: false,
     frequency: 0,

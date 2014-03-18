@@ -64,6 +64,7 @@ window.ElecraftLiveView = Backbone.View.extend({
     },
     
     events: {
+        //"click" : "debugClick",
         "click #power-direct-btn": "setpower",
         "click .store-frequency": "addfrequency",
         "click input#power-direct": "setpower",
@@ -81,6 +82,11 @@ window.ElecraftLiveView = Backbone.View.extend({
         "click .band-btn": "setBand",
         "shown.bs.tab a[data-toggle='tab']": "tabChange",
         "click #data-stream-clear": "clearDataStream",
+    },
+    
+    debugClick: function(e) {
+        console.log(e);
+        return true;
     },
     
     
@@ -109,7 +115,7 @@ window.ElecraftLiveView = Backbone.View.extend({
     },
     
     setBand: function(e) {
-        var band = e.target.innerHTML;
+        var band = e.target.innerText;
         linkManager.driver.setBand(band);
     },
     
@@ -264,7 +270,11 @@ window.ElecraftLiveView = Backbone.View.extend({
         } else if (cmd == "IS") {
             $("#ct-control", this.el).slider('setValue',parseInt(val)/1000);
         }  else if (cmd == "BN") {
-            $("#freq-slider-band",this.el).html(this.bands[parseInt(val)]);
+            var bnd = this.bands[parseInt(val)];
+            $("#freq-slider-band",this.el).html(bnd);
+            // Update the band selection radio buttons too:
+            $(".band-btn",this.el).removeClass("active");
+            $("#band-" + bnd).parent().addClass("active");
         } else if (cmd == "IF") {
             // IF messages are sent in some occasions, they contain tons of info:
             this.setModeIcon(val.substr(27,1));
