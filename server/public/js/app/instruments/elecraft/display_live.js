@@ -60,13 +60,14 @@ define(function(require) {
 
 
                 // Last, load the frequencies sub view:
-                this.ElecraftFrequencyListView = new ElecraftFrequencyListView({model: this.model});
-                    if (this.ElecraftFrequencyListView != null) {
-                        $('#frequency-selector').html(this.ElecraftFrequencyListView.el);
-                        this.ElecraftFrequencyListView.render();
+                require(['app/instruments/elecraft/frequency_list'], function(view) {
+                    self.ElecraftFrequencyListView = new view({model: self.model});
+                    if (self.ElecraftFrequencyListView != null) {
+                        $('#frequency-selector').html(self.ElecraftFrequencyListView.el);
+                        self.ElecraftFrequencyListView.render();
                     }
-                $('#frequency-selector').carousel();
-
+                    $('#frequency-selector', self.el).carousel();
+                });
                 return this;
             },
 

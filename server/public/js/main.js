@@ -22,6 +22,7 @@ require.config({
         
         bootstrap: 'bootstrap',
         bootstrapslider: 'bootstrap-slider-2.0.0',
+        bootstrapeditable: 'bootstrap-editable',
         flot: 'flot-0.8.1/jquery.flot',
         flot_time: 'flot-0.8.1/jquery.flot.time',
         
@@ -51,6 +52,9 @@ require.config({
             deps: ['jquery']
         },
         'bootstrapslider': {
+            deps: ['bootstrap']
+        },
+        'bootstrapeditable': {
             deps: ['bootstrap']
         },
         
