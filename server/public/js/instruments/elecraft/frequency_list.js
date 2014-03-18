@@ -185,6 +185,18 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
                                                             self.changeEvent();
                                                             }
                                          });
+        
+        $(".freq-mode", this.el).editable({ success: function(response, newValue) {
+                                                self.mem.mode = newValue;
+                                                self.changeEvent();
+                                                },
+                                            source: [{value:"LSB",text:"LSB"},
+                                                    {value:"USB", text:"USB"},
+                                                     {value:"CW", text:"CW"},
+                                                    {value:"DATA", text:"DATA"},
+                                                    {value:"AM", text:"AM"},
+                                                    {value:"FM", text:"FM"}],
+                                          });
 
         return this;
     },
@@ -247,6 +259,7 @@ window.ElecraftFrequencyItemView = Backbone.View.extend({
         $(".freq-description",this.el).editable('toggleDisabled');
         $(".freq-vfoa",this.el).editable('toggleDisabled');
         $(".freq-vfob",this.el).editable('toggleDisabled');
+        $(".freq-mode", this.el).editable('toggleDisabled');
         this.editing = ! this.editing;
         return false; // stop propagation
     },
