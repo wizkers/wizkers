@@ -106,7 +106,11 @@ define(function(require) {
         this.setMode = function(code) {
             this.cc('MD' + code + ';');
         }
-
+        
+        this.setSubmode = function(submode) {
+            var submodes = { "DATA A":"0", "AFSK A":"1", "FSK D":"2", "PSK D":"3"};
+            this.cc('DT' + submodes[submode] + ';');
+        }
 
         this.setVFO = function(f, vfo) {
             var freq = ("00000000000" + (parseInt(f*1e6).toString())).slice(-11); // Nifty, eh ?

@@ -1,5 +1,7 @@
 /**
  *  Elecraft Live Display view
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
  */
 
 
@@ -23,10 +25,9 @@ define(function(require) {
 
             initialize:function () {
                 this.deviceinitdone = false;
-
+                
                 linkManager.on('status', this.updateStatus, this);
                 linkManager.on('input', this.showInput, this);
-
             },
     
             ElecraftFrequencyListView: null,
@@ -40,15 +41,21 @@ define(function(require) {
                         f.select("#layer1").click(function (e) {
                             self.handleKX3Button(e);
                         });
-                    s.add(f);
-                        // Set display constraints for the radio face:
-                    s.attr({
+                        s.add(f);
+                        // Set display constraints for the radio panel:
+                        s.attr({
                         width: "100%",
-                        height: 350,
-                    });
-                    $("#kx3 .icon").css('visibility', 'hidden');
+                        });
+                        $("#kx3 .icon").css('visibility', 'hidden');
+                        $("#kx3").height($("#kx3").width()*0.42);
 
-                });
+                        // I was not able to make the SVG resize gracefully, so I have to do this
+                        $("#kx3").resize(function(e) {
+                            console.log("SVG container resized");
+                            $(e.target).height($(e.target).width()*0.42);
+                        });
+
+                    });
         
         
                 // Initialize our sliding controls:
@@ -98,6 +105,7 @@ define(function(require) {
                 "slideStop #bpf-control": "setBW",
                 "slideStop #ct-control": "setCT",
                 "click .band-btn": "setBand",
+                "click .submode-btn": "setSubmode",
                 "shown.bs.tab a[data-toggle='tab']": "tabChange",
                 "click #data-stream-clear": "clearDataStream",
             },
@@ -114,6 +122,7 @@ define(function(require) {
                     linkManager.driver.startTextStream();
                 } else {
                     linkManager.driver.stopTextStream();
+                    linkManager.driver.setSubmode("DATA A");
                 }
             },
 
@@ -135,6 +144,16 @@ define(function(require) {
             setBand: function(e) {
                 var band = e.target.innerText;
                 linkManager.driver.setBand(band);
+            },
+
+            setSubmode: function(e) {
+                var submode = e.target.innerText;
+                if (submode == "PSK") {
+                    submode = "PSK D";
+                } else {
+                    submode = "FSK D";
+                }
+                linkManager.driver.setSubmode(submode);
             },
 
             setvfoa: function() {

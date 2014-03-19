@@ -93,6 +93,35 @@ a.plain:hover {
     text-align: center;
 }
 
+/**
+ * Responsive buttons: make buttons smaller on narrow screens
+ */
+  
+/* Same as btn-sm */
+@media (min-width: 769px) and (max-width: 992px) {
+    .btn-responsive {
+      padding: 5px 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      border-radius: 3px;
+    }
+}
+
+/* Same as btn-xs */
+@media (max-width: 768px) {
+    .btn-responsive {
+      padding: 1px 5px;
+      font-size: 12px;
+      line-height: 1.5;
+      border-radius: 3px;
+    }
+}
+
+
+
+
+
+
 
 
 /**

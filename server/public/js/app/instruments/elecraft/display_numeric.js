@@ -15,6 +15,7 @@ define(function(require) {
     //require('bootstrap');
     require('flot');
     require('flot_time');
+    require('flot_resize');
 
     return Backbone.View.extend({
 

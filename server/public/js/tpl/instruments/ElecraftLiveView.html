@@ -4,9 +4,7 @@
         <div class="col-md-8">
             <div class="row">
                 <div class="col-md-12">
-                    <div>
                         <svg id="kx3"  viewBox="0 0 2325 991" preserveAspectRatio="xMidYMid"></svg>
-                    </div>
                 </div>
             </div><!-- radio -->
             <div class="row">
@@ -66,15 +64,15 @@
                         </div>
                         <div class="col-md-3">
                             <!-- Controls -->
-                            <div style="margin-top: 3px; margin-bottom:3px;">
-                                <div class="pull-right">
+                            
+                                <div class="pull-right" style="margin-top: 5px; margin-bottom: 5px;">
                                     <button role="button" class="btn btn-info store-frequency"><span class="glyphicon glyphicon-plus"></span></button>
                                     <a class="left btn btn-success" href="#frequency-selector"
                                         data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
                                     <a class="right btn btn-success" href="#frequency-selector"
                                             data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
                                 </div>
-                            </div>
+                            
                         </div>
                     </div> <!-- Frequency cards header -->
                     <!-- ********** -->
@@ -88,25 +86,35 @@
                   <div class="tab-pane" id="data-term">
                     <div class="row">
                         <div class="col-md-12">
-                             <div class="input-group">
+                            <div class="input-group input-margin">
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-primary submode-btn">
+                                        <input type="radio" name="data-submodes" id="data-submode-pskd">PSK
+                                    </label>
+                                    <label class="btn btn-primary submode-btn">
+                                        <input type="radio" name="data-submodes" id="data-submode-fskd">FSK
+                                    </label>
+                                </div>&nbsp; &nbsp;
+                                <button type="button" class="btn btn-default" id="data-stream-clear">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                             <div class="input-group input-margin">
                                  <span class="input-group-addon">Text:</span>
                                  <input id="data-text-input" class="form-control" value="" type="text" maxlength="32">
                                  <span class="input-group-btn"><button type="button" class="btn" id="cmdsend"><span class="glyphicon glyphicon-check"></span></button>
                                  </span>
                             </div>
-                            <br>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="well">
-                                <div style="float:right;"><button type="button" class="btn btn-default" id="data-stream-clear">Clear</button></div>
-                                <h6>Received text</h6>
                                 <textarea id="data-stream" style="height:200px; width:98%;"></textarea>
-                            </div>
                         </div>
                     </div>
-                  </div>
+                  </div> <!-- Data terminal -->
                   <div class="tab-pane" id="audio-settings"><h4>Audio Settings</h4>
                     We will have the following here:
                     <ul><li>RX/TX EQ settings</li><li>AGC S/F settings</li>
