@@ -155,11 +155,13 @@ define(function(require) {
             if (linkManager.connected) {
                 var allLogs = instrumentManager.getInstrument().logs;
                 allLogs.fetch({success:function(){
-                    self.switchView(instrumentManager.getLogManagementView({collection:allLogs}));
-                    self.headerView.selectMenuItem('management-menu');
+                    instrumentManager.getLogManagementView({collection:allLogs}, function(view) {
+                        self.switchView(view);
+                        self.headerView.selectMenuItem('management-menu');
+                    });
                 }});
             } else {
-                app.navigate('/',true);
+                this.navigate('/',true);
             }
 
         },

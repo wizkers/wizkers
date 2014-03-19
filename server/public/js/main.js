@@ -59,6 +59,9 @@ require.config({
         'bootstrapeditable': {
             deps: ['bootstrap']
         },
+        'utils': {
+            exports: 'utils'
+        },
         
         // The Flot library, along with our dependencies:
         'flot': {

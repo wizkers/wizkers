@@ -12,6 +12,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
+        utils   = require('app/utils'),
         tpl     = require('text!tpl/instruments/Fluke289LogManagementView.html'),
         
         template = _.template(tpl);
@@ -29,7 +30,7 @@ define(function(require) {
         },
 
         render: function() {
-            $(this.el).html(this.template());
+            $(this.el).html(template());
             // The link manager is always connected when we initialize (main.js makes sure of that)
             // so we send a few commands to initialize the contents of the display:
             linkManager.driver.getMemInfo();
@@ -65,7 +66,7 @@ define(function(require) {
 
             if (data.savedlogs) {
                 _.each(data.savedlogs, function(value,key) {
-                    $('#mem'+key,this.el).html(value);
+                    $('#mem'+key,self.el).html(value);
                     // Then query information about each of those logs
                         var i=0;
                     if (key == "record") {
@@ -106,7 +107,7 @@ define(function(require) {
                     data.alreadyThere = "<em>New log<sm>";
                     if (knownLog.length > 0)
                         data.alreadyThere = '<strong><a href="#displaylogs/' + knownLog[0].get('instrumentid') + '/' + knownLog[0].id  + '">This log is already downloaded</a><strong>';
-
+                    data.utils = utils; // Need to pass the "utils" object to the scope of the template too, since we use it inside.
                     $('#records',this.el).append(card(data));
                 } else {
                     // We just received a log entry for a Trendlog recording we are downloading: save it and request the

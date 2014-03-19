@@ -10,7 +10,6 @@
 define(function(require) {
     "use strict";
 
-
     // linkManager is a reference to the parent link manager
     return function(linkManager) {
 
