@@ -91,6 +91,7 @@ var express = require('express'),
     deviceLogs = require('./routes/logs.js');
     settings = require('./routes/settings.js'),
     backup = require('./routes/backup.js');
+//    audio = require('./routes/audio.js');
 
 
 
@@ -145,6 +146,12 @@ app.put('/settings/:id', settings.updateSettings);
  */
 app.get('/backup', backup.generateBackup);
 app.post('/restore', backup.restoreBackup);
+
+
+/**
+ *  Interface to stream audio. This is 100% experimental
+ */
+//app.get('/audio', audio.start);
 
 
 // Our static resources are in 'public'
@@ -255,10 +262,11 @@ openPort = function(data, socket) {
 
     // listen for new serial data:
    myPort.on('data', function (data) {
-       if (Debug) console.log('.');
+       // if (Debug) console.log('.');
        // Pass this data to on our driver
        if (Debug) { try {
-            console.log('Raw input:\n' + Hexdump.dump(data));
+            // console.log('Raw input:\n' + Hexdump.dump(data));
+           console.log("Data: " + data);
        } catch(e){}}
         driver.format(data);
    });

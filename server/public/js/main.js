@@ -9,9 +9,7 @@ require.config({
     paths: {
         app: '../app',
         tpl: '../tpl',
-        
-        socketio: '/socket.io/socket.io',
-        
+
         // Below we manage our versions explicitely, so that
         // we can upgrade easily
         jquery: 'jquery-1.11.0',
@@ -33,13 +31,11 @@ require.config({
     /*
      * Mappings to be able to switch our models (in-mem, browser, backend, etc)
      */
-    /*
     map: {
         '*': {
-            'app/models/devicelog': 'app/models/memory/devicelog'
+            'socketio': '/socket.io/socket.io.js',
         }
     },
-    */
     
     shim: {
         'backbone': {

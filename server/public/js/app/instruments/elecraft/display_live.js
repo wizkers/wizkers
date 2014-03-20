@@ -148,11 +148,6 @@ define(function(require) {
 
             setSubmode: function(e) {
                 var submode = e.target.innerText;
-                if (submode == "PSK") {
-                    submode = "PSK D";
-                } else {
-                    submode = "FSK D";
-                }
                 linkManager.driver.setSubmode(submode);
             },
 
