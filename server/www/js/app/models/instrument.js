@@ -9,21 +9,33 @@ define(function(require) {
     
     var $   = require('jquery'),
         Backbone = require('backbone'),
-        Devicelog = require('app/models/devicelog'),
+        Devicelog = require('app/models/devicelog');
 
+    if (vizapp.type == "cordova") {
+        Backbone.LocalStorage = require('localstorage');
+    }
 
-        Instrument = Backbone.Model.extend({
-
-            urlRoot: "/instruments",
-            idAttribute: "_id",
+    var Instrument = Backbone.Model.extend({
 
             type: null,
+            idAttribute: "_id",
+
 
             initialize: function () {
                 this.validators = {};
                 this.validators.name = function (value) {
                     return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a name"};
                 };
+                
+                /**
+                 * Depending on runmode, we are either defining a URL or
+                 * relying on backbone localstorage
+                 */
+                if (vizapp.type == "cordova") {
+                    this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
+                } else {
+                    this.urlRoot = "/instruments";
+                }
 
                 // Create a reference to my logs:
                 this.logs = new Devicelog.Logs();
@@ -62,15 +74,22 @@ define(function(require) {
                 icon: "",                          // TbD: either user-selectable, or served by server-side (linked to type)
                 liveviewspan: 600,                 // Width of live view in seconds
                 liveviewperiod: 1,                 // Period of polling if supported
-                liveviewlogscale: false,                // Should live view display as a log scale by default ?
-                metadata: {},
+                liveviewlogscale: false,           // Should live view display as a log scale by default ?
+                metadata: {},                      // Freeform metadata
             }
         }),
 
         InstrumentCollection = Backbone.Collection.extend({
 
             model: Instrument,
-            url: "/instruments"
+            
+            initialize: function() {
+                if (vizapp.type == "cordova") {
+                    this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
+                } else {
+                    this.url = "/instruments";
+                }
+            }
 
         });
     

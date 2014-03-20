@@ -154,11 +154,11 @@ app.post('/restore', backup.restoreBackup);
 //app.get('/audio', audio.start);
 
 
-// Our static resources are in 'public'
+// Our static resources are in 'www'
 // GET /javascripts/jquery.js
 // GET /style.css
 // GET /favicon.ico
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/www'));
 
 // TODO:
 //

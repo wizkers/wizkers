@@ -19,28 +19,23 @@ define(function(require) {
         template = _.template(tpl);
 
     return Backbone.View.extend({
-
-        initialize: function () {        
-
-        },
+        
+        id: "instrument-details",
 
         render: function () {
-            var self = this;
             console.log("Render instrument details");
-            linkManager.getPorts();
             linkManager.once('ports', function(portlist) {
-                $(self.el).html(template(_.extend(self.model.toJSON(), {instypes: instrumentManager.supportedInstruments, ports: portlist})));
+                $(this.el).html(template(_.extend(this.model.toJSON(), {instypes: instrumentManager.supportedInstruments, ports: portlist})));
 
-                // If the instrument type has got its own extra settings, then render it here:
-                var insSettingsView = instrumentManager.supportedInstruments[self.model.get('type')].settings;
+                // If the instrument type has got its own extra settings, then render those here:
+                var insSettingsView = instrumentManager.supportedInstruments[this.model.get('type')].settings;
                 if ( insSettingsView != null) {
-                    var settingsView = new insSettingsView({model: self.model});
-                    $('#metadata',self.el).html(settingsView.el);
+                    var settingsView = new insSettingsView({model: this.model});
+                    $('#metadata',this.el).html(settingsView.el);
                     settingsView.render();
                 }
-            });
-
-
+            }, this);
+            linkManager.getPorts();
             return this;
         },
 

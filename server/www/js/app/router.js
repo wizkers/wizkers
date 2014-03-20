@@ -58,7 +58,6 @@ define(function(require) {
                                           // within a callback, otherwise the "onClose" methods will never
                                           // be called.
 
-
             // When the current instrument model changes, we need to update
             // the link manager type:
             settings.on('change:currentInstrument', function(model, insId) {
@@ -91,7 +90,6 @@ define(function(require) {
             });
         },
 
-
         diagnostics: function (id) {
             var self = this;
             if (linkManager.connected) {
@@ -108,8 +106,12 @@ define(function(require) {
         // Display all logs known for the current instrument
         logmanagement: function() {
             var self = this;
+            var ins = instrumentManager.getInstrument();
+            // TODO: open a screen stating we have no instrument.
+            if (ins == null)
+                return;
             // Initialize with the list of logs for the current device:
-            var logs = instrumentManager.getInstrument().logs;
+            var logs = ins.logs;
             logs.fetch({
                 success:function() {
                     require(['app/views/logmanagement'], function(view) {
@@ -170,7 +172,6 @@ define(function(require) {
         listInstruments: function(page) {
             var self = this;
             var p = page ? parseInt(page, 10) : 1;
-            
             require(['app/models/instrument', 'app/views/instrument/instrumentlist'], function(model, view) {
                 var instrumentList = new model.InstrumentCollection();
                 instrumentList.fetch({success: function(){
@@ -178,15 +179,15 @@ define(function(require) {
                 }});
                 self.headerView.selectMenuItem('instrument-menu');                
             });
-            
-
         },
 
         addInstrument: function() {
             var self = this;
-            var instrument = new Instrument();
-            this.switchView(new InstrumentDetailsView({model: instrument}));
-            this.headerView.selectMenuItem('instrument-menu');
+            require(['app/models/instrument', 'app/views/instrument/instrumentdetails'], function(model, view) {
+                var instrument = new model.Instrument();
+                self.switchView(new view({model: instrument}));
+                self.headerView.selectMenuItem('instrument-menu');
+            });
 
         },
 
@@ -203,7 +204,6 @@ define(function(require) {
         },
     
         // Workspace management
-
         listWorkspaces: function(page) {
             var self = this;
             var p = page ? parseInt(page, 10) : 1;
@@ -222,7 +222,6 @@ define(function(require) {
             this.headerView.selectMenuItem('workspace-menu');
 
         },
-
 
         about: function () {
             var self = this;

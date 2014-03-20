@@ -79,6 +79,18 @@ require.config({
     }
 });
 
+// We are going to manage a single global variable for VizApp that contains the few things that have to
+// be defined application-wise:
+var vizapp = {
+    
+    // type is a helper to avoid code duplication depending on the
+    // run mode of the application. Can be:
+    //   - server : use a remote server for device connection & database
+    //   - cordova: run as an embedded Cordova application on Android
+    //   - others to be defined 
+    type: "server",
+};
+
 var router;
 
 require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instruments/instrumentmanager', 'app/linkmanager',
@@ -114,7 +126,15 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
 
                 router = new Router();
                 Backbone.history.start();
-            }});
+                },
+                      error: function() {
+                        // For some reason, we were not able to get our instrument,
+                        // let's start the application anyway (maybe we should reset
+                          // the instrument ID then ?
+                        router = new Router();
+                        Backbone.history.start();
+
+                }});
         } else {
 	   router = new Router();
 	   Backbone.history.start();

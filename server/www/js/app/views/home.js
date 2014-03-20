@@ -146,7 +146,7 @@ define(function(require) {
 
         updatestatus: function(data) {
             // First of all, if we don't have an instrument, no need to update our status:
-            if (typeof(this.instrument) == 'undefined')
+            if (this.instrument == null)
                 return;
             // Depending on port status, update our controller
             // connect button:
