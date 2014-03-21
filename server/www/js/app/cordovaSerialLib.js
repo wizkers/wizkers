@@ -26,7 +26,7 @@ define(function(require) {
                    case 'openinstrument':
                     openPort(args);
                     break;
-                   case 'closeport':
+                   case 'closeinstrument':
                     closePort(args);
                     break;
                    case 'controllerCommand':
@@ -68,6 +68,64 @@ define(function(require) {
             return buf;
         };
         
+        
+    /*
+        ---------- Hexdump utility for debugging ------------
+    */
+	function to_hex( number ) {
+		var r = number.toString(16);
+		if( r.length < 2 ) {
+			return "0" + r;
+		} else {
+			return r;
+		}
+	};
+	
+	function dump_chunk( chunk ) {
+		var dumped = "";
+		
+		for( var i = 0; i < 4; i++ ) {
+			if( i < chunk.length ) {
+				dumped += to_hex( chunk.charCodeAt( i ) );
+			} else {
+				dumped += "..";
+			}
+		}
+		
+		return dumped;
+	};
+	
+	function dump_block( block ) {
+		var dumped = "";
+		
+		var chunks = block.match( /[\s\S.]{1,4}/g );
+		for( var i = 0; i < 4; i++ ) {
+			if( i < chunks.length ) {
+				dumped += dump_chunk( chunks[i] );
+			} else {
+				dumped += "........";
+			}
+			dumped += " ";
+		}
+		
+		dumped += "    " + block.replace( /[\x00-\x1F]/g, "." );
+		
+		return dumped;
+	};
+	
+	function dump( s ) {
+		var dumped = "";
+		
+		var blocks = s.match( /[\s\S.]{1,16}/g );
+		for( var block in blocks ) {
+			dumped += dump_block( blocks[block] ) + "\n";
+		}
+		
+		return dumped;
+	};
+        
+        /*************************** End of utils ******************/
+        
         function getPorts() {
             console.log("cordovaSerial: get list of ports");
             self.trigger('ports', ["simulated port"]);
@@ -82,7 +140,8 @@ define(function(require) {
             console.log("chromeSerialLib: openPort");
             serial.requestPermission(
                 function(success) {
-                    serial.open({baudrate: 38400},
+                    serial.open(
+                                {"baudRate": 38400}, // pay attention to capital R and lowercase b ...
                                 onOpen,
                                 function(error) { alert("serial.open error: " + error); }
                                );
@@ -94,46 +153,29 @@ define(function(require) {
        };
 
         function serialEvent(data) {
-           var cmd = data.split('\n\r\n')[0];
-           if (Debug) console.log('Raw input:\n' + dump(data));
-           if (cmd == "LOGXFER") {
-               // The result should be data in JSON format: attempt to parse right now
-               // and transfer as a log rather than raw:
-               try {
-                  //data  = data.replace(/\r$/gm,'');
-                  //data  = data.replace(/\n$/gm,'');
-                   var log = JSON.parse(data.substring(cmd.length+3));
-                   self.trigger('serialEvent', log);
-               } catch (err) {
-                   console.log("Could not parse log packet\n" + err.message);
-               }
-           } else {
-               var rawdata = data.substring(cmd.length+3);
-               rawdata  = rawdata.replace(/\r\n$/gm,'');
-               var raw = { cmd: cmd, raw: rawdata };
-               self.trigger('serialEvent', raw);
-           }
-
+           // console.log('Raw input:\n' + data);
+           self.trigger('serialEvent', data);
         }
 
         function onRead(readInfo) {
-            if (readInfo.bytesRead == 0) {
+            // console.log(readInfo);
+            if (readInfo.byteLength == 0) {
                 // Delay next attempt to read in order to avoid a fast loop
                 setTimeout(function() {
-                    // chrome.serial.read(connectionId, 256, onRead);
-                }, 10);
+                    serial.read(onRead);
+                }, 100);
                 return;
             }
             // Inspired by Node's serialport library, why reinvent the wheel:
-            data += ab2str(readInfo.data);
+            data += ab2str(readInfo);
             // Split collected data by delimiter
-            var parts = data.split('\r\n>')
+            var parts = data.split(';')
             data = parts.pop();
             parts.forEach(function (part, i, array) {
                 serialEvent(part);
             });
             // Keep on reading.
-            // chrome.serial.read(connectionId, 256, onRead);
+            serial.read(onRead);
         };
 
         function onOpen(openInfo) {
@@ -150,6 +192,8 @@ define(function(require) {
         function closePort(port) {
            console.log("cordovaSerialLib: closePort");
             serial.close( function(success) {
+                self.portOpen = false;
+                self.trigger('status', {portopen: false} );
                 console.log("cordovaSerialLib: closePort success");
                }, function(error) {
                 console.log("cordovaSerialLib: closePort error - " + error);
@@ -158,23 +202,11 @@ define(function(require) {
         };
 
         function controllerCommand(cmd) {
-            console.log("chromeSerialLib: sending command: " + cmd);
-            if (connectionId == -1) {
-                console.log("Trying to write on a closed port");
-                self.portOpen = false;
-                return;
-            }
-            // chrome.serial.write(connectionId,str2ab(cmd + "\n"), function(writeInfo) {
+            // console.log("chromeSerialLib: sending command: " + cmd);
+            if (self.portOpen)
+                serial.write(cmd);
+            
         };
-
-        // Initialize the library:
-        /*
-            this.on('portstatus', portStatus);
-            this.on('openport', openPort);
-            this.on('closeport', closePort);
-            this.on('ports', getPorts);
-            this.on('controllercommand', controllerCommand);
-        */
 
     };
 
