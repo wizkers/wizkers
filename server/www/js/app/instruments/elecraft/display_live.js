@@ -250,7 +250,7 @@ define(function(require) {
                 var val = data.substr(2);
                 if (cmd == "DB") {
                     // VFO B Text
-                    $("#kx3 #VFOB").text(val + "&nbsp;&nbsp;");
+                    $("#kx3 #VFOB").text(val + "    ");
                 } else if (cmd == "DS") {
                     // VFO A Text, a bit more tricky:
                     if (val.length < 8) {
