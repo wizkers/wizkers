@@ -26,6 +26,8 @@ define(function(require) {
             initialize:function () {
                 this.deviceinitdone = false;
                 
+                this.textOutputBuffer = [];
+                
                 linkManager.on('status', this.updateStatus, this);
                 linkManager.on('input', this.showInput, this);
             },
@@ -129,12 +131,16 @@ define(function(require) {
             
             sendText: function(e) {
                 if ((event.target.id == "data-text-input" && event.keyCode==13) || (event.target.id != "data-text-input")) {
-                    var input = $('#data-stream',this.el);
                     var txt =  $("#data-text-input").val();
-                    var scroll = input.val() + "\n" + txt + "\n";
-                    input.val(scroll);
-                    linkManager.driver.sendText(txt);
-                    $("#data-text-input").val('');
+                    if (txt.length > 0) {
+                        var input = $('#data-stream',this.el);
+                        var scroll = input.val() + "\n" + txt + "\n";
+                        input.val(scroll);
+                        // Split our text in 24 character chunks and add them into the buffer:
+                        var chunks = txt.match(/.{1,24}/g); // Nice, eh ?
+                        chunks.forEach(function(chunk) {this.textOutputBuffer.push(chunk)},this);
+                        $("#data-text-input").val('');
+                    }
                 }
             },
 
@@ -337,7 +343,12 @@ define(function(require) {
                         i.val(scroll);
                         // Autoscroll:
                         i.scrollTop(i[0].scrollHeight - i.height());
-                       }
+                    }
+                    if (this.textOutputBuffer.length > 0) {
+                        var r = parseInt(val.substr(0,1));
+                        if (r == 0)
+                            linkManager.driver.sendText(this.textOutputBuffer.pop());
+                    }
                 }
 
             },
