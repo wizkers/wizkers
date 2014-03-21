@@ -108,13 +108,14 @@ define(function(require) {
                 "click .submode-btn": "setSubmode",
                 "shown.bs.tab a[data-toggle='tab']": "tabChange",
                 "click #data-stream-clear": "clearDataStream",
+                "click #data-text-text": "sendText",
+                "keypress input#data-text-input": "sendText",
             },
 
             debugClick: function(e) {
                 console.log(e);
                 return true;
             },
-
 
             tabChange: function(e) {
                 console.log("Change tab to: " + e.target);
@@ -123,6 +124,17 @@ define(function(require) {
                 } else {
                     linkManager.driver.stopTextStream();
                     linkManager.driver.setSubmode("DATA A");
+                }
+            },
+            
+            sendText: function(e) {
+                if ((event.target.id == "data-text-input" && event.keyCode==13) || (event.target.id != "data-text-input")) {
+                    var input = $('#data-stream',this.el);
+                    var txt =  $("#data-text-input").val();
+                    var scroll = input.val() + "\n" + txt + "\n";
+                    input.val(scroll);
+                    linkManager.driver.sendText(txt);
+                    $("#data-text-input").val('');
                 }
             },
 
@@ -320,11 +332,11 @@ define(function(require) {
                     var l = parseInt(val.substr(1,2));
                     if (l > 0) {
                         var txt = val.substr(3);
-                        var input = $('#data-stream',this.el);
-                        var scroll = input.val() + txt;
-                        input.val(scroll);
+                        var i = $('#data-stream',this.el);
+                        var scroll = i.val() + txt;
+                        i.val(scroll);
                         // Autoscroll:
-                        //i.scrollTop(i[0].scrollHeight - i.height());
+                        i.scrollTop(i[0].scrollHeight - i.height());
                        }
                 }
 

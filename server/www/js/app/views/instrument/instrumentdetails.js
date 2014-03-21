@@ -117,6 +117,13 @@ define(function(require) {
             this.model.save(null, {
                 success: function (model) {
                     utils.showAlert('Success', 'Configuration saved', 'alert-success');
+                    // Trick: if we notice no instrument is selected, then select this one.
+                    var insId = settings.get('currentInstrument');
+                    if (insId == null) {
+                        settings.set({currentInstrument:model.id});
+                        settings.save(null, {success: function() {}
+                                            });
+                    }
                 },
                 error: function () {
                     console.log('Instrument: error saving');

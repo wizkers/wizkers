@@ -82,6 +82,10 @@ define(function(require) {
             }
             return true;
         }
+        
+        this.sendText = function(text) {
+            this.cc('KY ' + text +';');
+        }
 
         this.queryTB = function() {
             this.cc('TB;');
