@@ -35,6 +35,9 @@ define(function(require) {
                    case 'ports':
                     getPorts(args);
                     break;
+                   case 'driver':
+                    setDriver(args);
+                    break;
                    default:
                     break;
            }
@@ -124,15 +127,20 @@ define(function(require) {
 		return dumped;
 	};
         
-        /*************************** End of utils ******************/
+    /*************************** End of utils ******************/
+        
+        
+        
+        // This is where we will hook up the serial parser - cordova version
+        function setDriver(driver) {
+            
+        }
         
         function getPorts() {
-            console.log("cordovaSerial: get list of ports");
-            self.trigger('ports', ["simulated port"]);
-        }        
+            self.trigger('ports', ["OTG Serial"]);
+        }
         
         function portStatus() {
-           console.log("chromeSerialLib: portStatus");
            self.trigger('status', {portopen: self.portOpen});
        };
 
@@ -157,8 +165,11 @@ define(function(require) {
            self.trigger('serialEvent', data);
         }
 
+        // Our Cordova serial plugin is not event-driven (yet), which means
+        // that we have to call read continously, which is pretty ugly and bad for
+        // battery life...
         function onRead(readInfo) {
-            // console.log(readInfo);
+            // readInfo is an ArrayBuffer
             if (readInfo.byteLength == 0) {
                 // Delay next attempt to read in order to avoid a fast loop
                 setTimeout(function() {
@@ -202,10 +213,8 @@ define(function(require) {
         };
 
         function controllerCommand(cmd) {
-            // console.log("chromeSerialLib: sending command: " + cmd);
             if (self.portOpen)
                 serial.write(cmd);
-            
         };
 
     };

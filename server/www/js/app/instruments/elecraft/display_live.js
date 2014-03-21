@@ -250,7 +250,7 @@ define(function(require) {
                 var val = data.substr(2);
                 if (cmd == "DB") {
                     // VFO B Text
-                    $("#kx3 #VFOB").html(val + "&nbsp;&nbsp;");
+                    $("#kx3 #VFOB").text(val + "&nbsp;&nbsp;");
                 } else if (cmd == "DS") {
                     // VFO A Text, a bit more tricky:
                     if (val.length < 8) {
@@ -267,7 +267,7 @@ define(function(require) {
                                 val2 = 0x20;
                         txt += String.fromCharCode(val2);
                     }
-                    $("#kx3 #VFOA").html(txt);
+                    $("#kx3 #VFOA").text(txt); //
                     // Now, decode icon data:
                     var a = val.charCodeAt(8);
                     var f = val.charCodeAt(9);
