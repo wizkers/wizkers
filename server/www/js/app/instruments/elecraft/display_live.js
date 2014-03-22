@@ -12,6 +12,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         Snap    = require('snap'),
+        utils   = require('app/utils'),
         tpl     = require('text!tpl/instruments/ElecraftLiveView.html'),
         
         template = _.template(tpl);
@@ -20,13 +21,13 @@ define(function(require) {
         require('bootstrap');
         require('bootstrapslider');
 
-
         return Backbone.View.extend({
 
             initialize:function () {
                 this.deviceinitdone = false;
                 
                 this.textOutputBuffer = [];
+                this.transmittingText = false;
                 
                 linkManager.on('status', this.updateStatus, this);
                 linkManager.on('input', this.showInput, this);
@@ -110,13 +111,24 @@ define(function(require) {
                 "click .submode-btn": "setSubmode",
                 "shown.bs.tab a[data-toggle='tab']": "tabChange",
                 "click #data-stream-clear": "clearDataStream",
-                "click #data-text-text": "sendText",
+                "click #data-text-send": "sendText",
                 "keypress input#data-text-input": "sendText",
+                // Clicks on the macro buttons in text terminal
+                "click #data-cq": "sendCQ",
+                "click #data-qso": "sendQSO",
+                "click #data-sk": "sendSK",
+                "click #data-kn": "sendKN",
+                "click #data-ans": "sendANS",
             },
 
             debugClick: function(e) {
                 console.log(e);
                 return true;
+            },
+            
+            queueText: function(txt) {
+                var chunks = txt.match(/.{1,20}/g); // Nice, eh ?
+                chunks.forEach(function(chunk) {this.textOutputBuffer.push(chunk)},this);                
             },
 
             tabChange: function(e) {
@@ -133,12 +145,8 @@ define(function(require) {
                 if ((event.target.id == "data-text-input" && event.keyCode==13) || (event.target.id != "data-text-input")) {
                     var txt =  $("#data-text-input").val();
                     if (txt.length > 0) {
-                        var input = $('#data-stream',this.el);
-                        var scroll = input.val() + "\n" + txt + "\n";
-                        input.val(scroll);
                         // Split our text in 24 character chunks and add them into the buffer:
-                        var chunks = txt.match(/.{1,24}/g); // Nice, eh ?
-                        chunks.forEach(function(chunk) {this.textOutputBuffer.push(chunk)},this);
+                        this.queueText(txt);
                         $("#data-text-input").val('');
                     }
                 }
@@ -260,7 +268,77 @@ define(function(require) {
                 $("#kx3 .mode_icon").css('visibility', 'hidden');
                 $("#kx3 #icon_" + modes[mode-1]).css('visibility', 'visible');
             },
+            
+            validateMacros: function() {
+                var me = $("#data-mycall");
+                var you = $("#data-theircall");
+                var ok = true;
+                if (me.val() != '') {
+                    $("#data-mycall-grp").removeClass("has-error");
+                } else {
+                    $("#data-mycall-grp").addClass("has-error");
+                    ok  = false;
+                }
+                if (you.val() != '') {
+                    $("#data-theircall-grp").removeClass("has-error");
+                } else {
+                    $("#data-theircall-grp").addClass("has-error");
+                    ok = false;
+                }
+                return ok;
+            },
+            
+            
+             sendCQ: function() {
+                 var mycall = $("#data-mycall").val();
+                 if (mycall != '') {
+                     $("#data-mycall-grp").removeClass("has-error");
+                     var key = "\n\ncq cq de " + mycall + " " + mycall + " " + mycall + " pse k";
+                     this.queueText(key);
+                 } else {
+                     $("#data-mycall-grp").addClass("has-error");
+                 }
+             },
 
+            sendANS: function() {
+                var ok = this.validateMacros();
+                if (!ok)
+                    return;
+                var me = $("#data-mycall").val();
+                var you = $("#data-theircall").val();
+                 var key = "\n" + you + " " + you + " de " + me + " " + me + " " + me + " pse kn\n";
+                 this.queueText(key);
+            },
+
+            sendKN: function() {
+                var ok = this.validateMacros();
+                if (!ok)
+                    return;
+                var me = $("#data-mycall").val();
+                var you = $("#data-theircall").val();
+                 var key = "\nbtu " + you + " de " + me + " pse kn\n";
+                 this.queueText(key);
+            },
+
+            sendQSO: function() {
+                var ok = this.validateMacros();
+                if (!ok)
+                    return;
+                var me = $("#data-mycall").val();
+                var you = $("#data-theircall").val();
+                 var key = "\n" + you + " de " + me + "\n";
+                 this.queueText(key);
+            },
+
+            sendSK: function() {
+                var ok = this.validateMacros();
+                if (!ok)
+                    return;
+                var me = $("#data-mycall").val();
+                var you = $("#data-theircall").val();
+                 var key = "Thanks for this QSO, 73 and all the best\n" + you + " de " + me + " sk sk sk";
+                 this.queueText(key);
+            },
 
             showInput: function(data) {
                 // Now update our display depending on the data we received:
@@ -343,11 +421,30 @@ define(function(require) {
                         i.val(scroll);
                         // Autoscroll:
                         i.scrollTop(i[0].scrollHeight - i.height());
+                        
+                        // Then we need to parse any callsign we find in the text:
+                        // note: without the "g", will split a single callsign into its elementary parts
+                        // and we deduplicate using utils.unique
+                        var callsigns = utils.unique(scroll.match(/([A-Z0-9]{1,4}\/)?(\d?[A-Z]+)(\d+)([A-Z]+)(\/[A-Z0-9]{1,4})?/g));
+                        var cdr = $("#calls-dropdown",this.el);
+                        cdr.empty();
+                        if (callsigns.length) {
+                            callsigns.forEach(function(sign) {
+                                cdr.append('<li><a onclick="$(\'#data-theircall\').val(\'' + sign + '\');\">'+sign+'</a></li>');
+                            });
+                        }
+                        
                     }
+                    var r = parseInt(val.substr(0,1));
+                    this.transmittingText = (r) ? true: false;
                     if (this.textOutputBuffer.length > 0) {
-                        var r = parseInt(val.substr(0,1));
-                        if (r == 0)
-                            linkManager.driver.sendText(this.textOutputBuffer.pop());
+                        if (r < 5) {
+                            var txt = this.textOutputBuffer.shift();
+                            var input = $('#data-stream',this.el);
+                            var scroll = input.val() + txt;
+                            input.val(scroll);
+                            linkManager.driver.sendText(txt);
+                        }
                     }
                 }
 

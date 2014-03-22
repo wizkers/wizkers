@@ -7,6 +7,20 @@ define(function(require) {
     "use strict";
     
     return {
+        
+        // Returns an array with unique elements from an array
+        // that can contain multiple elements, see
+        // http://www.shamasis.net/2009/09/fast-algorithm-to-find-unique-items-in-javascript-array/
+        // and multiple stackoverflow references:
+        unique: function(arr) {
+            if (arr == null)
+                return [];
+            var o = {}, i, l = arr.length, r = [];
+            for(i=0; i<l;i+=1) o[arr[i]] = arr[i];
+            for(i in o) r.push(o[i]);
+        return r;
+        },
+
 
         displayValidationErrors: function (messages) {
             for (var key in messages) {

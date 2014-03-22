@@ -104,6 +104,37 @@
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-md-3 col-xs-6">
+                            <div class="input-group input-margin" id="data-mycall-grp">
+                                <span class="input-group-addon">Me:</span>
+                                <input type="text" class="form-control" id="data-mycall">
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xs-6">
+                            <div class="input-group input-margin">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default" id="data-cq">CQ</button>
+                                    <button type="button" class="btn btn-default" id="data-ans">ANS</button>                                
+                                    <button type="button" class="btn btn-default" id="data-qso">QSO</button>
+                                    <button type="button" class="btn btn-default" id="data-kn">KN</button>
+                                    <button type="button" class="btn btn-default" id="data-sk">SK</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-xs-12">
+                            <div class="input-group input-margin" id="data-theircall-grp">
+                                <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                            You: <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" id="calls-dropdown" role="menu">
+                                        </ul>
+                                </div>
+                                <input type="text" class="form-control" id="data-theircall">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-12">
                              <div class="input-group input-margin">
                                  <span class="input-group-addon">Text:</span>
@@ -135,14 +166,14 @@
                 <div class="panel-body">
                     <div class="input-group input-margin">
                         <span class="input-group-addon">VFO A</span>
-                            <input  id="vfoa-direct" class="form-control" placeholder="14.070">
+                            <input  id="vfoa-direct" type="number" class="form-control" step="0.00001" placeholder="14.070">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" id="vfoa-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
                             </span>
                        </div> <!-- VFOA -->
                     <div class="input-group input-margin">
                         <span class="input-group-addon">VFO B</span>
-                            <input  id="vfob-direct" class="form-control" placeholder="14.070">
+                            <input  id="vfob-direct" type="number" class="form-control" step="0.00001" placeholder="14.070">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" id="vfob-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
                             </span>
