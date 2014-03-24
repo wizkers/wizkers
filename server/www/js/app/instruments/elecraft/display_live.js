@@ -143,7 +143,7 @@ define(function(require) {
             
             sendText: function(e) {
                 if ((event.target.id == "data-text-input" && event.keyCode==13) || (event.target.id != "data-text-input")) {
-                    var txt =  $("#data-text-input").val();
+                    var txt =  $("#data-text-input").val() + " ";
                     if (txt.length > 0) {
                         // Split our text in 24 character chunks and add them into the buffer:
                         this.queueText(txt);
@@ -293,7 +293,7 @@ define(function(require) {
                  var mycall = $("#data-mycall").val();
                  if (mycall != '') {
                      $("#data-mycall-grp").removeClass("has-error");
-                     var key = "\n\ncq cq de " + mycall + " " + mycall + " " + mycall + " pse k";
+                     var key = "cq cq cq de " + mycall + " " + mycall + " " + mycall + " pse k \x04";
                      this.queueText(key);
                  } else {
                      $("#data-mycall-grp").addClass("has-error");
@@ -306,7 +306,7 @@ define(function(require) {
                     return;
                 var me = $("#data-mycall").val();
                 var you = $("#data-theircall").val();
-                 var key = "\n" + you + " " + you + " de " + me + " " + me + " " + me + " pse kn\n";
+                 var key = you + " " + you + " de " + me + " " + me + " " + me + " pse kn \x04";
                  this.queueText(key);
             },
 
@@ -316,7 +316,7 @@ define(function(require) {
                     return;
                 var me = $("#data-mycall").val();
                 var you = $("#data-theircall").val();
-                 var key = "\nbtu " + you + " de " + me + " pse kn\n";
+                 var key = "  *** btu " + you + " de " + me + " pse kn \x04";
                  this.queueText(key);
             },
 
@@ -326,7 +326,7 @@ define(function(require) {
                     return;
                 var me = $("#data-mycall").val();
                 var you = $("#data-theircall").val();
-                 var key = "\n" + you + " de " + me + "\n";
+                 var key = "   ***   " + you + " de " + me + "  ***  ";
                  this.queueText(key);
             },
 
@@ -336,7 +336,7 @@ define(function(require) {
                     return;
                 var me = $("#data-mycall").val();
                 var you = $("#data-theircall").val();
-                 var key = "Thanks for this QSO, 73 and all the best\n" + you + " de " + me + " sk sk sk";
+                 var key = "  ***  Thanks for this QSO, 73 and all the best\n" + you + " de " + me + " sk sk sk \x04";
                  this.queueText(key);
             },
 
@@ -414,14 +414,11 @@ define(function(require) {
                     this.setModeIcon(parseInt(val));
                 } else if (cmd == "TB") {
                     var l = parseInt(val.substr(1,2));
+                    var i = $('#data-stream',this.el);
                     if (l > 0) {
                         var txt = val.substr(3);
-                        var i = $('#data-stream',this.el);
                         var scroll = i.val() + txt;
-                        i.val(scroll);
-                        // Autoscroll:
-                        i.scrollTop(i[0].scrollHeight - i.height());
-                        
+                        i.val(scroll);                        
                         // Then we need to parse any callsign we find in the text:
                         // note: without the "g", will split a single callsign into its elementary parts
                         // and we deduplicate using utils.unique
@@ -440,12 +437,14 @@ define(function(require) {
                     if (this.textOutputBuffer.length > 0) {
                         if (r < 5) {
                             var txt = this.textOutputBuffer.shift();
-                            var input = $('#data-stream',this.el);
-                            var scroll = input.val() + txt;
-                            input.val(scroll);
+                            var scroll = i.val() + txt;
+                            i.val(scroll);
                             linkManager.driver.sendText(txt);
                         }
                     }
+                    // Autoscroll:
+                    i.scrollTop(i[0].scrollHeight - i.height());
+
                 }
 
             },
