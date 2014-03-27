@@ -9,7 +9,7 @@
 
 require.config({
     
-    baseUrl: '.',
+    baseUrl: 'js',
     
     paths: {
         app: 'app',
@@ -22,7 +22,7 @@ require.config({
         localstorage: 'lib/backbone.localStorage-1.1.7',
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',
-	text: 'lib/text',
+           text: 'lib/text',
         
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
@@ -31,7 +31,7 @@ require.config({
         flot_time: 'lib/flot-0.8.1/jquery.flot.time',
         flot_resize: 'lib/flot-0.8.1/jquery.flot.resize',
         flot_selection: 'lib/flot-0.8.1/jquery.flot.selection',
-        flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween',
+        flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween'
     },
     
     /*
