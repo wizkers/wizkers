@@ -181,14 +181,15 @@ define(function(require) {
             // to avoid overloading the radio, not sure that is totally necessary, but
             // this won't hurt
 
-            // Query displays
-            this.cc('DB;DS;'); // Query VFO B and VFOA Display
+            // Query displays and band (does not update by itself)
+            this.cc('DB;DS;BN;'); // Query VFO B and VFOA Display
 
             // Then ask the radio for current figures:
             this.cc('PO;'); // Query actual power output
 
             // And if we have an amp, then we can get a lot more data:
             this.cc('^PI;^PF;^PV;^TM;');
+            this.cc('^PC;^SV;'); // Query voltage & current
         }
 
 

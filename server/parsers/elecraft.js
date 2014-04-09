@@ -6,17 +6,10 @@
  *    - KX3
  * 
  * At this stage, I am not recording anything on those instruments, but I still
- * need to 
+ * need to implement the API.
  * 
- * 
- *
- * 
- * 
- * 
- *
  */
 var serialport = require('serialport'),
-    SerialPort  = serialport.SerialPort,
     readline = require('readline'),
     net = require('net');
 
@@ -111,7 +104,7 @@ module.exports = {
         }
         var lcmd = data.substr(0,3);
         if (cmd != "DB" && cmd != "DS" && cmd != "PO" && lcmd != "^PI" && lcmd != "^PF" && lcmd != "^TM" &&
-           lcmd != "^PV" ) {
+            lcmd != "^PV" && lcmd != "^PC" && lcmd != "^SV"  && cmd == "BN" ) {
             // Additional output besides regular polling, print it
             console.log("******  " + data);
         }

@@ -26,6 +26,8 @@ define(function(require) {
                 this.ampReflPower = [];
                 this.ampInPower = [];
                 this.ampTemp = [];
+                this.ampAmp = [];
+                this.ampVolt = [];
 
 
 
@@ -65,6 +67,8 @@ define(function(require) {
                                                              ], this.plotOptions);
                 this.amppowerplot = $.plot($(".amppowerchart", this.el), [ {data:[], label:"W", color:this.color},
                                                              ], this.plotOptions);
+                this.voltplot = $.plot($(".voltchart", this.el), [ {data:[], label:"V", color:this.color},
+                                                             ], this.plotOptions);
 
             },
 
@@ -93,6 +97,7 @@ define(function(require) {
             showInput: function(data) {
                 var drawPwr = false;
                 var drawTemp = false;
+                var drawVolt = false;
                 // Now update our display depending on the data we received:
                 if (data.charAt(0) == '^') {
                     var cmd = data.substr(1,2);
@@ -126,7 +131,22 @@ define(function(require) {
                         }
                         this.ampTemp.push([stamp, val]);
                         drawTemp = true;
-                    }   
+                    } else if (cmd == "PC") {
+                        $("#kxpa-pc").html(val);
+                        if (this.ampAmp.length >= this.livepoints) {
+                            this.ampAmp = this.ampAmp.slice(1);
+                        }
+                        this.ampAmp.push([stamp,val]);
+                        drawVolt = true;
+                    } else if (cmd == "SV") {
+                        var val = Math.floor(val)/100;
+                        $("#kxpa-sv").html(val);
+                        if (this.ampVolt.length >= this.livepoints) {
+                            this.ampVolt = this.ampVolt.slice(1);
+                        }
+                        this.ampVolt.push([stamp,val]);
+                        drawVolt = true;
+                    }
                 } else {
                     var cmd = data.substr(0,2);
                     if (cmd == "PO") {
@@ -157,8 +177,14 @@ define(function(require) {
                                     ]);
                     this.tempplot.setupGrid(); // Time plots require this.
                     this.tempplot.draw();
-
-
+                }
+                if (drawVolt) {
+                    this.voltplot.setData([
+                                    { data:this.ampAmp, label: "A", color: this.color },
+                                    { data:this.ampVolt, label: "V" }
+                                    ]);
+                    this.voltplot.setupGrid(); // Time plots require this.
+                    this.voltplot.draw();
                 }
 
             },

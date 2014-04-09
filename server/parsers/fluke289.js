@@ -16,7 +16,6 @@
  *
  */
 var serialport = require('serialport'),
-    SerialPort  = serialport.SerialPort,
     crcCalc = require('./lib/crc-calc.js'),
     zlib = require('zlib');
 

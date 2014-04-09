@@ -9,8 +9,7 @@
 //  - The low level parser for the serial port driver
 //  - The high level parser for incoming serial port data
 
-var serialport = require('serialport'),
-    SerialPort  = serialport.SerialPort;
+var serialport = require('serialport');
 
 module.exports = {
     

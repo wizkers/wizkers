@@ -29,6 +29,11 @@ define(function(require) {
                 this.textOutputBuffer = [];
                 this.transmittingText = false;
                 
+                // Keep the value of the previous VFO value to avoid
+                // unnecessary redraws of the front panel.
+                this.oldVFOA = null;
+                this.oldVFOB = null;
+                
                 linkManager.on('status', this.updateStatus, this);
                 linkManager.on('input', this.showInput, this);
             },
@@ -119,6 +124,8 @@ define(function(require) {
                 "click #data-sk": "sendSK",
                 "click #data-kn": "sendKN",
                 "click #data-ans": "sendANS",
+                "click #data-me": "sendME",
+                "click #data-brag": "sendBRAG",
             },
 
             debugClick: function(e) {
@@ -222,7 +229,7 @@ define(function(require) {
                 "B_XMIT": "T16", "B_TUNE": "H16",
                 "B_PRE": "T19", "B_NR": "H19",
                 "B_ATTN": "T27", "B_NB": "H27",
-                "B_APT": "T20", "B_NTCH": "H20",
+                "B_APF": "T20", "B_NTCH": "H20",
                 "B_SPOT": "T28", "B_CWT": "H28",
                 "B_CMP": "T21", "B_PITCH": "H21",
                 "B_DLY": "T29", "B_VOX": "H29",
@@ -316,7 +323,7 @@ define(function(require) {
                     return;
                 var me = $("#data-mycall").val();
                 var you = $("#data-theircall").val();
-                 var key = "  *** btu " + you + " de " + me + " pse kn \x04";
+                 var key = "  ... btu " + you + " de " + me + " pse kn \x04";
                  this.queueText(key);
             },
 
@@ -326,8 +333,27 @@ define(function(require) {
                     return;
                 var me = $("#data-mycall").val();
                 var you = $("#data-theircall").val();
-                 var key = "   ***   " + you + " de " + me + "  ***  ";
+                 var key = "   ...   " + you + " de " + me + "  ... ";
                  this.queueText(key);
+            },
+
+            sendME: function() {
+                var ok = this.validateMacros();
+                if (!ok)
+                    return;
+                this.sendQSO();
+                var key = "My Info: ... Name: Ed, Ed ... QTH: ";
+                this.queueText(key);
+            },
+
+            sendBRAG: function() {
+                var ok = this.validateMacros();
+                if (!ok)
+                    return;
+                this.sendQSO();
+                var key = "Rig: Elecraft KX3, with End-fed antenna, 30\" wire, on temp installation ... Software is homebrew Android rig controller with PSK/RTTY support ... ";
+                this.queueText(key);
+                this.sendKN();
             },
 
             sendSK: function() {
@@ -336,7 +362,7 @@ define(function(require) {
                     return;
                 var me = $("#data-mycall").val();
                 var you = $("#data-theircall").val();
-                 var key = "  ***  Thanks for this QSO, 73 and all the best\n" + you + " de " + me + " sk sk sk \x04";
+                 var key = "  ...  Thanks for this QSO, 73 and all the best ... " + you + " de " + me + " sk sk sk \x04";
                  this.queueText(key);
             },
 
@@ -346,9 +372,15 @@ define(function(require) {
                 var val = data.substr(2);
                 if (cmd == "DB") {
                     // VFO B Text
+                    if (this.oldVFOB == val)
+                        return;
                     $("#kx3 #VFOB").text(val + "    ");
+                    this.oldVFOB = val;
                 } else if (cmd == "DS") {
-                    // VFO A Text, a bit more tricky:
+                    // VFO A Text, a bit more tricky.
+                    // Avoid useless redraws
+                    if (this.oldVFOA == val)
+                        return;
                     if (val.length < 8) {
                         console.log("Error: VFO A buffer too short!");
                         return;
@@ -379,6 +411,8 @@ define(function(require) {
 
                     this.setIcon("ATU",(f & 0x10));
                     this.setIcon("NR", (f & 0x04));
+                    
+                    this.oldVFOA = val;
 
                 } else if (cmd == "PC") {
                     $("#power-direct").val(parseInt(val));
