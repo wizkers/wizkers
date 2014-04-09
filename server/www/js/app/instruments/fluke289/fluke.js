@@ -49,7 +49,7 @@ define(function(require) {
         };
 
         // This has to be a link manager
-        this.getLinkManager = function(arg, callback) {
+        this.getDriver = function(arg, callback) {
             return new linkmanager(arg);
         };
 

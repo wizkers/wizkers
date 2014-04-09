@@ -4,7 +4,10 @@
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
  *
- * Work in progress.
+ * One of the roles of this lib is also to act as a middleman for the
+ * instrument driver: it receives data from the serial port, passes it to
+ * the instrument driver parser, and whenever the parser sends data back, it
+ * passes it to the intrument driver 'format' command.
  */
 
 define(function(require) {
@@ -12,14 +15,15 @@ define(function(require) {
     "use strict";
     
     var Backbone = require('backbone');
+    var Serialport = require('serialport');
 
     var serialLib = function() {
 
         // Public methods
 
         // Same API as for the socket object... pretty basic implementation, I know
-       this.emit = function(cmd, args) {
-           switch (cmd) {
+        this.emit = function(cmd, args) {
+            switch (cmd) {
                    case 'portstatus':
                     portStatus(args);
                     break;
@@ -40,109 +44,44 @@ define(function(require) {
                     break;
                    default:
                     break;
-           }
-       };
+            }
+        };
 
-       // Trick: 
-       this.connect = function() {return this; };
-        
+        // Trick: 
+        this.connect = function() {return this; };
+
+        // Needs to be public (defined with this.) because
+        // it is called from a callback
+        this.driver = null;
+        this.portOpen = false;
+
         // Private methods / properties:
 
-       var Debug = true;
+        var Debug = true;
+        var self = this;
+        var parser = null;
 
-       var portOpen = false;
-       var self = this;
-       var connectionId = -1;
-
-       var data = ""; // Our reading buffer
-
-        // From chrome developer API:
-        function ab2str(buf) {
-            return String.fromCharCode.apply(null, new Uint8Array(buf));
-        };
-
-        // Convert string to ArrayBuffer
-        var str2ab=function(str) {
-            var buf=new ArrayBuffer(str.length);
-            var bufView=new Uint8Array(buf);
-            for (var i=0; i<str.length; i++) {
-                bufView[i]=str.charCodeAt(i);
-            }
-            return buf;
-        };
-        
-        
-    /*
-        ---------- Hexdump utility for debugging ------------
-    */
-	function to_hex( number ) {
-		var r = number.toString(16);
-		if( r.length < 2 ) {
-			return "0" + r;
-		} else {
-			return r;
-		}
-	};
-	
-	function dump_chunk( chunk ) {
-		var dumped = "";
-		
-		for( var i = 0; i < 4; i++ ) {
-			if( i < chunk.length ) {
-				dumped += to_hex( chunk.charCodeAt( i ) );
-			} else {
-				dumped += "..";
-			}
-		}
-		
-		return dumped;
-	};
-	
-	function dump_block( block ) {
-		var dumped = "";
-		
-		var chunks = block.match( /[\s\S.]{1,4}/g );
-		for( var i = 0; i < 4; i++ ) {
-			if( i < chunks.length ) {
-				dumped += dump_chunk( chunks[i] );
-			} else {
-				dumped += "........";
-			}
-			dumped += " ";
-		}
-		
-		dumped += "    " + block.replace( /[\x00-\x1F]/g, "." );
-		
-		return dumped;
-	};
-	
-	function dump( s ) {
-		var dumped = "";
-		
-		var blocks = s.match( /[\s\S.]{1,16}/g );
-		for( var block in blocks ) {
-			dumped += dump_block( blocks[block] ) + "\n";
-		}
-		
-		return dumped;
-	};
-        
-    /*************************** End of utils ******************/
-        
-        
-        
-        // This is where we will hook up the serial parser - cordova version
+        // This is where we hook up the serial parser - cordova version
         function setDriver(driver) {
-            
+            console.log("Setting driver - should be " + driver);
+            // We can use our instrumentManager to ask for the right driver
+            // (in server-side mode, "driver" is passed as the driver name, we
+            //  don't need it here!)
+            instrumentManager.getBackendDriver(self, function(dr) {
+                self.driver = dr;
+                parser = self.driver.portSettings().parser;
+            });
         }
-        
+
+        // We support only one default port, the serial adapter
+        // connected to the OTG cable.
         function getPorts() {
             self.trigger('ports', ["OTG Serial"]);
         }
-        
+
         function portStatus() {
            self.trigger('status', {portopen: self.portOpen});
-       };
+        };
 
         function openPort(port) {
             console.log("chromeSerialLib: openPort");
@@ -158,12 +97,7 @@ define(function(require) {
                     alert("chromeSerialLib: requestPermission error: " + error);
                 }
             );        
-       };
-
-        function serialEvent(data) {
-           // console.log('Raw input:\n' + data);
-           self.trigger('serialEvent', data);
-        }
+        };
 
         // Our Cordova serial plugin is not event-driven (yet), which means
         // that we have to call read continously, which is pretty ugly and bad for
@@ -177,26 +111,24 @@ define(function(require) {
                 }, 100);
                 return;
             }
-            // Inspired by Node's serialport library, why reinvent the wheel:
-            data += ab2str(readInfo);
-            // Split collected data by delimiter
-            var parts = data.split(';')
-            data = parts.pop();
-            parts.forEach(function (part, i, array) {
-                serialEvent(part);
-            });
+            
+            // Pass this over to the parser.
+            // the parser will trigger a "data" even when it is ready
+            parser(self,readInfo);
+            
             // Keep on reading.
             serial.read(onRead);
         };
+        
+        // Called by the parser whenever data is ready to be formatted
+        // by our instrument driver
+        function onDataReady(data) {
+            self.driver.format(data);
+        }
 
         function onOpen(openInfo) {
             self.portOpen = true;
             self.trigger('status', {portopen: true} );
-            // OK, so this is horrible: the Cordova serial plugin is not
-            // event-driven, so we have to run a polling loop...
-            //
-            // Note that the plugin has a built-in 1000ms timeout on serial
-            // reads
             serial.read(onRead);
         };
 
@@ -209,18 +141,22 @@ define(function(require) {
                }, function(error) {
                 console.log("cordovaSerialLib: closePort error - " + error);
                }
-                );
+            );
         };
 
         function controllerCommand(cmd) {
             if (self.portOpen)
                 serial.write(cmd);
         };
+        
+        // Now hook up our own event listeners:
+        
+        this.on('data', onDataReady);
 
     };
 
     // Add event management to our serial lib, from the Backbone.Events class:
-    _.extend(serialLib.prototype, Backbone.Events);
-    
+    _.extend(serialLib.prototype, Backbone.Events);    
     return new serialLib;
+    
 });

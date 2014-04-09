@@ -55,7 +55,7 @@ define(function(require) {
         };
 
         // This has to be a link manager
-        this.getLinkManager = function(arg) {
+        this.getDriver = function(arg) {
             return new linkmanager(arg);
         };
 

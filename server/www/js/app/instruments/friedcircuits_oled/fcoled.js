@@ -48,8 +48,8 @@ define(function(require) {
             return null;
         };
 
-        // This has to be a link manager
-        this.getLinkManager = function(arg) {
+        // The instrument driver (browser-side)
+        this.getDriver = function(arg) {
             return new linkmanager(arg);
         };
 

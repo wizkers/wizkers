@@ -17,7 +17,7 @@ define(function(require) {
             return ["LiveDisplay", "NumDisplay", "DiagDisplay"];
         };
 
-        // This has to be a Backbone view
+        // This is a Backbone view
         this.getLiveDisplay = function(arg, callback) {
             require(['app/instruments/elecraft/display_live'], function(view) {
                 callback(new view(arg));
@@ -25,7 +25,6 @@ define(function(require) {
         };
 
         // This is a Backbone view
-        // This is a numeric display
         this.getNumDisplay = function(arg, callback) {
             require(['app/instruments/elecraft/display_numeric'], function(view) {
                 callback( new view(arg));
@@ -39,9 +38,17 @@ define(function(require) {
             });
         };
 
-        // This has to be a link manager
-        this.getLinkManager = function(arg) {
+        // This is the front-end driver
+        this.getDriver = function(arg) {
             return new linkmanager(arg);
+        };
+        
+        // This is a browser implementation of the backend driver, when we
+        // run the app fully in-browser on as a Cordova native app.
+        this.getBackendDriver = function(arg, callback) {
+            require(['app/instruments/elecraft/parser'], function(parser) {
+                callback(new parser(arg));
+            });
         };
 
         // Return a Backbone view which is a mini graph

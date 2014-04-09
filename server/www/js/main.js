@@ -95,7 +95,7 @@ var vizapp = {
 var router;
 
 require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instruments/instrumentmanager', 'app/linkmanager',
-         'app/models/instrument'], function($, Backbone, Router, Settings,InstrumentManager, LinkManager, Instrument) {
+         'app/models/instrument'], function($, Backbone, Router, Settings, InstrumentManager, LinkManager, Instrument) {
        // Get our settings here, and
         // share them afterwards, rather than requesting it
         // everytime...
@@ -110,7 +110,7 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
         // instruments as necessary, as well as providing a list of
         // instruments to other parts who need those
         instrumentManager = new InstrumentManager();
-                       
+
         // Create our link manager: it is in charge of talking
         // to the server-side controller interface through a socket.io
         // web socket. It is passed to all views that need it.
@@ -123,7 +123,7 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
                 var type = ins.get('type');
                 console.log('Load link manager driver for type: ' + type );
                 instrumentManager.setInstrument(ins);
-                linkManager.setDriver(instrumentManager.getLinkManager(linkManager));
+                linkManager.setDriver(instrumentManager.getDriver(linkManager));
 
                 router = new Router();
                 Backbone.history.start();
@@ -137,8 +137,8 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
 
                 }});
         } else {
-	   router = new Router();
-	   Backbone.history.start();
+           router = new Router();
+           Backbone.history.start();
 	}
 });
 

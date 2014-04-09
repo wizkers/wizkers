@@ -33,7 +33,7 @@ define(function(require) {
         listView: null,
 
         initialize: function (options) {
-            console.log("Frequency item - rendering item " + options.frequency);
+            // console.log("Frequency item - rendering item " + options.frequency);
             this.listView = options.listView;
             this.frequency = options.frequency; // What entry in the band memory
             this.band = options.band;           // The current band memory (string)
@@ -92,7 +92,6 @@ define(function(require) {
         },
 
         // End frequencies of each band. 4500 kHz is the 80 meter/60 meter transition for KX3. The K3 uses 4800 kHz.
-
         /* 0        <= BAND160  < 3000 kHz */
         /* 3000     <= BAND80   < 4500 */
         /* 4500     <= BAND60   < 6000 */
@@ -189,17 +188,7 @@ define(function(require) {
             this.bands= [ "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m" ];
 
             // The server lets us specify free-form metadata for each instrument,
-            // we are using it for storing our frequencies, per band:
-            // { frequencies: {
-            //     "20m": [
-            //          { vfoa: 14.070, vfob: 14.100, mode: "psk31", name: "This is a comment" },
-            //            ...
-            //      ],
-            //   }
-            //}
-            //
-            // TODO Also: we can setup in the KX3 settings how many frequencies per panel we want
-            // will be stored in "cardsperpanel" attribute.
+            // we are using it for storing our frequencies, per band.
             // 
             var metadata = this.model.get('metadata');
             this.frequencies = metadata.frequencies;
@@ -207,13 +196,13 @@ define(function(require) {
                 this.frequencies = {
                                     "6m": [], 
                                     "10m": [
-                                            { "vfoa": 28.120, "vfob": 28.120, "mode": "DATA A", "name": "PSK31" },
+                                            { "vfoa": 28.120, "vfob": 28.120, "mode": "DATA", "name": "PSK31" },
                                     ],
                                     "12m": [],
                                     "15m": [],
                                     "17m": [],
-                                    "20m": [ { "vfoa": 14.070, "vfob": 14.100, "mode": "DATA A", "name": "PSK31" },
-                                             { "vfoa": 14.085, "vfob": 14.100, "mode": "DATA A", "name": "RTTY" },
+                                    "20m": [ { "vfoa": 14.070, "vfob": 14.100, "mode": "DATA", "name": "PSK31" },
+                                             { "vfoa": 14.085, "vfob": 14.100, "mode": "DATA", "name": "RTTY" },
                                            ],
                                     "30m": [],
                                     "40m": [],
@@ -245,7 +234,7 @@ define(function(require) {
             $(this.el).html('<div class="item active"></div>');
 
             for (var screen = 0; screen < len/4; screen++) {
-                console.log("rendering screen " + screen);
+                // console.log("rendering screen " + screen);
                 if (screen) $(this.el).append('<div class="item other-'+screen+'"></div>');
                 for (var i = screen*4; i < Math.min(len,screen*4+4); i++) {
                     $(screen ? '.other-'+screen : '.active', this.el).append(new ElecraftFrequencyItemView({model: this.model, band: this.current_band, 
@@ -272,7 +261,10 @@ define(function(require) {
             var val = data.substr(2);
 
             if (cmd == "BN") {
-                this.current_band = this.bands[parseInt(val)];
+                var new_band = this.bands[parseInt(val)];
+                if (this.current_band == new_band)
+                    return; // Avoid useles re-renders;
+                this.current_band = new_band;
                 console.log(this.current_band);
                 this.render();
             } else if (cmd == "MD" && this.addingFrequency) {

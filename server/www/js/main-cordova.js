@@ -40,6 +40,7 @@ require.config({
     map: {
         '*': {
             'socketio': 'app/cordovaSerialLib',
+            'serialport': 'app/lib/serialport',
         }
     },
     
@@ -128,7 +129,7 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
                 var type = ins.get('type');
                 console.log('Load link manager driver for type: ' + type );
                 instrumentManager.setInstrument(ins);
-                linkManager.setDriver(instrumentManager.getLinkManager(linkManager));
+                linkManager.setDriver(instrumentManager.getDriver(linkManager));
 
                 router = new Router();
                 Backbone.history.start();

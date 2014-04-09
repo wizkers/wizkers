@@ -70,7 +70,7 @@ define(function(require) {
                         // Now update our Instrument manager:
                         linkManager.closeInstrument();  // Stop former link manager
                         instrumentManager.setInstrument(ins);
-                        linkManager.setDriver(instrumentManager.getLinkManager(linkManager));
+                        linkManager.setDriver(instrumentManager.getDriver(linkManager));
                         // We need to jump to the main screen now:
                         self.navigate('/', true);
                     }});
