@@ -11,6 +11,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
+        utils    = require('app/utils'),
         tpl     = require('text!tpl/instruments/FCOledNumView.html'),
         
         template = _.template(tpl);

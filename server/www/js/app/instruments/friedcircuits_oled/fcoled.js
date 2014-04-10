@@ -52,6 +52,14 @@ define(function(require) {
         this.getDriver = function(arg) {
             return new linkmanager(arg);
         };
+        
+        // This is a browser implementation of the backend driver, when we
+        // run the app fully in-browser on as a Cordova native app.
+        this.getBackendDriver = function(arg, callback) {
+            require(['app/instruments/friedcircuits_oled/parser'], function(parser) {
+                callback(new parser(arg));
+            });
+        };
 
         // Return a Backbone view which is a mini graph
         this.getMiniLogview = function(arg) {

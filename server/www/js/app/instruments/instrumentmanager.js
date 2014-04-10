@@ -23,7 +23,7 @@ define(function(require) {
         ElecraftInstrument = require('app/instruments/elecraft/elecraft'),
         ElecraftSettingsView = require('app/instruments/elecraft/settings'),
 
-        InstrumentManager = function() {
+    InstrumentManager = function() {
     
         this.instrument = null; // A Backbone Model
 

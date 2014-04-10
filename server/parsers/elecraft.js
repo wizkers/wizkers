@@ -104,7 +104,7 @@ module.exports = {
         }
         var lcmd = data.substr(0,3);
         if (cmd != "DB" && cmd != "DS" && cmd != "PO" && lcmd != "^PI" && lcmd != "^PF" && lcmd != "^TM" &&
-            lcmd != "^PV" && lcmd != "^PC" && lcmd != "^SV"  && cmd == "BN" ) {
+            lcmd != "^PV" && lcmd != "^PC" && lcmd != "^SV"  && cmd != "BN" ) {
             // Additional output besides regular polling, print it
             console.log("******  " + data);
         }

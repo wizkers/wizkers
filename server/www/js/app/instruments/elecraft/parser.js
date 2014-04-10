@@ -28,6 +28,7 @@ define(function(require) {
                 dataBits: 8,
                 parity: 'none',
                 stopBits: 1,
+                dtr: false,
                 flowControl: false,
                 // We get non-printable characters on some outputs, so
                 // we have to make sure we use "binary" encoding below,
@@ -37,9 +38,9 @@ define(function(require) {
             }
         };
 
-        // Called when the HTML app needs a unique identifier.
+        // Called when the app needs a unique identifier.
         // this is a standardized call across all drivers.
-        // 
+        //
         // Returns the Radio serial number.
         this.sendUniqueID = function() {
             this.uidrequested = true;
@@ -49,10 +50,9 @@ define(function(require) {
                 console.log("Error on serial port while requesting Elecraft UID : " + err);
             }
         };
-
         
-        // Format returns an ASCII string - or a buffer ? Radio replies with
-        // non-ASCII values on some important commands (VFO A text, Icons, etc)
+        // Format can act on incoming data from the radio, and then
+        // forwards the data to the app through a 'serialEvent' event.
         this.format = function(data, recording) {
 
             if (this.uidrequested && data.substr(0,5) == "DS@@@") {
@@ -61,16 +61,6 @@ define(function(require) {
                 this.socket.trigger('uniqueID','' + data.substr(5,5));
                 this.uidrequested = false;
                 return;
-            }
-
-            var cmd = data.substr(0,2);
-            switch(cmd) {
-                    case "FA":
-                        this.vfoa_frequency = parseInt(data.substr(2));
-                        break;
-                    case "BW":
-                        this.vfoa_bandwidth = parseInt(data.substr(2));
-                        break;
             }
 
             this.socket.trigger('serialEvent',data);
@@ -87,7 +77,7 @@ define(function(require) {
         // Status returns an object that is concatenated with the
         // global server status
         this.status = function() {
-            return { tcpserverconnect: this.serverconnected };
+            return { tcpserverconnect: false };
         };
     
         // Not used

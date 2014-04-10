@@ -54,11 +54,12 @@ define(function(require) {
         // it is called from a callback
         this.driver = null;
         this.portOpen = false;
+        this.portSettings  = null;
 
         // Private methods / properties:
-
         var Debug = true;
         var self = this;
+        // Parser does not need to be public...
         var parser = null;
 
         // This is where we hook up the serial parser - cordova version
@@ -69,7 +70,8 @@ define(function(require) {
             //  don't need it here!)
             instrumentManager.getBackendDriver(self, function(dr) {
                 self.driver = dr;
-                parser = self.driver.portSettings().parser;
+                self.portSettings = self.driver.portSettings();
+                parser = self.portSettings.parser;
             });
         }
 
@@ -88,7 +90,9 @@ define(function(require) {
             serial.requestPermission(
                 function(success) {
                     serial.open(
-                                {"baudRate": 38400}, // pay attention to capital R and lowercase b ...
+                                {"baudRate": "" + self.portSettings.baudRate,
+                                 "dataBits": "" + self.portSettings.dataBits,
+                                 "dtr": self.portSettings.dtr }, // pay attention to capital R and lowercase b ...
                                 onOpen,
                                 function(error) { alert("serial.open error: " + error); }
                                );
@@ -146,7 +150,7 @@ define(function(require) {
 
         function controllerCommand(cmd) {
             if (self.portOpen)
-                serial.write(cmd);
+                serial.write(self.driver.output(cmd));
         };
         
         // Now hook up our own event listeners:

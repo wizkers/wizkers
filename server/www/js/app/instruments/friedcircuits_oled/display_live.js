@@ -11,6 +11,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
+        utils    = require('app/utils'),
         tpl     = require('text!tpl/instruments/FCOledLiveView.html'),
         
         template = _.template(tpl);
@@ -19,6 +20,7 @@ define(function(require) {
     require('flot');
     require('flot_time');
     require('flot_fillbetween');
+    require('flot_resize');
 
     return Backbone.View.extend({
 
