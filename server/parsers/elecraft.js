@@ -174,7 +174,8 @@ module.exports = {
                     var freq = ("00000000000" + parseFloat(data.substr(2)).toString()).slice(-11); // Nifty, eh ?
                     
                     console.log("Rigctld emulation: set frequency to " + freq);
-                    this.port.write("FA" + freq + ";");
+                    if (this.port != null)
+                        this.port.write("FA" + freq + ";");
                     c.write("RPRT 0\n");
                     break;
                 case "m":
@@ -190,13 +191,15 @@ module.exports = {
                     break;
                 case "T ":
                     if (data.substr(2) == "1") {
-                        this.port.write('TX;');
+                        if (this.port != null)
+                            this.port.write('TX;');
                         // The radio does not echo this command, so we do it
                         // ourselves, so that the UI reacts
                         this.socket.emit('serialEvent','TX;');
                      
                     } else {
-                        this.port.write("RX;");
+                        if (this.port != null)
+                            this.port.write("RX;");
                         this.socket.emit('serialEvent','RX;');
                     }
                     c.write("RPRT 0\n");
