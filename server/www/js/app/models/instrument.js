@@ -11,15 +11,14 @@ define(function(require) {
         Backbone = require('backbone'),
         Devicelog = require('app/models/devicelog');
 
-    if (vizapp.type == "cordova") {
+    if (vizapp.type == "cordova" || vizapp.type == "chrome") {
         Backbone.LocalStorage = require('localstorage');
     }
-
+    
     var Instrument = Backbone.Model.extend({
 
             type: null,
             idAttribute: "_id",
-
 
             initialize: function () {
                 this.validators = {};
@@ -33,6 +32,8 @@ define(function(require) {
                  */
                 if (vizapp.type == "cordova") {
                     this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
+                } else if (vizapp.type == "chrome") {
+                    this.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument");
                 } else {
                     this.urlRoot = "/instruments";
                 }
@@ -86,6 +87,8 @@ define(function(require) {
             initialize: function() {
                 if (vizapp.type == "cordova") {
                     this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
+                } else if (vizapp.type =="chrome") {
+                    this.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
                 } else {
                     this.url = "/instruments";
                 }

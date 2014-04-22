@@ -86,7 +86,7 @@ define(function(require) {
         };
 
         function openPort(port) {
-            console.log("chromeSerialLib: openPort");
+            console.log("cordovaSerialLib: openPort");
             serial.requestPermission(
                 function(success) {
                     serial.open(
@@ -98,7 +98,7 @@ define(function(require) {
                                );
                 },
                 function(error) {
-                    alert("chromeSerialLib: requestPermission error: " + error);
+                    alert("cordovaSerialLib: requestPermission error: " + error);
                 }
             );        
         };
