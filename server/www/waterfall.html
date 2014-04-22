@@ -5,6 +5,7 @@
     <script src="js/lib/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="js/lib/chroma.js"></script>
     <script src="js/lib/resampler.js"></script>
+    <script src="js/lib/dsp.js"></script>
     <style>
         * {
             font-family: sans-serif;
@@ -13,8 +14,19 @@
 </head>
 <body style="background-color: white;">
 
-<canvas id="canvas" width="1024" height="256" style="display: block; background-color: black ;"></canvas>
+<button onclick="init();">Start</button>
+<button onclick="monitor();">Toggle audio monitor</button>
+    
+    <p><small>Web Audio FFT with resampling to 8.820 kHz</small></p>
+<canvas id="canvas" width="1024" height="256" style="display: block; background-color: black;"></canvas>
+    
+    <p><small>Manual fft</small>&nbsp;<span id="test"></span></p>
+    
+    <p>Gain:&nbsp;<input type="range" min="0" max="100" default="30" id="gain"/>  Floor:&nbsp;<input type="range" min="0" max="100" id="floor" default="10"/></p>
 
+<canvas id="canvas2" width="1024" height="256" style="display: block; background-color: black;"></canvas>
+
+    
 <script type="text/javascript">
 
     // create the audio context (chrome only for now)
@@ -25,10 +37,13 @@
         window.AudioContext = window.webkitAudioContext;
     }
     
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+    
     // Get the microphone input
     function getUserMedia(dictionary, callback) {
         try {
-            navigator.webkitGetUserMedia(dictionary, callback, onError);
+            navigator.getUserMedia(dictionary, callback, onError);
         } catch (e) {
             alert('webkitGetUserMedia threw exception :' + e);
         }
@@ -50,15 +65,17 @@
     }
     
     // Events
-    // init() once the page has finished loading.
-    window.onload = init;
 
     var context;
 
     var audioBuffer;
     var sourceNode;
+    var filterNode;
     var analyser;
     var javascriptNode;
+    var monitoring = false;
+    var gain=30;
+    var floor = 10;
 
     // get the context from the canvas to draw on
     var ctx = $("#canvas").get()[0].getContext("2d");
@@ -68,6 +85,17 @@
         tempCtx = tempCanvas.getContext("2d");
     tempCanvas.width=1024;
     tempCanvas.height=256;
+
+    
+        // get the context from the canvas to draw on
+    var ctx2 = $("#canvas2").get()[0].getContext("2d");
+
+    // create a temp canvas we use for copying
+    var tempCanvas2 = document.createElement("canvas"),
+        tempCtx2 = tempCanvas2.getContext("2d");
+    tempCanvas2.width=1024;
+    tempCanvas2.height=256;
+
 
     // used for color distribution
     var hot = new chroma.ColorScale({
@@ -82,12 +110,57 @@
         limits:[0, 300]
     });
     
+    // Where we are storing the results of the FFT
+    var array = new Uint8Array(1024);
+    var fftbuffer = new Float32Array(2048);
+    
+    var fft = new FFT(2048, 8820);
+
+    
+    if ( !window.requestAnimationFrame ) {
+        window.requestAnimationFrame = ( function() {
+
+                return window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame || // comment out if FF4 is slow (it caps framerate at ~30fps: https://bugzilla.mozilla.org/show_bug.cgi?id=630127)
+                window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+
+                        window.setTimeout( callback, 1000 / 60 );
+                };
+        } )();
+}
+
+    
     // Open the microphone
     function init() {
         var audioConstraints = {
             audio: true
         };
         getUserMedia(audioConstraints, gotStream);
+        
+        // Get slider value changes:
+        $("#gain").change(function() {
+            gain = this.value;
+        });
+        
+        $("#floor").change(function() {
+            floor = this.value;
+        });
+    }
+    
+    function pause() {
+        
+    }
+    
+    function monitor() {
+        if (!monitoring)
+            sourceNode.connect(context.destination);
+        else {
+            sourceNode.disconnect();
+            sourceNode.connect(filterNode);
+        }
+        monitoring = !monitoring;
     }
 
     // Called once we get a live audio stream of user input
@@ -102,18 +175,17 @@
 
         
         // Create an AudioNode from the stream (live input)
-        var sourceNode = context.createMediaStreamSource(stream);
+        sourceNode = context.createMediaStreamSource(stream);
         
         // Filter the audio to limit bandwidth to 4kHz before resampling,
         // by using a BiQuadFilterNode:
-        var filterNode = context.createBiquadFilter();
+        filterNode = context.createBiquadFilter();
         filterNode.type = filterNode.LOWPASS; // Low pass
         filterNode.frequency.value = 3800;
         filterNode.Q.value = 1.5;
         filterNode.gain.value = 0;
         
         sourceNode.connect(filterNode);
-        sourceNode.connect(context.destination);
         
 
         // Create an audio resampler:
@@ -124,8 +196,10 @@
             //
             // The output data will be 1638 or 1939 samples long (8192 samples divided by 5)
             var rss  = new Resampler(44100, 8820, 1, 1639, true);
-            //var ring = new Float32Array(8192);
-            //var idx = 0;
+            var ring = new Float32Array(4096);
+            var idx = 0;
+            var out_idx = 0;
+            
             return function(event) {
                 var inp, out;
                 //console.log(event);
@@ -136,16 +210,20 @@
                 // We can edit the values of the array, but not change the reference -
                 // if we do, it won't do anything, the audioBuffer will keep its internal
                 // reference: therefore we need to manually copy all samples:
-                for (var i=0; i < l; ++i) {
-                    // ring[(i+idx)%8192] = rss.outputBuffer[i];
+                for (var i=0; i < l; i++) {
+                    ring[(i+idx)%4096] = rss.outputBuffer[i];
                     out[i] = rss.outputBuffer[i];
+                    //fftbuffer[i] = rss.outputBuffer[i];
                 }
-                // Now copy the ring buffer to the output channel
-                //for (var i=0; i < 8192; ++i) {
-                //    out[i] = ring[(idx+i)%8192];
-                //}
-                //idx = (idx+l)%8192;    
-                //requestAnimationFrame(drawSpectrogram);
+    
+                // Now copy the first 2048 bytes from ring buffer to the output channel
+                for (var i=0; i < 2048; i++) {
+                    fftbuffer[i] = ring[(idx+i+2048)%4096];
+                    
+                }
+                idx = (idx+l)%4096;
+                out_idx = (out_idx+2048) % 4096;
+                
             };
         }());
 
@@ -165,13 +243,17 @@
         //requestAnimationFrame(drawSpectrogram);
         
         var syncDisplay  = keep(context.createScriptProcessor(2048,1,1));
+        var loop= 0;
         syncDisplay.onaudioprocess = function() {
-            // get the average for the first channel
-            var array = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(array);
-            drawSpectrogram(array);
-        }
-        
+                    // get the average for the first channel
+                   
+                    analyser.getByteFrequencyData(array);
+                    fft.forward(fftbuffer);
+                    requestAnimationFrame(drawSpectrogram);
+                    if (++loop%6)
+                        requestAnimationFrame(drawSpectrogram2);
+            
+                }
         syncDisplay.connect(context.destination);
         
         //analyser.connect(context.destination);
@@ -182,29 +264,45 @@
     function onError(e) {
         console.log(e);
     }
+    
+    
+    function drawSpectrogram2() {
+        var canvas = document.getElementById("canvas2");
+        tempCtx2.drawImage(canvas, 0, 0, 1024, 256);
 
-    function drawSpectrogram(array) {
+        // Each pixel is 4500/1024 = 4.39Hz wide
+        // iterate over the elements from the array
+        for (var i = 0; i < 1024; i++) {
+            // draw each pixel with the specific color
+            var value = 256 + gain *Math.floor(Math.log(fft.spectrum[i]*floor));
+            ctx2.fillStyle = hot.getColor(value).hex();
+            // draw the line on top of the canvas
+            ctx2.fillRect(i, 1, 1, 1);
+        
+        }
+        // draw the copied image
+        ctx2.drawImage(tempCanvas2, 0, 0, 1024, 256, 0, 1, 1024, 256);
+    }
+    
+
+    function drawSpectrogram() {
 
         // The analyzer is in constant underrun because it assumes
         // we have a 44.1kHz sample rate, and we downsampled 5 times to
         // 8820. 
         
-        // The only way, very empirical, is to check if we have a zero
-        // frequency in the middle of the band (impossible on a real world
-        // system) and skip if it's the case.
+        // Therefore I check if I didn't only get zeroes in the array, and if I did,
+        // I just return.
         var pwr = 0;
         for (var i=0; i < 1024; i++) {
             pwr += array[i];
         }
-        // console.log(pwr);
-        if (!pwr) {
-            //requestAnimationFrame(drawSpectrogram);
+        
+        if  (!pwr)
             return;
-        }
 
         // copy the current canvas onto the temp canvas
         var canvas = document.getElementById("canvas");
-
         tempCtx.drawImage(canvas, 0, 0, 1024, 256);
 
         // Each pixel is 4500/1024 = 4.39Hz wide
@@ -213,19 +311,12 @@
             // draw each pixel with the specific color
             var value = array[i];
             ctx.fillStyle = hot.getColor(value).hex();
-
-            // draw the line at the right side of the canvas
-            ctx.fillRect(i, 1, 1, 2);
+            // draw the line on top of the canvas
+            ctx.fillRect(i, 1, 1, 1);
         }
 
-        // set translate on the canvas
-        ctx.translate(0, 2);
         // draw the copied image
-        ctx.drawImage(tempCanvas, 0, 0, 1024, 256, 0, 0, 1024, 256);
-
-        // reset the transformation matrix
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        //requestAnimationFrame(drawSpectrogram);
+        ctx.drawImage(tempCanvas, 0, 0, 1024, 256, 0, 1, 1024, 256);
 
     }
 
