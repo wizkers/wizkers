@@ -19,7 +19,7 @@ require.config({
         // we can upgrade easily
         jquery: 'lib/jquery-1.11.0',
         backbone: 'lib/backbone-1.1.2',
-        localstorage: 'lib/backbone.localStorage-1.1.7',
+        localstorage: 'lib/backbone.chromestorage',
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',
         text: 'lib/text',
@@ -39,7 +39,7 @@ require.config({
      */
     map: {
         '*': {
-            'socketio': 'app/cordovaSerialLib',
+            'socketio': 'app/chromeSerialLib',
             'serialport': 'app/lib/serialport',
         }
     },
@@ -95,7 +95,7 @@ var vizapp = {
     //   - server : use a remote server for device connection & database
     //   - cordova: run as an embedded Cordova application on Android
     //   - others to be defined 
-    type: "cordova",
+    type: "chrome",
 };
 
 var router;
@@ -107,7 +107,7 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
         // everytime...
         settings = new Settings({id: 1 });
 
-        // Create our instrument manager: in charge of creating/deleting
+         // Create our instrument manager: in charge of creating/deleting
         // instruments as necessary, as well as providing a list of
         // instruments to other parts who need those
         instrumentManager = new InstrumentManager();

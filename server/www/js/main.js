@@ -100,46 +100,36 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
         // share them afterwards, rather than requesting it
         // everytime...
         settings = new Settings({id: 1 });
-        // We need to be sure the settings are fetched before moving
-        // further, so we add the Ajax option "async" below.
-        settings.fetch({async:false});
 
-        // Now create our instrument manager & link manager (todo: have only one object ?)
-
-        // Create our instrument manager: in charge of creating/deleting
+         // Create our instrument manager: in charge of creating/deleting
         // instruments as necessary, as well as providing a list of
         // instruments to other parts who need those
         instrumentManager = new InstrumentManager();
-
         // Create our link manager: it is in charge of talking
         // to the server-side controller interface through a socket.io
         // web socket. It is passed to all views that need it.
         linkManager =  new LinkManager();
-        var insId = settings.get('currentInstrument');
-        if (insId != null) {
-            var ins = new Instrument.Instrument({_id: insId});
-            ins.fetch({success: function(){
-                // We have the instrument, get the correct link manager for it:
-                var type = ins.get('type');
-                console.log('Load link manager driver for type: ' + type );
-                instrumentManager.setInstrument(ins);
-                linkManager.setDriver(instrumentManager.getDriver(linkManager));
 
-                router = new Router();
-                Backbone.history.start();
-                },
-                      error: function() {
-                        // For some reason, we were not able to get our instrument,
-                        // let's start the application anyway (maybe we should reset
-                          // the instrument ID then ?
-                        router = new Router();
-                        Backbone.history.start();
+        settings.fetch({success: function() {           
+            var insId = settings.get('currentInstrument');
+            if (insId != null) {
+                var ins = new Instrument.Instrument({_id: insId});
+                ins.fetch({success: function(){
+                    // We have the instrument, get the correct link manager for it:
+                    var type = ins.get('type');
+                    console.log('Load link manager driver for type: ' + type );
+                    instrumentManager.setInstrument(ins);
+                    linkManager.setDriver(instrumentManager.getDriver(linkManager));
 
+                    router = new Router();
+                    Backbone.history.start();
                 }});
-        } else {
+            } else {
            router = new Router();
            Backbone.history.start();
-	}
+	       }
+        }
+                       });
 });
 
 
