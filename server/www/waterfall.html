@@ -1,31 +1,105 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/html">
-<head>
-    <title>Loading and playing a sound with the Web Audio API</title>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="E. Lafargue, edouard@lafargue.name">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+        
+    body { padding-top: 55px;} /* Required for fixed navbar */
+
+    </style>
+    <link href="css/bootstrap-lightbox.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap-editable.css" rel="stylesheet" />
+    <link href="css/cards-carousel.css" rel="stylesheet" />
+    <link href="css/slider.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet"> <!-- Apply my own styles last ! -->
+      
     <script src="js/lib/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="js/lib/chroma.js"></script>
     <script src="js/lib/resampler.js"></script>
     <script src="js/lib/dsp.js"></script>
+      
+    <script src="js/lib/bootstrap.js"></script>
+      <script src="js/lib/bootstrap-slider-2.0.0.js"></script>
+      
     <style>
         * {
             font-family: sans-serif;
         }
     </style>
-</head>
-<body style="background-color: white;">
 
-<button onclick="init();">Start</button>
-<button onclick="monitor();">Toggle audio monitor</button>
+
+  </head>
     
-    <p><small>Web Audio FFT with resampling to 8.820 kHz</small></p>
-<canvas id="canvas" width="1024" height="256" style="display: block; background-color: black;"></canvas>
+<body style="background-color: white;">
     
-    <p><small>Manual fft</small>&nbsp;<span id="test"></span></p>
+
+<div style="padding: 0 15px; margin: 5px;"> <!-- Make the main content full screen -->
     
-    <p>Gain:&nbsp;<input type="range" min="0" max="100" default="30" id="gain"/>  Floor:&nbsp;<input type="range" min="0" max="100" id="floor" default="10"/></p>
+    <div class="row">
+    <div class="col-md-2">
+        <button type="button" class="btn btn-default" onclick="init();">Start</button>
+        <button type="button" class="btn btn-default" onclick="monitor();">Toggle audio monitor</button>
+    </div>
+        <div class="col-md-3">
+            <div class="input-group input-margin">
+                <span class="input-group-addon">Gain</span>
+                    <div class="form-control slider-bg-info">
+                      <input type="text" id="gain-control" data-slider-value="45" data-slider-min="0" data-slider-max="100" data-slider-step="1">
+                    </div>
+                </div> <!-- AF -->
+                <div class="input-group input-margin">
+                    <span class="input-group-addon">Floor</span>
+                    <div class="form-control slider-bg-info">
+                      <input type="text" id="floor-control" data-slider-value="40" data-slider-min="0" data-slider-max="100" data-slider-step="1">
+                    </div>
+                </div> <!-- AF -->
+        </div>
+        <div class="col-md-3">
+            <div class="input-group input-margin">
+                <span class="input-group-addon">Smoothing</span>
+                    <input  id="wf-smoothing" type="number" class="form-control" step="1" placeholder="1">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" id="wf-smoothing-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                    </span>
+            </div>
+            <div class="input-group input-margin">
+                <span class="input-group-addon">Sample rate</span>
+                    <select id="wf-samprate" class="form-control">
+                            <option>44.1 kHz</option>
+                            <option>22.05 kHz</option>
+                            <option>11.025 kHz</option>
+                            <option>8.82 kHz</option>
+                </select>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" id="wf-smoothing-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                    </span>
+            </div>
+        </div>
+        <div class="col-md-2">
+        Todo: <ul>
+            <li>Choice of FFT window</li>
+            <li>Smoothing of FFT</li>
+            <li>Labels</li>
+            </div>
+    
+    
+    </div>
+    <div class="row" id="content">
+        <div class="col-md-12">
+    
+
+<canvas id="spectrum-canvas" width="1024" height="256" style="display: block; background-color: white;"></canvas>
 
 <canvas id="canvas2" width="1024" height="256" style="display: block; background-color: black;"></canvas>
 
+            
+            <span id="orig"></span><br><span id="avg"></span>
     
 <script type="text/javascript">
 
@@ -39,6 +113,80 @@
     
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
+    if ( !window.requestAnimationFrame ) {
+    window.requestAnimationFrame = ( function() {
+                return window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame || // comment out if FF4 is slow (it caps framerate at ~30fps: https://bugzilla.mozilla.org/show_bug.cgi?id=630127)
+                window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+                    window.setTimeout( callback, 1000 / 60 );
+                };
+        } )();
+    }
+    
+    // Our variables:    
+    
+    var context;
+    var audioBuffer;
+    var sourceNode;
+    var filterNode;
+    var resamplerNode;
+    var monitoring = false;
+    var gain=45;
+    var floor = 40;
+    
+    // Where we are storing the results of the FFT
+    var spectrumbuffer =  [ ];
+    var maxAvg = 1;
+    var sampleRate = 44100;
+    var fft = null;
+
+    
+    // get the context from the canvas to draw on
+    var ctx2 = $("#canvas2").get()[0].getContext("2d");
+
+    // create a temp canvas we use for copying
+    var tempCanvas2 = document.createElement("canvas"),
+        tempCtx2 = tempCanvas2.getContext("2d");
+    tempCanvas2.width=1024;
+    tempCanvas2.height=256;
+
+    // get the context from the canvas to draw on
+    var ctx = $("#spectrum-canvas").get()[0].getContext("2d");
+
+    // create a temp canvas we use for copying
+    var tempCanvas = document.createElement("canvas"),
+        tempCtx = tempCanvas.getContext("2d");
+    tempCanvas.width=1024;
+    tempCanvas.height=256;
+
+    
+
+    // used for color distribution
+    var hot = new chroma.ColorScale({
+        //colors: ['#5C4D6B', '#536887', '#3D839A', '#259FA1', '#35B89B', '#67CF8A', '#A3E275', '#E7F065' ],
+        //colors: ['#5C4D6B', '#3F627B', '#1C757A', '#2A8569', '#5B8F4F', '#91933B', '#C89140', '#F78B65' ],
+        colors: [ '#000000', '#0B16B5', '#FFF782', '#EB1250' ],
+        
+        // colors:['#000000', '#ff0000', '#ffff00', '#ffffff'],
+        // positions:[0, .125, 0.25, 0.375, 0.5, 0.625, 0.75, 1],
+        positions: [ 0, 0.4, 0.68, 0.85 ],
+        mode:'rgb',
+        limits:[0, 300]
+    });
+    
+    var gradient = ctx.createLinearGradient(0,0,0,300);
+    gradient.addColorStop(1,'#000000');
+    gradient.addColorStop(0.75,'#ff0000');
+    gradient.addColorStop(0.25,'#ffff00');
+    gradient.addColorStop(0,'#ffffff');
+
+    
+    // Initialize our bootstrap controls
+    $("#gain-control", this.el).slider();
+    $("#floor-control", this.el).slider();
+    
     
     // Get the microphone input
     function getUserMedia(dictionary, callback) {
@@ -64,201 +212,121 @@
         return node;
     }
     
-    // Events
-
-    var context;
-
-    var audioBuffer;
-    var sourceNode;
-    var filterNode;
-    var analyser;
-    var javascriptNode;
-    var monitoring = false;
-    var gain=30;
-    var floor = 10;
-
-    // get the context from the canvas to draw on
-    var ctx = $("#canvas").get()[0].getContext("2d");
-
-    // create a temp canvas we use for copying
-    var tempCanvas = document.createElement("canvas"),
-        tempCtx = tempCanvas.getContext("2d");
-    tempCanvas.width=1024;
-    tempCanvas.height=256;
-
-    
-        // get the context from the canvas to draw on
-    var ctx2 = $("#canvas2").get()[0].getContext("2d");
-
-    // create a temp canvas we use for copying
-    var tempCanvas2 = document.createElement("canvas"),
-        tempCtx2 = tempCanvas2.getContext("2d");
-    tempCanvas2.width=1024;
-    tempCanvas2.height=256;
-
-
-    // used for color distribution
-    var hot = new chroma.ColorScale({
-        //colors: ['#5C4D6B', '#536887', '#3D839A', '#259FA1', '#35B89B', '#67CF8A', '#A3E275', '#E7F065' ],
-        //colors: ['#5C4D6B', '#3F627B', '#1C757A', '#2A8569', '#5B8F4F', '#91933B', '#C89140', '#F78B65' ],
-        colors: [ '#000000', '#0B16B5', '#FFF782', '#EB1250' ],
-        
-        // colors:['#000000', '#ff0000', '#ffff00', '#ffffff'],
-        // positions:[0, .125, 0.25, 0.375, 0.5, 0.625, 0.75, 1],
-        positions: [ 0, 0.4, 0.68, 0.85 ],
-        mode:'rgb',
-        limits:[0, 300]
-    });
-    
-    // Where we are storing the results of the FFT
-    var array = new Uint8Array(1024);
-    var fftbuffer = new Float32Array(2048);
-    
-    var fft = new FFT(2048, 8820);
-
-    
-    if ( !window.requestAnimationFrame ) {
-        window.requestAnimationFrame = ( function() {
-
-                return window.webkitRequestAnimationFrame ||
-                window.mozRequestAnimationFrame || // comment out if FF4 is slow (it caps framerate at ~30fps: https://bugzilla.mozilla.org/show_bug.cgi?id=630127)
-                window.oRequestAnimationFrame ||
-                window.msRequestAnimationFrame ||
-                function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
-
-                        window.setTimeout( callback, 1000 / 60 );
-                };
-        } )();
-}
 
     
     // Open the microphone
     function init() {
+        
+        context = new AudioContext();
+        
         var audioConstraints = {
             audio: true
         };
-        getUserMedia(audioConstraints, gotStream);
+        getUserMedia(audioConstraints, initAudio);
         
         // Get slider value changes:
-        $("#gain").change(function() {
+        $("#gain-control").slider().on('slideStop', function() {
             gain = this.value;
         });
         
-        $("#floor").change(function() {
+        $("#floor-control").slider().on('slideStop', function() {
             floor = this.value;
         });
-    }
-    
-    function pause() {
         
+        $("#wf-samprate").change(function() {
+            var table = { "44.1 kHz": 44100,
+                         "22.05 kHz": 22050,
+                         "11.025 kHz": 11025,
+                         "8.82 kHz": 8820
+                        }
+            sampleRate = table[this.value];
+            // Now reinit our whole chain: delete everything and restart
+            sourceNode.disconnect();
+            filterNode.disconnect();
+            resamplerNode.disconnect();
+            delete filterNode;
+            drop(resamplerNode);
+            initResampler();
+            
+        });
+        
+        $("#wf-smoothing").change(function() {
+            maxAvg = parseInt(this.value);
+            
+        });
     }
-    
+        
     function monitor() {
         if (!monitoring)
-            sourceNode.connect(context.destination);
+            filterNode.connect(context.destination);
         else {
-            sourceNode.disconnect();
-            sourceNode.connect(filterNode);
+            filterNode.disconnect();
+            filterNode.connect(resamplerNode);
         }
         monitoring = !monitoring;
     }
 
-    // Called once we get a live audio stream of user input
-    function gotStream(stream) {
-        initAudio(stream);
+    function initAudio(stream) {
+        
+        fft = new FFT(2048, sampleRate);
+        // Create an AudioNode from the stream (live input)
+        sourceNode = context.createMediaStreamSource(stream);  
+        
+        initResampler();
     }
     
-
-    function initAudio(stream) {
-        context = new AudioContext();
-        //context = new webkitOfflineAudioContext(1,8192,44100);
-
+    function initResampler() {
         
-        // Create an AudioNode from the stream (live input)
-        sourceNode = context.createMediaStreamSource(stream);
-        
-        // Filter the audio to limit bandwidth to 4kHz before resampling,
-        // by using a BiQuadFilterNode:
+        // Before anything, do a low band-pass filter before resampling,
+        // otherwise we'll get junk above the sampling freq.
         filterNode = context.createBiquadFilter();
         filterNode.type = filterNode.LOWPASS; // Low pass
-        filterNode.frequency.value = 3800;
-        filterNode.Q.value = 1.5;
-        filterNode.gain.value = 0;
+        filterNode.frequency.value = 22050;
+        filterNode.Q.value = 0.5;
         
         sourceNode.connect(filterNode);
         
-
         // Create an audio resampler:
-        var resamplerNode = keep(context.createScriptProcessor(8192,1,1));
+        resamplerNode = keep(context.createScriptProcessor(4096,1,1));
         resamplerNode.onaudioprocess = (function() {
-            // We're getting a 4500Hz bandwidth which is enough for the bandwidth
-            // of the audio of our receiver (4kHz max).
-            //
-            // The output data will be 1638 or 1939 samples long (8192 samples divided by 5)
-            var rss  = new Resampler(44100, 8820, 1, 1639, true);
+            var rss = new Resampler(44100, sampleRate, 1, 4096, true);
             var ring = new Float32Array(4096);
+            var fftbuffer = new Float32Array(2048);
             var idx = 0;
-            var out_idx = 0;
-            
+            var spectrumidx = 0;
+            var dspwindow = new WindowFunction(DSP.BLACKMAN);
+                        
             return function(event) {
                 var inp, out;
                 //console.log(event);
                 inp = event.inputBuffer.getChannelData(0);
                 out = event.outputBuffer.getChannelData(0);
                 var l = rss.resampler(inp);
-                // the "out" variable is a reference to a Float32Array.
-                // We can edit the values of the array, but not change the reference -
-                // if we do, it won't do anything, the audioBuffer will keep its internal
-                // reference: therefore we need to manually copy all samples:
+            
                 for (var i=0; i < l; i++) {
                     ring[(i+idx)%4096] = rss.outputBuffer[i];
-                    out[i] = rss.outputBuffer[i];
-                    //fftbuffer[i] = rss.outputBuffer[i];
                 }
     
-                // Now copy the first 2048 bytes from ring buffer to the output channel
+                // Now copy the oldest 2048 bytes from ring buffer to the output channel
                 for (var i=0; i < 2048; i++) {
                     fftbuffer[i] = ring[(idx+i+2048)%4096];
                     
                 }
                 idx = (idx+l)%4096;
-                out_idx = (out_idx+2048) % 4096;
+                // Before doing our FFT, we apply a window to attenuate frequency artifacts,
+                // otherwise the spectrum will bleed all over the place:
+                dspwindow.process(fftbuffer);
                 
+                fft.forward(fftbuffer);
+                spectrumbuffer[spectrumidx] = new Float32Array(fft.spectrum);
+                spectrumidx = (spectrumidx+1)%maxAvg;
+                requestAnimationFrame(drawSpectrogram2);
             };
         }());
 
-        filterNode.connect(resamplerNode);
-                
-        // Create an audio analyser:
-        analyser = context.createAnalyser();
-        analyser.smoothingTimeConstant = 0;
-        analyser.fftSize = 2048;
-
-        // Then connect the analyser to the resampler node
-        // The issue here is, that the analyser is going to get input
-        // buffers that are only filled up to 1639 samples, the rest being
-        // silence, since we have a sample rate mismatch after the resampler node.
-        resamplerNode.connect(analyser);
-        
-        //requestAnimationFrame(drawSpectrogram);
-        
-        var syncDisplay  = keep(context.createScriptProcessor(2048,1,1));
-        var loop= 0;
-        syncDisplay.onaudioprocess = function() {
-                    // get the average for the first channel
-                   
-                    analyser.getByteFrequencyData(array);
-                    fft.forward(fftbuffer);
-                    requestAnimationFrame(drawSpectrogram);
-                    if (++loop%6)
-                        requestAnimationFrame(drawSpectrogram2);
-            
-                }
-        syncDisplay.connect(context.destination);
-        
-        //analyser.connect(context.destination);
-
-    }
+        filterNode.connect(resamplerNode);        
+        resamplerNode.connect(context.destination); // Bogus (output data is zero) but otherwise the script node won't process.
+    };
 
     // log if an error occurs
     function onError(e) {
@@ -267,60 +335,45 @@
     
     
     function drawSpectrogram2() {
+        
+        // Waterfall clear/buffer
         var canvas = document.getElementById("canvas2");
         tempCtx2.drawImage(canvas, 0, 0, 1024, 256);
+        
+        // Spectrogram clear:
+        ctx.clearRect(0, 0, 1024, 256);
+        // set the fill style
+        // ctx.fillStyle=gradient;
+        ctx.beginPath();
+        ctx.moveTo(0, 256);
 
         // Each pixel is 4500/1024 = 4.39Hz wide
         // iterate over the elements from the array
         for (var i = 0; i < 1024; i++) {
             // draw each pixel with the specific color
-            var value = 256 + gain *Math.floor(Math.log(fft.spectrum[i]*floor));
-            ctx2.fillStyle = hot.getColor(value).hex();
+            var sp = 0;
+            for (var j=0;  j < maxAvg; j++) {
+                sp += spectrumbuffer[j][i];
+            }
+            var value = 256 + gain*Math.log(sp/maxAvg*floor);
             // draw the line on top of the canvas
+            ctx2.fillStyle = hot.getColor(value).hex();
             ctx2.fillRect(i, 1, 1, 1);
-        
+            if (!(i % 4)) {
+                // ctx.fillRect(i,256-value,3,256);
+                ctx.lineTo(i,256-value/2);
+                ctx.stroke();
+            }
         }
         // draw the copied image
         ctx2.drawImage(tempCanvas2, 0, 0, 1024, 256, 0, 1, 1024, 256);
     }
     
 
-    function drawSpectrogram() {
-
-        // The analyzer is in constant underrun because it assumes
-        // we have a 44.1kHz sample rate, and we downsampled 5 times to
-        // 8820. 
-        
-        // Therefore I check if I didn't only get zeroes in the array, and if I did,
-        // I just return.
-        var pwr = 0;
-        for (var i=0; i < 1024; i++) {
-            pwr += array[i];
-        }
-        
-        if  (!pwr)
-            return;
-
-        // copy the current canvas onto the temp canvas
-        var canvas = document.getElementById("canvas");
-        tempCtx.drawImage(canvas, 0, 0, 1024, 256);
-
-        // Each pixel is 4500/1024 = 4.39Hz wide
-        // iterate over the elements from the array
-        for (var i = 0; i < array.length; i++) {
-            // draw each pixel with the specific color
-            var value = array[i];
-            ctx.fillStyle = hot.getColor(value).hex();
-            // draw the line on top of the canvas
-            ctx.fillRect(i, 1, 1, 1);
-        }
-
-        // draw the copied image
-        ctx.drawImage(tempCanvas, 0, 0, 1024, 256, 0, 1, 1024, 256);
-
-    }
-
 </script>
+            
+            </div>
+        </div>
 
 </body>
 </html>
