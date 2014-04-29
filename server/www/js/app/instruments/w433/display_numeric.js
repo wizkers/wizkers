@@ -11,8 +11,16 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         tpl     = require('text!tpl/instruments/W433NumView.html'),
-        
-        template = _.template(tpl);
+                template = null;
+    
+        try {
+            template =  _.template(tpl);
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            template = require('js/tpl/instruments/W433NumView.js', function(){} , function(err) {
+                            console.log("Compiled JS preloading error callback.");
+                            });
+        }
 
     return Backbone.View.extend({
 

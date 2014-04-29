@@ -14,8 +14,16 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         tpl     = require('text!tpl/LogManagementView.html'),
+                template = null;
         
-        template = _.template(tpl);
+        try {
+            template = _.template(tpl);
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            template = require('js/tpl/LogManagementView.js', function(){} , function(err) {
+                            console.log("Precompiled JS error callback.");
+                            });
+        }
 
     return Backbone.View.extend({
 

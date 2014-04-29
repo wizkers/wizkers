@@ -12,8 +12,17 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         tpl     = require('text!tpl/instruments/W433SettingsView.html'),
-        
-        template = _.template(tpl);
+        template = null;
+    
+        try {
+            template =  _.template(tpl);
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            console.log('W433Settings View: using compiled version (chrome app)');
+            template = require('js/tpl/instruments/W433SettingsView.js', function(){} , function(err) {
+                            console.log("Compiled JS preloading error callback.");
+                            });
+        }
     
     return Backbone.View.extend({
             initialize:function () {

@@ -11,8 +11,16 @@ define(function(require) {
         Backbone = require('backbone'),
         utils    = require('app/utils'),
         tpl     = require('text!tpl/instruments/OnyxNumView.html'),
+        template = null;
         
-        template = _.template(tpl);
+        try {
+            template = _.template(tpl);
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            template = require('js/tpl/instruments/OnyxNumView.js', function(){} , function(err) {
+                            console.log("Compiled JS preloading error callback.");
+                            });
+        }
 
     return Backbone.View.extend({
 

@@ -14,8 +14,22 @@ define(function(require) {
         Backbone = require('backbone'),
         utils    = require('app/utils'),
         tpl     = require('text!tpl/instruments/Fluke289LiveView.html'),
-        
-        template = _.template(tpl);
+        template = null;
+                
+        try {
+            template =  _.template(tpl);
+            console.log("Loaded direct template");
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            try {
+                console.log("Trying compiled template");
+                template = require('js/tpl/Fluke289LiveView.js', function(){} , function(err) {
+                            console.log("JS Preload error");
+                        });
+            } catch (e) {
+            console.log(e);
+            }
+        }
     
     // Load the flot library & flot time plugin:
     require('flot');

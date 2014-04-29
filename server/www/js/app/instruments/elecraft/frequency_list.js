@@ -9,8 +9,16 @@ define(function(require) {
         Backbone = require('backbone'),
         Snap    = require('snap'),
         tpl     = require('text!tpl/instruments/ElecraftFrequencyItemView.html'),
+        template = null;
         
-        template = _.template(tpl);
+        try {
+            template = _.template(tpl);
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            template = require('js/tpl/instruments/ElecraftFrequencyItemView.js', function(){} , function(err) {
+                            console.log("Compiled JS preloading error callback.");
+                            });
+        }
     
     // Need to load these, but no related variables.
     require('bootstrap');

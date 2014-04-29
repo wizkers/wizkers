@@ -13,10 +13,18 @@ define(function(require) {
         Backbone = require('backbone'),
         Paginator = require('app/views/paginator'),
         tpl     = require('text!tpl/InstrumentListItemView.html'),
+        template = null;
         
-        template = _.template(tpl),
+        try {
+            template = _.template(tpl);
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            template = require('js/tpl/InstrumentListItemView.js', function(){} , function(err) {
+                            console.log("Compiled JS preloading error callback.");
+                            });
+        }
     
-        InstrumentListItemView = Backbone.View.extend({
+        var InstrumentListItemView = Backbone.View.extend({
 
             tagName: "div",
             className: "col-md-3 col-sm-2",

@@ -12,8 +12,18 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         tpl     = require('text!tpl/instruments/Fluke289DiagView.html'),
-        
-        template = _.template(tpl);
+        template = null;
+                
+        try {
+            template =  _.template(tpl);
+            console.log("Loaded direct template");
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            console.log("Trying compiled template");
+            template = require('js/tpl/Fluke289DiagView.js', function(){} , function(err) {
+                        console.log("JS preload error");
+                    });
+        }
 
 
     return Backbone.View.extend({

@@ -11,9 +11,17 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         tpl     = require('text!tpl/HomeView.html'),
+        template = null;
         
-        template = _.template(tpl);
-    
+        try {
+            template = _.template(tpl);
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            template = require('js/tpl/HomeView.js', function(){} , function(err) {
+                            console.log("Compiled JS preloading error callback.");
+                            });
+        }
+            
     // We have to require bootstrap whenever we use the Bootstrap javascript
     // library. In this file, we use it for 'modal' calls.
     require('bootstrap');

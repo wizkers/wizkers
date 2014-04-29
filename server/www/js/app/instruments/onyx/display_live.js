@@ -11,8 +11,16 @@ define(function(require) {
         Backbone = require('backbone'),
         utils    = require('app/utils'),
         tpl     = require('text!tpl/instruments/OnyxLiveView.html'),
+        template = null;
         
-        template = _.template(tpl);
+        try {
+            template = _.template(tpl);
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            template = require('js/tpl/instruments/OnyxLiveView.js', function(){} , function(err) {
+                            console.log("Compiled JS preloading error callback.");
+                            });
+        }
 
     // Load the flot library & flot time plugin:
     require('flot');

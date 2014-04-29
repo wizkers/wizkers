@@ -20,8 +20,7 @@ define(function(require) {
             for(i in o) r.push(o[i]);
         return r;
         },
-
-
+        
         displayValidationErrors: function (messages) {
             for (var key in messages) {
                 if (messages.hasOwnProperty(key)) {

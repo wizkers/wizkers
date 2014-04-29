@@ -1405,7 +1405,7 @@ var WindowFunction = DSP.WindowFunction = function(type, alpha) {
       break;
    
     case DSP.LANCZOS:
-      this.func = WindowFunction.Lanczoz;
+      this.func = WindowFunction.Lanczos;
       break;
      
     case DSP.RECTANGULAR:

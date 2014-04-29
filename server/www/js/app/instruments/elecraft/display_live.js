@@ -14,8 +14,16 @@ define(function(require) {
         Snap    = require('snap'),
         utils   = require('app/utils'),
         tpl     = require('text!tpl/instruments/ElecraftLiveView.html'),
+        template = null;
         
-        template = _.template(tpl);
+        try {
+            template = _.template(tpl);
+        } catch (e) {
+            // Will happen if we are packaged in a Chrome app
+            template = require('js/tpl/instruments/ElecraftLiveView.js', function(){} , function(err) {
+                            console.log("Compiled JS preloading error callback.");
+                            });
+        }
     
         // Need to load these, but no related variables.
         require('bootstrap');
@@ -74,7 +82,7 @@ define(function(require) {
                 $("#mic-control",this.el).slider();
 
 
-                // Last, load the frequencies sub view:
+                // Load the frequencies sub view:
                 require(['app/instruments/elecraft/frequency_list'], function(view) {
                     self.ElecraftFrequencyListView = new view({model: self.model});
                     if (self.ElecraftFrequencyListView != null) {
@@ -82,6 +90,15 @@ define(function(require) {
                         self.ElecraftFrequencyListView.render();
                     }
                     $('#frequency-selector', self.el).carousel();
+                });
+                
+                // And last, load the waterfall sub view:
+                require(['app/instruments/elecraft/waterfall'], function(view) {
+                    self.waterfallView = new view({model: self.model});
+                    if (self.waterfallView != null) {
+                        $('#waterfall').html(self.waterfallView.el);
+                        self.waterfallView.render();
+                    }
                 });
                 return this;
             },

@@ -1,3 +1,25 @@
+<!--
+ Copyright (C) 2014 By Edouard Lafargue.
+	
+ Written by Edouard Lafargue (edouard@lafargue.name)
+ All Rights Reserved.
+	
+ This program is free software; you can redistribute it and/or modify	
+ it under the terms of the GNU General Public License as published by
+	
+ the Free Software Foundation; either version 2 of the License, or	
+ (at your option) any later version.	
+
+ This program is distributed in the hope that it will be useful,	
+ but WITHOUT ANY WARRANTY; without even the implied warranty of	
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	
+ GNU General Public License for more details.	
+	
+ You should have received a copy of the GNU General Public License along	
+ with this program; if not, write to the Free Software Foundation, Inc.,	
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+	
+-->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,40 +31,32 @@
 
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
     <style type="text/css">
-        
-    body { padding-top: 55px;} /* Required for fixed navbar */
-
-    </style>
-    <link href="css/bootstrap-lightbox.min.css" rel="stylesheet"/>
-    <link href="css/bootstrap-editable.css" rel="stylesheet" />
-    <link href="css/cards-carousel.css" rel="stylesheet" />
-    <link href="css/slider.css" rel="stylesheet" />
-    <link href="css/styles.css" rel="stylesheet"> <!-- Apply my own styles last ! -->
-      
-    <script src="js/lib/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="js/lib/chroma.js"></script>
-    <script src="js/lib/resampler.js"></script>
-    <script src="js/lib/dsp.js"></script>
-      
-    <script src="js/lib/bootstrap.js"></script>
-      <script src="js/lib/bootstrap-slider-2.0.0.js"></script>
-      
-    <style>
+        body { padding-top: 10px;}
         * {
             font-family: sans-serif;
         }
+        .input-margin {
+            margin-bottom: 5px; 
+        }
     </style>
-
-
+    <link href="css/slider.css" rel="stylesheet" />
+      
+    <script src="js/lib/jquery-1.11.0.min.js"></script>
+    <script src="js/lib/chroma.js"></script>
+    <script src="js/lib/resampler.js"></script>
+    <script src="js/lib/dsp.js"></script>
+    <script src="js/lib/snap.svg-min.js"></script>  
+    <script src="js/lib/bootstrap.min.js"></script>
+    <script src="js/lib/bootstrap-slider-2.0.0.js"></script>
+      
   </head>
     
 <body style="background-color: white;">
-    
 
 <div style="padding: 0 15px; margin: 5px;"> <!-- Make the main content full screen -->
     
     <div class="row">
-    <div class="col-md-2">
+    <div class="col-md-3">
         <button type="button" class="btn btn-default" onclick="init();">Start</button>
         <button type="button" class="btn btn-default" onclick="monitor();">Toggle audio monitor</button>
     </div>
@@ -69,41 +83,57 @@
                     </span>
             </div>
             <div class="input-group input-margin">
-                <span class="input-group-addon">Sample rate</span>
-                    <select id="wf-samprate" class="form-control">
-                            <option>44.1 kHz</option>
-                            <option>22.05 kHz</option>
-                            <option>11.025 kHz</option>
-                            <option>8.82 kHz</option>
+                <span class="input-group-addon">Sample rate</span>                                
+                <select id="wf-samprate" class="form-control">
+                        <option>44.1 kHz</option>
+                        <option>22.05 kHz</option>
+                        <option>11.025 kHz</option>
+                        <option>8.82 kHz</option>
                 </select>
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" id="wf-smoothing-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
-                    </span>
             </div>
         </div>
-        <div class="col-md-2">
-        Todo: <ul>
-            <li>Choice of FFT window</li>
-            <li>Smoothing of FFT</li>
-            <li>Labels</li>
+        <div class="col-md-3">    
+            <div class="input-group input-margin">
+                <span class="input-group-addon">FFT Window</span>
+                <select id="wf-fftwindow" class="form-control">
+                    <option>Hamming</option>
+                    <option>Hann</option>
+                    <option>Bartlett</option>
+                    <option>Bartlett-Hann</option>
+                    <option>Blackman</option>
+                    <option>Cosine</option>
+                    <option>Gauss</option>
+                    <option>Lanczos</option>
+                    <option>Rectangular</option>
+                    <option>Triangular</option>
+                </select>
             </div>
-    
-    
+
+        </div>
     </div>
     <div class="row" id="content">
+        <div id="wf-display" class="col-md-12">
+            <div style="position:relative;">
+                <svg id="graticule"  viewBox="0 0 1024 512" preserveAspectRatio="xMinYMin" style="float:left; z-index:100;"></svg>
+                <div style="position:absolute; z-index: -1;">
+                    <canvas  id="spectrum-canvas" width="1024" height="256" style=" display: block; z-index: -1;"></canvas>
+                    <canvas id="wf-canvas" width="1024" height="256" style="display: block; background-color: black; z-index: -1;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-12">
-    
+            <p>Various stuff</p>
+            </div>
+    </div>
+        
 
-<canvas id="spectrum-canvas" width="1024" height="256" style="display: block; background-color: white;"></canvas>
 
-<canvas id="canvas2" width="1024" height="256" style="display: block; background-color: black;"></canvas>
-
-            
-            <span id="orig"></span><br><span id="avg"></span>
     
 <script type="text/javascript">
 
-    // create the audio context (chrome only for now)
+    // create the audio context (chrome/FF only for now)
     if (! window.AudioContext) {
         if (! window.webkitAudioContext) {
             alert('no audiocontext found');
@@ -113,20 +143,10 @@
     
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
-    if ( !window.requestAnimationFrame ) {
-    window.requestAnimationFrame = ( function() {
-                return window.webkitRequestAnimationFrame ||
-                window.mozRequestAnimationFrame || // comment out if FF4 is slow (it caps framerate at ~30fps: https://bugzilla.mozilla.org/show_bug.cgi?id=630127)
-                window.oRequestAnimationFrame ||
-                window.msRequestAnimationFrame ||
-                function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
-                    window.setTimeout( callback, 1000 / 60 );
-                };
-        } )();
-    }
+    window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                                    window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
     
     // Our variables:    
-    
     var context;
     var audioBuffer;
     var sourceNode;
@@ -141,19 +161,11 @@
     var maxAvg = 1;
     var sampleRate = 44100;
     var fft = null;
-
-    
-    // get the context from the canvas to draw on
-    var ctx2 = $("#canvas2").get()[0].getContext("2d");
-
-    // create a temp canvas we use for copying
-    var tempCanvas2 = document.createElement("canvas"),
-        tempCtx2 = tempCanvas2.getContext("2d");
-    tempCanvas2.width=1024;
-    tempCanvas2.height=256;
+    var fftWindow = DSP.HAMMING;
 
     // get the context from the canvas to draw on
     var ctx = $("#spectrum-canvas").get()[0].getContext("2d");
+    var ctx2 = $("#wf-canvas").get()[0].getContext("2d");
 
     // create a temp canvas we use for copying
     var tempCanvas = document.createElement("canvas"),
@@ -161,9 +173,7 @@
     tempCanvas.width=1024;
     tempCanvas.height=256;
 
-    
-
-    // used for color distribution
+        // used for color distribution
     var hot = new chroma.ColorScale({
         //colors: ['#5C4D6B', '#536887', '#3D839A', '#259FA1', '#35B89B', '#67CF8A', '#A3E275', '#E7F065' ],
         //colors: ['#5C4D6B', '#3F627B', '#1C757A', '#2A8569', '#5B8F4F', '#91933B', '#C89140', '#F78B65' ],
@@ -182,10 +192,31 @@
     gradient.addColorStop(0.25,'#ffff00');
     gradient.addColorStop(0,'#ffffff');
 
+
+        window.onload = init_ui;
+
+    function init_ui() {
     
     // Initialize our bootstrap controls
     $("#gain-control", this.el).slider();
     $("#floor-control", this.el).slider();
+    
+    
+    var paper = Snap("#graticule");
+    Snap.load("img/graticule.svg", function (f) {
+            paper.add(f);
+    });
+    // I was not able to make the SVG resize gracefully, so I have to do this
+        
+        // Somehow, in this code I cannot do $("#graticule").resize(), the event
+        // never fires ???
+    $(window).resize(function(e) {
+            $("#spectrum-canvas").width($("#graticule").width());
+            $("#wf-canvas").width($("#graticule").width());
+            });
+    }
+    $("#spectrum-canvas").width($("#graticule").width());
+    $("#wf-canvas").width($("#graticule").width());
     
     
     // Get the microphone input
@@ -250,6 +281,28 @@
             
         });
         
+        $("#wf-fftwindow").change(function() {
+            var table = {
+                    "Hamming": DSP.HAMMING,
+                    "Hann": DSP.HANN,
+                    "Bartlett": DSP.BARTLETT,
+                    "Bartlett-Hann": DSP.BARTLETTHANN,
+                    "Blackman": DSP.BLACKMAN,
+                    "Cosine": DSP.COSINE,
+                    "Gauss": DSP.GAUSS,
+                    "Lanczos": DSP.LANCZOS,
+                    "Rectangular": DSP.RECTANGULAR,
+                    "Triangular": DSP.TRIANGULAR
+            };
+            fftWindow = table[this.value];
+            sourceNode.disconnect();
+            filterNode.disconnect();
+            resamplerNode.disconnect();
+            delete filterNode;
+            drop(resamplerNode);
+            initResampler();
+        });
+        
         $("#wf-smoothing").change(function() {
             maxAvg = parseInt(this.value);
             
@@ -294,7 +347,7 @@
             var fftbuffer = new Float32Array(2048);
             var idx = 0;
             var spectrumidx = 0;
-            var dspwindow = new WindowFunction(DSP.BLACKMAN);
+            var dspwindow = new WindowFunction(fftWindow);
                         
             return function(event) {
                 var inp, out;
@@ -320,7 +373,7 @@
                 fft.forward(fftbuffer);
                 spectrumbuffer[spectrumidx] = new Float32Array(fft.spectrum);
                 spectrumidx = (spectrumidx+1)%maxAvg;
-                requestAnimationFrame(drawSpectrogram2);
+                requestAnimationFrame(drawSpectrogram);
             };
         }());
 
@@ -334,11 +387,11 @@
     }
     
     
-    function drawSpectrogram2() {
+    function drawSpectrogram() {
         
         // Waterfall clear/buffer
-        var canvas = document.getElementById("canvas2");
-        tempCtx2.drawImage(canvas, 0, 0, 1024, 256);
+        var canvas = document.getElementById("wf-canvas");
+        tempCtx.drawImage(canvas, 0, 0, 1024, 256);
         
         // Spectrogram clear:
         ctx.clearRect(0, 0, 1024, 256);
@@ -361,19 +414,17 @@
             ctx2.fillRect(i, 1, 1, 1);
             if (!(i % 4)) {
                 // ctx.fillRect(i,256-value,3,256);
-                ctx.lineTo(i,256-value/2);
+                ctx.lineTo(i,256-value);
                 ctx.stroke();
             }
         }
         // draw the copied image
-        ctx2.drawImage(tempCanvas2, 0, 0, 1024, 256, 0, 1, 1024, 256);
+        ctx2.drawImage(tempCanvas, 0, 0, 1024, 256, 0, 1, 1024, 256);
     }
     
 
 </script>
             
-            </div>
-        </div>
 
 </body>
 </html>

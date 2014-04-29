@@ -1,12 +1,13 @@
-VizApp
+Big Whiskers
 ============
 
-Web-based display, log managemetn, recording and config application for measurement instruments.
+Big Whiskers extends the reach of your measurement instruments.
+
+Web-based display, log management, recording and config application for measurement instruments.
 
 Displays the content of the logs, synchronises the internal clock with the computer, and
 displays a few additional infos.
 
-Functionality will evolve along with firmware features of the Onyx itself.
 
 Installing
 ----------
