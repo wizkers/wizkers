@@ -20,6 +20,7 @@
 
 var mongoose = require( 'mongoose' );
 var Schema   = mongoose.Schema;
+var bcrypt = require('bcrypt-nodejs');
 
 
 /**
@@ -97,6 +98,31 @@ var LogSession = new Schema({
        metadata: Schema.Types.Mixed, // Can be anything, used to store log metadata if relevant to the plugin
 });
 mongoose.model('LogSession', LogSession);
+
+
+
+/**
+ * User management (local only for now)
+ */
+var UserSchema = new Schema({
+    local: {
+        email: String,
+        password: String
+    },
+});
+
+// methods ======================
+// generating a hash (see http://scotch.io/tutorials/javascript/easy-node-authentication-setup-and-local)
+UserSchema.methods.generateHash = function(password) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+};
+
+// checking if password is valid
+UserSchema.methods.validPassword = function(password) {
+    return bcrypt.compareSync(password, this.local.password);
+};
+
+mongoose.model('User', UserSchema);
 
 
 var uri = 'mongodb://localhost/vizappdb';

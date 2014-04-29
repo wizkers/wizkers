@@ -30,7 +30,8 @@
  *   Setup access to serial ports
  */
 var serialport = require('serialport'),
-    SerialPort  = serialport.SerialPort;
+    SerialPort  = serialport.SerialPort,
+    flash = require('connect-flash');
 
 
 
@@ -78,10 +79,17 @@ serialport.list(function (err, ports) {
  * Setup Db connection before anything else
  */
 require('./db.js');
-
-
 var mongoose = require('mongoose');
 var Instrument = mongoose.model('Instrument');
+
+/**
+ * Setup our authentication middleware
+ */
+var passport = require('passport'),
+    LocalStrategy = require('passport-local').Strategy,
+    ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
+
+require('./config/passport')(passport); // Our Passport configuration
 
 /**
  * Setup the HTTP server and routes
@@ -91,80 +99,137 @@ var express = require('express'),
     deviceLogs = require('./routes/logs.js');
     settings = require('./routes/settings.js'),
     backup = require('./routes/backup.js');
-//    audio = require('./routes/audio.js');
-
-
 
 var app = express(),
     server = require('http').createServer(app),
     io = require('socket.io').listen(server, { log: false });
 
 app.configure(function () {
-    app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
-    app.use(express.favicon()); // Test please
+    app.use(express.logger('dev'));     // 'default', 'short', 'tiny', 'dev'
+    app.use(express.cookieParser());    // passport authentication needs to read cookies
+    app.use(express.favicon());         
     app.use(express.bodyParser({ keepExtensions: true }));
+    
+    app.set('view engine', 'ejs'); // Setup templating for login forms
+    
+    // Configure Passport
+    app.use(express.session({secret: 'LKJQDHFGLKJHpiusdhfgpsidf!à§98769876654è§!ç' }));
+    app.use(passport.initialize());
+    app.use(passport.session());     // Persistent login sessions, makes user life easier
+    app.use(flash());           // Flash messages upon login, stored in session
 });
 
 server.listen(8080);
 console.log("Listening for new clients on port 8080");
 var connected = false;
 
+/****************
+ *   ROUTES
+ ****************/
+
+// route middleware to make sure a user is logged in
+function isLoggedIn(req, res, next) {
+
+	// if user is authenticated in the session, carry on 
+	if (req.isAuthenticated())
+		return next();
+
+	// if they aren't redirect them to the home page
+	res.redirect('/');
+}
+
+
+/**
+ *  Authentication: before anything else, make sure all
+ * request to our root are authenticated:
+ */
+
+app.get ('/',
+         ensureLoggedIn('/login'),
+         function(req,res) {
+             res.sendfile('www/index.html');
+         });
+
+app.get('/login', function(req, res) {
+    res.render('login.ejs', { message: req.flash('loginMessage') });
+});
+app.get('/signup', function(req,res) {
+    res.render('signup.ejs', { message: req.flash('signupMessage')});
+});
+app.get('/logout', function(req,res) {
+    req.logout();
+    res.redirect('/');
+});
+// process the signup form
+	app.post('/signup', passport.authenticate('local-signup', {
+		successRedirect : '/profile', // redirect to the secure profile section
+		failureRedirect : '/signup', // redirect back to the signup page if there is an error
+		failureFlash : true // allow flash messages
+	}));
+// process the login form
+	app.post('/login', passport.authenticate('local-login', {
+		successRedirect : '/', // redirect to the secure profile section
+		failureRedirect : '/login', // redirect back to the signup page if there is an error
+		failureFlash : true // allow flash messages
+	}));
+
+
 /**
  * Interface for managing instruments
  */
-app.get('/instruments', instruments.findAll);
-app.get('/instruments/:id', instruments.findById);
-app.post('/instruments', instruments.addInstrument);
-app.post('/instruments/:id/picture', instruments.uploadPic);
-app.put('/instruments/:id', instruments.updateInstrument);
-app.delete('/instruments/:id', instruments.deleteInstrument);
+app.get('/instruments', isLoggedIn, instruments.findAll);
+app.get('/instruments/:id', isLoggedIn, instruments.findById);
+app.post('/instruments', isLoggedIn, instruments.addInstrument);
+app.post('/instruments/:id/picture', isLoggedIn, instruments.uploadPic);
+app.put('/instruments/:id', isLoggedIn, instruments.updateInstrument);
+app.delete('/instruments/:id', isLoggedIn, instruments.deleteInstrument);
 
 /**
  * Interface for managing instrument logs (summary)
- *
  */
-app.get('/instruments/:id/logs', deviceLogs.findByInstrumentId);
-app.post('/instruments/:id/logs', deviceLogs.addEntry);
-app.get('/logs/', deviceLogs.findAll);
-app.get('/logs/:id', deviceLogs.findById);
-app.get('/logs/:id/entries', deviceLogs.getLogEntries);
-app.post('/logs/:id/entries', deviceLogs.addLogEntry);
-app.put('/instruments/:iid/logs/:id', deviceLogs.updateEntry);
-app.delete('/instruments/:idd/logs/:id', deviceLogs.deleteEntry);
-app.delete('/logs/:lid/entries/:id', deviceLogs.deleteLogEntry);
-
+app.get('/instruments/:id/logs', isLoggedIn, deviceLogs.findByInstrumentId);
+app.post('/instruments/:id/logs', isLoggedIn, deviceLogs.addEntry);
+app.get('/logs/', isLoggedIn, deviceLogs.findAll);
+app.get('/logs/:id', isLoggedIn, deviceLogs.findById);
+app.get('/logs/:id/entries', isLoggedIn, deviceLogs.getLogEntries);
+app.post('/logs/:id/entries', isLoggedIn, deviceLogs.addLogEntry);
+app.put('/instruments/:iid/logs/:id', isLoggedIn, deviceLogs.updateEntry);
+app.delete('/instruments/:idd/logs/:id', isLoggedIn, deviceLogs.deleteEntry);
+app.delete('/logs/:lid/entries/:id', isLoggedIn, deviceLogs.deleteLogEntry);
 
 /**
  * Interface for our settings. Only one settings object,
- * so no getting by ID here
+ * so no getting by ID here. Note: I now mostly store settings
+ * in-browser rather than on-server.
  */
-app.get('/settings', settings.getSettings);
-app.put('/settings/:id', settings.updateSettings);
+app.get('/settings', isLoggedIn, settings.getSettings);
+app.put('/settings/:id', isLoggedIn, settings.updateSettings);
 
 /**
  * Interface for triggering a backup and a restore
  */
-app.get('/backup', backup.generateBackup);
-app.post('/restore', backup.restoreBackup);
-
-
-/**
- *  Interface to stream audio. This is 100% experimental
- */
-//app.get('/audio', audio.start);
-
+app.get('/backup', isLoggedIn, backup.generateBackup);
+app.post('/restore', isLoggedIn, backup.restoreBackup);
 
 // Our static resources are in 'www'
 // GET /javascripts/jquery.js
 // GET /style.css
 // GET /favicon.ico
+// Everything static should be authenticated: therefore we are inserting a checkpoint middleware
+// at this point
+app.use(function(req,res,next) {
+    console.log("*** checkpoint ***");
+    if (req.isAuthenticated())
+        return next();
+    
+    // We are allowing CSS and img folders
+    if (req.path.indexOf("/css") == 0)
+        return next();
+    
+    res.redirect('/');
+});
+
 app.use(express.static(__dirname + '/www'));
-
-// TODO:
-//
-//  - Create a route to get the list of all device types in JSON, with index
-
-//app.get('/protocols', '');
 
 
 /////////
