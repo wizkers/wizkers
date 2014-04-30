@@ -86,8 +86,7 @@ var Instrument = mongoose.model('Instrument');
  * Setup our authentication middleware
  */
 var passport = require('passport'),
-    LocalStrategy = require('passport-local').Strategy,
-    ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
+    LocalStrategy = require('passport-local').Strategy;
 
 require('./config/passport')(passport); // Our Passport configuration
 
