@@ -81,6 +81,8 @@ serialport.list(function (err, ports) {
 require('./db.js');
 var mongoose = require('mongoose');
 var Instrument = mongoose.model('Instrument');
+var User = mongoose.model('User');
+
 
 /**
  * Setup our authentication middleware
@@ -132,13 +134,16 @@ var connected = false;
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
+    
+    // if user is authenticated in the session, carry on 
+    if (req.isAuthenticated()) {
+        if (req.user.role === 'pending')
+            res.render('profile.ejs', {user: req.user, message: 'Your account is created, access approval is pending.'});        
+        return next();
+    }
 
-	// if user is authenticated in the session, carry on 
-	if (req.isAuthenticated())
-		return next();
-
-	// if they aren't redirect them to the login page
-	res.redirect('/login');
+    // if they aren't redirect them to the login page
+    res.redirect('/login');
 }
 
 /**
@@ -165,22 +170,36 @@ app.get('/logout', function(req,res) {
 // process the signup form
 app.post('/signup', passport.authenticate('local-signup', {
     successRedirect : '/profile', // redirect to the secure profile section
-    failureRedirect : '/signup', // redirect back to the signup page if there is an error
-    failureFlash : true // allow flash messages
+    failureRedirect : '/signup',  // redirect back to the signup page if there is an error
+    failureFlash : true           // allow flash messages
 }));
 // process the login form
 app.post('/login', passport.authenticate('local-login', {
-    successRedirect : '/', // redirect to the secure profile section
+    successRedirect : '/',      // redirect to the secure profile section
     failureRedirect : '/login', // redirect back to the signup page if there is an error
-    failureFlash : true // allow flash messages
+    failureFlash : true         // allow flash messages
 }));
 
 app.get('/profile', isLoggedIn, function(req,res) {
-    res.render('profile.ejs', { user: req.user });
+    res.render('profile.ejs', { user: req.user, message: '' });
+});
+app.post('/profile', isLoggedIn, function(req,res) {
+     User.findOne({ 'local.email': req.user.local.email }, function(err, record) {
+         console.log(record);
+         record.local.password = record.generateHash(req.body.password);
+         record.save(function(err) {
+             var msg  = (err) ? 'Error changing password': 'Password changed';
+             res.render('profile.ejs', {user: req.user, message: msg});
+         });
+
+     });
+    
 });
 
 app.get('/admin', user.is('admin'), function(req,res) {
-    res.render('admin.ejs', {user: req.user });
+    User.find({}, function(err, users) {
+        res.render('admin.ejs', {user: req.user, users: users });
+    });
 });
 
 /**
@@ -388,6 +407,17 @@ io.sockets.on('connection', function (socket) {
     if (portOpen && driver != null) {
        driver.setSocketRef(socket);
     }
+    
+    // Get information on the current user:
+    //   - username
+    //   - role
+    //
+    // Note: html5 UI will use this to remove some links that don't make sense
+    // for certain roles, but this backend enforces access, not the HTML5 UI.
+    socket.on('userinfo', function() {
+        var s = { username: 'ed', role: 'admin' };
+        socket.emit('userinfo', s);
+    });
 
     // Open a port by instrument ID: this way we can track which
     // instrument is being used by the app.

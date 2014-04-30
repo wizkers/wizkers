@@ -6,6 +6,9 @@
 	<style>
 		body { padding-top:80px; }
 	</style>
+    
+    <script src="js/lib/jquery-1.11.0.min.js"></script>
+    <script src="js/lib/validator.min.js"></script>
 </head>
 <body>
 
@@ -19,7 +22,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/">Big Whiskers</a>
+                <a class="navbar-brand" href="/">Viz App</a>
             </div>        
             <nav class="collapse navbar-collapse" id="vizapp-nav-collapse" role="navigation">
                 <ul class="nav navbar-nav navbar-right">
@@ -33,8 +36,12 @@
     
 <div class="container">
     <div class="page-header text-center">
-		<h1><span class="fa fa-anchor"></span> Profile Page</h1>
+		<h1><span class="fa fa-anchor"></span> Your Profile</h1>
 		<a href="/logout" class="btn btn-default btn-sm">Logout</a>
+        <% if (message.length > 0) { %>
+            <br><br><div class="alert alert-warning"><%= message %></div>
+	   <% } %>
+
 	</div>
 
 	<div class="row">
@@ -45,9 +52,38 @@
 				<h3><span class="fa fa-user"></span>User information:</h3>
 
 					<p>
-						<strong>email</strong>: <%= user.local.email %><br>
-                        <strong>role</strong>: <%= user.role %><br>
+						<strong>Email</strong>: <%= user.local.email %><br>
+                        <strong>Role</strong>: <%= user.role %><br>
 					</p>
+
+			</div>
+		</div>
+
+        <div class="col-sm-6">
+			<div class="well">
+				<h3><span class="fa fa-user"></span>Change password</h3>
+                
+                <form data-toggle="validator" role="form" action="/profile" method="post">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <input type="password" data-toggle="validator" data-minlength="6" class="form-control" id="newPassword" name="password"  placeholder="New password" required>
+                            <span class="help-block">6 characters minimum</span>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <input type="password" data-match="#newPassword" data-match-error="Passwords don't match" class="form-control" id="newPassword2" placeholder="Confirm" required>
+                             <div class="help-block with-errors"></div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <button type="submit" class="btn btn-primary">Change password</button>
+                        </div>
+                    </div>
+                </form>
+                
+
+
 
 			</div>
 		</div>

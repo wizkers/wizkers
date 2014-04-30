@@ -104,6 +104,7 @@ mongoose.model('LogSession', LogSession);
  * Role management: we are defining simple roles, and users will only have
  * one role at a time - no complex overlapping rights/roles/etc
  *
+ *  - pending: can only see their login page. An admin will have to upgrade to another role.
  *  - viewer: a read-only role (cannot connect/disconnect to a device, ony home screen + log access)
  *  - operator: a read-write role for all instruments on the instance
  *  - admin : same as operator + change roles for users
@@ -118,7 +119,7 @@ var UserSchema = new Schema({
         email: String,
         password: String
     },
-    role: { type:String, default: "viewer"}  // Should be "viewer", "operator" or "admin"
+    role: { type:String, default: "pending"}  // Should be "pending", "viewer", "operator" or "admin"
 });
 
 // methods ======================

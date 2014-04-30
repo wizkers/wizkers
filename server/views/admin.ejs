@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+	<title>Server Administration</title>
+	<link rel="stylesheet" href="css/bootstrap.min.css"> <!-- load bootstrap css -->
+	<style>
+		body { padding-top:80px; }
+	</style>
+</head>
+<body>
+
+<div class="header">
+    <div><header class="navbar navbar-inverse navbar-fixed-top vizapp-nav" role="banner">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#vizapp-nav-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Viz App</a>
+            </div>        
+            <nav class="collapse navbar-collapse" id="vizapp-nav-collapse" role="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="profile-menu"><a href="/profile">Profile</a></li>
+                    <li class="about-menu"><a href="/#about">About</a></li>      
+                </ul>
+            </nav><!--/.nav-collapse -->
+
+        </div>
+    </header></div>
+</div>
+    
+<div class="container">
+    <div class="page-header text-center">
+		<h1><span class="fa fa-anchor"></span> Admin Page</h1>
+		<a href="/logout" class="btn btn-default btn-sm">Logout</a>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="well">
+                <p>All users on this instance:</p>
+                <table class="table table-striped table-condensed">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Current role</th>
+                        <th>Change role to</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <% var selectedType = "";
+                  for (user in users) {
+                        /* Make sure we can only select identical log types */
+                %>
+                <tr>
+                    <td><%= users[user].local.email %></td>
+                    <td><%= users[user].role %></td>
+                    <td><select>
+                        <option value="pending" <%= users[user].role === 'pending' ? 'selected' : '' %> >Pending</option>
+                        <option value="viewer" <%= users[user].role === 'viewer' ? 'selected' : '' %>>Viewer</option>
+                        <option value="operator" <%= users[user].role === 'operator' ? 'selected' : '' %>>Operator</option>
+                        <option value="admin"  <%= users[user].role === 'admin' ? 'selected' : '' %>>Administrator</option>
+                        </select>
+                    </td>
+                </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+			</div>
+		</div>
+
+	</div>
+</div>
+    
+</body>
+</html>

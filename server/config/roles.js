@@ -13,6 +13,14 @@ module.exports = function(roles) {
     // Anonymous users should be redirected to the login page
     //roles.use(
     
+    
+    // 'pending' cannot see anything but their /profile page
+    roles.use('pending', function(req) {
+        if (req.user.role === 'pending') {
+            return true;
+        }
+    });
+    
     // 'viewer' can only see home page
     roles.use('viewer', function(req) {
         if (req.user.role === 'viewer') {
