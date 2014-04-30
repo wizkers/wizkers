@@ -179,6 +179,10 @@ app.get('/profile', isLoggedIn, function(req,res) {
     res.render('profile.ejs', { user: req.user });
 });
 
+app.get('/admin', user.is('admin'), function(req,res) {
+    res.render('admin.ejs', {user: req.user });
+});
+
 /**
  * Interface for managing instruments
  */
