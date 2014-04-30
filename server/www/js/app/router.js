@@ -31,6 +31,7 @@ define(function(require) {
             "editlogs/:ins/:loglist": "editlogs",
             "settings"              : "settings",
             "diagnostics/:id"       : "diagnostics",
+            "profile"               : "profile",
             "about"                 : "about",
         },
     
@@ -53,6 +54,10 @@ define(function(require) {
             console.log("Initializing application");
             this.headerView = new HeaderView();
             $('.header').html(this.headerView.el);
+            // We only support user management in server mode:
+            if (vizapp.type != "server")
+                $('.nav .profile-menu').hide();
+
             
             _.bindAll(this,"switchView"); // switchView needs to be bound to this context when called from
                                           // within a callback, otherwise the "onClose" methods will never
@@ -229,6 +234,14 @@ define(function(require) {
                 var aboutView = new view();
                 self.switchView(aboutView);
                 self.headerView.selectMenuItem('about-menu');
+            });
+        },
+        
+        profile: function() {
+            var self = this;
+            require(['app/views/profile'], function(view) {
+                self.switchView(new view());
+                self.headerView.selectMenuItem('profile-menu');
             });
         },
 

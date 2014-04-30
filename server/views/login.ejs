@@ -9,11 +9,36 @@
 	</style>
 </head>
 <body>
+    
+<div class="header"><div><header class="navbar navbar-inverse navbar-fixed-top vizapp-nav" role="banner">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#vizapp-nav-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Big Whiskers</a>
+        </div>        
+        <nav class="collapse navbar-collapse" id="vizapp-nav-collapse" role="navigation">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="about-menu"><a href="#about">About</a></li>      
+            </ul>
+        </nav><!--/.nav-collapse -->
+
+    </div>
+</header></div></div>
+    
 <div class="container">
 
 <div class="col-sm-6 col-sm-offset-3">
 
-	<h1><span class="fa fa-sign-in"></span>Welcome to VizApp</h1>
+	<h1><span class="fa fa-sign-in"></span>Welcome to Big Whiskers</h1>
+    
+    <div class="alert alert-info">
+        Access to this Big Whiskers instance is protected.
+    </div>
 
 	<!-- show any messages that come back with authentication -->
 	<% if (message.length > 0) { %>
@@ -36,8 +61,7 @@
 
 	<hr>
 
-	<p>Need an account? <a href="/signup">Signup</a></p>
-	<p>Or go <a href="/">home</a>.</p>
+	<p>Need an account? <a href="/signup">Request access</a></p>
 
 </div>
 
