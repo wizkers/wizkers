@@ -1,5 +1,10 @@
 // config/passport.js
 //
+// This configures our authentication layer - currently only local auth.
+//
+//  One important thing here: this is where we implement the connection to our backend
+//   persistency layer (mongoDB).
+//
 // From http://scotch.io/tutorials/javascript/easy-node-authentication-setup-and-local
 
 // load all the things we need

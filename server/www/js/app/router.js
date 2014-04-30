@@ -237,14 +237,6 @@ define(function(require) {
             });
         },
         
-        profile: function() {
-            var self = this;
-            require(['app/views/profile'], function(view) {
-                self.switchView(new view());
-                self.headerView.selectMenuItem('profile-menu');
-            });
-        },
-
         settings: function () {
             var self = this;
             require(['app/views/settings'], function(view) {

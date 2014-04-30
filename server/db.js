@@ -100,6 +100,15 @@ var LogSession = new Schema({
 mongoose.model('LogSession', LogSession);
 
 
+/**
+ * Role management: we are defining simple roles, and users will only have
+ * one role at a time - no complex overlapping rights/roles/etc
+ *
+ *  - viewer: a read-only role (cannot connect/disconnect to a device, ony home screen + log access)
+ *  - operator: a read-write role for all instruments on the instance
+ *  - admin : same as operator + change roles for users
+ */
+
 
 /**
  * User management (local only for now)
@@ -109,6 +118,7 @@ var UserSchema = new Schema({
         email: String,
         password: String
     },
+    role: { type:String, default: "viewer"}  // Should be "viewer", "operator" or "admin"
 });
 
 // methods ======================

@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+	<title>User Management</title>
+	<link rel="stylesheet" href="css/bootstrap.min.css"> <!-- load bootstrap css -->
+	<style>
+		body { padding-top:80px; }
+	</style>
+</head>
+<body>
+
+<div class="header">
+    <div><header class="navbar navbar-inverse navbar-fixed-top vizapp-nav" role="banner">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#vizapp-nav-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Big Whiskers</a>
+            </div>        
+            <nav class="collapse navbar-collapse" id="vizapp-nav-collapse" role="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="about-menu"><a href="/#about">About</a></li>      
+                </ul>
+            </nav><!--/.nav-collapse -->
+
+        </div>
+    </header></div>
+</div>
+    
+<div class="container">
+    <div class="page-header text-center">
+		<h1><span class="fa fa-anchor"></span> Profile Page</h1>
+		<a href="/logout" class="btn btn-default btn-sm">Logout</a>
+	</div>
+
+	<div class="row">
+
+		<!-- LOCAL INFORMATION -->
+		<div class="col-sm-6">
+			<div class="well">
+				<h3><span class="fa fa-user"></span> Local</h3>
+
+					<p>
+						<strong>id</strong>: <%= user._id %><br>
+						<strong>email</strong>: <%= user.local.email %><br>
+						<strong>password</strong>: <%= user.local.password %>
+					</p>
+
+			</div>
+		</div>
+
+	</div>
+    
+    
+    
+<div class="row">
+
+<div class="col-md-12">
+
+    <p>This is where I will do profile management.</p>
+    
+    <ul>
+    <li>User email, change password</li>
+    <li>Link to Google+ login</li>
+    <li>Role management</li>
+    </ul>
+    
+    <hr>
+    
+    <em>Roles:</em>
+    
+    <ul>
+    <li>Viewer: only look at main screen and logs, no access to the rest. No connection rights.</li>
+    <li>Operator: create/delete devices, read/write access</li>
+    <li>Administrator: same as operator + create users</li>
+    </ul>
+    </div>
+</div>
+</div>
+    
+</body>
+</html>

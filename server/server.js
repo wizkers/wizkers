@@ -86,9 +86,13 @@ var Instrument = mongoose.model('Instrument');
  * Setup our authentication middleware
  */
 var passport = require('passport'),
-    LocalStrategy = require('passport-local').Strategy;
+    LocalStrategy = require('passport-local').Strategy,
+    ConnectRoles = require('connect-roles');
+
+var user = new ConnectRoles();
 
 require('./config/passport')(passport); // Our Passport configuration
+require('./config/roles')(user);        // Configure user roles
 
 /**
  * Setup the HTTP server and routes
@@ -115,7 +119,7 @@ app.configure(function () {
     app.use(express.session({secret: 'LKJQDHFGLKJHpiusdhfgpsidf!à§98769876654è§!ç' }));
     app.use(passport.initialize());
     app.use(passport.session());     // Persistent login sessions, makes user life easier
-    app.use(flash());           // Flash messages upon login, stored in session
+    app.use(flash());               // Flash messages upon login, stored in session
 });
 
 server.listen(8080);
@@ -133,10 +137,9 @@ function isLoggedIn(req, res, next) {
 	if (req.isAuthenticated())
 		return next();
 
-	// if they aren't redirect them to the home page
-	res.redirect('/');
+	// if they aren't redirect them to the login page
+	res.redirect('/login');
 }
-
 
 /**
  *  Authentication: before anything else, make sure all
@@ -144,7 +147,7 @@ function isLoggedIn(req, res, next) {
  */
 
 app.get ('/',
-         ensureLoggedIn('/login'),
+         isLoggedIn,
          function(req,res) {
              res.sendfile('www/index.html');
          });
@@ -160,18 +163,21 @@ app.get('/logout', function(req,res) {
     res.redirect('/');
 });
 // process the signup form
-	app.post('/signup', passport.authenticate('local-signup', {
-		successRedirect : '/profile', // redirect to the secure profile section
-		failureRedirect : '/signup', // redirect back to the signup page if there is an error
-		failureFlash : true // allow flash messages
-	}));
+app.post('/signup', passport.authenticate('local-signup', {
+    successRedirect : '/profile', // redirect to the secure profile section
+    failureRedirect : '/signup', // redirect back to the signup page if there is an error
+    failureFlash : true // allow flash messages
+}));
 // process the login form
-	app.post('/login', passport.authenticate('local-login', {
-		successRedirect : '/', // redirect to the secure profile section
-		failureRedirect : '/login', // redirect back to the signup page if there is an error
-		failureFlash : true // allow flash messages
-	}));
+app.post('/login', passport.authenticate('local-login', {
+    successRedirect : '/', // redirect to the secure profile section
+    failureRedirect : '/login', // redirect back to the signup page if there is an error
+    failureFlash : true // allow flash messages
+}));
 
+app.get('/profile', isLoggedIn, function(req,res) {
+    res.render('profile.ejs', { user: req.user });
+});
 
 /**
  * Interface for managing instruments
