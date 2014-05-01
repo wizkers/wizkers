@@ -36,6 +36,11 @@
     <div class="page-header text-center">
 		<h1><span class="fa fa-anchor"></span> Admin Page</h1>
 		<a href="/logout" class="btn btn-default btn-sm">Logout</a>
+        	<!-- show any messages that come back with authentication -->
+        <% if (message.length > 0) { %>
+            <br><br><div class="alert alert-warning"><%= message %></div>
+        <% } %>
+
 	</div>
 
 	<div class="row">
@@ -56,15 +61,19 @@
                         /* Make sure we can only select identical log types */
                 %>
                 <tr>
+                    <form method="post">
+                        <input type=hidden name="id" value="<%= users[user]._id %>">
+
                     <td><%= users[user].local.email %></td>
                     <td><%= users[user].role %></td>
-                    <td><select>
+                    <td><select name="newrole" onchange="this.form.submit();">
                         <option value="pending" <%= users[user].role === 'pending' ? 'selected' : '' %> >Pending</option>
                         <option value="viewer" <%= users[user].role === 'viewer' ? 'selected' : '' %>>Viewer</option>
                         <option value="operator" <%= users[user].role === 'operator' ? 'selected' : '' %>>Operator</option>
                         <option value="admin"  <%= users[user].role === 'admin' ? 'selected' : '' %>>Administrator</option>
                         </select>
                     </td>
+                        </form>
                 </tr>
                 <% } %>
             </tbody>

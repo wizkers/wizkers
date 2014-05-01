@@ -193,12 +193,29 @@ app.post('/profile', isLoggedIn, function(req,res) {
          });
 
      });
+});
+app.post('/admin', user.is('admin'), function(req,res) {
+    console.log(req.body);
+    User.findOne({_id: req.body.id}, function(err, user) {
+        var msg = "Role updated to " + req.body.newrole + " for user " + user.local.email;
+        if (err)
+            msg = "Someting went wrong, no change was made.";
+        
+        user.role = req.body.newrole;
+        user.save(function(err) {
+            if (err)
+                msg = "Something went wrong, no change was made.";
+            User.find({}, function(err, users) {
+                res.render('admin.ejs', {user: req.user, users: users, message: msg });
+            });
+        });
+    });
     
 });
 
 app.get('/admin', user.is('admin'), function(req,res) {
     User.find({}, function(err, users) {
-        res.render('admin.ejs', {user: req.user, users: users });
+        res.render('admin.ejs', {user: req.user, users: users, message: '' });
     });
 });
 
