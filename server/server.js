@@ -137,8 +137,10 @@ function isLoggedIn(req, res, next) {
     
     // if user is authenticated in the session, carry on 
     if (req.isAuthenticated()) {
-        if (req.user.role === 'pending')
-            res.render('profile.ejs', {user: req.user, message: 'Your account is created, access approval is pending.'});        
+        if (req.user.role === 'pending') {
+            res.render('profile.ejs', {user: req.user, message: 'Your account is created, access approval is pending.'});
+            return;
+        }
         return next();
     }
 
@@ -194,7 +196,13 @@ app.post('/profile', isLoggedIn, function(req,res) {
 
      });
 });
-app.post('/admin', user.is('admin'), function(req,res) {
+
+app.get('/admin', isLoggedIn, user.is('admin'), function(req,res) {
+    User.find({}, function(err, users) {
+        res.render('admin.ejs', {user: req.user, users: users, message: '' });
+    });
+});
+app.post('/admin', isLoggedIn, user.is('admin'), function(req,res) {
     console.log(req.body);
     User.findOne({_id: req.body.id}, function(err, user) {
         var msg = "Role updated to " + req.body.newrole + " for user " + user.local.email;
@@ -213,34 +221,29 @@ app.post('/admin', user.is('admin'), function(req,res) {
     
 });
 
-app.get('/admin', user.is('admin'), function(req,res) {
-    User.find({}, function(err, users) {
-        res.render('admin.ejs', {user: req.user, users: users, message: '' });
-    });
-});
 
 /**
  * Interface for managing instruments
  */
 app.get('/instruments', isLoggedIn, instruments.findAll);
 app.get('/instruments/:id', isLoggedIn, instruments.findById);
-app.post('/instruments', isLoggedIn, instruments.addInstrument);
-app.post('/instruments/:id/picture', isLoggedIn, instruments.uploadPic);
-app.put('/instruments/:id', isLoggedIn, instruments.updateInstrument);
-app.delete('/instruments/:id', isLoggedIn, instruments.deleteInstrument);
+app.post('/instruments', isLoggedIn, user.is('operator'), instruments.addInstrument);
+app.post('/instruments/:id/picture', isLoggedIn, user.is('operator'), instruments.uploadPic);
+app.put('/instruments/:id', isLoggedIn, user.is('operator'), instruments.updateInstrument);
+app.delete('/instruments/:id', isLoggedIn, user.is('operator'), instruments.deleteInstrument);
 
 /**
  * Interface for managing instrument logs (summary)
  */
 app.get('/instruments/:id/logs', isLoggedIn, deviceLogs.findByInstrumentId);
-app.post('/instruments/:id/logs', isLoggedIn, deviceLogs.addEntry);
+app.post('/instruments/:id/logs', isLoggedIn, user.is('operator'), deviceLogs.addEntry);
 app.get('/logs/', isLoggedIn, deviceLogs.findAll);
 app.get('/logs/:id', isLoggedIn, deviceLogs.findById);
 app.get('/logs/:id/entries', isLoggedIn, deviceLogs.getLogEntries);
-app.post('/logs/:id/entries', isLoggedIn, deviceLogs.addLogEntry);
-app.put('/instruments/:iid/logs/:id', isLoggedIn, deviceLogs.updateEntry);
-app.delete('/instruments/:idd/logs/:id', isLoggedIn, deviceLogs.deleteEntry);
-app.delete('/logs/:lid/entries/:id', isLoggedIn, deviceLogs.deleteLogEntry);
+app.post('/logs/:id/entries', isLoggedIn, user.is('operator'), deviceLogs.addLogEntry);
+app.put('/instruments/:iid/logs/:id', isLoggedIn, user.is('operator'), deviceLogs.updateEntry);
+app.delete('/instruments/:idd/logs/:id', isLoggedIn, user.is('operator'), deviceLogs.deleteEntry);
+app.delete('/logs/:lid/entries/:id', isLoggedIn, user.is('operator'), deviceLogs.deleteLogEntry);
 
 /**
  * Interface for our settings. Only one settings object,
@@ -248,13 +251,13 @@ app.delete('/logs/:lid/entries/:id', isLoggedIn, deviceLogs.deleteLogEntry);
  * in-browser rather than on-server.
  */
 app.get('/settings', isLoggedIn, settings.getSettings);
-app.put('/settings/:id', isLoggedIn, settings.updateSettings);
+app.put('/settings', isLoggedIn, user.is('operator'),  settings.updateSettings);
 
 /**
  * Interface for triggering a backup and a restore
  */
-app.get('/backup', isLoggedIn, backup.generateBackup);
-app.post('/restore', isLoggedIn, backup.restoreBackup);
+app.get('/backup', isLoggedIn, user.is('admin'), backup.generateBackup);
+app.post('/restore', isLoggedIn, user.is('admin'), backup.restoreBackup);
 
 // Our static resources are in 'www'
 // GET /javascripts/jquery.js

@@ -32,6 +32,15 @@ define(function(require) {
 
         render: function () {
             $(this.el).html(template());
+            if (vizapp.type == 'server') {
+                // If we're running with a backend server, we need to hide some elements
+                // in case we are only a 'viewer'. This is not relevant if we're running as an app,
+                // since we're always an admin there
+                if (settings.get('currentUserRole') == 'viewer') {
+                    $('.instrument-menu', this.el).hide();
+                    $('.settings-menu', this.el).hide();
+                }
+            }
             return this;
         },
 

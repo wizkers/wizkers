@@ -21,15 +21,17 @@ module.exports = function(roles) {
         }
     });
     
-    // 'viewer' can only see home page
+    // 'viewer' is read-only.
     roles.use('viewer', function(req) {
         if (req.user.role === 'viewer') {
             return true;
         }
     });
     
+    // Operator is read/write (admin is an operator)
     roles.use('operator', function(req) {
-        if (req.user.role === 'operator') {
+        if (req.user.role === 'operator' ||
+            req.user.role === 'admin' ) {
             return true;
         }
     });

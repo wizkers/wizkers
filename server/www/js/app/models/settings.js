@@ -10,7 +10,7 @@ define(function(require) {
     var $   = require('jquery'),
         Backbone = require('backbone');
     
-        Backbone.LocalStorage = require('localstorage');
+        // Backbone.LocalStorage = require('localstorage');
 
     return Backbone.Model.extend({
 
@@ -19,7 +19,8 @@ define(function(require) {
             if (vizapp.type == "chrome") {
                     this.chromeStorage =  new Backbone.LocalStorage("org.aerodynes.vizapp.Settings");
             } else {
-                this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Settings");
+                // this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Settings");
+                this.url = "/settings";
             }
 
         },

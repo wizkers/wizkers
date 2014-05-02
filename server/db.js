@@ -61,10 +61,13 @@ mongoose.model('Instrument', InstrumentSchema );
  * For now: ID of the current layout, and current loco
  */
 var ApplicationSettingsSchema = new Schema({
-    currentLayout: {type: Schema.Types.ObjectId, ref:'Layout', default:null},
-    currentLoco: {type: Schema.Types.ObjectId, ref:'Loco', default:null},
-    powersliderstyle: String,
+    serialPort: String,
+    timezone: String,
+    cpmcolor: Number,
+    cpmscale: String,
     itemsperpage: Number,
+    currentInstrument: {type: Schema.Types.ObjectId, ref:'Instrument', default:null},
+    currentUserRole: { type:String, default: "pending"}
 });
 
 mongoose.model('Settings',ApplicationSettingsSchema);

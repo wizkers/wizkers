@@ -27,6 +27,7 @@ exports.getSettings = function(req, res) {
         // We have only one settings object, so we find one and that's it.
         // TODO: make use we handle a case where there would be several ?
         if (item) {
+            item.currentUserRole = req.user.role;
             res.send(item);
         } else {
             // Create our default settings
