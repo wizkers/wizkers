@@ -15,7 +15,9 @@ define(function(require) {
         LinkManager = function() {
 
             var self = this;
-            this.socket = io.connect(); // (we connect on same host, we don't need a URL)
+            this.socket = io.connect('', {
+                query: 'token=' + settings.get('token')
+            }); // (we connect on same host, we don't need a URL)
 
             this.connected = false;
             this.streaming = false;

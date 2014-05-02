@@ -82,6 +82,7 @@ require('./db.js');
 var mongoose = require('mongoose');
 var Instrument = mongoose.model('Instrument');
 var User = mongoose.model('User');
+var Settings = mongoose.model('Settings');
 
 
 /**
@@ -96,6 +97,9 @@ var user = new ConnectRoles();
 require('./config/passport')(passport); // Our Passport configuration
 require('./config/roles')(user);        // Configure user roles
 
+var jwt = require('jsonwebtoken');
+var socketioJwt = require('socketio-jwt');
+
 /**
  * Setup the HTTP server and routes
  */
@@ -107,7 +111,19 @@ var express = require('express'),
 
 var app = express(),
     server = require('http').createServer(app),
-    io = require('socket.io').listen(server, { log: false });
+    io = require('socket.io').listen(server, { log: true });
+
+
+var secret_salt = new Date().getMilliseconds();
+
+// Setup Socket.io authorization based on JSON Web Tokens so that we get
+// authorization info from our login process:
+io.set('authorization', socketioJwt.authorize({
+  secret: 'superSecretYesYesYes' + secret_salt,
+  handshake: true
+}));
+
+
 
 app.configure(function () {
     app.use(express.logger('dev'));     // 'default', 'short', 'tiny', 'dev'
@@ -124,7 +140,23 @@ app.configure(function () {
     app.use(flash());               // Flash messages upon login, stored in session
 });
 
-server.listen(8080);
+
+// Before starting our server, make sure we reset any stale authentication token:
+Settings.findOne({}, function(err, item) {
+    if (err) {
+        console.log('Issue finding my own settings ' + err);
+    }
+    item.token = "_invalid_";
+    item.save(function(err) {
+        if (err) {
+            console.log('***** WARNING ****** Could not reset socket.io session token at server startup');
+            return;
+        }
+        server.listen(8080);
+    });
+});
+
+
 console.log("Listening for new clients on port 8080");
 var connected = false;
 
@@ -177,10 +209,35 @@ app.post('/signup', passport.authenticate('local-signup', {
 }));
 // process the login form
 app.post('/login', passport.authenticate('local-login', {
-    successRedirect : '/',      // redirect to the secure profile section
+    // successRedirect : '/',      // redirect to the secure profile section
     failureRedirect : '/login', // redirect back to the signup page if there is an error
     failureFlash : true         // allow flash messages
-}));
+}), function(req,res) {
+    // We're good: we gotta generate a json web token
+    var profile = {
+        username: req.user.local.email,
+        role: req.user.role
+    };
+
+    // we are sending the profile in the token
+    var token = jwt.sign(profile, 'superSecretYesYesYes' + secret_salt, { expiresInMinutes: 60*5 });
+
+    // Now store our token into the settings, so that the app can get it when it starts:
+    Settings.findOne({}, function(err, item) {
+        if (err) {
+            console.log('Issue finding my own settings ' + err);
+            res.redirect('/login');
+        }
+        item.token = token;
+        item.save(function(err) {
+            if (err)
+                res.redirect('/login');
+            res.redirect('/');
+        });
+    });
+
+    
+});
 
 app.get('/profile', isLoggedIn, function(req,res) {
     res.render('profile.ejs', { user: req.user, message: '' });
@@ -266,7 +323,7 @@ app.post('/restore', isLoggedIn, user.is('admin'), backup.restoreBackup);
 // Everything static should be authenticated: therefore we are inserting a checkpoint middleware
 // at this point
 app.use(function(req,res,next) {
-    console.log("*** checkpoint ***");
+    // console.log("*** checkpoint ***");
     if (req.isAuthenticated())
         return next();
     
@@ -416,6 +473,10 @@ openPort = function(data, socket) {
 
 // listen for new socket.io connections:
 io.sockets.on('connection', function (socket) {
+    
+    console.log(socket.handshake.decoded_token.role, 'connected');
+    var userinfo = socket.handshake.decoded_token;
+    
 	// if the client connects:
 	if (!connected) {
             console.log('User connected');
@@ -435,19 +496,21 @@ io.sockets.on('connection', function (socket) {
     // Note: html5 UI will use this to remove some links that don't make sense
     // for certain roles, but this backend enforces access, not the HTML5 UI.
     socket.on('userinfo', function() {
-        var s = { username: 'ed', role: 'admin' };
-        socket.emit('userinfo', s);
+        socket.emit('userinfo', userinfo);
     });
 
     // Open a port by instrument ID: this way we can track which
     // instrument is being used by the app.
     socket.on('openinstrument', function(data) {
-        console.log('Instrument open request for instrument ID ' + data);
-        Instrument.findById(data, function(err,item) {
-            currentInstrument = item;
-            driver.setInstrumentRef(currentInstrument);
-            openPort(item.port, socket);
-        });
+        if (userinfo.role == 'operator' || userinfo.role == 'admin') {
+            console.log('Instrument open request for instrument ID ' + data);
+            Instrument.findById(data, function(err,item) {
+                currentInstrument = item;
+                driver.setInstrumentRef(currentInstrument);
+                openPort(item.port, socket);
+            });
+        } else
+            console.log("Unauthorized attempt to open instrument");
     });
     
     // TODO: support multiple ports, right now we
@@ -455,16 +518,18 @@ io.sockets.on('connection', function (socket) {
     // I assume closing the port will remove
     // the listeners ?? NOPE! To be checked.
     socket.on('closeinstrument', function(data) {
-        console.log('Instrument close request for instrument ID ' + data);
-        Instrument.findById(data, function(err,item) {
-            if(portOpen) {
-                myPort.close();
-                portOpen = false;
-            }
-        });
-        
+        if (userinfo.role == 'operator' || userinfo.role == 'admin') {
+            console.log('Instrument close request for instrument ID ' + data);
+            Instrument.findById(data, function(err,item) {
+                if(portOpen) {
+                    myPort.close();
+                    portOpen = false;
+                }
+            });
+        } else
+            console.log("Unauthorized attempt to open instrument");
     });
-        
+
     socket.on('portstatus', function() {
         var s = {portopen: portOpen, recording: recorder.isRecording()};
         var ds = {};
@@ -500,6 +565,11 @@ io.sockets.on('connection', function (socket) {
      });
 
     socket.on('driver', function(data) {
+        
+        if (!(userinfo.role == 'operator' || userinfo.role == 'admin')) {
+            console.log('Unauthorized attempt to change instrument driver');
+            return;
+        }
         console.log('Request to update our serial driver to ' + data);
         
         // Close the serial port if it is open and the driver has changed:
@@ -527,3 +597,4 @@ io.sockets.on('connection', function (socket) {
     });
     
 });
+    

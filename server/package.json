@@ -11,9 +11,11 @@
         "passport-local": "latest",
         "connect-flash": "latest",
         "connect-ensure-login": "latest",
-	"connect-roles": "latest",
+	    "connect-roles": "latest",
         "bcrypt-nodejs": "latest",
+        "jsonwebtoken": "latest",
         "socket.io": "0.9.x",
+        "socketio-jwt": "latest",
         "serialport": "https://github.com/voodootikigod/node-serialport/tarball/master"
     },
     "engines": {

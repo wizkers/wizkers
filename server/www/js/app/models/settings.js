@@ -32,6 +32,7 @@ define(function(require) {
             cpmscale: "linear",
             itemsperpage: 10,
             currentInstrument: null,
+            token: null,
         }
     });    
     

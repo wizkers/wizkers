@@ -67,7 +67,8 @@ var ApplicationSettingsSchema = new Schema({
     cpmscale: String,
     itemsperpage: Number,
     currentInstrument: {type: Schema.Types.ObjectId, ref:'Instrument', default:null},
-    currentUserRole: { type:String, default: "pending"}
+    currentUserRole: { type:String, default: "pending"},
+    token: String, // The current authorization token for socket.io
 });
 
 mongoose.model('Settings',ApplicationSettingsSchema);

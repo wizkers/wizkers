@@ -105,12 +105,14 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
         // instruments as necessary, as well as providing a list of
         // instruments to other parts who need those
         instrumentManager = new InstrumentManager();
-        // Create our link manager: it is in charge of talking
-        // to the server-side controller interface through a socket.io
-        // web socket. It is passed to all views that need it.
-        linkManager =  new LinkManager();
 
-        settings.fetch({success: function() {           
+        settings.fetch({success: function() {
+            
+            // Create our link manager: it is in charge of talking
+            // to the server-side controller interface through a socket.io
+            // web socket. It is passed to all views that need it.
+            linkManager =  new LinkManager();
+
             var insId = settings.get('currentInstrument');
             if (insId != null) {
                 var ins = new Instrument.Instrument({_id: insId});
