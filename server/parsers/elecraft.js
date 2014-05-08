@@ -195,12 +195,14 @@ module.exports = {
                             this.port.write('TX;');
                         // The radio does not echo this command, so we do it
                         // ourselves, so that the UI reacts
-                        this.socket.emit('serialEvent','TX;');
+                        if (this.socket != null)
+                            this.socket.emit('serialEvent','TX;');
                      
                     } else {
                         if (this.port != null)
                             this.port.write("RX;");
-                        this.socket.emit('serialEvent','RX;');
+                        if (this.socket != null)
+                            this.socket.emit('serialEvent','RX;');
                     }
                     c.write("RPRT 0\n");
                     break;
