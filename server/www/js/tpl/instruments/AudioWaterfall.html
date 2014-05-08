@@ -1,0 +1,75 @@
+<div id="xtrafunc-wf">
+    <div class="row">
+        <div class="col-md-4">
+            <button type="button" class="btn btn-small btn-default" id="wf-start"><span class="glyphicon glyphicon-off"></span></button>
+            <button type="button" class="btn btn-small btn-default" id="wf-audiomonitor"><span class="glyphicon glyphicon-headphones"></span></button>
+            <button type="button" id="wf-popout" class="btn btn-small btn-default"><span class="glyphicon glyphicon-new-window"></span></button>
+        </div>
+        <div class="col-md-8">
+            <div class="input-group input-margin">
+                <span class="input-group-addon">Gain</span>
+                    <div class="form-control slider-bg-info">
+                      <input type="text" id="gain-control" data-slider-value="45" data-slider-min="0" data-slider-max="100" data-slider-step="1">
+                    </div>
+                </div> <!-- AF -->
+                <div class="input-group input-margin">
+                    <span class="input-group-addon">Floor</span>
+                    <div class="form-control slider-bg-info">
+                      <input type="text" id="floor-control" data-slider-value="40" data-slider-min="0" data-slider-max="100" data-slider-step="1">
+                    </div>
+                </div> <!-- AF -->
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="wf-display" class="col-md-12">
+            <div style="position:relative">
+                <svg id="graticule"  viewBox="0 0 1024 512" preserveAspectRatio="xMinYMin" style="float:left; z-index:100;"></svg>
+                <div style="position:absolute; z-index: -1;">
+                    <canvas  id="spectrum-canvas" width="1024" height="256" style=" display: block; z-index: -1;"></canvas>
+                    <canvas id="wf-canvas" width="1024" height="256" style="display: block; background-color: black; z-index: -1;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 6px;">
+        <div class="col-md-6">
+            <div class="input-group input-margin">
+                <span class="input-group-addon">Smoothing</span>
+                    <input  id="wf-smoothing" type="number" class="form-control" step="1" placeholder="1">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" id="wf-smoothing-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                    </span>
+            </div>
+            <div class="input-group input-margin">
+                <span class="input-group-addon">Sample rate</span>                                
+                <select id="wf-samprate" class="form-control">
+                        <option>44.1 kHz</option>
+                        <option>22.05 kHz</option>
+                        <option>11.025 kHz</option>
+                        <option>8.82 kHz</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6">    
+            <div class="input-group input-margin">
+                <span class="input-group-addon">FFT Window</span>
+                <select id="wf-fftwindow" class="form-control">
+                    <option>Hamming</option>
+                    <option>Hann</option>
+                    <option>Bartlett</option>
+                    <option>Bartlett-Hann</option>
+                    <option>Blackman</option>
+                    <option>Cosine</option>
+                    <option>Gauss</option>
+                    <option>Lanczos</option>
+                    <option>Rectangular</option>
+                    <option>Triangular</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="xtrafunc-popin" class="col-md-12">
+    <button type="button" id="wf-popin" class="btn btn-small btn-default"><span class="glyphicon glyphicon-stats"></span></button>
+</div>

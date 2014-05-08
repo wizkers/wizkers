@@ -1,25 +1,34 @@
 <div class="col-md-8 ">
+    <h4>Instrument Settings</h4>
+    
+    
+    <p>TODO: put instrument settings here. These are stored in the "metadata" field of the instrument.</p>
+    
+</div>
+    
+<div class="col-md-4 well">
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <h4>Application settings</h4>
             <p>
-                <a href="#" role="button" id="reset" class="btn pull-left">Reset all settings.</a>
+                <a href="#" role="button" id="reset" class="btn btn-danger">Reset all settings.</a>
             </p>
         </div>
     </div>
-        
     <div class="row">
             <div class="col-md-12"><h4>User interface</h4></div>
-        </div>
+    </div>
     <div class="row">
-        <div class="col-md-4">
-            <p>Display time in:</p>
+            <div class="col-md-12">
+            Display time in:&nbsp;
             <select style="width:65%" name="timezone" >
                 <option value="UTC" <%= timezone == "GMT" ? 'selected="selected"'  : '' %>>GMT</option>
                 <option value="browser" <%= timezone == "browser" ? 'selected="selected"'  : '' %>>Browser timezone</option>
             </select>
         </div>
-        <div class="col-md-3">
+    </div>
+    <div class="row">
+        <div class="col-md-12">
             <% var palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ] %>
             Graph color: <span id="currentcpmcolor" class="badge" style="background:<%=palette[cpmcolor]%>;width:20%;">&nbsp;</span>
             <div class="btn-group">
@@ -37,29 +46,32 @@
                 </ul>
             </div>
         </div>
-        <div class="col-md-3">
+        
+    </div>
+    <div class="row">
+        <div class="col-md-12">
             Default Graph Scale:
             <select style="width:65%" name="cpmscale" >
                 <option value="linear" <%= cpmscale == "linear" ? 'selected="selected"'  : '' %>>Linear</option>
                 <option value="log" <%= cpmscale == "log" ? 'selected="selected"'  : '' %>>Logarithmic</option>
             </select>
         </div>
-        <div class="col-md-2 well">
-                &nbsp;
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <br><br><hr><br>
+            <p>
+                Debug:
+            </p>
+            <ul>
+                <li>Serial port: <%= serialPort %></li>
+                    <li>Timezone: <%= timezone %></li>
+                <li>Graph color: <%= cpmcolor %></li>
+                <li>CPM Scale: <%= cpmscale %></li>
+            </ul>
         </div>
     </div>
-</div>
-    
-<div class="col-md-4">
-    <p>
-        Debug:
-    </p>
-    <ul>
-        <li>Serial port: <%= serialPort %></li>
-            <li>Timezone: <%= timezone %></li>
-        <li>Graph color: <%= cpmcolor %></li>
-        <li>CPM Scale: <%= cpmscale %></li>
-    </ul>
 </div>
 
 <div class="row status-bar">

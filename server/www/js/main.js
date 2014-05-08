@@ -17,7 +17,12 @@ require.config({
         localstorage: 'lib/backbone.localStorage-1.1.7',
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',
-	   text: 'lib/text',
+	    text: 'lib/text',
+        
+        // Signal processing libs
+        dsp: 'lib/dsp',
+        chroma: 'lib/chroma',
+        resampler: 'lib/resampler',
         
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',

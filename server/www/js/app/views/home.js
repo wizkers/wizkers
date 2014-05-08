@@ -10,6 +10,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
+        Devicelog = require('app/models/devicelog'),
         tpl     = require('text!tpl/HomeView.html'),
         template = null;
         
@@ -233,7 +234,7 @@ define(function(require) {
             var self = this;
             $('#RecordModal').modal('hide');
 
-            var currentLogSession = new Log();
+            var currentLogSession = new Devicelog.Log();
             currentLogSession.set('name', $('#recordingname',this.el).val());
             currentLogSession.set('description', $('#description', this.el).val());
             currentLogSession.set('logtype', 'live');
