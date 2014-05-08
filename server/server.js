@@ -113,18 +113,6 @@ var app = express(),
     server = require('http').createServer(app),
     io = require('socket.io').listen(server, { log: true });
 
-
-var secret_salt = new Date().getMilliseconds();
-
-// Setup Socket.io authorization based on JSON Web Tokens so that we get
-// authorization info from our login process:
-io.set('authorization', socketioJwt.authorize({
-  secret: 'superSecretYesYesYes' + secret_salt,
-  handshake: true
-}));
-
-
-
 app.configure(function () {
     app.use(express.logger('dev'));     // 'default', 'short', 'tiny', 'dev'
     app.use(express.cookieParser());    // passport authentication needs to read cookies
@@ -470,6 +458,14 @@ openPort = function(data, socket) {
 // Socket management: supporting one client at a time for now
 //////////////////
 
+var secret_salt = new Date().getMilliseconds();
+
+// Setup Socket.io authorization based on JSON Web Tokens so that we get
+// authorization info from our login process:
+io.set('authorization', socketioJwt.authorize({
+  secret: 'superSecretYesYesYes' + secret_salt,
+  handshake: true,
+}));
 
 // listen for new socket.io connections:
 io.sockets.on('connection', function (socket) {
