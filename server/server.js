@@ -129,15 +129,21 @@ app.configure(function () {
 });
 
 
+
 // Before starting our server, make sure we reset any stale authentication token:
 Settings.findOne({}, function(err, item) {
     if (err) {
         console.log('Issue finding my own settings ' + err);
     }
+    if (item == null) {
+      item = new Settings(); // First run
+    }
+    console.log("Settings ID: " + item._id);
     item.token = "_invalid_";
     item.save(function(err) {
         if (err) {
             console.log('***** WARNING ****** Could not reset socket.io session token at server startup');
+            console.log(err);
             return;
         }
         server.listen(8080);
@@ -180,7 +186,25 @@ app.get ('/',
          });
 
 app.get('/login', function(req, res) {
-    res.render('login.ejs', { message: req.flash('loginMessage') });
+    // Before logging in, we need to make sure there are users defined on our system.
+    // Checking this each time has a marginal performance hit on the server, but we
+    // are not designed to handle huge loads since this runs on a small embedded Linux
+    // or a laptop - just a couple of users altogether.
+    User.find({}, function(err, users) {
+      if (users.length == 0) {
+        var adm = new User();
+        adm.local.email = "admin";
+        adm.local.password = adm.generateHash('admin');
+        adm.role = 'admin';
+        adm.save(function(err) {
+           if (err)
+              console.log("Error during first user creation");
+            res.render('login.ejs', { message: 'Welcome! Your default login/password is admin/admin'  });
+       });
+      } else {
+       res.render('login.ejs', { message: req.flash('loginMessage') }); 
+     }
+    });
 });
 app.get('/signup', function(req,res) {
     res.render('signup.ejs', { message: req.flash('signupMessage')});
@@ -201,6 +225,15 @@ app.post('/login', passport.authenticate('local-login', {
     failureRedirect : '/login', // redirect back to the signup page if there is an error
     failureFlash : true         // allow flash messages
 }), function(req,res) {
+
+    // If the login process generated a flash message, go to the warning page
+    // first
+    var w = req.flash('warningMessage');
+    console.log("Warning: " + w);
+    if (w != '') {
+	res.render('warning.ejs', { message: w });
+	return;
+    }
     // We're good: we gotta generate a json web token
     var profile = {
         username: req.user.local.email,
@@ -228,7 +261,7 @@ app.post('/login', passport.authenticate('local-login', {
 });
 
 app.get('/profile', isLoggedIn, function(req,res) {
-    res.render('profile.ejs', { user: req.user, message: '' });
+    res.render('profile.ejs', { user: req.user, message: '' });
 });
 app.post('/profile', isLoggedIn, function(req,res) {
      User.findOne({ 'local.email': req.user.local.email }, function(err, record) {

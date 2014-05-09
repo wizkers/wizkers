@@ -135,7 +135,12 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
            router = new Router();
            Backbone.history.start();
 	       }
-        }
+        },
+		error: function() {
+		// Probably first run: settings don't exist on the backend
+		router = new Router();
+		Backbone.history.start();
+	}
                        });
 });
 

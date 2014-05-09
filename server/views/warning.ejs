@@ -1,0 +1,55 @@
+<!-- views/login.ejs -->
+<!doctype html>
+<html>
+<head>
+	<title>Authentication</title>
+	<link rel="stylesheet" href="css/bootstrap.min.css"> <!-- load bootstrap css -->
+	<style>
+		body 		{ padding-top:80px; }
+	</style>
+</head>
+<body>
+    
+<div class="header"><div><header class="navbar navbar-inverse navbar-fixed-top vizapp-nav" role="banner">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#vizapp-nav-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Viz App</a>
+        </div>        
+        <nav class="collapse navbar-collapse" id="vizapp-nav-collapse" role="navigation">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="about-menu"><a href="#about">About</a></li>      
+            </ul>
+        </nav><!--/.nav-collapse -->
+
+    </div>
+</header></div></div>
+    
+<div class="container">
+
+<div class="col-sm-6 col-sm-offset-3">
+
+	<h1><span class="fa fa-sign-in"></span>Warning !</h1>
+    
+	<!-- show any messages that come back with authentication -->
+	<% if (message.length > 0) { %>
+		<div class="alert alert-danger"><%= message %></div>
+	<% } %>
+
+       <br><br>
+
+	<a href="/" type="button"  class="btn btn-warning btn-lg">Continue</a>
+
+	<hr>
+
+
+</div>
+
+</div>
+</body>
+</html>

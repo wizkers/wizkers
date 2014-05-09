@@ -112,10 +112,15 @@ module.exports = function(passport) {
             if (!user)
                 return done(null, false, req.flash('loginMessage', 'Username or password incorrect.')); // req.flash is the way to set flashdata using connect-flash
 
-			// if the user is found but the password is wrong
+            // if the user is found but the password is wrong
             if (!user.validPassword(password))
                 return done(null, false, req.flash('loginMessage', 'Username or password incorrect.')); // create the loginMessage and save it to session as flashdata
-            
+
+            // If the user is an admin, and the password is "admin", then
+            // complain loudly
+           if (user.role == 'admin' && user.validPassword('admin'))
+                return done(null, user, req.flash('warningMessage', 'Your admin password is the default password, "admin". Please change this to something more secure! Most features will be disabled until your change your password, log out and log back in again.'));
+ 
             // all is well, return successful user
             return done(null, user);
         });
