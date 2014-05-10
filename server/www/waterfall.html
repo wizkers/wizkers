@@ -148,7 +148,7 @@
     
     // Our variables:    
     var context;
-    var audioBuffer;
+    
     var sourceNode;
     var filterNode;
     var resamplerNode;
@@ -172,28 +172,13 @@
         tempCtx = tempCanvas.getContext("2d");
     tempCanvas.width=1024;
     tempCanvas.height=256;
+    
+    var canvas = document.getElementById("wf-canvas");
+
 
         // used for color distribution
-    var hot = new chroma.ColorScale({
-        //colors: ['#5C4D6B', '#536887', '#3D839A', '#259FA1', '#35B89B', '#67CF8A', '#A3E275', '#E7F065' ],
-        //colors: ['#5C4D6B', '#3F627B', '#1C757A', '#2A8569', '#5B8F4F', '#91933B', '#C89140', '#F78B65' ],
-        colors: [ '#000000', '#0B16B5', '#FFF782', '#EB1250' ],
-        
-        // colors:['#000000', '#ff0000', '#ffff00', '#ffffff'],
-        // positions:[0, .125, 0.25, 0.375, 0.5, 0.625, 0.75, 1],
-        positions: [ 0, 0.4, 0.68, 0.85 ],
-        mode:'rgb',
-        limits:[0, 300]
-    });
-    
-    var gradient = ctx.createLinearGradient(0,0,0,300);
-    gradient.addColorStop(1,'#000000');
-    gradient.addColorStop(0.75,'#ff0000');
-    gradient.addColorStop(0.25,'#ffff00');
-    gradient.addColorStop(0,'#ffffff');
-
-
-        window.onload = init_ui;
+    var hot = new chroma.scale([ '#000000', '#0B16B5', '#FFF782', '#EB1250' ]).domain([ 0, 300 ]).out('hex');
+    window.onload = init_ui;
 
     function init_ui() {
     
@@ -208,8 +193,8 @@
     });
     // I was not able to make the SVG resize gracefully, so I have to do this
         
-        // Somehow, in this code I cannot do $("#graticule").resize(), the event
-        // never fires ???
+    // Somehow, in this code I cannot do $("#graticule").resize(), the event
+    // never fires ???
     $(window).resize(function(e) {
             $("#spectrum-canvas").width($("#graticule").width());
             $("#wf-canvas").width($("#graticule").width());
@@ -390,13 +375,10 @@
     function drawSpectrogram() {
         
         // Waterfall clear/buffer
-        var canvas = document.getElementById("wf-canvas");
         tempCtx.drawImage(canvas, 0, 0, 1024, 256);
         
         // Spectrogram clear:
         ctx.clearRect(0, 0, 1024, 256);
-        // set the fill style
-        // ctx.fillStyle=gradient;
         ctx.beginPath();
         ctx.moveTo(0, 256);
 
@@ -410,7 +392,7 @@
             }
             var value = 256 + gain*Math.log(sp/maxAvg*floor);
             // draw the line on top of the canvas
-            ctx2.fillStyle = hot.getColor(value).hex();
+            ctx2.fillStyle = hot(value);
             ctx2.fillRect(i, 1, 1, 1);
             if (!(i % 4)) {
                 // ctx.fillRect(i,256-value,3,256);
