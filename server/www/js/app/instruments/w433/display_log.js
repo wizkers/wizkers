@@ -53,7 +53,7 @@ define(function(require) {
 
             // TODO: save color palette in settings ?
             // My own nice color palette:
-            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ],
+            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ];
 
 
             this.plotOptions = {

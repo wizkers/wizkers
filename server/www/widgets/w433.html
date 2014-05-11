@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>W433 Log display</title>
+	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../js/lib/flot-0.8.1/excanvas.min.js"></script><![endif]-->
+	<script src="../js/lib/flot-0.8.1/jquery.js"></script>
+	<script src="../js/lib/flot-0.8.1/jquery.flot.js"></script>
+	<script src="../js/lib/flot-0.8.1/jquery.flot.time.js"></script>
+    
+    
+    <script>
+        // We are defining our configuration here:
+        
+        var timezone = "browser";
+        
+        // The address where we should get the data to display
+        var data_url = "/live/60";
+        
+        // If we only want to display one sensor, define sensor_name
+        var sensor_name = "";
+        
+        // Customize the default palette if you wish:
+        var palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ];
+        
+    </script>
+    
+    <style type="text/css">
+    
+    .graph-container {
+        box-sizing: border-box;
+        width: 850px;
+        height: 450px;
+        padding: 20px 15px 15px 15px;
+        margin: 15px auto 30px auto;
+        border: 1px solid #ddd;
+        background: #fff;
+        background: linear-gradient(#f6f6f6 0, #fff 50px);
+        background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+        background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+        background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+        background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+        
+    .graph {
+        width: 100%;
+        height: 100%;
+        font-size: 14px;
+        line-height: 1.2em;
+    }
+
+    
+    </style>
+    
+    
+    
+	<script type="text/javascript">
+        
+        // You should not need to change anything below, until you want to do heavier customisation
+        
+        // Data formatting: - raw log to flotcharts-friendly data
+        var packData = function(log) {
+            // Create a table of Y values with the x values from our collection
+            var sensorData = [];
+            var sensors = [];
+            for (var i=0; i < log.length; i++) {
+                var data = log[i].data;
+                // Now add the current sensor
+                // TODO: upon release, just remove support for non-named sensors
+                var sensor = ((data.sensor_name == undefined) ? data.sensor_address : data.sensor_name) + " - " + data.reading_type;
+                if (sensors.indexOf(sensor) == -1) {
+                    sensors.push(sensor);
+                    sensorData.push([]);
+                }
+                var idx = sensors.indexOf(sensor);
+                sensorData[idx].push([new Date(log[i].timestamp).getTime(), parseFloat(data.value)]);
+            }
+
+            var plotData = [];
+            // Now pack our live data:
+            for (var i = 0; i < sensors.length; i++) {
+                plotData.push( { data: sensorData[i],
+                                label: sensors[i]} );
+            }
+            return plotData;
+        };
+        
+         var plotOptions = {
+                xaxis: { mode: "time", show:true,
+                        timezone: timezone,                  
+                       },
+                grid: {
+                    hoverable: true,
+                    clickable: true
+                },
+                legend: { position: "ne" },
+                selection: {
+                    mode: "xy"
+                },
+
+                colors: this.palette,
+            };
+        
+        $.getJSON(data_url, function(data) {
+            var plotData = packData(data);
+            
+            $.plot($(".graph",this.el), plotData, plotOptions);
+        });
+
+        
+    </script>
+    
+</head>
+<body>
+    
+    <div class="graph-container">
+        <div class="graph" width="500" height="250">
+        </div>
+    </div>
+    
+</body>

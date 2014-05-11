@@ -21,6 +21,7 @@
 var mongoose = require('mongoose');
 var LogSession = mongoose.model('LogSession');
 var DeviceLogEntry = mongoose.model('DeviceLogEntry');
+var recorder = require('../recorder.js');
 
 // Get all log sessions for a given instrument
 exports.findByInstrumentId = function(req, res) {
@@ -82,6 +83,34 @@ exports.getLogEntries = function(req, res) {
         res.end();
     });
 }
+
+// Get log entries for the current live recording: we only get data for the last
+// XX minutes
+exports.getLive = function(req,res) {
+    console.log("Request to get extract of live recording for the last " + req.params.period + " minutes");
+    var rid = recorder.getRecordingID();
+    console.log(rid);
+    if (rid == null) {
+        res.send('{"error": "Not recording" }');
+        return;
+    }
+    var minstamp = new Date( new Date().getTime() - req.params.period* 60000);
+    var stream = DeviceLogEntry.find({logsessionid: rid, timestamp: {"$gte": minstamp} }).stream();
+    res.writeHead(200, {"Content-Type": "application/json"});
+    res.write("[");
+    var ok = false;
+    stream.on('data', function(item) {
+                         if (ok) res.write(",");
+                         ok = true;
+                         res.write(JSON.stringify(item));
+                        }
+             ).on('error', function(err) {
+    }).on('close', function() {
+        res.write("]");
+        res.end();
+    });
+}
+
 
 // Add a new log entry for a log:
 // TODO : create a library to store logs in a more sophisticated

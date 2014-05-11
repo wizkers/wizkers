@@ -34,6 +34,10 @@ exports.isRecording = function() {
     return recording;
 }
 
+exports.getRecordingID = function() {
+    return recordingID;
+}
+
 exports.stopRecording = function(req,res) {
     console.log("*** Stop recording");
     recording = false;

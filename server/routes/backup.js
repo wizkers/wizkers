@@ -31,7 +31,7 @@ var deleteDirectoryRecursive = function(dirpath) {
 exports.generateBackup = function(req, res) {
     console.log('Launching backup');
     // Phase Zero: clean up the tmp directory for any old backup...
-    var tmpdir = path.resolve(__dirname, '../public/pics/tmp');
+    var tmpdir = path.resolve(__dirname, '../www/pics/tmp');
     fs.readdirSync(tmpdir).forEach(function(file,index) {
         if (file.indexOf('backup-') > -1) {
             console.log('Clean up stale backup file: ' + file);
@@ -40,8 +40,8 @@ exports.generateBackup = function(req, res) {
     });
     
     // Phase I: dump the database
-    var args = ['--db', 'traindb'],
-        options= { cwd: path.resolve(__dirname, '../public/pics/'),
+    var args = ['--db', 'vizappdb'],
+        options= { cwd: path.resolve(__dirname, '../www/pics/'),
                     env: process.env
                 };
     var mongodump = spawn('mongodump', args, options);
@@ -56,13 +56,13 @@ exports.generateBackup = function(req, res) {
     mongodump.on('exit', function (code) {
       console.log('mongodump exited with code ' + code);
       // Phase II: add a tag in the file to validate upon restore
-      args = ['valid_train_backup'];
+      args = ['valid_database_backup'];
       var touch = spawn('touch', args, options);
       touch.on('exit', function(code) {
-          console.log('Touch train backup tag exit ' + code);
+          console.log('Touch database backup tag exit ' + code);
           var filename = 'backup-' + Date.now() + '.tar.bz2';
           console.log('Backup file name: ' + filename);
-          args = [ 'cvjf', 'tmp/' + filename, 'locos', 'layouts', 'dump', 'locodocs', 'cars', 'valid_train_backup'];
+          args = [ 'cvjf', 'tmp/' + filename, 'instruments', 'dump', 'valid_database_backup'];
           // Phase II: create a tarfile in 'tmp' with the whole backup:
           var maketar = spawn('tar', args, options);
           maketar.on('exit', function(code) {
@@ -81,7 +81,7 @@ exports.restoreBackup = function(req, res) {
         var filename = req.files.file.path;
         // Phase I: check that we have a "valid_train_backup" tag in the
         // tar backup:
-        var args = ['tjf', filename, 'valid_train_backup'],
+        var args = ['tjf', filename, 'valid_database_backup'],
             options= { cwd: path.resolve(__dirname, '../public/pics/'),
                        env: process.env
                      };
@@ -95,16 +95,8 @@ exports.restoreBackup = function(req, res) {
                 console.log("Invalid backup file, deleting...");
             } else {
                 // Phase II: clean up current image directories
-                var dirpath = path.resolve(__dirname, '../public/pics/locos/');
+                var dirpath = path.resolve(__dirname, '../public/pics/instruments/');
                 console.log("Deleting " + dirpath);
-                deleteDirectoryRecursive(dirpath);
-                dirpath = path.resolve(__dirname, '../public/pics/locodocs/');
-                deleteDirectoryRecursive(dirpath);
-                dirpath = path.resolve(__dirname, '../public/pics/layouts/');
-                deleteDirectoryRecursive(dirpath);
-                dirpath = path.resolve(__dirname, '../public/pics/dump/');
-                deleteDirectoryRecursive(dirpath);
-                dirpath = path.resolve(__dirname, '../public/pics/cars/');
                 deleteDirectoryRecursive(dirpath);
                 // Phase III: Restore images files
                 args = ['xjf', filename];

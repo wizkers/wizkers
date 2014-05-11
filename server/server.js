@@ -324,6 +324,17 @@ app.delete('/instruments/:idd/logs/:id', isLoggedIn, user.is('operator'), device
 app.delete('/logs/:lid/entries/:id', isLoggedIn, user.is('operator'), deviceLogs.deleteLogEntry);
 
 /**
+ * Interface for extracting logs in json format
+ *
+ * /export/:id/:start/:end/:format (need API key in URL ?)
+ *     Extract a particular log ID with a start & end timestamp
+ * /live/:period : period being in minutes
+ *     Get the current live recording for the last ':period'
+ */
+app.get('/live/:period', deviceLogs.getLive);
+ 
+
+/**
  * Interface for our settings. Only one settings object,
  * so no getting by ID here. Note: I now mostly store settings
  * in-browser rather than on-server.
