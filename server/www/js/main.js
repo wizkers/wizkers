@@ -5,6 +5,9 @@
 require.config({
     
     baseUrl: 'js',
+
+    // On the Beaglebone, some calls take forever
+    waitSeconds: 30,
     
     paths: {
         app: 'app',
