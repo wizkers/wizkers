@@ -92,11 +92,26 @@
     
     <% if (user.role === 'admin') { %>
     <div class="row">  
-        <div class="col-sm-6">
+        <div class="col-sm-4">
 			<div class="well">
                 <a href="/admin" class="btn btn-default btn-sm">Server Administration</a>
 			</div>
 		</div>
+        
+        <div class="col-sm-4">
+			<div class="well">
+                <p>Backup all settings and data in a backup file (.tbz): <a href="/backup" role="button" class="do-backup btn btn-default">Backup</a>
+                </p>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="well">
+                <p>Drop a backup file on the box below to restore your settings:</p>
+                <div style="width:120px; height:107px; position:relative;margin: 0px auto;">
+                        <div style="position:absolute; bottom:0;"><img id="restore-area" width="120" src="img/package-open.png"/></div>
+                </div>
+            </div>
+        </div>
     </div>
     <% } %>
     

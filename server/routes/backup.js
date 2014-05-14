@@ -44,32 +44,37 @@ exports.generateBackup = function(req, res) {
         options= { cwd: path.resolve(__dirname, '../www/pics/'),
                     env: process.env
                 };
-    var mongodump = spawn('mongodump', args, options);
-    /*
-    mongodump.stdout.on('data', function (data) {
-      console.log('stdout: ' + data);
-    });
-    */
-    mongodump.stderr.on('data', function (data) {
-      console.log('stderr: ' + data);
-    });
-    mongodump.on('exit', function (code) {
-      console.log('mongodump exited with code ' + code);
-      // Phase II: add a tag in the file to validate upon restore
-      args = ['valid_database_backup'];
-      var touch = spawn('touch', args, options);
-      touch.on('exit', function(code) {
-          console.log('Touch database backup tag exit ' + code);
-          var filename = 'backup-' + Date.now() + '.tar.bz2';
-          console.log('Backup file name: ' + filename);
-          args = [ 'cvjf', 'tmp/' + filename, 'instruments', 'dump', 'valid_database_backup'];
-          // Phase II: create a tarfile in 'tmp' with the whole backup:
-          var maketar = spawn('tar', args, options);
-          maketar.on('exit', function(code) {
-          res.redirect('/pics/tmp/' + filename);        
+    try {
+        var mongodump = spawn('mongodump', args, options);
+        /*
+        mongodump.stdout.on('data', function (data) {
+          console.log('stdout: ' + data);
         });
-      });
-    });
+        */
+        mongodump.stderr.on('data', function (data) {
+          console.log('stderr: ' + data);
+        });
+        mongodump.on('exit', function (code) {
+          console.log('mongodump exited with code ' + code);
+          // Phase II: add a tag in the file to validate upon restore
+          args = ['valid_database_backup'];
+          var touch = spawn('touch', args, options);
+          touch.on('exit', function(code) {
+              console.log('Touch database backup tag exit ' + code);
+              var filename = 'backup-' + Date.now() + '.tar.bz2';
+              console.log('Backup file name: ' + filename);
+              args = [ 'cvjf', 'tmp/' + filename, 'instruments', 'dump', 'valid_database_backup'];
+              // Phase II: create a tarfile in 'tmp' with the whole backup:
+              var maketar = spawn('tar', args, options);
+              maketar.on('exit', function(code) {
+              res.redirect('/pics/tmp/' + filename);        
+            });
+          });
+        });
+    } catch (err) {
+        console.log("Alert: mongodump was not found, or failed");
+        res.send("Error: could not do the backup.");
+    }
     
 
 };
@@ -82,7 +87,7 @@ exports.restoreBackup = function(req, res) {
         // Phase I: check that we have a "valid_train_backup" tag in the
         // tar backup:
         var args = ['tjf', filename, 'valid_database_backup'],
-            options= { cwd: path.resolve(__dirname, '../public/pics/'),
+            options= { cwd: path.resolve(__dirname, '../www/pics/'),
                        env: process.env
                      };
         var check = spawn('tar', args, options);
@@ -95,7 +100,7 @@ exports.restoreBackup = function(req, res) {
                 console.log("Invalid backup file, deleting...");
             } else {
                 // Phase II: clean up current image directories
-                var dirpath = path.resolve(__dirname, '../public/pics/instruments/');
+                var dirpath = path.resolve(__dirname, '../www/pics/instruments/');
                 console.log("Deleting " + dirpath);
                 deleteDirectoryRecursive(dirpath);
                 // Phase III: Restore images files
