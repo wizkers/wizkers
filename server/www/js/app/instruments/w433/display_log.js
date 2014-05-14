@@ -79,6 +79,8 @@ define(function(require) {
                 selection: { mode: "xy" },
                 colors: this.palette,
             };  
+            
+            this.previousPoint = null;
 
         },
 
@@ -154,8 +156,8 @@ define(function(require) {
 
             $(".locochart", this.el).bind("plothover", function (event, pos, item) {
                 if (item) {
-                    if (previousPoint != item.dataIndex) {
-                        previousPoint = item.dataIndex;
+                    if (this.previousPoint != item.dataIndex) {
+                        this.previousPoint = item.dataIndex;
 
                         $("#tooltip").remove();
                         var x = item.datapoint[0],
@@ -168,7 +170,7 @@ define(function(require) {
                     }
                 } else {
                     $("#tooltip").remove();
-                    previousPoint = null;            
+                    this.previousPoint = null;            
                 }
             });
 
