@@ -133,12 +133,14 @@ module.exports = {
         if (this.server == null) {
             this.server = net.createServer(function(c) { //'connection' listener
                 console.log('server connected');
-                self.socket.emit('status',{ tcpserverconnect: true });
+                if (self.socket)
+                    self.socket.emit('status',{ tcpserverconnect: true });
                 self.serverconnected = true;
                 
                 c.on('end', function() {
                     console.log('Server disconnected');
-                    self.socket.emit('status',{ tcpserverconnect: false });
+                    if (self.socket)
+                        self.socket.emit('status',{ tcpserverconnect: false });
                     self.serverconnected = false;
                 });
                 var rl = readline.createInterface(c,c);
