@@ -90,7 +90,16 @@ exports.restoreBackup = function(req, res) {
             options= { cwd: path.resolve(__dirname, '../www/pics/'),
                        env: process.env
                      };
-        var check = spawn('tar', args, options);
+        var check;
+        
+        try { check = spawn('tar', args, options);
+            } catch (error) {
+                console.log("Error opening the archive: " + error);
+                res.send("Invalid");
+                return;
+            }
+        
+        
         check.on('exit', function(code) {
             console.log('Backup file check: ' + code);
             if (code != 0) {

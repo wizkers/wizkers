@@ -3,12 +3,14 @@
 <head>
 	<title>User Management</title>
 	<link rel="stylesheet" href="css/bootstrap.min.css"> <!-- load bootstrap css -->
+    <link rel="stylesheet" href="css/styles.css">
 	<style>
 		body { padding-top:80px; }
 	</style>
     
     <script src="js/lib/jquery-1.11.0.min.js"></script>
     <script src="js/lib/validator.min.js"></script>
+    
 </head>
 <body>
 
@@ -116,8 +118,90 @@
     <% } %>
     
     
+    <div class="row status-bar">
+    <div class="col-md-12">
+        <div class="alert alert-success" style="display: none">
+            <b>Success!</b> generic message.
+        </div>
+    </div>
+</div>
     
 </div>
+    
+<script>
+    
+        var uploadFile = function(path, file, callbackSuccess) {
+            var self = this;
+            var data = new FormData();
+            data.append('file', file);
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data: data,
+                processData: false,
+                cache: false,
+                contentType: false
+            })
+            .done(function (val) {
+                console.log(file.name + " uploaded successfully");
+                callbackSuccess(val);
+            })
+            .fail(function () {
+                showAlert('Error!', 'An error occurred while uploading ' + file.name, 'alert-error');
+            });
+        };
+    
+        var showAlert = function(title, text, klass) {
+            $('.alert').removeClass("alert-error alert-warning alert-success alert-info");
+            $('.alert').addClass(klass);
+            $('.alert').html('<strong>' + title + '</strong> ' + text);
+            $('.alert').show();
+        };
+
+    
+    window.onload = function() {
+        
+        $("#restore-area").on('dragover', function(event) {
+            $("#restore-area").addClass("hover");
+            event.preventDefault();
+            event.stopPropagation();
+        });
+    
+        $("#restore-area").on('dragleave', function(event) {
+            $("#restore-area").removeClass("hover");
+            return false;
+        });
+
+        
+        $("#restore-area").on('drop', function (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            $("#restore-area").removeClass("hover");
+            console.log('File dropped');
+            showAlert('Hang on...', 'Restoring your settings, don\'t go away.', 'alert-warning');
+            var e = event.originalEvent;
+            e.dataTransfer.dropEffect = 'copy';
+            var pictureFile = e.dataTransfer.files[0];
+
+            // Read the image file from the local file system and display it in the img tag
+            $('#restore-area').attr('src', 'img/package-open-star.png');
+            uploadFile("/restore", pictureFile,
+                function (value) {
+                        console.log('Return value: ' + value);
+                        $('#restore-area').attr('src', 'img/package-open.png');
+                        if (value === "Invalid") {
+                            showAlert('Error', 'This backup file is invalid', 'alert-error');
+                        } else {
+                            showAlert('Success!', 'Backup restored successfully', 'alert-success');
+                        }
+                    }
+                );
+        });
+    };
+
+    
+    </script>
+
     
 </body>
 </html>
