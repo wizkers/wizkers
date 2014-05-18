@@ -18,8 +18,9 @@ define(function(require) {
         initialize: function () {
             if (vizapp.type == "chrome") {
                     this.chromeStorage =  new Backbone.LocalStorage("org.aerodynes.vizapp.Settings");
+            } else if (vizapp.type == "cordova") {
+                this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Settings");
             } else {
-                // this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Settings");
                 this.url = "/settings";
             }
 
