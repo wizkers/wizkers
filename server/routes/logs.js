@@ -68,7 +68,7 @@ exports.getLogEntries = function(req, res) {
     // Empty for now...
     var id = req.params.id;
     console.log("Retrieving entries of log ID: " + id);
-    var stream = DeviceLogEntry.find({logsessionid: id}).stream();
+    var stream = DeviceLogEntry.find({logsessionid: id}).lean().batchSize(500).stream();
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write("[");
     var ok = false;
