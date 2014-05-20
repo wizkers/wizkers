@@ -78,9 +78,12 @@ mongoose.model('Settings',ApplicationSettingsSchema);
 /**
  *  Device logs
  *  Device logs manage generic log entries (using 'data' which can be anything)
+ *
+ * logsessionid is indexed for performance, otherwise the app takes forever to return
+ * logs on small devices like the Beaglebone Black
  */
 var DeviceLogEntrySchema = new Schema({
-    logsessionid: {type: Schema.Types.ObjectId, ref:'LogSession', default:null}, // Should match the ID of a log session model (see below)
+    logsessionid: {type: Schema.Types.ObjectId, ref:'LogSession', default:null, index: true}, // Should match the ID of a log session model (see below)
     timestamp: Date,    // Javascript timestamp for that entry (milliseconds since 1970)
     comment: String,     // We will one day support commenting any data point in a log...
     data: Schema.Types.Mixed       // Will be an object that depends on the device type
@@ -123,6 +126,19 @@ var UserSchema = new Schema({
         email: String,
         password: String
     },
+    google           : {
+        id           : String,
+        token        : String,
+        email        : String,
+        name         : String
+    },
+    facebook         : {
+        id           : String,
+        token        : String,
+        email        : String,
+        name         : String
+    },
+
     role: { type:String, default: "pending"}  // Should be "pending", "viewer", "operator" or "admin"
 });
 
