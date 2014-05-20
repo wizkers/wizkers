@@ -26,6 +26,7 @@ define(function(require) {
     // Load the flot library & flot time plugin:
     require('flot');
     require('flot_time');
+    require('flot_selection');
 
     return  Backbone.View.extend({
 
