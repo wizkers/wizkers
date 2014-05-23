@@ -125,7 +125,7 @@ app.configure(function () {
     app.use(express.session({secret: 'LKJQDHFGLKJHpiusdhfgpsidf!à§98769876654è§!ç' }));
     app.use(passport.initialize());
     app.use(passport.session());     // Persistent login sessions, makes user life easier
-    app.use(flash());               // Flash messages upon login, stored in session
+    app.use(flash());                // Flash messages upon login, stored in session
 });
 
 
@@ -241,7 +241,7 @@ app.post('/login', passport.authenticate('local-login', {
     };
 
     // we are sending the profile in the token
-    var token = jwt.sign(profile, 'superSecretYesYesYes' + secret_salt, { expiresInMinutes: 60*5 });
+    var token = jwt.sign(profile, 'superSecretYesYesYes' + secret_salt);
 
     // Now store our token into the settings, so that the app can get it when it starts:
     Settings.findOne({}, function(err, item) {
@@ -360,7 +360,7 @@ app.use(function(req,res,next) {
         return next();
     
     // We are allowing CSS and img folders
-    if (req.path.indexOf("/css") == 0)
+    if (req.path.indexOf("/css") == 0 || req.path.indexOf("/fonts") == 0)
         return next();
     
     res.redirect('/');
