@@ -11,6 +11,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         tpl     = require('text!tpl/instruments/W433LiveView.html'),
+        simpleplot = require('app/lib/flotplot'),
         template = null;
     
         try {
@@ -47,19 +48,13 @@ define(function(require) {
         },
 
         addPlot: function(name) {
-            var self=this;
-            
             var newplot = $('.charts').append('<div class="col-md-4"><h4>' + name + '</h4><div class="chart"></div></div>');
-            
-            require(['app/lib/flotplot'], function(view) {
-                    var plot = new view({model: self.model});
-                    if (plot != null) {
-                        $('.chart', newplot).append(plot.el);
-                        plot.render();
-                        self.plots.push(plot);
-                    }
-            });            
-            
+            var plot = new simpleplot({model: this.model});
+            if (plot != null) {
+                $('.chart', newplot).append(plot.el);
+                plot.render();
+                this.plots.push(plot);
+            }
         },
 
         onClose: function() {
@@ -79,6 +74,9 @@ define(function(require) {
             i.val(scroll.join('\n'));
             // Autoscroll:
             i.scrollTop(i[0].scrollHeight - i.height());
+            
+            if (data.value == null)
+                return;
 
             // Now add the current sensor
             var sensor =data.sensor_name + " - " + data.reading_type;
@@ -88,10 +86,7 @@ define(function(require) {
             }
             
             var idx = this.sensors.indexOf(sensor);
-            // addPlot above is asynchronous, so upon creation, we'll arrive here before the
-            // plot is actually int he plots table, hence the test below:
-            if (this.plots[idx] != null)
-                this.plots[idx].appendPoint({'name': sensor, 'value': data.value});
+            this.plots[idx].appendPoint({'name': sensor, 'value': data.value});
 
         },
     });
