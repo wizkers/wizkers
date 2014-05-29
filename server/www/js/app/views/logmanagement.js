@@ -14,7 +14,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         tpl     = require('text!tpl/LogManagementView.html'),
-                template = null;
+        template = null;
         
         try {
             template = _.template(tpl);

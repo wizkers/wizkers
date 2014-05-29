@@ -100,12 +100,15 @@ require(['jquery', 'backbone', 'app/lib/flotplot.min', 'flot', 'flot_time'], fun
     var settings = { points:0 }; // Disable trimming!
     
     var addPlot = function(name) {
-        var newplot = $('.graphs').append('<div class="col-md-4"><h4>' + name + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
-        var plot = new simpleplot({settings: settings});
-        if (plot != null) {
-            $('.graph', newplot).append(plot.el);
-            plot.render();
-            plots.push(plot);
+        if (sensors.indexOf(name) == -1) {
+            sensors.push(name);
+            var newplot = $('.graphs').append('<div class="col-md-4"><h4>' + name + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
+            var plot = new simpleplot({settings: settings});
+            if (plot != null) {
+                $('.graph', newplot).append(plot.el);
+                plot.render();
+                plots.push(plot);
+            }
         }
     };
 
@@ -115,12 +118,21 @@ require(['jquery', 'backbone', 'app/lib/flotplot.min', 'flot', 'flot_time'], fun
             if (data.value != null) {
                 // Now add the current sensor
                 var sensor =data.sensor_name + " - " + data.reading_type;
-                var idx = sensors.indexOf(sensor);
-                if (idx  == -1) {
-                    sensors.push(sensor);
-                    addPlot(sensor);
-                } else
-                    plots[idx].fastAppendPoint({'name': sensor, 'value': data.value, 'timestamp': log[i].timestamp});
+                if (data.reading_type == 'wind' || data.reading_type == 'wind-gust') {
+                    // Those reading types return two values: we graph them separately
+                    var sensor1 = sensor + " - direction";
+                    var sensor2 = sensor + " - speed";
+                    addPlot(sensor1);
+                    var idx = sensors.indexOf(sensor1);
+                    plots[idx].fastAppendPoint({'name': sensor1, 'value': data.value.dir, 'timestamp': log[i].timestamp});
+                    addPlot(sensor2);
+                    idx = sensors.indexOf(sensor2);
+                    plots[idx].fastAppendPoint({'name': sensor2, 'value': data.value.speed, 'timestamp': log[i].timestamp});
+            } else {
+                addPlot(sensor);
+                var idx = sensors.indexOf(sensor);                
+                plots[idx].fastAppendPoint({'name': sensor, 'value': data.value, 'timestamp': log[i].timestamp});
+            }
             }
         }
         for (var i=0; i < plots.length; i++) {
