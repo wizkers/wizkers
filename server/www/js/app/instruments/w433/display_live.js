@@ -12,6 +12,7 @@ define(function(require) {
         Backbone = require('backbone'),
         tpl     = require('text!tpl/instruments/W433LiveView.html'),
         simpleplot = require('app/lib/flotplot'),
+        roseplot = require('app/lib/flotwindrose'),
         template = null;
     
         try {
@@ -52,9 +53,14 @@ define(function(require) {
 
         addPlot: function(name) {
           if (this.sensors.indexOf(name) == -1) {
-                this.sensors.push(name);
-                var newplot = $('.charts').append('<div class="col-md-4"><h4>' + name + '</h4><div class="chart"></div></div>');
-                var plot = new simpleplot({model: this.model, settings:this.plotoptions});
+              this.sensors.push(name);
+              var newplot = $('.charts').append('<div class="col-md-4"><h4>' + name + '</h4><div class="chart"></div></div>');
+              var plot = null;
+              if (name.indexOf('wind - direction') == -1)
+                  plot = new simpleplot({model: this.model, settings:this.plotoptions});
+              else
+                  plot = new roseplot({model:this.model, settings:this.plotoptions});
+              
                 if (plot != null) {
                     $('.chart', newplot).append(plot.el);
                     plot.render();
