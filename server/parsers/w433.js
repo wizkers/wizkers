@@ -182,9 +182,9 @@ module.exports = {
         }
         
         // We have some sensors that interleave their burst: temp / humidity then temp/humidity
-        // therefore we are going to keep the last four stamps
+        // therefore we are going to keep the last six stamps
         this.prevRes.push({ stamp: stamp, res: res});
-        if (this.prevRes.length > 4)
+        if (this.prevRes.length > 6)
             this.prevRes = this.prevRes.slice(1);
 
         this.prevStamp = stamp;
