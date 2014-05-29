@@ -38,8 +38,11 @@ define(function(require) {
 
             linkManager.on('input', this.showInput, this);
 
-            this.livepoints = Math.floor(Number(this.settings.get('liveviewspan'))/Number(this.settings.get('liveviewperiod')));
-            // livedata is an array of all readings by detected sensors
+            // We will pass this when we create plots, this is the global
+            // config for the look and feel of the plot
+            this.plotoptions = {
+                points: Math.floor(Number(this.settings.get('liveviewspan'))/Number(this.settings.get('liveviewperiod')))
+            };
         },
 
         render:function () {
@@ -48,13 +51,16 @@ define(function(require) {
         },
 
         addPlot: function(name) {
-            var newplot = $('.charts').append('<div class="col-md-4"><h4>' + name + '</h4><div class="chart"></div></div>');
-            var plot = new simpleplot({model: this.model});
-            if (plot != null) {
-                $('.chart', newplot).append(plot.el);
-                plot.render();
-                this.plots.push(plot);
-            }
+          if (this.sensors.indexOf(name) == -1) {
+                this.sensors.push(name);
+                var newplot = $('.charts').append('<div class="col-md-4"><h4>' + name + '</h4><div class="chart"></div></div>');
+                var plot = new simpleplot({model: this.model, settings:this.plotoptions});
+                if (plot != null) {
+                    $('.chart', newplot).append(plot.el);
+                    plot.render();
+                    this.plots.push(plot);
+                }
+          }
         },
 
         onClose: function() {
@@ -79,14 +85,24 @@ define(function(require) {
                 return;
 
             // Now add the current sensor
-            var sensor =data.sensor_name + " - " + data.reading_type;
-            if (this.sensors.indexOf(sensor) == -1) {
-                this.sensors.push(sensor);
-                this.addPlot(sensor);
-            }
             
-            var idx = this.sensors.indexOf(sensor);
-            this.plots[idx].appendPoint({'name': sensor, 'value': data.value});
+            var sensor =data.sensor_name + " - " + data.reading_type;
+
+            if (data.reading_type == 'wind' || data.reading_type == 'wind-gust') {
+                // Those reading types return two values: we graph them separately
+                var sensor1 = sensor + " - direction";
+                var sensor2 = sensor + " - speed";
+                this.addPlot(sensor1);
+                var idx = this.sensors.indexOf(sensor1);
+                this.plots[idx].appendPoint({'name': sensor1, 'value': data.value.dir});
+                this.addPlot(sensor2);
+                idx = this.sensors.indexOf(sensor2);
+                this.plots[idx].appendPoint({'name': sensor2, 'value': data.value.speed});
+            } else {
+                this.addPlot(sensor);
+                var idx = this.sensors.indexOf(sensor);                
+                this.plots[idx].appendPoint({'name': sensor, 'value': data.value});
+            }
 
         },
     });
