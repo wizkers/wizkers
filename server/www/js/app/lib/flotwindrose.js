@@ -89,7 +89,7 @@ define(function(require) {
         
         // Append a data point. Data should be in the form of
         // { name: "measurement_name", value: { dir: dir, speed: speed} } or
-        // { name: "measurement_°name", value:{ dir: dir, speed: speed}, timestamp: timestamp }
+        // { name: "measurement_name", value:{ dir: dir, speed: speed}, timestamp: timestamp }
         fastAppendPoint: function(data) {
             if (this.settings.points) this.trimLiveData();
             var stamp = (data.timestamp) ? new Date(data.timestamp).getTime(): new Date().getTime();
@@ -97,6 +97,8 @@ define(function(require) {
         },
         
         redraw: function() {
+            if (this.livedata.length < 2)
+               return;
             var force13 = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; // Wind < 10 knt
             var force47 = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; // Wind < 33 knt
             var force8p = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; // Wind > 33 knt
@@ -113,8 +115,12 @@ define(function(require) {
                     force8p[dir] += duration;
                 }
             }
+            var timespan = this.livedata[this.livedata.length-1].stamp - this.livedata[0].stamp;
             // Then stack the data:
             for (var i = 0; i < 16; i++) {
+                force13[i] = force13[i]/timespan*100;
+                force47[i] = force47[i]/timespan*100;
+                force8p[i] = force8p[i]/timespan*100;
                 force47[i] += force13[i];
                 force8p[i] += force47[i];
             }
