@@ -38,7 +38,7 @@ module.exports = {
 
     
     lastStamp: new Date().getTime(),
-    prevRes: null,
+    prevRes: [],
     
     sensor_types_tx3: ['temperature', '1', '2', '3', '4', '5', '6',
                         '7', '8', '9', '10', '11', '12', '13','humidity', '15'],
@@ -120,7 +120,11 @@ module.exports = {
                         break;
                         case 3:
                         case 7:
-                            // Wind -> problem, we have two values here!
+                            // Wind -> we have two values here, so the result is a json structure
+                            var direction = data.substr(10,1)*22.5;
+                            var speed = data.substr(8,2)/10;
+                            res.reading_type = 'wind';
+                            res.value = { dir: direction, speed: speed};
                         /**
                         
                             $direction = (hex substr $i,10,1)*22.5;
@@ -134,17 +138,15 @@ module.exports = {
                         case 0xb:
                         case 0xf:
                             // Wind - gust -> we have two values again
+                            var dir = data.substr(10,1)*22.5;
+                            var speed= data.substr(8,2)/10;
+                            res.reading_type = 'wind-gust';
+                            res.value = { dir: direction, speed: speed};
                             /**
                             $direction = (hex substr $i,10,1)*22.5;
                             $type_txt = "wind-gust-dir";
-                            check_sensor_known($sensor_address,$type_txt);
-                            $updatesensor_query->execute($direction,$sensor_address,$type_txt);
-                            print $type_txt . ") - $direction";
                             $speed = (hex substr $i,8,2)/10;
                             $type_txt = "wind-gust";
-                            check_sensor_known($sensor_address,$type_txt);
-                            $updatesensor_query->execute($speed,$sensor_address,$type_txt);
-                            print " ( $type_txt ) - $speed";
                             **/
                         break;
                         case 2:
@@ -167,15 +169,25 @@ module.exports = {
         // Sensors send data multiple times, so we are going to dedupe:
         // if we got exactly the same reading less than 1.5 second ago, then
         // discard it.
-        if ( (new Date().getTime()-this.prevStamp) < 1000 &&
-              res.sensor_address == this.prevRes.sensor_address &&
-              res.sensor_type == this.prevRes.sensor_type &&
-              res.value == this.prevRes.value
-             )
-            return;
+        var stamp = new Date().getTime();
+        if ( (stamp-this.prevStamp) < 1500 ) {            
+            // Loop in the last four measurements:
+            for (var i = 0; i < this.prevRes.length; i++) {
+                if ((stamp - this.prevRes[i].stamp) < 1500 &&
+                    res.sensor_address == this.prevRes[i].res.sensor_address &&
+                    res.sensor_type == this.prevRes[i].res.sensor_type &&
+                    res.value == this.prevRes[i].res.value )
+                    return;
+            }
+        }
         
-        this.prevRes = res;
-        this.prevStamp = new Date().getTime();
+        // We have some sensors that interleave their burst: temp / humidity then temp/humidity
+        // therefore we are going to keep the last four stamps
+        this.prevRes.push({ stamp: stamp, res: res});
+        if (this.prevRes.length > 4)
+            this.prevRes = this.prevRes.slice(1);
+
+        this.prevStamp = stamp;
         
         // Now: sensor addresses are all nice, but what we really want, is a sensor name: look up in our current
         // instrument whether we have a name for the sensor. If no name, use the address as the name.
