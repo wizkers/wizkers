@@ -149,7 +149,6 @@ THE SOFTWARE.
             function drawGridRange(ctx,i){
                 var radius;
                 ctx.beginPath();
-                ctx.moveTo(centerLeft,centerTop);
                 radius = maxRadius / opt.grid.ranges * i;
                 ctx.arc(centerLeft,centerTop,radius,0,Math.PI * 2);
                 ctx.closePath();
