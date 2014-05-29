@@ -15,18 +15,26 @@ define(function(require) {
     require('flot_time');
 
     return Backbone.View.extend({
+        
+        // Here are all the options we can define, to pass as "settings" when creating the view:        
+        settings: {
+            points: 150,
+            log: false,
+            showtips: true,
+            get: function(key) {
+                return this[key];
+            },
+        },
+            
         initialize:function (options) {
-            
-            // TODO: use an options JSON object to set things like the:
-            // - max number of points
-            // - legend container
-            // - plot options
-            // - Number of variables in the plot
-            // - fillbetween options ?
-            
-            
-            this.livepoints = 150;
-            
+            // Replace defaults by our own config for all keys
+            // passed - if any
+            if (options && options.settings) {
+                for (var prop in options.settings) {
+                    this.settings[prop] = options.settings[prop];
+                }
+            }
+                        
             // livedata is an array of all readings.
             // We can have multiple values plotted on the chart, so this is
             // an array of arrays.
@@ -39,7 +47,7 @@ define(function(require) {
             this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ];
 
             this.plotOptions = {
-                xaxis: { mode: "time", show:true, timezone: this.model.get("timezone") },
+                xaxis: { mode: "time", show:true, timezone: (this.model) ? this.model.get("timezone") : "GMT" },
                 grid: {
                     hoverable: true,
                     clickable: true
@@ -63,6 +71,9 @@ define(function(require) {
             // this.plotOptions.legend = { container: $('#legend',this.el) };
             this.plot = $.plot($(".chart", this.el), [ {data:[], label:"??", color:this.color} ], this.plotOptions);
             
+            if (!this.settings.showtips)
+                return;
+            
             $(".chart", this.el).bind("plothover", function (event, pos, item) {
                 if (item) {
                         $("#tooltip").remove();
@@ -70,7 +81,7 @@ define(function(require) {
                             y = item.datapoint[1];
 
                         self.showTooltip(item.pageX, item.pageY,
-                            "<small>" + ((settings.get('timezone') === 'UTC') ? 
+                            "<small>" + ((self.settings.get('timezone') === 'UTC') ? 
                                             new Date(x).toUTCString() :
                                             new Date(x).toString()) + "</small><br>" + item.series.label + ": <strong>" + y + "</strong>");
                 } else {
@@ -94,24 +105,28 @@ define(function(require) {
 
         
         trimLiveData: function(idx) {
-            if (this.livedata[idx].length >= this.livepoints) {
+            if (this.livedata[idx].length >= this.settings.points) {
                     this.livedata[idx] = this.livedata[idx].slice(1);
             }
         },
         
-        appendPoint: function(data) {
-            // Append a data point. Data should be in the form of
-            // { name: "measurement_name", value: value }
-
+        // Append a data point. Data should be in the form of
+        // { name: "measurement_name", value: value } or
+        // { name: "measurement°name", value: value, timestamp: timestamp }
+        fastAppendPoint: function(data) {
             var sensor = data.name;
-            if (this.sensors.indexOf(sensor) == -1) {
+            var idx = this.sensors.indexOf(sensor);
+            if (idx == -1) {
                 this.sensors.push(sensor);
                 this.livedata.push([]);
+                idx = 0;
             }
-            var idx = this.sensors.indexOf(sensor);
-            this.trimLiveData(idx);
-            this.livedata[idx].push([new Date().getTime(), data.value]);
-
+            if (this.settings.points) this.trimLiveData(idx);
+            var stamp = (data.timestamp) ? new Date(data.timestamp).getTime(): new Date().getTime();
+            this.livedata[idx].push([stamp, data.value]);
+        },
+        
+        redraw: function() {
             var plotData = [];
             // Now pack our live data:
             for (var i = 0; i < this.sensors.length; i++) {
@@ -122,6 +137,13 @@ define(function(require) {
             this.plot.setData(plotData);
             this.plot.setupGrid();
             this.plot.draw();
+        },
+        
+        // This method forces a redraw and is slow: use fastAppendPoint for
+        // loading a large number of points before redrawing
+        appendPoint: function(data) {
+            this.fastAppendPoint(data);
+            this.redraw();
         }    
             
     });

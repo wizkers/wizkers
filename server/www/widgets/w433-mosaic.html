@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>W433 Log display</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <style type="text/css">
+    
+        body {
+            font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', sans-serif;
+        }
+
+        .graph-container {
+            box-sizing: border-box;
+            padding: 20px 15px 15px 15px;
+            margin: 15px auto 30px auto;
+            border: 1px solid #ddd;
+            background: #fff;
+            background: linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .graph {
+            height: 100%;
+            width: 100%;
+            font-size: 14px;
+            line-height: 1.2em;
+        }
+    
+</style>
+    
+<script src="js/lib/require.js"></script>    
+
+<script>
+    
+/**
+ * Display a mosaic of graphs
+ *
+ * (c) 2014 Edouard Lafargue ed@lafargue.name
+ *   all rights reserved
+ */
+        
+require.config({
+    
+    baseUrl: 'js',
+
+    // On the Beaglebone, some calls take forever
+    waitSeconds: 0,
+    
+    paths: {
+        app: 'app',
+
+        // Below we manage our versions explicitely, so that
+        // we can upgrade easily
+        jquery: 'lib/jquery-1.11.0.min',
+        backbone: 'lib/backbone-1.1.2-min',
+        underscore: 'lib/underscore-1.6.0-min',
+        
+        bootstrap: 'lib/bootstrap.min',
+        flot: 'lib/flot-0.8.1/jquery.flot',
+        flot_time: 'lib/flot-0.8.1/jquery.flot.time',
+        flot_resize: 'lib/flot-0.8.1/jquery.flot.resize',
+        flot_selection: 'lib/flot-0.8.1/jquery.flot.selection',
+        flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween'
+    },
+    
+    shim: {
+        'backbone': {deps: ['underscore', 'jquery' ],exports: 'Backbone'},'underscore': {exports: '_'},        
+        'bootstrap': {deps: ['jquery']},
+        'flot': {deps: ['jquery' ],exports: '$.plot'},
+        'flot_time': {deps: ['flot']},
+        'flot_resize': {deps: ['flot']},
+        'flot_selection': {deps: ['flot']},
+        'flot_fillbetween': {deps: ['flot']},
+    }
+});
+
+require(['jquery', 'backbone', 'app/lib/flotplot.min', 'flot', 'flot_time'], function($, Backbone, simpleplot) {
+    // We are defining our configuration here:
+
+    // The address where we should get the data to display
+    var data_url = "/live/120";
+
+    // If we only want to display some sensors, define sensor_names array
+    var sensor_names = [];
+
+    // You should not need to change anything below, until you want to do heavier customisation            
+    
+    var sensors = [];
+    var plots = [];
+    var settings = { points:0 }; // Disable trimming!
+    
+    var addPlot = function(name) {
+        var newplot = $('.graphs').append('<div class="col-md-4"><h4>' + name + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
+        var plot = new simpleplot({settings: settings});
+        if (plot != null) {
+            $('.graph', newplot).append(plot.el);
+            plot.render();
+            plots.push(plot);
+        }
+    };
+
+    $.getJSON(data_url, function(log) {
+        for (var i = 0; i < log.length; i++) {
+            var data = log[i].data;
+            if (data.value != null) {
+                // Now add the current sensor
+                var sensor =data.sensor_name + " - " + data.reading_type;
+                var idx = sensors.indexOf(sensor);
+                if (idx  == -1) {
+                    sensors.push(sensor);
+                    addPlot(sensor);
+                } else
+                    plots[idx].fastAppendPoint({'name': sensor, 'value': data.value, 'timestamp': log[i].timestamp});
+            }
+        }
+        for (var i=0; i < plots.length; i++) {
+            plots[i].redraw();
+        }
+    });
+
+ });
+        
+</script>    
+    
+</head>
+<body>
+    <div class="container">
+        <div class="graphs row">
+        </div>
+    </div>
+</body>

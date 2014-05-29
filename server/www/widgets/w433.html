@@ -3,63 +3,92 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>W433 Log display</title>
-	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../js/lib/flot-0.8.1/excanvas.min.js"></script><![endif]-->
-	<script src="../js/lib/flot-0.8.1/jquery.js"></script>
-	<script src="../js/lib/flot-0.8.1/jquery.flot.js"></script>
-	<script src="../js/lib/flot-0.8.1/jquery.flot.time.js"></script>
     
+    <style type="text/css">
     
-    <script>
+        .graph-container {
+            box-sizing: border-box;
+            width: 850px;
+            height: 450px;
+            padding: 20px 15px 15px 15px;
+            margin: 15px auto 30px auto;
+            border: 1px solid #ddd;
+            background: #fff;
+            background: linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .graph {
+            width: 100%;
+            height: 100%;
+            font-size: 14px;
+            line-height: 1.2em;
+        }
+    
+</style>
+    
+<script src="js/lib/require.js"></script>    
+
+<script>
+        
+require.config({
+    
+    baseUrl: 'js',
+
+    // On the Beaglebone, some calls take forever
+    waitSeconds: 0,
+    
+    paths: {
+        app: 'app',
+
+        // Below we manage our versions explicitely, so that
+        // we can upgrade easily
+        jquery: 'lib/jquery-1.11.0.min',
+        backbone: 'lib/backbone-1.1.2-min',
+        underscore: 'lib/underscore-1.6.0-min',
+        
+        bootstrap: 'lib/bootstrap.min',
+        flot: 'lib/flot-0.8.1/jquery.flot',
+        flot_time: 'lib/flot-0.8.1/jquery.flot.time',
+        flot_resize: 'lib/flot-0.8.1/jquery.flot.resize',
+        flot_selection: 'lib/flot-0.8.1/jquery.flot.selection',
+        flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween'
+    },
+    
+    shim: {
+        'backbone': {deps: ['underscore', 'jquery' ],exports: 'Backbone'},'underscore': {exports: '_'},        
+        'bootstrap': {deps: ['jquery']},
+        'flot': {deps: ['jquery' ],exports: '$.plot'},
+        'flot_time': {deps: ['flot']},
+        'flot_resize': {deps: ['flot']},
+        'flot_selection': {deps: ['flot']},
+        'flot_fillbetween': {deps: ['flot']},
+    }
+});
+
+require(['jquery', 'backbone','flot', 'flot_time'], function($, Backbone) {
+
+        
         // We are defining our configuration here:
         
         var timezone = "browser";
         
         // The address where we should get the data to display
-        var data_url = "/live/60";
+        var data_url = "/live/120";
         
         // If we only want to display one sensor, define sensor_name
         var sensor_name = "";
         
         // Customize the default palette if you wish:
         var palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ];
-        
-    </script>
-    
-    <style type="text/css">
-    
-    .graph-container {
-        box-sizing: border-box;
-        width: 850px;
-        height: 450px;
-        padding: 20px 15px 15px 15px;
-        margin: 15px auto 30px auto;
-        border: 1px solid #ddd;
-        background: #fff;
-        background: linear-gradient(#f6f6f6 0, #fff 50px);
-        background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
-        background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
-        background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
-        background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
-        box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-        -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    }
-        
-    .graph {
-        width: 100%;
-        height: 100%;
-        font-size: 14px;
-        line-height: 1.2em;
-    }
-
-    
-    </style>
-    
-    
-    
-	<script type="text/javascript">
         
         // You should not need to change anything below, until you want to do heavier customisation
         
@@ -112,8 +141,9 @@
             $.plot($(".graph",this.el), plotData, plotOptions);
         });
 
+ });
         
-    </script>
+</script>    
     
 </head>
 <body>
