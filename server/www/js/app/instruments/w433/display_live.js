@@ -61,11 +61,11 @@ define(function(require) {
               else
                   plot = new roseplot({model:this.model, settings:this.plotoptions});
               
-                if (plot != null) {
-                    $('.chart', newplot).append(plot.el);
-                    plot.render();
-                    this.plots.push(plot);
-                }
+              if (plot != null) {
+                  $('.chart', newplot).append(plot.el);
+                  plot.render();
+                  this.plots.push(plot);
+              }
           }
         },
 
@@ -94,13 +94,13 @@ define(function(require) {
             
             var sensor =data.sensor_name + " - " + data.reading_type;
 
-            if (data.reading_type == 'wind' || data.reading_type == 'wind-gust') {
+            if (data.reading_type == 'wind' || data.reading_type == 'wind-gust') {
                 // Those reading types return two values: we graph them separately
                 var sensor1 = sensor + " - direction";
                 var sensor2 = sensor + " - speed";
                 this.addPlot(sensor1);
                 var idx = this.sensors.indexOf(sensor1);
-                this.plots[idx].appendPoint({'name': sensor1, 'value': data.value.dir});
+                this.plots[idx].appendPoint({'name': sensor1, 'value': data.value});
                 this.addPlot(sensor2);
                 idx = this.sensors.indexOf(sensor2);
                 this.plots[idx].appendPoint({'name': sensor2, 'value': data.value.speed});

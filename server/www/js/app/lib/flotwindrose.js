@@ -46,7 +46,7 @@ define(function(require) {
                             roseSize:0.8,
                             leafSize:0.5,
                             drawGrid:{
-                                gridMode: "data",
+                                gridMode: "ticks",
                                 labelPos: 0.5,
                                 drawValue: false
                             } 
@@ -70,7 +70,7 @@ define(function(require) {
         },
             
         addPlot: function() {
-            var d1 = [ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+            var d1 = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
             var data = [
                 { label: "8+",  color:"red", data: d1, rose: {show: true } },
                 { label: "4-7", color:{colors:["yellow","orange","red"] }, data: d1, rose: {show: true } },
@@ -88,26 +88,26 @@ define(function(require) {
         },
         
         // Append a data point. Data should be in the form of
-        // { name: "measurement_name", value: value } or
-        // { name: "measurementÂ°name", value: value, timestamp: timestamp }
+        // { name: "measurement_name", value: { dir: dir, speed: speed} } or
+        // { name: "measurement_°name", value:{ dir: dir, speed: speed}, timestamp: timestamp }
         fastAppendPoint: function(data) {
             if (this.settings.points) this.trimLiveData();
             var stamp = (data.timestamp) ? new Date(data.timestamp).getTime(): new Date().getTime();
-            this.livedata.push({stamp: stamp, dir: data.dir, force: data.speed});
+            this.livedata.push({stamp: stamp, dir: data.value.dir, speed: data.value.speed});
         },
         
         redraw: function() {
-            var force13 = []; // Wind < 10 knt
-            var force47 = []; // Wind < 33 knt
-            var force8p = []; // Wind > 33 knt
+            var force13 = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; // Wind < 10 knt
+            var force47 = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; // Wind < 33 knt
+            var force8p = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; // Wind > 33 knt
             // Now pack our live data:
             for (var i = 1; i < this.livedata.length; i++) {
                 var data = this.livedata[i];
                 var duration = data.stamp - this.livedata[i-1].stamp;
                 var dir = data.dir/22.5-1;
-                if (data < 10) {
+                if (data.speed < 10) {
                     force13[dir] += duration;
-                } else if (data < 33) {
+                } else if (data.speed < 33) {
                     force47[dir] += duration;
                 } else {
                     force8p[dir] += duration;
