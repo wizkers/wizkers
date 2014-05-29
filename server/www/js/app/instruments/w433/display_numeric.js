@@ -53,15 +53,18 @@ define(function(require) {
             var stamp = new Date().getTime();
             // Get sensor info: if we know it, update the value & label
             // if we don't, add it
-            var sensor =data.sensor_name + " - " + data.reading_type;
+            var sensor = data.sensor_name + " - " + data.reading_type;
             var sensordata = this.sensors[sensor];
             if (sensordata == undefined) {
                 $('#sensorlist',this.el).append('<li id="' + sensor.replace(/ /g, '_') + '">' +
                                                 '<span class="label label-success">&nbsp;</span>&nbsp;' +
-                                                sensor + ':&nbsp;' + data.value + '</li>');
+                                                sensor + ':&nbsp;' +
+                                                ((data.reading_type == 'wind' ||
+                                                  data.reading_type == 'wind-gust') ? data.value.dir + '° - ' + data.value.speed + 'knt' : data.value) + '</li>');
             } else {
                 $('#' + sensor.replace(/ /g, '_'), this.el).html('<span class="label label-success">&nbsp;</span>&nbsp;' +
-                                                sensor + ':&nbsp;' + data.value);
+                                                sensor + ':&nbsp;' + ((data.reading_type == 'wind' ||
+                                                  data.reading_type == 'wind-gust') ? data.value.dir + '° - ' + data.value.speed + 'knt' : data.value) + '</li>');
             }
             this.sensors[sensor] = { stamp: stamp};
 
