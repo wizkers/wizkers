@@ -105,8 +105,8 @@ define(function(require) {
                 latest = 0;
             // Now pack our live data:
             for (var i = 1; i < this.livedata.length; i++) {
-                var data = this.livedata[i];
-                var duration = data.stamp - this.livedata[i-1].stamp;
+                var data = this.livedata[i-1];
+                var duration = this.livedata[i].stamp - data.stamp;
                 var dir = data.dir/22.5;
                 if (data.speed < 10) {
                     force13[dir] += duration;
