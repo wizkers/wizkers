@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="E. Lafargue, edouard@lafargue.name (c) 2014">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Den'Cam</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <style type="text/css">
+    
+        body {
+            font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', sans-serif;
+            padding-top: 55px;
+        }
+
+        .graph-container {
+            box-sizing: border-box;
+            padding: 20px 15px 15px 15px;
+            margin: 15px auto 30px auto;
+            border: 1px solid #ddd;
+            background: #fff;
+            background: linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+            background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .graph {
+            height: 100%;
+            width: 100%;
+            font-size: 14px;
+            line-height: 1.2em;
+        }
+    
+</style>
+    
+<script src="js/lib/require.js"></script>    
+
+<script>
+    
+/**
+ * Display a mosaic of graphs
+ *
+ * (c) 2014 Edouard Lafargue ed@lafargue.name
+ *   all rights reserved
+ */
+        
+require.config({
+    
+    baseUrl: 'js',
+
+    // On the Beaglebone, some calls take forever
+    waitSeconds: 0,
+    
+    paths: {
+        app: 'app',
+
+        // Below we manage our versions explicitely, so that
+        // we can upgrade easily
+        jquery: 'lib/jquery-1.11.0.min',
+        backbone: 'lib/backbone-1.1.2-min',
+        underscore: 'lib/underscore-1.6.0-min',
+        
+        bootstrap: 'lib/bootstrap.min',
+        flot: 'lib/flot-0.8.1/jquery.flot',
+        flot_time: 'lib/flot-0.8.1/jquery.flot.time',
+        flot_resize: 'lib/flot-0.8.1/jquery.flot.resize',
+        flot_selection: 'lib/flot-0.8.1/jquery.flot.selection',
+        flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween',
+        flot_windrose: 'lib/jquery.flot.windrose',
+        flot_jumlib: 'lib/jquery.flot.JUMlib'
+
+    },
+    
+    shim: {
+        'backbone': {deps: ['underscore', 'jquery' ],exports: 'Backbone'},'underscore': {exports: '_'},        
+        'bootstrap': {deps: ['jquery']},
+        'flot': {deps: ['jquery' ],exports: '$.plot'},
+        'flot_time': {deps: ['flot']},
+        'flot_resize': {deps: ['flot']},
+        'flot_selection': {deps: ['flot']},
+        'flot_fillbetween': {deps: ['flot']},
+                'flot_jumlib': {
+            deps: ['jquery', 'flot'],
+            exports: '$.plot.JUMlib'
+        },        
+
+        'flot_windrose': { deps: ['flot', 'flot_jumlib']}
+
+    }
+});
+
+require(['jquery', 'backbone', 'app/lib/flotplot.min', 'app/lib/flotwindrose.min', 'flot', 'flot_time'], function($, Backbone, simpleplot, roseplot ) {
+    // We are defining our configuration here:
+
+    // The address where we should get the data to display
+    var data_url = "data.json";
+
+    // If we only want to display some sensors, define sensor_names array
+    var sensor_names = ["Plage - temperature", "Anémomètre - humidity", "Anémomètre - wind"];
+    //var sensor_names = [];
+
+    // You should not need to change anything below, until you want to do heavier customisation            
+    
+    var sensors = [];
+    var plots = [];
+    var settings = { points:0 }; // Disable trimming!
+    
+    var addPlot = function(name) {
+        if (sensors.indexOf(name) == -1) {
+            sensors.push(name);
+            var newplot = $('.graphs').append('<div class="col-md-4"><h4>' + name + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
+            var plot = null;
+            if (name.indexOf('wind - direction') == -1)
+              plot = new simpleplot({ settings: settings});
+            else
+              plot = new roseplot({ settings: settings});
+
+            if (plot != null) {
+                $('.graph', newplot).append(plot.el);
+                plot.render();
+                plots.push(plot);
+            }
+        }
+    };
+
+    $.getJSON(data_url, function(log) {
+        for (var i = 0; i < log.length; i++) {
+            var data = log[i].data;
+            if (data.value != null) {
+                // Now add the current sensor
+                var sensor =data.sensor_name + " - " + data.reading_type;
+                if (sensor_names.indexOf(sensor) == -1)
+                    continue;
+                if (data.reading_type == 'wind' || data.reading_type == 'wind-gust') {
+                    // Those reading types return two values: we graph them separately
+                    var sensor1 = sensor + " - direction";
+                    var sensor2 = sensor + " - speed";
+                    addPlot(sensor1);
+                    var idx = sensors.indexOf(sensor1);
+                    plots[idx].fastAppendPoint({'name': sensor1, 'value': data.value, 'timestamp': log[i].timestamp});
+                    addPlot(sensor2);
+                    idx = sensors.indexOf(sensor2);
+                    plots[idx].fastAppendPoint({'name': sensor2, 'value': data.value.speed, 'timestamp': log[i].timestamp});
+                } else {
+                    addPlot(sensor);
+                    var idx = sensors.indexOf(sensor);                
+                    plots[idx].fastAppendPoint({'name': sensor, 'value': data.value, 'timestamp': log[i].timestamp});
+                }
+            }
+        }
+        for (var i=0; i < plots.length; i++) {
+            plots[i].redraw();
+        }
+    });
+    
+});
+        
+</script>    
+    
+</head>
+<body>
+    
+    <div class="header"><div><header class="navbar navbar-inverse navbar-fixed-top vizapp-nav" role="banner">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Den'Cam</a>
+        </div>
+        <nav class="collapse navbar-collapse" id="vizapp-nav-collapse" role="navigation">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="about-menu"><a href="about.html">A propos</a></li>      
+            </ul>
+        </nav><!--/.nav-collapse -->
+    </div>
+        </header></div></div>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="row">
+                    <h4>Bienvenue sur la nouvelle page de Den'Cam</h4>
+                    <p>Il reste encore du travail, bien sûr, mais les températures sont maintenant de retour! Contactez-moi à <a href="mailto:edouard+dencam@lafargue.name">edouard@lafargue.name</a> pour tout commentaire.</p>
+                </div>
+                <div class="row">
+                    <iframe src="http://horloge.maree.frbateaux.net/ws38" width="226" height="217" frameborder="0" scrolling="no"></iframe>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="thumbnail">
+                <img src="http://www.denvoiles.org/denCam/denneville.php" width="450">
+                </div>
+            </div>
+        </div>
+        <div class="graphs row">
+        </div>
+    </div>
+</body>
+</html>

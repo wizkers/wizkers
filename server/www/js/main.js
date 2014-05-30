@@ -36,6 +36,7 @@ require.config({
         flot_selection: 'lib/flot-0.8.1/jquery.flot.selection',
         flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween',
         flot_windrose: 'lib/jquery.flot.windrose',
+        flot_jumlib: 'lib/jquery.flot.JUMlib',
     },
     
     /*
@@ -86,8 +87,12 @@ require.config({
         'flot_fillbetween': {
             deps: ['flot']
         },
+        'flot_jumlib': {
+            deps: ['jquery', 'flot'],
+            exports: '$.plot.JUMlib'
+        },        
         'flot_windrose': {
-            deps: ['flot', 'lib/jquery.flot.JUMlib']
+            deps: ['flot', 'flot_jumlib']
         }
         
     }
