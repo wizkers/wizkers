@@ -83,37 +83,49 @@ define(function(require) {
                     if (reading.readingState == "NORMAL") {
                         // There are several areas where we can draw:
                         var location = "";
+                        var val = Math.round(
+                            parseFloat(reading.readingValue) *
+                            Math.pow(10,- parseInt(reading.unitMultiplier)) *
+                            Math.pow(10,parseInt(reading.decimalPlaces))) / Math.pow(10, parseInt(reading.decimalPlaces));
+                        var unit = "&nbsp;" + linkManager.driver.mapUnit(reading.baseUnit, reading.unitMultiplier);
                         switch (reading.readingID) {
                                 case "LIVE":
-                                    location="live"
+                                    location="live";
+                                    val = val + unit;
                                     break;
                                 case "PRIMARY":
                                     location = "primary";
+                                    $('#primaryunit').html(unit);
                                     break;
                                 case "SECONDARY":
                                     location = "secondary";
+                                    val = val + unit;
                                     break;
                                 case "TEMP_OFFSET":
                                     location = "temp_offset";
-                                    reading.readingValue = "Offset: " + reading.readingValue;
+                                    val = val + unit;
+                                    val = "Offset: " + val;
                                     break;
                                 case "MINIMUM":
                                     location = "minimum";
-                                    reading.readingValue = "Minimum: " + reading.readingValue;
+                                    val = val + unit;
+                                    val = "Minimum: " + val;
                                     break;
                                 case "MAXIMUM":
                                     location = "maximum";
-                                    reading.readingValue = "Maximum: " + reading.readingValue;
+                                    val = val + unit;
+                                    val = "Maximum: " + val;
                                     break;
                                 case "AVERAGE":
                                     location = "average";
-                                    reading.readingValue = "Average: " + reading.readingValue;
+                                    val = val + unit;
+                                    val = "Average: " + val;
                                     break;
                                 case "REL_LIVE":
-
+                                    val = val + unit;
                                     break;
                         }
-                        $('#' + location).html(reading.readingValue + "&nbsp;" + linkManager.driver.mapUnit(reading.baseUnit));
+                        $('#' + location).html(val);
                     }
                }
             }

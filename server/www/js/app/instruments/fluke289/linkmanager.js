@@ -155,14 +155,17 @@ define(function(require) {
             "HZ": "Hz",
             "FAR": "°F",
             "F": "F",
-            "PCT": "%",    
+            "PCT": "%",
         };
+        
+        this.multipliers = ['M', 'k', '', 'm', '&mu;', 'n', 'p'];
 
-        this.mapUnit = function(unit) {
+        this.mapUnit = function(unit, mult) {
             var res = this.units[unit];
             if (res == undefined)
                     return unit;
-            return res;
+            var prefix = this.multipliers[-mult/3+2];
+            return prefix + res ;
         }
         console.log('Started Fluke289 link manager driver..');
 

@@ -171,7 +171,7 @@ define(function(require) {
                     if (data.readingState == "NORMAL") {
                         this.trimLiveData(0);
                         this.livedata[0].push([new Date().getTime(), data.value]);
-                        var unit = linkManager.driver.mapUnit(data.unit);
+                        var unit = linkManager.driver.mapUnit(data.unit, 0);
 
                         this.plot.setData([ { data:this.livedata[0], label: unit, color: this.color },
                                             ]);
@@ -207,7 +207,7 @@ define(function(require) {
                             var tzOffset = new Date().getTimezoneOffset()*60000;
                             this.livedata[i].push([(reading.timeStamp == 0) ?
                                                     new Date().getTime()-tzOffset: reading.timeStamp,reading.readingValue]);
-                            var unit = linkManager.driver.mapUnit(reading.baseUnit) + " - " + reading.readingID;
+                            var unit = linkManager.driver.mapUnit(reading.baseUnit, 0) + " - " + reading.readingID;
                             // Now find out whether the user wants us to plot this:
                             var unitnosp = reading.baseUnit + reading.readingID.replace(/\s/g,'_');
                             var toggle = $('#linestoggle ul',this.el).find('.' + unitnosp);

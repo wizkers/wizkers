@@ -4,18 +4,19 @@
 </div>
 <div class="row">
     <div class="col-md-12" style="text-align:center;">
-        <span class="livereading" id="live">0.00</span>
+        <small><span class="livereading" id="live">0.00</span></small>
     </div>
 </div>
 <div class="row">
     <div class="col-md-12">
-        <span class="bigreading" id="primary">0.000</span><br>
+        <p style="text-align:center;">
+        <span class="bigreading" id="primary">0.000</span><span id="primaryunit" style="font-size:18px;"></span></p>
     </div>
 </div>
 <div class="row">
     <div class="col-md-6"></div>
     <div class="col-md-6">
-        <span id="secondary">0.00</span>
+        <span id="secondary"></span>
     </div>
 </div>
 <div class="row">
@@ -25,14 +26,18 @@
 </div>
 <div class="row">
 <div class="col-md-12">
-<h4>Sessions stats</h4>
-
-<p>Duration: <span id="sessionlength">00:00:00</span></p>
     <ul id="minmax">
         <li><span id="maximum"></span></li>
         <li><span id="average"></span></li>
         <li><span id="minimum"></span></li>
     </ul>
     </div>
+    <hr>
 </div>
-<br>
+<div class="row">
+
+<h4>Sessions stats</h4>
+
+<p>Duration: <span id="sessionlength">00:00:00</span></p>
+</div>
+
