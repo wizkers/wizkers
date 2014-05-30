@@ -64,7 +64,7 @@ define(function(require) {
 
         render: function () {
             console.log("Rendering a flow wind rose widget");
-            $(this.el).html('<div class="chart" style="position: relative; min-height: 150px;"></div>');
+            $(this.el).html('<div class="chart" style="position: relative; min-height: 350px;"></div>');
             this.addPlot();
             return this;
         },

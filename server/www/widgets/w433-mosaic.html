@@ -70,7 +70,10 @@ require.config({
         flot_time: 'lib/flot-0.8.1/jquery.flot.time',
         flot_resize: 'lib/flot-0.8.1/jquery.flot.resize',
         flot_selection: 'lib/flot-0.8.1/jquery.flot.selection',
-        flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween'
+        flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween',
+        flot_windrose: 'lib/jquery.flot.windrose',
+        flot_jumlib: 'lib/jquery.flot.JUMlib'
+
     },
     
     shim: {
@@ -81,10 +84,12 @@ require.config({
         'flot_resize': {deps: ['flot']},
         'flot_selection': {deps: ['flot']},
         'flot_fillbetween': {deps: ['flot']},
+        'flot_jumlib': { deps: ['jquery', 'flot'], exports: '$.plot.JUMlib'},        
+        'flot_windrose': { deps: ['flot', 'flot_jumlib']}
     }
 });
 
-require(['jquery', 'backbone', 'app/lib/flotplot.min', 'flot', 'flot_time'], function($, Backbone, simpleplot) {
+require(['jquery', 'backbone', 'app/lib/flotplot.min', 'app/lib/flotwindrose.min', 'flot', 'flot_time'], function($, Backbone, simpleplot, roseplot) {
     // We are defining our configuration here:
 
     // The address where we should get the data to display

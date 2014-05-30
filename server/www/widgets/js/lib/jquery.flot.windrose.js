@@ -51,7 +51,7 @@ THE SOFTWARE.
                 drawHover: null
             }
         },
-        grid:{ ranges:5, font:"11px HelveticaNeue-Light"}
+        grid:{ ranges:5, font:"12px HelveticaNeue-Light"}
 
     };
     function init(plot) {
@@ -73,7 +73,7 @@ THE SOFTWARE.
                 var canvas = plot.getCanvas();
                 maxRadius =  Math.min(canvas.width,canvas.height)/2 * opt.series.rose.roseSize;
                 centerTop = (canvas.height/2);
-                centerLeft = centerTop;
+                centerLeft = (canvas.width/2);
                 colors = createColors(opt,series.data[0].length);
                 series.nearBy.findItem = findNearbyItemRose;
                 series.nearBy.drawHover = drawHoverRose;
@@ -171,11 +171,12 @@ THE SOFTWARE.
             function drawGridLabel(ctx,angle,label){
                 ctx.font = opt.grid.font;
                 var s = 2 * Math.PI * angle / 360,
-                    x = centerLeft + Math.round(Math.cos(s) * maxRadius),
-                    y = centerTop + Math.round(Math.sin(s) * maxRadius),
-                    metrics = ctx.measureText(label);
-                if(between(angle,0, 180)) { y += 10; }
-                if(between(angle,90,270)) { x -= metrics.width; }
+                    metrics = ctx.measureText(label),
+                    x = centerLeft - metrics.width/2 + Math.round(Math.cos(s) * maxRadius * 1.2),
+                    y = centerTop + 6 + Math.round(Math.sin(s) * maxRadius * 1.2);
+                // if(between(angle,-90,0) || between(angle,180,270)) { y -= 5; }
+                // if(between(angle,0, 180)) { y += 15; }
+                // if(between(angle,90,270)) { x -= metrics.width; }
                 ctx.fillText(label,x,y);
             }
         }

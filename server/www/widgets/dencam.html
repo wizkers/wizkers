@@ -88,11 +88,7 @@ require.config({
         'flot_resize': {deps: ['flot']},
         'flot_selection': {deps: ['flot']},
         'flot_fillbetween': {deps: ['flot']},
-                'flot_jumlib': {
-            deps: ['jquery', 'flot'],
-            exports: '$.plot.JUMlib'
-        },        
-
+        'flot_jumlib': { deps: ['jquery', 'flot'], exports: '$.plot.JUMlib'},        
         'flot_windrose': { deps: ['flot', 'flot_jumlib']}
 
     }
@@ -117,13 +113,14 @@ require(['jquery', 'backbone', 'app/lib/flotplot.min', 'app/lib/flotwindrose.min
     var addPlot = function(name) {
         if (sensors.indexOf(name) == -1) {
             sensors.push(name);
-            var newplot = $('.graphs').append('<div class="col-md-4"><h4>' + name + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
-            var plot = null;
-            if (name.indexOf('wind - direction') == -1)
+            var newplot, plot;
+            if (name.indexOf('wind - direction') == -1) {
+              newplot = $('.graphs').append('<div class="col-md-6"><h4>' + name + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
               plot = new simpleplot({ settings: settings});
-            else
+            } else {
+              newplot = $('.anemograph').append('<div class="col-md-12"><h4>' + name + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
               plot = new roseplot({ settings: settings});
-
+            }
             if (plot != null) {
                 $('.graph', newplot).append(plot.el);
                 plot.render();
@@ -199,7 +196,11 @@ require(['jquery', 'backbone', 'app/lib/flotplot.min', 'app/lib/flotwindrose.min
                 </div>
             </div>
         </div>
-        <div class="graphs row">
+        <div class="row">
+            <div class="graphs col-md-8">
+            </div>
+            <div class="anemograph col-md-4">
+            </div>
         </div>
     </div>
 </body>
