@@ -89,9 +89,11 @@ module.exports = {
                 switch (res.reading_type) {
                     case 'temperature':
                         res.value = Math.round(data.substr(6,3)-500)/10;
+                        res.unit = '°C';
                         break;
                     case 'humidity':
                         res.value = Math.round((data.substr(6,3)/10));
+                        res.unit = '%RH';
                         break;
                 }
             }
@@ -110,6 +112,7 @@ module.exports = {
                             if (sensor_model == 6 ) { res.value = Math.round(data.substr(8,3)-400)/10; }
                             if (sensor_model == 9 ) { res.value = Math.round(data.substr(8,3)-300)/10; }
                             res.reading_type = 'temperature';
+                            res.unit = '°C';
                             break;
                         case 1:
                         case 5:
@@ -117,6 +120,7 @@ module.exports = {
                             if (sensor_model == 6 ) { res.value = data.substr(8,3)/10; }
                             if (sensor_model == 9 ) { res.value = data.substr(8,2); }
                             res.reading_type = 'humidity';
+                            res.unit = '%RH';
                         break;
                         case 3:
                         case 7:
@@ -125,6 +129,7 @@ module.exports = {
                             var speed = parseInt(data.substr(8,2),16)/10;
                             res.reading_type = 'wind';
                             res.value = { dir: direction, speed: speed};
+                            res.unit = { dir: '°', speed:'knot'};
                         /**
                         
                             $direction = (hex substr $i,10,1)*22.5;
@@ -142,6 +147,7 @@ module.exports = {
                             var speed= parseInt(data.substr(8,2),16)/10;
                             res.reading_type = 'wind-gust';
                             res.value = { dir: direction, speed: speed};
+                            res.unit = { dir: '°', speed:'knot'};
                             /**
                             $direction = (hex substr $i,10,1)*22.5;
                             $type_txt = "wind-gust-dir";

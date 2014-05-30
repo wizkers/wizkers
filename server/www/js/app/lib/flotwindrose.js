@@ -20,7 +20,7 @@ define(function(require) {
         // Here are all the options we can define, to pass as "settings" when creating the view:        
         settings: {
             points: 150,
-            log: false,
+            instant: true,    // Add a small pointer showing current/instant wind direction
             showtips: true,
             get: function(key) {
                 return this[key];
@@ -101,7 +101,8 @@ define(function(require) {
                return;
             var force13 = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; // Wind < 10 knt
             var force47 = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; // Wind < 33 knt
-            var force8p = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; // Wind > 33 knt
+            var force8p = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // Wind > 33 knt
+                latest = 0;
             // Now pack our live data:
             for (var i = 1; i < this.livedata.length; i++) {
                 var data = this.livedata[i];
@@ -124,11 +125,16 @@ define(function(require) {
                 force47[i] += force13[i];
                 force8p[i] += force47[i];
             }
+            // Get the latest wind speed in the live data, to draw a nice pointer around it:
+            if (this.settings.instant) {
+                latest = this.livedata[this.livedata.length-1].dir;
+            }
             // Last, format it nicely;
             var data = [
-                { label: "8+",  color:"red", data: force8p, rose: {show: true } },
-                { label: "4-7", color:{colors:["yellow","orange","red"] }, data: force47, rose: {show: true } },
-                { label: "1-3", color:"green", data: force13, rose: {show: true} }
+                { label: "8+",   color:"red", data: force8p, rose: {show: true } },
+                { label: "4-7",  color:{colors:["yellow","orange","red"] }, data: force47, rose: {show: true } },
+                { label: "1-3",  color:"green", data: force13, rose: {show: true} },
+                { color:"blue", data: [ latest ], rose: {show: this.settings.instant, pointer: true} }
             ];
             // Now update our plot
             this.plot.setData(data);

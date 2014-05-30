@@ -90,25 +90,48 @@ THE SOFTWARE.
         function drawSeries(plot, ctx, serie){
             var angle,angleStart,angleEnd,radius,color,colorData,dt;
             if (serie.rose.show) {
-                series = serie;
-                angle = -90 - offsetAngle*2;
-                for(var j = 0; j < serie.data.length; j++){
-                    dt = serie.data[j];
-                    angleStart =  angle + offsetAngle;
-                    angleEnd =  angle + leafAngle - offsetAngle;
-                    angle += leafAngle;
-                    if(dt.length){
-                        radius = getPieRadius(dt[0]);
-                        colorData = { ctx:ctx,serie:serie,serieIndex:j,colors:colors,radius:radius,left:centerLeft,top:centerTop};
-                        color = getColor(colorData);
-                        drawPie(ctx,dt[1],dt[2],radius,color);
-                    }
-                    else
-                    {
-                        radius = getPieRadius(dt);
-                        colorData = { ctx:ctx,serie:serie,serieIndex:j,colors:colors,radius:radius,left:centerLeft,top:centerTop};
-                        color = getColor(colorData);
-                        drawPie(ctx,angleStart,angleEnd,radius,color);
+                if (serie.rose.pointer) {
+                    // If a data series contains a "pointer" attribute which is true,
+                    // then we expect data to be an angle to draw the data
+                    angle = -90 + serie.data[0];
+                    // New: draw a pointer with the last value of the data
+                    ctx.beginPath();
+                    var ptx = centerLeft + Math.round(Math.cos(Math.PI*2*angle/360) * maxRadius* 94/100),
+                        pty = centerTop + Math.round(Math.sin(Math.PI*2*angle/360) * maxRadius * 94/100),
+                        side = maxRadius * 6 / 100; // size of the triangle
+                    color = getColor(serie.color);
+                    ctx.fillStyle = color;
+                    ctx.strokeStyle = color;
+                    ctx.beginPath();
+                    ctx.lineTo(ptx,pty);
+                    ctx.lineTo(ptx+Math.round(Math.cos(Math.PI*2*(angle+45)/360)*side),
+                                pty+Math.round(Math.sin(Math.PI*2*(angle+45)/360)*side));
+                    ctx.lineTo(ptx+Math.round(Math.cos(Math.PI*2*(angle-45)/360)*side),
+                                pty+Math.round(Math.sin(Math.PI*2*(angle-45)/360)*side));
+                    ctx.lineTo(ptx,pty);
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    series = serie;
+                    angle = -90 - offsetAngle*2;
+                    for(var j = 0; j < serie.data.length; j++){
+                        dt = serie.data[j];
+                        angleStart =  angle + offsetAngle;
+                        angleEnd =  angle + leafAngle - offsetAngle;
+                        angle += leafAngle;
+                        if(dt.length){
+                            radius = getPieRadius(dt[0]);
+                            colorData = { ctx:ctx,serie:serie,serieIndex:j,colors:colors,radius:radius,left:centerLeft,top:centerTop};
+                            color = getColor(colorData);
+                            drawPie(ctx,dt[1],dt[2],radius,color);
+                        }
+                        else
+                        {
+                            radius = getPieRadius(dt);
+                            colorData = { ctx:ctx,serie:serie,serieIndex:j,colors:colors,radius:radius,left:centerLeft,top:centerTop};
+                            color = getColor(colorData);
+                            drawPie(ctx,angleStart,angleEnd,radius,color);
+                        }
                     }
                 }
             }
