@@ -122,20 +122,13 @@ a.plain:hover {
     }
 }
 
-
-
-
-
-
-
-
 /**
  * Flot charts styling
  */
 
 .chart {
     min-width: 100%;
-    height: 200px;
+    min-height: 200px;
 }
 
 

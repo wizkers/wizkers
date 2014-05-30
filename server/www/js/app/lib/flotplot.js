@@ -60,7 +60,7 @@ define(function(require) {
 
         render: function () {
             console.log("Rendering a flow chart widget");
-            $(this.el).html('<div class="chart" style="position: relative; min-height: 150px;"></div>');
+            $(this.el).html('<div class="chart" style="position: relative; min-height: 200px;"></div>');
             this.addPlot();
             return this;
         },
