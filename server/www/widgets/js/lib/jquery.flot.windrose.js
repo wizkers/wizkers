@@ -32,6 +32,7 @@ THE SOFTWARE.
             rose: {
                 active: false,
                 show: false,
+                autoscale: true,
                 roseSize: 0.7,
                 leafSize: 0.7,
                 dataMin: 0,
@@ -51,7 +52,7 @@ THE SOFTWARE.
                 drawHover: null
             }
         },
-        grid:{ ranges:5, font:"12px HelveticaNeue-Light"}
+        grid:{ ranges:5, font:"12px HelveticaNeue-Light", valuefont: "6px HelveticaNeue-Light"}
 
     };
     function init(plot) {
@@ -66,7 +67,26 @@ THE SOFTWARE.
                 opt = options;
                 plot.hooks.drawSeries.push(drawSeries);
                 plot.hooks.draw.push(draw);
+                plot.hooks.drawBackground.push(autoScale);
             }
+        }
+        function autoScale(plot, canvascontext) {
+            console.log("Where we can reinit the autoscale value ?");
+            if (!opt.series.rose.autoscale)
+                return;
+            var maxval = 0;
+            var data = plot.getData();
+            for (var j = 0; j < data.length; j++) {
+                if (data[j].rose.pointer)
+                    continue;
+                for (var i = 0; i < data[j].data.length; i++) {
+                    if (data[j].data[i] > maxval) maxval = data[j].data[i];
+                }
+            }
+            maxval = 5 + 5*Math.round(maxval/5);
+            if (maxval>100 ) maxval = 100;
+            
+            opt.series.rose.dataMax = maxval;
         }
         function processRawData(plot,series,data,datapoints){
             if(series.rose.show === true){
@@ -90,25 +110,48 @@ THE SOFTWARE.
         function drawSeries(plot, ctx, serie){
             var angle,angleStart,angleEnd,radius,color,colorData,dt;
             if (serie.rose.show) {
-                series = serie;
-                angle = -90 - offsetAngle*2;
-                for(var j = 0; j < serie.data.length; j++){
-                    dt = serie.data[j];
-                    angleStart =  angle + offsetAngle;
-                    angleEnd =  angle + leafAngle - offsetAngle;
-                    angle += leafAngle;
-                    if(dt.length){
-                        radius = getPieRadius(dt[0]);
-                        colorData = { ctx:ctx,serie:serie,serieIndex:j,colors:colors,radius:radius,left:centerLeft,top:centerTop};
-                        color = getColor(colorData);
-                        drawPie(ctx,dt[1],dt[2],radius,color);
-                    }
-                    else
-                    {
-                        radius = getPieRadius(dt);
-                        colorData = { ctx:ctx,serie:serie,serieIndex:j,colors:colors,radius:radius,left:centerLeft,top:centerTop};
-                        color = getColor(colorData);
-                        drawPie(ctx,angleStart,angleEnd,radius,color);
+                if (serie.rose.pointer) {
+                    // If a data series contains a "pointer" attribute which is true,
+                    // then we expect data to be an angle to draw the data
+                    angle = -90 + serie.data[0];
+                    // New: draw a pointer with the last value of the data
+                    ctx.beginPath();
+                    var ptx = centerLeft + Math.round(Math.cos(Math.PI*2*angle/360) * maxRadius* 94/100),
+                        pty = centerTop + Math.round(Math.sin(Math.PI*2*angle/360) * maxRadius * 94/100),
+                        side = maxRadius * 6 / 100; // size of the triangle
+                    color = getColor(serie.color);
+                    ctx.fillStyle = color;
+                    ctx.strokeStyle = color;
+                    ctx.beginPath();
+                    ctx.lineTo(ptx,pty);
+                    ctx.lineTo(ptx+Math.round(Math.cos(Math.PI*2*(angle+45)/360)*side),
+                                pty+Math.round(Math.sin(Math.PI*2*(angle+45)/360)*side));
+                    ctx.lineTo(ptx+Math.round(Math.cos(Math.PI*2*(angle-45)/360)*side),
+                                pty+Math.round(Math.sin(Math.PI*2*(angle-45)/360)*side));
+                    ctx.lineTo(ptx,pty);
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    series = serie;
+                    angle = -90 - offsetAngle*2;
+                    for(var j = 0; j < serie.data.length; j++){
+                        dt = serie.data[j];
+                        angleStart =  angle + offsetAngle;
+                        angleEnd =  angle + leafAngle - offsetAngle;
+                        angle += leafAngle;
+                        if(dt.length){
+                            radius = getPieRadius(dt[0]);
+                            colorData = { ctx:ctx,serie:serie,serieIndex:j,colors:colors,radius:radius,left:centerLeft,top:centerTop};
+                            color = getColor(colorData);
+                            drawPie(ctx,dt[1],dt[2],radius,color);
+                        }
+                        else
+                        {
+                            radius = getPieRadius(dt);
+                            colorData = { ctx:ctx,serie:serie,serieIndex:j,colors:colors,radius:radius,left:centerLeft,top:centerTop};
+                            color = getColor(colorData);
+                            drawPie(ctx,angleStart,angleEnd,radius,color);
+                        }
                     }
                 }
             }
@@ -156,7 +199,8 @@ THE SOFTWARE.
             }
             function drawGridValue(ctx,i){
                 var t = opt.series.rose.dataMin + (opt.series.rose.dataMax - opt.series.rose.dataMin) / opt.grid.ranges * i;
-                ctx.fillText(t,centerLeft + maxRadius / opt.grid.ranges * i,centerTop - 1);
+                ctx.font = opt.grid.valuefont;
+                ctx.fillText(t,centerLeft + maxRadius / opt.grid.ranges * i + 2 ,centerTop + 2 );
             }
             function drawGridLine(ctx,angle){
                 var s = 2 * Math.PI * angle / 360,

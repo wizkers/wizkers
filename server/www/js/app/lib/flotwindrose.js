@@ -48,7 +48,7 @@ define(function(require) {
                             drawGrid:{
                                 gridMode: "ticks",
                                 labelPos: 0.5,
-                                drawValue: false
+                                drawValue: true
                             } 
                         }
                 },
@@ -117,7 +117,7 @@ define(function(require) {
                 }
             }
             var timespan = this.livedata[this.livedata.length-1].stamp - this.livedata[0].stamp;
-            // Then stack the data:
+            // Then stack the data
             for (var i = 0; i < 16; i++) {
                 force13[i] = force13[i]/timespan*100;
                 force47[i] = force47[i]/timespan*100;
@@ -125,6 +125,8 @@ define(function(require) {
                 force47[i] += force13[i];
                 force8p[i] += force47[i];
             }
+            
+            
             // Get the latest wind speed in the live data, to draw a nice pointer around it:
             if (this.settings.instant) {
                 latest = this.livedata[this.livedata.length-1].dir;

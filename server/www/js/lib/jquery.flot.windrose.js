@@ -32,6 +32,7 @@ THE SOFTWARE.
             rose: {
                 active: false,
                 show: false,
+                autoscale: true,
                 roseSize: 0.7,
                 leafSize: 0.7,
                 dataMin: 0,
@@ -51,7 +52,7 @@ THE SOFTWARE.
                 drawHover: null
             }
         },
-        grid:{ ranges:5, font:"12px HelveticaNeue-Light"}
+        grid:{ ranges:5, font:"12px HelveticaNeue-Light", valuefont: "6px HelveticaNeue-Light"}
 
     };
     function init(plot) {
@@ -66,7 +67,26 @@ THE SOFTWARE.
                 opt = options;
                 plot.hooks.drawSeries.push(drawSeries);
                 plot.hooks.draw.push(draw);
+                plot.hooks.drawBackground.push(autoScale);
             }
+        }
+        function autoScale(plot, canvascontext) {
+            console.log("Where we can reinit the autoscale value ?");
+            if (!opt.series.rose.autoscale)
+                return;
+            var maxval = 0;
+            var data = plot.getData();
+            for (var j = 0; j < data.length; j++) {
+                if (data[j].rose.pointer)
+                    continue;
+                for (var i = 0; i < data[j].data.length; i++) {
+                    if (data[j].data[i] > maxval) maxval = data[j].data[i];
+                }
+            }
+            maxval = 5 + 5*Math.round(maxval/5);
+            if (maxval>100 ) maxval = 100;
+            
+            opt.series.rose.dataMax = maxval;
         }
         function processRawData(plot,series,data,datapoints){
             if(series.rose.show === true){
@@ -179,7 +199,8 @@ THE SOFTWARE.
             }
             function drawGridValue(ctx,i){
                 var t = opt.series.rose.dataMin + (opt.series.rose.dataMax - opt.series.rose.dataMin) / opt.grid.ranges * i;
-                ctx.fillText(t,centerLeft + maxRadius / opt.grid.ranges * i,centerTop - 1);
+                ctx.font = opt.grid.valuefont;
+                ctx.fillText(t,centerLeft + maxRadius / opt.grid.ranges * i + 2 ,centerTop + 2 );
             }
             function drawGridLine(ctx,angle){
                 var s = 2 * Math.PI * angle / 360,
