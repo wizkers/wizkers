@@ -27,29 +27,48 @@
                           </ul>
                     </div>
                     <div class="col-md-4">
-                        <div class="thumbnail">
-                            <h4>Asset information:</h4>
-                              <div class="input-append"><span class="add-on" style="width:80px;">Operator</span>
-                                  <input id="operator" value="" type="text" maxlength="32">
-                              </div>
-                              <div class="input-append"><span class="add-on" style="width:80px;">Company</span><input class="col-md-12" id="company" value="" type="text" maxlength="32"></div>
-                              <div class="input-append"><span class="add-on" style="width:80px;">Site</span><input class="col-md-12" id="site" value="" type="text" maxlength="32"></div>
-                              <div class="input-append"><span class="add-on" style="width:80px;">Contact</span><input class="col-md-12" id="contact" value="" type="text" maxlength="32"></div>
-                                <button class="btn setassetinfo" type="button" style="float:right;">Update</button>
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <h4>Asset information:</h4>
+                                <div class="input-group input-margin">
+                                    <span class="input-group-addon">Operator</span>
+                                    <input id="operator" value="" class="form-control" type="text" maxlength="32">                                    
+                                </div>
+                                <div class="input-group input-margin">
+                                    <span class="input-group-addon">Company</span>
+                                    <input id="company" class="form-control" value="" type="text" maxlength="32">
+                                </div>
+                                <div class="input-group input-margin">
+                                    <span class="input-group-addon">Site</span>
+                                    <input id="site" class="form-control" value="" type="text" maxlength="32">
+                                </div>
+                                <div class="input-group input-margin">
+                                    <span class="input-group-addon">Contact</span>
+                                    <input id="contact" class="form-control" value="" type="text" maxlength="32">
+                                </div>
+                                <button class="btn setassetinfo" type="button" style="float:right;"><span class="glyphicon glyphicon-ok"></span>&nbsp;Update</button>
                             <p>&nbsp;</p>
-                        </div>
+                                </div>
+                            </div>
+                    </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <h4>Device diagnostics</h4>
+                    <p><button class="btn setrtc" type="button"><span class="glyphicon glyphicon-refresh"></span>&nbsp; Sync device time</button>
+                </div>
+                <div class="col-md-8">
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">Manual command</span>
+                        <input id="manualcmd" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-btn">
+                                <button class="btn btn-default" id="cmdsend" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                        </span>
                     </div>
                 </div>
-          
-      <h4>Device diagnostics</h4>
-      <p><button class="btn setrtc" type="button">Sync device time</button>
-          <div class="input-append"><span class="add-on">Manual Command</span><input class="col-md-12" id="manualcmd" value="" type="text" maxlength="32"><button type="button" class="btn" id="cmdsend"><i class="icon-check"></i></button></div>
-      
-
-
-      
-  </div>
-                    </div>
+            </div>
+            </div>
+        </div>
     </div>
     <div class="row">
         <div class="col-md-12">
@@ -62,7 +81,7 @@
 
   <div class="col-md-3">
   <div class="well keyboard-area" id="port-diags">
-      <button class="btn takeshot" type="button" style="float:right;"><i class="icon-refresh"></i></button>
+      <button class="btn takeshot" type="button" style="float:right;"><span class="glyphicon glyphicon-refresh"></span></button>
       <h4>Remote control</h4>
       <div class="row thumbnail">
           <canvas id="screenshot" style="width:320px; height:240px;" class="takeshot"></canvas>
@@ -91,22 +110,22 @@
             </div>
         </div>
         <div class="col-md-2">
-              <button class="btn keyboard" value="LEFT" type="button"><i class="icon-arrow-left"></i></button>
+              <button class="btn keyboard" value="LEFT" type="button"><span class="glyphicon glyphicon-arrow-left"></span></button>
         </div>  
         <div class="col-md-2">
             <div class="row">
                 <div class="col-md-12">
-                    <button class="btn keyboard" value="UP" type="button"><i class="icon-arrow-up"></i></button>
+                    <button class="btn keyboard" value="UP" type="button"><span class="glyphicon glyphicon-arrow-up"></span></button>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <button class="btn keyboard" value="DOWN" type="button"><i class="icon-arrow-down"></i></button>
+                    <button class="btn keyboard" value="DOWN" type="button"><span class="glyphicon glyphicon-arrow-down"></span></button>
                 </div>
             </div>
         </div>  
         <div class="col-md-2">
-              <button class="btn keyboard" value="RIGHT" type="button"><i class="icon-arrow-right"></i></button>
+              <button class="btn keyboard" value="RIGHT" type="button"><span class="glyphicon glyphicon-arrow-right"></span></button>
         </div>  
         <div class="col-md-3">
             <div class="row">
