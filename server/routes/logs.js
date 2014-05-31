@@ -75,6 +75,11 @@ exports.getLogEntries = function(req, res) {
     stream.on('data', function(item) {
                          if (ok) res.write(",");
                          ok = true;
+                         // Clean up the log data: we don't need a lot of stuff that takes
+                         // lots of space:
+                        delete item._id;
+                        delete item.__v;
+                        delete item.logsessionid;
                          res.write(JSON.stringify(item));
                         }
              ).on('error', function(err) {
@@ -102,6 +107,9 @@ exports.getLive = function(req,res) {
     stream.on('data', function(item) {
                          if (ok) res.write(",");
                          ok = true;
+                         delete item._id;
+                         delete item.__v;
+                         delete item.logsessionid;
                          res.write(JSON.stringify(item));
                         }
              ).on('error', function(err) {
