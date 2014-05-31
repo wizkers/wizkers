@@ -94,22 +94,24 @@ exports.getLogEntries = function(req, res) {
 exports.getLive = function(req,res) {
     console.log("Request to get extract of live recording for the last " + req.params.period + " minutes");
     var rid = recorder.getRecordingID();
-    console.log(rid);
     if (rid == null) {
         res.send('{"error": "Not recording" }');
         return;
     }
     var minstamp = new Date( new Date().getTime() - req.params.period* 60000);
-    var stream = DeviceLogEntry.find({logsessionid: rid, timestamp: {"$gte": minstamp} }).stream();
+    var stream = DeviceLogEntry.find({logsessionid: rid, timestamp: {"$gte": minstamp} }).lean().batchSize(500).stream();
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write("[");
     var ok = false;
     stream.on('data', function(item) {
                          if (ok) res.write(",");
                          ok = true;
+                         console.log(item);
                          delete item._id;
                          delete item.__v;
                          delete item.logsessionid;
+                         console.log("---------- AFTER --------");
+                         console.log(item);
                          res.write(JSON.stringify(item));
                         }
              ).on('error', function(err) {

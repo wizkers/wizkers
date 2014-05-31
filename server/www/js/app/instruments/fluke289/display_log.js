@@ -369,6 +369,8 @@ define(function(require) {
             var tzOffset = new Date().getTimezoneOffset()*60000;
             // Go through every reading contained here:
             var entrydata = entry.get('data');
+            if (entrydata === null)
+                return;
             if (entrydata.reading == undefined)
                 return;
             var readings = entrydata.reading.readings;
