@@ -182,7 +182,11 @@ module.exports = {
                 if ((stamp - this.prevRes[i].stamp) < 1500 &&
                     res.sensor_address == this.prevRes[i].res.sensor_address &&
                     res.sensor_type == this.prevRes[i].res.sensor_type &&
-                    res.value == this.prevRes[i].res.value )
+                    ((res.value == this.prevRes[i].res.value) || 
+                     ((typeof(res.value) == "object") && (typeof(this.prevRes[i]) == "object") &&
+                       (res.value.dir == this.prevRes[i].value.dir) && (res.value.speed == this.prevRes[i].speed)
+                     ))
+                   )
                     return;
             }
         }
