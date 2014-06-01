@@ -158,7 +158,7 @@ define(function(require) {
 
             tabChange: function(e) {
                 console.log("Change tab to: " + e.target);
-                if (e.target.text == "Data Terminal") {
+                if (e.target.text == "Data") {
                     linkManager.driver.startTextStream();
                 } else {
                     linkManager.driver.stopTextStream();
