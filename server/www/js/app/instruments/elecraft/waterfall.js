@@ -265,6 +265,8 @@ define(function(require) {
                                                     // Create an AudioNode from the stream (live input)
                                                     sourceNode = context.createMediaStreamSource(stream);
                                                     self.initResampler();
+                                                }, function(err) {
+                                                    alert('Get User Media Failure: ' + err);
                                                 }
                                               );
                     } catch (e) {
