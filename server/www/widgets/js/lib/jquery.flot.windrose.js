@@ -70,8 +70,10 @@ THE SOFTWARE.
                 plot.hooks.drawBackground.push(autoScale);
             }
         }
+        
+        // This function goes through our series to find the highest value,
+        // then rounds the scale to the upper 5%
         function autoScale(plot, canvascontext) {
-            console.log("Where we can reinit the autoscale value ?");
             if (!opt.series.rose.autoscale)
                 return;
             var maxval = 0;
@@ -110,6 +112,11 @@ THE SOFTWARE.
         function drawSeries(plot, ctx, serie){
             var angle,angleStart,angleEnd,radius,color,colorData,dt;
             if (serie.rose.show) {
+                var canvas = plot.getCanvas();
+                maxRadius =  Math.min(canvas.width,canvas.height)/2 * opt.series.rose.roseSize;
+                centerTop = (canvas.height/2);
+                centerLeft = (canvas.width/2);
+
                 if (serie.rose.pointer) {
                     // If a data series contains a "pointer" attribute which is true,
                     // then we expect data to be an angle to draw the data

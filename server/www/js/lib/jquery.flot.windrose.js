@@ -112,6 +112,11 @@ THE SOFTWARE.
         function drawSeries(plot, ctx, serie){
             var angle,angleStart,angleEnd,radius,color,colorData,dt;
             if (serie.rose.show) {
+                var canvas = plot.getCanvas();
+                maxRadius =  Math.min(canvas.width,canvas.height)/2 * opt.series.rose.roseSize;
+                centerTop = (canvas.height/2);
+                centerLeft = (canvas.width/2);
+
                 if (serie.rose.pointer) {
                     // If a data series contains a "pointer" attribute which is true,
                     // then we expect data to be an angle to draw the data
