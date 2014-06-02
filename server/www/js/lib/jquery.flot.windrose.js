@@ -70,8 +70,10 @@ THE SOFTWARE.
                 plot.hooks.drawBackground.push(autoScale);
             }
         }
+        
+        // This function goes through our series to find the highest value,
+        // then rounds the scale to the upper 5%
         function autoScale(plot, canvascontext) {
-            console.log("Where we can reinit the autoscale value ?");
             if (!opt.series.rose.autoscale)
                 return;
             var maxval = 0;

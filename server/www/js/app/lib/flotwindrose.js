@@ -10,7 +10,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone');
     
-        // Load the flot library & flot time plugin:
+    // Load the flot library & flot time plugin:
     require('flot');
     require('flot_resize');
     require('flot_windrose');
