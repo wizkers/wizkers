@@ -144,7 +144,14 @@ define(function(require) {
                 "click #data-ans": "sendANS",
                 "click #data-me": "sendME",
                 "click #data-brag": "sendBRAG",
+                "click #mem-left": "hideOverflow",
+                "click #mem-right": "hideOverlow"
             },
+            
+            hideOverflow: function() {
+               // $("#xtrafunc-leftside").css('overflow', 'hidden');
+
+        },
 
             debugClick: function(e) {
                 console.log(e);
