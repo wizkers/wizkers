@@ -54,7 +54,7 @@ define(function(require) {
         addPlot: function(name) {
           if (this.sensors.indexOf(name) == -1) {
               this.sensors.push(name);
-              var newplot = $('.charts').append('<div class="col-md-4"><h4>' + name + '</h4><div class="chart"></div></div>');
+              var newplot = $('.charts').append('<div class="col-md-4"><h4>' + name + '</h4><div class="chartcontainer"></div></div>');
               var plot = null;
               if (name.indexOf('wind - direction') == -1)
                   plot = new simpleplot({model: this.model, settings:this.plotoptions});
@@ -62,7 +62,7 @@ define(function(require) {
                   plot = new roseplot({model:this.model, settings:this.plotoptions});
               
               if (plot != null) {
-                  $('.chart', newplot).append(plot.el);
+                  $('.chartcontainer', newplot).append(plot.el);
                   plot.render();
                   this.plots.push(plot);
               }

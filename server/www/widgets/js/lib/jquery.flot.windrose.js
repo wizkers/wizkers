@@ -92,10 +92,6 @@ THE SOFTWARE.
         }
         function processRawData(plot,series,data,datapoints){
             if(series.rose.show === true){
-                var canvas = plot.getCanvas();
-                maxRadius =  Math.min(canvas.width,canvas.height)/2 * opt.series.rose.roseSize;
-                centerTop = (canvas.height/2);
-                centerLeft = (canvas.width/2);
                 colors = createColors(opt,series.data[0].length);
                 series.nearBy.findItem = findNearbyItemRose;
                 series.nearBy.drawHover = drawHoverRose;
@@ -113,9 +109,9 @@ THE SOFTWARE.
             var angle,angleStart,angleEnd,radius,color,colorData,dt;
             if (serie.rose.show) {
                 var canvas = plot.getCanvas();
-                maxRadius =  Math.min(canvas.width,canvas.height)/2 * opt.series.rose.roseSize;
-                centerTop = (canvas.height/2);
-                centerLeft = (canvas.width/2);
+                maxRadius =  Math.min(plot.width(),plot.height())/2 * opt.series.rose.roseSize;
+                centerTop = (plot.height()/2);
+                centerLeft = (plot.width()/2);
 
                 if (serie.rose.pointer) {
                     // If a data series contains a "pointer" attribute which is true,
@@ -187,6 +183,11 @@ THE SOFTWARE.
             data = plot.getData();
             ctx.strokeStyle = opt.grid.tickColor;
             ctx.fillStyle = opt.grid.color;
+            var canvas = plot.getCanvas();
+            maxRadius =  Math.min(plot.width(),plot.height())/2 * opt.series.rose.roseSize;
+            centerTop = (plot.height()/2);
+            centerLeft = (plot.width()/2);
+
             for(i = 1; i <= opt.grid.ranges; i++){
                 drawGridRange(ctx,i);
                 if(opt.series.rose.drawGrid.drawValue === true){ drawGridValue(ctx,i);}
