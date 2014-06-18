@@ -8,10 +8,13 @@ define(function(require) {
     "use strict";
     
     var $   = require('jquery'),
-        Backbone = require('backbone'),
+        Backbone = require('backbone');
 
+    if (vizapp.type == "cordova" || vizapp.type == "chrome") {
+        Backbone.LocalStorage = require('localstorage');
+    }
 
-        LogEntry = Backbone.Model.extend({
+    var LogEntry = Backbone.Model.extend({
     
             idAttribute: "_id",
 
@@ -78,8 +81,9 @@ define(function(require) {
                 // A lot contains... entries (surprising, eh?). Nest
                 // the collection here:
                 this.entries = new LogEntries();
-                this.entries.url =  "/logs/" + this.id + "/entries";
-
+                
+                this.updateEntriesURL();
+                
                 // When we create a model, this.id is undefined: because of this, we listen to
                 // the "sync" event, and update the entries' URL upon it (sync is fired when the model is
                 // saved, therefore the ID is updated
@@ -87,7 +91,18 @@ define(function(require) {
             },
 
             updateEntriesURL: function() {
-                this.entries.url =  "/logs/" + this.id + "/entries";
+                /**
+                 * Depending on runmode, we are either defining a URL or
+                 * relying on backbone localstorage
+                 */
+                if (vizapp.type == "cordova") {
+                    this.entries.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries"); // Unique name within your app.
+                } else if (vizapp.type == "chrome") {
+                    this.entries.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries");
+                } else {
+                    this.entries.url =  "/logs/" + this.id + "/entries";
+                }
+
             },
 
            defaults: {
@@ -129,9 +144,18 @@ define(function(require) {
             model: Log,
 
             initialize: function(models, options) {
+                /**
+                 * Depending on runmode, we are either defining a URL or
+                 * relying on backbone localstorage
+                 */
+                if (vizapp.type == "cordova") {
+                    this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs"); // Unique name within your app.
+                } else if (vizapp.type == "chrome") {
+                    this.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs");
+                } else {
+                    this.url =  "/logs/";
+                }
             },
-
-            url: "/logs",
 
             // Create a new subset collection of only some log sessions
             getLogSubset: function(logSessionIDs) {

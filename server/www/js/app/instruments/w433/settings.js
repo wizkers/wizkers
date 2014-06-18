@@ -19,7 +19,7 @@ define(function(require) {
         } catch (e) {
             // Will happen if we are packaged in a Chrome app
             console.log('W433Settings View: using compiled version (chrome app)');
-            template = require('js/tpl/instruments/W433SettingsView.js', function(){} , function(err) {
+            template = require(['js/tpl/instruments/W433SettingsView.js'], function(){} , function(err) {
                             console.log("Compiled JS preloading error callback.");
                             });
         }

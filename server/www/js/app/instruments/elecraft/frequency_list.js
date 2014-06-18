@@ -15,9 +15,7 @@ define(function(require) {
             template = _.template(tpl);
         } catch (e) {
             // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/ElecraftFrequencyItemView.js', function(){} , function(err) {
-                            console.log("Compiled JS preloading error callback.");
-                            });
+            template = require('js/tpl/instruments/ElecraftFrequencyItemView.js');
         }
     
     // Need to load these, but no related variables.

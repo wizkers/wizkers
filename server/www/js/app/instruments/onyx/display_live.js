@@ -17,9 +17,7 @@ define(function(require) {
             template = _.template(tpl);
         } catch (e) {
             // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/OnyxLiveView.js', function(){} , function(err) {
-                            console.log("Compiled JS preloading error callback.");
-                            });
+            template = require('js/tpl/instruments/OnyxLiveView.js');
         }
 
     // Load the flot library & flot time plugin:

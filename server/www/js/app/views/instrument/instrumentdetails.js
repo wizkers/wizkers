@@ -21,9 +21,7 @@ define(function(require) {
             template = _.template(tpl);
         } catch (e) {
             // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/InstrumentDetailsView.js', function(){} , function(err) {
-                            console.log("Compiled JS preloading error callback.");
-                            });
+            template = require('js/tpl/InstrumentDetailsView.js');
         }
 
     return Backbone.View.extend({

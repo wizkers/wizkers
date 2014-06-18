@@ -23,7 +23,6 @@ define(function(require) {
             } else {
                 this.url = "/settings";
             }
-
         },
 
         defaults: {

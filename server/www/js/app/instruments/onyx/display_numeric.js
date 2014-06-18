@@ -17,9 +17,7 @@ define(function(require) {
             template = _.template(tpl);
         } catch (e) {
             // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/OnyxNumView.js', function(){} , function(err) {
-                            console.log("Compiled JS preloading error callback.");
-                            });
+            template = require('js/tpl/instruments/OnyxNumView.js');
         }
 
     return Backbone.View.extend({
@@ -55,7 +53,7 @@ define(function(require) {
             if (typeof(data.cpm) == 'undefined')
                 return;
             var cpm = parseFloat(data.cpm.value);
-            $('#livecpm', this.el).html(cpm.toFixed(3) + "&nbsp;CPM");
+            $('#livecpm', this.el).html(cpm.toFixed(3));
             $('#liveusvh', this.el).html((cpm*0.00294).toFixed(3) + "&nbsp;&mu;Sv/h");
             
             // Update "valid" pill only if state changes to save CPU

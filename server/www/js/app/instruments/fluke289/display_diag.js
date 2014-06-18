@@ -20,9 +20,7 @@ define(function(require) {
         } catch (e) {
             // Will happen if we are packaged in a Chrome app
             console.log("Trying compiled template");
-            template = require('js/tpl/Fluke289DiagView.js', function(){} , function(err) {
-                        console.log("JS preload error");
-                    });
+            template = require('js/tpl/Fluke289DiagView.js');
         }
 
 

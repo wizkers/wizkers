@@ -18,9 +18,7 @@ define(function(require) {
             template = _.template(tpl);
         } catch (e) {
             // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/OnyxLogView.js', function(){} , function(err) {
-                            console.log("Compiled JS preloading error callback.");
-                            });
+            template = require('js/tpl/instruments/OnyxLogView.js');
         }
     
     // Load the flot library & flot time plugin:
@@ -92,6 +90,7 @@ define(function(require) {
             "click .resetZoom": "resetZoom",
             "click #cpmscale": "cpmScaleToggle",
             "click .ctrl-edit": "editLog",
+            "click #download-csv": "downloadCSV"
         },
 
         resetZoom: function() {
@@ -121,8 +120,7 @@ define(function(require) {
             });
             router.navigate('editlogs/' + settings.get('currentInstrument') + '/' + logIds.join(','),true);
         },
-
-
+        
         render:function () {
             var self = this;
             console.log('Main render of Log management view');
@@ -166,17 +164,43 @@ define(function(require) {
         },
 
         // Generate a "blob:"  URL to download (all) the data;
-        saveDataUrl: function() {
-            return;
+        downloadJSON: function() {
             var json = "";
-            for (var i=0; i < this.onyxlog.length; i++) {
-                json += "{timestamp:" + this.onyxlog.at(i).get('timestamp') +
+            for (var i=0; i < this.deviceLogs.length; i++) {
+                json += "{timestamp:" + this.devicesLogs.at(i).get('timestamp') +
                         ",cpm:" + this.onyxlog.at(i).get('cpm') + "},";
             }
 
             var jsonBlob = new Blob([json], {type: 'application/json'});
             var url = window.URL.createObjectURL(jsonBlob);
             $('.ctrl-save', this.el).attr('href', url);
+        },
+        
+        downloadCSV: function() {
+            var header = 'data:text/csv; charset=utf-8,';
+            var csv = header + "Timestamp (UTC), CPM, CPM30, CPMRAW, Valid\n";
+            for (var i=0; i < this.deviceLogs.length; i++) {
+                var entries = this.deviceLogs.at(i).entries;
+                for (var j=0; j < entries.length; j++) {
+                    var entry = entries.at(j);
+                    var cpm = entry.get('data').cpm;
+                    // Sometimes, we get entries without a valid CPM reading, detect this
+                    if (cpm) {
+                        // No known spreadsheet software handles ISO8601 dates
+                        // properly (like 2014-06-17T18:00:04.067Z ) so we
+                        // convert the timestamp to a string that is recognized by
+                        // Excel or Google Docs:
+                        var ts = entry.get('timestamp').replace(/[TZ]/g, ' ');
+                        csv += ts + "," +
+                               cpm.value + "," +
+                               cpm.cpm30 + "," +
+                               cpm.raw + "," +
+                               cpm.valid + "\n";
+                    }
+                }
+            }
+            var uri = encodeURI(csv);
+            window.open(uri);
         },
 
 
@@ -191,10 +215,6 @@ define(function(require) {
             $('#log_size',this.el).html(this.deviceLogs.getOverallLength());
             $('#log_start',this.el).html(new Date(this.deviceLogs.getLogsStart()).toString());
             $('#log_end',this.el).html(new Date(this.deviceLogs.getLogsEnd()).toString());
-
-
-            // Now initialize the plot area:
-            console.log('Geiger chart size: ' + this.$('.locochart').width());
 
             // Restore current zoom level if it exists:
             if (this.ranges) {
@@ -266,7 +286,7 @@ define(function(require) {
               });
 
             // Last, update the save data URL to point to the data we just displayed:
-            this.saveDataUrl();
+            // this.saveDataUrl();
 
         },
 

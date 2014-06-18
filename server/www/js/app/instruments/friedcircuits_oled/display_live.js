@@ -22,9 +22,7 @@ define(function(require) {
             // Will happen if we are packaged in a Chrome app
             try {
                 console.log("Trying compiled template");
-                template = require('js/tpl/FCOledLiveView.js', function(){} , function(err) {
-                            console.log("Preloading error callback from header.js");
-                        });
+                template = require('js/tpl/FCOledLiveView.js');
             } catch (e) {
             console.log(e);
             }
