@@ -210,8 +210,6 @@ define(function(require) {
             } else {
                 if (data.cpm != undefined) {
                     var cpm = parseFloat(data.cpm.value);
-                    $('#livecpm', this.el).html(cpm + "&nbsp;CPM");
-                    $('#liveusvh', this.el).html((cpm*0.00294).toFixed(3) + "&nbsp;&mu;Sv/h");
                     if (this.livedata.length >= this.livepoints)
                         this.livedata = this.livedata.slice(1);
                     this.livedata.push([new Date().getTime(), cpm]);

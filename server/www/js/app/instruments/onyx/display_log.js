@@ -119,7 +119,7 @@ define(function(require) {
             _.each(this.deviceLogs.models, function(log) {
                 logIds.push(log.id);
             });
-            app.navigate('editlogs/' + settings.get('currentInstrument') + '/' + logIds.join(','),true);
+            router.navigate('editlogs/' + settings.get('currentInstrument') + '/' + logIds.join(','),true);
         },
 
 
