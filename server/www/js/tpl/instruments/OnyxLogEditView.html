@@ -32,7 +32,7 @@
                 <% _.each(entries, function(entry) { %>
                 <tr>
                     <td><%= new Date(entry.get('timestamp')).toString() %></td>
-                    <td><%= entry.get('data').cpm %></td>
+                    <td><%= entry.get('data').cpm ? entry.get('data').cpm.value : 'n.a.' %></td>
                     <td><span class="glyphicon glyphicon-remove delete-point" data-id="<%=entry.id%>" title="Delete"></span></td>
                 </tr>        
                 <% }) %>
