@@ -150,7 +150,9 @@ define(function(require) {
             var allLogs = instrumentManager.getInstrument().logs;
             allLogs.fetch({success:function(){
                 var myLogs = allLogs.getLogSubset(logarray);
-                self.switchView(instrumentManager.getLogEditView({collection:myLogs}));
+                instrumentManager.getLogEditView({collection:myLogs}, function(view) {
+                    self.switchView(view);
+                });
             }});
         },
     
