@@ -11,9 +11,9 @@ var recording = false;
 var recordingID = null;
 
 
-exports.startRecording = function(req,res) {
-    console.log("*** Start recording for session ID "  + req.params.id);
-    recordingID = req.params.id;    
+exports.startRecording = function(id) {
+    console.log("*** Start recording for session ID "  + id);
+    recordingID = id;    
     recording = true;
     
     LogSession.findById(recordingID, function(err,session) {
@@ -27,7 +27,7 @@ exports.startRecording = function(req,res) {
         }
     });
     
-    res.send({"recording": true});
+//    res.send({"recording": true});
 };
 
 exports.isRecording = function() {
@@ -38,7 +38,7 @@ exports.getRecordingID = function() {
     return recordingID;
 }
 
-exports.stopRecording = function(req,res) {
+exports.stopRecording = function() {
     console.log("*** Stop recording");
     recording = false;
     if (recordingID == null)
@@ -53,7 +53,7 @@ exports.stopRecording = function(req,res) {
             DeviceLogEntry.count({logsessionid: recordingID}, function(err,count) {
                 if (err) {
                     console.log('Error updating log session entry: ' + err);
-                    res.send({'error': 'Error updating log session entry'});
+                    // res.send({'error': 'Error updating log session entry'});
                 } else {
                     session.datapoints = count;
                     console.log("This log has " + count + " datapoints.");
@@ -64,7 +64,7 @@ exports.stopRecording = function(req,res) {
             });
         }
     });
-    res.send({"recording": false});
+    // res.send({"recording": false});
 };
     
 

@@ -82,7 +82,6 @@ define(function(require) {
                 });
             });
 
-
         },
 
         home: function (id) {

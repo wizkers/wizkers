@@ -58,10 +58,11 @@ define(function(require) {
                     this.uidrequested = false;
                 } else {
                     this.socket.trigger('serialEvent', response);
-                    // this.recorder.record(response);
+                    if (recording)
+                        this.socket.record(response); // 'socket' also records for in-browser impl.
                 }
             } catch (err) {
-                console.log('Not able to parse JSON response from device:\n' + data);
+                console.log('Not able to parse JSON response from device:\n' + data + '\n' + err);
             }
             
         };

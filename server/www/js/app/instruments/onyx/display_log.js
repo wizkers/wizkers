@@ -189,8 +189,11 @@ define(function(require) {
                         // No known spreadsheet software handles ISO8601 dates
                         // properly (like 2014-06-17T18:00:04.067Z ) so we
                         // convert the timestamp to a string that is recognized by
-                        // Excel or Google Docs:
-                        var ts = entry.get('timestamp').replace(/[TZ]/g, ' ');
+                        // Excel or Google Docs. The whole new Date + toISOString
+                        // is here to guarantee that we do get a proper formatted
+                        // time stamp whenever we are running as an embedded app or a server
+                        // app.
+                        var ts = new Date(entry.get('timestamp')).toISOString().replace(/[TZ]/g, ' ');
                         csv += ts + "," +
                                cpm.value + "," +
                                cpm.cpm30 + "," +

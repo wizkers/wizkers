@@ -11,7 +11,7 @@ define(function(require) {
     
     return  function() {
 
-            // Helper function: get driver capabilites.
+        // Helper function: get driver capabilites.
         // returns a simple array of capabilities    
         this.getCaps = function() {
             return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView",

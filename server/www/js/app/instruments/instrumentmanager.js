@@ -1,9 +1,7 @@
 /**
- * This will provide a list of supported instruments, and return
- * the relevant:
- *  - Settings and diags screen
- *  - Link manager
- *  - Display widgets (at least one)
+ *
+ * The Instrument manager handles all interactions with the various instruments.
+
  */
 
 define(function(require) {
@@ -28,10 +26,10 @@ define(function(require) {
         this.instrument = null; // A Backbone Model
 
         this.supportedInstruments = {
-            "onyx": {      name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView} ,
-            "fluke28x": {  name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView},
-            "fcoledv1": {  name: "Fried Circuits OLED backpack", type: FCOledInstrument, settings: FCOledSettingsView },
-            "w433": {      name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView },
+            "onyx":     { name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView},
+            "fluke28x": { name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView},
+            "fcoledv1": { name: "Fried Circuits OLED backpack", type: FCOledInstrument, settings: FCOledSettingsView },
+            "w433":     { name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView },
             "elecraft": { name: "Elecraft radios", type: ElecraftInstrument, settings:ElecraftSettingsView },
         };
 
@@ -53,7 +51,7 @@ define(function(require) {
         this.getInstrument = function() {
             return this.instrument;
         }
-
+        
     };
 
     _.extend(InstrumentManager.prototype, Backbone.Events);

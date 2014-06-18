@@ -16,6 +16,7 @@ define(function(require) {
     
     var Backbone = require('backbone');
     var Serialport = require('serialport');
+    var DeviceLog = require('app/models/devicelog');
 
     var serialLib = function() {
 
@@ -28,10 +29,10 @@ define(function(require) {
                     portStatus(args);
                     break;
                    case 'openinstrument':
-                    openPort(args);
+                    openInstrument(args);
                     break;
                    case 'closeinstrument':
-                    closePort(args);
+                    closeInstrument(args);
                     break;
                    case 'controllerCommand':
                     controllerCommand(args);
@@ -42,6 +43,12 @@ define(function(require) {
                    case 'driver':
                     setDriver(args);
                     break;
+                   case 'startrecording':
+                    startRecording(args);
+                    break;
+                   case 'stoprecording':
+                    stopRecording(args);
+                    break;
                    default:
                     break;
             }
@@ -49,6 +56,20 @@ define(function(require) {
 
         // Trick: 
         this.connect = function() {return this; };
+        
+        /////////////
+        // Recorder API (public)
+        /////////////
+        this.record = function(data) {
+            console.log("Recording " + data);
+            var entry = new DeviceLog.LogEntry({
+                timestamp: new Date().getTime(),
+                logsessionid: currentLog.id,
+                data: data
+            });
+            currentLog.entries.add(entry);
+            entry.save();
+        }
 
         // Needs to be public (defined with this.) because
         // it is called from a callback
@@ -59,6 +80,8 @@ define(function(require) {
 
         // Private methods / properties:
         var Debug = true;
+        var recording = false;
+        var currentLog = null;
         var self = this;
         // Parser does not need to be public...
         var parser = null;
@@ -74,8 +97,21 @@ define(function(require) {
             return buf;
         };
 
+        function ab2str(buf) {
+            return String.fromCharCode.apply(null, new Uint8Array(buf));
+        };
+        
+        
+        //////////////
+        //
+        //   Implementation of socket API
+        //
+        //////////////
+        function portStatus() {
+           self.trigger('status', {portopen: self.portOpen});
+        };
 
-        // This is where we hook up the serial parser - cordova version
+        // This is where we hook up the serial parser - Chrome version
         function setDriver(driver) {
             console.log("Setting driver - should be " + driver);
             // We can use our instrumentManager to ask for the right driver
@@ -87,27 +123,9 @@ define(function(require) {
                 parser = self.portSettings.parser;
             });
         }
-
-        // We support only one default port, the serial adapter
-        // connected to the OTG cable.
-        function getPorts() {
-            chrome.serial.getDevices(onGetDevices);
-        }
         
-        function onGetDevices(ports) {
-            var portlist = [];
-            for (var i=0; i< ports.length; i++) {
-                portlist.push(ports[i].path);
-            }
-            self.trigger('ports', portlist);
-        }
-
-        function portStatus() {
-           self.trigger('status', {portopen: self.portOpen});
-        };
-
-        function openPort(port) {
-            console.log("chromeSerialLib: openPort");
+        function openInstrument(port) {
+            console.log("chromeSerialLib: openInstrument");
             var path = instrumentManager.getInstrument().get("port");
             // TODO: support other data bit and stop bit lengths 
             chrome.serial.connect(path, { bitrate: self.portSettings.baudRate,
@@ -116,42 +134,8 @@ define(function(require) {
                                  );        
         };
 
-        function ab2str(buf) {
-            return String.fromCharCode.apply(null, new Uint8Array(buf));
-        };
-
-        // Our Cordova serial plugin is not event-driven (yet), which means
-        // that we have to call read continously, which is pretty ugly and bad for
-        // battery life...
-        function onRead(readInfo) {
-            if (readInfo.connectionId == self.connectionId && readInfo.data) {
-                // Pass this over to the parser.
-                // the parser will trigger a "data" even when it is ready
-                //console.log("R: " + ab2str(readInfo.data));
-                parser(self,readInfo.data);
-            }
-        };
-        
-        // Called by the parser whenever data is ready to be formatted
-        // by our instrument driver
-        function onDataReady(data) {
-            self.driver.format(data);
-        }
-
-        function onOpen(openInfo) {
-            if (!openInfo) {
-                console.log("Open Failed");
-                return;
-            }
-            self.portOpen = true;
-            self.connectionId = openInfo.connectionId;
-            self.trigger('status', {portopen: true} );
-            chrome.serial.onReceive.addListener(onRead);
-
-        };
-
-        function closePort(port) {
-           console.log("chromeSerialLib: closePort");
+        function closeInstrument(port) {
+           console.log("chromeSerialLib: closeInstrument");
             if (!self.portOpen)
                 return;
             chrome.serial.disconnect( self.connectionId, function(success) {
@@ -167,9 +151,69 @@ define(function(require) {
                 return;
             chrome.serial.send(self.connectionId, str2ab(self.driver.output(cmd)), function() {});
         };
+
+        // We support only one default port, the serial adapter
+        // connected to the OTG cable.
+        function getPorts() {
+            chrome.serial.getDevices(onGetDevices);
+        }
+        
+        
+        function startRecording(id) {
+            console.log("In-browser implementation of start recording");
+            currentLog = instrumentManager.getInstrument().logs.get(id);
+            currentLog.fetch({success: function(){
+                recording = true;
+            } });
+        }
+        
+        function stopRecording() {
+            console.log("In-browser implementation of stop recording");
+            recording = false;
+        }
+                
+        /////////////
+        //   Callbacks below
+        /////////////
+        
+        function onGetDevices(ports) {
+            var portlist = [];
+            for (var i=0; i< ports.length; i++) {
+                portlist.push(ports[i].path);
+            }
+            self.trigger('ports', portlist);
+        }
+
+        // This gets called whenever something is ready on the serial port
+        function onRead(readInfo) {
+            if (readInfo.connectionId == self.connectionId && readInfo.data) {
+                // Pass this over to the parser.
+                // the parser will trigger a "data" even when it is ready
+                //console.log("R: " + ab2str(readInfo.data));
+                parser(self,readInfo.data);
+            }
+        };
+        
+        // Called by the parser whenever data is ready to be formatted
+        // by our instrument driver
+        function onDataReady(data) {            
+            // 'format' triggers a serialEvent when ready
+            self.driver.format(data, recording);
+        }
+
+        function onOpen(openInfo) {
+            if (!openInfo) {
+                console.log("Open Failed");
+                return;
+            }
+            self.portOpen = true;
+            self.connectionId = openInfo.connectionId;
+            self.trigger('status', {portopen: true} );
+            chrome.serial.onReceive.addListener(onRead);
+
+        };
         
         // Now hook up our own event listeners:
-        
         this.on('data', onDataReady);
 
     };

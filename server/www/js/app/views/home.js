@@ -223,7 +223,7 @@ define(function(require) {
             } else {
                 $('.ctrl-record', this.el).html('<i class="icon-download"></i>&nbsp;Record session').addClass('btn-danger')
                            .removeClass('btn-success');
-                $.get('/stoprecording');
+                linkManager.stopRecording();
                 this.recording = false;
             }        
         },
@@ -241,7 +241,7 @@ define(function(require) {
             this.instrument.logs.add(currentLogSession);
             currentLogSession.save(null,{
                     success: function() {
-                            $.get('/startrecording/' + currentLogSession.id); // Tell our backend to start recording.
+                        linkManager.startRecording(currentLogSession.id); // Tell our backend to start recording.
                       }}
               );
 

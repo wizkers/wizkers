@@ -121,10 +121,21 @@ define(function(require) {
                     this.streaming = false;
                 }
             }
+            
+            // id is the Log session ID we are recording into.
+            this.startRecording = function(id) {
+                this.socket.emit('startrecording', id);
+            }
+
+            this.stopRecording = function() {
+                this.socket.emit('stoprecording');
+            }
 
             this.manualCommand = function(cmd) {
                 this.socket.emit('controllerCommand', cmd);
             }
+            
+            
 
 
             // Initialization code:

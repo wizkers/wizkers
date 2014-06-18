@@ -37,7 +37,6 @@ define(function(require) {
 
         }
 
-
         this.stopLiveStream = function() {
             if (typeof this.livePoller != 'undefined') {
                 console.log("Stopping live data stream");
@@ -45,7 +44,7 @@ define(function(require) {
                 this.streaming = false;
             }
         }
-
+        
         //////
         // End of standard API
         //////

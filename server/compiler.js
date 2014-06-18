@@ -35,6 +35,5 @@ compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogMana
                  'instruments/ElecraftDiagView', 'instruments/ElecraftFrequencyItemView', 'instruments/ElecraftLiveView', 'instruments/ElecraftNumView',
                  'instruments/FCOledLiveView', 'instruments/FCOledLogView', 'instruments/FCOledNumView',
                  'instruments/Fluke289DiagView', 'instruments/Fluke289LiveView', 'instruments/Fluke289LogManagementView', 'instruments/Fluke289LogView', 'instruments/Fluke289NumView',
-                 'instruments/OnyxDiagView', 'instruments/OnyxLiveView', 'instruments/OnyxLogEditView', 'instruments/OnyxLogManagementView', 'instruments/OnyxLogView', 'instruments/OnyxNumView',
-                 
+                 'instruments/OnyxDiagView', 'instruments/OnyxLiveView', 'instruments/OnyxLogEditView', 'instruments/OnyxLogManagementView', 'instruments/OnyxLogView', 'instruments/OnyxNumView'
                 ]);

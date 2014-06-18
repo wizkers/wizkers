@@ -78,6 +78,7 @@ define(function(require) {
 
             initialize: function() {
                 var self = this;
+                
                 // A lot contains... entries (surprising, eh?). Nest
                 // the collection here:
                 this.entries = new LogEntries();
@@ -87,7 +88,7 @@ define(function(require) {
                 // When we create a model, this.id is undefined: because of this, we listen to
                 // the "sync" event, and update the entries' URL upon it (sync is fired when the model is
                 // saved, therefore the ID is updated
-                this.on("sync", this.updateEntriesURL, this);
+                this.on("sync", this.updateEntriesURL, this);                
             },
 
             updateEntriesURL: function() {
@@ -96,9 +97,9 @@ define(function(require) {
                  * relying on backbone localstorage
                  */
                 if (vizapp.type == "cordova") {
-                    this.entries.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries"); // Unique name within your app.
+                    this.entries.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
                 } else if (vizapp.type == "chrome") {
-                    this.entries.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries");
+                    this.entries.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
                 } else {
                     this.entries.url =  "/logs/" + this.id + "/entries";
                 }
