@@ -221,19 +221,19 @@ app.post('/signup', passport.authenticate('local-signup', {
 }));
 // process the login form
 app.post('/login', passport.authenticate('local-login', {
-    // successRedirect : '/',      // redirect to the secure profile section
     failureRedirect : '/login', // redirect back to the signup page if there is an error
     failureFlash : true         // allow flash messages
 }), function(req,res) {
-
+    
     // If the login process generated a flash message, go to the warning page
     // first
     var w = req.flash('warningMessage');
-    console.log("Warning: " + w);
     if (w != '') {
-	res.render('warning.ejs', { message: w });
-	return;
+        console.log("Warning: " + w);
+        res.render('warning.ejs', { message: w });
+        return;
     }
+    
     // We're good: we gotta generate a json web token
     var profile = {
         username: req.user.local.email,

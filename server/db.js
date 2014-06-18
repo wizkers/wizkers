@@ -123,7 +123,7 @@ mongoose.model('LogSession', LogSession);
  */
 var UserSchema = new Schema({
     local: {
-        email: String,
+        email: {type: String, index: true },
         password: String
     },
     google           : {
