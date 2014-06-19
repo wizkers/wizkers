@@ -145,6 +145,7 @@ define(function(require) {
         },
 
         editFrequency: function(event) {
+            $("#xtrafunc-leftside").css('overflow', (this.editing) ? "hidden":"visible");
             $(".freq-description",this.el).editable('toggleDisabled');
             $(".freq-vfoa",this.el).editable('toggleDisabled');
             $(".freq-vfob",this.el).editable('toggleDisabled');
@@ -189,7 +190,7 @@ define(function(require) {
         className: "carousel-inner",
     
         initialize: function (options) {
-            this.options = options || {};
+            this.options = options || {};
 
             this.bands= [ "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m" ];
 

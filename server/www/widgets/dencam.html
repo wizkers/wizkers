@@ -6,7 +6,7 @@
     <meta name="author" content="E. Lafargue, edouard@lafargue.name (c) 2014">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Den'Cam</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="live/css/bootstrap.min.css" rel="stylesheet" media="screen">
 
     <style type="text/css">
     
@@ -42,7 +42,7 @@
     
 </style>
     
-<script src="js/lib/require.js"></script>    
+<script src="live/js/lib/require.js"></script>    
 
 <script>
     
@@ -55,7 +55,7 @@
         
 require.config({
     
-    baseUrl: 'js',
+    baseUrl: 'live/js',
 
     // On the Beaglebone, some calls take forever
     waitSeconds: 0,
@@ -98,10 +98,10 @@ require(['jquery', 'backbone', 'app/lib/flotplot.min', 'app/lib/flotwindrose.min
     // We are defining our configuration here:
 
     // The address where we should get the data to display
-    var data_url = "data.json";
+    var data_url = "live/data.json";
 
     // If we only want to display some sensors, define sensor_names array
-    var sensor_names = ["Plage - temperature", "Anémomètre - humidity", "Anémomètre - wind"];
+    var sensor_names = ["Plage - temp&eacute;rature", "Anémomètre - humidit&eacute;", "Anémomètre - wind"];
     //var sensor_names = [];
 
     // You should not need to change anything below, until you want to do heavier customisation            
@@ -110,15 +110,15 @@ require(['jquery', 'backbone', 'app/lib/flotplot.min', 'app/lib/flotwindrose.min
     var plots = [];
     var settings = { points:0 }; // Disable trimming!
     
-    var addPlot = function(name) {
+    var addPlot = function(name, unit) {
         if (sensors.indexOf(name) == -1) {
             sensors.push(name);
             var newplot, plot;
-            if (name.indexOf('wind - direction') == -1) {
-              newplot = $('.graphs').append('<div class="col-md-6"><h4>' + name + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
+            if (name.indexOf('vent - dir') == -1) {
+              newplot = $('.graphs').append('<div class="col-md-6"><h4>' + name + ' - ' + unit + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
               plot = new simpleplot({ settings: settings});
             } else {
-              newplot = $('.anemograph').append('<div class="col-md-12"><h4>' + name + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
+              newplot = $('.anemograph').append('<div class="col-md-12"><h4>' + name + ' - ' + unit  + '</h4><div class="graph-container"><div class="graph"></div></div></div>');
               plot = new roseplot({ settings: settings});
             }
             if (plot != null) {
@@ -134,21 +134,25 @@ require(['jquery', 'backbone', 'app/lib/flotplot.min', 'app/lib/flotwindrose.min
             var data = log[i].data;
             if (data.value != null) {
                 // Now add the current sensor
+                if (data.reading_type == "humidity")
+                    data.reading_type = "humidit&eacute;";
+                if (data.reading_type == "temperature")
+                    data.reading_type = "temp&eacute;rature";
                 var sensor =data.sensor_name + " - " + data.reading_type;
                 if (sensor_names.indexOf(sensor) == -1)
                     continue;
                 if (data.reading_type == 'wind' || data.reading_type == 'wind-gust') {
                     // Those reading types return two values: we graph them separately
-                    var sensor1 = sensor + " - direction";
-                    var sensor2 = sensor + " - speed";
-                    addPlot(sensor1);
+                    var sensor1 = "vent - dir";
+                    var sensor2 = "vent";
+                    addPlot(sensor1, "%");
                     var idx = sensors.indexOf(sensor1);
                     plots[idx].fastAppendPoint({'name': sensor1, 'value': data.value, 'timestamp': log[i].timestamp});
-                    addPlot(sensor2);
+                    addPlot(sensor2, "noeuds");
                     idx = sensors.indexOf(sensor2);
                     plots[idx].fastAppendPoint({'name': sensor2, 'value': data.value.speed, 'timestamp': log[i].timestamp});
                 } else {
-                    addPlot(sensor);
+                    addPlot(sensor, data.unit);
                     var idx = sensors.indexOf(sensor);                
                     plots[idx].fastAppendPoint({'name': sensor, 'value': data.value, 'timestamp': log[i].timestamp});
                 }

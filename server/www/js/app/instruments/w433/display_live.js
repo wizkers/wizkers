@@ -49,10 +49,10 @@ define(function(require) {
             return this;
         },
 
-        addPlot: function(name) {
+        addPlot: function(name, unit) {
           if (this.sensors.indexOf(name) == -1) {
               this.sensors.push(name);
-              var newplot = $('.charts').append('<div class="col-md-4"><h4>' + name + '</h4><div class="chart"></div></div>');
+              var newplot = $('.charts').append('<div class="col-md-4"><h4>' + name + ' - ' + unit + '</h4><div class="chartcontainer"></div></div>');
               var plot = null;
               if (name.indexOf('wind - direction') == -1)
                   plot = new simpleplot({model: this.model, settings:this.plotoptions});
@@ -60,7 +60,7 @@ define(function(require) {
                   plot = new roseplot({model:this.model, settings:this.plotoptions});
               
               if (plot != null) {
-                  $('.chart', newplot).append(plot.el);
+                  $('.chartcontainer', newplot).append(plot.el);
                   plot.render();
                   this.plots.push(plot);
               }
@@ -96,14 +96,14 @@ define(function(require) {
                 // Those reading types return two values: we graph them separately
                 var sensor1 = sensor + " - direction";
                 var sensor2 = sensor + " - speed";
-                this.addPlot(sensor1);
+                this.addPlot(sensor1, "%");
                 var idx = this.sensors.indexOf(sensor1);
                 this.plots[idx].appendPoint({'name': sensor1, 'value': data.value});
-                this.addPlot(sensor2);
+                this.addPlot(sensor2, "knots");
                 idx = this.sensors.indexOf(sensor2);
                 this.plots[idx].appendPoint({'name': sensor2, 'value': data.value.speed});
             } else {
-                this.addPlot(sensor);
+                this.addPlot(sensor, data.unit);
                 var idx = this.sensors.indexOf(sensor);                
                 this.plots[idx].appendPoint({'name': sensor, 'value': data.value});
             }

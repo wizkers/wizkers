@@ -142,7 +142,14 @@ define(function(require) {
                 "click #data-ans": "sendANS",
                 "click #data-me": "sendME",
                 "click #data-brag": "sendBRAG",
+                "click #mem-left": "hideOverflow",
+                "click #mem-right": "hideOverlow"
             },
+            
+            hideOverflow: function() {
+               // $("#xtrafunc-leftside").css('overflow', 'hidden');
+
+        },
 
             debugClick: function(e) {
                 console.log(e);
@@ -156,7 +163,7 @@ define(function(require) {
 
             tabChange: function(e) {
                 console.log("Change tab to: " + e.target);
-                if (e.target.text == "Data Terminal") {
+                if (e.target.text == "Data") {
                     linkManager.driver.startTextStream();
                 } else {
                     linkManager.driver.stopTextStream();
