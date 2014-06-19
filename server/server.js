@@ -146,12 +146,12 @@ Settings.findOne({}, function(err, item) {
             console.log(err);
             return;
         }
-        server.listen(8080);
+        server.listen(8090);
     });
 });
 
 
-console.log("Listening for new clients on port 8080");
+console.log("Listening for new clients on port 8090");
 var connected = false;
 
 /****************
@@ -394,9 +394,6 @@ function Collect(ob1, ob1) {
     }
     return ret;
 }
- 
-
-
 
 //
 // For now, we are supporting only one communication
@@ -415,8 +412,6 @@ var driver = Onyx;
 var recorder = require('./recorder.js');
 
 var recordingSessionId = 0; // Is set by the front-end when pressing the 'Record' button.
-app.get('/startrecording/:id', recorder.startRecording);
-app.get('/stoprecording', recorder.stopRecording);
 
 //
 // In order to be more flexible, we are also going to keep track globally of a few things
@@ -583,6 +578,14 @@ io.sockets.on('connection', function (socket) {
         if (Debug) console.log('Controller command: ' + data);
         if (portOpen)
             myPort.write(driver.output(data));
+    });
+    
+    socket.on('startrecording', function(id) {
+        recorder.startRecording(id);
+    });
+    
+    socket.on('stoprecording', function() {
+        recorder.stopRecording();
     });
     
     // Request a unique identifier to our driver
