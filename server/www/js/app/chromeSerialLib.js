@@ -108,7 +108,7 @@ define(function(require) {
         //
         //////////////
         function portStatus() {
-           self.trigger('status', {portopen: self.portOpen});
+           self.trigger('status', {portopen: self.portOpen, recording: recording});
         };
 
         // This is where we hook up the serial parser - Chrome version
