@@ -22,7 +22,7 @@ define(function(require) {
             // Will happen if we are packaged in a Chrome app
             try {
                 console.log("Trying compiled template");
-                template = require('js/tpl/FCOledNumView.js');
+                template = require('js/tpl/instruments/FCOledNumView.js');
             } catch (e) {
             console.log(e);
             }

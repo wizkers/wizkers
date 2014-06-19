@@ -24,6 +24,12 @@ require.config({
         snap: 'lib/snap.svg-0.2.0',
         text: 'lib/text',
         
+        // Signal processing libs
+        dsp: 'lib/dsp',
+        chroma: 'lib/chroma',
+        resampler: 'lib/resampler',
+
+        
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
         bootstrapeditable: 'lib/bootstrap-editable',
