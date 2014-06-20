@@ -1,13 +1,6 @@
-
 <div class="col-md-12">
   <div class="row">
-      <div class="col-md-3">
-        <div class="well">
-        <h4>Memory status:</h4>
-            <span class="label" id="memlevel">Unknown</span>
-        </div>
-      </div>
-      <div class="col-md-9">
+      <div class="col-md-6">
         <div class="well">
             <h4>Memory statistics:</h4>
             <strong>Number of records:</strong> <span id="memused">0</span>,
@@ -15,35 +8,42 @@
             <br>
             <strong>Log status: </strong> <span id="memdays">0</span> full,
             <strong>Interval:</strong> <span id="meminterval">0</span>
+            <br>
+            <strong>Logging time left:</strong> <span id="timeleft"></span>
           </div>
       </div>
-  </div> <!-- row -->
-  <div class="row">
-      <div class="col-md-12 well">
-          <h4>Log download</h4>
-          
-          <ul>
-              <li><a href="#" role="button" class="btn btn-info downloadlog">Download device log</a></li>
-              <li>Clear log on device</li>
-          </ul>
-          
+      <div class="col-md-6">
+          <div class="well">
+              <h4>Log download</h4>
+              <p>
+              <a href="#" role="button" class="btn btn-info downloadlog">Download device log</a>
+              </p> 
+          </div>
       </div>
-  </div>
-
 </div><!--/row-->
+<div class="row">
+    <div class="col-md-12">
+    <p><b>Notes about device log:</b> the "Memory Statistics" above gives you an indication of how many records your Onyx can hold, and how full it currently is. It also tells you how many days/hours of logging are remaining in the instrument's flash</p>
+        
+    <p>"Download Log" transfers the current log to the computer. The app can detect whether this is a new log, or if we should append to an existing log (same starting timestamp as an existing log on the computer).</p>
+
+    </div>
+</div>
     
 <!-- Log download modal -->
-<div id="logModal" class="modal hide" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Log download</h3>
-  </div>
-  <div class="modal-body">
-      <p>Downloading log from device, this can take a long time...</p>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn" id="logDismissOK" disabled data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
+<div class="container">
+<div id="logModal" class="modal fade" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="myModalLabel">Log download</h3>
+        </div>
+    <div class="modal-body">
+        <p>Downloading log from device, this can take a long time...</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn" id="logDismissOK" disabled data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+</div></div>
+    </div>
 </div>
-
-

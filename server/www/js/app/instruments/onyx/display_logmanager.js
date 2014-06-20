@@ -12,6 +12,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
+        Devicelog = require('app/models/devicelog'),
         tpl     = require('text!tpl/instruments/OnyxLogManagementView.html'),
         template = null;
         
@@ -47,7 +48,7 @@ define(function(require) {
 
 
         downloadlog: function(event) {
-            $('#logModal', this.el).modal('show');
+            $('#logModal', this.el).modal();
             linkManager.manualCommand('LOGXFER');
             return false;
         },
@@ -64,6 +65,17 @@ define(function(require) {
                 $('#memused',this.el).html(used);
                 $('#memtotal',this.el).html(total);
                 $('#meminterval',this.el).html(interval + ' seconds');
+                
+                // Now compute how long this is in terms of Days/Hours:
+                var time_left = (total-used) * interval / 3600;
+                // Make the user's life easier: above 48 hours, display in days/hours
+                if (time_left < 49) {
+                    $('$#timeleft', this.el).html(time_left + " hours");
+                } else {
+                    var days  = (Math.floor(time_left / 24)).toFixed(0);
+                    var hours = time_left % 24;
+                    $('#timeleft', this.el).html(days + " days and " + hours + " hours");
+                }
             }
         },
 
@@ -89,7 +101,7 @@ define(function(require) {
 
             if (currentLog == null) {
                 // We don't know this log: create a new session
-                currentLog = new Log();
+                currentLog = new Devicelog.Log();
                 this.deviceLogs.add(currentLog);
                 currentLog.set('startstamp', new Date(points[0].time).getTime());
                 // The type is purely arbitrary: we are using the type "onyxlog" for
@@ -116,7 +128,7 @@ define(function(require) {
                                     // Only add new entries, don't overwrite existing ones...
                                     // Note: the logsession ID is automaticallyu added by the
                                     //       server.
-                                    logEntry = new LogEntry({
+                                    logEntry = new Devicelog.LogEntry({
                                                     timestamp:pointStamp.getTime(),
                                                     data: points[i]
                                                   });
