@@ -39,19 +39,24 @@
 </div>
 <!-- Below are two modal dialogs, these start hidden -->
 
-<div id="dtModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <h3 id="myModalLabel">Set device tag</h3>
-  </div>
-  <div class="modal-body">
-      <p>The Device tag is not set for this Onyx. Choose a unique name below. It will be used as a nickname for the device everywhere in this application.</p>
-      <p>Device tag: <input  id="devicetagfield" value="" type="text" maxlength="32"></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-primary" id="setdevicetag">Save</button>
-  </div>
+<div class="container">
+<div id="dtModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="myModalLabel">Set device tag</h3>
+            </div>
+            <div class="modal-body">
+                <p>The Device tag is not set for this Onyx. Choose a unique name below. It will be used as a nickname for the device everywhere in this application.</p>
+                <p>Device tag: <input  id="devicetagfield" value="" type="text" maxlength="32"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="setdevicetag">Save</button>
+            </div>
+        </div>
+    </div>
 </div>
-
+</div>
 
 <div id="dlModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="myDlModalLabel" aria-hidden="true">
   <div class="modal-header">

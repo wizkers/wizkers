@@ -72,9 +72,12 @@ define(function(require) {
                 if (time_left < 49) {
                     $('$#timeleft', this.el).html(time_left + " hours");
                 } else {
-                    var days  = (Math.floor(time_left / 24)).toFixed(0);
-                    var hours = time_left % 24;
+                    var days  = Math.floor(time_left / 24).toFixed(0);
+                    var hours = Math.floor(time_left % 24).toFixed(0);
                     $('#timeleft', this.el).html(days + " days and " + hours + " hours");
+                }
+                if (used) {
+                    ('.downloadlog', this,el).attr('disabled', false);
                 }
             }
         },
