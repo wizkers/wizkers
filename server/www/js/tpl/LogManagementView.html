@@ -4,15 +4,11 @@
       <div class="col-md-6">
             <a role="button" <%= (selected.length) ? '':'disabled'%> title="Select one or more logs below and click here" class="btn btn-info displaylog">
                 Display Log</a>
-            <% /* we can simply use deviceLogs[0] because all deviceLog entries have the same device ID */%>
-            <a href="#devicelogs/<%=deviceLogs[0].instrumentid%>" role="button" class="btn btn-info devicelogs" 
+            <a href="#devicelogs/<%=instrumentid%>" role="button" class="btn btn-info devicelogs" 
                title="Enabled if you are connected and your device supports it">Manage device Logs</a>
 
       </div>
       <div class="col-md-6">
-          <!--
-              <a href="#" download="onyxdata.json" role="button" class="btn btn-info ctrl-save">Download log to computer</a>
-            -->
       </div>
     </div>
   <div class="row">

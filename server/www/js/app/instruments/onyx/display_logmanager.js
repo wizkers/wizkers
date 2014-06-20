@@ -77,7 +77,7 @@ define(function(require) {
                     $('#timeleft', this.el).html(days + " days and " + hours + " hours");
                 }
                 if (used) {
-                    ('.downloadlog', this,el).attr('disabled', false);
+                    $('.downloadlog', this.el).attr('disabled', false);
                 }
             }
         },

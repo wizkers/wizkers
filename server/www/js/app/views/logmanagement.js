@@ -80,17 +80,16 @@ define(function(require) {
                 {success: function(model, response) {
                     $('#deleteConfirm',this.el).modal('hide');
                     self.render();
-                }
-                                   });
+                                }
+               });
         },
 
         render:function () {
             var self = this;
             console.log('Main render of Log management view');
-            if (this.collection.length == 0)
-                return;
-
-            $(this.el).html(template({ deviceLogs: this.collection.toJSON(), selected: this.selectedLogs}));
+            
+            $(this.el).html(template({ deviceLogs: this.collection.toJSON(), selected: this.selectedLogs,
+                                      instrumentid: instrumentManager.getInstrument().id}));
 
             // Depending on device capabilities, enable/disable "device logs" button
             if (instrumentManager.getCaps().indexOf("LogManagementView") == -1 || ! linkManager.connected) {
