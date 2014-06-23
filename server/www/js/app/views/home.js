@@ -43,7 +43,6 @@ define(function(require) {
             this.instrumentUniqueID = null;
 
             this.instrument = instrumentManager.getInstrument();
-            this.recording = false;
 
         },
 
@@ -83,13 +82,11 @@ define(function(require) {
                 }
             }
 
-
             if (this.instrumentLiveView != null)
                 this.instrumentLiveView.onClose();
 
             if (this.instrumentNumericView != null)
                 this.instrumentNumericView.onClose();
-
 
             // If we have a selected instrument, then instanciate its liveview here
             if (settings.get('currentInstrument') != null) {
@@ -117,7 +114,6 @@ define(function(require) {
             }
 
             linkManager.requestStatus();
-
             return this;
         },
 
@@ -133,8 +129,6 @@ define(function(require) {
 
             if (this.instrumentNumericView != null)
                 this.instrumentNumericView.onClose();
-
-            linkManager.stopLiveStream();
 
             // Restore the settings since we don't want them to be saved when changed from
             // the home screen
@@ -167,7 +161,7 @@ define(function(require) {
                 return;
             // Depending on port status, update our controller
             // connect button:
-            if (linkManager.connected) {
+            if (linkManager.isConnected()) {
                 $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Disconnect ' + this.instrument.get('name'))
                     .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 $('.btn-enable-connected', this.el).removeAttr('disabled');
@@ -176,7 +170,7 @@ define(function(require) {
                     linkManager.getUniqueID();
                 }
                 // Depending on device capabilities, enable/disable "Diag view" button
-                if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || ! linkManager.connected) {
+                if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || ! linkManager.isConnected()) {
                         $('.ctrl-diag',self.el).attr('disabled', true);
                 }            
             } else {
@@ -188,7 +182,9 @@ define(function(require) {
             if (data.recording) {
                 $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording...').addClass('btn-success')
                        .removeClass('btn-danger').attr('disabled', false);
-                this.recording = true;
+            } else {
+                $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-download"></span>&nbsp;Record session').addClass('btn-danger')
+                           .removeClass('btn-success');
             }
 
         },
@@ -203,7 +199,7 @@ define(function(require) {
             // First, get serial port settings (assume Serial for now)
             var id = instrumentManager.getInstrument().id;
             if (id != null ) {
-                    if (!linkManager.connected) {
+                    if (!linkManager.isConnected()) {
                         $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Opening...')
                         self.instrumentUniqueID = null; // Just in case we change the instrument
                         linkManager.openInstrument(id);
@@ -219,13 +215,10 @@ define(function(require) {
             if ($('.ctrl-record', this.el).attr('disabled')){
                     return;
             }
-            if (!this.recording) {
+            if (!linkManager.isRecording()) {
                 $('#RecordModal').modal();
             } else {
-                $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-download"></span>&nbsp;Record session').addClass('btn-danger')
-                           .removeClass('btn-success');
                 linkManager.stopRecording();
-                this.recording = false;
             }        
         },
 
@@ -248,7 +241,6 @@ define(function(require) {
 
             $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording...').addClass('btn-success')
                        .removeClass('btn-danger').attr('disabled', false);
-            this.recording = true;
         },
 
     });

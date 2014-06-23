@@ -24,15 +24,6 @@ define(function(require) {
             lm.socket.emit('driver','fcoledv1');
         }
 
-        // This instrument always streams its data!
-        this.startLiveStream = function() {
-            return true; 
-        }
-
-        this.stopLiveStream = function() {
-            return false;
-        }
-
         //////
         // End of standard API
         //////

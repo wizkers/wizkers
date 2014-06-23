@@ -49,6 +49,12 @@ define(function(require) {
                    case 'stoprecording':
                     stopRecording(args);
                     break;
+                   case 'startlivestream':
+                    startLiveStream(args);
+                    break;
+                   case 'stoplivestream':
+                    stopLiveStream(args);
+                    break;
                    default:
                     break;
             }
@@ -107,16 +113,30 @@ define(function(require) {
         //   Implementation of socket API
         //
         //////////////
+        
+        // We defer to our instrument driver for the actual live streaming
+        // method:
+        function startLiveStream(args) {
+            if (self.driver.startLiveStream)
+                self.driver.startLiveStream(args);            
+        };
+        
+        function stopLiveStream(args) {
+            if (self.driver.stopLiveStream)
+                self.driver.stopLiveStream(args);            
+        };
+        
         function portStatus() {
-           self.trigger('status', {portopen: self.portOpen, recording: recording});
+           self.trigger('status', {portopen: self.portOpen, recording: recording, streaming: self.driver ? self.driver.streaming : false});
         };
 
         // This is where we hook up the serial parser - Chrome version
         function setDriver(driver) {
             console.log("Setting driver - should be " + driver);
+            
             // We can use our instrumentManager to ask for the right driver
             // (in server-side mode, "driver" is passed as the driver name, we
-            //  don't need it here!)
+            //  don't need it here)
             instrumentManager.getBackendDriver(self, function(dr) {
                 self.driver = dr;
                 self.portSettings = self.driver.portSettings();
@@ -138,9 +158,12 @@ define(function(require) {
            console.log("chromeSerialLib: closeInstrument");
             if (!self.portOpen)
                 return;
+            
+            stopRecording();
+            stopLiveStream();
             chrome.serial.disconnect( self.connectionId, function(success) {
                 self.portOpen = false;
-                self.trigger('status', {portopen: false} );
+                portStatus();
                 if (self.driver.onClose) {
                     self.driver.onClose();
                 }
@@ -162,6 +185,8 @@ define(function(require) {
         }
         
         
+        // When called, id refers to a new log that got created by the home view
+        // just before.
         function startRecording(id) {
             console.log("In-browser implementation of start recording");
             currentLog = instrumentManager.getInstrument().logs.get(id);
@@ -201,6 +226,7 @@ define(function(require) {
         // by our instrument driver
         function onDataReady(data) {            
             // 'format' triggers a serialEvent when ready
+            console.log("[chromeSeriaLib] *** Send data to driver for formatting");
             self.driver.format(data, recording);
         }
 
@@ -211,7 +237,7 @@ define(function(require) {
             }
             self.portOpen = true;
             self.connectionId = openInfo.connectionId;
-            self.trigger('status', {portopen: true} );
+            portStatus();
             chrome.serial.onReceive.addListener(onRead);
 
         };

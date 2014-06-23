@@ -51,6 +51,26 @@ define(function(require) {
             }
         };
         
+        // period in seconds
+        this.startLiveStream = function(period) {
+            var self = this;
+            if (!this.streaming) {
+                this.livePoller = setInterval(function() {
+                    self.socket.emit('controllerCommand', 'GETCPM');                    
+                }, (period) ? period*1000: 1000);
+                this.streaming = true;
+            }
+        };
+        
+        this.stopLiveStream = function(args) {
+            if (this.streaming) {
+                console.log("Stopping live data stream");
+                clearInterval(this.livePoller);
+                this.streaming = false;
+            }
+        };
+
+        
         // Format can act on incoming data from the radio, and then
         // forwards the data to the app through a 'serialEvent' event.
         this.format = function(data, recording) {

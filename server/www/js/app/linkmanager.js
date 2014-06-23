@@ -19,9 +19,9 @@ define(function(require) {
                 query: 'token=' + settings.get('token')
             }); // (we connect on same host, we don't need a URL)
 
-            this.connected = false;
-            this.streaming = false;
-            this.lastInput = 0;
+            var connected = false;
+            var streaming = false;
+            var recording = false;
 
             this.driver = null;
 
@@ -42,21 +42,38 @@ define(function(require) {
             // hence the use of self.
             this.processInput = function(data) {
                 self.trigger('input', data);
-                self.lastInput = new Date().getTime();
             };
 
             this.sendUniqueID = function(uid) {
                 self.trigger('uniqueID', uid);
             }
+            
+            this.isRecording = function() {
+                return recording;
+            }
+            
+            this.isStreaming = function() {
+                return streaming;
+            }
 
+            this.isConnected = function() {
+                return connected;
+            }
+
+            // status contains:
+            // - Port open: portopen
+            // - Recording: recording
+            // - Streaming: streaming
             this.processStatus = function(data) {
                 if (typeof(data.portopen) != 'undefined') {
                     if (data.portopen) {
-                        self.connected = true;
+                        connected = true;
+                        streaming = data.streaming;
+                        recording = data.recording;
                     } else {
-                        self.connected = false;
-                        if (self.driver)
-                            self.driver.stopLiveStream();
+                        connected = false;
+                        streaming = data.streaming;
+                        recording = data.recording;
                     }
                 }
                 // Tell anyone who would be listening that status is updated
@@ -84,9 +101,9 @@ define(function(require) {
             }
 
             this.closeInstrument = function(id) {
-                this.stopLiveStream();
+                // Note: this will also close recording and streaming
+                // on the backend.
                 this.socket.emit('closeinstrument', id);
-                this.connected = false;
             }
 
             // This needs to return some sort of unique identifier for the device,
@@ -99,27 +116,22 @@ define(function(require) {
                 self.socket.emit('uniqueID');
             }
 
-
+            // Request regular port status updates
             this.wdCall = function() {
-                var ts = new Date().getTime();
-                if ((ts-this.lastInput) > 5000)
-                    this.requestStatus();
+                this.requestStatus();
             }
 
-            this.startLiveStream = function(arg) {
-                if (!this.streaming) {
-                    console.log("Start live stream");
-                    this.driver.startLiveStream(arg);
-                    this.streaming = true;
-                }
+            this.startLiveStream = function(period) {
+                console.log("Start live stream");
+                console.log("[Link Manager] Starting live data stream");
+                // We have moved polled live streaming to server-side so that
+                // recording still works when we are not on the home screen
+                this.socket.emit('startlivestream', (period) ? period: 1);
             }
 
             this.stopLiveStream = function() {
-                if (this.streaming) {
-                    console.log("Stop live stream");
-                    this.driver.stopLiveStream();
-                    this.streaming = false;
-                }
+                console.log("[Link Manager] Stopping live data stream");
+                this.socket.emit('stoplivestream');
             }
             
             // id is the Log session ID we are recording into.
@@ -134,9 +146,6 @@ define(function(require) {
             this.manualCommand = function(cmd) {
                 this.socket.emit('controllerCommand', cmd);
             }
-            
-            
-
 
             // Initialization code:
 
@@ -150,9 +159,9 @@ define(function(require) {
             this.socket.on('uniqueID', this.sendUniqueID);
             // Initialize connexion status on the remote controller
             this.socket.emit('portstatus','');
-            // Start a 3-seconds interval watchdog to listen for input:
-            // if no input in the last 2 seconds, then request port status
-            this.watchdog = setInterval(this.wdCall.bind(this), 5000);    
+            // Start a 3-seconds interval watchdog to listen for input
+            // and request regular back-end status
+            this.watchdog = setInterval(this.wdCall.bind(this), 3000);    
         };
 
         // Add event management to our link manager, from the Backbone.Events class:

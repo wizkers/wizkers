@@ -16,6 +16,8 @@ define(function(require) {
     var parser = function(socket) {
         
         this.socket = socket;
+        this.livePoller = null; // Reference to the live streaming poller
+        this.streaming = false;
         
         this.portSettings = function() {
             return  {
@@ -40,6 +42,25 @@ define(function(require) {
         this.sendUniqueID = function() {
             this.uidrequested = true;
             this.port.write(this.output('{ "get": "guid" }'));
+        };
+        
+        // period in seconds
+        this.startLiveStream = function(period) {
+            var self = this;
+            if (!this.streaming) {
+                this.livePoller = setInterval(function() {
+                    self.socket.emit('controllerCommand', 'GETCPM');                    
+                }, (period) ? period*1000: 1000);
+                this.streaming = true;
+            }
+        };
+        
+        this.stopLiveStream = function(args) {
+            if (this.streaming) {
+                console.log("Stopping live data stream");
+                clearInterval(this.livePoller);
+                this.streaming = false;
+            }
         };
         
         // Format can act on incoming data from the counter, and then

@@ -557,6 +557,8 @@ io.sockets.on('connection', function (socket) {
             console.log('Instrument close request for instrument ID ' + data);
             Instrument.findById(data, function(err,item) {
                 if(portOpen) {
+                    recorder.stopRecording();
+                    driver.stopLiveStream();
                     myPort.close();
                     portOpen = false;
                 }
@@ -566,7 +568,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('portstatus', function() {
-        var s = {portopen: portOpen, recording: recorder.isRecording()};
+        var s = {portopen: portOpen, recording: recorder.isRecording(), streaming: driver.isStreaming()};
         var ds = {};
         if (driver.status)
             ds= driver.status();
@@ -574,7 +576,6 @@ io.sockets.on('connection', function (socket) {
     });
         
     socket.on('controllerCommand', function(data) {
-        // TODO: do a bit of sanity checking here
         if (Debug) console.log('Controller command: ' + data);
         if (portOpen)
             myPort.write(driver.output(data));
@@ -586,6 +587,14 @@ io.sockets.on('connection', function (socket) {
     
     socket.on('stoprecording', function() {
         recorder.stopRecording();
+    });
+    
+    socket.on('startlivestream', function(data) {
+        driver.startLiveStream(data);
+    });
+    
+    socket.on('stoplivestream', function() {
+        driver.stopLiveStream();
     });
     
     // Request a unique identifier to our driver
@@ -622,7 +631,7 @@ io.sockets.on('connection', function (socket) {
             myPort.close();
         }
         
-        socket.emit('status', {portopen: portOpen});
+        socket.emit('status', {portopen: portOpen, streaming: false, recording: false});
         
         // For now, we have only a few drivers, so let's just hardcode...
         if (data == "onyx") {

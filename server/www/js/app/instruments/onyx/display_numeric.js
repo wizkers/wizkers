@@ -23,15 +23,11 @@ define(function(require) {
     return Backbone.View.extend({
 
         initialize:function (options) {
-
             this.sessionStartStamp = new Date().getTime();
             this.maxreading = 0;
             this.minreading = -1;
             this.valid = false;
-
-
             linkManager.on('input', this.showInput, this);
-
         },
 
         events: {

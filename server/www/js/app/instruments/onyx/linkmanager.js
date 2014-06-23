@@ -27,24 +27,7 @@ define(function(require) {
         this.setBackendDriver = function() {
             lm.socket.emit('driver','onyx');
         }
-
-        this.startLiveStream = function(period) {
-            if (!this.streaming) {
-                console.log("Starting live data stream for Onyx");
-                this.livePoller = setInterval(this.getCPM, (period) ? period*1000: 1000);
-                this.streaming = true;
-            }
-
-        }
-
-        this.stopLiveStream = function() {
-            if (typeof this.livePoller != 'undefined') {
-                console.log("Stopping live data stream");
-                clearInterval(this.livePoller);
-                this.streaming = false;
-            }
-        }
-        
+                
         //////
         // End of standard API
         //////
@@ -58,7 +41,6 @@ define(function(require) {
         };
 
         this.getCPM = function() {
-                // console.log('cpm...');
                 self.socket.emit('controllerCommand', 'GETCPM');
         };
 

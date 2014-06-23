@@ -92,7 +92,7 @@ define(function(require) {
                                       instrumentid: instrumentManager.getInstrument().id}));
 
             // Depending on device capabilities, enable/disable "device logs" button
-            if (instrumentManager.getCaps().indexOf("LogManagementView") == -1 || ! linkManager.connected) {
+            if (instrumentManager.getCaps().indexOf("LogManagementView") == -1 || ! linkManager.isConnected()) {
                     $('.devicelogs',self.el).attr('disabled', true);
             }
             return this;

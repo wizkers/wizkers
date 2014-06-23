@@ -179,7 +179,7 @@ define(function(require) {
 
             // This is queried every second - we stage our queries in order
             // to avoid overloading the radio, not sure that is totally necessary, but
-            // this won't hurt
+            // it won't hurt
 
             // Query displays and band (does not update by itself)
             this.cc('DB;DS;BN;'); // Query VFO B and VFOA Display

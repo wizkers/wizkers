@@ -15,6 +15,8 @@ module.exports = {
     port: null,
     recorder: null,
     uidrequested: false,
+    streaming: false,
+    livePoller: null,
     
     setPortRef: function(s) {
         this.port = s;
@@ -29,9 +31,6 @@ module.exports = {
     setInstrumentRef: function(i) {
     },
 
-
-
-        
     // How the device is connected on the serial port            
     portSettings: function() {
         return  {
@@ -55,7 +54,29 @@ module.exports = {
         this.uidrequested = true;
         this.port.write(this.output('{ "get": "guid" }'));
     },
-
+    
+    isStreaming: function() {
+        return this.streaming;
+    },
+    
+    startLiveStream: function(period) {
+        var self = this;
+        if (!this.streaming) {
+            console.log("[Onyx] Starting live data stream");
+            this.livePoller = setInterval(function() {
+                        self.port.write(self.output('GETCPM'));
+                    }, (period) ? period*1000: 1000);
+            this.streaming = true;
+        }
+    },
+    
+    stopLiveStream: function(period) {
+        if (this.streaming) {
+            console.log("[Onyx] Stopping live data stream");
+            clearInterval(this.livePoller);
+            this.streaming = false;
+        }
+    },
     
     format: function(data, recording) {
         // All commands now return JSON

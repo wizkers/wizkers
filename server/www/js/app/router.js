@@ -96,7 +96,7 @@ define(function(require) {
 
         diagnostics: function (id) {
             var self = this;
-            if (linkManager.connected) {
+            if (linkManager.isConnected()) {
                 console.log('Switching to the instrument diagnostics view');
                 instrumentManager.getDiagDisplay({model: settings}, function(view) {
                     self.switchView(view);
@@ -160,7 +160,7 @@ define(function(require) {
         // is already downloaded in the database or not.
         devicelogmanagement: function(id) {
             var self = this;
-            if (linkManager.connected) {
+            if (linkManager.isConnected()) {
                 var allLogs = instrumentManager.getInstrument().logs;
                 allLogs.fetch({success:function(){
                     instrumentManager.getLogManagementView({collection:allLogs}, function(view) {

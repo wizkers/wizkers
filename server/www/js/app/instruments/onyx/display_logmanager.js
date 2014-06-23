@@ -84,6 +84,7 @@ define(function(require) {
 
         saveLogSession: function(data) {
             console.log("Log transfer incoming...");
+            var self = this;
 
             var points = data.log_data;
             // Phase I: check if this log is already stored and we need to append to it, or if
@@ -139,8 +140,8 @@ define(function(require) {
                                     logEntry.save();    
                                 }
                             }
-                            $('#logModal .modal-body', this.el).html('<p>Log downloaded.</p><p>New data points:' + newPoints + '.</p>');
-                            $('#logDismissOK', this.el).removeAttr('disabled');
+                            $('#logModal .modal-body', self.el).html('<p>Log downloaded.</p><p>New data points:' + newPoints + '.</p>');
+                            $('#logDismissOK', self.el).removeAttr('disabled');
                         }
                     });                
                 }

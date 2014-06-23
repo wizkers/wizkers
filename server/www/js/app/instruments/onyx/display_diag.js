@@ -26,7 +26,7 @@ define(function(require) {
         initialize:function () {
             linkManager.on('input', this.showInput, this);
 
-            if (linkManager.streaming)
+            if (!linkManager.isRecording())
                 linkManager.stopLiveStream();
         },
 
@@ -60,7 +60,7 @@ define(function(require) {
             $('#post2',this.el).html('');
             // Query controller for various info:
             this.queriesDone = false;
-            if (linkManager.connected) {
+            if (linkManager.isConnected()) {
                 linkManager.driver.version();            
             }
         },

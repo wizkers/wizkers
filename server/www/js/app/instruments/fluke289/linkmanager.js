@@ -15,8 +15,6 @@ define(function(require) {
         var self = this;
         var lm = linkManager;
         this.socket = lm.socket;
-        var streaming = false;
-        var livePoller = null; // Reference to the timer for live streaming
         this.battCheck = 0;
         this.ledState = "OFF";
 
@@ -34,15 +32,6 @@ define(function(require) {
             this.livePoller = setInterval(this.queryMeasurementFull, (period) ? period*1000: 1000);
             this.streaming = true;
 
-        }
-
-
-        this.stopLiveStream = function() {
-            if (typeof this.livePoller != 'undefined') {
-                console.log("Fluke 289  - Stopping live data stream");
-                clearInterval(this.livePoller);
-                this.streaming = false;
-            }
         }
 
         //////
