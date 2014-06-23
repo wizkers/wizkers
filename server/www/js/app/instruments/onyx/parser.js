@@ -15,9 +15,9 @@ define(function(require) {
     
     var parser = function(socket) {
         
-        this.socket = socket;
-        this.livePoller = null; // Reference to the live streaming poller
-        this.streaming = false;
+        var socket = socket;
+        var livePoller = null; // Reference to the live streaming poller
+        var streaming = false;
         
         this.portSettings = function() {
             return  {
@@ -47,19 +47,19 @@ define(function(require) {
         // period in seconds
         this.startLiveStream = function(period) {
             var self = this;
-            if (!this.streaming) {
-                this.livePoller = setInterval(function() {
-                    self.socket.emit('controllerCommand', 'GETCPM');                    
+            if (!streaming) {
+                livePoller = setInterval(function() {
+                    socket.emit('controllerCommand', 'GETCPM');                    
                 }, (period) ? period*1000: 1000);
-                this.streaming = true;
+                streaming = true;
             }
         };
         
         this.stopLiveStream = function(args) {
-            if (this.streaming) {
+            if (streaming) {
                 console.log("Stopping live data stream");
-                clearInterval(this.livePoller);
-                this.streaming = false;
+                clearInterval(livePoller);
+                streaming = false;
             }
         };
         
@@ -75,12 +75,12 @@ define(function(require) {
                     return;
                 var response = JSON.parse(data);
                 if (this.uidrequested && response.guid != undefined) {
-                    this.socket.trigger('uniqueID',response.guid);
+                    socket.trigger('uniqueID',response.guid);
                     this.uidrequested = false;
                 } else {
-                    this.socket.trigger('serialEvent', response);
+                    socket.trigger('serialEvent', response);
                     if (recording)
-                        this.socket.record(response); // 'socket' also records for in-browser impl.
+                        socket.record(response); // 'socket' also records for in-browser impl.
                 }
             } catch (err) {
                 console.log('Not able to parse JSON response from device:\n' + data + '\n' + err);

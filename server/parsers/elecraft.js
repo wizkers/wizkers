@@ -35,6 +35,9 @@ module.exports = {
     socket: null,
     recorder: null,
     port: null,
+    streaming: false,
+    livePoller: null,
+
     
     setPortRef: function(s) {
         this.port = s;
@@ -79,7 +82,55 @@ module.exports = {
             console.log("Error on serial port while requesting Elecraft UID : " + err);
         }
     },
+    
+    isStreaming: function() {
+        return this.streaming;
+    },
+    
+    // period is in seconds
+    startLiveStream: function(period) {
+        var self = this;
+        if (!this.streaming) {
+            console.log("[Elecraft] Starting live data stream");
+            // The radio can do live streaming to an extent, so we definitely will
+            // take advantage:
+            // K31 enables extended values such as proper BPF reporting
+            // AI2 does not send an initial report, so we ask for the initial data
+            // before...
+            this.port.write('K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
+            this.livePoller = setInterval(this.queryRadio.bind(this), (period) ? period*1000: 1000);
+            this.streaming = true;
+        }
+    },
+    
+    stopLiveStream: function(period) {
+        if (this.streaming) {
+            console.log("[Elecraft] Stopping live data stream");
+            // Stop live streaming from the radio:
+            this.port.write('AI0;');
+            clearInterval(this.livePoller);
+            this.streaming = false;
+        }
+    },
+    
+    queryRadio: function() {
+        // TODO: follow radio state over here, so that we only query power
+        // when the radio transmits, makes much more sense
 
+        // This is queried every second - we stage our queries in order
+        // to avoid overloading the radio, not sure that is totally necessary, but
+        // it won't hurt
+
+        // Query displays and band (does not update by itself)
+        this.port.write('DB;DS;BN;'); // Query VFO B and VFOA Display
+
+        // Then ask the radio for current figures:
+        this.port.write('PO;'); // Query actual power output
+
+        // And if we have an amp, then we can get a lot more data:
+        this.port.write('^PI;^PF;^PV;^TM;');
+        this.port.write('^PC;^SV;'); // Query voltage & current
+    },
         
     // Format returns an ASCII string - or a buffer ? Radio replies with
     // non-ASCII values on some important commands (VFO A text, Icons, etc)

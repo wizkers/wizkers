@@ -20,7 +20,10 @@ define(function(require) {
     
     var parser = function(socket) {
         
-        this.socket = socket;
+        var socket = socket;
+        var livePoller = null; // Reference to the live streaming poller
+        var streaming = false;
+
         
         this.portSettings = function() {
             return  {
@@ -45,7 +48,7 @@ define(function(require) {
         this.sendUniqueID = function() {
             this.uidrequested = true;
             try {
-                this.port.write("MN026;ds;MN255;");
+                socket.controllerCommand("MN026;ds;MN255;");
             } catch (err) {
                 console.log("Error on serial port while requesting Elecraft UID : " + err);
             }
@@ -54,22 +57,47 @@ define(function(require) {
         // period in seconds
         this.startLiveStream = function(period) {
             var self = this;
-            if (!this.streaming) {
-                this.livePoller = setInterval(function() {
-                    self.socket.emit('controllerCommand', 'GETCPM');                    
-                }, (period) ? period*1000: 1000);
-                this.streaming = true;
+            if (!streaming) {
+                console.log("[Elecraft] Starting live data stream");
+                // The radio can do live streaming to an extent, so we definitely will
+                // take advantage:
+                // K31 enables extended values such as proper BPF reporting
+                // AI2 does not send an initial report, so we ask for the initial data
+                // before...
+                socket.controllerCommand('K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
+                livePoller = setInterval(this.queryRadio.bind(this), (period) ? period*1000: 1000);
+                streaming = true;
             }
         };
         
         this.stopLiveStream = function(args) {
-            if (this.streaming) {
-                console.log("Stopping live data stream");
-                clearInterval(this.livePoller);
-                this.streaming = false;
+            if (streaming) {
+                console.log("[Elecraft] Stopping live data stream");
+                // Stop live streaming from the radio:
+                socket.controllerCommand('AI0;');
+                clearInterval(livePoller);
+                streaming = false;
             }
         };
+        
+        function queryRadio() {
+            // TODO: follow radio state over here, so that we only query power
+            // when the radio transmits, makes much more sense
 
+            // This is queried every second - we stage our queries in order
+            // to avoid overloading the radio, not sure that is totally necessary, but
+            // it won't hurt
+
+            // Query displays and band (does not update by itself)
+            socket.controllerCommand('DB;DS;BN;'); // Query VFO B and VFOA Display
+
+            // Then ask the radio for current figures:
+            socket.controllerCommand('PO;'); // Query actual power output
+
+            // And if we have an amp, then we can get a lot more data:
+            socket.controllerCommand('^PI;^PF;^PV;^TM;');
+            socket.controllerCommand('^PC;^SV;'); // Query voltage & current
+        };
         
         // Format can act on incoming data from the radio, and then
         // forwards the data to the app through a 'serialEvent' event.
@@ -78,12 +106,12 @@ define(function(require) {
             if (this.uidrequested && data.substr(0,5) == "DS@@@") {
                 // We have a Unique ID
                 console.log("Sending uniqueID message");
-                this.socket.trigger('uniqueID','' + data.substr(5,5));
+                socket.trigger('uniqueID','' + data.substr(5,5));
                 this.uidrequested = false;
                 return;
             }
 
-            this.socket.trigger('serialEvent',data);
+            socket.trigger('serialEvent',data);
             
         };
     

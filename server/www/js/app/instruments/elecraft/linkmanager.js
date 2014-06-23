@@ -31,37 +31,6 @@ define(function(require) {
             lm.socket.emit('driver','elecraft');
         }
 
-        // LiveStream polls the radio every 2 seconds for VFOA and VFOB data
-        this.startLiveStream = function() {
-            console.log("Starting live data stream for Elecraft");
-            // Ignore settings and use a good fixed interval, i.e. 1 second
-
-            // The radio can do live streaming to an extent, so we definitely gotta
-            // take advantage:
-            // K31 enables extended values such as proper BPF reporting
-            // AI2 does not send an initial report, so we ask for the initial data
-            // before...
-            this.cc('K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
-
-            this.livePoller = setInterval(this.queryRadio.bind(this), 1000);
-            this.streaming = true;
-            return true; 
-        }
-
-        this.stopLiveStream = function() {
-            if (!this.streaming)
-                return;
-            if (typeof this.livePoller != 'undefined') {
-                console.log("Elecraft  - Stopping live data stream");
-                // Stop live streaming from the radio:
-                this.cc('AI0;');
-
-                clearInterval(this.livePoller);
-                this.streaming = false;
-            }
-            return true;
-        }
-    
         //////
         // End of standard API
         //////
@@ -171,29 +140,6 @@ define(function(require) {
                 this.cc('BN' + bandcode + ';');
             }
         }
-
-        this.queryRadio = function() {
-
-            // TODO: follow radio state over here, so that we only query power
-            // when the radio transmits, makes much more sense
-
-            // This is queried every second - we stage our queries in order
-            // to avoid overloading the radio, not sure that is totally necessary, but
-            // it won't hurt
-
-            // Query displays and band (does not update by itself)
-            this.cc('DB;DS;BN;'); // Query VFO B and VFOA Display
-
-            // Then ask the radio for current figures:
-            this.cc('PO;'); // Query actual power output
-
-            // And if we have an amp, then we can get a lot more data:
-            this.cc('^PI;^PF;^PV;^TM;');
-            this.cc('^PC;^SV;'); // Query voltage & current
-        }
-
-
-
 
         console.log('Started Elecraft link manager driver..');
 
