@@ -186,7 +186,7 @@ define(function(require) {
 
             }
             if (data.recording) {
-                $('.ctrl-record', this.el).html("<i class=\"icon-white icon-pause\"></i>&nbsp;Recording...").addClass('btn-success')
+                $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording...').addClass('btn-success')
                        .removeClass('btn-danger').attr('disabled', false);
                 this.recording = true;
             }
@@ -198,16 +198,17 @@ define(function(require) {
             var self = this;
             if ($('.ctrl-connect', this.el).attr('disabled'))
                 return;
-            $('.ctrl-connect', this.el).html("<i class=\"icon-off icon-white\"></i>&nbsp;Connecting...").addClass('btn-warning')
+            $('.ctrl-connect', this.el).addClass('btn-warning')
                                        .removeClass('btn-success').removeClass('btn-danger').attr('disabled', true);
             // First, get serial port settings (assume Serial for now)
             var id = instrumentManager.getInstrument().id;
-            console.log('Opening instrument ID ' + id);
             if (id != null ) {
                     if (!linkManager.connected) {
+                        $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Opening...')
                         self.instrumentUniqueID = null; // Just in case we change the instrument
                         linkManager.openInstrument(id);
                     } else {
+                        $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Closing...')
                         linkManager.closeInstrument(id);
                     }
             }
@@ -221,7 +222,7 @@ define(function(require) {
             if (!this.recording) {
                 $('#RecordModal').modal();
             } else {
-                $('.ctrl-record', this.el).html('<i class="icon-download"></i>&nbsp;Record session').addClass('btn-danger')
+                $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-download"></span>&nbsp;Record session').addClass('btn-danger')
                            .removeClass('btn-success');
                 linkManager.stopRecording();
                 this.recording = false;
@@ -245,7 +246,7 @@ define(function(require) {
                       }}
               );
 
-            $('.ctrl-record', this.el).html("<i class=\"icon-white icon-pause\"></i>&nbsp;Recording...").addClass('btn-success')
+            $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording...').addClass('btn-success')
                        .removeClass('btn-danger').attr('disabled', false);
             this.recording = true;
         },

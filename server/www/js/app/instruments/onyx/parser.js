@@ -82,12 +82,12 @@ define(function(require) {
     
         // Not used
         this.onOpen =  function(success) {
-            console.log("Elecraft Driver: got a port open signal");
+            console.log("Onyx in-browser Driver: got a port open signal");
         };
     
         // Not used
         this.onClose = function(success) {
-            console.log("Elecraft driver: got a port close signal");
+            console.log("Onyx in-browser Driver: got a port close signal");
         };
 
     }
