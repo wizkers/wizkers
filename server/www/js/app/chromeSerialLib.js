@@ -141,6 +141,9 @@ define(function(require) {
             chrome.serial.disconnect( self.connectionId, function(success) {
                 self.portOpen = false;
                 self.trigger('status', {portopen: false} );
+                if (self.driver.onClose) {
+                    self.driver.onClose();
+                }
                 console.log("chromeSerialLib: closePort success");
                }
             );
@@ -215,6 +218,8 @@ define(function(require) {
         
         // Now hook up our own event listeners:
         this.on('data', onDataReady);
+        
+        console.log("Chrome Serial Library loaded");
 
     };
 

@@ -38,7 +38,7 @@ define(function(require) {
     // create the audio context (chrome/FF only for now)
     if (! window.AudioContext) {
         if (! window.webkitAudioContext) {
-            alert('no audiocontext found');
+            console.log('no audiocontext found');
         }
         window.AudioContext = window.webkitAudioContext;
     }
@@ -264,11 +264,11 @@ define(function(require) {
                                                     sourceNode = context.createMediaStreamSource(stream);
                                                     self.initResampler();
                                                 }, function(err) {
-                                                    alert('Get User Media Failure: ' + err);
+                                                    console.log('Get User Media Failure: ' + err);
                                                 }
                                               );
                     } catch (e) {
-                        alert('webkitGetUserMedia threw exception :' + e);
+                        console.log('webkitGetUserMedia threw exception :' + e);
                     }
                 } else {
                     self.initResampler();

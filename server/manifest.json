@@ -10,7 +10,8 @@
   },
   "permissions": [
     "serial",
-    "storage"
+    "storage",
+    "audioCapture"
   ],
   "sandbox": {
     "pages": [ "public/tpl/HomeView.html" ]
