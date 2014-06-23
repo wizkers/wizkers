@@ -1,5 +1,4 @@
 <div class="col-md-9">
-
     <div class="row" id="id1">
       <div class="col-md-6">
             <a role="button" <%= (selected.length) ? '':'disabled'%> title="Select one or more logs below and click here" class="btn btn-info displaylog">
@@ -54,32 +53,38 @@
 
 <div class="col-md-3">
     <div class="row">
-        <div class="col-md-12 thumbnail">
+        <div class="col-md-12">
+             <div class="thumbnail">
             <div style="float:right;"><a href="#" role="button" class="resetZoom btn btn-mini">Reset Zoom</a></div>
             <h6>Overiew</h6>
             <div id="overview" class="chart" style="position: relative; height:150px;cursor:crosshair;"></div>
-        </div>
+            </div>
+    </div>
     </div><br>
     <div class="row">
         <h4><span id="logtitle">Log title</span></h4>
     </div>
     <div class="row">
-        <div class="col-md-12 thumbnail">
+        <div class="col-md-12">
+            <div class="thumbnail">
                 <p>Data points: <span id="log_size">0</span></p>
                 <p>Log start:<br><small><span id="log_start">0</span></small></p>
                 <p>Log end:<br><small><span id="log_end">0</span></small></p>
                     <!-- <p>User cal: <span id="usercal">0</span></p> -->
+            </div>
         </div>
     </div><br>
   <div class="row">
-      <div class="well" id="help-area">
-        <!--<img src="img/safecast_unboxed.png" width="60" style="float:right;">-->
-        <h3>Log Management</h3>
-          <p>
-              The table on the left lists all logs stored in our database. Use "Manage Device Logs" if supported by your device, to download new device logs.
-          </p>
-          <p>Note that "Manage Device Logs" will be disabled if your device is not connected.</p>
-      </div><!--/.well -->
+      <div class="col-md-12">
+          <div class="well" id="help-area">
+            <!--<img src="img/safecast_unboxed.png" width="60" style="float:right;">-->
+            <h3>Log Management</h3>
+              <p>
+                  The table on the left lists all logs stored in our database. Use "Manage Device Logs" if supported by your device, to download new device logs.
+              </p>
+              <p>Note that "Manage Device Logs" will be disabled if your device is not connected.</p>
+          </div><!--/.well -->
+      </div>
    </div><!--/row-->
 
 </div><!--/col-md-3-->
