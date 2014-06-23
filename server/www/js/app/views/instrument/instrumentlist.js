@@ -51,23 +51,18 @@ define(function(require) {
             selectInstrument: function(event) {
                 console.log('Instrument selected: ' + this.model.id);
                 var theID = this.model.id;
+                // Detect if we clicked on a new instrument or not:
+                if (this.model.id == instrumentManager.getInstrument().id) {
+                    // If so, just return to main screen
+                    router.navigate('/', true);
+                }
                 // Now store the instrument ID in our settings:
                 settings.set({currentInstrument:theID});
                 // Update our settings to use the correct port: 
                 settings.set({ serialPort: this.model.get('port')});
+                // If the settings changed, the router will pick this up since
+                // it listens to change events in settings, and react accordingly.
                 settings.save(null, {success: function() {
-                    // We have to close the current instrument before getting to the main page:
-                    try {
-                        var id = instrumentManager.getInstrument().id;
-                        linkManager.closeInstrument(id);
-                    } catch (err) {
-                        console.log("No current instrument selected, not closing it");
-                    }
-                    // Disabled the navigate below: our router will trigger this once hte
-                    // new instrument is loaded, so that we don't get a double rendering, which is
-                    // super expensive (once of the old instrument, once of the new instrument)
-                    //router.navigate('/', true);
-                    return false;
                 }});
                 return false;
             },
