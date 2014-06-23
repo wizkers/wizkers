@@ -95,6 +95,13 @@ define(function(require) {
             if (instrumentManager.getCaps().indexOf("LogManagementView") == -1 || ! linkManager.isConnected()) {
                     $('.devicelogs',self.el).attr('disabled', true);
             }
+            
+            // Now, we only want to scroll the table, not the whole page:
+            var tbheight = window.innerHeight - $('#id1',this.el).height() - $('.header .container').height() - 20;
+            $('#tablewrapper',this.el).css('max-height',
+                                       tbheight + 'px'
+                                            );
+            
             return this;
         },
 
