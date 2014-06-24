@@ -48,7 +48,7 @@ define(function(require) {
         this.sendUniqueID = function() {
             this.uidrequested = true;
             try {
-                socket.controllerCommand("MN026;ds;MN255;");
+                socket.emit('controllerCommand', "MN026;ds;MN255;");
             } catch (err) {
                 console.log("Error on serial port while requesting Elecraft UID : " + err);
             }
@@ -64,8 +64,8 @@ define(function(require) {
                 // K31 enables extended values such as proper BPF reporting
                 // AI2 does not send an initial report, so we ask for the initial data
                 // before...
-                socket.controllerCommand('K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
-                livePoller = setInterval(this.queryRadio.bind(this), (period) ? period*1000: 1000);
+                socket.emit('controllerCommand','K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
+                livePoller = setInterval(queryRadio, (period) ? period*1000: 1000);
                 streaming = true;
             }
         };
@@ -74,7 +74,7 @@ define(function(require) {
             if (streaming) {
                 console.log("[Elecraft] Stopping live data stream");
                 // Stop live streaming from the radio:
-                socket.controllerCommand('AI0;');
+                socket.emit('controllerCommand','AI0;');
                 clearInterval(livePoller);
                 streaming = false;
             }
@@ -89,14 +89,14 @@ define(function(require) {
             // it won't hurt
 
             // Query displays and band (does not update by itself)
-            socket.controllerCommand('DB;DS;BN;'); // Query VFO B and VFOA Display
+            socket.emit('controllerCommand','DB;DS;BN;'); // Query VFO B and VFOA Display
 
             // Then ask the radio for current figures:
-            socket.controllerCommand('PO;'); // Query actual power output
+            socket.emit('controllerCommand','PO;'); // Query actual power output
 
             // And if we have an amp, then we can get a lot more data:
-            socket.controllerCommand('^PI;^PF;^PV;^TM;');
-            socket.controllerCommand('^PC;^SV;'); // Query voltage & current
+            socket.emit('controllerCommand','^PI;^PF;^PV;^TM;');
+            socket.emit('controllerCommand','^PC;^SV;'); // Query voltage & current
         };
         
         // Format can act on incoming data from the radio, and then

@@ -276,15 +276,15 @@ define(function(require) {
             },
 
             updateStatus: function(data) {
-                if (linkManager.connected && !this.deviceinitdone) {
+                if (data.portopen && !this.deviceinitdone) {
                     linkManager.startLiveStream();
 
                     // Ask the radio for a few additional things:
                     // Requested power:
                     linkManager.driver.getRequestedPower();
-                } else {
+                } else if (!data.portopen) {
                     this.deviceinitdone = false;
-                }        
+                }       
             },
 
             setIcon: function(name, visible) {

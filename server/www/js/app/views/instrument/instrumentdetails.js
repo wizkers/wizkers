@@ -56,6 +56,7 @@ define(function(require) {
         },
 
         selectPort: function(event) {
+            $('#port').val($('select#otherports').val());
             this.model.set({port: event.target.value});
         },
 
