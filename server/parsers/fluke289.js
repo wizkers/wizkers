@@ -88,6 +88,8 @@ module.exports = {
     recorder: null,
     uidrequested: false,
     recording: false,     // to call the main app in case we need to record readings
+    streaming: false,
+    livePoller: null,
     
     // Link state handling
     currentLinkstate: 0,     // see linkstate above
@@ -210,7 +212,7 @@ module.exports = {
     // what we will request, but we will return it inside a special
     // message.
     sendUniqueID: function() {
-        this.debug("Fluke289: Asking for serial number for UID request");
+        this.debug("[fluke289] Asking for serial number for UID request");
         this.uidrequested = true;
         // TODO: handle port write within this.output
         try {
@@ -219,6 +221,37 @@ module.exports = {
             console.log("Error on serial port while requesting UID : " + err);
         }
     },
+    
+    queryMeasurementFull: function() {
+        try {
+            this.port.write(this.output("QDDA"));        
+        } catch (err) {
+            console.log("[fluke289] Error while writing to serial port in live streaming");
+        }
+    },
+    
+    isStreaming: function() {
+        return this.streaming;
+    },
+    
+    // period is in seconds
+    
+    startLiveStream: function(period) {
+        if (!this.streaming) {
+            console.log("[fluke289] Starting live data stream");
+            this.livePoller = setInterval(this.queryMeasurementFull.bind(this), (period) ? period*1000: 1000);
+            this.streaming = true;
+        }
+    },
+    
+    stopLiveStream: function(period) {
+        if (this.streaming) {
+            console.log("[fluke289] Stopping live data stream");
+            clearInterval(this.livePoller);
+            this.streaming = false;
+        }
+    },
+
     
     
     // Link layer protocol management: receives raw data from

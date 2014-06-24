@@ -26,6 +26,9 @@ define(function(require) {
                     return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a name"};
                 };
                 
+                // Create a reference to my logs:
+                this.logs = new Devicelog.Logs();
+
                 /**
                  * Depending on runmode, we are either defining a URL or
                  * relying on backbone localstorage
@@ -36,11 +39,8 @@ define(function(require) {
                     this.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument");
                 } else {
                     this.urlRoot = "/instruments";
+                    this.logs.url = "/instruments/" + this.id + "/logs";
                 }
-
-                // Create a reference to my logs:
-                this.logs = new Devicelog.Logs();
-                this.logs.url = "/instruments/" + this.id + "/logs";
 
             },
 

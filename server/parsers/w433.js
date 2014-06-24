@@ -19,6 +19,7 @@ module.exports = {
     socket: null,
     recorder: null,
     instrument: null,
+    streaming: false,
     
     setPortRef: function(s) {
     },
@@ -69,6 +70,20 @@ module.exports = {
     // always return the same ID
     sendUniqueID: function() {
         this.socket.emit('uniqueID','00000000 (n.a.)');
+    },
+
+    isStreaming: function() {
+        return this.streaming;
+    },
+    
+    // period is in seconds
+    // The sensor sends data by itself, so those functions are empty...
+    startLiveStream: function(period) {
+        this.streaming = true;
+    },
+    
+    stopLiveStream: function(period) {
+        this.streaming = false;
     },
 
         

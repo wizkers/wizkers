@@ -76,11 +76,14 @@ define(function(require) {
         doDeleteLog: function(event) {
             var self = this;
             var logToDelete = this.deviceLogs.where({_id: $(event.currentTarget).data('id')});
+            // WARNING: DOES NOT DELETE THE LOG ENTRIES !
+            var logEntries = logToDelete[0].entries;
+            
             logToDelete[0].destroy(
                 {success: function(model, response) {
-                    $('#deleteConfirm',this.el).modal('hide');
+                    $('#deleteConfirm',self.el).modal('hide');
                     self.render();
-                                }
+                    }
                });
         },
 

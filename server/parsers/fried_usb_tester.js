@@ -14,6 +14,7 @@ module.exports = {
     // Set a reference to the socket.io socket and port
     socket: null,
     recorder: null,
+    streaming: false,
     
     setPortRef: function(s) {
     },
@@ -50,7 +51,20 @@ module.exports = {
     sendUniqueID: function() {
         this.socket.emit('uniqueID','00000000 (n.a.)');
     },
-
+    
+    isStreaming: function() {
+        return this.streaming;
+    },
+    
+    // period is in seconds
+    // The sensor sends data by itself, so those functions are empty...
+    startLiveStream: function(period) {
+        this.streaming = true;
+    },
+    
+    stopLiveStream: function(period) {
+        this.streaming = false;
+    },
         
     // format should return a JSON structure.
     format: function(data, recording) {

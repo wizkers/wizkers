@@ -27,13 +27,6 @@ define(function(require) {
             lm.socket.emit('driver','fluke28x');
         }
 
-        this.startLiveStream = function(period) {
-            console.log("Starting live data stream for Fluke289");
-            this.livePoller = setInterval(this.queryMeasurementFull, (period) ? period*1000: 1000);
-            this.streaming = true;
-
-        }
-
         //////
         // End of standard API
         //////
