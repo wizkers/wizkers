@@ -145,19 +145,8 @@ define(function(require) {
             model: Log,
 
             initialize: function(models, options) {
-                /**
-                 * Depending on runmode, we are either defining a URL or
-                 * relying on backbone localstorage
-                 */
-                if (vizapp.type == "cordova") {
-                    this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs"); // Unique name within your app.
-                } else if (vizapp.type == "chrome") {
-                    this.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs");
-                } else {
-                    this.url =  "/logs/";
-                }
             },
-
+            
             // Create a new subset collection of only some log sessions
             getLogSubset: function(logSessionIDs) {
                 var extract = this.filter(function(logSession) {

@@ -39,10 +39,30 @@ define(function(require) {
                     this.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument");
                 } else {
                     this.urlRoot = "/instruments";
-                    this.logs.url = "/instruments/" + this.id + "/logs";
+                }
+
+                this.updateLogsURL();
+                // When we create a model, this.id is undefined: because of this, we listen to
+                // the "sync" event, and update the entries' URL upon it (sync is fired when the model is
+                // saved, therefore the ID is updated
+                this.on("sync", this.updateLogsURL, this);                
+            },
+        
+            updateLogsURL: function() {
+                /**
+                 * Depending on runmode, we are either defining a URL or
+                 * relying on backbone localstorage
+                 */
+                if (vizapp.type == "cordova") {
+                    this.logs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
+                } else if (vizapp.type == "chrome") {
+                    this.logs.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
+                } else {
+                    this.logs.url = "/instruments/" + this.id + "/logs/";
                 }
 
             },
+
 
             validateItem: function (key) {
                 return (this.validators[key]) ? this.validators[key](this.get(key)) : {isValid: true};
