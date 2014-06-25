@@ -107,16 +107,15 @@ define(function(require) {
                 // We don't know this log: create a new session
                 currentLog = new Devicelog.Log();
                 this.deviceLogs.add(currentLog);
-                currentLog.set('startstamp', new Date(points[0].time).getTime());
+                currentLog.set('startstamp', new Date(points[0].time).toISOString());
                 // The type is purely arbitrary: we are using the type "onyxlog" for
                 // logs that are downloaded from the Onyx device
                 currentLog.set('logtype', 'onyxlog'); 
             }
-            currentLog.set('endstamp', new Date(points[points.length-1].time).getTime());
+            currentLog.set('endstamp', new Date(points[points.length-1].time).toISOString());
             currentLog.save(null,{
                 success: function() {
-                    currentLog.updateEntriesURL(); // Somehow this is required ??
-
+                    currentLog.updateEntriesURL();
                     // We now gotta fetch all existing log entries for the log so that
                     // we don't create duplicates
                     currentLog.entries.fetch({
@@ -133,7 +132,7 @@ define(function(require) {
                                     // Note: the logsession ID is automaticallyu added by the
                                     //       server.
                                     logEntry = new Devicelog.LogEntry({
-                                                    timestamp:pointStamp.getTime(),
+                                                    timestamp:pointStamp.toISOString(),
                                                     data: points[i]
                                                   });
                                     currentLog.entries.add(logEntry);

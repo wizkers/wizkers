@@ -178,14 +178,20 @@ define(function(require) {
         
         downloadCSV: function() {
             var header = 'data:text/csv; charset=utf-8,';
-            var csv = header + "Timestamp (UTC), CPM, CPM30, CPMRAW, Valid\n";
+            var csv = header + "Timestamp (UTC), ";
             for (var i=0; i < this.deviceLogs.length; i++) {
                 var entries = this.deviceLogs.at(i).entries;
+                var type = this.deviceLogs.at(i).get('logtype');
+                if (type == 'live') {
+                     csv += "CPM, CPM30, CPMRAW, Valid\n";
+                } else {
+                    csv += "accel_x_end, accel_x_start, accel_y_end, accel_y_start, accel_z_end, accel_z_start, cpm, duration (min), time (ISO String)\n";
+                }
                 for (var j=0; j < entries.length; j++) {
                     var entry = entries.at(j);
-                    var cpm = entry.get('data').cpm;
+                    var data = entry.get('data');
                     // Sometimes, we get entries without a valid CPM reading, detect this
-                    if (cpm) {
+                    if (data.cpm) {
                         // No known spreadsheet software handles ISO8601 dates
                         // properly (like 2014-06-17T18:00:04.067Z ) so we
                         // convert the timestamp to a string that is recognized by
@@ -194,11 +200,15 @@ define(function(require) {
                         // time stamp whenever we are running as an embedded app or a server
                         // app.
                         var ts = new Date(entry.get('timestamp')).toISOString().replace(/[TZ]/g, ' ');
-                        csv += ts + "," +
-                               cpm.value + "," +
-                               cpm.cpm30 + "," +
-                               cpm.raw + "," +
-                               cpm.valid + "\n";
+                        csv += ts;
+                        // Our live data is packed a bit differently than onyxlog data:
+                        if (type == 'live') {
+                            data = data.cpm;
+                        }
+                        for (var key in data) {
+                            csv += ',' + data[key];
+                        }
+                        csv += '\n';
                     }
                 }
             }

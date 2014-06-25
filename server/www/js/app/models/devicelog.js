@@ -41,12 +41,10 @@ define(function(require) {
             initialize: function(models, options) {
             },
 
-    
             //url:   is not defined by default, LogEntries is
             // nested inside of Log
 
             idAttribute: "_id",
-
             model: LogEntry,
 
             // Maintain our collection in order automatically by adding a comparator:
@@ -79,16 +77,26 @@ define(function(require) {
             initialize: function() {
                 var self = this;
                 
-                // A lot contains... entries (surprising, eh?). Nest
+                // A log contains... entries (surprising, eh?). Nest
                 // the collection here:
                 this.entries = new LogEntries();
                 
                 this.updateEntriesURL();
                 
+                // Watch our entries so that we can update the datapoints entry
+                this.entries.on("sync", this.updateDatapoints, this);
+                
                 // When we create a model, this.id is undefined: because of this, we listen to
                 // the "sync" event, and update the entries' URL upon it (sync is fired when the model is
                 // saved, therefore the ID is updated
                 this.on("sync", this.updateEntriesURL, this);                
+            },
+            
+            updateDatapoints: function() {
+                var points = this.entries.size();
+                console.log("Number of datapoints: " + points);
+                this.set('datapoints',points);
+                this.save();
             },
 
             updateEntriesURL: function() {
@@ -103,7 +111,6 @@ define(function(require) {
                 } else {
                     this.entries.url =  "/logs/" + this.id + "/entries";
                 }
-
             },
 
            defaults: {
