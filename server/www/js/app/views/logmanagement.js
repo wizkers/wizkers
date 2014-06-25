@@ -88,7 +88,7 @@ define(function(require) {
                     var doit = function() {
                         var entry = logEntries.at(0);
                         if (entry) {
-                            console.log("Destroying entry: " + entry.id);
+                            console.log("Destroying entry...");
                             entry.destroy({ success: function() {
                                                 console.log("Entry deleted");
                                                 doit();                
