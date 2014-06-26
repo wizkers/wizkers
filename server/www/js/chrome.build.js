@@ -61,11 +61,11 @@
     
     appDir: '..',
     baseUrl: 'js',
-    dir: '../../polylog_cordova_build/',
+    dir: '../../chrome_build/',
     
     modules: [
         {
-            name: 'main-cordova'
+            name: 'main-chrome'
         }
     ],
     
@@ -77,10 +77,16 @@
         // we can upgrade easily
         jquery: 'lib/jquery-1.11.0',
         backbone: 'lib/backbone-1.1.2',
-        localstorage: 'lib/backbone.localStorage-1.1.7',
+        localstorage: 'lib/backbone.chromestorage',
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',
-	    text: 'lib/text',
+        text: 'lib/text',
+        
+        // Signal processing libs
+        dsp: 'lib/dsp',
+        chroma: 'lib/chroma',
+        resampler: 'lib/resampler',
+
         
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
@@ -89,8 +95,7 @@
         flot_time: 'lib/flot-0.8.1/jquery.flot.time',
         flot_resize: 'lib/flot-0.8.1/jquery.flot.resize',
         flot_selection: 'lib/flot-0.8.1/jquery.flot.selection',
-        flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween',
-        
+        flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween'
     },
     
     /*
@@ -98,7 +103,7 @@
      */
     map: {
         '*': {
-            'socketio': 'app/cordovaSerialLib',
+            'socketio': 'app/chromeSerialLib',
             'serialport': 'app/lib/serialport',
         }
     },
