@@ -3,6 +3,7 @@
  * in the case of a Chrome packaged application.
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  *
  * One of the roles of this lib is also to act as a middleman for the
  * instrument driver: it receives data from the serial port, passes it to
