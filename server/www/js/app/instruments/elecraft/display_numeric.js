@@ -1,5 +1,8 @@
 /**
  *  The Num View actually makes small graphs for Elecraft radios :)
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

@@ -1,8 +1,11 @@
-// Log view for the W433.
-// 
-// Our model is a collection of Logs
-//
-// (c) 2014 Edouard Lafargue, ed@lafargue.name
+/*
+ * Log view for the W433.
+ * 
+ * Our model is a collection of Logs
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */
 
 define(function(require) {
     "use strict";

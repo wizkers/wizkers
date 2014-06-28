@@ -1,6 +1,9 @@
 /**
  * Use the 'spawn' module to interact with mongodb for
  * backup/restore operations
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 var spawn = require('child_process').spawn;
 var path = require('path');

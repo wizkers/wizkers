@@ -2,6 +2,8 @@
  * This is the link manager: it will use its low-level driver
  * for sending commands to instruments and parsing responses
  *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

@@ -1,7 +1,10 @@
 /**
  * An  W433 custom weather receiver This
  * object implements a standard API shared by all instruments
- * objects:
+ * objects
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 

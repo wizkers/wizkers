@@ -1,9 +1,11 @@
-// A parser for the Fried Circuits OLED Backpack
-
-
-// This object contains two entries:
-//  - The low level parser for the serial port driver
-//  - The high level parser for incoming serial port data
+/*
+ * A parser for the Fried Circuits OLED Backpack
+ *  This object contains two entries:
+ *  - The low level parser for the serial port driver
+ *  - The high level parser for incoming serial port data
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */
 
 var serialport = require('serialport');
 

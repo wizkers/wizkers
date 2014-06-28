@@ -2,6 +2,8 @@
  *  Settings returns an intrument settings view. These are displayed
  * on top of standard instrument settings in the instrument details view.
  *  
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 

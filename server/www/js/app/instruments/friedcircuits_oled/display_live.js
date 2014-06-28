@@ -1,9 +1,11 @@
-// Live view for the Fried Circuits OLED backpack
-// 
-// Our model is the settings object.
-//
-// (c) 2014 Edouard Lafargue, ed@lafargue.name
-//
+/*
+ * Live view for the Fried Circuits OLED backpack
+ *
+ * Our model is the settings object.
+ * 
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */
 
 define(function(require) {
     "use strict";

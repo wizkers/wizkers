@@ -1,7 +1,8 @@
 /**
  * We now use require.js: these are the mappings of our application
  *
-* (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 require.config({

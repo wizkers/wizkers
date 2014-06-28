@@ -1,7 +1,9 @@
-//  Live view display of the output of the Onyx
-// 
-// (c) 2014 Edouard Lafargue, ed@lafargue.name
-//
+/*
+ * Live view display of the output of the Onyx
+ * 
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */
 
 define(function(require) {
     "use strict";

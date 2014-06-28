@@ -1,6 +1,8 @@
 /**
  * The module that manages recording the output of an instrument to the
  * database
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 var mongoose = require('mongoose');

@@ -2,6 +2,7 @@
  * Edit the content of a log/ Only lets the user delete a point
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

@@ -6,6 +6,8 @@
  * Differences with server-side parser:
  *   - No recording support yet
  * 
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

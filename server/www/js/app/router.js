@@ -1,7 +1,8 @@
 /**
  * The main application router.
  *
- * (c) 2014 Edouard Lafargue ed@lafargue.name
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

@@ -1,7 +1,9 @@
 /**
  *
  * The Instrument manager handles all interactions with the various instruments.
-
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

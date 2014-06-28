@@ -1,7 +1,9 @@
-// Display output of Geiger counter in numeric format
-// 
-// (c) 2014 Edouard Lafargue, ed@lafargue.name
-
+/*
+ * Display output of Geiger counter in numeric format
+ * 
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */
 
 define(function(require) {
     "use strict";

@@ -3,6 +3,7 @@
  * Fluke 289 Diagnostics View. Extensive meter control.
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

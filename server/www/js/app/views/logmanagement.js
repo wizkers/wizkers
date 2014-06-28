@@ -1,10 +1,13 @@
-// Log management.
-// 
-// Our model is the settings object.
-//
-// This is a generic view, all devices display this.
-//
-// (c) 2014 Edouard Lafargue, ed@lafargue.name
+/*
+ * Log management.
+ *
+ * Our model is the settings object.
+ *
+ * This is a generic view, all devices display this.
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */
 
 define(function(require) {
     

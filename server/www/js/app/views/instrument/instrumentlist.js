@@ -2,6 +2,7 @@
  * Defines a list of instruments, arranged as a series of 'cards'
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

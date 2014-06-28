@@ -1,13 +1,17 @@
-//
-// A parser for my W433 Weather receiver. Totally custom design,
-// but very important to me.
-//
-// Supports the TX3 sensors.
-
-
-// This object contains two entries:
-//  - The low level parser for the serial port driver
-//  - The high level parser for incoming serial port data
+/*
+ * A parser for my W433 Weather receiver. Totally custom design,
+ * but very important to me.
+ *
+ * Supports the TX3 sensors.
+ *
+ *
+ * This object contains two entries:
+ *  - The low level parser for the serial port driver
+ *  - The high level parser for incoming serial port data
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */
 
 var serialport = require('serialport');
 

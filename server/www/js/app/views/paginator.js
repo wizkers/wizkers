@@ -1,6 +1,7 @@
 /**
  * Encapsulates a list of items into a paged view
  *
+ * Parts of this code coming from Christophe Coenraets, license to be clarified / TODO
  */
 
 define(function(require) {

@@ -6,6 +6,8 @@
  * Differences with server-side parser:
  *   - 'socket' uses "trigger" to emit events, not "emit"
  * 
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

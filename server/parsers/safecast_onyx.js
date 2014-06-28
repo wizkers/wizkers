@@ -1,7 +1,12 @@
-// A parser for the SafeCast Onyx.
-//
-// Only works on the current devel branch with json-compliant
-// serial output.
+/*
+ * A parser for the SafeCast Onyx.
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ *
+ * Only works on the current devel branch with json-compliant
+ * serial output.
+ */
 
 var serialport = require('serialport'),
     SerialPort  = serialport.SerialPort;

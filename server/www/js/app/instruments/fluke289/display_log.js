@@ -1,17 +1,20 @@
-// Log view for the Fluke 289.
-// 
-// Our model is a collection of Logs
-//
-// Eventually, will manage (dispatch?) all sort of log types:
-//
-//   - Live recording - done
-//   - Trendview logs
-//   - Min-Max logs
-//   - Peak logs
-//
-// Current status: - Live recording display
-//
-// (c) 2014 Edouard Lafargue, ed@lafargue.name
+/*
+ * Log view for the Fluke 289.
+ * 
+ * Our model is a collection of Logs
+ * 
+ * Eventually, will manage (dispatch?) all sort of log types:
+ * 
+ *   - Live recording - done
+ *   - Trendview logs
+ *   - Min-Max logs
+ *   - Peak logs
+ * 
+ * Current status: - Live recording display
+ * 
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */
 
 define(function(require) {
     "use strict";

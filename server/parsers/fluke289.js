@@ -13,6 +13,8 @@
  * Due to the nature of the Fluke protocol, a lot of commands have to be
  * explicitly defined and handled within the driver.
  * 
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  *
  */
 var serialport = require('serialport'),

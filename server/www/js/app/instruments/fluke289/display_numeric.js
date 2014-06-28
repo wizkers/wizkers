@@ -1,9 +1,9 @@
-// Numeric view for the Fluke 289
-//
-// (c) 2014 Edouard Lafargue, ed@lafargue.name
-// 
-
-
+/*
+ * Numeric view for the Fluke 289
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */ 
 define(function(require) {
     "use strict";
     

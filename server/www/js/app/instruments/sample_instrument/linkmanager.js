@@ -3,6 +3,8 @@
  *  - manages the socket.io link
  *  - provides API to the backend device to use by views
  *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 

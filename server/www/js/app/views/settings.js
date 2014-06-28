@@ -4,6 +4,7 @@
  * 2014.03: Needs refactoring / updates
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 define(function(require) {
     

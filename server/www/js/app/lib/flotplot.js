@@ -1,7 +1,10 @@
-// A generic Flot plot, do be used by any instrument that requires it
-// 
-//
-// (c) 2014 Edouard Lafargue, ed@lafargue.name
+/*
+ * A generic Flot plot, do be used by any instrument that requires it
+ * 
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */
 
 define(function(require) {
     "use strict";

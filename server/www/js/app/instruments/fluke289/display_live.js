@@ -4,6 +4,7 @@
  * Our model is the instrument object.
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

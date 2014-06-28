@@ -5,6 +5,7 @@
  * I only implement what makes sense for my application.
  *
  * Copyright 2014 Edouard Lafargue <edouard@lafargue.name>
+ * All rights reserved.
  *
  * based on NodeSerial Parsers, Copyright 2011 Chris Williams <chris@iterativedesigns.com>
  * 

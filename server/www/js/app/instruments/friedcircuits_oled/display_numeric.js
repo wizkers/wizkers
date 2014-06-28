@@ -1,9 +1,11 @@
-// The main screen of our app.
-// 
-// Our model is the settings object.
-//
-// (c) 2014 Edouard Lafargue, ed@lafargue.name
-//
+/*
+ * The main screen of our app.
+ * 
+ * Our model is the settings object.
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ */
 
 define(function(require) {
     "use strict";

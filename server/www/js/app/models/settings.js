@@ -1,6 +1,9 @@
 /**
  * Where we define the settings. Note that we always use the
  * localstorage mechanism to store settings locally.
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {

@@ -7,6 +7,9 @@
  * 
  * At this stage, I am not recording anything on those instruments, but I still
  * need to implement the API.
+ *
+ * (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  * 
  */
 var serialport = require('serialport'),

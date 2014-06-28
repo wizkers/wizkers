@@ -1,5 +1,10 @@
 /**
  *  Various useful utility functions.
+ *
+ * Original code (c) 2014 Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
+ *
+ * Some parts of this code come from Christophe Coenraets, license unclear ? TODO
  */
 
 define(function(require) {
