@@ -1,5 +1,7 @@
 /**
  * We now use require.js: these are the mappings of our application
+ *
+* (c) 2014 Edouard Lafargue, ed@lafargue.name
  */
 
 require.config({
@@ -30,6 +32,7 @@ require.config({
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
         bootstrapeditable: 'lib/bootstrap-editable',
+        bootbox: 'lib/bootbox',
         flot: 'lib/flot-0.8.1/jquery.flot',
         flot_time: 'lib/flot-0.8.1/jquery.flot.time',
         flot_resize: 'lib/flot-0.8.1/jquery.flot.resize',

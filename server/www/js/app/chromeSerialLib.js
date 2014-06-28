@@ -28,6 +28,9 @@ define(function(require) {
                    case 'portstatus':
                     portStatus(args);
                     break;
+                   case 'uniqueID':
+                    uniqueID(args);
+                    break;
                    case 'openinstrument':
                     openInstrument(args);
                     break;
@@ -128,6 +131,11 @@ define(function(require) {
         
         function portStatus() {
            self.trigger('status', {portopen: self.portOpen, recording: recording, streaming: self.driver ? self.driver.streaming : false});
+        };
+        
+        function uniqueID() {
+            console.log('[chromeSerialLib] Requesting UniqueID to device driver');
+            self.driver.sendUniqueID();
         };
 
         // This is where we hook up the serial parser - Chrome version

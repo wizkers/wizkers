@@ -41,7 +41,7 @@ define(function(require) {
         // Returns the Geiger counter GUID.
         this.sendUniqueID = function() {
             this.uidrequested = true;
-            this.port.write(this.output('{ "get": "guid" }'));
+            socket.emit('controllerCommand','{ "get": "guid" }');
         };
         
         // period in seconds

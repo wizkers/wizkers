@@ -7,10 +7,11 @@
 define(function(require) {
     "use strict";
     
-    var $       = require('jquery'),
-        _       = require('underscore'),
+    var $        = require('jquery'),
+        _        = require('underscore'),
         Backbone = require('backbone'),
-        tpl     = require('text!tpl/instruments/OnyxLogEditView.html'),
+        bootbox  = require('bootbox'),
+        tpl      = require('text!tpl/instruments/OnyxLogEditView.html'),
         template = null;
         
         try {
@@ -54,6 +55,12 @@ define(function(require) {
             $('#log_size',this.el).html(this.deviceLogs.getOverallLength());
             $('#log_start',this.el).html(new Date(this.deviceLogs.getLogsStart()).toString());
             $('#log_end',this.el).html(new Date(this.deviceLogs.getLogsEnd()).toString());
+
+            // Now, we only want to scroll the table, not the whole page:
+            var tbheight = window.innerHeight - $('.header .container').height() - 20;
+            $('#tablewrapper',this.el).css('max-height',
+                                       tbheight + 'px'
+                                            );
 
             return this;
         },
