@@ -12,6 +12,8 @@ define(function(require) {
     
     var _ = require('underscore'),
         Backbone = require('backbone'),
+        Instrument = require(['app/models/instrument']),
+        
         OnyxInstrument = require('app/instruments/onyx/onyx'),
         OnyxSettingsView = require('app/instruments/onyx/settings'),
         Fluke289Instrument = require('app/instruments/fluke289/fluke'),
@@ -34,7 +36,7 @@ define(function(require) {
             "w433":     { name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView },
             "elecraft": { name: "Elecraft radios", type: ElecraftInstrument, settings:ElecraftSettingsView },
         };
-
+        
         this.setInstrument = function(instrument) {
             var type = instrument.get('type');
             for (var ins in this.supportedInstruments) {

@@ -65,7 +65,7 @@ define(function(require) {
         displayLog: function() {
             if ($('.displaylog', this.el).attr('disabled'))
                 return false;
-            router.navigate('displaylogs/' + settings.get('currentInstrument') + '/' + this.selectedLogs.join(','),true);
+            router.navigate('displaylogs/' + instrumentManager.getInstrument().id + '/' + this.selectedLogs.join(','),true);
             return false;
         },
 

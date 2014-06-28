@@ -36,8 +36,16 @@ define(function(require) {
 
             this.deviceinitdone = false;
             this.plotavg = false;
-
-            this.livepoints = 300; // 5 minutes @ 1 Hz
+            
+            // Get frequency and span if specified:
+            var span = this.model.get('liveviewspan');     // In seconds
+            var period = this.model.get('liveviewperiod'); // Polling frequency
+            
+            if (span && period) {
+                this.livepoints = span/period;
+            } else {
+                this.livepoints = 300; // 5 minutes @ 1 Hz
+            }
             this.livedata = [];
 
 
@@ -203,7 +211,7 @@ define(function(require) {
                         $('#dtModal',this.el).modal('show');
                     } else {
                         $('#devicetag',this.el).html(data.devicetag);
-                        linkManager.startLiveStream(settings.get('liveviewperiod'));
+                        linkManager.startLiveStream(this.model.get('liveviewperiod'));
                         this.deviceinitdone = true;
                     }
                 } else {

@@ -1,7 +1,7 @@
 /*
  * Live view for the W433 sensor
  * 
- * Our model is the settings object.
+ * Our model is the instrument
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
@@ -33,7 +33,6 @@ define(function(require) {
     return Backbone.View.extend({
 
         initialize:function (options) {
-            this.settings = this.model;
             
             this.plots = [];
             this.sensors = [];
@@ -43,7 +42,7 @@ define(function(require) {
             // We will pass this when we create plots, this is the global
             // config for the look and feel of the plot
             this.plotoptions = {
-                points: Math.floor(Number(this.settings.get('liveviewspan'))/Number(this.settings.get('liveviewperiod')))
+                points: Math.floor(Number(this.model.get('liveviewspan'))/Number(this.model.get('liveviewperiod')))
             };
         },
 

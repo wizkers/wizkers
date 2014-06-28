@@ -126,11 +126,13 @@ define(function(require) {
                 success: function (model) {
                     utils.showAlert('Success', 'Configuration saved', 'alert-success');
                     // Trick: if we notice no instrument is selected, then select this one.
-                    var insId = settings.get('currentInstrument');
-                    if (insId == null) {
+                    var ins = instrumentManager.getInstrument();
+                    if (ins == null) {
                         settings.set({currentInstrument:model.id});
-                        settings.save(null, {success: function() {}
-                                            });
+                        settings.save(); // will trigger an instrument change from the router
+                    } else if (ins.id == model.id) {
+                        // Force an instrument reload if we changed the settings
+                        router.switchinstrument(model.id);
                     }
                 },
                 error: function () {

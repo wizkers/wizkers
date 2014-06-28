@@ -52,15 +52,15 @@ define(function(require) {
             selectInstrument: function(event) {
                 console.log('Instrument selected: ' + this.model.id);
                 var theID = this.model.id;
+
                 // Detect if we clicked on a new instrument or not:
                 if (this.model.id == instrumentManager.getInstrument().id) {
                     // If so, just return to main screen
                     router.navigate('/', true);
                 }
-                // Now store the instrument ID in our settings:
+                // Now store the instrument ID in our settings
+                // Note: this is only to remember it at next application start.
                 settings.set({currentInstrument:theID});
-                // Update our settings to use the correct port: 
-                settings.set({ serialPort: this.model.get('port')});
                 // If the settings changed, the router will pick this up since
                 // it listens to change events in settings, and react accordingly.
                 settings.save(null, {success: function() {

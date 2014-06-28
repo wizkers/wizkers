@@ -63,26 +63,32 @@ define(function(require) {
             _.bindAll(this,"switchView"); // switchView needs to be bound to this context when called from
                                           // within a callback, otherwise the "onClose" methods will never
                                           // be called.
+            _.bindAll(this,"switchinstrument");
 
             // When the current instrument model changes, we need to update
             // the link manager type:
             settings.on('change:currentInstrument', function(model, insId) {
-                console.log('New instrument ID, updating the link manager type and jumping to home screen');
-                require(['app/models/instrument'], function(model) {
-                    var ins = new model.Instrument({_id: insId});
-                    ins.fetch({success: function(){
-                        var type = ins.get('type');
-                        console.log('New instrument type: ' + type );
-                        // Now update our Instrument manager:
-                        linkManager.closeInstrument();  // Stop former link manager
-                        instrumentManager.setInstrument(ins);
-                        linkManager.setDriver(instrumentManager.getDriver(linkManager));
-                        // We need to jump to the main screen now:
-                        self.navigate('/', true);
-                    }});
-                });
+                self.switchinstrument(insId);
             });
 
+        },
+        
+        switchinstrument: function(insId) {
+            var self = this;
+            console.log('New instrument ID, updating the link manager type and jumping to home screen');
+            require(['app/models/instrument'], function(model) {
+                var ins = new model.Instrument({_id: insId});
+                ins.fetch({success: function(){
+                    var type = ins.get('type');
+                    console.log('New instrument type: ' + type );
+                    // Now update our Instrument manager:
+                    linkManager.closeInstrument();  // Stop former link manager
+                    instrumentManager.setInstrument(ins);
+                    linkManager.setDriver(instrumentManager.getDriver(linkManager));
+                    // We need to jump to the main screen now:
+                    self.navigate('/', true);
+                }});
+            });            
         },
 
         home: function (id) {

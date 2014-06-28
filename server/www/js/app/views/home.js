@@ -94,7 +94,7 @@ define(function(require) {
                 this.instrumentNumericView.onClose();
 
             // If we have a selected instrument, then instanciate its liveview here
-            if (settings.get('currentInstrument') != null) {
+            if (instrumentManager.getInstrument() != null) {
                 console.log('Create the instrument live view');
 
                 instrumentManager.getLiveDisplay({model: this.instrument}, function(view) {
