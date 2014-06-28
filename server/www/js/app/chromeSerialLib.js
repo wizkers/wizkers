@@ -141,7 +141,7 @@ define(function(require) {
 
         // This is where we hook up the serial parser - Chrome version
         function setDriver(driver) {
-            console.log("Setting driver - should be " + driver);
+            console.log("[chromeSerialLib] Setting driver - should be " + driver);
             
             // We can use our instrumentManager to ask for the right driver
             // (in server-side mode, "driver" is passed as the driver name, we
@@ -154,7 +154,7 @@ define(function(require) {
         }
         
         function openInstrument(port) {
-            console.log("chromeSerialLib: openInstrument");
+            console.log("[chromeSerialLib] chromeSerialLib: openInstrument");
             var path = instrumentManager.getInstrument().get("port");
             // TODO: support other data bit and stop bit lengths 
             chrome.serial.connect(path, { bitrate: self.portSettings.baudRate,
@@ -164,10 +164,19 @@ define(function(require) {
         };
 
         function closeInstrument(port) {
-           console.log("chromeSerialLib: closeInstrument");
+           console.log("[chromeSerialLib] chromeSerialLib: closeInstrument");
             if (!self.portOpen)
                 return;
             
+            // Important: remove the listener that gets incoming data, otherwise
+            // at the next open we'll add a new listener and it will mess everything
+            // up.
+            //
+            // Moreover: we have to remove the listener before closing the device, because
+            // on the Mac (2014.06) this causes a hard reboot about 50% of the time, whenever
+            // serial data arrives after disconnect - not 100% clean on origin.
+            chrome.serial.onReceive.removeListener(onRead);
+
             stopRecording();
             stopLiveStream();
             chrome.serial.disconnect( self.connectionId, function(success) {
@@ -176,7 +185,7 @@ define(function(require) {
                 if (self.driver.onClose) {
                     self.driver.onClose();
                 }
-                console.log("chromeSerialLib: closePort success");
+                console.log("[chromeSerialLib] chromeSerialLib: closePort success");
                }
             );
         };
@@ -197,7 +206,7 @@ define(function(require) {
         // When called, id refers to a new log that got created by the home view
         // just before.
         function startRecording(id) {
-            console.log("In-browser implementation of start recording");
+            console.log("[chromeSerialLib] In-browser implementation of start recording");
             currentLog = instrumentManager.getInstrument().logs.get(id);
             currentLog.fetch({success: function(){
                 recording = true;
@@ -205,7 +214,7 @@ define(function(require) {
         }
         
         function stopRecording() {
-            console.log("In-browser implementation of stop recording");
+            console.log("[chromeSerialLib] In-browser implementation of stop recording");
             recording = false;
         }
                 
@@ -235,13 +244,12 @@ define(function(require) {
         // by our instrument driver
         function onDataReady(data) {            
             // 'format' triggers a serialEvent when ready
-            console.log("[chromeSeriaLib] *** Send data to driver for formatting");
             self.driver.format(data, recording);
         }
 
         function onOpen(openInfo) {
             if (!openInfo) {
-                console.log("Open Failed");
+                console.log("[chromeSerialLib] Open Failed");
                 return;
             }
             self.portOpen = true;
@@ -254,12 +262,12 @@ define(function(require) {
         // Now hook up our own event listeners:
         this.on('data', onDataReady);
         
-        console.log("Chrome Serial Library loaded");
+        console.log("[chromeSerialLib] ***********************  Chrome Serial Library loaded **********************");
 
     };
 
     // Add event management to our serial lib, from the Backbone.Events class:
     _.extend(serialLib.prototype, Backbone.Events);    
     return new serialLib;
-    
+    f
 });
