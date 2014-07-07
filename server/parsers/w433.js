@@ -145,19 +145,10 @@ module.exports = {
                         case 7:
                             // Wind -> we have two values here, so the result is a json structure
                             var direction = parseInt(data.substr(10,1),16)*22.5;
-                            var speed = parseInt(data.substr(8,2),16)/10 * 1.943; // Sensor speed is in m/s, convert to knt
+                            var speed = parseInt(data.substr(8,2),16)*.1943; // Sensor speed is in m/s, convert to knt
                             res.reading_type = 'wind';
                             res.value = { dir: direction, speed: speed};
                             res.unit = { dir: '°', speed:'knot'};
-                        /**
-                        
-                            $direction = (hex substr $i,10,1)*22.5;
-                            $type_txt = "wind-direction";
-                        
-                            $speed = (hex substr $i,8,2)/10;
-                            $type_txt = "wind-instant";
-                        **/
-                        
                         break;
                         case 0xb:
                         case 0xf:
@@ -200,13 +191,16 @@ module.exports = {
             for (var i = 0; i < this.prevRes.length; i++) {
                 if ((stamp - this.prevRes[i].stamp) < 1500 &&
                     res.sensor_address == this.prevRes[i].res.sensor_address &&
-                    res.sensor_type == this.prevRes[i].res.sensor_type &&
-                    ((res.value == this.prevRes[i].res.value) || 
-                     ((typeof(res.value) == "object") && (typeof(this.prevRes[i]) == "object") &&
-                       (res.value.dir == this.prevRes[i].value.dir) && (res.value.speed == this.prevRes[i].speed)
-                     ))
-                   )
-                    return;
+                    res.sensor_type == this.prevRes[i].res.sensor_type
+                   ) {
+                    if (res.value == this.prevRes[i].res.value)
+                        return;
+                    if ((typeof(res.value) == "object") && (typeof(this.prevRes[i]) == "object")) {
+                        console.log(res.value);
+                        if ((res.value.dir == this.prevRes[i].value.dir) && (res.value.speed == this.prevRes[i].speed))
+                            return;
+                    }   
+                }
             }
         }
         
