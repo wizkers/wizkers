@@ -191,16 +191,13 @@ module.exports = {
             for (var i = 0; i < this.prevRes.length; i++) {
                 if ((stamp - this.prevRes[i].stamp) < 1500 &&
                     res.sensor_address == this.prevRes[i].res.sensor_address &&
-                    res.sensor_type == this.prevRes[i].res.sensor_type
-                   ) {
-                    if (res.value == this.prevRes[i].res.value)
-                        return;
-                    if ((typeof(res.value) == "object") && (typeof(this.prevRes[i]) == "object")) {
-                        console.log(res.value);
-                        if ((res.value.dir == this.prevRes[i].value.dir) && (res.value.speed == this.prevRes[i].speed))
-                            return;
-                    }   
-                }
+                    res.sensor_type == this.prevRes[i].res.sensor_type &&
+                    ((res.value == this.prevRes[i].res.value) || 
+                     ((typeof(res.value) == "object") && (typeof(this.prevRes[i].value) == "object") &&
+                       (res.value.dir == this.prevRes[i].value.dir) && (res.value.speed == this.prevRes[i].value.speed)
+                     ))
+                   )
+                    return;
             }
         }
         
