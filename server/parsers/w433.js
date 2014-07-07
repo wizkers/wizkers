@@ -154,7 +154,7 @@ module.exports = {
                         case 0xf:
                             // Wind - gust -> we have two values again
                             var dir = parseInt(data.substr(10,1),16)*22.5;
-                            var speed= parseInt(data.substr(8,2),16)/10;
+                            var speed= parseInt(data.substr(8,2),16)*.1943;
                             res.reading_type = 'wind-gust';
                             res.value = { dir: direction, speed: speed};
                             res.unit = { dir: '°', speed:'knot'};
