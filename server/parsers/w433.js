@@ -145,7 +145,7 @@ module.exports = {
                         case 7:
                             // Wind -> we have two values here, so the result is a json structure
                             var direction = parseInt(data.substr(10,1),16)*22.5;
-                            var speed = parseInt(data.substr(8,2),16)/10;
+                            var speed = parseInt(data.substr(8,2),16)/10 * 1.943; // Sensor speed is in m/s, convert to knt
                             res.reading_type = 'wind';
                             res.value = { dir: direction, speed: speed};
                             res.unit = { dir: '°', speed:'knot'};
