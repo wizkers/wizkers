@@ -117,11 +117,14 @@ define(function(require) {
         },
 
         addPlot: function() {
+            var self = this;
             this.plot = $.plot($(".geigerchart", this.el), [ {data:[], label:"CPM", color:this.color} ], this.plotOptions);
             
             // Make sure the chart takes all the window height:
             var rsc = function() {
-                var chartheight = window.innerHeight - $('#control-area').height() - $('.header .container').height() - 20;
+                var chartheight = window.innerHeight - $('#control-area').height() - $('.header .container').height() - 45;
+                if (self.showstream)
+                    chartheight -= $('#showstream').height() + 20;
                 $('.geigerchart').css('height',
                                            chartheight + 'px'
                                                 );
