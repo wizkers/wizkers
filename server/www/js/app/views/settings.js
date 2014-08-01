@@ -44,7 +44,7 @@ define(function(require) {
             // Apply the change to the model
             var target = event.target;
             var change = {};
-            change[target.name] = target.value;
+            change[target.name] = (target.type == "checkbox") ? target.checked : target.value;
             this.model.set(change);
             this.model.save();
             this.render();
@@ -52,10 +52,10 @@ define(function(require) {
         },
 
         selectColor: function(event) {
+            var self = this;
             console.log("Selected color: " + event.target.title);
             this.model.set('cpmcolor', event.target.title);
-            this.model.save();
-            this.render();
+            this.model.save({success: function() { self.render; } });
         },
 
         resetSettings: function() {

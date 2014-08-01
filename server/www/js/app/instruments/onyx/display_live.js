@@ -33,6 +33,7 @@ define(function(require) {
         initialize:function (options) {
 
             this.currentDevice = null;
+            this.showstream = settings.get('showstream');
 
             this.deviceinitdone = false;
             this.plotavg = false;
@@ -90,10 +91,14 @@ define(function(require) {
             var self = this;
             console.log('Main render of Onyx live view');
             $(this.el).html(template());
+            
+            // Hide the raw data stream if we don't want it
+            if (!this.showstream) {
+                $('#showstream',this.el).css('visibility', 'hidden');
+            }
+            
             linkManager.requestStatus();
-            if (this.model.get("cpmscale") == "log")
-                $("#cpmscale",this.el).attr("checked",true);
-            if (this.model.get('cpmscale')=="log") {
+            if (settings.get('cpmscale')=="log") {
                 this.plotOptions.yaxis = {
                             min:1,
                             //ticks: [1,10,30,50,100,500,1000,1500],
@@ -107,17 +112,23 @@ define(function(require) {
             }
 
             this.color = 1;
-
             this.addPlot();
-
             return this;
         },
 
         addPlot: function() {
-            var self=this;
-            // Now initialize the plot area:
-            console.log('Geiger chart size: ' + this.$('.locochart').width());
-            this.plot = $.plot($(".locochart", this.el), [ {data:[], label:"CPM", color:this.color} ], this.plotOptions);
+            this.plot = $.plot($(".geigerchart", this.el), [ {data:[], label:"CPM", color:this.color} ], this.plotOptions);
+            
+            // Make sure the chart takes all the window height:
+            var rsc = function() {
+                var chartheight = window.innerHeight - $('#control-area').height() - $('.header .container').height() - 20;
+                $('.geigerchart').css('height',
+                                           chartheight + 'px'
+                                                );
+            }
+
+            $(window).resize(rsc);
+            rsc();
         },
 
         onClose: function() {
@@ -190,16 +201,18 @@ define(function(require) {
         showInput: function(data) {
             var self = this;
 
-            // Update our raw data monitor
-            var i = $('#input',this.el);
-            var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-            // Keep max 50 lines:
-            if (scroll.length > 50) {
-                scroll = scroll.slice(scroll.length-50);
+            if (this.showstream) {
+                // Update our raw data monitor
+                var i = $('#input',this.el);
+                var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
+                // Keep max 50 lines:
+                if (scroll.length > 50) {
+                    scroll = scroll.slice(scroll.length-50);
+                }
+                i.val(scroll.join('\n'));
+                // Autoscroll:
+                i.scrollTop(i[0].scrollHeight - i.height());
             }
-            i.val(scroll.join('\n'));
-            // Autoscroll:
-            i.scrollTop(i[0].scrollHeight - i.height());
 
             // Have we read all we need from the device?
             if (!this.deviceinitdone) {
@@ -210,7 +223,6 @@ define(function(require) {
                         // Show the device tag set dialog
                         $('#dtModal',this.el).modal('show');
                     } else {
-                        $('#devicetag',this.el).html(data.devicetag);
                         linkManager.startLiveStream(this.model.get('liveviewperiod'));
                         this.deviceinitdone = true;
                     }

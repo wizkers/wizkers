@@ -1,34 +1,15 @@
 <!-- this is added within a row area -->
 <div class="col-md-12">
 <div class="row">
-    <div class="col-md-2">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="thumbnail">
-                    <p>Device tag:<br><span id="devicetag"></span>
-                        </p>
-                    </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="thumbnail">
-                    <p><label class="checkbox"><input id="cpmscale" type="checkbox">Log scale</label></p>
-                    <p><label class="checkbox"><input id="plotavg" disabled checked type="checkbox">Moving average</label></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-10">
+    <div class="col-md-12">
         <div class="thumbnail">
-            <div class="locochart chart" style="position: relative; height:400px;"></div>
+            <div class="geigerchart chart" style="position: relative; height:400px;"></div>
         </div>
         <p>&nbsp;</p>
     </div>   
 </div>
     
-<div class="row">
+<div class="row" id="showstream">
     <div class="col-md-12">
         <div class="well">
             <h6>Raw data stream</h6>

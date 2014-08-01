@@ -48,6 +48,10 @@ define(function(require) {
         },
 
         showInput: function(data) {
+            
+            if (typeof(data.devicetag) != 'undefined')
+                $('#devicetag',this.el).html(data.devicetag);
+
             if (typeof(data.cpm) == 'undefined')
                 return;
             var cpm = parseFloat(data.cpm.value);

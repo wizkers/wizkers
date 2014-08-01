@@ -35,6 +35,7 @@ define(function(require) {
             itemsperpage: 10,
             currentInstrument: null,
             token: null,
+            showstream: false,
         }
     });    
     
