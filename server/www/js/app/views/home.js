@@ -16,15 +16,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         Devicelog = require('app/models/devicelog'),
-        tpl     = require('text!tpl/HomeView.html'),
-        template = null;
-        
-        try {
-            template = _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/HomeView.js');
-        }
+        template = require('js/tpl/HomeView.js');
             
     // We have to require bootstrap whenever we use the Bootstrap javascript
     // library. In this file, we use it for 'modal' calls.

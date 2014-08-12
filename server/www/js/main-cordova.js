@@ -28,11 +28,11 @@ require.config({
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
         bootstrapeditable: 'lib/bootstrap-editable',
         bootbox: 'lib/bootbox',
-        flot: 'lib/flot-0.8.1/jquery.flot',
-        flot_time: 'lib/flot-0.8.1/jquery.flot.time',
-        flot_resize: 'lib/flot-0.8.1/jquery.flot.resize',
-        flot_selection: 'lib/flot-0.8.1/jquery.flot.selection',
-        flot_fillbetween: 'lib/flot-0.8.1/jquery.flot.fillbetween'
+        flot: 'lib/flot-0.8.3/jquery.flot',
+        flot_time: 'lib/flot-0.8.3/jquery.flot.time',
+        flot_resize: 'lib/flot-0.8.3/jquery.flot.resize',
+        flot_selection: 'lib/flot-0.8.3/jquery.flot.selection',
+        flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween'
     },
     
     /*

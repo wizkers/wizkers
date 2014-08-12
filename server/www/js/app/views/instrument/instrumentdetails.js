@@ -15,15 +15,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         utils   = require('app/utils'),
-        tpl     = require('text!tpl/InstrumentDetailsView.html'),
-        template = null;
-        
-        try {
-            template = _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/InstrumentDetailsView.js');
-        }
+        template = require('js/tpl/InstrumentDetailsView.js');
 
     return Backbone.View.extend({
         

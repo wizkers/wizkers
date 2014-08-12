@@ -13,15 +13,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         Paginator = require('app/views/paginator'),
-        tpl     = require('text!tpl/InstrumentListItemView.html'),
-        template = null;
-        
-        try {
-            template = _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/InstrumentListItemView.js');
-        }
+        template = require('js/tpl/InstrumentListItemView.js');
     
         var InstrumentListItemView = Backbone.View.extend({
 
