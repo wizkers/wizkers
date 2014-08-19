@@ -46,7 +46,7 @@ define(function(require) {
             },
     
             ElecraftFrequencyListView: null,
-            bands: [ "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m" ],
+            bands: [ "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", 0,0,0,0,0, "2m" ],
 
             render:function () {
                 var self = this;
@@ -279,6 +279,7 @@ define(function(require) {
             updateStatus: function(data) {
                 if (data.portopen && !this.deviceinitdone) {
                     linkManager.startLiveStream();
+                    this.deviceinitdone = true;
 
                     // Ask the radio for a few additional things:
                     // Requested power:

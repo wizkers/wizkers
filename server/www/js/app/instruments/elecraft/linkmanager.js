@@ -135,7 +135,7 @@ define(function(require) {
 
         this.setBand = function(band) {
             // We use a band number in meters (with a "m"), this function translates into the KX3 values:
-            var bands= { "160m":"00", "80m":"01", "60m":"02", "40m":"03", "30m":"04", "20m":"05", "17m":"06", "15m":"07", "12m":"08", "10m":"09", "6m":"10" };
+            var bands= { "160m":"00", "80m":"01", "60m":"02", "40m":"03", "30m":"04", "20m":"05", "17m":"06", "15m":"07", "12m":"08", "10m":"09", "6m":"10", "2m": "16" };
             var bandcode = bands[band];
             if (typeof(bandcode) != 'undefined') {
                 this.cc('BN' + bandcode + ';');

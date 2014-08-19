@@ -10,6 +10,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         Snap    = require('snap'),
+        bootbox  = require('bootbox'),
         tpl     = require('text!tpl/instruments/ElecraftFrequencyItemView.html'),
         template = null;
         
@@ -46,6 +47,10 @@ define(function(require) {
             this.frequency = options.frequency; // What entry in the band memory
             this.band = options.band;           // The current band memory (string)
             this.allmems = this.model.get('metadata').frequencies;
+            if (this.allmems[this.band] === undefined) {
+                // This will happen whenever we have a new band that was not present in previous software versions
+                this.allmems[this.band] = [];
+            }
             this.mem = this.allmems[this.band][this.frequency]; // should always be defined
 
             _.bindAll(this,'checkFreqBoundaries');
@@ -122,7 +127,8 @@ define(function(require) {
             "15m": {min: 19000, max:23000},
             "12m": {min:23000, max:26000},
             "10m": {min:26000, max:38000},
-            "6m":  {min:38000, max:54000}
+            "6m":  {min:38000, max:54000},
+            "2m":  {min:120000, max: 200000 }
         },
 
 
@@ -194,7 +200,7 @@ define(function(require) {
         initialize: function (options) {
             this.options = options || {};
 
-            this.bands= [ "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m" ];
+            this.bands= [ "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", 0,0,0,0,0, "2m"  ];
 
             // The server lets us specify free-form metadata for each instrument,
             // we are using it for storing our frequencies, per band.
@@ -203,6 +209,7 @@ define(function(require) {
             this.frequencies = metadata.frequencies;
             if (this.frequencies == null) {
                 this.frequencies = {
+                                    "2m": [],
                                     "6m": [], 
                                     "10m": [
                                             { "vfoa": 28.120, "vfob": 28.120, "mode": "DATA", "name": "PSK31" },
@@ -237,7 +244,12 @@ define(function(require) {
         },
 
         render: function () {
-            var len = this.frequencies[this.current_band].length;        
+            var fr = this.frequencies[this.current_band];
+            if (fr === undefined) {
+                this.frequencies[this.current_band] = [];
+                fr = [];
+            }
+            var len = fr.length;
             console.log("Frequency list: " + len + " frequencies");
 
             $(this.el).html('<div class="item active"></div>');

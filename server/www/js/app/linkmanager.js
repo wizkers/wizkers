@@ -124,7 +124,6 @@ define(function(require) {
             }
 
             this.startLiveStream = function(period) {
-                console.log("Start live stream");
                 console.log("[Link Manager] Starting live data stream");
                 // We have moved polled live streaming to server-side so that
                 // recording still works when we are not on the home screen
