@@ -17,6 +17,8 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         template = require('js/tpl/LogManagementView.js');
+    
+    require('bootstrap');
 
     return Backbone.View.extend({
 
@@ -71,39 +73,15 @@ define(function(require) {
         doDeleteLog: function(event) {
             var self = this;
             var logToDelete = this.deviceLogs.where({_id: $(event.currentTarget).data('id')});
-            var logEntries = logToDelete[0].entries;
             
-            // Unfortunately, we need to fetch the entries to populate the array, before
-            // deleting it - I have not found a way around this...
-            logEntries.fetch({
-                success: function() {
-                    // Note: CANNOT use a "each" for logEntries because we
-                    // are doing destroys which modifies the array as we go along,
-                    // so we are using this recursive async method:
-                    var doit = function() {
-                        var entry = logEntries.at(0);
-                        if (entry) {
-                            console.log("Destroying entry...");
-                            entry.destroy({ success: function() {
-                                                console.log("Entry deleted");
-                                                doit();                
-                                                            },
-                                                            error: function(model, err) { 
-                                                                console.log(err);
-                                                            }
-                                                          });
-                        } else {
-                            // No entries anymore, delete the log
-                            logToDelete[0].destroy(
+            // the backend will take care of deleting all the log entries associated with
+            // the log.
+            logToDelete[0].destroy(
                                 {success: function(model, response) {
                                     $('#deleteConfirm',self.el).modal('hide');
                                     self.render();
                                     }
                                 });
-                        }
-                    }
-                    doit();
-                }});
         },
 
         render:function () {

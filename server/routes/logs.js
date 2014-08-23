@@ -77,7 +77,7 @@ exports.getLogEntries = function(req, res) {
                          ok = true;
                          // Clean up the log data: we don't need a lot of stuff that takes
                          // lots of space:
-                        delete item._id;
+                        // delete item._id;  // Don't delete the _id, otherwise our front-end loses sync with backend!
                         delete item.__v;
                         delete item.logsessionid;
                          res.write(JSON.stringify(item));
@@ -204,7 +204,7 @@ exports.deleteLogEntry = function(req, res) {
 // This deletes a LOG Session (i.e. a collection of log entries)
 exports.deleteEntry = function(req, res) {
     var id = req.params.id;
-    console.log('Deleting log session entry: ' + id);
+    console.log('Deleting log: ' + id);
     LogSession.findByIdAndRemove(id, {safe:true}, function(err,result) {
             if (err) {
                 res.send({'error':'An error has occurred - ' + err});
@@ -214,6 +214,7 @@ exports.deleteEntry = function(req, res) {
                 // TODO: no error handling, not that we really should need it?
                 DeviceLogEntry.find({logsessionid: id}, function(err,items) {
                         items.forEach(function(item) {
+                            console.log('Log entry deleted...');
                             item.remove();
                         });
                         });

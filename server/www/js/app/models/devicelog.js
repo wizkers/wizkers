@@ -86,12 +86,16 @@ define(function(require) {
                 this.updateEntriesURL();
                 
                 // Watch our entries so that we can update the datapoints entry
-                this.entries.on("sync", this.updateDatapoints, this);
+                this.listenTo(this.entries, "sync", this.updateDatapoints );
                 
                 // When we create a model, this.id is undefined: because of this, we listen to
                 // the "sync" event, and update the entries' URL upon it (sync is fired when the model is
                 // saved, therefore the ID is updated
-                this.on("sync", this.updateEntriesURL, this);                
+                this.listenTo(this, "sync", this.updateEntriesURL);
+                
+                // We want to listen to the "destroy" event: upon destroy, we need to make
+                // sure our entries are also all deleted from the database
+                this.listenTo(this, "destroy", this.destroyEntries);
             },
             
             updateDatapoints: function() {
@@ -112,6 +116,14 @@ define(function(require) {
                     this.entries.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
                 } else {
                     this.entries.url =  "/logs/" + this.id + "/entries";
+                }
+            },
+            
+            destroyEntries: function() {
+                console.log("****** Destroy all entries for this log");
+                var entry;
+                while (entry = this.entries.first()) {
+                    entry.destroy();                    
                 }
             },
 
