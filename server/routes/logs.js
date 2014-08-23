@@ -217,8 +217,9 @@ exports.deleteEntry = function(req, res) {
                             console.log('Log entry deleted...');
                             item.remove();
                         });
+                        // Don't send the reply until we are done with all deletions
+                        res.send(req.body);
                         });
-                res.send(req.body);
             }
     });    
 }
