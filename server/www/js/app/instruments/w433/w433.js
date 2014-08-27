@@ -11,7 +11,7 @@
 define(function(require) {
     "use strict";
     
-    var linkmanager = require('app/instruments/w433/linkmanager');
+    var driver_frontend = require('app/instruments/w433/driver_frontend');
     
     return function() {
 
@@ -43,7 +43,7 @@ define(function(require) {
 
         // The browser-side instrument driver
         this.getDriver = function(arg) {
-            return new linkmanager(arg);
+            return new driver_frontend(arg);
         };
 
         // Return a Backbone view which is a mini graph

@@ -27,6 +27,7 @@ define(function(require) {
 
             this.driver = null;
 
+            // Set the front-end instrument driver, and load the back-end instrument driver
             this.setDriver = function(driver) {
                 this.driver = driver;
                 this.driver.setBackendDriver();
@@ -34,6 +35,8 @@ define(function(require) {
                 console.log('Link manager: updated link manager driver for current instrument');
             };
     
+            // Called to restore the state of the backend when the frontend
+            // connects to it (make sure the backend driver matches the frontend instrument)
             this.initConnection = function() {
                 if (typeof(this.driver) != undefined) {
                     this.driver.setBackendDriver();

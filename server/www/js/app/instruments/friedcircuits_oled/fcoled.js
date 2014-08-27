@@ -7,7 +7,7 @@
 define(function(require) {
     "use strict";
 
-    var linkmanager = require('app/instruments/friedcircuits_oled/linkmanager');
+    var driver_frontend = require('app/instruments/friedcircuits_oled/driver_frontend');
 
     return function() {
     
@@ -52,14 +52,14 @@ define(function(require) {
 
         // The instrument driver (browser-side)
         this.getDriver = function(arg) {
-            return new linkmanager(arg);
+            return new driver_frontend(arg);
         };
         
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.
         this.getBackendDriver = function(arg, callback) {
-            require(['app/instruments/friedcircuits_oled/parser'], function(parser) {
-                callback(new parser(arg));
+            require(['app/instruments/friedcircuits_oled/driver_backend'], function(driver) {
+                callback(new driver(arg));
             });
         };
 

@@ -10,7 +10,7 @@
 define(function(require) {
     "use strict";
     
-    var linkmanager = require('app/instruments/fluke289/linkmanager');
+    var driver_frontend = require('app/instruments/fluke289/driver_frontend');
 
     return function() {
 
@@ -51,14 +51,14 @@ define(function(require) {
 
         // This has to be a link manager
         this.getDriver = function(arg, callback) {
-            return new linkmanager(arg);
+            return new driver_frontend(arg);
         };
         
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.
         this.getBackendDriver = function(arg, callback) {
-            require(['app/instruments/fluke/parser'], function(parser) {
-                callback(new parser(arg));
+            require(['app/instruments/fluke/driver_backend'], function(driver) {
+                callback(new driver(arg));
             });
         };
 
