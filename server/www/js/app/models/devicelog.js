@@ -166,9 +166,10 @@ define(function(require) {
         }),
 
         /**
-         * We only ever request log sessions linked to a specific Instrument ID,
+         * We only ever request logs linked to a specific Instrument ID,
          * so this collection is normally instanciated from within the "Instrument" model,
-         * see the corresponding instrument.js
+         * see the corresponding instrument.js, and this is why we don't see the URL property
+         * defined here.
          */
         Logs = Backbone.Collection.extend({
     

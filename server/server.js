@@ -94,7 +94,8 @@ var socketioJwt = require('socketio-jwt');
  */
 var express = require('express'),
     instruments = require('./routes/instruments.js'),
-    deviceLogs = require('./routes/logs.js');
+    outputs = require('./routes/outputs.js'),
+    deviceLogs = require('./routes/logs.js'),
     settings = require('./routes/settings.js'),
     backup = require('./routes/backup.js');
 
@@ -300,6 +301,12 @@ app.put('/instruments/:id', isLoggedIn, user.is('operator'), instruments.updateI
 app.delete('/instruments/:id', isLoggedIn, user.is('operator'), instruments.deleteInstrument);
 
 /**
+ * Interface for managing output plugins. Outputs are only defined
+ * relative to an instrument, which is reflected in the URL
+ */
+app.get('/instruments/:id/outputs', isLoggedIn, user.is('operator'), outputs.findByInstrumentId);
+
+/**
  * Interface for managing instrument logs (summary)
  */
 app.get('/instruments/:id/logs', isLoggedIn, deviceLogs.findByInstrumentId);
@@ -311,6 +318,7 @@ app.post('/logs/:id/entries', isLoggedIn, user.is('operator'), deviceLogs.addLog
 app.put('/instruments/:iid/logs/:id', isLoggedIn, user.is('operator'), deviceLogs.updateEntry);
 app.delete('/instruments/:idd/logs/:id', isLoggedIn, user.is('operator'), deviceLogs.deleteEntry);
 app.delete('/logs/:lid/entries/:id', isLoggedIn, user.is('operator'), deviceLogs.deleteLogEntry);
+
 
 /**
  * Interface for extracting logs in json format

@@ -22,6 +22,10 @@ define(function(require) {
             "instruments/page/:page": "listInstruments",
             "instruments/add"       : "addInstrument",
             "instruments/:id"       : "instrumentDetails",
+            "outputs"               : "listOutputs",
+            "outputs/page/:page"    : "listOutputs",
+            "outputs/add"           : "addOutput",
+            "outputs/:id"           : "outputDetails",
             "workspaces"            : "listWorkspaces",
             "workspaces/page/:page" : "listWorkspaces",
             "workspaces/add"        : "addWorkspace",
@@ -181,7 +185,9 @@ define(function(require) {
 
         },
 
+        //////////
         // Instrument management
+        //////////
         listInstruments: function(page) {
             var self = this;
             var p = page ? parseInt(page, 10) : 1;
@@ -215,7 +221,55 @@ define(function(require) {
             });
 
         },
-    
+
+        //////////
+        // Output management
+        //////////
+        listOutputs: function(page) {
+            var self = this;
+            var p = page ? parseInt(page, 10) : 1;
+            
+            var self = this;
+            var ins = instrumentManager.getInstrument();
+            // TODO: open a screen stating we have no instrument defined.
+            if (ins == null)
+                return;
+            // Initialize with the list of output for the current instrument:
+            var outputs = ins.outputs;
+            outputs.fetch({
+                success:function() {
+                    require(['app/views/output/outputlist'], function(view) {
+                    self.switchView(new view({model: outputs, page: p}));
+                    self.headerView.selectMenuItem('output-menu');                
+            });
+
+                }});   
+        },
+
+        addOutput: function() {
+            var self = this;
+            require(['app/models/output', 'app/views/output/outputdetails'], function(model, view) {
+                var output = new model.Output();
+                self.switchView(new view({model: output}));
+                self.headerView.selectMenuItem('output-menu');
+            });
+
+        },
+
+        outputDetails: function(id) {
+            var self = this;
+            require(['app/models/output', 'app/views/output/outputdetails'], function(model, view) {
+                var output = new model.Output({_id: id});
+                output.fetch({success: function(){
+                    self.switchView(new view({model: output}));
+                }});
+                self.headerView.selectMenuItem('output-menu');
+            });
+
+        },
+
+        
+        
         // Workspace management
         listWorkspaces: function(page) {
             var self = this;

@@ -36,13 +36,15 @@ define(function(require) {
         this.supportedInstruments = {
             "onyx":     { name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView},
             "fcoledv1": { name: "Fried Circuits OLED backpack", type: FCOledInstrument, settings: FCOledSettingsView },
-            "w433":     { name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView },
             "elecraft": { name: "Elecraft radios", type: ElecraftInstrument, settings:ElecraftSettingsView },
         };
         
+        // The instruments below are not supported in Cordova or Chrome runmodes:
         if (vizapp.type == "server") {
             this.supportedInstruments["fluke28x"] =
                 { name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView};
+            this.supportedInstruments["w433"] =
+                { name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView };
         }
 
         this.setInstrument = function(instrument) {

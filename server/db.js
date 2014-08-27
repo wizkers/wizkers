@@ -28,13 +28,7 @@ var bcrypt = require('bcrypt-nodejs');
  */
 
 /**
- * TO DO or possibilities:
- * - Loco response curves (bemf/power) over time.
- *     -> In a separate document?
- * - Controller settings for the loco ?
- * - PDF documentation (one PDF document)
- * - Portfolio for the loco: several pictures & PDFs
- *
+ * Describes an instrument. The "metadata" field enables storage of generic key/values
  */
 var InstrumentSchema = new Schema({
     
@@ -53,6 +47,24 @@ var InstrumentSchema = new Schema({
  
 // Compile the schema by issuing the below:
 mongoose.model('Instrument', InstrumentSchema );
+
+/**
+ *  Describes an output plugin. Again, the metadata object is where interesting
+ *  things happen.
+ */
+var OutputSchema = new Schema({
+    
+        instrumentid: {type: Schema.Types.ObjectId, ref:'Instrument', default:null},
+        name: String,           // Used for display
+        type: String,           // Will correspond to parsers known on the server side
+        comment: String,        // Simple comments
+        enabled: Boolean,
+        metadata: Schema.Types.Mixed, // Depending on output type, this metadata can include additional settings
+});
+ 
+// Compile the schema by issuing the below:
+mongoose.model('Output', OutputSchema );
+
 
 
 /**
