@@ -11,6 +11,7 @@
   "permissions": [
     "serial",
     "storage",
+    "unlimitedStorage",
     "audioCapture"
   ],
   "sandbox": {

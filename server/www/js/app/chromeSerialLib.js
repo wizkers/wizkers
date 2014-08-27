@@ -71,7 +71,7 @@ define(function(require) {
         // Recorder API (public)
         /////////////
         this.record = function(data) {
-            console.log("Recording " + data);
+            // console.log("Recording " + data);
             var entry = new DeviceLog.LogEntry({
                 timestamp: new Date().getTime(),
                 logsessionid: currentLog.id,

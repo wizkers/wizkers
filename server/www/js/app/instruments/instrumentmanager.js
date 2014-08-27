@@ -12,31 +12,39 @@ define(function(require) {
     
     var _ = require('underscore'),
         Backbone = require('backbone'),
-        Instrument = require(['app/models/instrument']),
-        
-        OnyxInstrument = require('app/instruments/onyx/onyx'),
-        OnyxSettingsView = require('app/instruments/onyx/settings'),
-        Fluke289Instrument = require('app/instruments/fluke289/fluke'),
-        Fluke289SettingsView = require('app/instruments/fluke289/settings'),
-        FCOledInstrument = require('app/instruments/friedcircuits_oled/fcoled'),
-        FCOledSettingsView = require('app/instruments/friedcircuits_oled/settings'),
-        W433Instrument = require('app/instruments/w433/w433'),
-        W433SettingsView = require('app/instruments/w433/settings'),
-        ElecraftInstrument = require('app/instruments/elecraft/elecraft'),
-        ElecraftSettingsView = require('app/instruments/elecraft/settings'),
+        Instrument = require(['app/models/instrument']);
 
-    InstrumentManager = function() {
+    var OnyxInstrument = require('app/instruments/onyx/onyx'),
+        OnyxSettingsView = require('app/instruments/onyx/settings');
+
+    var FCOledInstrument = require('app/instruments/friedcircuits_oled/fcoled'),
+        FCOledSettingsView = require('app/instruments/friedcircuits_oled/settings');
+
+    var W433Instrument = require('app/instruments/w433/w433'),
+        W433SettingsView = require('app/instruments/w433/settings');
+
+    var ElecraftInstrument = require('app/instruments/elecraft/elecraft'),
+        ElecraftSettingsView = require('app/instruments/elecraft/settings');
+    
+    var Fluke289Instrument = require('app/instruments/fluke289/fluke'),
+        Fluke289SettingsView = require('app/instruments/fluke289/settings');
+
+    var InstrumentManager = function() {
     
         this.instrument = null; // A Backbone Model
 
         this.supportedInstruments = {
             "onyx":     { name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView},
-            "fluke28x": { name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView},
             "fcoledv1": { name: "Fried Circuits OLED backpack", type: FCOledInstrument, settings: FCOledSettingsView },
             "w433":     { name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView },
             "elecraft": { name: "Elecraft radios", type: ElecraftInstrument, settings:ElecraftSettingsView },
         };
         
+        if (vizapp.type == "server") {
+            this.supportedInstruments["fluke28x"] =
+                { name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView};
+        }
+
         this.setInstrument = function(instrument) {
             var type = instrument.get('type');
             for (var ins in this.supportedInstruments) {

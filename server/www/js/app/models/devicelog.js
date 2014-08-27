@@ -100,7 +100,7 @@ define(function(require) {
             
             updateDatapoints: function() {
                 var points = this.entries.size();
-                console.log("Number of datapoints: " + points);
+                // console.log("Number of datapoints: " + points);
                 this.set('datapoints',points);
                 this.save();
             },
@@ -120,12 +120,22 @@ define(function(require) {
             },
             
             destroyEntries: function() {
-                console.log("****** Destroy all entries for this log");
-                var entry;
-                while (entry = this.entries.first()) {
-                    entry.destroy();                    
-                }
-            },
+                console.log("Destroy all entries for this log");
+                // We only need to do this if we are running in Cordova or Chrome mode, where
+                // fetching all entries won't cost us much. In server mode, the backend takes care of
+                // deleting everything
+                if (vizapp.type == "server")
+                    return;
+                this.entries.fetch(
+                    {success: function(results) {
+                        var entry;
+                        while (entry = results.first()) {
+                            entry.destroy();
+                        }
+                    }}
+                );
+
+                        },
 
            defaults: {
                instrumentid: 0,                // Instrument for this log (not the instrument's serial number, but the ID in MongoDB)

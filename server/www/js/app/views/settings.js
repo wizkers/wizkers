@@ -22,6 +22,16 @@ define(function(require) {
 
         render:function () {        
             $(this.el).html(template(this.model.toJSON()));
+            
+            // Depending on the runmode, we can display additional info
+            if (vizapp.type == "chrome") {
+                $("#chromesettings", this.el).append("<br><h4>Storage</h4>");
+                chrome.storage.local.getBytesInUse(function(used){
+                    $("#chromesettings", this.el).append("<p>" + used + " bytes used out of a " +
+                                                         chrome.storage.local.QUOTA_BYTES + " bytes quota.</p>");
+                    });
+            }
+            
             return this;
         },
 

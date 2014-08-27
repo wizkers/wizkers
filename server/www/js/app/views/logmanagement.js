@@ -74,6 +74,9 @@ define(function(require) {
             var self = this;
             var logToDelete = this.deviceLogs.where({_id: $(event.currentTarget).data('id')});
             
+            // Ask our user to be patient:
+            $("#deleteConfirm .modal-body", this.el).html("Deleting log, please wait...");
+            
             // the backend will take care of deleting all the log entries associated with
             // the log.
             logToDelete[0].destroy(
