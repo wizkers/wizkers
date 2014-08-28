@@ -14,6 +14,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         utils   = require('app/utils'),
+        Devicelog = require('app/models/devicelog'),
         tpl     = require('text!tpl/instruments/Fluke289LogManagementView.html'),
         template = null;
                 
@@ -129,7 +130,7 @@ define(function(require) {
                     // Update the progress bar:
                     $('#downloadbar', this.el).width(this.currentLogIndex/this.logtoDownloadData.records*100 + "%");
                     var stamp = data.record.startTime;
-                    var logEntry = new LogEntry({
+                    var logEntry = new Devicelog.LogEntry({
                                                     timestamp:stamp,
                                                     data: data.record
                                                   });
@@ -139,7 +140,7 @@ define(function(require) {
                             if (self.currentLogIndex < self.logtoDownloadData.records) {
                                 linkManager.driver.getTrendlogRecord(self.logtoDownloadData.address, self.currentLogIndex++);
                             } else {
-                                $('.start-download', this.el).html("Done&nbsp;!").attr('disabled');
+                                $('.start-download', self.el).html("Done&nbsp;!").attr('disabled', 'disabled');
                             }
                         }
                     });
@@ -158,13 +159,14 @@ define(function(require) {
             $('#logname').val($(event.currentTarget).data('name'));        
             this.logtoDownloadData= $(event.currentTarget).data();
             $('.start-download', this.el).html("Start download").attr('disabled', false);
+            $('#downloadbar', this.el).width("0%");
             $('#logModal').modal('show');
             return false;
         },
 
         startDownload: function(event) {
             var self = this;
-            this.currentLog = new Log();
+            this.currentLog = new Devicelog.Log();
             this.currentLog.set('name', $('#logname',this.el).val());
             this.currentLog.set('description', $('#description', this.el).val());
             this.currentLog.set('startstamp', this.logtoDownloadData.start);

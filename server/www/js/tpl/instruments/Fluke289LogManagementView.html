@@ -1,4 +1,3 @@
-<div class="row">
 <div class="col-md-12">
   <div class="row">
       <div class="col-md-3">
@@ -57,30 +56,33 @@
       </div>
   </div>
 
-</div><!--/row-->
+</div><!--/col-md-12 -->
     
 <!-- Log download modal -->
-<div id="logModal" class="modal hide" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Log download</h3>
-  </div>
-  <div class="modal-body">
-      <div class="horizontal">
-          <span>Log name:&nbsp;</span><input id="logname" name="logname" type="text" />
+<div class="container">
+<div id="logModal" class="modal" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Log download</h3>
       </div>
-      <div>Description:
-         <textarea id="description" name="description" style="width: 90%;" rows="6"></textarea>
+      <div class="modal-body">
+        <div class="horizontal">
+            <span>Log name:&nbsp;</span><input id="logname" name="logname" type="text" />
+        </div>
+        <div>Description:
+            <textarea id="description" name="description" style="width: 90%;" rows="6"></textarea>
+        </div>
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" arial-valuemin="0" aria-valuemax="100" id="downloadbar" style="width: 0%;"></div>
+        </div>
       </div>
-      <div class="progress">
-        <div class="bar" id="downloadbar" style="width: 0%;"></div>
-      </div>
-</div>
-  <div class="modal-footer">
-<!--    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button> -->
-    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    <button class="btn start-download btn-primary">Start download</button>
-  </div>
+    <div class="modal-footer">
+        <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        <button class="btn start-download btn-primary">Start download</button>
+    </div>
+  </div></div>
+    </div>
 </div>
 
 
