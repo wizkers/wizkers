@@ -54,8 +54,7 @@ exports.addInstrument = function(req, res) {
                 console.log('Success: ' + JSON.stringify(result));
                 res.send(result);
             }
-    });
-    
+    });    
 };
 
 exports.updateInstrument = function(req, res) {

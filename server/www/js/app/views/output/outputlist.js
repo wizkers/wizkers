@@ -57,6 +57,12 @@ define(function(require) {
             var outputs = this.model.models;
             var len = outputs.length;
             console.log("Output list: " + len + " outputs");
+            
+            if (len == 0) {
+                $(this.el).html('<div class="col-md-12"><div class="row thumbnails"><div class="col-md-3 col-sm-2"><div class="thumbnail glowthumbnail select" style="text-align:center;"><a href="#" class="plain"><h5>No output defined</h5><p>There are no outputs defined for this instrument. Click on "Add Output" in the menu above to add one.</p></a></div></div></div></div>');
+                return this;
+            }
+            
             var items = parseInt(settings.get('itemsperpage'));
             var startPos = (this.options.page - 1) * items;
             var endPos = Math.min(startPos + items, len);

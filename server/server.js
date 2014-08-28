@@ -305,6 +305,10 @@ app.delete('/instruments/:id', isLoggedIn, user.is('operator'), instruments.dele
  * relative to an instrument, which is reflected in the URL
  */
 app.get('/instruments/:id/outputs', isLoggedIn, user.is('operator'), outputs.findByInstrumentId);
+app.post('/instruments/:id/outputs', isLoggedIn, user.is('operator'), outputs.addOutput);
+app.get('/instruments/:iid/outputs/:id', isLoggedIn, user.is('operator'), outputs.findById);
+app.put('/instruments/:iid/outputs/:id', isLoggedIn, user.is('operator'), outputs.updateOutput);
+app.delete('/instruments/:iid/outputs/:id', isLoggedIn, user.is('operator'), outputs.deleteOutput);
 
 /**
  * Interface for managing instrument logs (summary)

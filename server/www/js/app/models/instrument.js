@@ -51,7 +51,15 @@ define(function(require) {
                 // the "sync" event, and update the entries' URL upon it (sync is fired when the model is
                 // saved, therefore the ID is updated
                 this.listenTo(this, "sync", this.updateChildrenURL);
+                
+                // Make sure that whenever we add an output to the Instrument, we
+                // set its instrumentid reference
+                this.listenTo(this.outputs, "add", this.setInstrumentId);
                
+            },
+        
+            setInstrumentId: function(newoutput) {
+                newoutput.set("instrumentid", this.id);
             },
         
             updateChildrenURL: function() {

@@ -56,7 +56,7 @@ var OutputSchema = new Schema({
     
         instrumentid: {type: Schema.Types.ObjectId, ref:'Instrument', default:null},
         name: String,           // Used for display
-        type: String,           // Will correspond to parsers known on the server side
+        type: String,
         comment: String,        // Simple comments
         enabled: Boolean,
         metadata: Schema.Types.Mixed, // Depending on output type, this metadata can include additional settings

@@ -12,13 +12,19 @@ define(function(require) {
     
     return  function() {
 
-        // Helper function: get driver capabilites.
+        // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities    
         this.getCaps = function() {
             return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView",
                     "LogManagementView",
                    ];
         };
+        
+        // Return the type of data reading that this instrument generates. Can be used
+        // by output plugins to accept data from this instrument or not.
+        this.getDataType = function() {
+                    return [ "radioactivity" ];
+        }
 
         // This has to be a backbone view
         this.getSettings = function(arg, callback) {

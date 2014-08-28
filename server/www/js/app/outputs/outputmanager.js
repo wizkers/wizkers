@@ -13,15 +13,18 @@ define(function(require) {
     var _ = require('underscore'),
         Backbone = require('backbone'),
         Instrument = require(['app/models/instrument']);
+    
+    var Safecast = require('app/outputs/safecast/safecast');
+    var Rest     = require('app/outputs/rest/rest');
 
     var OutputManager = function() {
-    
-        this.instrument = null; // A Backbone Model
         
-        this.enabledOuputs = []; // A list of all data output plugins that are enabled
+        var enabledOuputs = []; // A list of all data output plugins that are enabled
 
         this.supportedOutputs = {
-            "safecast":     { name: "SafeCast API", type: SafecastOutput },
+            "safecast":     { name: "SafeCast API", plugin: Safecast },
+            // "dweet":  { name: "dtweet.io", plugin: '' },
+            "rest": { name: "http REST calls", plugin: Rest },
         };
         
         /**
@@ -32,13 +35,8 @@ define(function(require) {
             var type = output.get('type');
             for (var ins in this.supportedOutputs) {
             if (ins == type) {
-                
-                // Nifty: we extend our link manager with the methods of our instrument.
-                // (since all instruments support the same API, a change of instrument
-                // overrides the methods)
-                var instrumentObject =new this.supportedInstruments[ins].type;
-                _.extend(this,instrumentObject);
-                this.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
+                var outputPlugin =new this.supportedInstruments[ins].type;
+                enabledOutputs.push(outputPlugin);
                 }
             }
         }
@@ -50,6 +48,36 @@ define(function(require) {
         this.getEnabledOutputs = function() {
             return this.enabledOuputs;
         }
+        
+        
+        // Returns all output plugin names that make sense for this instrument.
+        // we manage this through the instrument manager because there is a close interaction between
+        // what the instrument can output, and the data that is then sent to the output plugin. For instance,
+        this.getOutputsForCurrentInstrument = function() {
+            if (instrumentManager.getInstrument() == null) return {};
+            
+            var caps = instrumentManager.getDataType();
+            console.info("Caps: " + caps);
+            var accepted = {};
+            _.each(this.supportedOutputs, function(out, type) {
+                var wo = new out.plugin().wantOnly();
+                var wantit = false;
+                if (wo.length > 0) {
+                    for (var want in wo) {
+                        wantit |= (caps.indexOf(wo[want]) != -1);
+                    }
+                } else {
+                    wantit = true;
+                }
+                if (wantit)
+                    accepted[type] = out;
+
+            });
+            
+            return accepted;
+            
+        }
+
         
         // Send data coming from an instrument to all enabled output plugins
         this.dispatchData = function(data) {

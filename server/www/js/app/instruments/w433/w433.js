@@ -20,6 +20,13 @@ define(function(require) {
         this.getCaps = function() {
             return ["LiveDisplay", "NumDisplay", "LogView"];
         };
+        
+        // Return the type of data reading that this instrument generates. Can be used
+        // by output plugins to accept data from this instrument or not.
+        this.getDataType = function() {
+                    return [ "temperature", "humidity", "rainfall", "wind" ];
+        }
+
 
         // This has to be a Backbone view
         this.getLiveDisplay = function(arg, callback) {

@@ -71,6 +71,12 @@ define(function(require) {
             var instruments = this.model.models;
             var len = instruments.length;
             console.log("Instrument list: " + len + " instruments");
+            
+            if (len == 0) {
+                $(this.el).html('<div class="col-md-12"><div class="row thumbnails"><div class="col-md-3 col-sm-2"><div class="thumbnail glowthumbnail select" style="text-align:center;"><a href="#" class="plain"><h5>No instrument</h5><p>There are no instruments setup in the application yet. Click on "Add Instrument" in the menu above to add one.</p></a></div></div></div></div>');
+                return this;
+            }
+
             var items = parseInt(settings.get('itemsperpage'));
             var startPos = (this.options.page - 1) * items;
             var endPos = Math.min(startPos + items, len);

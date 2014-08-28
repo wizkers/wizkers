@@ -16,6 +16,13 @@ define(function(require) {
         this.getCaps = function() {
             return ["LiveDisplay",  "NumDisplay", ];
         };
+                    
+        // Return the type of data reading that this instrument generates. Can be used
+        // by output plugins to accept data from this instrument or not.
+        this.getDataType = function() {
+                    return [ "voltage", "current", "power", "energy" ];
+        }
+
 
         // This has to be a backbone view
         this.getSettings = function(arg, callback) {

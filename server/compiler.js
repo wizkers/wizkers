@@ -30,7 +30,8 @@ var compileTemplate = function(templates) {
 }
 
 compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogManagementView',
-                 'InstrumentDetailsView', 'InstrumentListItemView', 'OutputListItemView', 'instruments/AudioWaterfall',
+                 'InstrumentDetailsView', 'InstrumentListItemView', 'OutputListItemView', 'OutputDetailsView',
+                 'instruments/AudioWaterfall',
                  'instruments/W433LiveView', 'instruments/W433SettingsView', 'instruments/W433LogView', 'instruments/W433NumView',
                  'instruments/ElecraftDiagView', 'instruments/ElecraftFrequencyItemView', 'instruments/ElecraftLiveView', 'instruments/ElecraftNumView',
                  'instruments/FCOledLiveView', 'instruments/FCOledLogView', 'instruments/FCOledNumView',

@@ -1,6 +1,6 @@
 /**
  *
- * Send data to the Safecast API
+ * Send data through RESTful calls
  *
  * This plugin shall implement the following API
  *
@@ -19,16 +19,16 @@ define(function(require) {
     var _ = require('underscore'),
         Backbone = require('backbone');
 
-    var Safecast = function() {
+    var Rest = function() {
         
         this.wantOnly = function() {
-            return [ "radioactivity" ];
+            return [];
         }
         
     };
 
-    _.extend(Safecast.prototype, Backbone.Events);
+    _.extend(Rest.prototype, Backbone.Events);
     
-    return Safecast;
+    return Rest;
 
 });

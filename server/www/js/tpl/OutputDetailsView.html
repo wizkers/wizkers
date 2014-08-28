@@ -1,0 +1,72 @@
+<!-- Details view of a layout -->
+<div class="col-md-12">
+    <form class="form-horizontal">
+        <fieldset>
+            <legend>Output Details</legend>
+            <br/>
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="control-group">
+                        <label for="name" class="control-label">Name:</label>
+
+                        <div class="controls">
+                            <input type="text" name="name" value="<%= name %>"/>
+                            <span class="help-inline"></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="name" class="control-label">Type:</label>
+                        <div class="controls">
+                            <select name="type" >
+                                <% for(var ins in outtypes) { %>
+                                <option
+                                <%= type == ins ?'selected':'' %>
+                                value="<%= ins %>"><%= outtypes[ins].name %></option>
+                                <% } %>                                
+                            </select>
+                            <span class="help-inline"></span>
+                        </div>
+                    </div>
+            </div>
+            <div class="col-md-4">
+                <div class="control-group">
+                    <label for="description" class="control-label">Notes:</label>
+                    <div class="controls">
+                            <textarea id="comment" name="comment" style="width: 90%;" rows="6"><%= comment %></textarea>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="metadata" class="control-label">Extra settings:</label>
+                    <div class="controls">
+                            <div id="metadata">This device types does not require extra settings.</div>
+                    </div>
+                </div>
+            </div> 
+            <div class="col-md-3">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="well hidden-xs" style="text-align: center;margin: 0px auto;">
+                        <p><img id="icon" width="180" src="js/app/outputs/<%=type%>/logo.png"/></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- row -->
+    </fieldset>
+
+        <div class="form-actions">
+            <a href="#" class="btn btn-primary save">Save</a>
+            <a href="#" class="btn btn-default delete">Delete</a>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="row status-bar">
+    <div class="col-md-12">
+        <div class="alert alert-success" style="display: none">
+            <b>Success!</b> Instrument saved successfully
+        </div>
+    </div>
+</div>

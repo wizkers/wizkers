@@ -117,16 +117,21 @@ var vizapp = {
 var router;
 
 require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instruments/instrumentmanager', 'app/linkmanager',
-         'app/models/instrument'], function($, Backbone, Router, Settings, InstrumentManager, LinkManager, Instrument) {
-       // Get our settings here, and
-        // share them afterwards, rather than requesting it
+         'app/outputs/outputmanager', 'app/models/instrument'], function($, Backbone, Router, Settings, InstrumentManager, LinkManager,
+                                                                  OutputManager, Instrument) {
+        // Get our settings here, and
+        // share them afterwards, rather than requesting them
         // everytime...
         settings = new Settings({id: 1 });
 
-         // Create our instrument manager: in charge of creating/deleting
+        // Create our instrument manager: in charge of creating/deleting
         // instruments as necessary, as well as providing a list of
         // instruments to other parts who need those
         instrumentManager = new InstrumentManager();
+             
+        // Create our output manager: in charge of connecting instrument outputs
+        // to third party data consumers.
+        outputManager = new OutputManager();
 
         settings.fetch({success: function() {
             

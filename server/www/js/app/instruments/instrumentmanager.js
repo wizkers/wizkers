@@ -31,7 +31,7 @@ define(function(require) {
 
     var InstrumentManager = function() {
     
-        this.instrument = null; // A Backbone Model
+        var current_instrument = null; // The instrument currently in use
 
         this.supportedInstruments = {
             "onyx":     { name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView},
@@ -51,7 +51,7 @@ define(function(require) {
             var type = instrument.get('type');
             for (var ins in this.supportedInstruments) {
             if (ins == type) {
-                this.instrument = instrument;
+                current_instrument = instrument;
                 // Nifty: we extend our link manager with the methods of our instrument.
                 // (since all instruments support the same API, a change of instrument
                 // overrides the methods)
@@ -62,8 +62,9 @@ define(function(require) {
             }
         }
 
+        // Get the currently loaded instrument
         this.getInstrument = function() {
-            return this.instrument;
+            return current_instrument;
         }
         
     };

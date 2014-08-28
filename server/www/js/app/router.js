@@ -248,8 +248,13 @@ define(function(require) {
 
         addOutput: function() {
             var self = this;
+            var ins = instrumentManager.getInstrument();
+            if (ins == null)
+                this.navigate('/',true);
             require(['app/models/output', 'app/views/output/outputdetails'], function(model, view) {
                 var output = new model.Output();
+                ins.outputs.add(output); // Adding the output to our instrument outputs creates its URL
+                                         // the instrument also updates the instrumentid of the output
                 self.switchView(new view({model: output}));
                 self.headerView.selectMenuItem('output-menu');
             });
@@ -258,12 +263,17 @@ define(function(require) {
 
         outputDetails: function(id) {
             var self = this;
-            require(['app/models/output', 'app/views/output/outputdetails'], function(model, view) {
-                var output = new model.Output({_id: id});
-                output.fetch({success: function(){
-                    self.switchView(new view({model: output}));
-                }});
-                self.headerView.selectMenuItem('output-menu');
+            var outputs = instrumentManager.getInstrument().outputs;
+            outputs.fetch( {
+                success: function() {
+                    require(['app/views/output/outputdetails'], function(view) {
+                    var output = outputs.get(id);
+                    output.fetch({success: function(){
+                        self.switchView(new view({model: output}));
+                    }});
+                    self.headerView.selectMenuItem('output-menu');
+                });
+                }
             });
 
         },

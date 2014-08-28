@@ -54,8 +54,8 @@ define(function(require) {
 
             defaults: {
                 instrumentid: 0,                // Instrument for this log (not the instrument's serial number, but the ID in MongoDB)
-                name: "Safecast API Connection",   // Used for display
-                type: "safecast",                  // Corresponds to parsers known on the server side as well
+                name: "REST call",                 // Used for display
+                type: "rest",                      // The output type to know what output plugin to load
                 comment: "enter your notes here",  // Simple comments
                 enabled: false,                    // Whether the plugin is active
                 metadata: {},                      // Freeform metadata

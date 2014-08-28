@@ -30,3 +30,59 @@ exports.findByInstrumentId = function(req, res) {
     });
 };
 
+// Get a specific output
+exports.findById = function(req, res) {
+    var id = req.params.id;
+    console.log('Retrieving output: ' + id);
+    Output.findById(id, function(err,item) {
+        res.send(item);
+    });
+};
+
+
+// Create a new output
+exports.addOutput = function(req, res) {
+    var output = req.body;
+    console.log('Adding output: ' + JSON.stringify(output));
+    new Output(output).save( function(err, result) {
+            if (err) {
+                res.send({'error':'An error has occurred'});
+            } else {
+                console.log('Success: ' + JSON.stringify(result));
+                res.send(result);
+            }
+    });    
+};
+
+// Update an existing output
+exports.updateOutput = function(req, res) {
+    var id = req.params.id;
+    var output = req.body;
+    console.log(JSON.stringify(output));
+    delete output._id;
+    console.log('Updating output: ' + id);
+    console.log(JSON.stringify(output));
+    Output.findByIdAndUpdate(id, output, {safe:true}, function(err, result) {
+            if (err) {
+                console.log('Error updating output: ' + err);
+                res.send({'error':'An error has occurred'});
+            } else {
+                console.log('' + result + ' output was updated');
+                res.send(result);
+            }
+    });    
+}
+
+exports.deleteOutput = function(req, res) {
+    var id = req.params.id;
+    console.log('Deleting output: ' + id);
+    Output.findByIdAndRemove(id, {safe:true}, function(err,result) {
+            if (err) {
+                res.send({'error':'An error has occurred - ' + err});
+            } else {
+                console.log('' + result + ' output deleted');
+                res.send(req.body);
+            }
+    });    
+}
+
