@@ -142,17 +142,14 @@ require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instrume
 
             var insId = settings.get('currentInstrument');
             if (insId != null) {
-                var ins = new Instrument.Instrument({_id: insId});
-                ins.fetch({success: function(){
                     // We have the instrument, get the correct link manager for it:
-                    var type = ins.get('type');
-                    console.log('Load link manager driver for type: ' + type );
-                    instrumentManager.setInstrument(ins);
-                    linkManager.setDriver(instrumentManager.getDriver(linkManager));
-
+                    // var type = ins.get('type');
+                    // console.log('Load link manager driver for type: ' + type );
+                    // instrumentManager.setInstrument(ins);
+                    // linkManager.setDriver(instrumentManager.getDriver(linkManager));
                     router = new Router();
+                    router.switchinstrument(insId, false); // second argument prevents router from closing instrument
                     Backbone.history.start();
-                }});
             } else {
            router = new Router();
            Backbone.history.start();

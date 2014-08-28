@@ -9,7 +9,9 @@
  */
 
 var serialport = require('serialport'),
-    SerialPort  = serialport.SerialPort;
+    SerialPort  = serialport.SerialPort,
+    recorder = require('../recorder.js'),
+    outputmanager = require('../outputs/outputmanager.js');
 
 module.exports = {
     
@@ -18,7 +20,6 @@ module.exports = {
     // Set a reference to the socket.io socket and port
     socket: null,
     port: null,
-    recorder: null,
     uidrequested: false,
     streaming: false,
     livePoller: null,
@@ -30,8 +31,7 @@ module.exports = {
         this.socket = s;
     },
     setRecorderRef: function(s) {
-        console.log("Setting recorder reference.");
-        this.recorder = s;
+        console.log("DELETE THIS Setting recorder reference.");
     },
     setInstrumentRef: function(i) {
     },
@@ -96,8 +96,12 @@ module.exports = {
                 this.socket.emit('uniqueID',response.guid);
                 this.uidrequested = false;
             } else {
+                // Send the response to the front-end
                 this.socket.emit('serialEvent', response);
-                this.recorder.record(response);
+                // Send our response to the recorder and the output manager
+                // as well
+                recorder.record(response);
+                outputmanager.output(response);
             }
         } catch (err) {
             console.log('Not able to parse JSON response from device:\n' + data);

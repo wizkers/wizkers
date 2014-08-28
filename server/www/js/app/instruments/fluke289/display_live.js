@@ -92,9 +92,9 @@ define(function(require) {
 
         updatestatus: function(data) {
             console.log("Fluke 289 live display: serial status update");
-            if (linkManager.connected && !this.deviceinitdone) {
+            if (linkManager.isConnected() && !this.deviceinitdone) {
                 linkManager.driver.version();
-            } else {
+            } else  if (!data.portopen) {
                 this.deviceinitdone = false;
             }
         },
@@ -120,7 +120,7 @@ define(function(require) {
             if (!this.deviceinitdone) {
                 if (data.owner != undefined) {
                     // TODO update owner info
-                    linkManager.startLiveStream();
+                    linkManager.startLiveStream(this.model.get('liveviewperiod'));
                     this.deviceinitdone = true;                
                 } else
                 if (data.version != undefined) {

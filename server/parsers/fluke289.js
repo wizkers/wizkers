@@ -19,6 +19,7 @@
  */
 var serialport = require('serialport'),
     crcCalc = require('./lib/crc-calc.js'),
+    recorder = require('../recorder.js'),
     zlib = require('zlib');
 
 Hexdump = require('../hexdump.js');
@@ -87,7 +88,7 @@ module.exports = {
     // some protocol link layer operations and command queue management
     port: null,
     socket: null,
-    recorder: null,
+    
     uidrequested: false,
     recording: false,     // to call the main app in case we need to record readings
     streaming: false,
@@ -125,7 +126,7 @@ module.exports = {
     
     setRecorderRef: function(s) {
         this.debug("Setting recorder reference.");
-        this.recorder = s;
+       // this.recorder = s;
     },
     
     setInstrumentRef: function(i) {
@@ -145,7 +146,7 @@ module.exports = {
     sendData: function(data) {
         if (data) {
             this.socket.emit('serialEvent',data);
-            this.recorder.record(data);
+            recorder.record(data);
         }
     },
     

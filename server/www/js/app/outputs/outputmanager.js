@@ -19,35 +19,33 @@ define(function(require) {
 
     var OutputManager = function() {
         
-        var enabledOutputs = []; // A list of all data output plugins that are enabled
+        var enabledOutputs = []; // A list of all data output plugins that are enabled (strings)
 
         this.supportedOutputs = {
-            "safecast":     { name: "SafeCast API", plugin: Safecast },
+            "safecast":     { name: "SafeCast API", plugin: Safecast, backend: 'app/outputs/safecast/driver_backend' },
             // "dweet":  { name: "dtweet.io", plugin: '' },
             "rest": { name: "http REST calls", plugin: Rest },
         };
         
-        /**
-         * Enable an output plugin for the current instrument
-         * 'output' is a string description of the output plugin (see supportedOutput above)
-         */        
-        this.enableOutput = function(type) {
-            for (var ins in this.supportedOutputs) {
-            if (ins == type) {
-                var outputPlugin =new this.supportedOutputs[ins].plugin;
-                enabledOutputs.push(outputPlugin);
+        // Called upon instrument change or output enable/disable and makes sure
+        // the output plugins are connected and ready to receive data from the
+        // instrument backend driver
+        this.reconnectOutputs = function() {
+            var outputs = instrumentManager.getInstrument().outputs;
+            // We need to make sure we have a current list, hence the "fetch"
+            outputs.fetch({
+                success: function() {
+                    var enabled = [];
+                    outputs.each(function(output) {
+                        if (output.get('enabled'))
+                            enabled.push(output.get('type'));
+                    });
+                    console.info("[outputManager] asking link manager to connect: " + enabled);
+                    linkManager.setOutputs({ "instrument": instrumentManager.getInstrument().id,
+                                            "outputs": enabled });
                 }
-            }
+            });
         }
-        
-        // Disable an output plugin for the current instrument
-        this.disableOutput = function(output) {
-        }
-
-        this.getEnabledOutputs = function() {
-            return this.enabledOuputs;
-        }
-        
         
         // Returns all output plugin names that make sense for this instrument.
         // we manage this through the instrument manager because there is a close interaction between

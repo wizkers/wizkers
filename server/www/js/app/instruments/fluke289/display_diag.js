@@ -65,7 +65,7 @@ define(function(require) {
         refresh: function() {
             // Query DMM for various info:
             this.queriesDone = false;
-            if (linkManager.connected) {
+            if (linkManager.isConnected()) {
                 linkManager.driver.getDevInfo();
                 linkManager.driver.version();
                 linkManager.driver.takeScreenshot();

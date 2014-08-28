@@ -42,6 +42,9 @@ define(function(require) {
                    case 'driver':
                     setDriver(args);
                     break;
+                   case 'outputs':
+                     setOutputs(args);
+                     break;                    
                    default:
                     break;
             }
@@ -74,6 +77,11 @@ define(function(require) {
                 parser = self.portSettings.parser;
             });
         }
+        
+        function setOutputs(outputs) {
+            console.warn("[cordovaSerialLib] TODO: implement chrome-side output plugins");
+        }
+
 
         // We support only one default port, the serial adapter
         // connected to the OTG cable.

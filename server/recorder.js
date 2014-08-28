@@ -6,6 +6,7 @@
  */
 
 var mongoose = require('mongoose');
+var db = require('./db.js');
 var DeviceLogEntry = mongoose.model('DeviceLogEntry');
 var LogSession = mongoose.model('LogSession');
  

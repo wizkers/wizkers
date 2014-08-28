@@ -49,7 +49,6 @@ deviceTypes.push(W433);
 var Elecraft = require('./parsers/elecraft.js');
 deviceTypes.push(Elecraft);
 
-
 /**
  * Debug: get a list of available serial
  * ports on the server - we'll use this later
@@ -407,6 +406,11 @@ var portOpen = false;
 
 var driver = Onyx;
 
+// Output plugin management: we have an outputmanager, whose role
+// is to send data to various third parties (twitter, Safecast, HTTP REST calls
+// etc... 
+var outputmanager = require('./outputs/outputmanager.js');
+
 //
 // Backend logging: we want to let the backend record stuff into
 // the database by itself, so we keep a global variable for doing this
@@ -616,6 +620,10 @@ io.sockets.on('connection', function (socket) {
             socket.emit('ports', portlist);
         });
      });
+    
+    socket.on('outputs', function(outputs) {
+       outputmanager.enableOutputs(outputs.instrument, outputs.outputs);
+    });
 
     socket.on('driver', function(data) {
         

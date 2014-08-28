@@ -51,11 +51,10 @@ define(function(require) {
                         if (en) {
                             $(".enStatus", self.el).addClass('btn-success').removeClass('btn-danger');
                             // Tell the output manager we got enabled
-                            outputManager.enableOutput(self.model.get('type'));
                         } else {
                             $(".enStatus", self.el).addClass('btn-danger').removeClass('btn-success');
-                            outputManager.disableOutput(self.model.get('type'));
                         }
+                        outputManager.reconnectOutputs();
                     }
                 });
                 

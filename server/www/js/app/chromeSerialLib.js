@@ -47,6 +47,9 @@ define(function(require) {
                    case 'driver':
                     setDriver(args);
                     break;
+                   case 'outputs':
+                     setOutputs(args);
+                     break;
                    case 'startrecording':
                     startRecording(args);
                     break;
@@ -151,6 +154,10 @@ define(function(require) {
                 self.portSettings = self.driver.portSettings();
                 parser = self.portSettings.parser;
             });
+        }
+        
+        function setOutputs(outputs) {
+            console.warn("[chromeSerialLib] TODO: implement chrome-side output plugins");
         }
         
         function openInstrument(port) {

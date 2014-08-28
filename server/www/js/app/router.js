@@ -77,18 +77,25 @@ define(function(require) {
 
         },
         
-        switchinstrument: function(insId) {
+        switchinstrument: function(insId, closeprevious) {
             var self = this;
+            if (closeprevious === undefined)
+                closeprevious = true;
             console.log('New instrument ID, updating the link manager type and jumping to home screen');
             require(['app/models/instrument'], function(model) {
                 var ins = new model.Instrument({_id: insId});
                 ins.fetch({success: function(){
                     var type = ins.get('type');
-                    console.log('New instrument type: ' + type );
+                    console.info('New instrument type: ' + type );
                     // Now update our Instrument manager:
-                    linkManager.closeInstrument();  // Stop former link manager
+                    if (closeprevious) linkManager.closeInstrument();  // Stop former link manager
                     instrumentManager.setInstrument(ins);
                     linkManager.setDriver(instrumentManager.getDriver(linkManager));
+                    
+                    // Next step: retrieve the list of outputs that should be
+                    // enabled for this instrument
+                    outputManager.reconnectOutputs();
+                    
                     // We need to jump to the main screen now:
                     self.navigate('/', true);
                 }});

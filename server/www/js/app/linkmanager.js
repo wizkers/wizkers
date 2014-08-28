@@ -28,12 +28,20 @@ define(function(require) {
             this.driver = null;
 
             // Set the front-end instrument driver, and load the back-end instrument driver
+            // This is called whenever we switch instrument
             this.setDriver = function(driver) {
                 this.driver = driver;
                 this.driver.setBackendDriver();
                 this.socket.emit('ports','');
                 console.log('Link manager: updated link manager driver for current instrument');
             };
+            
+            /**
+             * Tells our backend to enable a list of output plugins for this instrument
+             */
+            this.setOutputs = function(outputs) {
+                this.socket.emit('outputs', outputs);
+            }
     
             // Called to restore the state of the backend when the frontend
             // connects to it (make sure the backend driver matches the frontend instrument)
