@@ -19,7 +19,7 @@ define(function(require) {
 
     var OutputManager = function() {
         
-        var enabledOuputs = []; // A list of all data output plugins that are enabled
+        var enabledOutputs = []; // A list of all data output plugins that are enabled
 
         this.supportedOutputs = {
             "safecast":     { name: "SafeCast API", plugin: Safecast },
@@ -31,18 +31,17 @@ define(function(require) {
          * Enable an output plugin for the current instrument
          * 'output' is a string description of the output plugin (see supportedOutput above)
          */        
-        this.enableOutput = function(output) {
-            var type = output.get('type');
+        this.enableOutput = function(type) {
             for (var ins in this.supportedOutputs) {
             if (ins == type) {
-                var outputPlugin =new this.supportedInstruments[ins].type;
+                var outputPlugin =new this.supportedOutputs[ins].plugin;
                 enabledOutputs.push(outputPlugin);
                 }
             }
         }
         
         // Disable an output plugin for the current instrument
-        this.disableOuput = function(output) {
+        this.disableOutput = function(output) {
         }
 
         this.getEnabledOutputs = function() {

@@ -42,8 +42,23 @@ define(function(require) {
             },
 
             toggleOutput: function(event) {
-                console.log('Output toggled: ' + this.model.id);
-                var theID = this.model.id;
+                var self = this;
+                var en = this.model.get('enabled');
+                en = !en;
+                this.model.save({enabled: en}, {
+                    success: function() {
+                        console.log('Output status: ' + en);
+                        if (en) {
+                            $(".enStatus", self.el).addClass('btn-success').removeClass('btn-danger');
+                            // Tell the output manager we got enabled
+                            outputManager.enableOutput(self.model.get('type'));
+                        } else {
+                            $(".enStatus", self.el).addClass('btn-danger').removeClass('btn-success');
+                            outputManager.disableOutput(self.model.get('type'));
+                        }
+                    }
+                });
+                
             },
         });
 

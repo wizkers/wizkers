@@ -1,7 +1,9 @@
 <div class="thumbnail glowthumbnail select" style="text-align:center;">
-    <a href="#" class="plain">
+    
         <h5><%= name %></h5>
         <p><%= comment %></p>
-    </a>
+    
         <a class="btn btn-mini btn-default edit" href="#outputs/<%= _id %>">Edit</a>
+        <button class="btn btn-mini <% if (enabled) { %> btn-success <% } else { %> btn-danger <% } %> enStatus" type="button">Enabled</button>
+
 </div>
