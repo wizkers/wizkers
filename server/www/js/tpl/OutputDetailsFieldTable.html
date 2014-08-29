@@ -12,7 +12,8 @@
                    _.each(fields,function(field, fieldname) {
                 %>
                     <tr>
-                        <td><input class="logcheckbox" type="checkbox"></td>
+                        <td><input class="fieldcheckbox" name="<%=fieldname%>" type="checkbox" <%= selected.indexOf(fieldname) > -1  ? 'checked':''%>
+                            ></td>
                         <td><%= fieldname %></td>
                         <td><%= field %></td>
                     </tr>

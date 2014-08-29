@@ -59,6 +59,7 @@ var OutputSchema = new Schema({
         type: String,
         comment: String,        // Simple comments
         enabled: Boolean,
+        datafields: [ String ], // Data fields we want to send
         metadata: Schema.Types.Mixed, // Depending on output type, this metadata can include additional settings
 });
  

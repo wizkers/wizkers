@@ -22,11 +22,11 @@ define(function(require) {
         
         id: "output-details",
         
-        fields: {},
+        fields: [],
         
         initialize: function() {
             
-            
+            this.fields = this.model.get('datafields');
             
         },
 
@@ -65,6 +65,7 @@ define(function(require) {
             "change"        : "change",
             "click .save"   : "beforeSave",
             "click .delete" : "deleteOutput",
+            "click .fieldcheckbox" : "toggleEnabled",
         },
 
         change: function (event) {
@@ -140,20 +141,30 @@ define(function(require) {
             return false;
         },
         
+        toggleEnabled: function(event) {
+            var field = event.currentTarget.name;
+            var idx = this.fields.indexOf(field);
+            if ( idx > -1 ) {
+                this.fields.splice(idx);
+            } else {
+                this.fields.push(field);
+            }
+            this.model.set('datafields', this.fields);
+        },
+        
         showInput: function(data) {
-            if (typeof(data) === "object") {
-                $(".realtimefields", this.el).html(JSON.stringify(data));
-                
+            var flat = {};
+            if (typeof(data) === "object") {                
                 // We sometimes have embedded JSON structures: flatten them
-                var flat = utils.JSONflatten(data);
+                flat = utils.JSONflatten(data);
                 
-                $(".fieldselect", this.el).html(tableTemplate({fields: flat}));
             } else if (typeof(data) === "string") {
-                $(".realtimefields", this.el).html(data);
                 // If the instrument is sending a string, not much we can do except
                 // send that string:
+                flat = { "string" : data };
             }
-            console.warn("--- real time field update --");
+            $(".fieldselect", this.el).html(tableTemplate({fields: flat, selected: this.fields}));
+
         },
 
     });

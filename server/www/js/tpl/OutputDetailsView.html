@@ -15,7 +15,7 @@
             <div class="form-group col-md-4">
                 <label for="type" class="col-md-3 control-label">Type:</label>
                     <div class="col-md-9">
-                            <select name="type" >
+                            <select name="type" class="form-control">
                                 <% for(var ins in outtypes) { %>
                                 <option
                                 <%= type == ins ?'selected':'' %>
@@ -47,19 +47,12 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-10">
-                <div class="row">
-                    <div class="col-md-12">
-                        <p>Below are data fields that we are detecting. Select the fields you would like this output plugin to send.</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-11 fieldselect">
-                    </div>
-                </div>
+            <div class="col-md-12">
+                    <p>Below are data fields that we are detecting. Select the fields you would like this output plugin to send.</p>
             </div>
-            <div class="col-md-1 realtimefields well" style="overflow-wrap: break-word; font-size: 9px;">
-
+        </div>
+        <div class="row">
+            <div class="col-md-12 fieldselect">
             </div>
         </div>
         <div class="row">
@@ -72,7 +65,72 @@
                 <p>Select send conditions: alarm (above/under), regular (frequency), threshold (percent change). All conditions can be enabled at once.</p>
             </div>
         </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="type" class="col-md-6 control-label">Alarm:</label>
+                <div class="col-md-6">
+                        <select name="type" class="form-control">
+                            <option>(Inactive)</option>                       
+                        </select>
+                    </div>
+            </div>
+            <div class="form-group col-md-3">
+                <select name="type" class="form-control">
+                    <option>Is more than or equal to</option>                       
+                    <option>Is less than</option>
+                    <option>Is equal to</option>                       
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <input type="text" class="form-control" name="name" value=""/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="form-group col-md-1">
+                <select name="type" class="form-control">
+                    <option>And</option>
+                    <option>Or</option>
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                            <select name="type" class="form-control">
+                                <option>(Inactive)</option>                       
+                            </select>
+            </div>
+            <div class="form-group col-md-3">
+                <select name="type" class="form-control">
+                    <option>Is more than or equal to</option>                       
+                    <option>Is less than</option>
+                    <option>Is equal to</option>                       
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <input type="text" class="form-control" name="name" value=""/>
+            </div>
+        </div>
+            
+            <br/>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="type" class="col-md-6 control-label">Regular output every:</label>
+                <div class="input-group col-md-6">
+                    <input type="text" class="form-control" name="name" value=""/>
+                    <span class="input-group-addon">seconds</span>
+                </div>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="type" class="col-md-6 control-label">... or if it changes more than:</label>
+                <div class="input-group col-md-6">
+                    <input type="text" class="form-control" name="name" value=""/>
+                    <span class="input-group-addon">percent</span>
+                </div>
+            </div>
 
+        </div>
+
+
+            
         <div class="row">
             <div class="col-md-12">
                 <legend>Output Settings</legend>
