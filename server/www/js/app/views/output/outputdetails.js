@@ -15,11 +15,20 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         utils   = require('app/utils'),
-        template = require('js/tpl/OutputDetailsView.js');
+        tableTemplate = require('tpl/OutputDetailsFieldTable'),
+        template = require('tpl/OutputDetailsView');
 
     return Backbone.View.extend({
         
         id: "output-details",
+        
+        fields: {},
+        
+        initialize: function() {
+            
+            
+            
+        },
 
         render: function () {
             console.log("Render output details");
@@ -33,8 +42,23 @@ define(function(require) {
                 $('#metadata',this.el).html(settingsView.el);
                 settingsView.render();
             }
+                        
+            // Now, we want to listen to the instrument to display a nice table of all fields
+            // that the instrument outputs, so that the user can select those he wants to send to the
+            // output plugin.
+            this.wasStreaming = true;
+            if (! linkManager.isStreaming() ) {
+                linkManager.startLiveStream();
+                this.wasStreaming = false;
+            }
+            this.listenTo(linkManager, 'input', this.showInput);
             
             return this;
+        },
+        
+        onClose: function() {
+            if (! this.wasStreaming )
+                linkManager.stopLiveStream();
         },
 
         events: {
@@ -114,6 +138,22 @@ define(function(require) {
                 }
             });
             return false;
+        },
+        
+        showInput: function(data) {
+            if (typeof(data) === "object") {
+                $(".realtimefields", this.el).html(JSON.stringify(data));
+                
+                // We sometimes have embedded JSON structures: flatten them
+                var flat = utils.JSONflatten(data);
+                
+                $(".fieldselect", this.el).html(tableTemplate({fields: flat}));
+            } else if (typeof(data) === "string") {
+                $(".realtimefields", this.el).html(data);
+                // If the instrument is sending a string, not much we can do except
+                // send that string:
+            }
+            console.warn("--- real time field update --");
         },
 
     });

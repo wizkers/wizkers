@@ -15,16 +15,18 @@ define(function(require) {
         Instrument = require(['app/models/instrument']);
     
     var Safecast = require('app/outputs/safecast/safecast');
+    var SafecastSettings = require('app/outputs/safecast/settings');
     var Rest     = require('app/outputs/rest/rest');
+    var RestSettings = require('app/outputs/rest/settings');
 
     var OutputManager = function() {
         
         var enabledOutputs = []; // A list of all data output plugins that are enabled (strings)
 
         this.supportedOutputs = {
-            "safecast":     { name: "SafeCast API", plugin: Safecast, backend: 'app/outputs/safecast/driver_backend' },
-            // "dweet":  { name: "dtweet.io", plugin: '' },
-            "rest": { name: "http REST calls", plugin: Rest },
+            "safecast":     { name: "SafeCast API", plugin: Safecast, backend: 'app/outputs/safecast/driver_backend',
+                              settings: SafecastSettings },
+            "rest": { name: "http REST calls", plugin: Rest, settings: RestSettings },
         };
         
         // Called upon instrument change or output enable/disable and makes sure

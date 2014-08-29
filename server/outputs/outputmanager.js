@@ -12,9 +12,12 @@ var Safecast = require('./safecast.js');
 
 module.exports = {
     
-    activeOutputs: [],
+    activeOutputs: {},
+    availableOutputs: { "safecast": Safecast },
     
-    // Selects the active output plugins
+    // Selects the active output plugins. Note that we only require
+    // the instrument ID, since it stores its own list of enabled outputs,
+    // and more importantly, all the settings for those.
     enableOutputs: function(insId) {
         console.log("[OutputManager] Enable outputs for instrument ID " + insId);
     },
