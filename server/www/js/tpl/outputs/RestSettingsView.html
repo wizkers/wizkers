@@ -1,1 +1,22 @@
-<p>REST Specific Settings.</p>
+<div class="row">
+    <div class="form-group col-md-6">
+        <label for="type" class="col-md-6 control-label">Server URL:</label>
+        <div class="input-group col-md-6">
+            <input type="text" class="form-control" name="resturl" value="<%= metadata['resturl'] %>"/>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-6">
+        <label for="type" class="col-md-6 control-label">Do a GET or POST:</label>
+        <div class="input-group col-md-6">
+            <select name="httprequest" class="form-control">
+                <option value="post" <%= metadata['httprequest'] == 'post' ?'selected':'' %>>POST</option>
+                <option value="get" <%= metadata['httprequest'] == 'get' ?'selected':'' %>>GET</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+
+

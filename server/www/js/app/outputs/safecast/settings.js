@@ -27,10 +27,9 @@ define(function(require) {
                 // {  'address': 'name', 'address2': 'name2', etc... }
                 this.metadata = this.model.get('metadata');
                 if (this.metadata == null) {
-                    this.metadata = {};
+                    this.metadata = { 'instance': 'dev' };
                     this.model.set('metadata', this.metadata);
                 }
-                this.render();
             },
 
             render:function () {

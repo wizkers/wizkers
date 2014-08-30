@@ -5,16 +5,14 @@
             <input type="text" class="form-control" name="apikey" value="<%= metadata['apikey'] %>"/>
         </div>
     </div>
-</div>
-<div class="row">
     <div class="form-group col-md-6">
-        <label for="type" class="col-md-6 control-label">Use safecast instance:</label>
-        <div class="input-group col-md-6">
-            <select name="instance" class="form-control">
-                <option value="production" <%= metadata['instance'] == 'production' ?'selected':'' %>>Production</option>
-                <option value="dev" <%= metadata['instance'] == 'dev' ?'selected':'' %>>Development</option>
-            </select>
-        </div>
+    <label for="type" class="col-md-6 control-label">Use safecast instance:</label>
+    <div class="input-group col-md-6">
+        <select name="instance" class="form-control">
+            <option value="production" <%= metadata['instance'] == 'production' ?'selected':'' %>>Production</option>
+            <option value="dev" <%= metadata['instance'] == 'dev' ?'selected':'' %>>Development</option>
+        </select>
+    </div>
     </div>
 </div>
 

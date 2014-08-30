@@ -41,6 +41,8 @@ module.exports = function safecast() {
     
     var resolveMapping = function(key,data) {
         var m = mappings[key];
+        if (typeof m == 'undefined')
+            return undefined;
         // Static mappings start with "__"
         if (m.indexOf("__")==0)
             return m.substr(2);
@@ -56,9 +58,10 @@ module.exports = function safecast() {
         var radiation =  resolveMapping("radiation",data);
         var lat =  resolveMapping("latitude",data);
         var lon =  resolveMapping("longitude",data);
+        var devid = resolveMapping("device_id", data);
         
         // If any of those are empty, abort:
-        if (unit == '' || radiation == '' || lat == '' || lon == '') {
+        if (unit == undefined || radiation == undefined || lat == undefined || lon == undefined) {
             console.log("[Safecast Output]  Data error, some required fields are empty");
             console.log(data);
             return;
@@ -70,9 +73,14 @@ module.exports = function safecast() {
             'measurement[unit]': unit,
             'measurement[value]': radiation,
             'measurement[latitude]': lat,
-            'measurement[longitude]': lon
+            'measurement[longitude]': lon,
         });
         
+        // Add optional fields if they are there:
+        if (devid != undefined)
+            post_data['measurement[device_id]'] = devid;
+        
+        post_options.headers['Content-Length'] = post_data.length;
         
         var post_request = http.request(post_options, function(res) {
             res.setEncoding('utf8');
@@ -81,6 +89,7 @@ module.exports = function safecast() {
             });
         });
         
+        console.log("[Safecast Output] Sending data to " + post_options.host);
         
         console.log(post_data);
         post_request.write(post_data);

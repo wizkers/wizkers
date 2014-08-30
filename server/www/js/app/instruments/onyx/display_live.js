@@ -140,8 +140,10 @@ define(function(require) {
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
             
+            /*
             if (!linkManager.isRecording())
                 linkManager.stopLiveStream();
+            */
 
         },
 

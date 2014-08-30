@@ -32,7 +32,7 @@ define(function(require) {
                      "latitude" : { "name": "Latitude", "required": true },
                      "longitude": { "name": "Longitude", "required": true },
                      "height"   : { "name": "Height", "required": false},
-                     "device"   : { "name": "Device", "required": false }
+                     "device_id"   : { "name": "Device Id", "required": false }
                    }
         }
         
