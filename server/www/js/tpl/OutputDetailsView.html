@@ -37,7 +37,7 @@
             <div class="form-group col-md-12">
                 <label for="description" class="col-md-2 control-label">Notes:</label>
                 <div class="col-md-10">
-                        <textarea id="comment" name="comment" style="width: 90%;" rows="6"><%= comment %></textarea>
+                        <textarea id="comment" name="comment" style="width: 90%;" rows="3"><%= comment %></textarea>
                 </div>
             </div>
         </div>
@@ -48,11 +48,12 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                    <p>Below are data fields that we are detecting. Select the fields you would like this output plugin to send.</p>
+                    <p>Below are data fields that we are detecting from the instrument. Connect these fields to those needed by the output plugin.</p>
             </div>
         </div>
         <div class="row">
             <div class="col-md-12 fieldselect">
+                <p><em>The instrument does not seem to be sending anything right now...</em></p>
             </div>
         </div>
         <div class="row">
@@ -128,8 +129,6 @@
             </div>
 
         </div>
-
-
             
         <div class="row">
             <div class="col-md-12">
@@ -143,15 +142,30 @@
         </div>
 </form>
     </div>
-    <div class="col-md-3">
+                
+
+    <div class="col-md-4">
         <div class="row">
             <div class="col-md-12">
                 <div class="well hidden-xs" style="text-align: center;margin: 0px auto;">
-                <p><img id="icon" width="180" src="js/app/outputs/<%=type%>/logo.png"/></p>
+                <p><img id="icon" width="100" src="js/app/outputs/<%=type%>/logo.png"/></p>
                 </div>
             </div>
         </div>
-    </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <legend>Data mapping summary</legend>
+                    <p>Below are the data fields required by the plugin and how they are currently configured</p>
+                <div id="mappings"></div>                
+            </div>
+        </div>
+
+                
+                
+                
+                
+                </div>
 </div>
     
     

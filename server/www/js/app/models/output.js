@@ -58,7 +58,7 @@ define(function(require) {
                 type: "rest",                      // The output type to know what output plugin to load
                 comment: "enter your notes here",  // Simple comments
                 enabled: false,                    // Whether the plugin is active
-                datafields: [],                    // Data fields we want to send
+                mappings: {},                    // Data fields we want to send
                 metadata: {},                      // Freeform metadata
             }
         }),

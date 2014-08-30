@@ -49,6 +49,15 @@ define(function(require) {
             });
         }
         
+        // Returns all the fields that are required/supported by a plugin type
+        this.getOutputFields = function(type) {
+            var out = this.supportedOutputs[type];
+            if (out != undefined) {
+                return new out.plugin().outputFields();
+            }
+            return {};
+        }
+        
         // Returns all output plugin names that make sense for this instrument.
         // we manage this through the instrument manager because there is a close interaction between
         // what the instrument can output, and the data that is then sent to the output plugin. For instance,

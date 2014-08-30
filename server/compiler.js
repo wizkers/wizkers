@@ -31,7 +31,7 @@ var compileTemplate = function(templates) {
 
 compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogManagementView',
                  'InstrumentDetailsView', 'InstrumentListItemView', 'OutputListItemView', 'OutputDetailsView',
-                 'OutputDetailsFieldTable', 
+                 'OutputDetailsFieldTable', 'OutputDetailsMappingTable',
                  'outputs/SafecastSettingsView', 'outputs/RestSettingsView',
                  'instruments/AudioWaterfall',
                  'instruments/W433LiveView', 'instruments/W433SettingsView', 'instruments/W433LogView', 'instruments/W433NumView',
