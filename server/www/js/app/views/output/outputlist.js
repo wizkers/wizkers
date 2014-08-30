@@ -21,8 +21,6 @@ define(function(require) {
             className: "col-md-3 col-sm-2",
 
             initialize: function () {
-                this.model.bind("change", this.render, this);
-                this.model.bind("destroy", this.close, this);
             },
 
             render: function () {

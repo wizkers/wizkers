@@ -30,7 +30,7 @@ define(function(require) {
             return { "radiation": { "name": "Radiation Level", "required": true },
                      "unit"     : { "name": "Unit", "required": true},
                      "latitude" : { "name": "Latitude", "required": true },
-                     "lontitude": { "name": "Longitude", "required": true },
+                     "longitude": { "name": "Longitude", "required": true },
                      "height"   : { "name": "Height", "required": false},
                      "device"   : { "name": "Device", "required": false }
                    }

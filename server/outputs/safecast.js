@@ -22,7 +22,7 @@ module.exports = function safecast() {
     };
     
     this.sendData = function(data) {
-        console.log("[Safecast Output plugin] ToDo: send data for Safecast");
+        console.log("[Safecast Output plugin] ToDo: send data to Safecast");
     };
     
         

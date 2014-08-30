@@ -38,7 +38,9 @@ define(function(require) {
 
             console.log("Render output details");
             
-            $(this.el).html(template(_.extend(this.model.toJSON(), {outtypes: outputManager.getOutputsForCurrentInstrument()})));
+            $(this.el).html(template(_.extend(this.model.toJSON(), {outtypes: outputManager.getOutputsForCurrentInstrument(),
+                                                                   outputfields: this.outputfields
+                                                                   })));
 
             // If the instrument type has got its own extra settings, then render those here:
             var outSettingsView = outputManager.supportedOutputs[this.model.get('type')].settings;
@@ -125,6 +127,12 @@ define(function(require) {
                 }
                 this.model.set('mappings', this.devicefields);
                 this.renderMappingsTable();
+            }  else if (target.name.indexOf("alarm") == 0) {
+                // Update our alarms:
+                var keys = target.name.split(".");
+                var alrm = this.model.get(keys[0]);
+                alrm[keys[1]] = target.value;
+                this.model.set(keys[0],alrm);
             } else {
 
                 // Our Spinedit control returns values as strings even
@@ -134,14 +142,6 @@ define(function(require) {
                 var numval = parseFloat(target.value);
                 change[target.name] = isNaN(numval) ? target.value : numval;
                 this.model.set(change);
-
-                // Run validation rule (if any) on changed item
-                var check = this.model.validateItem(target.id);
-                if (check.isValid === false) {
-                    utils.addValidationError(target.id, check.message);
-                } else {
-                    utils.removeValidationError(target.id);
-                }
 
                 // If we changed the plugin type, we need to reset the view:
                 if (target.name == "type") {
@@ -160,24 +160,18 @@ define(function(require) {
         },
 
         beforeSave: function () {
-            var self = this;
             console.log('Output: before save for output ' + this.model.id);
-            var check = this.model.validateAll();
-            if (check.isValid === false) {
-                utils.displayValidationErrors(check.messages);
-                return false;
-            }
-
+            
             this.saveOutput();
             return false;
         },
 
         saveOutput: function () {
             var self = this;
-
             this.model.save(null, {
                 success: function (model) {
                     utils.showAlert('Success', 'Configuration saved', 'alert-success');
+                    linkManager.setOutputs(instrumentManager.getInstrument().id);
                 },
                 error: function () {
                     console.log('Output: error saving');

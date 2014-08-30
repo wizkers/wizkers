@@ -68,46 +68,56 @@
         </div>
         <div class="row">
             <div class="form-group col-md-6">
-                <label for="type" class="col-md-6 control-label">Alarm:</label>
+                <label for="alarm1.field" class="col-md-6 control-label">Alarm:</label>
                 <div class="col-md-6">
-                        <select name="type" class="form-control">
-                            <option>(Inactive)</option>                       
+                        <select name="alarm1.field" class="form-control">
+                                <option value="_unused">(Inactive)</option>
+                            <% _.each(outputfields, function(ofield, ofieldname) { %>
+                                <option value="<%= ofieldname %>"
+                                <%= ofieldname == alarm1.field ?'selected':'' %>        
+                                ><%= ofield.name %></%></option>
+                            <% }) %>                     
                         </select>
                     </div>
             </div>
             <div class="form-group col-md-3">
-                <select name="type" class="form-control">
-                    <option>Is more than or equal to</option>                       
-                    <option>Is less than</option>
-                    <option>Is equal to</option>                       
+                <select name="alarm1.comparator" class="form-control">
+                    <option <%= alarm1.comparator == "moreeq" ?'selected':'' %> value="moreeq">Is more than or equal to</option>
+                    <option <%= alarm1.comparator == "less" ?'selected':'' %> value="less">Is less than</option>
+                    <option <%= alarm1.comparator == "eq" ?'selected':'' %> value="eq">Is equal to</option>                       
                 </select>
             </div>
             <div class="form-group col-md-3">
-                <input type="text" class="form-control" name="name" value=""/>
+                <input type="text" class="form-control" name="alarm1.level" value="<%= alarm1.level %>"/>
             </div>
         </div>
         <div class="row">
             <div class="col-md-2"></div>
             <div class="form-group col-md-1">
-                <select name="type" class="form-control">
-                    <option>And</option>
-                    <option>Or</option>
+                <select name="alrmbool" class="form-control">
+                    <option <%= alrmbool == "and" ?'selected':'' %>value="and">And</option>
+                    <option <%= alrmbool == "or" ?'selected':'' %> value="or" >Or</option>
                 </select>
             </div>
             <div class="form-group col-md-3">
-                            <select name="type" class="form-control">
-                                <option>(Inactive)</option>                       
+                            <select name="alarm2.field" class="form-control">
+                                <option value="_unused">(Inactive)</option>
+                            <% _.each(outputfields, function(ofield, ofieldname) { %>
+                                <option value="<%= ofieldname %>"
+                                <%= ofieldname == alarm2.field ?'selected':'' %>        
+                                ><%= ofield.name %></%></option>
+                            <% }) %>
                             </select>
             </div>
             <div class="form-group col-md-3">
-                <select name="type" class="form-control">
-                    <option>Is more than or equal to</option>                       
-                    <option>Is less than</option>
-                    <option>Is equal to</option>                       
+                <select name="alarm2.comparator" class="form-control">
+                    <option <%= alarm2.comparator == "moreeq" ?'selected':'' %>value="moreeq">Is more than or equal to</option>
+                    <option <%= alarm2.comparator == "less" ?'selected':'' %> value="less">Is less than</option>
+                    <option <%= alarm2.comparator == "eq" ?'selected':'' %> value="eq">Is equal to</option>                       
                 </select>
             </div>
             <div class="form-group col-md-3">
-                <input type="text" class="form-control" name="name" value=""/>
+                <input type="text" class="form-control" name="alarm2.level" value="<%= alarm2.level %>"/>
             </div>
         </div>
             
@@ -116,10 +126,11 @@
             <div class="form-group col-md-6">
                 <label for="type" class="col-md-6 control-label">Regular output every:</label>
                 <div class="input-group col-md-6">
-                    <input type="text" class="form-control" name="name" value=""/>
+                    <input type="text" class="form-control" name="frequency" value="<%= frequency %>"/>
                     <span class="input-group-addon">seconds</span>
                 </div>
             </div>
+            <!--
             <div class="form-group col-md-6">
                 <label for="type" class="col-md-6 control-label">... or if it changes more than:</label>
                 <div class="input-group col-md-6">
@@ -127,7 +138,7 @@
                     <span class="input-group-addon">percent</span>
                 </div>
             </div>
-
+            -->
         </div>
             
         <div class="row">

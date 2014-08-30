@@ -41,7 +41,7 @@ module.exports = {
                     // The plugin needs its metadata and the mapping for the data,
                     // the output manager will take care of the alarms/regular output
                     plugin.setup(output.metadata, output.mappings);
-                    self.activeOutputs.push( { "plugin": plugin, "config": output } );
+                    self.activeOutputs.push( { "plugin": plugin, "config": output, last: new Date().getTime() } );
                 }
             });
         });
@@ -53,8 +53,29 @@ module.exports = {
     // to all active output plugins according to their
     // schedule.
     output: function(data) {
-        console.log("*** STUB: send data to output plugins ***");
+        for (idx in this.activeOutputs) {
+            var output = this.activeOutputs[idx];
+            if (this.alarm(output) || this.regular(output) ) {
+                output.plugin.sendData();
+                output.last = new Date().getTime();
+            }
+        }
+    },
+    
+    // Do we have an alarm on this output ?
+    alarm: function(output) {
+        var alarm1 = output.config.alarm1,
+            alarm2 = output.config.alarm2,
+            alrmbool = output.config.alrmbool;
         
+        return false;
+    },
+    
+    regular: function(output) {
+        var freq = output.config.frequency;
+        if ((new Date().getTime() - output.last) > freq*1000)
+            return true;
+        return false;        
     }
     
 };

@@ -25,16 +25,16 @@ define(function(require) {
             initialize:function () {
                 // Metadata is a simple object looking like this:
                 // {  'address': 'name', 'address2': 'name2', etc... }
-                this.mappings = this.model.get('metadata');
-                if (this.mappings == null) {
-                    this.mappings = {};
-                    this.model.set('metadata', this.mappings);
+                this.metadata = this.model.get('metadata');
+                if (this.metadata == null) {
+                    this.metadata = {};
+                    this.model.set('metadata', this.metadata);
                 }
                 this.render();
             },
 
             render:function () {
-                $(this.el).html(template({mappings: this.mappings}));
+                $(this.el).html(template({metadata: this.metadata}));
                 return this;
             },
     
@@ -43,12 +43,12 @@ define(function(require) {
             },
     
             change: function(event) {
-                console.log("Rest output bespoke settings change");
+                console.log("Safecast output bespoke settings change");
 
                 // Apply the change to the metadata
                 var target = event.target;        
-                this.mappings[target.name] = target.value;
-                this.model.set('metadata',this.mappings);
+                this.metadata[target.name] = target.value;
+                this.model.set('metadata',this.metadata);
 
                 // This view is embedded into another view, so change events
                 // are going to bubble up to the upper view and change attributes
