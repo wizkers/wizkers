@@ -12,12 +12,12 @@ var Output = mongoose.model('Output');
 
 
 var Safecast = require('./safecast.js');
-// var Rest     = require('./rest.js');
+var Rest     = require('./rest.js');
 
 module.exports = {
     
     activeOutputs: [],
-    availableOutputs: { "safecast": Safecast },
+    availableOutputs: { "safecast": Safecast, "rest": Rest},
     
     // Selects the active output plugins. Note that we only require
     // the instrument ID, since it stores its own list of enabled outputs,
@@ -56,7 +56,7 @@ module.exports = {
         for (idx in this.activeOutputs) {
             var output = this.activeOutputs[idx];
             if (this.alarm(output) || this.regular(output) ) {
-                output.plugin.sendData();
+                output.plugin.sendData(data);
                 output.last = new Date().getTime();
             }
         }

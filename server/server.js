@@ -100,7 +100,7 @@ var express = require('express'),
 
 var app = express(),
     server = require('http').createServer(app),
-    io = require('socket.io').listen(server, { log: true });
+    io = require('socket.io').listen(server, { log: false });
 
 app.configure(function () {
     app.use(express.logger('dev'));     // 'default', 'short', 'tiny', 'dev'

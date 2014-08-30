@@ -105,6 +105,7 @@ module.exports = {
             }
         } catch (err) {
             console.log('Not able to parse JSON response from device:\n' + data);
+            console.log('Error code: ' + err);
         }
     },
     
