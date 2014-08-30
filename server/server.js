@@ -595,11 +595,13 @@ io.sockets.on('connection', function (socket) {
     });
     
     socket.on('startlivestream', function(data) {
-        driver.startLiveStream(data);
+        if (portOpen)
+            driver.startLiveStream(data);
     });
     
     socket.on('stoplivestream', function() {
-        driver.stopLiveStream();
+        if (portOpen)
+            driver.stopLiveStream();
     });
     
     // Request a unique identifier to our driver
@@ -621,8 +623,9 @@ io.sockets.on('connection', function (socket) {
         });
      });
     
-    socket.on('outputs', function(outputs) {
-       outputmanager.enableOutputs(outputs.instrument, outputs.outputs);
+    socket.on('outputs', function(instrumentId) {
+        console.log("[server.js]  Update the outputs for this instrument");
+        outputmanager.enableOutputs(instrumentId);
     });
 
     socket.on('driver', function(data) {

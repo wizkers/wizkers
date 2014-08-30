@@ -27,6 +27,7 @@ define(function(require) {
 
             render: function () {
                 $(this.el).html(template(this.model.toJSON()));
+                this.updateButtonStatus(this.model.get('enabled'));
                 return this;
             },
 
@@ -47,18 +48,24 @@ define(function(require) {
                 en = !en;
                 this.model.save({enabled: en}, {
                     success: function() {
-                        console.log('Output status: ' + en);
-                        if (en) {
-                            $(".enStatus", self.el).addClass('btn-success').removeClass('btn-danger');
-                            // Tell the output manager we got enabled
-                        } else {
-                            $(".enStatus", self.el).addClass('btn-danger').removeClass('btn-success');
-                        }
+                        self.updateButtonStatus(en);
                         outputManager.reconnectOutputs();
                     }
                 });
                 
             },
+            
+            updateButtonStatus: function(en) {
+                console.log('Output status: ' + en);
+                if (en) {
+                    $(".enStatus", this.el).addClass('btn-success').removeClass('btn-danger');
+                    $(".enStatus", this.el).html("Enabled");
+                    // Tell the output manager we got enabled
+                } else {
+                    $(".enStatus", this.el).addClass('btn-danger').removeClass('btn-success');
+                    $(".enStatus", this.el).html("Disabled");
+                }
+            }
         });
 
     return Backbone.View.extend({

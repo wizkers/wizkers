@@ -42,9 +42,9 @@ define(function(require) {
                         if (output.get('enabled'))
                             enabled.push(output.get('type'));
                     });
-                    console.info("[outputManager] asking link manager to connect: " + enabled);
-                    linkManager.setOutputs({ "instrument": instrumentManager.getInstrument().id,
-                                            "outputs": enabled });
+                    console.info("[outputManager] asking link manager to connect outputs for intstrument " +
+                                instrumentManager.getInstrument().id);
+                    linkManager.setOutputs(instrumentManager.getInstrument().id);
                 }
             });
         }

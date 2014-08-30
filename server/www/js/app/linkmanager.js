@@ -37,10 +37,10 @@ define(function(require) {
             };
             
             /**
-             * Tells our backend to enable a list of output plugins for this instrument
+             * Tells our backend to refresh the outputs for an instrument
              */
-            this.setOutputs = function(outputs) {
-                this.socket.emit('outputs', outputs);
+            this.setOutputs = function(instrumentId) {
+                this.socket.emit('outputs', instrumentId);
             }
     
             // Called to restore the state of the backend when the frontend

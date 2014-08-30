@@ -25,8 +25,8 @@ var Output = mongoose.model('Output');
 exports.findByInstrumentId = function(req, res) {
     var id = req.params.id;
     console.log('Retrieving Outputs for Instrument ID: ' + id);
-    Output.find({ instrumentid: id} , function(err,item) {
-        res.send(item);
+    Output.find({ instrumentid: id} , function(err,items) {
+        res.send(items);
     });
 };
 

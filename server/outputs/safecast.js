@@ -7,11 +7,23 @@
 
 var mongoose = require('mongoose');
 
-module.exports = {
+module.exports = function safecast() {
     
-    setupOutput: function(outputId) {
+    var mappings = null;
+    var settings = null;
+    
+    // Load the settings for this plugin
+    this.setup = function(metadata, mappings) {
         
-    },
+        console.log("[Safecast Output plugin] Setup a new instance");
+        mappings = mappings;
+        settings = metadata;
+        
+    };
+    
+    this.sendData = function(data) {
+        console.log("[Safecast Output plugin] ToDo: send data for Safecast");
+    };
     
         
 };

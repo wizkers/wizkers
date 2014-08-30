@@ -118,7 +118,11 @@ define(function(require) {
                 this.renderMappingsTable();
             } else if (target.name == "staticvalue") {
                 var field = $(target).data('field');
-                this.devicefields[field] = "__" + target.value;
+                if (target.value == '') {
+                    delete this.devicefields[field];
+                } else {
+                    this.devicefields[field] = "__" + target.value;
+                }
                 this.model.set('mappings', this.devicefields);
                 this.renderMappingsTable();
             } else {
