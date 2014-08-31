@@ -62,7 +62,7 @@ define(function(require) {
         },
 
         render: function () {
-            console.log("Rendering a flow chart widget");
+            console.log("Rendering a simple chart widget");
             $(this.el).html('<div class="chart" style="position: relative; min-height: 200px;"></div>');
             this.addPlot();
             return this;
@@ -73,7 +73,22 @@ define(function(require) {
             // Now initialize the plot area:
             // this.plotOptions.legend = { container: $('#legend',this.el) };
             this.plot = $.plot($(".chart", this.el), [ {data:[], label:"??", color:this.color} ], this.plotOptions);
-            
+
+            // Adjust whether we want a log display, or linear (setup in global settings)
+            if (settings.get('cpmscale')=="log") {
+                this.plotOptions.yaxis = {
+                            min:1,
+                            //ticks: [1,10,30,50,100,500,1000,1500],
+                            transform: function (v) { return Math.log(v+10); },
+                            inverseTransform: function (v) { return Math.exp(v)-10;}
+                        };
+            } else if ('yaxis' in this.plotOptions){
+                delete this.plotOptions.yaxis.min;
+                delete this.plotOptions.yaxis.transform;
+                delete this.plotOptions.yaxis.inverseTransform;
+            }
+
+            // Add Tooltips
             if (!this.settings.showtips)
                 return;
             
@@ -122,7 +137,7 @@ define(function(require) {
             if (idx == -1) {
                 this.sensors.push(sensor);
                 this.livedata.push([]);
-                idx = 0;
+                idx = this.sensors.length-1;
             }
             if (this.settings.points) this.trimLiveData(idx);
             var stamp = (data.timestamp) ? new Date(data.timestamp).getTime(): new Date().getTime();

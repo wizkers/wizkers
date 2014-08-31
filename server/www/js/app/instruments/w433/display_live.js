@@ -44,6 +44,7 @@ define(function(require) {
             this.plotoptions = {
                 points: Math.floor(Number(this.model.get('liveviewspan'))/Number(this.model.get('liveviewperiod')))
             };
+            
         },
 
         render:function () {

@@ -12,16 +12,9 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         utils    = require('app/utils'),
-        tpl     = require('text!tpl/instruments/OnyxLiveView.html'),
-        template = null;
+        simpleplot = require('app/lib/flotplot'),
+        template = require('js/tpl/instruments/OnyxLiveView.js');
         
-        try {
-            template = _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/OnyxLiveView.js');
-        }
-
     // Load the flot library & flot time plugin:
     require('flot');
     require('flot_time');
@@ -42,36 +35,22 @@ define(function(require) {
             var span = this.model.get('liveviewspan');     // In seconds
             var period = this.model.get('liveviewperiod'); // Polling frequency
             
+            var livepoints = 300; // 5 minutes @ 1 Hz
             if (span && period) {
-                this.livepoints = span/period;
-            } else {
-                this.livepoints = 300; // 5 minutes @ 1 Hz
+                livepoints = span/period;
             }
-            this.livedata = [];
+            
+            // We will pass this when we create plots, this is the global
+            // config for the look and feel of the plot
+            this.plotoptions = {
+                points: livepoints
+            };
 
-
-            // Keep another array for moving average over the last X samples
+            // Keep an array for moving average over the last X samples
             // In Live view, we fix this at 1 minute. In log management, we will
             // make this configurable
             this.movingAvgPoints = 60;
-            this.movingAvgData = [];  // Note: used for the graph, this stores the result of the moving average
-
-            // TODO: save color palette in settings ?
-            // My own nice color palette:
-            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ],
-
-
-            this.plotOptions = {
-                xaxes: [{ mode: "time", show:true, timezone: this.model.get("timezone") },
-                        { mode: "time", show:false, timezone: this.model.get("timezone") }
-                       ],
-                grid: {
-                    hoverable: true,
-                    clickable: true
-                },
-                legend: { position: "ne" },
-                colors: this.palette,
-            };        
+            this.movingAvgData = [0];  // Note: used for the graph, this stores the result of the moving average
 
             this.prevStamp = 0;
 
@@ -98,36 +77,33 @@ define(function(require) {
             }
             
             linkManager.requestStatus();
-            if (settings.get('cpmscale')=="log") {
-                this.plotOptions.yaxis = {
-                            min:1,
-                            //ticks: [1,10,30,50,100,500,1000,1500],
-                            transform: function (v) { return Math.log(v+10); },
-                            inverseTransform: function (v) { return Math.exp(v)-10;}
-                        };
-            } else if ('yaxis' in this.plotOptions){
-                delete this.plotOptions.yaxis.min;
-                delete this.plotOptions.yaxis.transform;
-                delete this.plotOptions.yaxis.inverseTransform;
-            }
-
-            this.color = 1;
             this.addPlot();
             return this;
         },
 
         addPlot: function() {
             var self = this;
-            this.plot = $.plot($(".geigerchart", this.el), [ {data:[], label:"CPM", color:this.color} ], this.plotOptions);
             
+            this.plot = new simpleplot({model: this.model, settings:this.plotoptions});
+            if (this.plot != null) {
+                  $('.geigerchart', this.el).append(this.plot.el);
+                  this.plot.render();
+              }
+
             // Make sure the chart takes all the window height:
             var rsc = function() {
                 var chartheight = window.innerHeight - $('#control-area').height() - $('.header .container').height() - 45;
                 if (self.showstream)
                     chartheight -= $('#showstream').height() + 20;
+
                 $('.geigerchart').css('height',
                                            chartheight + 'px'
                                                 );
+                // The simpleplot lib embeds the chart into .geigerchart
+                $('.geigerchart .chart').css('height',
+                                           chartheight + 'px'
+                                                );
+
             }
 
             $(window).resize(rsc);
@@ -144,42 +120,23 @@ define(function(require) {
             if (!linkManager.isRecording())
                 linkManager.stopLiveStream();
             */
-
         },
 
-        cpmScaleToggle: function(event) {
-            var change = {};
-            if (event.target.checked) {
-                change["cpmscale"]="log";
-            } else {
-                change["cpmscale"]="linear";
-            }
-            this.model.set(change);
-            // this.model.save();
-            this.render();
-            this.addPlot();
+        movingAverager: function(newpoint) {
+            
+            this.movingAvgData.push(newpoint);
 
-        },
+            // Keep our data to the length we want
+            if (this.movingAvgData.length >= this.movingAvgPoints)
+                this.movingAvgData = this.movingAvgData.slice(1);
 
-        plotavgToggle: function(event) {
-
-        },
-
-        movingAverager: function(source, points, result) {
-            // Use input data from source, to save the moving average of the last X points
-            // of the source into the result.
-            if (points > source.length)
-                points = source.length;
-            if (result.length >= source.length)
-                result = result.slice(1);
-            // Now add the new moving average at the end of the result array:
+            // Now compute the average
             var avg = 0;
-            for (var i= (source.length-points); i < source.length; i++) {
-                avg += source[i][1]; // source should be an array of [timestamp,val] arrays
+            for (var i= 0; i < this.movingAvgData.length; i++) {
+                avg += this.movingAvgData[i];
             }
-            avg = avg/points;
-            result.push([source[source.length-1][0], avg]);
-            return result;
+            return avg/this.movingAvgData.length;
+            
         },
 
         setdevicetag: function() {
@@ -238,14 +195,9 @@ define(function(require) {
             } else {
                 if (data.cpm != undefined) {
                     var cpm = parseFloat(data.cpm.value);
-                    if (this.livedata.length >= this.livepoints)
-                        this.livedata = this.livedata.slice(1);
-                    this.livedata.push([new Date().getTime(), cpm]);
-                    this.movingAvgData = this.movingAverager(this.livedata,this.movingAvgPoints, this.movingAvgData);
-                    this.plot.setData([ { data:this.livedata, label: "CPM", color: this.color },
-                                        { data:this.movingAvgData, label: "AVG" }]);
-                    this.plot.setupGrid(); // Time plots require this.
-                    this.plot.draw();
+                    
+                    this.plot.appendPoint({'name': "CPM", 'value': cpm});
+                    this.plot.appendPoint({'name': "AVG", 'value': this.movingAverager(cpm) });
 
                     // Update statistics:
                     var sessionDuration = (new Date().getTime() - this.sessionStartStamp)/1000;
