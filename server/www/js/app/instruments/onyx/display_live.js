@@ -50,7 +50,7 @@ define(function(require) {
             // In Live view, we fix this at 1 minute. In log management, we will
             // make this configurable
             this.movingAvgPoints = 60;
-            this.movingAvgData = [0];  // Note: used for the graph, this stores the result of the moving average
+            this.movingAvgData = [];  // Note: used for the graph, this stores the result of the moving average
 
             this.prevStamp = 0;
 
