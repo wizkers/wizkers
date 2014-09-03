@@ -28,6 +28,10 @@ define(function(require) {
     
     var Fluke289Instrument = require('app/instruments/fluke289/fluke'),
         Fluke289SettingsView = require('app/instruments/fluke289/settings');
+    
+    var USBGeigerInstrument = require('app/instruments/usb_geiger/usb_geiger'),
+        USBGeigerInstrumentSettingsView = require('app/instruments/usb_geiger/settings');
+    
 
     var InstrumentManager = function() {
     
@@ -37,6 +41,7 @@ define(function(require) {
             "onyx":     { name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView},
             "fcoledv1": { name: "Fried Circuits OLED backpack", type: FCOledInstrument, settings: FCOledSettingsView },
             "elecraft": { name: "Elecraft radios", type: ElecraftInstrument, settings:ElecraftSettingsView },
+            "usbgeiger":{ name: "USB Geiger Dongle", type: USBGeigerInstrument, settings: USBGeigerInstrumentSettingsView },
         };
         
         // The instruments below are not supported in Cordova or Chrome runmodes:

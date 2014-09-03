@@ -49,6 +49,9 @@ deviceTypes.push(W433);
 var Elecraft = require('./parsers/elecraft.js');
 deviceTypes.push(Elecraft);
 
+var USBGeiger = require('./parsers/usb_geiger.js');
+deviceTypes.push(USBGeiger);
+
 /**
  * Debug: get a list of available serial
  * ports on the server - we'll use this later
@@ -656,6 +659,8 @@ io.sockets.on('connection', function (socket) {
             driver = W433;
         } else if ( data == "elecraft") {
             driver = Elecraft;
+        } else if ( data == "usbgeiger") {
+            driver = USBGeiger;
         }
         
     });
