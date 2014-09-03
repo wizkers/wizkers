@@ -65,7 +65,7 @@ module.exports = {
     },
     
     stopLiveStream: function(period) {
-        this.streaming = false;
+        this.streaming = true;
     },
         
     // format should return a JSON structure.

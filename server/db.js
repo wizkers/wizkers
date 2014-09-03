@@ -86,6 +86,7 @@ var ApplicationSettingsSchema = new Schema({
     currentInstrument: {type: Schema.Types.ObjectId, ref:'Instrument', default:null},
     currentUserRole: { type:String, default: "pending"},
     token: String, // The current authorization token for socket.io
+    showstream: Boolean, // Show debug output
 });
 
 mongoose.model('Settings',ApplicationSettingsSchema);

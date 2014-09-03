@@ -42,20 +42,15 @@ module.exports = {
             parity: 'none',
             stopBits: 1,
             flowControl: false,
-            parser: serialport.parsers.readline('\r\n'),
+            parser: serialport.parsers.readline(),
         }
     },
     
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
-    // This particular device does not support this concept, so we
-    // always return the same
     sendUniqueID: function() {
-        this.uidrequested = true;
-        
         // TODO: implement serial number query here
         this.socket.emit('uniqueID','00000000 (n.a.)');
-
     },
     
     isStreaming: function() {
@@ -73,13 +68,11 @@ module.exports = {
         this.streaming = true;
     },
     
-    format: function(data, recording) {
-        // All commands now return JSON
+    format: function(data, recording) {        
+        
         try {
-            //console.log(Hexdump.dump(data.substr(0,5)));
-            if (data.length < 2)
-                return;
-            
+            data = data.replace('\n','');
+            console.log(Hexdump.dump(data));
             // We are going to format the output in a manner similar
             // to the Onyx data output format, so that we can reuse the
             // same visualisation plugins for both.
@@ -104,7 +97,7 @@ module.exports = {
     },
     
     output: function(data) {
-        return data + '\n\n';
+        return data + '\n';
     }
 
 };

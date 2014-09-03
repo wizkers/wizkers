@@ -61,9 +61,6 @@ define(function(require) {
 
 
         events: {
-            "click #cpmscale": "cpmScaleToggle",
-            "click #plotavg": "plotavgToggle",
-            "click #setdevicetag": "setdevicetag",
         },
 
         render:function () {
@@ -178,20 +175,17 @@ define(function(require) {
 
             // Have we read all we need from the device?
             if (!this.deviceinitdone) {
-                if (data.guid != undefined) {
-                    linkManager.driver.devicetag();
-                } else if (data.devicetag != undefined) {
-                    if (data.devicetag == "No device tag set") {
-                        // Show the device tag set dialog
-                        $('#dtModal',this.el).modal('show');
-                    } else {
-                        linkManager.startLiveStream(this.model.get('liveviewperiod'));
-                        this.deviceinitdone = true;
-                    }
+                linkManager.driver.devicetag();
+            }
+            
+            if (data.devicetag != undefined) {
+                if (data.devicetag == "No device tag set") {
+                    // Show the device tag set dialog
+                    $('#dtModal',this.el).modal('show');
                 } else {
-                    linkManager.driver.guid();
+                    linkManager.startLiveStream(this.model.get('liveviewperiod'));
+                    this.deviceinitdone = true;
                 }
-
             } else {
                 if (data.cpm != undefined) {
                     var cpm = parseFloat(data.cpm.value);

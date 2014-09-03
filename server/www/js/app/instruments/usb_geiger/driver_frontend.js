@@ -36,7 +36,6 @@ define(function(require) {
         // the instrument's capabilities
 
         this.ping = function() {
-                self.socket.emit('controllerCommand', 'HELLO');
         };
 
         this.getCPM = function() {
@@ -44,11 +43,11 @@ define(function(require) {
         };
 
         this.version = function() {
-                self.socket.emit('controllerCommand', '{"get": "version"}');
+                self.socket.emit('controllerCommand', 'V:');
         };
 
-        this.guid = function() {
-                self.socket.emit('controllerCommand', '{ "get": "guid" }');
+        this.devicetag = function() {
+                self.socket.emit('controllerCommand', 'V:' );
         };
 
         console.log('Started USB Geiger link manager front end driver..');
