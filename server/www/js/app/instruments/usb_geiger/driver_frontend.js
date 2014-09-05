@@ -47,7 +47,7 @@ define(function(require) {
         };
 
         this.devicetag = function() {
-                self.socket.emit('controllerCommand', 'V:' );
+                self.socket.emit('controllerCommand', 'TAG' );
         };
 
         console.log('Started USB Geiger link manager front end driver..');

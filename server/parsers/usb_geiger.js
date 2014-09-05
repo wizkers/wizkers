@@ -80,6 +80,16 @@ module.exports = {
             var jsresp = {};
             if (resp[0] == "CPM") {
                 jsresp.cpm = { value: resp[1] };
+                switch (resp[2]) {
+                        case 'X':
+                        jsresp.cpm.valid = false;
+                        break;
+                        case 'V':
+                        jsresp.cpm.valid = true;
+                        break;
+                        default:
+                        break;
+                }
             } else {
                 jsresp.raw = data;
             }
@@ -97,6 +107,11 @@ module.exports = {
     },
     
     output: function(data) {
+        console.log("[USB Geiger] Command sent to dongle: " + data);
+        if (data == "TAG") {
+            this.socket.emit('serialEvent', {devicetag: 'Not supported'});
+            return '\n';
+        }
         return data + '\n';
     }
 

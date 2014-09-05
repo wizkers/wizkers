@@ -193,19 +193,6 @@ define(function(require) {
                     this.plot.appendPoint({'name': "CPM", 'value': cpm});
                     this.plot.appendPoint({'name': "AVG", 'value': this.movingAverager(cpm) });
 
-                    // Update statistics:
-                    var sessionDuration = (new Date().getTime() - this.sessionStartStamp)/1000;
-                    $('#sessionlength',this.el).html(utils.hms(sessionDuration));
-
-                    if (cpm > this.maxreading) {
-                        this.maxreading = cpm;
-                        $('#maxreading', this.el).html(cpm);
-                    }
-                    if (cpm < this.minreading || this.minreading == -1) {
-                        this.minreading = cpm;
-                        $('#minreading', this.el).html(cpm);
-                    }
-
                 }
             } 
         },

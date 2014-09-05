@@ -1,5 +1,5 @@
 /*
- * Browser-side Parser for IMI Onyx devices.
+ * Browser-side Parser for IMI USB Geiger devices.
  *
  * This Browser-side parser is used when running as a Chrome or Cordova app.
  *
@@ -42,8 +42,7 @@ define(function(require) {
         //
         // Returns the Geiger counter GUID.
         this.sendUniqueID = function() {
-            this.uidrequested = true;
-            socket.emit('controllerCommand','{ "get": "guid" }');
+            socket.emit('uniqueID','00000000 (n.a.)');
         };
         
         // period in seconds
@@ -65,13 +64,23 @@ define(function(require) {
                 if (data.length < 2)
                     return;
                 
-                var resp = data.split(':');
-                var jsresp = {};
-                if (resp[0] == "CPM") {
-                    jsresp.cpm = { value: resp[1] };
-                } else {
-                    jsresp.raw = data;
+            var resp = data.split(':');
+            var jsresp = {};
+            if (resp[0] == "CPM") {
+                jsresp.cpm = { value: resp[1] };
+                switch (resp[2]) {
+                        case 'X':
+                        jsresp.cpm.valid = false;
+                        break;
+                        case 'V':
+                        jsresp.cpm.valid = true;
+                        break;
+                        default:
+                        break;
                 }
+            } else {
+                jsresp.raw = data;
+            }
                 socket.trigger('serialEvent', jsresp);
                 if (recording)
                     socket.record(response); // 'socket' also records for in-browser impl.
@@ -85,7 +94,11 @@ define(function(require) {
         // the data that is sent on the serial port, coming from the
         // HTML interface.
         this.output = function(data) {
-            return data + '\n\n';
+            if (data == "TAG") {
+                socket.emit('serialEvent', {devicetag: 'Not supported'});
+                return '\n';
+            }
+            return data + '\n';
         };
         
         // Status returns an object that is concatenated with the
@@ -96,12 +109,12 @@ define(function(require) {
     
         // Not used
         this.onOpen =  function(success) {
-            console.log("Onyx in-browser Driver: got a port open signal");
+            console.log("USB Geiger in-browser Driver: got a port open signal");
         };
     
         // Not used
         this.onClose = function(success) {
-            console.log("Onyx in-browser Driver: got a port close signal");
+            console.log("USB Geiger in-browser Driver: got a port close signal");
         };
 
     }

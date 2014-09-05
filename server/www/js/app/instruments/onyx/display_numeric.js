@@ -29,6 +29,7 @@ define(function(require) {
             this.maxreading = 0;
             this.minreading = -1;
             this.valid = false;
+            this.validinit = false;
             linkManager.on('input', this.showInput, this);
         },
 
@@ -58,13 +59,10 @@ define(function(require) {
             $('#livecpm', this.el).html(cpm.toFixed(3));
             $('#liveusvh', this.el).html((cpm*0.00294).toFixed(3) + "&nbsp;&mu;Sv/h");
             
-            // Update "valid" pill only if state changes to save CPU
-            if (data.cpm.valid != this.valid) {
-                if (data.cpm.valid)
-                     $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('VALID');
-                else
-                    $('#readingvalid', this.el).removeClass('label-success').addClass('label-danger').html('INVALID');
-            }
+            if (data.cpm.valid)
+                 $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('VALID');
+            else
+                $('#readingvalid', this.el).removeClass('label-success').addClass('label-danger').html('INVALID');
 
             // Update statistics:
             var sessionDuration = (new Date().getTime() - this.sessionStartStamp)/1000;
