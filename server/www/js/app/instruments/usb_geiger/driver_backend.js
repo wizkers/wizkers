@@ -42,7 +42,7 @@ define(function(require) {
         //
         // Returns the Geiger counter GUID.
         this.sendUniqueID = function() {
-            socket.emit('uniqueID','00000000 (n.a.)');
+            socket.trigger('uniqueID','00000000 (n.a.)');
         };
         
         // period in seconds
@@ -63,7 +63,8 @@ define(function(require) {
             try {
                 if (data.length < 2)
                     return;
-                
+                data = data.replace('\n','');
+
             var resp = data.split(':');
             var jsresp = {};
             if (resp[0] == "CPM") {
