@@ -16,6 +16,9 @@ define(function(require) {
         Backbone = require('backbone'),
         utils   = require('app/utils'),
         template = require('js/tpl/InstrumentDetailsView.js');
+    
+    require('bootstrap');
+
 
     return Backbone.View.extend({
         
@@ -43,6 +46,7 @@ define(function(require) {
             "change #otherports" : "selectPort",
             "click .save"   : "beforeSave",
             "click .delete" : "deleteInstrument",
+            "click #do-delete": "doDeleteInstrument",
             "dragover #icon"     : "dragOver",
             "dragleave #icon"     : "dragLeave",
             "drop #icon" : "dropHandler"
@@ -129,20 +133,43 @@ define(function(require) {
                 },
                 error: function () {
                     console.log('Instrument: error saving');
-                    utils.showAlert('Error', 'An error occurred while trying to save intrument config', 'alert-error');
+                    utils.showAlert('Error', 'An error occurred while trying to save intrument config', 'alert-danger');
                 }
             });
         },
+        
+        deleteInstrument: function(event) {
+            var self = this;
+            if (this.model.id == undefined) {
+                // Will happen if we are on a new instrument that was not saved yet
+                // but where the user pressed delete
+                console.log("User wants to delete an instrument that was not created yet");
+                router.navigate('instruments', {trigger: true});
+                return;
+            }
 
-        deleteInstrument: function () {
+            // We refuse to delete an instrument that contains logs
+            var logs = this.model.logs;
+            
+            logs.fetch({
+                success:function(res) {
+                    if (res.length == 0) {
+                        $('#deleteConfirm',self.el).modal('show');
+                    } else {
+                      utils.showAlert('Error', 'This instrument has logs associated to it. Delete them before deleting the instrument.'
+                                      , 'alert-danger');  
+                    }
+                }});
+
+        },
+
+        doDeleteInstrument: function () {
             self = this;
             console.log("Delete instrument " + this.model.id);
             this.model.destroy({
                 success: function () {
-                    //alert('Controller deleted successfully');
-                    self.remove();
-                    //this.render();
-                    return false;
+                    $('#deleteConfirm',self.el).modal('hide');
+                    router.navigate('instruments', {trigger: true});
                 }
             });
             return false;
