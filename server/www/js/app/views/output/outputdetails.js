@@ -90,6 +90,7 @@ define(function(require) {
             "change"        : "change",
             "click .save"   : "beforeSave",
             "click .delete" : "deleteOutput",
+            "click #do-delete": "doDeleteOutput",
             "click .fieldcheckbox" : "toggleEnabled",
         },
 
@@ -179,8 +180,12 @@ define(function(require) {
                 }
             });
         },
+        
+        deleteOutput: function() {
+            $('#deleteConfirm',self.el).modal('show');
+        },
 
-        deleteOutput: function () {
+        doDeleteOutput: function () {
             self = this;
             console.log("Delete output " + this.model.id);
             this.model.destroy({
