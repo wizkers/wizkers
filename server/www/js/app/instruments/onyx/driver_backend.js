@@ -83,6 +83,7 @@ define(function(require) {
                     socket.trigger('serialEvent', response);
                     if (recording)
                         socket.record(response); // 'socket' also records for in-browser impl.
+                    outputManager.output(response); // And also tell the output manager
                 }
             } catch (err) {
                 console.log('Not able to parse JSON response from device:\n' + data + '\n' + err);

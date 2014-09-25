@@ -12,7 +12,9 @@
     "serial",
     "storage",
     "unlimitedStorage",
-    "audioCapture"
+    "audioCapture",
+    "http://*/*",
+    "https://*/*"
   ],
   "sandbox": {
     "pages": [ "public/tpl/HomeView.html" ]

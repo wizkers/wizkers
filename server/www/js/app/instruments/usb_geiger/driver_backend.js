@@ -84,7 +84,8 @@ define(function(require) {
             }
                 socket.trigger('serialEvent', jsresp);
                 if (recording)
-                    socket.record(response); // 'socket' also records for in-browser impl.
+                    socket.record(jsresp); // 'socket' also records for in-browser impl.
+                outputManager.output(jsresp); // And also tell the output manager
             } catch (err) {
                 console.log('Not able to parse data from device:\n' + data + '\n' + err);
             }

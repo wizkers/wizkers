@@ -157,7 +157,8 @@ define(function(require) {
         }
         
         function setOutputs(outputs) {
-            console.warn("[chromeSerialLib] TODO: implement chrome-side output plugins");
+            // Pass on to the output manager who knows best
+            outputManager.enableOutputs(outputs);
         }
         
         function openInstrument(port) {

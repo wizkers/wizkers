@@ -21,7 +21,8 @@ define(function(require) {
 
     var OutputManager = function() {
         
-        var enabledOutputs = []; // A list of all data output plugins that are enabled (strings)
+        // Needs to be public because used in a callback below
+        this.activeOutputs = []; // A list of all data output plugins that are enabled (strings)
 
         this.supportedOutputs = {
             "safecast":     { name: "SafeCast API", plugin: Safecast, backend: 'app/outputs/safecast/driver_backend',
@@ -37,17 +38,79 @@ define(function(require) {
             // We need to make sure we have a current list, hence the "fetch"
             outputs.fetch({
                 success: function() {
-                    var enabled = [];
-                    outputs.each(function(output) {
-                        if (output.get('enabled'))
-                            enabled.push(output.get('type'));
-                    });
                     console.info("[outputManager] asking link manager to connect outputs for intstrument " +
                                 instrumentManager.getInstrument().id);
                     linkManager.setOutputs(instrumentManager.getInstrument().id);
                 }
             });
         }
+        
+        // Used by Chrome/Cordova: implements the same API as on the server
+        // (outputs/outputmanager.js)
+        //  id: ID of the current instrument. We do not actually need it right now
+        //      because we only have one instrument connected at a time.
+        this.enableOutputs = function(id) {
+            var self = this;
+            console.warn(id);
+            var enabled = [];
+            var outputs = instrumentManager.getInstrument().outputs;
+            // No need to fetch, because this is always called after "reconnectOutputs" above
+            outputs.each(function(output) {
+                if (output.get('enabled')) {
+                    console.warn("[outputManager] Enable output " + output.get('type'));
+                    var pluginType = self.supportedOutputs[output.get('type')];
+                    if (pluginType == undefined) {
+                        console.warn("***** WARNING ***** we were asked to enable an output plugin that is not supported but this server");
+                    } else {
+                         require([pluginType.backend], function(p) {
+                             var plugin = new p();
+                             // The plugin needs its metadata and the mapping for the data,
+                             // the output manager will take care of the alarms/regular output
+                             plugin.setup(output.get('metadata'), output.get('mappings'));
+                             self.activeOutputs.push( { "plugin": plugin, "config": output, last: new Date().getTime() } );
+                        });
+                        
+                }
+                }
+            });   
+        }
+        
+        // Used in Chrome/Cordova mode
+        // Main feature of our manager: send the data
+        // to all active output plugins according to their
+        // schedule.
+        this.output = function(data) {
+            for (var idx in this.activeOutputs) {
+                var output = this.activeOutputs[idx];
+                if (this.alarm(output) || this.regular(output) ) {
+                    output.plugin.sendData(data);
+                    output.last = new Date().getTime();
+                }
+            }
+        };
+    
+        // Used in Chrome/Cordova mode
+        // Do we have an alarm on this output ?
+        this.alarm = function(output) {
+            var alarm1 = output.config.get('alarm1'),
+                alarm2 = output.config.get('alarm2'),
+                alrmbool = output.config.get('alrmbool');
+
+            return false;
+        };
+    
+        // Used in Chrome/Cordova mode
+        // Regular output of data
+        this.regular = function(output) {
+            var freq = output.config.get('frequency');
+            if ((new Date().getTime() - output.last) > freq*1000)
+                return true;
+            return false;        
+        }
+
+        
+        
+        
         
         // Returns all the fields that are required/supported by a plugin type
         this.getOutputFields = function(type) {
