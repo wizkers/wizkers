@@ -85,13 +85,8 @@ define(function(require) {
         if (devid != undefined)
             post_data['measurement[device_id]'] = devid;
         
-        post_options.headers['Content-Length'] = post_data.length;
-        
         var post_request = httprequest.request(post_options, function(res) {
-            res.setEncoding('utf8');
-            res.on('data', function(data) {
-                console.log("API Request result - " + data);
-            });
+            console.log("API Request result - " + res);
         });
         
         console.log("[Safecast Output] Sending data to " + post_options.host);

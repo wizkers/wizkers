@@ -54,6 +54,12 @@ define(function(require) {
             console.warn(id);
             var enabled = [];
             var outputs = instrumentManager.getInstrument().outputs;
+            
+            // Before anything else, clear the current outputs. Somehow
+            // the while loop below seems to be super fast:
+            while (this.activeOutputs.length)
+                this.activeOutputs.pop();
+            
             // No need to fetch, because this is always called after "reconnectOutputs" above
             outputs.each(function(output) {
                 if (output.get('enabled')) {
