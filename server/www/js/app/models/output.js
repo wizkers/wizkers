@@ -42,7 +42,11 @@ define(function(require) {
                 alarm1: { field: "", comparator: "", level: 0 },
                 alarm2: { field: "", comparator: "", level: 0 },
                 alrmbool: "or",
-                frequency: 0,
+                frequency: 0,       // Output frequency under normal conditions
+                alrmfrequency: 0,  // Output frequency when in alarm condition
+                lastsuccess: 0,  // When data was last sent with success
+                last: 0,         // When data was last sent
+                lastmessage: "", // Reply or error when data was last sent
                 
             }
         }),

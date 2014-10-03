@@ -20,13 +20,15 @@ define(function(require) {
     var mappings = null;
     var settings = null;
     var post_options = {};
+    var outputRef = null;
     
     // Load the settings for this plugin
-    this.setup = function(meta, map) {
+    this.setup = function(output) {
         
         console.log("[Safecast Output plugin] Setup a new instance");
-        mappings = map;
-        settings = meta;
+        outputRef = output;
+        mappings = output.get('mappings');
+        settings = output.get('metadata');
         
         var instance = settings.instance; // can be "production" or "dev"
         
@@ -56,7 +58,7 @@ define(function(require) {
     
     
     this.sendData = function(data) {
-        console.log("[Safecast Output plugin] ToDo: send data to Safecast");
+        console.log("[Safecast Output plugin] Send data to Safecast");
         
         // Step one: prepare the structure
         var unit = resolveMapping("unit",data);
@@ -85,11 +87,13 @@ define(function(require) {
         if (devid != undefined)
             post_data['measurement[device_id]'] = devid;
         
+        output.save({'last': new Date().getTime()});
         var post_request = httprequest.request(post_options, function(res) {
-            console.log("API Request result - " + res);
+            console.log("[Safecast Output Plugin] API Request result - " + res);
+            console.log(output);
         });
         
-        console.log("[Safecast Output] Sending data to " + post_options.host);
+        // console.log("[Safecast Output] Sending data to " + post_options.host);
         
         console.log(post_data);
         post_request.send(post_data);

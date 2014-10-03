@@ -72,7 +72,7 @@ define(function(require) {
                              var plugin = new p();
                              // The plugin needs its metadata and the mapping for the data,
                              // the output manager will take care of the alarms/regular output
-                             plugin.setup(output.get('metadata'), output.get('mappings'));
+                             plugin.setup(output);
                              self.activeOutputs.push( { "plugin": plugin, "config": output, last: new Date().getTime() } );
                         });
                         
@@ -113,10 +113,6 @@ define(function(require) {
                 return true;
             return false;        
         }
-
-        
-        
-        
         
         // Returns all the fields that are required/supported by a plugin type
         this.getOutputFields = function(type) {

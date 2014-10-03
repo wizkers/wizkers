@@ -1,156 +1,170 @@
 <!-- Details view of a layout (we are embedded in a row) -->
 <div class="col-md-12">
-
-<div class="row">
-    <div class="col-md-12">
-        <legend>Output Details</legend>
-    </div>
-</div>
-
     
 <div class="row">
     <div class="col-md-8">
-<form class="form-inline" role="form">
         <div class="row">
-            <div class="form-group col-md-4">
-                <label for="type" class="col-md-3 control-label">Type:</label>
-                    <div class="col-md-9">
-                            <select name="type" class="form-control">
-                                <% for(var ins in outtypes) { %>
-                                <option
-                                <%= type == ins ?'selected':'' %>
-                                value="<%= ins %>"><%= outtypes[ins].name %></option>
-                                <% } %>                                
-                            </select>
-                            <span class="help-block">Select the output plugin</span>
+            <div class="col-md-12">
+                <legend>Output Details</legend>
+            </div>
+        </div>
+<form class="form-horizontal" role="form">
+        <div class="row">
+            <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="type" class="col-md-3 control-label">Type:</label>
+                            <div class="col-md-9">
+                                    <select name="type" class="form-control">
+                                        <% for(var ins in outtypes) { %>
+                                        <option
+                                        <%= type == ins ?'selected':'' %>
+                                        value="<%= ins %>"><%= outtypes[ins].name %></option>
+                                        <% } %>                                
+                                    </select>
+                                    <!-- <span class="help-block">Select the output plugin</span> -->
+                                </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="name" class="col-md-3 control-label">Name:</label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" name="name" value="<%= name %>"/>
+                            <!-- <span class="help-block">Choose a friendly name for this output</span> -->
                         </div>
-            </div>
-            <div class="form-group col-md-8">
-                <label for="name" class="col-md-2 control-label">Name:</label>
-                <div class="col-md-10">
-                    <input type="text" name="name" value="<%= name %>"/>
-                    <span class="help-block">Choose a friendly name for this output</span>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="form-group col-md-12">
-                <label for="description" class="col-md-2 control-label">Notes:</label>
-                <div class="col-md-10">
-                        <textarea id="comment" name="comment" style="width: 90%;" rows="3"><%= comment %></textarea>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <legend>Data to send</legend>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                    <p>Below are data fields that we are detecting from the instrument. Connect these fields to those needed by the output plugin.</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12 fieldselect">
-                <p><em>The instrument does not seem to be sending anything right now...</em></p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <legend>When to send it</legend>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <p>Select send conditions: alarm (above/under), regular (frequency), threshold (percent change). All conditions can be enabled at once.</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="form-group col-md-6">
-                <label for="alarm1.field" class="col-md-6 control-label">Alarm:</label>
-                <div class="col-md-6">
-                        <select name="alarm1.field" class="form-control">
-                                <option value="_unused">(Inactive)</option>
-                            <% _.each(outputfields, function(ofield, ofieldname) { %>
-                                <option value="<%= ofieldname %>"
-                                <%= ofieldname == alarm1.field ?'selected':'' %>        
-                                ><%= ofield.name %></%></option>
-                            <% }) %>                     
-                        </select>
                     </div>
             </div>
-            <div class="form-group col-md-3">
-                <select name="alarm1.comparator" class="form-control">
-                    <option <%= alarm1.comparator == "moreeq" ?'selected':'' %> value="moreeq">Is more than or equal to</option>
-                    <option <%= alarm1.comparator == "less" ?'selected':'' %> value="less">Is less than</option>
-                    <option <%= alarm1.comparator == "eq" ?'selected':'' %> value="eq">Is equal to</option>                       
-                </select>
-            </div>
-            <div class="form-group col-md-3">
-                <input type="text" class="form-control" name="alarm1.level" value="<%= alarm1.level %>"/>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-2"></div>
-            <div class="form-group col-md-1">
-                <select name="alrmbool" class="form-control">
-                    <option <%= alrmbool == "and" ?'selected':'' %>value="and">And</option>
-                    <option <%= alrmbool == "or" ?'selected':'' %> value="or" >Or</option>
-                </select>
-            </div>
-            <div class="form-group col-md-3">
-                            <select name="alarm2.field" class="form-control">
-                                <option value="_unused">(Inactive)</option>
-                            <% _.each(outputfields, function(ofield, ofieldname) { %>
-                                <option value="<%= ofieldname %>"
-                                <%= ofieldname == alarm2.field ?'selected':'' %>        
-                                ><%= ofield.name %></%></option>
-                            <% }) %>
-                            </select>
-            </div>
-            <div class="form-group col-md-3">
-                <select name="alarm2.comparator" class="form-control">
-                    <option <%= alarm2.comparator == "moreeq" ?'selected':'' %>value="moreeq">Is more than or equal to</option>
-                    <option <%= alarm2.comparator == "less" ?'selected':'' %> value="less">Is less than</option>
-                    <option <%= alarm2.comparator == "eq" ?'selected':'' %> value="eq">Is equal to</option>                       
-                </select>
-            </div>
-            <div class="form-group col-md-3">
-                <input type="text" class="form-control" name="alarm2.level" value="<%= alarm2.level %>"/>
-            </div>
-        </div>
-            
-            <br/>
-        <div class="row">
-            <div class="form-group col-md-6">
-                <label for="type" class="col-md-6 control-label">Regular output every:</label>
-                <div class="input-group col-md-6">
-                    <input type="text" class="form-control" name="frequency" value="<%= frequency %>"/>
-                    <span class="input-group-addon">seconds</span>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="description" class="col-md-2 control-label">Notes:</label>
+                    <div class="col-md-10">
+                            <textarea id="comment" name="comment" style="width: 90%;" rows="3"><%= comment %></textarea>
+                    </div>
                 </div>
             </div>
-            <!--
-            <div class="form-group col-md-6">
-                <label for="type" class="col-md-6 control-label">... or if it changes more than:</label>
-                <div class="input-group col-md-6">
-                    <input type="text" class="form-control" name="name" value=""/>
-                    <span class="input-group-addon">percent</span>
-                </div>
-            </div>
-            -->
-        </div>
-            
-        <div class="row">
-            <div class="col-md-12">
-                <legend>Output Settings</legend>
+            <div class="col-md-3 thumbnail" style="max-height: 100px; overflow-y: scroll;">
+                <p>Last sent at: <span id="lastsuccess"><%= last %></span></p>
+                <p>Last message: <span id="lastmessage">n.a.</span></p>
             </div>
         </div>
         <div class="row">
             <div class="col-md-12">
-                <div id="metadata">This device types does not require extra settings.</div>
+                <ul class="nav nav-tabs" role="tablist">
+                  <li class="active"><a href="#what" role="tab" data-toggle="tab">Data to send</a></li>
+                  <li><a href="#when" role="tab" data-toggle="tab">When to send it</a></li>
+                  <li><a href="#props" role="tab" data-toggle="tab">Output Settings</a></li>
+                </ul>
+                <br>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div class="tab-pane active" id="what">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p>Below are data fields that we are detecting from the instrument.
+                                    Connect these fields to those needed by the output plugin.</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 fieldselect">
+                                <p><em>The instrument does not seem to be sending anything right now, make sure it is plugged in and connected on the main screen...</em></p>
+                            </div>
+                        </div>                
+                 </div>
+                    <div class="tab-pane" id="when">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p>Select send conditions: alarm (above/under), regular (frequency),
+                                    threshold (percent change). All conditions can be enabled at once.</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="alarm1.field" class="col-md-5 control-label">Alarm:</label>
+                                    <div class="col-md-7">
+                                        <select name="alarm1.field" class="form-control">
+                                                <option value="_unused">(Inactive)</option>
+                                            <% _.each(outputfields, function(ofield, ofieldname) { %>
+                                                <option value="<%= ofieldname %>"
+                                                <%= ofieldname == alarm1.field ?'selected':'' %>        
+                                                ><%= ofield.name %></%></option>
+                                            <% }) %>                     
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select name="alarm1.comparator" class="form-control">
+                                    <option <%= alarm1.comparator == "moreeq" ?'selected':'' %> value="moreeq">Is more than or equal to</option>
+                                    <option <%= alarm1.comparator == "less" ?'selected':'' %> value="less">Is less than</option>
+                                    <option <%= alarm1.comparator == "eq" ?'selected':'' %> value="eq">Is equal to</option>                       
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="alarm1.level" value="<%= alarm1.level %>"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-md-5">
+                                        <select name="alrmbool" class="form-control">
+                                            <option <%= alrmbool == "and" ?'selected':'' %>value="and">And</option>
+                                            <option <%= alrmbool == "or" ?'selected':'' %> value="or" >Or</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <select name="alarm2.field" class="form-control">
+                                            <option value="_unused">(Inactive)</option>
+                                        <% _.each(outputfields, function(ofield, ofieldname) { %>
+                                            <option value="<%= ofieldname %>"
+                                            <%= ofieldname == alarm2.field ?'selected':'' %>        
+                                            ><%= ofield.name %></%></option>
+                                        <% }) %>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select name="alarm2.comparator" class="form-control">
+                                    <option <%= alarm2.comparator == "moreeq" ?'selected':'' %>value="moreeq">Is more than or equal to</option>
+                                    <option <%= alarm2.comparator == "less" ?'selected':'' %> value="less">Is less than</option>
+                                    <option <%= alarm2.comparator == "eq" ?'selected':'' %> value="eq">Is equal to</option>                       
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="alarm2.level" value="<%= alarm2.level %>"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6">
+                                <label for="type" class="col-md-6 control-label">Regular output every:</label>
+                                <div class="input-group col-md-6">
+                                    <input type="text" class="form-control" name="frequency" value="<%= frequency %>"/>
+                                    <span class="input-group-addon">seconds</span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="type" class="col-md-6 control-label">Output when alarm condition every:</label>
+                                <div class="input-group col-md-6">
+                                    <input type="text" class="form-control" name="alrmfrequency" value="<%= alrmfrequency %>"/>
+                                    <span class="input-group-addon">seconds</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  <div class="tab-pane" id="props">
+                      <div class="row">
+                        <div class="col-md-12">
+                            <div id="metadata">This device types does not require extra settings.</div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </form>
     </div>
                 
@@ -172,25 +186,19 @@
             </div>
         </div>
 
-    <div class="row">
-    <div class="col-md-12">
-        <div class="form-actions">
-            <button type="button" class="btn btn-primary save">Save</button>
-            <button type="button" class="btn btn-default delete">Delete</button>
+        <div class="row">
+            <div class="col-md-5">
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary save">Save</button>
+                    <button type="button" class="btn btn-default delete">Delete</button>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="alert alert-success" style="display: none">
+                    <b>Success!</b> Instrument saved successfully
+                </div>
+            </div>
         </div>
-    </div>
-        </div>
-        
-    <div class="row status-bar">
-        <div class="col-md-12">
-        <div class="alert alert-success" style="display: none">
-            <b>Success!</b> Instrument saved successfully
-        </div>
-    </div>
-</div>
-                
-                
-                
     </div>
 </div>
 

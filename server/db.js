@@ -65,6 +65,10 @@ var OutputSchema = new Schema({
         alarm2: { field: String, comparator: String, level: String },
         alrmbool: String,
         frequency: Number,
+        alrmfrequency: Number,
+        lastsuccess: Date,  // When data was last successfully sent
+        last: Date,         // When was the last attempt (successful or not) to upload
+        lastmessage: String // What was the result of that last attempt
 });
  
 // Compile the schema by issuing the below:

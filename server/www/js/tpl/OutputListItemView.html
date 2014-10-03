@@ -3,7 +3,8 @@
         <h5><%= name %></h5>
         <p><%= comment %></p>
             <img id="icon" width="100" src="js/app/outputs/<%=type%>/logo.png"/>
-    
+
+        <!-- <button class="btn btn-mini <% if (enabled) { %> btn-success <% } else { %> btn-danger <% } %> errStatus" type="button">OK</button> -->
         <a class="btn btn-mini btn-default edit" href="#outputs/<%= _id %>">Edit</a>
         <button class="btn btn-mini <% if (enabled) { %> btn-success <% } else { %> btn-danger <% } %> enStatus" type="button">Enabled</button>
 
