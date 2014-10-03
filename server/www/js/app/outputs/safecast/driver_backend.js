@@ -20,13 +20,13 @@ define(function(require) {
     var mappings = null;
     var settings = null;
     var post_options = {};
-    var outputRef = null;
+    var output_ref = null;
     
     // Load the settings for this plugin
     this.setup = function(output) {
         
         console.log("[Safecast Output plugin] Setup a new instance");
-        outputRef = output;
+        output_ref = output;
         mappings = output.get('mappings');
         settings = output.get('metadata');
         
@@ -70,7 +70,7 @@ define(function(require) {
         // If any of those are empty, abort:
         if (unit == undefined || radiation == undefined || lat == undefined || lon == undefined) {
             console.log("[Safecast Output]  Data error, some required fields are empty");
-            console.log(data);
+            output_ref.save({'lastmessage': 'Missing required fields in the data'});
             return;
         }
         
@@ -87,10 +87,10 @@ define(function(require) {
         if (devid != undefined)
             post_data['measurement[device_id]'] = devid;
         
-        output.save({'last': new Date().getTime()});
+        output_ref.save({'last': new Date().getTime()});
         var post_request = httprequest.request(post_options, function(res) {
-            console.log("[Safecast Output Plugin] API Request result - " + res);
-            console.log(output);
+            console.log("[Safecast Output Plugin] API Request result");
+            console.log(res);
         });
         
         // console.log("[Safecast Output] Sending data to " + post_options.host);
