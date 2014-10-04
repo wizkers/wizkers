@@ -39,8 +39,8 @@ define(function(require) {
                 enabled: false,                    // Whether the plugin is active
                 mappings: {},                    // Data fields we want to send
                 metadata: {},                      // Freeform metadata
-                alarm1: { field: "", comparator: "", level: 0 },
-                alarm2: { field: "", comparator: "", level: 0 },
+                alarm1: { field: "", comparator: "moreeq", level: 0 },
+                alarm2: { field: "", comparator: "less", level: 100 },
                 alrmbool: "or",
                 frequency: 0,       // Output frequency under normal conditions
                 alrmfrequency: 0,  // Output frequency when in alarm condition

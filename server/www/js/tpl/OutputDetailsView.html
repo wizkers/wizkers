@@ -32,7 +32,7 @@
                         </div>
                     </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="form-group">
                     <label for="description" class="col-md-2 control-label">Notes:</label>
                     <div class="col-md-10">
@@ -40,7 +40,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 thumbnail" style="max-height: 100px; overflow-y: scroll; font-size: 8px;">
+            <div class="col-md-5 thumbnail" id="statusreport" style="max-height: 100px; overflow-y: scroll; font-size: 10px;">
                 <p>Last trigger at: <span id="lastsuccess"><%= (settings.get('timezone') === 'UTC') ? 
                                             new Date(lastsuccess).toUTCString() :
                                             new Date(lastsuccess).toString() %></span> with success</p>

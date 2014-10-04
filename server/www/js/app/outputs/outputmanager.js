@@ -21,6 +21,31 @@ define(function(require) {
 
     var OutputManager = function() {
         
+        // Private utility functions
+        
+        // Returns 'true' if alarm is triggered
+        var check_alarm = function(alarm, data) {
+            if (alarm.field != "_unused") {
+                if (data[alarm.field] != undefined) {
+                    var field = data[alarm.field];
+                    switch (alarm.comparator) {
+                        case "less":
+                            return (field < alarm.level);
+                            break;
+                        case "moreeq":
+                            return (field >= alarm.level);
+                            break;
+                        case "eq":
+                            return (field == alarm.level);
+                            break;
+                        default:
+                            return false;
+                    }
+                }
+            }
+        }
+        
+        
         // Needs to be public because used in a callback below
         this.activeOutputs = []; // A list of all data output plugins that are enabled (strings)
 
@@ -73,7 +98,7 @@ define(function(require) {
                              // The plugin needs its metadata and the mapping for the data,
                              // the output manager will take care of the alarms/regular output
                              plugin.setup(output);
-                             self.activeOutputs.push( { "plugin": plugin, "config": output, last: new Date().getTime() } );
+                             self.activeOutputs.push( { "plugin": plugin, "config": output, last: new Date().getTime(), last_alarm: 0 } );
                         });
                         
                 }
@@ -88,7 +113,7 @@ define(function(require) {
         this.output = function(data) {
             for (var idx in this.activeOutputs) {
                 var output = this.activeOutputs[idx];
-                if (this.alarm(output) || this.regular(output) ) {
+                if (this.alarm(output, data) || this.regular(output) ) {
                     output.plugin.sendData(data);
                     output.last = new Date().getTime();
                 }
@@ -97,18 +122,41 @@ define(function(require) {
     
         // Used in Chrome/Cordova mode
         // Do we have an alarm on this output ?
-        this.alarm = function(output) {
+        this.alarm = function(output, data) {
             var alarm1 = output.config.get('alarm1'),
                 alarm2 = output.config.get('alarm2'),
-                alrmbool = output.config.get('alrmbool');
-
-            return false;
+                alrmbool = output.config.get('alrmbool'),
+                alarm = false;
+            
+            var alarm1_triggered = check_alarm(alarm1, data);
+            var alarm2_triggered = check_alarm(alarm2, data);
+            
+            switch (alrmbool) {
+                    case 'and':
+                        alarm = (alarm1_triggered && alarm2_triggered);
+                        break;
+                    case 'or':
+                        alarm = (alarm1_triggered || alarm2_triggered);
+                        break;
+                    default:
+                        break;
+            }
+            if (!alarm)
+                return false;
+            
+            var freq = output.config.get('alrmfrequency');
+            if (freq = 0)
+                return false;
+            if (new Date().getTime() - output.last_alarm > freq*1000)
+                return true;
         };
     
         // Used in Chrome/Cordova mode
         // Regular output of data
         this.regular = function(output) {
             var freq = output.config.get('frequency');
+            if (freq == 0)
+                return false;
             if ((new Date().getTime() - output.last) > freq*1000)
                 return true;
             return false;        

@@ -90,7 +90,11 @@ define(function(require) {
         output_ref.save({'last': new Date().getTime()});
         var post_request = httprequest.request(post_options, function(res) {
             console.log("[Safecast Output Plugin] API Request result");
-            console.log(res);
+            if (res.target.status == 201) {
+                output_ref.set('lastsuccess', res.timeStamp);
+            }
+            output_ref.set('lastmessage', res.target.statusText);
+            output_ref.save();
         });
         
         // console.log("[Safecast Output] Sending data to " + post_options.host);
