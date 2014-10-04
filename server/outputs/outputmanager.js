@@ -14,6 +14,29 @@ var Output = mongoose.model('Output');
 var Safecast = require('./safecast.js');
 var Rest     = require('./rest.js');
 
+
+// Returns 'true' if alarm is triggered
+var check_alarm = function(alarm, data) {
+    if (alarm.field != "_unused") {
+        if (data[alarm.field] != undefined) {
+            var field = data[alarm.field];
+            switch (alarm.comparator) {
+                case "less":
+                    return (field < alarm.level);
+                    break;
+                case "moreeq":
+                    return (field >= alarm.level);
+                    break;
+                case "eq":
+                    return (field == alarm.level);
+                    break;
+                default:
+                    return false;
+            }
+        }
+    }
+}
+
 module.exports = {
     
     activeOutputs: [],
@@ -40,7 +63,7 @@ module.exports = {
                     var plugin = new pluginType();
                     // The plugin needs its metadata and the mapping for the data,
                     // the output manager will take care of the alarms/regular output
-                    plugin.setup(output.metadata, output.mappings);
+                    plugin.setup(output);
                     self.activeOutputs.push( { "plugin": plugin, "config": output, last: new Date().getTime() } );
                 }
             });
@@ -66,13 +89,38 @@ module.exports = {
     alarm: function(output) {
         var alarm1 = output.config.alarm1,
             alarm2 = output.config.alarm2,
-            alrmbool = output.config.alrmbool;
+            alrmbool = output.config.alrmbool,
+            alarm = false;
         
+        var alarm1_triggered = check_alarm(alarm1, data);
+        var alarm2_triggered = check_alarm(alarm2, data);
+
+        switch (alrmbool) {
+            case 'and':
+                alarm = (alarm1_triggered && alarm2_triggered);
+                break;
+            case 'or':
+                alarm = (alarm1_triggered || alarm2_triggered);
+                break;
+            default:
+                break;
+        }
+        if (!alarm)
+            return false;
+
+        var freq = output.config.alrmfrequency;
+        if (freq = 0)
+            return false;
+        if (new Date().getTime() - output.last_alarm > freq*1000)
+            return true;
+
         return false;
     },
     
     regular: function(output) {
         var freq = output.config.frequency;
+        if (freq == 0)
+            return false;
         if ((new Date().getTime() - output.last) > freq*1000)
             return true;
         return false;        

@@ -14,14 +14,16 @@ module.exports = function safecast() {
     
     var mappings = null;
     var settings = null;
+    var output_ref = null;
     var post_options = {};
     
     // Load the settings for this plugin
-    this.setup = function(meta, map) {
+    this.setup = function(output) {
         
         console.log("[Safecast Output plugin] Setup a new instance");
-        mappings = map;
-        settings = meta;
+        mappings = output.maping;
+        settings = output.metadata;
+        output_ref = output;
         
         var instance = settings.instance; // can be "production" or "dev"
         
@@ -64,6 +66,8 @@ module.exports = function safecast() {
         if (unit == undefined || radiation == undefined || lat == undefined || lon == undefined) {
             console.log("[Safecast Output]  Data error, some required fields are empty");
             console.log(data);
+            output_ref.lastmessage = 'Missing required fields in the data';
+            output_ref.save();
             return;
         }
         
@@ -85,7 +89,10 @@ module.exports = function safecast() {
         var post_request = http.request(post_options, function(res) {
             res.setEncoding('utf8');
             res.on('data', function(data) {
-                console.log("API Request result - " + data);
+                console.log("API Request result");
+                console.log(data);
+                // output_ref.lastmessage = ;
+                output_ref.save();
             });
         });
         
