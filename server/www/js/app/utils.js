@@ -92,6 +92,7 @@ define(function(require) {
                         );
         },
         
+        
         // See http://stackoverflow.com/questions/19098797/fastest-way-to-flatten-un-flatten-nested-json-objects
         JSONflatten : function(data) {
             var result = {};

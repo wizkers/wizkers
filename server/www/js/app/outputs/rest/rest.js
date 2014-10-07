@@ -27,12 +27,13 @@ define(function(require) {
         
         this.outputFields = function() {
             return { "field1": { "name": "Field 1", "required": true },
-                     "field2"     : { "name": "Field 2", "required": false},
+                     "field2" : { "name": "Field 2", "required": false},
                      "field3" : { "name": "Field 3", "required": false },
+                     "field4" : { "name": "Field 4", "required": false },
+                     "field5" : { "name": "Field 5", "required": false },
+                     "field6" : { "name": "Field 6", "required": false },
                    }
         }
-
-        
     };
 
     _.extend(Rest.prototype, Backbone.Events);

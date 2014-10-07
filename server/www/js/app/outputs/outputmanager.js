@@ -24,19 +24,19 @@ define(function(require) {
         // Private utility functions
         
         // Returns 'true' if alarm is triggered
-        var check_alarm = function(alarm, data) {
+        var check_alarm = function(output, alarm, data) {
             if (alarm.field != "_unused") {
-                if (data[alarm.field] != undefined) {
-                    var field = data[alarm.field];
+                var value = output.plugin.resolveMapping(alarm.field, data);
+                if (value != undefined) {
                     switch (alarm.comparator) {
                         case "less":
-                            return (field < alarm.level);
+                            return (value < alarm.level);
                             break;
                         case "moreeq":
-                            return (field >= alarm.level);
+                            return (value >= alarm.level);
                             break;
                         case "eq":
-                            return (field == alarm.level);
+                            return (value == alarm.level);
                             break;
                         default:
                             return false;
@@ -50,9 +50,10 @@ define(function(require) {
         this.activeOutputs = []; // A list of all data output plugins that are enabled (strings)
 
         this.supportedOutputs = {
-            "safecast":     { name: "SafeCast API", plugin: Safecast, backend: 'app/outputs/safecast/driver_backend',
+            "safecast":  { name: "SafeCast API", plugin: Safecast, backend: 'app/outputs/safecast/driver_backend',
                               settings: SafecastSettings },
-            "rest": { name: "http REST calls", plugin: Rest, settings: RestSettings },
+            "rest":      { name: "http REST calls", plugin: Rest, backend: 'app/outputs/rest/driver_backend',
+                              settings: RestSettings },
         };
         
         // Called upon instrument change or output enable/disable and makes sure
@@ -99,6 +100,8 @@ define(function(require) {
                              // the output manager will take care of the alarms/regular output
                              plugin.setup(output);
                              self.activeOutputs.push( { "plugin": plugin, "config": output, last: new Date().getTime(), last_alarm: 0 } );
+                             // Also subscribe to events coming from the plugin
+                             self.listenTo(plugin, 'outputTriggered', self.dispatchOutputEvents );
                         });
                         
                 }
@@ -128,18 +131,18 @@ define(function(require) {
                 alrmbool = output.config.get('alrmbool'),
                 alarm = false;
             
-            var alarm1_triggered = check_alarm(alarm1, data);
-            var alarm2_triggered = check_alarm(alarm2, data);
+            var alarm1_triggered = check_alarm(output, alarm1, data);
+            var alarm2_triggered = check_alarm(output, alarm2, data);
             
             switch (alrmbool) {
-                    case 'and':
-                        alarm = (alarm1_triggered && alarm2_triggered);
-                        break;
-                    case 'or':
-                        alarm = (alarm1_triggered || alarm2_triggered);
-                        break;
-                    default:
-                        break;
+                case 'and':
+                    alarm = (alarm1_triggered && alarm2_triggered);
+                    break;
+                case 'or':
+                    alarm = (alarm1_triggered || alarm2_triggered);
+                    break;
+                default:
+                    break;
             }
             if (!alarm)
                 return false;
@@ -149,6 +152,8 @@ define(function(require) {
                 return false;
             if (new Date().getTime() - output.last_alarm > freq*1000)
                 return true;
+            
+            return false;
         };
     
         // Used in Chrome/Cordova mode
@@ -173,7 +178,7 @@ define(function(require) {
         
         // Returns all output plugin names that make sense for this instrument.
         // we manage this through the instrument manager because there is a close interaction between
-        // what the instrument can output, and the data that is then sent to the output plugin. For instance,
+        // what the instrument can output, and the data that is then sent to the output plugin.
         this.getOutputsForCurrentInstrument = function() {
             if (instrumentManager.getInstrument() == null) return {};
             
@@ -200,9 +205,10 @@ define(function(require) {
         }
 
         
-        // Send data coming from an instrument to all enabled output plugins
-        this.dispatchData = function(data) {
-            
+        // Forward events coming form outputs
+        this.dispatchOutputEvents = function(evt) {
+            console.log("Event from plugin");
+            this.trigger('outputTriggered', evt);
         }
         
     };

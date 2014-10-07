@@ -34,6 +34,7 @@ var check_alarm = function(alarm, data) {
                     return false;
             }
         }
+        return false;
     }
 }
 

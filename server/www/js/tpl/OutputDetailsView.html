@@ -41,10 +41,10 @@
                 </div>
             </div>
             <div class="col-md-5 thumbnail" id="statusreport" style="max-height: 100px; overflow-y: scroll; font-size: 10px;">
-                <p>Last trigger at: <span id="lastsuccess"><%= (settings.get('timezone') === 'UTC') ? 
+                <p>Last trigger at: <span id="lastsuccess"><%= (lastsuccess ==0) ? 'never' : (settings.get('timezone') === 'UTC') ? 
                                             new Date(lastsuccess).toUTCString() :
                                             new Date(lastsuccess).toString() %></span> with success</p>
-                <p>Last attempt at: <%= (settings.get('timezone') === 'UTC') ? 
+                <p>Last attempt at: <%= (last ==0) ? 'never' :(settings.get('timezone') === 'UTC') ? 
                                             new Date(last).toUTCString() :
                                             new Date(last).toString() %></p>
                 <p>Last message: <span id="lastmessage"><%= lastmessage %></span></p>
@@ -157,6 +157,11 @@
                                     <input type="text" class="form-control" name="alrmfrequency" value="<%= alrmfrequency %>"/>
                                     <span class="input-group-addon">seconds</span>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p>Use "0" seconds to disable regular or alarm output. </p>
                             </div>
                         </div>
                     </div>

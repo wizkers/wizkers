@@ -4,6 +4,13 @@
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
+ *
+ *
+ *  Exposes three methods:
+ *
+ *  - setup
+ *  - sendData
+ *  - resolveMapping
  */
 
 define(function(require) {
@@ -46,7 +53,8 @@ define(function(require) {
         
     };
     
-    var resolveMapping = function(key,data) {
+    // The output manager needs access to this to compute alarm conditions
+    this.resolveMapping = function(key,data) {
         var m = mappings[key];
         if (typeof m == 'undefined')
             return undefined;
@@ -58,14 +66,15 @@ define(function(require) {
     
     
     this.sendData = function(data) {
+        var self = this;
         console.log("[Safecast Output plugin] Send data to Safecast");
         
         // Step one: prepare the structure
-        var unit = resolveMapping("unit",data);
-        var radiation =  resolveMapping("radiation",data);
-        var lat =  resolveMapping("latitude",data);
-        var lon =  resolveMapping("longitude",data);
-        var devid = resolveMapping("device_id", data);
+        var unit = this.resolveMapping("unit",data);
+        var radiation =  this.resolveMapping("radiation",data);
+        var lat =  this.resolveMapping("latitude",data);
+        var lon =  this.resolveMapping("longitude",data);
+        var devid = this.resolveMapping("device_id", data);
         
         // If any of those are empty, abort:
         if (unit == undefined || radiation == undefined || lat == undefined || lon == undefined) {
@@ -89,16 +98,25 @@ define(function(require) {
         
         output_ref.save({'last': new Date().getTime()});
         var post_request = httprequest.request(post_options, function(res) {
+            var err = true;
             console.log("[Safecast Output Plugin] API Request result");
-            if (res.target.status == 201) {
-                output_ref.set('lastsuccess', res.timeStamp);
+            // this is the xmlhttprequest
+            switch (this.status) {
+                    case 0:  // Cannot connect
+                        output_ref.set('lastmessage', 'Cannot connect to Safecast');
+                        break;
+                    case 201: // success
+                        output_ref.set('lastsuccess', res.timeStamp);
+                        output_ref.set('lastmessage', this.statusText);
+                        err = false;
+                        break;
+                    default:
+                        output_ref.set('lastmessage', this.statusText);
+                        break;
             }
-            output_ref.set('lastmessage', res.target.statusText);
+            self.trigger('outputTriggered', { 'name': 'safecast', 'error': err } );
             output_ref.save();
         });
-        
-        // console.log("[Safecast Output] Sending data to " + post_options.host);
-        
         console.log(post_data);
         post_request.send(post_data);
         
