@@ -10,13 +10,16 @@
     </div>
 </div>
 <div class="row">
-    <div class="form-group col-md-6">
-        <label for="type" class="col-md-6 control-label">Server URL:</label>
-        <div class="input-group col-md-6">
+    <div class="form-group col-md-12">
+        <label for="type" class="col-md-2 control-label">Server URL:</label>
+        <div class="input-group col-md-10">
             <input type="text" class="form-control" name="resturl" value="<%= metadata['resturl'] %>"/>
         </div>
     </div>
-    <div class="col-md-6">
+</div>
+<div class="row">
+    <div class="col-md-3">&nbsp;</div>
+    <div class="col-md-9">
     <p>If you need to insert field values in the url, use tags formatted like this: "&lt;%=field1%&gt;"</p>
         <p>Example:<br> http://127.0.0.1/temp/&lt;%=field1%&gt;/pressure/&lt;%=field2%&gt;</p>
     </div>
