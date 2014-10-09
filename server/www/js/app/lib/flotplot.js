@@ -50,7 +50,7 @@ define(function(require) {
             this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ];
 
             this.plotOptions = {
-                xaxis: { mode: "time", show:true, timezone: (this.model) ? this.model.get("timezone") : "GMT" },
+                xaxis: { mode: "time", show:true, timezone: settings.get("timezone")},
                 grid: {
                     hoverable: true,
                     clickable: true
