@@ -92,6 +92,11 @@ define(function(require) {
             
             post_options.path = matchTempl(regexpath, fields);
             var post_data = matchTempl(regexargs, fields);
+            
+            // If we do a GET, aggregate the path and post_data
+            if (post_options.method == "GET") {
+                post_options.path = post_options.path + '?' + post_data;
+            }
 
             output_ref.save({'last': new Date().getTime()});
             var post_request = httprequest.request(post_options, function(res) {
@@ -115,8 +120,11 @@ define(function(require) {
                 self.trigger('outputTriggered', { 'name': 'rest', 'error': err, 'message': this.statusText } );
                 output_ref.save();
             });
-            console.log(post_data);
-            post_request.send(post_data);
+            if (post_options.method == 'POST') {
+                post_request.send(post_data);
+            } else {
+                post_request.send();
+            }
         }
 
     }

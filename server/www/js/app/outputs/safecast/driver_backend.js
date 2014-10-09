@@ -46,7 +46,7 @@ define(function(require) {
             method: 'POST',
             path: '/measurements.json',
             headers: {
-            'X-Datalogger': 'wizkers.io Safecast plugin'
+            'X-Datalogger': 'wizkers.io Safecast plugin',
             'Content-Type': 'application/x-www-form-urlencoded',
             }
         };
