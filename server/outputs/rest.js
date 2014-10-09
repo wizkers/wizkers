@@ -44,7 +44,7 @@ module.exports = function rest() {
     this.setup = function(output) {
         
         console.log("[REST Output plugin] Setup a new instance");
-        mappings = output.maping;
+        mappings = output.mappings;
         settings = output.metadata;
         output_ref = output;
         
@@ -55,10 +55,13 @@ module.exports = function rest() {
             method: (settings.httprequest == "get") ? 'GET':'POST',
             // we don't set path here because it is templated
             headers: {
-                'X-Datalogger': 'wizkers.io REST plugin'
+                'X-Datalogger': 'wizkers.io server-mode REST plugin'
             }
         };
-        if (settings.httprequest == "post")
+        
+        // We test on "!= get" because settings.httprequest can be empty and we want to default
+        // to POST
+        if (settings.httprequest != "get")
             post_options['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
 
         regexpath = decompUrl(settings.resturl).path;
@@ -66,7 +69,7 @@ module.exports = function rest() {
         
     };
     
-    var resolveMapping = function(key,data) {
+    this.resolveMapping = function(key,data) {
         var m = mappings[key];
         if (typeof m == 'undefined')
             return undefined;
@@ -80,6 +83,8 @@ module.exports = function rest() {
     
     this.sendData = function(data) {
         var self = this;
+        var post_data = '';
+        
         console.log("[REST Output plugin] Send data");
 
         // Step one: prepare the structure
@@ -89,34 +94,41 @@ module.exports = function rest() {
         };
 
         post_options.path = matchTempl(regexpath, fields);
-        var post_data = matchTempl(regexargs, fields);
+        if (regexargs != undefined)
+            post_data = matchTempl(regexargs, fields);
 
         // If we do a GET, aggregate the path and post_data
         if (post_options.method == "GET") {
             post_options.path = post_options.path + '?' + post_data;
         }
 
-        output_ref.save({'last': new Date().getTime()});
+        output_ref.last = new Date().getTime();
+        output_ref.save();
         var post_request = http.request(post_options, function(res) {
             var err = true;
             console.log("[REST Output Plugin] REST Request result");
             // this is the xmlhttprequest
-            switch (this.status) {
+            switch (res.statusCode) {
                     case 0:  // Cannot connect
-                        output_ref.set('lastmessage', 'Cannot connect to host');
+                        output_ref.lastmessage = 'Cannot connect to host';
                         break;
                     case 200:
                     case 201: // success
-                        output_ref.set('lastsuccess', res.timeStamp);
-                        output_ref.set('lastmessage', this.statusText);
+                        output_ref.lastsuccess = new Date().getTime();
                         err = false;
                         break;
                     default:
-                        output_ref.set('lastmessage', this.statusText);
                         break;
             }
             // self.trigger('outputTriggered', { 'name': 'rest', 'error': err, 'message': this.statusText } );
             output_ref.save();
+            res.on('data', function(data) {
+                console.log("API Request result");
+                console.log(data);
+                output_ref.lastmessage = data;
+                output_ref.save();
+            });
+
         });
         if (post_options.method == 'POST') {
             post_request.write(post_data);

@@ -71,18 +71,23 @@ module.exports = function safecast() {
             return;
         }
         
-        var post_data = querystring.stringify({
+        // Only keep three decimals on Radiation, more does not make sense
+        radiation = parseFloat(radiation).toFixed(3);
+        
+        var post_obj = {
             'api_key' :  settings.apikey,
             'measurement[captured_at]': new Date().toISOString(),
             'measurement[unit]': unit,
             'measurement[value]': radiation,
             'measurement[latitude]': lat,
             'measurement[longitude]': lon,
-        });
-        
+        };
+
         // Add optional fields if they are there:
         if (devid != undefined)
-            post_data['measurement[device_id]'] = devid;
+            post_obj['measurement[device_id]'] = devid;
+
+        var post_data = querystring.stringify(post_obj);
         
         post_options.headers['Content-Length'] = post_data.length;
         
