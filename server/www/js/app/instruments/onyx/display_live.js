@@ -61,6 +61,7 @@ define(function(require) {
 
 
         events: {
+            "click #setdevicetag": "setdevicetag",
         },
 
         render:function () {
