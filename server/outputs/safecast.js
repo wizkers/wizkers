@@ -21,7 +21,7 @@ module.exports = function safecast() {
     this.setup = function(output) {
         
         console.log("[Safecast Output plugin] Setup a new instance");
-        mappings = output.maping;
+        mappings = output.mappings;
         settings = output.metadata;
         output_ref = output;
         
@@ -34,14 +34,14 @@ module.exports = function safecast() {
             method: 'POST',
             path: '/measurements.json',
             headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Datalogger': 'wizkers.io server-mode Safecast plugin',
+                'Content-Type': 'application/x-www-form-urlencoded',
             }
         };
         console.log(post_options);
-        
     };
     
-    var resolveMapping = function(key,data) {
+    this.resolveMapping = function(key,data) {
         var m = mappings[key];
         if (typeof m == 'undefined')
             return undefined;
@@ -56,11 +56,11 @@ module.exports = function safecast() {
         console.log("[Safecast Output plugin] ToDo: send data to Safecast");
         
         // Step one: prepare the structure
-        var unit = resolveMapping("unit",data);
-        var radiation =  resolveMapping("radiation",data);
-        var lat =  resolveMapping("latitude",data);
-        var lon =  resolveMapping("longitude",data);
-        var devid = resolveMapping("device_id", data);
+        var unit = this.resolveMapping("unit",data);
+        var radiation =  this.resolveMapping("radiation",data);
+        var lat =  this.resolveMapping("latitude",data);
+        var lon =  this.resolveMapping("longitude",data);
+        var devid = this.resolveMapping("device_id", data);
         
         // If any of those are empty, abort:
         if (unit == undefined || radiation == undefined || lat == undefined || lon == undefined) {
@@ -88,16 +88,21 @@ module.exports = function safecast() {
         
         var post_request = http.request(post_options, function(res) {
             res.setEncoding('utf8');
+            if (res.statusCode == 201 || res.statusCode == 200) {
+                output_ref.lastsuccess = new Date().getTime();
+                output_ref.save();
+            }
             res.on('data', function(data) {
                 console.log("API Request result");
                 console.log(data);
-                // output_ref.lastmessage = ;
+                output_ref.lastmessage = data;
                 output_ref.save();
             });
         });
         
         console.log("[Safecast Output] Sending data to " + post_options.host);
-        
+        output_ref.last = new Date().getTime();
+        output_ref.save();
         console.log(post_data);
         post_request.write(post_data);
         post_request.end();

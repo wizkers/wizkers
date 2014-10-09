@@ -16,10 +16,10 @@ var Rest     = require('./rest.js');
 
 
 // Returns 'true' if alarm is triggered
-var check_alarm = function(alarm, data) {
-    if (alarm.field != "_unused") {
-        if (data[alarm.field] != undefined) {
-            var field = data[alarm.field];
+var check_alarm = function(output, alarm, data) {
+    if (alarm.field != "_unused" && alarm.field != "") {
+        var field = output.plugin.resolveMapping(alarm.field, data);
+        if (field != undefined) {
             switch (alarm.comparator) {
                 case "less":
                     return (field < alarm.level);
@@ -34,8 +34,8 @@ var check_alarm = function(alarm, data) {
                     return false;
             }
         }
-        return false;
     }
+    return false;
 }
 
 module.exports = {
@@ -79,7 +79,7 @@ module.exports = {
     output: function(data) {
         for (idx in this.activeOutputs) {
             var output = this.activeOutputs[idx];
-            if (this.alarm(output) || this.regular(output) ) {
+            if (this.alarm(output,data) || this.regular(output) ) {
                 output.plugin.sendData(data);
                 output.last = new Date().getTime();
             }
@@ -87,14 +87,14 @@ module.exports = {
     },
     
     // Do we have an alarm on this output ?
-    alarm: function(output) {
+    alarm: function(output, data) {
         var alarm1 = output.config.alarm1,
             alarm2 = output.config.alarm2,
             alrmbool = output.config.alrmbool,
             alarm = false;
         
-        var alarm1_triggered = check_alarm(alarm1, data);
-        var alarm2_triggered = check_alarm(alarm2, data);
+        var alarm1_triggered = check_alarm(output, alarm1, data);
+        var alarm2_triggered = check_alarm(output, alarm2, data);
 
         switch (alrmbool) {
             case 'and':
