@@ -70,6 +70,7 @@ define(function(require) {
                 method: (settings.httprequest == "get") ? 'GET':'POST',
                 // we don't set path here because it is templated
                 headers: {
+                    'X-Datalogger': 'wizkers.io REST plugin'
                 }
             };
             if (settings.httprequest == "post")
@@ -101,6 +102,7 @@ define(function(require) {
                         case 0:  // Cannot connect
                             output_ref.set('lastmessage', 'Cannot connect to host');
                             break;
+                        case 200:
                         case 201: // success
                             output_ref.set('lastsuccess', res.timeStamp);
                             output_ref.set('lastmessage', this.statusText);
