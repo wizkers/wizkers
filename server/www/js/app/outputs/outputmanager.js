@@ -168,6 +168,10 @@ define(function(require) {
         }
         
         // Returns all the fields that are required/supported by a plugin type
+        //
+        // If a plugin supports a dynamic number of fields, these are defined in
+        // the plugin metadata as "numfields". The plugin will return "variable"
+        // here instead of a json structure.
         this.getOutputFields = function(type) {
             var out = this.supportedOutputs[type];
             if (out != undefined) {

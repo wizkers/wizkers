@@ -1,5 +1,16 @@
 <div class="row">
     <div class="form-group col-md-6">
+        <label for="type" class="col-md-6 control-label">Number of fields:</label>
+        <div class="input-group col-md-6">
+            <input type="number" step="1" min="1" class="form-control" name="numfields" value="<%= metadata['numfields'] %>"/>
+        </div>
+    </div>
+    <div class="col-md-6">
+    <p>Select how many data fields should be sent with each call. Press "Save" after updating this value.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-6">
         <label for="type" class="col-md-6 control-label">Server URL:</label>
         <div class="input-group col-md-6">
             <input type="text" class="form-control" name="resturl" value="<%= metadata['resturl'] %>"/>

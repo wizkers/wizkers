@@ -52,7 +52,8 @@ define(function(require) {
                 // This view is embedded into another view, so change events
                 // are going to bubble up to the upper view and change attributes
                 // with the same name, so we stop event propagation here:
-                event.stopPropagation();
+                if (target.name != "numfields")
+                    event.stopPropagation();
 
             },
     });

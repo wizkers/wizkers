@@ -25,7 +25,10 @@ define(function(require) {
             return [];
         }
         
+        // We do not enforce a strict number of fields.
         this.outputFields = function() {
+            return "variable";
+            /*
             return { "field1": { "name": "Field 1", "required": true },
                      "field2" : { "name": "Field 2", "required": false},
                      "field3" : { "name": "Field 3", "required": false },
@@ -33,6 +36,7 @@ define(function(require) {
                      "field5" : { "name": "Field 5", "required": false },
                      "field6" : { "name": "Field 6", "required": false },
                    }
+             */
         }
     };
 

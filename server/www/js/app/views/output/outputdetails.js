@@ -29,9 +29,25 @@ define(function(require) {
             // Mapping is "outputfield" : "datafield"
             this.devicefields = this.model.get('mappings');
 
-            // We need to query our output plugin for the fields it needs, so that we can map them
-            this.outputfields = outputManager.getOutputFields(this.model.get('type'));
+            // We need to query our output plugin for the fields it needs, so that we can map them.
+            //
+            // Some plugins can accept a variable number of fiels, named "Field1" ... "FieldN", and
+            // this.outputfields will be "variable" in that case.
+            this.generateOutputFields();
             
+        },
+        
+        generateOutputFields: function() {
+            this.outputfields = outputManager.getOutputFields(this.model.get('type'));
+            if (this.outputfields == "variable") {
+                var num = parseInt(this.model.get('metadata')['numfields']) || 1;
+                this.outputfields = {};
+                for (var i=1; i < num+1 ; i++) {
+                    this.outputfields['field' + i] = { "name": "Field " + i,
+                                                      "required": (i==1)? true: false
+                                                     };
+                }
+            }
         },
 
         render: function () {
@@ -70,7 +86,7 @@ define(function(require) {
             // config with the name of the data field it is mapped to
             
             // Gotta refresh the default outputfields each time
-            this.outputfields = outputManager.getOutputFields(this.model.get('type'));
+            this.generateOutputFields();
             _.each(this.outputfields, function(field, fieldname) {
                 var mapped = self.devicefields[fieldname];
                 if (mapped != undefined)
@@ -134,6 +150,15 @@ define(function(require) {
                 var alrm = this.model.get(keys[0]);
                 alrm[keys[1]] = target.value;
                 this.model.set(keys[0],alrm);
+            } else if (target.name == 'numfields') {
+                // this is a change that bubbled up from the bespoke settings view,
+                // we just need to re-render for the updated number of fields
+                this.gotdata = false;
+                this.generateOutputFields();
+                this.render();
+                // And switch back to the correct tab so that the user is not surprised:
+                $('#settingsTabs a[href="#props"]').tab('show')
+                
             } else {
 
                 // Our Spinedit control returns values as strings even
@@ -147,7 +172,7 @@ define(function(require) {
                 // If we changed the plugin type, we need to reset the view:
                 if (target.name == "type") {
                     this.gotdata = false;
-                    this.outputfields = outputManager.getOutputFields(this.model.get('type'));
+                    this.generateOutputFields();
                     this.render();
                 }
                 
