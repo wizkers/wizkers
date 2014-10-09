@@ -25,7 +25,7 @@ define(function(require) {
         
         // Returns 'true' if alarm is triggered
         var check_alarm = function(output, alarm, data) {
-            if (alarm.field != "_unused") {
+            if (alarm.field != "_unused" && alarm.field != "") {
                 var value = output.plugin.resolveMapping(alarm.field, data);
                 if (value != undefined) {
                     switch (alarm.comparator) {

@@ -18,7 +18,7 @@ define(function(require) {
     var templ = function(str, args) {
         return str.replace(/<%=(.*?)%>/g, function(match, field) {
             return args[field] || match;
-        }
+        });
     }
 
     var Output = function() {
