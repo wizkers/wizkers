@@ -10,11 +10,11 @@
     optimize: 'uglify2',
 
    
-    closure: {
-      CompilerOptions: {
-        languageIn: Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.ECMASCRIPT5
-        }
-    },
+//    closure: {
+//      CompilerOptions: {
+//        languageIn: Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.ECMASCRIPT5
+//        }
+//    },
     
     //If using UglifyJS for script optimization, these config options can be
     //used to pass configuration values to UglifyJS.
@@ -94,6 +94,7 @@
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
         bootstrapeditable: 'lib/bootstrap-editable',
+        bootbox: 'lib/bootbox',
         flot: 'lib/flot-0.8.1/jquery.flot',
         flot_time: 'lib/flot-0.8.1/jquery.flot.time',
         flot_resize: 'lib/flot-0.8.1/jquery.flot.resize',
