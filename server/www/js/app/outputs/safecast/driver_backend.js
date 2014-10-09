@@ -119,7 +119,7 @@ define(function(require) {
                         output_ref.set('lastmessage', this.statusText);
                         break;
             }
-            self.trigger('outputTriggered', { 'name': 'safecast', 'error': err } );
+            self.trigger('outputTriggered', { 'name': 'safecast', 'error': err, 'message': this.statusText } );
             output_ref.save();
         });
         console.log(post_data);

@@ -27,6 +27,8 @@ define(function(require) {
         initialize:function (options) {
             linkManager.on('status', this.updatestatus, this); 
             linkManager.on('uniqueID', this.updateUID, this);
+            
+            this.listenTo(outputManager, 'outputTriggered', this.updateOutputStatus );
             instrumentManager.on('instrumentChanged', this.updateInstrument, this);
 
             // Keep a reference to our instrument views to close
@@ -63,6 +65,15 @@ define(function(require) {
             // of the home view after selecting an instrument.
             this.instrument = instrumentManager.getInstrument();
             this.render();
+        },
+        
+        updateOutputStatus: function(evt) {
+            console.log("[Home view] Got an update from an output plugin");
+            if (evt.error) {
+                $("#outputstatus",this.el).html("Outputs Error").addClass('btn-danger').removeClass('btn-success').removeClass('btn-info')
+            } else {
+                $("#outputstatus",this.el).html("Outputs OK").addClass('btn-success').removeClass('btn-danger').removeClass('btn-info')
+            }
         },
 
         render:function () {
