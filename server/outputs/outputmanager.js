@@ -20,6 +20,15 @@ var check_alarm = function(output, alarm, data) {
     if (alarm.field != "_unused" && alarm.field != "") {
         var field = output.plugin.resolveMapping(alarm.field, data);
         if (field != undefined) {
+            // If both field and alarm.level can be parsed as
+            // numbers, do it:
+            var numval = parseFloat(field);
+            if (!isNaN(numval))
+                field = numval;
+            numval = parseFloat(alarm.level);
+            if (!isNaN(numval))
+                alarm.level = numval;
+            
             switch (alarm.comparator) {
                 case "less":
                     return (field < alarm.level);

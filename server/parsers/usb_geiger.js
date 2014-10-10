@@ -79,7 +79,7 @@ module.exports = {
             var resp = data.split(':');
             var jsresp = {};
             if (resp[0] == "CPM") {
-                jsresp.cpm = { value: resp[1] };
+                jsresp.cpm = { value: parseInt(resp[1]) };
                 switch (resp[2]) {
                         case 'X':
                         jsresp.cpm.valid = false;

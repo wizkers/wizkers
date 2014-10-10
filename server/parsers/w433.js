@@ -13,7 +13,9 @@
  * All rights reserved.
  */
 
-var serialport = require('serialport');
+var serialport = require('serialport'),
+    recorder = require('../recorder.js'),
+    outputmanager = require('../outputs/outputmanager.js');
 
 module.exports = {
     
@@ -223,7 +225,10 @@ module.exports = {
         
         // TODO :-)
         
-        this.recorder.record(res);
+        // Send our response to the recorder and the output manager
+        // as well
+        recorder.record(res);
+        outputmanager.output(res);
         this.socket.emit('serialEvent',res);
     },
     
