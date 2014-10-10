@@ -28,6 +28,15 @@ define(function(require) {
             if (alarm.field != "_unused" && alarm.field != "") {
                 var value = output.plugin.resolveMapping(alarm.field, data);
                 if (value != undefined) {
+                    // If both field and alarm.level can be parsed as
+                    // numbers, do it (we might have numbers as strings on both sides
+                    // which will lead to a wrong comparison)
+                    var numval = parseFloat(field);
+                    if (!isNaN(numval))
+                        field = numval;
+                    numval = parseFloat(alarm.level);
+                    if (!isNaN(numval))
+                        alarm.level = numval;
                     switch (alarm.comparator) {
                         case "less":
                             return (value < alarm.level);
