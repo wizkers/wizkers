@@ -121,8 +121,12 @@ module.exports = {
         var freq = output.config.alrmfrequency;
         if (freq = 0)
             return false;
-        if (new Date().getTime() - output.last_alarm > freq*1000)
-            return true;
+        if ( (output.last_alarm == undefined) ||
+             (new Date().getTime() - output.last_alarm > freq*1000)
+           ) {
+                output.last_alarm = new Date().getTime();
+                return true;
+        }
 
         return false;
     },
