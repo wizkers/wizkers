@@ -34,16 +34,7 @@ define(function(require) {
     
     // Define a few fundamental API calls:
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-
-
-    // create the audio context (chrome/FF only for now)
-    if (! window.AudioContext) {
-        if (! window.webkitAudioContext) {
-            console.log('no audiocontext found');
-        }
-        window.AudioContext = window.webkitAudioContext;
-    }
-    
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;    
     window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                                 window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
@@ -252,8 +243,11 @@ define(function(require) {
             } else {
             
 
+                // Since Chrome M36, we need to add "echoCancellation" otherwise the audio
+                // is totally distorted as Chrome now uses webaudio and webrtc in a more consistant
+                // manner, see https://code.google.com/p/chromium/issues/detail?id=397959
                 var audioConstraints = {
-                    audio: true
+                    audio: { optional: [{ echoCancellation: false }] }
                 };
                 
                 if (sourceNode == null) {
