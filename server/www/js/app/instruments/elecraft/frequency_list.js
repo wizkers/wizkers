@@ -95,6 +95,8 @@ define(function(require) {
             "click .trash": "removeFrequency",
             "click .panel" : "selectFrequency",
             "click .edit": "editFrequency",
+            "mouseover div.scrollable": "gscrollDown",
+            "mouseout div.scrollable": "resetScroll",
         },
 
         // End frequencies of each band. 4500 kHz is the 80 meter/60 meter transition for KX3. The K3 uses 4800 kHz.
@@ -143,6 +145,19 @@ define(function(require) {
             this.model.set('metadata', {"frequencies": this.allmems} );
             this.model.save();
             this.listView.refresh();
+        },
+        
+        gscrollDown: function(evt) {
+            var text = $(evt.target);
+            this.scroller = setInterval(function(){
+                                    var pos = text.scrollTop();
+                                    text.scrollTop(++pos);
+                                    }, 50);
+        },
+        
+        resetScroll: function(evt) {
+            clearInterval(this.scroller);
+            $(evt.target).scrollTop(0);
         },
 
         editFrequency: function(event) {
