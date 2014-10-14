@@ -10,15 +10,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        tpl     = require('text!tpl/instruments/ElecraftDiagView.html'),
-        template = null;
-        
-        try {
-            template = _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/ElecraftDiagView.js');
-        }
+        template = require('js/tpl/instruments/ElecraftDiagView.js');
     
         // Need to load these, but no related variables.
         require('bootstrap');

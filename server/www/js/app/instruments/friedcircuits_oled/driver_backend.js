@@ -71,6 +71,10 @@ define(function(require) {
         this.status = function() {
             return { };
         };
+        
+        this.isStreaming = function() {
+            return true;
+        };
     
         // Not used
         this.onOpen =  function(success) {

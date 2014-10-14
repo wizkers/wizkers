@@ -134,7 +134,7 @@ define(function(require) {
         };
         
         function portStatus() {
-           self.trigger('status', {portopen: self.portOpen, recording: recording, streaming: self.driver ? self.driver.streaming : false});
+           self.trigger('status', {portopen: self.portOpen, recording: recording, streaming: self.driver ? self.driver.isStreaming() : false});
         };
         
         function uniqueID() {

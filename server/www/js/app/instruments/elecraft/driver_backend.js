@@ -26,6 +26,9 @@ define(function(require) {
         var livePoller = null; // Reference to the live streaming poller
         var streaming = false;
 
+        this.isStreaming = function() {
+            return streaming;
+        }
         
         this.portSettings = function() {
             return  {

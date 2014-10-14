@@ -1,3 +1,6 @@
+// 2014.10.13: Added hardcoded versions for several situations, since
+// we also run in Chrome apps where we cannot use "eval" or "Function"
+
 //JavaScript Audio Resampler (c) 2011 - Grant Galitz
 function Resampler(fromSampleRate, toSampleRate, channels, outputBufferSize, noReturn) {
 	this.fromSampleRate = fromSampleRate;
@@ -31,7 +34,10 @@ Resampler.prototype.initialize = function () {
 					like standard linear interpolation in high downsampling.
 					This is more accurate than linear interpolation on downsampling.
 				*/
-				this.compileMultiTapFunction();
+                if (this.channels==1) {
+                    this.resampler = this.MultiTapOneChannel;
+                } else
+                    this.compileMultiTapFunction();
 				this.tailExists = false;
 				this.lastWeight = 0;
 			}
@@ -85,8 +91,15 @@ Resampler.prototype.compileLinearInterpolationFunction = function () {
 	else {\
 		throw(new Error(\"Buffer was of incorrect sample length.\"));\
 	}";
+    
+    
+    console.log(toCompile);
+    
+    
 	this.resampler = Function("buffer", toCompile);
 }
+
+
 Resampler.prototype.compileMultiTapFunction = function () {
 	var toCompile = "var bufferLength = buffer.length;\
 	var outLength = this.outputBufferSize;\
@@ -159,8 +172,13 @@ Resampler.prototype.compileMultiTapFunction = function () {
 	else {\
 		throw(new Error(\"Buffer was of incorrect sample length.\"));\
 	}";
+    
+    
+    
 	this.resampler = Function("buffer", toCompile);
 }
+
+
 Resampler.prototype.bypassResampler = function (buffer) {
 	if (this.noReturn) {
 		//Set the buffer passed as our own, as we don't need to resample it:
@@ -172,6 +190,56 @@ Resampler.prototype.bypassResampler = function (buffer) {
 		return buffer;
 	}
 }
+
+Resampler.prototype.MultiTapOneChannel = function(buffer) {
+    var bufferLength = buffer.length;
+    var outLength = this.outputBufferSize;
+    if ((bufferLength % 1) == 0) {
+        if (bufferLength > 0) {
+            var ratioWeight = this.ratioWeight;
+            var weight = 0;var output0 = 0;var actualPosition = 0;
+            var amountToNext = 0;
+            var alreadyProcessedTail = !this.tailExists;
+            this.tailExists = false;
+            var outputBuffer = this.outputBuffer;
+            var outputOffset = 0;
+            var currentPosition = 0;
+            do {
+                if (alreadyProcessedTail) {
+                    weight = ratioWeight;output0 = 0;}
+                else {
+                    weight = this.lastWeight;output0 = this.lastOutput[0];alreadyProcessedTail = true;
+                }
+                while (weight > 0 && actualPosition < bufferLength) {
+                    amountToNext = 1 + actualPosition - currentPosition;
+                    if (weight >= amountToNext) {output0 += buffer[actualPosition++] * amountToNext;currentPosition = actualPosition;
+                                                 weight -= amountToNext;
+                                                }
+                    else {
+                        output0 += buffer[actualPosition] * weight;currentPosition += weight;
+                        weight = 0;
+                        break;
+                    }
+                }
+                if (weight == 0) {outputBuffer[outputOffset++] = output0 / ratioWeight;}
+                else {
+                    this.lastWeight = weight;this.lastOutput[0] = output0;this.tailExists = true;
+                    break;
+                }
+            } while (actualPosition < bufferLength && outputOffset < outLength);
+            return this.bufferSlice(outputOffset);
+        }
+        else {
+            return (this.noReturn) ? 0 : [];
+        }
+    }
+    else {
+        throw(new Error("Buffer was of incorrect sample length."));
+    }
+}
+
+
+
 Resampler.prototype.bufferSlice = function (sliceAmount) {
 	if (this.noReturn) {
 		//If we're going to access the properties directly from this object:

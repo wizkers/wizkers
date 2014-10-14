@@ -11,15 +11,8 @@ define(function(require) {
         Backbone = require('backbone'),
         Snap    = require('snap'),
         bootbox  = require('bootbox'),
-        tpl     = require('text!tpl/instruments/ElecraftFrequencyItemView.html'),
-        template = null;
+        template =  require('js/tpl/instruments/ElecraftFrequencyItemView.js');
         
-        try {
-            template = _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/ElecraftFrequencyItemView.js');
-        }
     
     // Need to load these, but no related variables.
     require('bootstrap');

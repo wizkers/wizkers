@@ -17,21 +17,12 @@ define(function(require) {
         DSP     = require('dsp'),
         chroma  = require('chroma'),
         resampler= require('resampler'),
-        tpl     = require('text!tpl/instruments/AudioWaterfall.html'),
-        template = null;
+        template = require('js/tpl/instruments/AudioWaterfall.js');
     
         // Need to load these, but no related variables.
         require('bootstrap');
         require('bootstrapslider');
 
-        
-    try {
-        template = _.template(tpl);
-    } catch (e) {
-        // Will happen if we are packaged in a Chrome app
-        template = require('js/tpl/instruments/AudioWaterfall.js');
-    }
-    
     // Define a few fundamental API calls:
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
     window.AudioContext = window.AudioContext || window.webkitAudioContext;    
