@@ -23,7 +23,7 @@ define(function(require) {
     return Backbone.View.extend({
 
         initialize:function () {
-            if (linkManager.streaming) {
+            if (linkManager.isStreaming()) {
                 linkManager.stopLiveStream();
             }
 
