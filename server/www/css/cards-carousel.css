@@ -20,15 +20,18 @@
 .frequency-carousel .panel-footer {
     padding-top: 5px;
     padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .frequency-carousel .panel-footer .btn-left {
-    width: 70%;
+    width: 65%;
     float: left;
+    text-align: left;
 }
 
 .frequency-carousel .panel-footer .btn-trash {
-    width: 15%;
+    width: 20%;
     float: left;
     text-align: left;
 }
@@ -54,6 +57,10 @@
     line-height: 20px;
     margin-bottom: 0;
     text-align: left;
+}
+
+.frequency-carousel .panel {
+        overflow-x: hidden;
 }
 
 .frequency-carousel .panel:hover {
