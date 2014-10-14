@@ -38,7 +38,9 @@ require.config({
         flot_time: 'lib/flot-0.8.3/jquery.flot.time',
         flot_resize: 'lib/flot-0.8.3/jquery.flot.resize',
         flot_selection: 'lib/flot-0.8.3/jquery.flot.selection',
-        flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween'
+        flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
+        flot_windrose: 'lib/jquery.flot.windrose',
+        flot_jumlib: 'lib/jquery.flot.JUMlib',
     },
     
     /*
@@ -90,6 +92,14 @@ require.config({
         'flot_fillbetween': {
             deps: ['flot']
         },
+        'flot_jumlib': {
+            deps: ['jquery', 'flot'],
+            exports: '$.plot.JUMlib'
+        },        
+        'flot_windrose': {
+            deps: ['flot', 'flot_jumlib']
+        }
+
     }
 });
 

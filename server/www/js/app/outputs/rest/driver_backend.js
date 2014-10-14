@@ -126,7 +126,6 @@ define(function(require) {
                 post_request.send();
             }
         }
-
     }
     
     _.extend(Output.prototype, Backbone.Events);

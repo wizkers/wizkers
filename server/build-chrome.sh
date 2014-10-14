@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd www/js
-java -Xmx1024m -classpath ../../java/rhino.jar:../../java/compiler.jar org.mozilla.javascript.tools.shell.Main /opt/local/bin/r.js -o chrome.build.js
+/opt/local/bin/r.js -o chrome.build.js
