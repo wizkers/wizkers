@@ -93,7 +93,7 @@ module.exports = {
     // period is in seconds
     startLiveStream: function(period) {
         var self = this;
-        if (!this.streaming) {
+        
             console.log("[Elecraft] Starting live data stream");
             // The radio can do live streaming to an extent, so we definitely will
             // take advantage:
@@ -101,9 +101,10 @@ module.exports = {
             // AI2 does not send an initial report, so we ask for the initial data
             // before...
             this.port.write('K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
-            this.livePoller = setInterval(this.queryRadio.bind(this), (period) ? period*1000: 1000);
-            this.streaming = true;
-        }
+            if (!this.streaming) {
+                this.livePoller = setInterval(this.queryRadio.bind(this), (period) ? period*1000: 1000);
+                this.streaming = true;
+            }
     },
     
     stopLiveStream: function(period) {

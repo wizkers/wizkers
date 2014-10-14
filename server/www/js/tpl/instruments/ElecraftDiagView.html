@@ -1,68 +1,138 @@
 <div class="col-md-12">
     <div class="row">
-        <div class="col-md-4">
-            <div class="row">
-                <div class="col-md-12">
-                    <h4>Amplifier</h4>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="col-md-4">
-                                Input Power: 0.0 <br>
-                                Drain Current: 0.0 <br>
-                                Supply Voltage: 0.0 <br>
-                                Dissipater Power: 0.0 <br>
-                                Temperature: 0.0 <br>
-                            </div>
-                            <div class="col-md-4">
-                                Forward Power: 0.0 <br>
-                                Reflected Power: 0.0 <br>
-                                Last SWR: 0.0 <br>
-                                Frequency: <br>
-                                Band: <br>
-                            </div>
-                            <div class="col-md-4">
-                                Fault <br>                            
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="row">
-                <div class="col-md-12">
-                    <h4>Antenna Tuner</h4>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <p>Mode, Antenna (1/2), Capacitance (pF), Inductance (nH), ATU Bypassed, Caps on TX Side</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="col-md-12">
+            <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+              <li class="active"><a href="#kx3" role="tab" data-toggle="tab">KX3</a></li>
+              <li><a href="#kxpa100" role="tab" data-toggle="tab">KXPA100</a></li>
+              <li><a href="#px3" role="tab" data-toggle="tab">PX3</a></li>
+            </ul>
+            <br>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-3">
-            <p>Input Power, Forward Power, Reflected Power, Dissipated Power</p>
-        </div>
-        <div class="col-md-3">
-            <p>Temperature</p>
-        </div>
-        <div class="col-md-3">
-            <p>Supply Voltage, Drain Current</p>
-        </div>
-        <div class="col-md-3">
-            <p>SWR</p>
-        </div>
-    </div> <!-- Add here Amplifier graphs -->
+        <div class="col-md-12">
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div class="tab-pane active" id="kx3">
+                    <div class="row">
+                        <div class="col-md-3">
+                            Firmware versions: MCU v<span id="kx3-fw-mcu"></span>, DSP v<span id="kx3-fw-dsp"></span>.
+                            
+                        </div>
+                        <div class="col-md-9">
+                            <button class="btn btn-info refresh" title="Refresh" type="button" >
+                                <span class="glyphicon glyphicon-refresh"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <legend>Reception</legend>
+                        </div>
+                    </div>
+                    <div class="row">
+                    <div class="col-md-4">
+                        <h4>RX Equalizer</h4>
+                        <div id="kx3-rxeq"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <legend>Transmission</legend>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h4>TX Equalizer</h4>
+                            <div id="kx3-txeq"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <legend>Calibration</legend>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            RX Calibration freq: <span id="kx3-refcal"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="kxpa100">
+                    <div class="row">
+                    <div class="col-md-4">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h4>Amplifier</h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
+                                        <div class="col-md-4">
+                                            Input Power: 0.0 <br>
+                                            Drain Current: 0.0 <br>
+                                            Supply Voltage: 0.0 <br>
+                                            Dissipater Power: 0.0 <br>
+                                            Temperature: 0.0 <br>
+                                        </div>
+                                        <div class="col-md-4">
+                                            Forward Power: 0.0 <br>
+                                            Reflected Power: 0.0 <br>
+                                            Last SWR: 0.0 <br>
+                                            Frequency: <br>
+                                            Band: <br>
+                                        </div>
+                                        <div class="col-md-4">
+                                            Fault <br>                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h4>Antenna Tuner</h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
+                                        <p>Mode, Antenna (1/2), Capacitance (pF), Inductance (nH), ATU Bypassed, Caps on TX Side</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <p>Input Power, Forward Power, Reflected Power, Dissipated Power</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p>Temperature</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p>Supply Voltage, Drain Current</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p>SWR</p>
+                        </div>
+                    </div> <!-- Add here Amplifier graphs -->
+
+                </div>
+                <div class="tab-pane" id="px3">
+                    <div class="col-md-12">
+                    </div>
+                </div>
+                
+                
+            </div>
+    
     <div class="row">
         <div class="col-md-12">
              <div class="input-group">

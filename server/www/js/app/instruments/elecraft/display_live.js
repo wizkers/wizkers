@@ -446,14 +446,14 @@ define(function(require) {
                 } else if (cmd == "FB") {
                     $("#vfob-direct").val(parseInt(val)/1e6);
                 } else if (cmd =="AG") {
-                    $("#ag-control", this.el).slider('setValue',val);
+                    $("#ag-control", this.el).slider('setValue',parseInt(val));
                 } else if (cmd =="RG") {
-                    $("#rf-control", this.el).slider('setValue',val-250);
+                    $("#rf-control", this.el).slider('setValue',parseInt(val-250));
                 } else if (cmd =="FW") {
-                    $("#bpf-control", this.el).slider('setValue',val/100);
+                    $("#bpf-control", this.el).slider('setValue',parseFloat(val/100));
                     // TODO: update filter icons
                 } else if(cmd =="MG") {
-                    $("#mic-control", this.el).slider('setValue',val);
+                    $("#mic-control", this.el).slider('setValue',parseInt(val));
                 } else if (cmd == "IS") {
                     $("#ct-control", this.el).slider('setValue',parseInt(val)/1000);
                 }  else if (cmd == "BN") {

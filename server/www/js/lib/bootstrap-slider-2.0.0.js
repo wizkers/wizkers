@@ -47,6 +47,8 @@
 		if (typeof Modernizr !== 'undefined' && Modernizr.touch) {
 			this.touchCapable = true;
 		}
+        
+        this.options = options;
 
 		this.orientation = this.element.data('slider-orientation')||options.orientation;
 		switch(this.orientation) {
@@ -149,14 +151,20 @@
 		inDrag: false,
 		
 		layout: function(){
-			this.handle1Stype[this.stylePos] = this.percentage[0]+'%';
-			this.handle2Stype[this.stylePos] = this.percentage[1]+'%';
+            var positionPercentages;
+            if(this.options.reversed) {
+					positionPercentages = [ 100 - this.percentage[0], this.percentage[1] ];
+            } else {
+					positionPercentages = [ this.percentage[0], this.percentage[1] ];
+            }
+			this.handle1Stype[this.stylePos] = positionPercentages[0]+'%';
+			this.handle2Stype[this.stylePos] = positionPercentages[1]+'%';
 			if (this.orientation == 'vertical') {
-				this.selectionElStyle.top = Math.min(this.percentage[0], this.percentage[1]) +'%';
-				this.selectionElStyle.height = Math.abs(this.percentage[0] - this.percentage[1]) +'%';
+				this.selectionElStyle.top = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
+				this.selectionElStyle.height = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
 			} else {
-				this.selectionElStyle.left = Math.min(this.percentage[0], this.percentage[1]) +'%';
-				this.selectionElStyle.width = Math.abs(this.percentage[0] - this.percentage[1]) +'%';
+				this.selectionElStyle.left = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
+				this.selectionElStyle.width = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
 			}
 		},
 
@@ -180,7 +188,7 @@
 				this.dragged = 0;
 			}
 
-			this.percentage[this.dragged] = percentage;
+            this.percentage[this.dragged] = this.options.reversed ? 100 - percentage : percentage;
 			this.layout();
 
 			if (this.touchCapable) {
@@ -225,7 +233,7 @@
 					this.dragged = 0;
 				}
 			}
-			this.percentage[this.dragged] = percentage;
+            this.percentage[this.dragged] = this.options.reversed ? 100 - percentage : percentage;
 			this.layout();
             this.tooltip.tooltip('show'); // ELafargue: not ideal, because the tooltip flickers...
 			var val = this.calculateValue();
