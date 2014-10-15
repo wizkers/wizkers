@@ -1,24 +1,24 @@
 <!-- Details view of a layout -->
 <div class="col-md-12">
-    <div class="row"><div class="col-md-12">
-    <form class="form-horizontal">
-        <fieldset>
+    <div class="row">
+        <div class="col-md-12">
             <legend>Instrument Details</legend>
-            <br/>
-            <div class="row">
-                <div class="col-md-5">
-                    <div class="control-group">
-                        <label for="name" class="control-label">Name:</label>
-
-                        <div class="controls">
-                            <input type="text" name="name" value="<%= name %>"/>
-                            <span class="help-inline"></span>
-                        </div>
+        </div>
+    </div>
+    <form class="form-horizontal">        
+        <div class="row">
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label for="name" class="col-md-3 control-label">Name:</label>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" name="name" value="<%= name %>"/>
+                        <span class="help-inline"></span>
                     </div>
-                    <div class="control-group">
-                        <label for="name" class="control-label">Type:</label>
-                        <div class="controls">
-                            <select name="type" >
+                </div>
+                <div class="form-group">
+                    <label for="name" class="col-md-3 control-label">Type:</label>
+                        <div class="col-md-9">
+                            <select name="type" class="form-control">
                                 <% for(var ins in instypes) { %>
                                 <option
                                 <%= type == ins ?'selected':'' %>
@@ -27,13 +27,14 @@
                             </select>
                             <span class="help-inline"></span>
                         </div>
+                </div>
+                <div class="form-group">
+                    <label for="port" class="col-md-3 control-label">Port:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="port" name="port" value="<%= port %>"/>
                     </div>
-                                
-                    <div class="control-group">
-                        <label for="port" class="control-label">Port:</label>
-                        <div class="controls">
-                        <input type="text" id="port" name="port" value="<%= port %>"/>
-                            <select id="otherports" name="otherports">
+                    <div class="col-md-5">
+                            <select id="otherports" name="otherports" class="form-control">
                                 <option>New port...</option>
                                 <% for(var i=0; i < ports.length; i++) { %>
                                 <option
@@ -41,23 +42,26 @@
                                     value="<%= ports[i] %>"><%= ports[i] %></option>
                                 <% } %>
                             </select>
-                        </div>
-                    </div>      
-                    <div class="control-group">
-                        <label for="liveviewspan" class="control-label">Live view length:</label>
-                        <div class="controls">
-                            <input type="text" name="liveviewspan" value="<%= liveviewspan %>"</>&nbsp; seconds.
-                        </div>
                     </div>
-                    <div class="control-group">
-                        <label for="liveviewperiod" class="control-label">Polling period:</label>
-                        <div class="controls">Poll&nbsp;every&nbsp;
-                            <input type="text" name="liveviewperiod" value="<%= liveviewperiod %>"</>&nbsp;seconds.
-                        </div>
+                </div>      
+                <div class="form-group">
+                    <label for="liveviewspan" class="col-md-3 control-label">Live view length:</label>
+                    <div class="col-md-9 input-group">
+                        <input type="text" class="form-control" name="liveviewspan" value="<%= liveviewspan %>">
+                        <span class="input-group-addon">seconds</span>
                     </div>
-                <div class="control-group">
-                    <label></label>
-                    <div class="controls">
+                </div>
+                <div class="form-group">
+                    <label for="liveviewperiod" class="col-md-3 control-label">Polling period:</label>
+                    <div class="col-md-9 input-group">
+                        <span class="input-group-addon">Poll Every</span>
+                        <input type="text" class="form-control" name="liveviewperiod" value="<%= liveviewperiod %>">
+                        <span class="input-group-addon">seconds</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    
+                    <div class="col-md-12">
                         <h4>Instrument information</h4>
                     <p>Unique ID: <span id="uniqueid"><%= uuid %></span></p>
                         </div>
@@ -68,7 +72,7 @@
                 <div class="control-group">
                     <label for="description" class="control-label">Notes:</label>
                     <div class="controls">
-                            <textarea id="comment" name="comment" style="width: 90%;" rows="6"><%= comment %></textarea>
+                            <textarea id="comment" class="form-control" name="comment" style="width: 90%;" rows="6"><%= comment %></textarea>
                     </div>
                 </div>
                 <div class="control-group">
@@ -89,7 +93,6 @@
                 </div>
             </div>
         </div> <!-- row -->
-    </fieldset>
 
         <div class="form-actions">
             <button type="button" class="btn btn-primary save">Save</button>
@@ -97,7 +100,6 @@
         </div>
 
     </form>
-</div></div>
 
 <div class="row">
     <div class="col-md-12">
