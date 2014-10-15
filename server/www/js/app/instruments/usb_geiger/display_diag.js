@@ -12,15 +12,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        tpl     = require('text!tpl/instruments/OnyxDiagView.html'),
-        template = null;
-        
-        try {
-            template = _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/OnyxDiagView.js');
-        }
+        template = require('js/tpl/instruments/USBGeigerSettingsView.js');
 
     return Backbone.View.extend({
 
@@ -42,7 +34,7 @@ define(function(require) {
         },
 
         onClose: function() {
-            console.log("Onyx Diag view closing...");
+            console.log("[USB Geiger] Diag view closing...");
             linkManager.off('input', this.showInput);
         },
 
@@ -55,14 +47,11 @@ define(function(require) {
         },
 
         refresh: function() {
-            $('#accessorydetect',this.el).empty();
-            $('#post',this.el).removeClass('badge-success').removeClass('badge-important');
-            $('#post',this.el).html("Waiting...");
-            $('#post2',this.el).html('');
             // Query controller for various info:
             this.queriesDone = false;
             if (linkManager.isConnected()) {
-                linkManager.driver.version();            
+                linkManager.driver.version();
+                linkManager.driver.dump_settings();
             }
         },
 
@@ -97,14 +86,14 @@ define(function(require) {
             if (data.version != undefined) {
                 $('#version',this.el).html(data.version);
                 linkManager.driver.guid();
+            } else if (data.cpm_output != undefined) {
+                $("#cpm_output",this.el).prop("checked",(data.cpm_output[0] == "1"));
+            } else if (data.count_enable != undefined) {
+                $("#count_enable",this.el).prop("checked",(data.count_enable[0] == "1"));
+            } else if (data.pulse_enable != undefined) {
+                $("#pulse_enable",this.el).prop("checked",(data.pulse_enable[0] == "1"));
             }
-            if (data.guid != undefined) {
-                $('#guid',this.el).html(data.guid);
-                linkManager.driver.devicetag();
-            }
-            if (data.devicetag != undefined) {
-                $('#devname', this.el).val(data.devicetag);
-            }
+            
 
         }
     });

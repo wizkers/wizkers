@@ -43,7 +43,11 @@ define(function(require) {
         };
 
         this.version = function() {
-                self.socket.emit('controllerCommand', 'V:');
+                self.socket.emit('controllerCommand', 'v:');
+        };
+
+        this.dump_settings = function() {
+                self.socket.emit('controllerCommand', 'p:');
         };
 
         this.devicetag = function() {

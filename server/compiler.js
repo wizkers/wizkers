@@ -33,7 +33,7 @@ compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogMana
                  'InstrumentDetailsView', 'InstrumentListItemView', 'OutputListItemView', 'OutputDetailsView',
                  'OutputDetailsFieldTable', 'OutputDetailsMappingTable',
                  'outputs/SafecastSettingsView', 'outputs/RestSettingsView',
-                 'instruments/AudioWaterfall',
+                 'instruments/AudioWaterfall', 'instruments/USBGeigerSettingsView',
                  'instruments/W433LiveView', 'instruments/W433SettingsView', 'instruments/W433LogView', 'instruments/W433NumView',
                  'instruments/ElecraftDiagView', 'instruments/ElecraftFrequencyItemView', 'instruments/ElecraftLiveView',
                  'instruments/ElecraftNumView', 'instruments/ElecraftSettingsView',
