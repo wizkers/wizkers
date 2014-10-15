@@ -212,8 +212,8 @@ define(function(require) {
 
         // RIGCTLD Emulation - super light, but does the trick for fldigi...
         var rigctl_command = function(data,c) {
-            // console.log("[rigctl_command] " + data);
-            var cmd = data.substr(0,2);
+            //console.log("[rigctl_command] " + data);
+            var cmd = (data.substr(0,1) == "\\") ? data.substr(0,2) : data.substr(0,1);
             switch (cmd) {
                     case "\\d": // "mp_state":
                         // No f**king idea what this means, but it makes hamlib happy.
@@ -222,7 +222,7 @@ define(function(require) {
                     case "f":
                         c.sendMessage(vfoa_frequency + "\n");
                         break;
-                    case "F ": // Set Frequency (VFOA):  F 14069582.000000
+                    case "F": // Set Frequency (VFOA):  F 14069582.000000
                         var freq = ("00000000000" + parseFloat(data.substr(2)).toString()).slice(-11); // Nifty, eh ?
 
                         console.log("Rigctld emulation: set frequency to " + freq);
@@ -233,7 +233,7 @@ define(function(require) {
                     case "m":
                          c.sendMessage(radio_mode + "\n" + vfoa_bandwidth + "\n");
                         break;
-                    case "M ": // Set mode
+                    case "M": // Set mode
                          // Not implemented yet
                          radio_mode = data.substr(2);
                          c.sendMessage("RPRT 0\n");
@@ -246,7 +246,7 @@ define(function(require) {
                     case "v": // Which VFO ?
                         c.sendMessage("VFOA\n");
                         break;
-                    case "T ":
+                    case "T":
                         if (data.substr(2) == "1") {
                             if (serialport != null)
                                 serialport.emit('controllerCommand', 'TX;');
