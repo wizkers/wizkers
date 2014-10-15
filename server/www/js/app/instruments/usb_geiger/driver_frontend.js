@@ -41,6 +41,10 @@ define(function(require) {
         this.getCPM = function() {
             // The USB dongle always streams
         };
+        
+        this.devicetag = function() {
+            // The Onyx live view calls this method
+        };
 
         this.version = function() {
                 self.socket.emit('controllerCommand', 'v:');
@@ -50,8 +54,15 @@ define(function(require) {
                 self.socket.emit('controllerCommand', 'p:');
         };
 
-        this.devicetag = function() {
-                self.socket.emit('controllerCommand', 'TAG' );
+        this.cpm_output = function(enable) {
+                self.socket.emit('controllerCommand', 'M:' + (enable ? '1' : '0') );
+        };
+
+        this.pulse_enable = function(enable) {
+                self.socket.emit('controllerCommand', 'P:' + (enable ? '1' : '0') );
+        };
+        this.count_enable = function(enable) {
+                self.socket.emit('controllerCommand', 'T:' + (enable ? '1' : '0') );
         };
 
         console.log('Started USB Geiger link manager front end driver..');

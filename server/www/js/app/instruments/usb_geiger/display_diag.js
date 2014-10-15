@@ -25,12 +25,9 @@ define(function(require) {
 
         events: {
             "click .refresh": "refresh",
-            "click .disptest": "disptest",
-            "click .setrtc": "setrtc",
             "click #cmdsend": "sendcmd",
             "keypress input#manualcmd": "sendcmd",
-            "click #nameset": "setdevtag",
-            "keypress input#devname": "setdevtag",
+            "change #output_control input": "setupOutputs",
         },
 
         onClose: function() {
@@ -54,13 +51,20 @@ define(function(require) {
                 linkManager.driver.dump_settings();
             }
         },
-
-        disptest: function() {
-            linkManager.driver.displaytest();
-        },
-
-        setrtc: function() {
-            linkManager.driver.settime();
+        
+        setupOutputs: function(evt) {
+            var checked = $(evt.target).is(':checked');
+            switch (evt.target.id) {
+                case 'cpm_output':
+                    linkManager.driver.cpm_output(checked);
+                break;
+                case 'pulse_enable':
+                    linkManager.driver.pulse_enable(checked);
+                break;
+                case 'count_enable':
+                    linkManager.driver.count_enable(checked);
+                break;
+            }
         },
 
         sendcmd: function(event) {

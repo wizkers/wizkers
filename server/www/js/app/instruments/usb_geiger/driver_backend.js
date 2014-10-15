@@ -83,7 +83,7 @@ define(function(require) {
                         default:
                         break;
                 }
-            }  else if (data.substr(0,10) == "USB Geiger") {
+            } else if (data.substr(0,10) == "USB Geiger") {
                 jsresp.version = data;
             } else if (resp.length > 1) {
                 jsresp[resp[0]] = resp.slice(1);
