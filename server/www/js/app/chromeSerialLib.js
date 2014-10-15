@@ -134,7 +134,9 @@ define(function(require) {
         };
         
         function portStatus() {
-           self.trigger('status', {portopen: self.portOpen, recording: recording, streaming: self.driver ? self.driver.isStreaming() : false});
+           self.trigger('status', {portopen: self.portOpen,
+                                   recording: recording,
+                                   streaming: self.driver ? self.driver.isStreaming() : false});
         };
         
         function uniqueID() {
@@ -263,6 +265,9 @@ define(function(require) {
             self.portOpen = true;
             self.connectionId = openInfo.connectionId;
             portStatus();
+           if (self.driver.onOpen) {
+                self.driver.onOpen(self); // Pass our own reference as the port.
+            }
             chrome.serial.onReceive.addListener(onRead);
 
         };

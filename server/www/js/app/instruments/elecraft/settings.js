@@ -5,9 +5,17 @@
 define(function(require) {
     "use strict";
     
-    var Backbone = require('backbone');
-    
+     var $        = require('jquery'),
+        _       = require('underscore'),
+        Backbone = require('backbone'),
+        template = require('js/tpl/instruments/ElecraftSettingsView.js');
+
     return Backbone.View.extend({
-    
+
+        render:function () {
+            $(this.el).html(template());
+            return this;
+        }
+
     });
 });

@@ -16,6 +16,11 @@
     "http://*/*",
     "https://*/*"
   ],
+  "sockets": {
+      "tcpServer": {
+        "listen": ":4532"
+      }
+  },
   "sandbox": {
     "pages": [ "public/tpl/HomeView.html" ]
   }
