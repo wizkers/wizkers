@@ -39,6 +39,7 @@ define(function(require) {
         var vfoa_frequency = 0;
         var vfob_frequency = 0;
         var vfoa_bandwidth = 0;
+        var radio_mode = "USB";
         
         // Standard Driver API below
 
@@ -230,13 +231,17 @@ define(function(require) {
                         c.sendMessage("RPRT 0\n");
                         break;
                     case "m":
-                         c.sendMessage("PKTUSB\n");
-                         c.sendMessage(vfoa_bandwidth + "\n");
+                         c.sendMessage(radio_mode + "\n" + vfoa_bandwidth + "\n");
                         break;
+                    case "M ": // Set mode
+                         // Not implemented yet
+                         radio_mode = data.substr(2);
+                         c.sendMessage("RPRT 0\n");
+                         break;
                     case "q":
                         // TODO: we should close the socket here ?
                         console.log("Rigctld emulation: quit");
-                        c.disconnect();
+                        c.close();
                         break;
                     case "v": // Which VFO ?
                         c.sendMessage("VFOA\n");
@@ -264,63 +269,28 @@ define(function(require) {
             }
 
         };
-    
-    var hamlib_init = "0\n\
-229\n\
-2\n\
-500000.000000 30000000.000000 0xdbf -1 -1 0x3 0x3\n\
-48000000.000000 54000000.000000 0xdbf -1 -1 0x3 0x3\n\
-0 0 0 0 0 0 0\n\
-1800000.000000 2000000.000000 0xdbf 10 10000 0x3 0x3\n\
-3500000.000000 4000000.000000 0xdbf 10 10000 0x3 0x3\n\
-7000000.000000 7300000.000000 0xdbf 10 10000 0x3 0x3\n\
-10100000.000000 10150000.000000 0xdbf 10 10000 0x3 0x3\n\
-14000000.000000 14350000.000000 0xdbf 10 10000 0x3 0x3\n\
-18068000.000000 18168000.000000 0xdbf 10 10000 0x3 0x3\n\
-21000000.000000 21450000.000000 0xdbf 10 10000 0x3 0x3\n\
-24890000.000000 24990000.000000 0xdbf 10 10000 0x3 0x3\n\
-28000000.000000 29700000.000000 0xdbf 10 10000 0x3 0x3\n\
-50000000.000000 54000000.000000 0xdbf 10 10000 0x3 0x3\n\
-0 0 0 0 0 0 0\n\
-0xdbf 1\n\
-0 0\n\
-0xc 2700\n\
-0xc 2800\n\
-0xc 1800\n\
-0xc 0\n\
-0x82 1000\n\
-0x82 2800\n\
-0x82 50\n\
-0x82 0\n\
-0x110 2000\n\
-0x110 2700\n\
-0x110 500\n\
-0x110 0\n\
-0xc00 2700\n\
-0xc00 2800\n\
-0xc00 50\n\
-0xc00 0\n\
-0x1 6000\n\
-0x1 13000\n\
-0x1 2700\n\
-0x1 0\n\
-0x20 13000\n\
-0 0\n\
-9990\n\
-9990\n\
-0\n\
-0\n\
-14 \n\
-10 \n\
-0x81010002\n\
-0x81010002\n\
-0x4402703b\n\
-0x2703b\n\
-0x0\n\
-0x0\n";
-
-    
-    
+            
+        var hamlib_init =   "0\n" +
+                            "2\n" +
+                            "2\n" +
+                            "150000.000000 30000000.000000  0x900af -1 -1 0x10 000003 0x3\n" +
+                            "0 0 0 0 0 0 0\n" +
+                            "150000.000000 30000000.000000  0x900af -1 -1 0x10 000003 0x3\n" +
+                            "0 0 0 0 0 0 0\n" +
+                            "0 0\n" +
+                            "0 0\n" +
+                            "0\n" +
+                            "0\n" +
+                            "0\n" +
+                            "0\n" +
+                            "\n" +
+                            "\n" +
+                            "0x0\n" +
+                            "0x0\n" +
+                            "0x0\n" +
+                            "0x0\n" +
+                            "0x0\n" +
+                            "0\n";        
     }
     
     return parser;
