@@ -27,7 +27,8 @@ define(function(require) {
         render: function () {
             console.log("Render instrument details");
             linkManager.once('ports', function(portlist) {
-                $(this.el).html(template(_.extend(this.model.toJSON(), {instypes: instrumentManager.supportedInstruments, ports: portlist})));
+                $(this.el).html(template(_.extend(this.model.toJSON(), {instypes: instrumentManager.supportedInstruments,
+                                                                        ports: portlist})));
 
                 // If the instrument type has got its own extra settings, then render those here:
                 var insSettingsView = instrumentManager.supportedInstruments[this.model.get('type')].settings;
@@ -42,19 +43,39 @@ define(function(require) {
         },
 
         events: {
-            "change"        : "change",
-            "change #otherports" : "selectPort",
-            "click .save"   : "beforeSave",
-            "click .delete" : "deleteInstrument",
-            "click #do-delete": "doDeleteInstrument",
-            "dragover #icon"     : "dragOver",
-            "dragleave #icon"     : "dragLeave",
-            "drop #icon" : "dropHandler"
+            "change"                    : "change",
+            "change #otherports"        : "selectPort",
+            "click .save"               : "beforeSave",
+            "click .delete"             : "deleteInstrument",
+            "click .export"             : "exportSettings",
+            "click #do-delete"          : "doDeleteInstrument",
+            "dragover #icon"            : "dragOver",
+            "dragleave #icon"           : "dragLeave",
+            "drop #icon"                : "dropHandler",
+            "dragover #restore-area"    : "dragOver",
+            "dragleave #restore-area"   : "dragLeave",
+            "drop #restore-area"        : "importSettings"
+
         },
 
         selectPort: function(event) {
             $('#port').val($('select#otherports').val());
             this.model.set({port: event.target.value});
+        },
+        
+        exportSettings: function() {
+             var header = 'data:application/json; charset=utf-8,';
+            // Now encapsulate our metadata into a structure that
+            // tells up what instrument type this is. In the future,
+            // we might do version checking too, but it is not necessary at this stage
+            var xports = {
+                magic: 'Wizkers.io - backup version 1',
+                type: this.model.get('type'),
+                comment: this.model.get('comment'),
+                metadata: this.model.get('metadata')                
+            };
+            var uri = encodeURI(header + JSON.stringify(xports));
+            window.open(uri, this.model.get('type') + ".json");
         },
 
         change: function (event) {
@@ -178,15 +199,42 @@ define(function(require) {
 
         dragOver: function(event) {
             //console.log('Something gettting dragged in here');
-            $("#icon").addClass("hover");
+            $("#"+event.target.id).parent().parent().parent().addClass("hover");
             return false;
         },
 
         dragLeave: function(event) {
-            $("#icon").removeClass("hover");
+            $("#" + event.target.id).parent().parent().parent().removeClass("hover");
             return false;
         },
 
+        importSettings: function (event) {
+            var self = this;
+            event.stopPropagation();
+            event.preventDefault();
+            var e = event.originalEvent;
+            e.dataTransfer.dropEffect = 'copy';
+            this.settingsFile = e.dataTransfer.files[0];
+
+            // Read the text file from the local file system, and restore the instrument data
+            var reader = new FileReader();
+            reader.onloadend = function () {
+                try {
+                    var settings = JSON.parse(reader.result);
+                    if (settings.magic != "Wizkers.io - backup version 1")
+                        throw"Invalid backup version";
+                    self.model.set('metadata', settings.metadata);
+                    self.model.set('comment', settings.comment);
+                    self.model.set('type',settings.type);
+                    self.render();
+                } catch (err) {
+                    utils.showAlert('Error', 'Invalid settings file', 'alert-danger');
+                }
+            };
+            reader.readAsText(this.settingsFile);
+        },
+
+        
         dropHandler: function (event) {
             event.stopPropagation();
             event.preventDefault();
