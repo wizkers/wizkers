@@ -27,11 +27,14 @@ define(function(require) {
             "click .refresh": "refresh",
             "click #cmdsend": "sendcmd",
             "keypress input#manualcmd": "sendcmd",
+            "click #deadset": "setdeadtime",
+            "keypress input#deadtime" : "setdeadtime",
             "change #output_control input": "setupOutputs",
         },
 
         onClose: function() {
             console.log("[USB Geiger] Diag view closing...");
+            linkManager.manualCommand("d:0"); // Disable debug output
             linkManager.off('input', this.showInput);
         },
 
@@ -48,6 +51,7 @@ define(function(require) {
             this.queriesDone = false;
             if (linkManager.isConnected()) {
                 linkManager.driver.version();
+                linkManager.manualCommand("d:1"); // Enable debug output
                 linkManager.driver.dump_settings();
             }
         },
@@ -72,6 +76,12 @@ define(function(require) {
             if ((event.target.id == "manualcmd" && event.keyCode==13) || (event.target.id != "manualcmd"))
                 linkManager.manualCommand($('#manualcmd',this.el).val());
         },
+        
+        setdeadtime: function(event) {
+            // We react both to button press & Enter key press
+            if ((event.target.id == "deadtime" && event.keyCode==13) || (event.target.id != "deadtime"))
+                linkManager.manualCommand("F:" + $('#deadtime',this.el).val());
+        },
 
         setdevtag: function(event) {
             if ((event.target.id == "devname" && event.keyCode==13) || (event.target.id != "devname"))
@@ -87,7 +97,12 @@ define(function(require) {
             // Autoscroll:
             i.scrollTop(i[0].scrollHeight - i.height());
 
-            if (data.version != undefined) {
+            if (data.cpm != undefined) {
+                $("#cpmvalue", this.el).html(" " + data.cpm.value + " CPM");
+                $("#freqvalue",this.el).html((data.cpm.value/60).toFixed(3) + " Hz");
+            } else if (data.HZ != undefined) {
+                $("#rawfreqvalue", this.el).html(data.HZ[0] + " Hz");
+            } else if (data.version != undefined) {
                 $('#version',this.el).html(data.version);
                 linkManager.driver.guid();
             } else if (data.cpm_output != undefined) {
@@ -96,9 +111,9 @@ define(function(require) {
                 $("#count_enable",this.el).prop("checked",(data.count_enable[0] == "1"));
             } else if (data.pulse_enable != undefined) {
                 $("#pulse_enable",this.el).prop("checked",(data.pulse_enable[0] == "1"));
-            }
-            
-
+            } else if (data.cpm_factor != undefined) {
+                $("#deadtime",this.el).val(data.cpm_factor[0]);
+            } 
         }
     });
 });

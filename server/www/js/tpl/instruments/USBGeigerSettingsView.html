@@ -1,0 +1,101 @@
+<div class="col-md-9">
+<div class="well" id="diags-area">
+    <div class="row">
+      <div class="col-md-8">
+        <legend>Settings <button class="btn btn-info refresh" title="Refresh" type="button" ><span class="glyphicon glyphicon-refresh">     </span></button>
+          </legend>
+      </div>
+        <div class="col-md-4">
+            <button class="btn comlink" type="button" style="float:right;">Data</button>
+        </div>
+    </div>
+  <div class="row">
+      <div class="col-md-6">
+              <ul>
+                  <li>Software version: <span id="version">waiting...</span></li>
+                  <li>Current CPM Reading: <span id="cpmvalue">waiting...</span></li>
+                  <li>Equivalent frequency: <span id="freqvalue">waiting...</span></li>
+                  <li>Raw frequency: <span id="rawfreqvalue">waiting...</span></li>
+              </ul>
+      </div>
+      <div class="col-md-6">
+          <div class="thumbnail">        
+             <h4>Manual command:</h4>
+             <div class="input-group input-margin">
+                <span class="input-group-addon">Command</span>
+                <input id="manualcmd" value="" class="form-control" type="text" maxlength="32">
+                <span class="input-group-btn">
+                        <button class="btn btn-default" id="cmdsend" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                </span>
+             </div>  
+          </div>
+      </div>  
+  </div>
+    <div class="row">
+        <div class="col-md-12">
+        <div class="form-horizontal" id="output_control">
+            <div class="form-group">
+                <label class="col-md-3 control-label">Output control:</label>
+                <div class="checkbox col-md-3">
+                    <label>
+                        <input  id="cpm_output" type="checkbox"> Enable CPM Output
+                    </label>
+                </div>
+                <div class="checkbox col-md-3">
+                    <label>
+                        <input id="count_enable" type="checkbox"> Enable COUNT Output
+                    </label>
+                </div>
+                <div class="checkbox col-md-3">
+                    <label>
+                        <input id="pulse_enable" type="checkbox"> Enable PULSE Output
+                    </label>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+        <div class="form-horizontal" id="output_control">
+            <div class="form-group">
+                <label for="deadtime" class="col-md-3 control-label">Tube settings:</label>
+                <div class="col-md-6">
+                <div class="input-group input-margin">
+                    <span class="input-group-addon">Dead time factor</span>
+                    <input id="deadtime" value="" class="form-control" type="text" maxlength="32">
+                    <span class="input-group-btn">
+                            <button class="btn btn-default" id="deadset" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                    </span>
+                 </div>  
+                </div>
+                </div>
+        </div>
+        </div>
+    </div>
+
+    
+    
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="well">
+                <textarea id="input" style="height:200px; width:98%;"></textarea>
+            </div>
+        </div>
+    </div>
+
+</div><!--/col-md-9-->
+
+  <div class="col-md-3">
+  <div class="well" id="port-diags">
+      <h4>Help</h4>
+      <p>You can test commands on the dongle here. Type "?" to get started..</p>
+      
+      <p><b>Equivalent Frequency</b>: this converts the current CPM value into a frequency in Hz, which will be different from Raw frequency unless the dead time factor is zero.</p>
+      <p><b>Raw Frequency</b>: the raw frequency measured on input over the last 3 seconds.</p>
+
+      </div><!--/.well -->
+</div><!--/col-md--->
