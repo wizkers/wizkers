@@ -17,8 +17,8 @@ define(function(require) {
     var OnyxInstrument = require('app/instruments/onyx/onyx'),
         OnyxSettingsView = require('app/instruments/onyx/settings');
 
-    var FCOledInstrument = require('app/instruments/friedcircuits_oled/fcoled'),
-        FCOledSettingsView = require('app/instruments/friedcircuits_oled/settings');
+    var FCOledInstrument = require('app/instruments/fcoledv1/fcoled'),
+        FCOledSettingsView = require('app/instruments/fcoledv1/settings');
 
     var W433Instrument = require('app/instruments/w433/w433'),
         W433SettingsView = require('app/instruments/w433/settings');
@@ -29,8 +29,8 @@ define(function(require) {
     var Fluke289Instrument = require('app/instruments/fluke289/fluke'),
         Fluke289SettingsView = require('app/instruments/fluke289/settings');
     
-    var USBGeigerInstrument = require('app/instruments/usb_geiger/usb_geiger'),
-        USBGeigerInstrumentSettingsView = require('app/instruments/usb_geiger/settings');
+    var USBGeigerInstrument = require('app/instruments/usbgeiger/usb_geiger'),
+        USBGeigerInstrumentSettingsView = require('app/instruments/usbgeiger/settings');
     
 
     var InstrumentManager = function() {

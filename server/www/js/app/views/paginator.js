@@ -29,7 +29,8 @@ define(function(require) {
             $(this.el).html('<ul class="pagination" />');
 
             for (var i=0; i < pageCount; i++) {
-                $('ul', this.el).append("<li" + ((i + 1) === this.options.page ? " class='active'" : "") + "><a href='#locos/page/"+(i+1)+"'>" + (i+1) + "</a></li>");
+                $('ul', this.el).append("<li" + ((i + 1) === this.options.page ? " class='active'" : "") + "><a href='#" +
+                                        this.options.viewname + "/page/"+(i+1)+"'>" + (i+1) + "</a></li>");
             }
 
             return this;

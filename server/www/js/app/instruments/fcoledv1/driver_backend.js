@@ -17,7 +17,7 @@ define(function(require) {
     
     var parser = function(socket) {
         
-        this.socket = socket;
+        var socket = socket;
         
         this.portSettings = function() {
             return  {
@@ -40,7 +40,7 @@ define(function(require) {
         //
         // Returns the Geiger counter GUID.
         this.sendUniqueID = function() {
-            this.socket.trigger('uniqueID','00000000 (n.a.)');
+            socket.trigger('uniqueID','00000000 (n.a.)');
         };
         
         // Format can act on incoming data from the counter, and then
@@ -55,8 +55,10 @@ define(function(require) {
             } catch (e) {
                 console.log("Error: cannot parse logger data : " + e + " - " + data);
             }
-            this.socket.trigger('serialEvent',fields);
-            
+            socket.trigger('serialEvent',fields);
+            if (recording)
+                    socket.record(fields); // 'socket' also records for in-browser impl.
+            outputManager.output(fields); // And also tell the output manager
         };
     
         // output should return a string, and is used to format

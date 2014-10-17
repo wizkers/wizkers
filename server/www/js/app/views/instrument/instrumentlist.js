@@ -77,7 +77,7 @@ define(function(require) {
                 return this;
             }
 
-            var items = parseInt(settings.get('itemsperpage'));
+            var items = 4;
             var startPos = (this.options.page - 1) * items;
             var endPos = Math.min(startPos + items, len);
 
@@ -87,7 +87,7 @@ define(function(require) {
                 $('.thumbnails', this.el).append(new InstrumentListItemView({model: instruments[i]}).render().el);
             }
 
-            $(this.el).append(new Paginator({model: this.model, page: this.options.page, items: items}).render().el);
+            $(this.el).append(new Paginator({model: this.model, page: this.options.page, viewname: 'instruments', items: items}).render().el);
 
             return this;
         }

@@ -1,6 +1,8 @@
 <div class="thumbnail glowthumbnail select" style="text-align:center;">
     <a href="#" class="plain">
-        <img src="<%= icon === '' ? 'pics/instruments/generic.png' : 'pics/instruments/' + icon %>" width="250" alt="">
+        <img src="<%= icon === '' ? 'js/app/instruments/' + type + '/icon.png' : 'pics/instruments/' + icon %>"
+            
+             >
         <h5><%= name %></h5>
     </a>
         <a class="btn btn-mini btn-default edit" href="#instruments/<%= _id %>">Edit</a>

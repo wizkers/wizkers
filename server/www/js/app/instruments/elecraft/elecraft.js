@@ -70,7 +70,6 @@ define(function(require) {
         this.getLogView = function(arg) {
             return null;
         }
-
     };
     
 });

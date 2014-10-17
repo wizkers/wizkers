@@ -103,6 +103,11 @@ define(function(require) {
                 utils.removeValidationError(target.id);
             }
 
+                // If we changed the plugin type, we need to reset the view:
+            if (target.name == "type") {
+                this.render();
+            }
+
             // TODO: is this right ?
             // This view is embedded into another view, so change events
             // are going to bubble up to the upper view and change attributes

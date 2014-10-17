@@ -11,7 +11,7 @@
 define(function(require) {
     "use strict";
     
-    var driver_frontend = require('app/instruments/usb_geiger/driver_frontend');
+    var driver_frontend = require('app/instruments/usbgeiger/driver_frontend');
     
     return  function() {
 
@@ -31,7 +31,7 @@ define(function(require) {
 
         // This has to be a backbone view
         this.getSettings = function(arg, callback) {
-            require(['app/instruments/usb_geiger/settings'], function(view) {
+            require(['app/instruments/usbgeiger/settings'], function(view) {
                 callback(new view(arg));
             });
         };
@@ -59,7 +59,7 @@ define(function(require) {
 
         // A diagnostics/device setup screen
         this.getDiagDisplay = function(arg, callback) {
-            require(['app/instruments/usb_geiger/display_diag'], function(view) {
+            require(['app/instruments/usbgeiger/display_diag'], function(view) {
                 callback(new view(arg));
             });
         };
@@ -72,7 +72,7 @@ define(function(require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.
         this.getBackendDriver = function(arg, callback) {
-            require(['app/instruments/usb_geiger/driver_backend'], function(driver) {
+            require(['app/instruments/usbgeiger/driver_backend'], function(driver) {
                 callback(new driver(arg));
             });
         };

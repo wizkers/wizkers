@@ -7,7 +7,7 @@
 define(function(require) {
     "use strict";
 
-    var driver_frontend = require('app/instruments/friedcircuits_oled/driver_frontend');
+    var driver_frontend = require('app/instruments/fcoledv1/driver_frontend');
 
     return function() {
     
@@ -26,7 +26,7 @@ define(function(require) {
 
         // This has to be a backbone view
         this.getSettings = function(arg, callback) {
-            require(['app/instruments/friedcircuits_oled/settings'], function(view) {
+            require(['app/instruments/fcoledv1/settings'], function(view) {
                 callback(new view(arg));
             });
         };
@@ -34,7 +34,7 @@ define(function(require) {
         // This has to be a Backbone view
         // This is the full screen live view (not a small widget)
         this.getLiveDisplay = function(arg, callback) {
-            require(['app/instruments/friedcircuits_oled/display_live'], function(view) {
+            require(['app/instruments/fcoledv1/display_live'], function(view) {
                 callback(new view(arg));
             });
         };
@@ -42,7 +42,7 @@ define(function(require) {
         // This is a Backbone view
         // This is a numeric display
         this.getNumDisplay = function(arg, callback) {
-            require(['app/instruments/friedcircuits_oled/display_numeric'], function(view) {
+            require(['app/instruments/fcoledv1/display_numeric'], function(view) {
                 callback(new view(arg));
             });
         };
@@ -65,7 +65,7 @@ define(function(require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.
         this.getBackendDriver = function(arg, callback) {
-            require(['app/instruments/friedcircuits_oled/driver_backend'], function(driver) {
+            require(['app/instruments/fcoledv1/driver_backend'], function(driver) {
                 callback(new driver(arg));
             });
         };
@@ -82,7 +82,7 @@ define(function(require) {
 
         // Render a log (or list of logs) for the device.
         this.getLogView = function(arg, callback) {
-            require(['app/instruments/friedcircuits_oled/display_log'], function(view) {
+            require(['app/instruments/fcoledv1/display_log'], function(view) {
                 callback(new view(arg));
             });
         }

@@ -92,7 +92,7 @@ define(function(require) {
                 $('.thumbnails', this.el).append(new OutputListItemView({model: outputs[i]}).render().el);
             }
 
-            $(this.el).append(new Paginator({model: this.model, page: this.options.page, items: items}).render().el);
+            $(this.el).append(new Paginator({model: this.model, page: this.options.page, viewname: 'outputs', items: items}).render().el);
 
             return this;
         }
