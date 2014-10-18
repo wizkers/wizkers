@@ -34,7 +34,7 @@ define(function(require) {
     // Inportant: buffer is a Javascript ArrayBuffer
     var parsers ={
           raw: function (emitter, buffer) {
-            emitter.emit("data", buffer);
+            emitter.trigger("data", buffer);
           },
           //encoding: ascii utf8 utf16le ucs2 base64 binary hex
           //More: http://nodejs.org/api/buffer.html#buffer_buffer

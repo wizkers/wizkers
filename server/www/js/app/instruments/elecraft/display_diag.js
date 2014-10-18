@@ -15,14 +15,14 @@ define(function(require) {
         // Need to load these, but no related variables.
         require('bootstrap');
         require('bootstrapslider');
+    
+    var taking_screenshot = false;
+    var pamode_on = false;
 
     return Backbone.View.extend({
 
         initialize:function () {
-            if (linkManager.isStreaming()) {
-                linkManager.stopLiveStream();
-            }
-
+            linkManager.stopLiveStream();
             linkManager.on('input', this.showInput, this);
         },
 
@@ -58,6 +58,17 @@ define(function(require) {
         events: {
            "click #cmdsend": "sendcmd",
             "keypress input#manualcmd": "sendcmd",
+            "click #px3-screenshot": "take_screenshot"
+        },
+        
+        take_screenshot: function() {
+            // It looks like screenshots are not reliable when the KX3 and the KXPA100 are talking, so set
+            // KXPA100 mode off during transfer
+            taking_screenshot = true;
+            $('#px3-screenshot').html('Wait...');
+            linkManager.manualCommand('MN146;');
+            linkManager.manualCommand('MP;');
+            // Now wait for the MP value to come back
         },
         
         queryKX3: function() {
@@ -83,13 +94,60 @@ define(function(require) {
             // Autoscroll:
             i.scrollTop(i[0].scrollHeight - i.height());
             
-            // Populate fields depending on what we get:
-            var da2 = data.substr(0,2);
-            var da3 = data.substr(0,3);
-            if (da3 == 'RVM') {
-                $("#kx3-fw-mcu",this.el).html(data.substr(3));
-            } else if (da3 == 'RVD') {
-                $("#kx3-fw-dsp",this.el).html(data.substr(3));
+            
+            
+            if (data.screenshot != undefined) {
+                // Restore PA Mode from state before screenshot:
+                if (pamode_on) {
+                    linkManager.manualCommand('MN146;MP001;MN255;');
+                }
+                // Incoming data from a screenshot
+                var height = data.height;
+                var width = data.width;
+                var cnv = $('#screenshot')[0];
+                var ctx = cnv.getContext('2d');
+                ctx.canvas.width = width;
+                ctx.canvas.height = height;
+                var imageData = ctx.createImageData(width,height);
+
+                // Now fill the canvas using our B&W image:
+                // Our data is a 272x480 array of 32bit integers that store RGB values
+                // as r<<16 | g <<8 | b
+                for (var y = 0; y < height; y++) {
+                    for (var x = 0; x < width; x++) {
+                        // Find pixel index in imageData:
+                        var idx = (y * width + x) * 4;
+                        imageData.data[idx] = data.screenshot[y][x] >> 16;
+                        imageData.data[idx+1] = 0xff & (data.screenshot[y][x] >> 8);
+                        imageData.data[idx+2] = 0xff & (data.screenshot[y][x]);
+                       imageData.data[idx+3] = 255;  // Alpha
+                    }
+                }
+                ctx.putImageData(imageData,0,0);
+                $('#px3-screenshot').html('Take Screenshot');
+            } else if (data.downloading != undefined) {
+                $('#bmdownload',this.el).width(data.downloading + "%");
+            } else {
+                // Populate fields depending on what we get:
+                var da2 = data.substr(0,2);
+                var da3 = data.substr(0,3);
+                if (da3 == 'RVM') {
+                    $("#kx3-fw-mcu",this.el).html(data.substr(3));
+                } else if (da3 == 'RVD') {
+                    $("#kx3-fw-dsp",this.el).html(data.substr(3));
+                } else if (da2 == 'MP') {
+                    if (data.substr(3) === '000') {
+                        pamode_on = false;
+                    } else
+                        pamode_on = true;
+                    if (taking_screenshot)  {
+                        // PA Mode off, take screenshot, but we need to wait for the amp to settle
+                        linkManager.manualCommand('MP000;MN255;');
+                        setTimeout(function() {
+                            linkManager.manualCommand('#BMP;'); // PA Mode off, take Screenshot
+                        }, 2000);
+                    }
+                }
             }
         }
 

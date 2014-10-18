@@ -29,6 +29,12 @@
     border-color: #46b8da;
 }
 
+/* Define an "Equalizer" that is shorter. 
+   place all vertical sliders inside a div with class "equalizer"
+*/
+.equalizer > .slider.slider-vertical {
+    height: 100px;
+}
 
 .slider {
   display: inline-block;

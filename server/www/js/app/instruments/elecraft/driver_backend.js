@@ -19,7 +19,9 @@ define(function(require) {
     "use strict";
 
     var Serialport = require('serialport'),
-        Rigctld = require('app/instruments/elecraft/tcp_server');
+        Rigctld = require('app/instruments/elecraft/tcp_server'),
+        Bitmap = require('app/lib/bitmap');
+                          
     
     var parser = function(socket) {
         
@@ -41,6 +43,50 @@ define(function(require) {
         var vfoa_bandwidth = 0;
         var radio_mode = "USB";
         
+        // Because Elecraft radios are not 100% consistent with their protocols,
+        // we need to use a pure raw parser for data input, and most of the time,
+        // forward that data to a readline parser. But sometimes, we will need the
+        // raw input, for instance for Bitmap requests
+        var second_parser =  Serialport.parsers.readline(';','binary');
+        
+        // Flag to indicate we are receiving a bitmap
+        var waiting_for_bmp = false;
+        var bitmap = new Uint8Array(131768);
+        var bitmap_index = 0;
+        var oldpercent = 0;
+        
+        // Private functions:
+        function onDataReady(data) {
+            if (this.uidrequested && data.substr(0,5) == "DS@@@") {
+                // We have a Unique ID
+                console.log("Sending uniqueID message");
+                socket.trigger('uniqueID','' + data.substr(5,5));
+                this.uidrequested = false;
+                return;
+            }
+            var cmd = data.substr(0,2);
+            switch(cmd) {
+                    case "FA":
+                        vfoa_frequency = parseInt(data.substr(2));
+                        break;
+                    case "BW":
+                        vfoa_bandwidth = parseInt(data.substr(2));
+                        break;
+            }
+            socket.trigger('serialEvent',data);
+        }
+        
+        // Send the bitmap back to the front-end
+        function sendBitmap() {
+                    var bm = new Bitmap(bitmap);
+                    bm.init();
+                    var data = bm.getData();
+                    socket.trigger('serialEvent', {screenshot: data, width:bm.getWidth(), height: bm.getHeight()});
+        };
+                
+
+        
+        
         // Standard Driver API below
 
         this.isStreaming = function() {
@@ -59,7 +105,8 @@ define(function(require) {
                 // we have to make sure we use "binary" encoding below,
                 // otherwise the parser will assume Unicode and mess up the
                 // values.
-                parser: Serialport.parsers.readline(';','binary'),
+                //parser: Serialport.parsers.readline(';','binary'),
+                parser: Serialport.parsers.raw,
             }
         };
 
@@ -123,26 +170,30 @@ define(function(require) {
         
         // Format can act on incoming data from the radio, and then
         // forwards the data to the app through a 'serialEvent' event.
+        //
+        // data is an ArrayBuffer;
         this.format = function(data, recording) {
-
-            if (this.uidrequested && data.substr(0,5) == "DS@@@") {
-                // We have a Unique ID
-                console.log("Sending uniqueID message");
-                socket.trigger('uniqueID','' + data.substr(5,5));
-                this.uidrequested = false;
+            
+            if (!waiting_for_bmp) {
+                second_parser(this,data);
                 return;
             }
-            var cmd = data.substr(0,2);
-            switch(cmd) {
-                    case "FA":
-                        vfoa_frequency = parseInt(data.substr(2));
-                        break;
-                    case "BW":
-                        vfoa_bandwidth = parseInt(data.substr(2));
-                        break;
+            
+            // We are receiving a Bitmap: we know it is 131638 bytes plus a checksum
+            // Copy the data we received into our bitmap array buffer:
+            var tmpArray = new Uint8Array(data);
+            bitmap.set(tmpArray,bitmap_index);
+            bitmap_index += data.byteLength;
+            var percent = Math.floor(bitmap_index/1000/132*100);
+            if (percent != oldpercent) {
+                socket.trigger('serialEvent', {downloading: percent});
+                oldpercent = percent;
             }
-
-            socket.trigger('serialEvent',data);
+            if (bitmap_index > 131638) {
+                waiting_for_bmp = false;
+                console.log('[elecraft driver] Got the bitmap!');
+                sendBitmap();
+            }
             
         };
     
@@ -150,6 +201,15 @@ define(function(require) {
         // the data that is sent on the serial port, coming from the
         // HTML interface.
         this.output = function(data) {
+            
+            // We want to catch the '#BMP' command to the P3/PX3, because
+            // the data returned if not semicolon-terminated at all..
+            if (data.indexOf('#BMP') != -1) {
+                waiting_for_bmp = true;
+                bitmap_index = 0;
+                console.log('Got a bitmap request, need to switch parsers for a while!');
+            }
+            
             return data;
         };
         
@@ -291,7 +351,12 @@ define(function(require) {
                             "0x0\n" +
                             "0x0\n" +
                             "0\n";        
+        this.on('data', onDataReady); // when second_parser sends a 'data' message;
+
     }
+
+   // Add event management to our parser, from the Backbone.Events class:
+    _.extend(parser.prototype, Backbone.Events);    
     
     return parser;
 });

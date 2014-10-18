@@ -55,6 +55,7 @@ define(function(require) {
                 if (data.substr(0,7) == "DBRX EQ") {
                     linkManager.manualCommand("SWT"+this.bandCommands[this.band++]+";DB;");
                 } else {
+                    console.log(data);
                     var band = data.substr(3,4);
                     var val = parseInt(data.substr(7));
                     console.log("Band " + band + " is " + val);
@@ -64,8 +65,11 @@ define(function(require) {
                     }
                     if (this.band < 9) {
                         linkManager.manualCommand("SWT"+this.bandCommands[this.band++]+";DB;");
-                    } else
+                    } else {
+                        linkManager.manualCommand('MN255;'); // Exit menu
                         this.refreshing = false;
+                        this.band = 0;
+                    }
                 }
             }
         },
