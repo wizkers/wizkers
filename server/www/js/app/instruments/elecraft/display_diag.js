@@ -45,6 +45,11 @@ define(function(require) {
             });
             
             this.queryKX3();
+            
+            // Force rendering of KX3 tab, somehow the drawing on the tab does not work
+            // very well until I click, otherwise
+            $("#kx3").tab();
+            
             return this;
         },
 
@@ -58,7 +63,8 @@ define(function(require) {
         events: {
            "click #cmdsend": "sendcmd",
             "keypress input#manualcmd": "sendcmd",
-            "click #px3-screenshot": "take_screenshot"
+            "click #px3-screenshot": "take_screenshot",
+            "click #screenshot": "save_screenshot"
         },
         
         take_screenshot: function() {
@@ -69,6 +75,11 @@ define(function(require) {
             linkManager.manualCommand('MN146;');
             linkManager.manualCommand('MP;');
             // Now wait for the MP value to come back
+        },
+        
+        save_screenshot: function() {
+            var cnv = $('#screenshot')[0];
+            window.open(cnv.toDataURL(), "screenshot.png");
         },
         
         queryKX3: function() {
@@ -141,6 +152,7 @@ define(function(require) {
                     } else
                         pamode_on = true;
                     if (taking_screenshot)  {
+                        taking_screenshot = false;
                         // PA Mode off, take screenshot, but we need to wait for the amp to settle
                         linkManager.manualCommand('MP000;MN255;');
                         setTimeout(function() {
