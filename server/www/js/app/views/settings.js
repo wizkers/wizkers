@@ -1,4 +1,4 @@
-/**
+    /**
  * The global settings for the applications.
  *
  * 2014.03: Needs refactoring / updates
@@ -14,6 +14,8 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         template = require('js/tpl/SettingsView.js');
+    
+    require('bootstrap');
 
     return Backbone.View.extend({
 
@@ -37,7 +39,9 @@ define(function(require) {
 
         events: {
             "change"      : "change",
-            "click #reset": "resetSettings",
+            "click #reset": "reset_settings",
+            "click #reset_storage" : "reset_storage_ask",
+            "click #do-delete" : "do_reset_storage",
             "click .cpmcolor": "selectColor",
         },
 
@@ -60,7 +64,7 @@ define(function(require) {
             this.model.save({success: function() { self.render; } });
         },
 
-        resetSettings: function() {
+        reset_settings: function() {
             var self = this;
             // Clear our global settings/state:
             this.model.clear().set(this.model.defaults);
@@ -75,6 +79,21 @@ define(function(require) {
                 }
             });
             return false;
+        },
+        
+        reset_storage_ask: function() {
+            $('#deleteConfirm',this.el).modal('show');
+        },
+        
+        do_reset_storage: function() {
+            var ins = instrumentManager.getInstrument();
+            if (ins != null) {
+                linkManager.closeInstrument(ins.id);
+            }
+            chrome.storage.local.clear();
+            instrumentManager.clear();
+            $('#deleteConfirm',self.el).modal('hide');
+            router.navigate('home', {trigger: true});
         },
 
 

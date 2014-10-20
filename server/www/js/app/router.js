@@ -18,6 +18,7 @@ define(function(require) {
 
         routes: {
             ""                      : "home",
+            "home"                  : "home",
             "instruments"           : "listInstruments",
             "instruments/page/:page": "listInstruments",
             "instruments/add"       : "addInstrument",

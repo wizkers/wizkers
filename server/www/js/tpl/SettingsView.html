@@ -12,6 +12,9 @@
             <h4>Application settings</h4>
             <p>
                 <a href="#" role="button" id="reset" class="btn btn-danger">Reset all settings.</a>
+                <% if (vizapp.type == "chrome") { %>
+                <button type="button" class="btn btn-danger" id="reset_storage">Reset all storage</button>
+                <% } %>
             </p>
         </div>
     </div>
@@ -88,10 +91,21 @@
     </div>
 </div>
 
-<div class="row status-bar">
-    <div class="col-md-12">
-        <div class="alert alert-success" style="display: none">
-            <b>Success!</b> generic message.
-        </div>
+<!-- Instrument delete modal -->
+<div class="container">
+    <div id="deleteConfirm" class="modal" data-backdrop="true" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3 id="myModalLabel">Confirm reset</h3>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reset all storage? This will remove all instruments, all logs and all outputs. This cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">No</button>
+                <button class="btn btn-primary" id="do-delete">Yes, reset it</button>
+            </div>
+        </div></div>
     </div>
 </div>
