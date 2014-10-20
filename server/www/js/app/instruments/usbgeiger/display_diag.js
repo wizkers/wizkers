@@ -113,7 +113,7 @@ define(function(require) {
                 $("#pulse_enable",this.el).prop("checked",(data.pulse_enable[0] == "1"));
             } else if (data.cpm_factor != undefined) {
                 $("#deadtime",this.el).val(data.cpm_factor[0]);
-            } 
+            }
         }
     });
 });

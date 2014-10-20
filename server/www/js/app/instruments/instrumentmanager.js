@@ -51,6 +51,10 @@ define(function(require) {
             this.supportedInstruments["w433"] =
                 { name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView };
         }
+        
+        this.clear = function() {
+            current_instrument = null;
+        }
 
         this.setInstrument = function(instrument) {
             var type = instrument.get('type');

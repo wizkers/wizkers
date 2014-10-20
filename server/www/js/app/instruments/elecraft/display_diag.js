@@ -111,6 +111,9 @@ define(function(require) {
                 // Restore PA Mode from state before screenshot:
                 if (pamode_on) {
                     linkManager.manualCommand('MN146;MP001;MN255;');
+                    setTimeout(function() {
+                            linkManager.manualCommand('RVM;'); // Not really used, just flushes the buffer
+                    }, 2000);
                 }
                 // Incoming data from a screenshot
                 var height = data.height;
