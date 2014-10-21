@@ -1,11 +1,12 @@
 <div class="col-md-9">
 <div class="well" id="diags-area">
     <div class="row">
-      <div class="col-md-8">
-        <legend>Settings <button class="btn btn-info refresh" title="Refresh" type="button" ><span class="glyphicon glyphicon-refresh">     </span></button>
+      <div class="col-md-7">
+        <legend>Settings
           </legend>
       </div>
-        <div class="col-md-4">
+        <div class="col-md-5">
+            <button class="btn btn-info refresh" title="Refresh" type="button" ><span class="glyphicon glyphicon-refresh">     </span></button>
             <button class="btn comlink" type="button" style="float:right;">Data</button>
         </div>
     </div>
@@ -13,7 +14,7 @@
       <div class="col-md-6">
               <ul>
                   <li>Software version: <span id="version">waiting...</span></li>
-                  <li>Current CPM Reading: <span id="cpmvalue">waiting...</span></li>
+                  <li>Current CPM Reading: <span id="cpmvalue">waiting...</span><span id="current_window"></span></li>
                   <li>Equivalent frequency: <span id="freqvalue">waiting...</span></li>
                   <li>Raw frequency: <span id="rawfreqvalue">waiting...</span></li>
               </ul>
@@ -75,6 +76,112 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-md-12">
+        <div class="form-horizontal" id="window_settings">
+            <div class="form-group">
+                <label class="col-md-3 control-label">Counter windows:</label>
+                <div class="col-md-3">
+                <button class="btn btn-info windows-update" title="Update" type="button" ><span class="glyphicon glyphicon-save">     </span>&nbsp;Save</button>
+                </div>
+                <div class="col-md-6"><span id="windows_warn"></span></div>
+            </div>
+            <div class="form-group">
+            <div class="col-md-2" style="text-align:center;">
+                Min
+                </div>
+            <div class="col-md-2" style="text-align:center;">
+                Window 1
+                </div>
+            <div class="col-md-2" style="text-align:center;">
+                Limit
+                </div>
+            <div class="col-md-2" style="text-align:center;">
+                Window 2
+                </div>
+            <div class="col-md-2" style="text-align:center;">
+                Limit
+                </div>
+            <div class="col-md-2" style="text-align:center;">
+                Window 3
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input value="0" disabled class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                CPM
+                        </span>
+                     </div>  
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input id="window1_size" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                sec.
+                        </span>
+                     </div>  
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input id="window1_threshold" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                CPM
+                        </span>
+                     </div>  
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input id="window2_size" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                sec.
+                        </span>
+                     </div>  
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input id="window2_threshold" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                CPM
+                        </span>
+                     </div>  
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input id="window3_size" disabled value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                sec.
+                        </span>
+                     </div>  
+                </div>
+
+            </div>
+        </div>
+        </div>
+    </div>
+        <div class="row">
+        <div class="col-md-12">
+        <div class="form-horizontal" id="output_control">
+            <div class="form-group">
+                <label class="col-md-3 control-label">Auxiliary port:</label>
+                <div class="checkbox col-md-3">
+                    <label>
+                        <input  id="aux_enable" type="checkbox"> Enable
+                    </label>
+                </div>
+                <div class="col-md-4">
+                <div class="input-group input-margin">
+                    <span class="input-group-addon">Baudrate</span>
+                    <input id="aux_baudrate" disabled value="" class="form-control" type="text" maxlength="32">
+                 </div>  
+                </div>
+
+            </div>
+        </div>
+        </div>
+    </div>
+
     
     
     </div>
@@ -82,7 +189,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="well">
-                <textarea id="input" style="height:200px; width:98%;"></textarea>
+                <textarea id="input" style="height:100px; width:98%;"></textarea>
             </div>
         </div>
     </div>
@@ -96,6 +203,8 @@
       
       <p><b>Equivalent Frequency</b>: this converts the current CPM value into a frequency in Hz, which will be different from Raw frequency unless the dead time factor is zero.</p>
       <p><b>Raw Frequency</b>: the raw frequency measured on input over the last 3 seconds.</p>
+      
+      <p><b>Counter Windows:</b> depending on the current CPM count, the counter will calculate the CPM using a sliding time window: the higher the CPM, the shorter the window. The dongle supports three windows that can be setup here. Window 3 duration is fixed.</p>
 
       </div><!--/.well -->
 </div><!--/col-md--->

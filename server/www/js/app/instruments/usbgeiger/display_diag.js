@@ -29,7 +29,9 @@ define(function(require) {
             "keypress input#manualcmd": "sendcmd",
             "click #deadset": "setdeadtime",
             "keypress input#deadtime" : "setdeadtime",
-            "change #output_control input": "setupOutputs",
+            "change #output_control input": "setup_outputs",
+            "click .windows-update" : "save_windows",
+            "change #aux_enable": "setup_auxport"
         },
 
         onClose: function() {
@@ -56,7 +58,7 @@ define(function(require) {
             }
         },
         
-        setupOutputs: function(evt) {
+        setup_outputs: function(evt) {
             var checked = $(evt.target).is(':checked');
             switch (evt.target.id) {
                 case 'cpm_output':
@@ -69,6 +71,39 @@ define(function(require) {
                     linkManager.driver.count_enable(checked);
                 break;
             }
+        },
+        
+        setup_auxport: function(evt) {
+            var checked = $(evt.target).is(':checked');
+            if (checked) {
+                var br = parseInt($("#aux_baudrate",this.el).val());
+                if (!isNaN(br))
+                    linkManager.manualCommand("S:" + br);
+                    $("#aux_baudrate",this.el).prop("disabled",true);
+            } else {
+                linkManager.manualCommand("S:0");
+                $("#aux_baudrate",this.el).prop("disabled",false);
+            }
+            
+        },
+        
+        save_windows: function(evt) {
+            var win1_size = parseInt($("#window1_size",this.el).val());
+            var win1_thr = parseInt($("#window1_threshold",this.el).val());
+            var win2_size = parseInt($("#window2_size",this.el).val());
+            var win2_thr = parseInt($("#window2_threshold",this.el).val());
+            
+            if (win1_thr > win2_thr) {
+                $("#windows_warn",this.el).addClass("alert-danger").html("Error: Window 1 limit must be lower than Window 2 limit");
+                return;
+            } 
+            $("#windows_warn",this.el).empty();
+            linkManager.manualCommand("A:" + win1_size);
+            linkManager.manualCommand("B:" + win2_size);
+            linkManager.manualCommand("C:" + win2_thr);
+            linkManager.manualCommand("E:" + win1_thr);
+            $("#windows_warn",this.el).addClass("alert-success").html("Success: Window params saved to dongle.");
+            
         },
 
         sendcmd: function(event) {
@@ -102,6 +137,7 @@ define(function(require) {
                 $("#freqvalue",this.el).html((data.cpm.value/60).toFixed(3) + " Hz");
             } else if (data.HZ != undefined) {
                 $("#rawfreqvalue", this.el).html(data.HZ[0] + " Hz");
+                $("#current_window",this.el).html(" (" + data.HZ[4] + " sec window)");
             } else if (data.version != undefined) {
                 $('#version',this.el).html(data.version);
                 linkManager.driver.guid();
@@ -113,7 +149,23 @@ define(function(require) {
                 $("#pulse_enable",this.el).prop("checked",(data.pulse_enable[0] == "1"));
             } else if (data.cpm_factor != undefined) {
                 $("#deadtime",this.el).val(data.cpm_factor[0]);
-            }
+            } else if (data.window1_size != undefined) {
+                $("#window1_size",this.el).val(data.window1_size[0]);
+            } else if (data.window2_size != undefined) {
+                $("#window2_size",this.el).val(data.window2_size[0]);
+            } else if (data.window3_size != undefined) {
+                $("#window3_size",this.el).val(data.window3_size[0]);
+            } else if (data.window1_threshold != undefined) {
+                $("#window1_threshold",this.el).val(data.window1_threshold[0]);
+            } else if (data.window2_threshold != undefined) {
+                $("#window2_threshold",this.el).val(data.window2_threshold[0]);
+            } else if (data.aux_port_enable != undefined) {
+                $("#aux_enable",this.el).prop("checked",(data.aux_port_enable[0] == "1"));
+                $("#aux_baudrate",this.el).prop("disabled",(data.aux_port_enable == "1"));
+                
+            } else if (data.aux_port_speed != undefined) {
+                $("#aux_baudrate",this.el).val(data.aux_port_speed[0]);
+            } 
         }
     });
 });
