@@ -207,6 +207,12 @@ define(function(require) {
         },
         
         deleteOutput: function() {
+            if (this.model.id == undefined) {
+                console.log("User wants to delete an output that was not created yet");
+                router.navigate('outputs', {trigger: true});
+                return;
+            }
+
             $('#deleteConfirm',self.el).modal('show');
         },
 
