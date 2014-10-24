@@ -19,7 +19,7 @@ define(function(require) {
     require('bootstrapeditable');
 
     
-        /**
+    /**
      * Model is the instrument. This is a single frequency card: vfoa, vfob, description & mode.
      */
     var ElecraftFrequencyItemView = Backbone.View.extend({
@@ -259,6 +259,8 @@ define(function(require) {
             }
             var len = fr.length;
             console.log("Frequency list: " + len + " frequencies");
+            
+            // Sort frequencies by VFOA numerical order
 
             $(this.el).html('<div class="item active"></div>');
 
@@ -266,8 +268,10 @@ define(function(require) {
                 // console.log("rendering screen " + screen);
                 if (screen) $(this.el).append('<div class="item other-'+screen+'"></div>');
                 for (var i = screen*4; i < Math.min(len,screen*4+4); i++) {
-                    $(screen ? '.other-'+screen : '.active', this.el).append(new ElecraftFrequencyItemView({model: this.model, band: this.current_band, 
-                                                                                                            frequency: i, listView: this}).render().el);
+                    $(screen ? '.other-'+screen : '.active', this.el).append(new ElecraftFrequencyItemView({model: this.model,
+                                                                                                            band: this.current_band, 
+                                                                                                            frequency: i,
+                                                                                                            listView: this}).render().el);
                 }
             }
 
@@ -316,6 +320,12 @@ define(function(require) {
             var vfoa = $("#vfoa-direct").val();
             var vfob = $("#vfob-direct").val();
             this.frequencies[this.current_band].push( { "vfoa": vfoa, "vfob": vfob, "mode": this.modes[parseInt(val)-1], "name": "Empty" });
+            // Keep frequencies sorted by VFOA frequency:
+            this.frequencies[this.current_band].sort(function(a,b) {
+                        var v1 = parseFloat(a.vfoa);
+                        var v2 = parseFloat(b.vfoa);
+                        return v1-v2;
+            });
             this.model.set('metadata', {"frequencies": this.frequencies} );
             this.model.save(null, { success: function() { self.render(); } } );
         },
