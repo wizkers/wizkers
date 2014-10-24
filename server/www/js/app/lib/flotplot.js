@@ -24,6 +24,16 @@ define(function(require) {
             points: 150,
             log: false,
             showtips: true,
+            plot_options: {
+                xaxis: { mode: "time", show:true, timezone: settings.get("timezone")},
+                grid: {
+                    hoverable: true,
+                    clickable: true
+                },
+                legend: { position: "ne", container: $('#legend') },
+                colors: ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ],
+            },
+            
             get: function(key) {
                 return this[key];
             },
@@ -46,24 +56,13 @@ define(function(require) {
             this.plotData = [];
             this.previousPoint = null;
             
-            // My own nice color palette:
-            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ];
-
-            this.plotOptions = {
-                xaxis: { mode: "time", show:true, timezone: settings.get("timezone")},
-                grid: {
-                    hoverable: true,
-                    clickable: true
-                },
-                legend: { position: "ne", container: $('#legend') },
-                colors: this.palette,
-            };
+            this.plotOptions = this.settings.plot_options;
 
         },
 
         render: function () {
             console.log("Rendering a simple chart widget");
-            $(this.el).html('<div class="chart" style="position: relative; min-height: 200px;"></div>');
+            $(this.el).html('<div class="chart" style="position: relative; min-height: 100px;"></div>');
             this.addPlot();
             return this;
         },
@@ -106,7 +105,8 @@ define(function(require) {
                     $("#tooltip").remove();
                 }
             });
-
+            
+            $('.chart', this.el).css('height', $(this.el).parent().css('height'));
         },
         
         // Ugly at this stage, just to make it work (from flotcharts.org examples)
