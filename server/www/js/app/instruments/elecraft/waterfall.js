@@ -51,7 +51,7 @@ define(function(require) {
     // the code much cleaner (no tons of "this" and "self" everywhere:
     var gain = 45;
     var floor = 40;
-    var sampleRate = 44100;
+    var sampleRate = 8820;
     var maxAvg = 1;
     var fftWindow = DSP.HAMMING;
         
