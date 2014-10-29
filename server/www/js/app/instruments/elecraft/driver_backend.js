@@ -41,7 +41,7 @@ define(function(require) {
         var vfoa_frequency = 0;
         var vfob_frequency = 0;
         var vfoa_bandwidth = 0;
-        var radio_mode = "USB";
+        var radio_mode = "RTTY";
         
         // Because Elecraft radios are not 100% consistent with their protocols,
         // we need to use a pure raw parser for data input, and most of the time,
@@ -273,6 +273,7 @@ define(function(require) {
         // RIGCTLD Emulation - super light, but does the trick for fldigi...
         var rigctl_command = function(data,c) {
             //console.log("[rigctl_command] " + data);
+            var tmpstr = [];
             var cmd = (data.substr(0,1) == "\\") ? data.substr(0,2) : data.substr(0,1);
             switch (cmd) {
                     case "\\d": // "mp_state":
@@ -291,11 +292,12 @@ define(function(require) {
                         c.sendMessage("RPRT 0\n");
                         break;
                     case "m":
-                         c.sendMessage(radio_mode + "\n" + vfoa_bandwidth + "\n");
+                         c.sendMessage("NONE\n2500\n");
                         break;
                     case "M": // Set mode
                          // Not implemented yet
-                         radio_mode = data.substr(2);
+                         tmpstr = data.split(' ');
+                         radio_mode = tmpstr[1];
                          c.sendMessage("RPRT 0\n");
                          break;
                     case "q":
@@ -350,7 +352,46 @@ define(function(require) {
                             "0x0\n" +
                             "0x0\n" +
                             "0x0\n" +
-                            "0\n";        
+                            "0\n";
+        var hamlib_init_2 = "0\n" +
+                            "229\n" +
+                           "2\n" +
+                           "500000.000000 30000000.000000 0x1bf -1 -1 0x3 0x3\n" +
+                           "48000000.000000 54000000.000000 0x1bf -1 -1 0x3 0x3\n" +
+                           "0 0 0 0 0 0 0\n" +
+                           "1800000.000000 2000000.000000 0x1bf 10 10000 0x3 0x3\n" +
+                           "3500000.000000 4000000.000000 0x1bf 10 10000 0x3 0x3\n" +
+                           "7000000.000000 7300000.000000 0x1bf 10 10000 0x3 0x3\n" +
+                           "10100000.000000 10150000.000000 0x1bf 10 10000 0x3 0x3\n" +
+                           "14000000.000000 14350000.000000 0x1bf 10 10000 0x3 0x3\n" +
+                           "18068000.000000 18168000.000000 0x1bf 10 10000 0x3 0x3\n" +
+                           "21000000.000000 21450000.000000 0x1bf 10 10000 0x3 0x3\n" +
+                           "24890000.000000 24990000.000000 0x1bf 10 10000 0x3 0x3\n" +
+                           "28000000.000000 29700000.000000 0x1bf 10 10000 0x3 0x3\n" +
+                           "50000000.000000 54000000.000000 0x1bf 10 10000 0x3 0x3\n" +
+                           "0 0 0 0 0 0 0\n" +
+                           "0x1bf 1\n" +
+                           "0 0\n" +
+                           "0xc 2500\n" +
+                           "0x82 500\n" +
+                           "0x110 500\n" +
+                           "0x1 6000\n" +
+                           "0x20 6000\n" +
+                           "0 0\n" +
+                           "9990\n" +
+                           "9990\n" +
+                           "0\n" +
+                           "0\n" +
+                           "14 \n" +
+                           "10 \n" +
+                           "0x10002\n" +
+                           "0x10002\n" +
+                           "0x4002703b\n" +
+                           "0x2703b\n" +
+                           "0x0\n" +
+                           "0x0";
+        
+        
         this.on('data', onDataReady); // when second_parser sends a 'data' message;
 
     }

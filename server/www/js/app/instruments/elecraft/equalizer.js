@@ -69,6 +69,7 @@ define(function(require) {
                         linkManager.manualCommand('MN255;'); // Exit menu
                         this.refreshing = false;
                         this.band = 0;
+                        this.trigger('initialized');
                     }
                 }
             }

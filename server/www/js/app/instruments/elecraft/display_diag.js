@@ -18,6 +18,14 @@ define(function(require) {
     
     var taking_screenshot = false;
     var pamode_on = false;
+    
+    var setLabel = function(selector, el, green) {
+        if (green) {
+            $(selector, el).addClass("label-success").removeClass("label-default");
+        } else {
+            $(selector, el).addClass("label-default").removeClass("label-success");
+        }
+    };
 
     return Backbone.View.extend({
 
@@ -31,21 +39,16 @@ define(function(require) {
             $(this.el).html(template());
             
             require(['app/instruments/elecraft/equalizer'], function(view) {
-                self.ElecraftRXEQ = new view({model: self.model});
-                if (self.ElecraftRXEQ != null) {
-                    $('#kx3-rxeq', self.el).html(self.ElecraftRXEQ.el);
-                    self.ElecraftRXEQ.render();
+                self.elecraftRXEQ = new view({model: self.model});
+                if (self.elecraftRXEQ != null) {
+                    $('#kx3-rxeq', self.el).html(self.elecraftRXEQ.el);
+                    // So that we don't overlap queries, we use an event mechanism to
+                    // cascade creations and renderings:
+                    self.elecraftRXEQ.once('initialized', self.makeTXEQ, self);
+                    self.elecraftRXEQ.render();
                 }
-                /* self.ElecraftTXEQ = new view({model: self.model});
-                if (self.ElecraftTXEQ != null) {
-                    $('#kx3-txeq', self.el).html(self.ElecraftTXEQ.el);
-                    self.ElecraftTXEQ.render();
-                }
-                */
             });
-            
-            this.queryKX3();
-            
+                        
             // Force rendering of KX3 tab, somehow the drawing on the tab does not work
             // very well until I click, otherwise
             $("#kx3").tab();
@@ -56,8 +59,8 @@ define(function(require) {
         onClose: function() {
             console.log("Elecraft diagnostics view closing...");        
             linkManager.off('input', this.showInput, this);
-            //this.ElecraftTXEQ.onClose();
-            this.ElecraftRXEQ.onClose();
+            this.elecraftTXEQ.onClose();
+            this.elecraftRXEQ.onClose();
         },
 
         events: {
@@ -65,6 +68,19 @@ define(function(require) {
             "keypress input#manualcmd": "sendcmd",
             "click #px3-screenshot": "take_screenshot",
             "click #screenshot": "save_screenshot"
+        },
+        
+        makeTXEQ: function() {
+            var self = this;
+            require(['app/instruments/elecraft/equalizer'], function(view) {
+                self.elecraftTXEQ = new view({model: self.model});
+                if (self.elecraftTXEQ != null) {
+                    $('#kx3-txeq', self.el).html(self.elecraftTXEQ.el);
+                    self.elecraftTXEQ.once('initialized', self.queryKX3, self);
+                    self.elecraftTXEQ.render();
+                }
+            });
+
         },
         
         take_screenshot: function() {
@@ -83,7 +99,8 @@ define(function(require) {
         },
         
         queryKX3: function() {
-            linkManager.manualCommand("RVM;RVD;");
+            $("#kx3-sn",this.el).html(instrumentManager.getInstrument().get('uuid'));
+            linkManager.manualCommand("RVM;RVD;OM;");
             
         },
 
@@ -134,7 +151,7 @@ define(function(require) {
                         imageData.data[idx] = data.screenshot[y][x] >> 16;
                         imageData.data[idx+1] = 0xff & (data.screenshot[y][x] >> 8);
                         imageData.data[idx+2] = 0xff & (data.screenshot[y][x]);
-                       imageData.data[idx+3] = 255;  // Alpha
+                        imageData.data[idx+3] = 255;  // Alpha
                     }
                 }
                 ctx.putImageData(imageData,0,0);
@@ -149,6 +166,14 @@ define(function(require) {
                     $("#kx3-fw-mcu",this.el).html(data.substr(3));
                 } else if (da3 == 'RVD') {
                     $("#kx3-fw-dsp",this.el).html(data.substr(3));
+                } else if (da2 == 'OM') {
+                    // Display what options are installed/enabled
+                    setLabel("#opt-kxat3",   this.el, (data.charAt(3) == 'A'));
+                    setLabel("#opt-kxpa100", this.el, (data.charAt(4) == 'P'));
+                    setLabel("#opt-kxfl3",   this.el, (data.charAt(5) == 'F'));
+                    setLabel("#opt-kxat100", this.el, (data.charAt(9) == 'T'));
+                    setLabel("#opt-kxbc3",   this.el, (data.charAt(10) == 'B'));
+                    setLabel("#opt-kx3-2m",  this.el, (data.charAt(11) == 'X'));
                 } else if (da2 == 'MP') {
                     if (data.substr(3) === '000') {
                         pamode_on = false;

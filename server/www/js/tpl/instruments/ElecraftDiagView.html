@@ -16,32 +16,30 @@
                 <div class="tab-pane active" id="kx3">
                     <div class="row">
                         <div class="col-md-3">
-                            Firmware versions: MCU v<span id="kx3-fw-mcu"></span>, DSP v<span id="kx3-fw-dsp"></span>.
-                            
+                            <p>Radio Serial number: <span id="kx3-sn"></span></p>
+                            <p>Firmware versions: MCU v<span id="kx3-fw-mcu"></span>, DSP v<span id="kx3-fw-dsp"></span></p>
                         </div>
-                        <div class="col-md-9">
-                            <button class="btn btn-info refresh" title="Refresh" type="button" >
-                                <span class="glyphicon glyphicon-refresh"></span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <legend>Reception</legend>
-                        </div>
-                    </div>
-                    <div class="row">
-                    <div class="col-md-4">
-                        <h4>RX Equalizer</h4>
-                        <div id="kx3-rxeq"></div>
+                        <div class="col-md-5">
+                            <p>Options installed/enabled:
+                                <span class="label label-default" id="opt-kxat3">KXAT3</span>
+                                <span class="label label-default" id="opt-kxpa100">KXPA100</span>
+                                <span class="label label-default" id="opt-kxfl3">KXLF3</span>
+                                <span class="label label-default" id="opt-kxat100">KXAT100</span>
+                                <span class="label label-default" id="opt-kxbc3">KXBC3</span>
+                                <span class="label label-default" id="opt-kx3-2m">KX3-2M</span>
+                            </p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <legend>Transmission</legend>
+                            <legend>Audio</legend>
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-md-4">
+                            <h4>RX Equalizer</h4>
+                            <div id="kx3-rxeq"></div>
+                        </div>
                         <div class="col-md-4">
                             <h4>TX Equalizer</h4>
                             <div id="kx3-txeq"></div>
