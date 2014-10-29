@@ -39,7 +39,7 @@ define(function(require) {
             $(this.el).html(template());
             
             require(['app/instruments/elecraft/equalizer'], function(view) {
-                self.elecraftRXEQ = new view({model: self.model});
+                self.elecraftRXEQ = new view({eq: 'rx'});
                 if (self.elecraftRXEQ != null) {
                     $('#kx3-rxeq', self.el).html(self.elecraftRXEQ.el);
                     // So that we don't overlap queries, we use an event mechanism to
@@ -73,7 +73,7 @@ define(function(require) {
         makeTXEQ: function() {
             var self = this;
             require(['app/instruments/elecraft/equalizer'], function(view) {
-                self.elecraftTXEQ = new view({model: self.model});
+                self.elecraftTXEQ = new view({'eq': 'tx'});
                 if (self.elecraftTXEQ != null) {
                     $('#kx3-txeq', self.el).html(self.elecraftTXEQ.el);
                     self.elecraftTXEQ.once('initialized', self.queryKX3, self);
