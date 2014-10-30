@@ -96,6 +96,13 @@ define(function(require) {
         var recording = false;
         var currentLog = null;
         var self = this;
+        var recover_from_syserror = false;
+        
+        // Because Windows is fucked up, we need to keep
+        // a command queue
+        var cmd_queue = [];
+        var queue_busy = false;
+        
         // Parser does not need to be public...
         var parser = null;
         
@@ -186,6 +193,7 @@ define(function(require) {
             // on the Mac (2014.06) this causes a hard reboot about 50% of the time, whenever
             // serial data arrives after disconnect - not 100% clean on origin.
             chrome.serial.onReceive.removeListener(onRead);
+            chrome.serial.onReceiveError.removeListener(onError);
 
             stopRecording();
             stopLiveStream();
@@ -200,10 +208,39 @@ define(function(require) {
             );
         };
 
+        // On Unices (Linux, MacOS, ChromeOS etc), everything works fine,
+        // but Windows is much slower and will regularly trigger "pending" errors
+        // if we send too many commands one after another.
+        //
+        // This forces us to keep a stack of pending commands and retry them if
+        // we get a "pending" error. cmd_queue is a FIFO (we send the oldest command
+        // and push new ones to the top. We have a "busy" flag that prevents us from sending
+        // a command while we are waiting for another.
         function controllerCommand(cmd) {
             if (!self.portOpen || cmd == '')
                 return;
-            chrome.serial.send(self.connectionId, str2ab(self.driver.output(cmd)), function() {});
+            
+            cmd_queue.push(cmd); // Add cmd at the end of the queue
+            processCmdQueue();
+        };
+        
+        function processCmdQueue() {
+            if (queue_busy)
+                return;
+            queue_busy = true;
+            var cmd = cmd_queue[0]; // Get the oldest command
+            chrome.serial.send(self.connectionId, str2ab(self.driver.output(cmd)), 
+                               function(sendInfo) {
+                                   if (sendInfo.error && sendInfo.error == "pending") {
+                                       console.log("Retrying command");
+                                       processCmdQueue();
+                                   } else {
+                                       cmd_queue.shift(); // remove oldest command
+                                       queue_busy = false;
+                                       if (cmd_queue.length)
+                                           processCmdQueue();
+                                   }
+                               });
         };
 
         // We support only one default port, the serial adapter
@@ -250,6 +287,26 @@ define(function(require) {
             }
         };
         
+        // onError is called on Windows in some situations, when the serial device
+        // generates a "Break" signal. In that case, we wait for 200ms and we try
+        // to reconnect.
+        // Note: we do a clean close/open, so the close/open propagates all the
+        // way to the front-end.
+        function onError(info) {
+            console.log("[chromeSerial] We got an error from the driver: " + info.error);
+            switch(info.error) {
+                    case "system_error":
+                        if (!self.portOpen)
+                            break;
+                        closeInstrument();
+                        setTimeout(openInstrument, 500);
+                    break;
+                    case "device_lost":
+                        closeInstrument();
+                    break;
+            }
+        };
+        
         // Called by the parser whenever data is ready to be formatted
         // by our instrument driver
         function onDataReady(data) {            
@@ -264,11 +321,15 @@ define(function(require) {
             }
             self.portOpen = true;
             self.connectionId = openInfo.connectionId;
+            // Flush our command queue and busy status:
+            cmd_queue = [];
+            queue_busy = false;
             portStatus();
            if (self.driver.onOpen) {
                 self.driver.onOpen(self); // Pass our own reference as the port.
             }
             chrome.serial.onReceive.addListener(onRead);
+            chrome.serial.onReceiveError.addListener(onError);
 
         };
         
