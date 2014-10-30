@@ -233,6 +233,7 @@ define(function(require) {
                                function(sendInfo) {
                                    if (sendInfo.error && sendInfo.error == "pending") {
                                        console.log("Retrying command");
+                                       queue_busy = false;
                                        processCmdQueue();
                                    } else {
                                        cmd_queue.shift(); // remove oldest command
