@@ -43,24 +43,6 @@ define(function(require) {
                 this.socket.emit('outputs', instrumentId);
             }
     
-            // Called to restore the state of the backend when the frontend
-            // connects to it (make sure the backend driver matches the frontend instrument)
-            this.initConnection = function() {
-                if (typeof(this.driver) != undefined) {
-                    this.driver.setBackendDriver();
-                }
-            };
-
-            // Careful: in those functions, "this" is the socket.io context,
-            // hence the use of self.
-            this.processInput = function(data) {
-                self.trigger('input', data);
-            };
-
-            this.sendUniqueID = function(uid) {
-                self.trigger('uniqueID', uid);
-            }
-            
             this.isRecording = function() {
                 return recording;
             }
@@ -73,29 +55,6 @@ define(function(require) {
                 return connected;
             }
 
-            // status contains:
-            // - Port open: portopen
-            // - Recording: recording
-            // - Streaming: streaming
-            this.processStatus = function(data) {
-                if (typeof(data.portopen) != 'undefined') {
-                    if (data.portopen) {
-                        connected = true;
-                        streaming = data.streaming;
-                        recording = data.recording;
-                    } else {
-                        connected = false;
-                        streaming = data.streaming;
-                        recording = data.recording;
-                    }
-                }
-                // Tell anyone who would be listening that status is updated
-                self.trigger('status', data);
-            }
-
-            this.processPorts = function(data) {
-                self.trigger('ports',data);
-            }
 
             this.controllerCommandResponse = function() {
             }
@@ -129,10 +88,6 @@ define(function(require) {
                 self.socket.emit('uniqueID');
             }
 
-            // Request regular port status updates
-            this.wdCall = function() {
-                this.requestStatus();
-            }
 
             this.startLiveStream = function(period) {
                 console.log("[Link Manager] Starting live data stream");
@@ -158,22 +113,70 @@ define(function(require) {
             this.manualCommand = function(cmd) {
                 this.socket.emit('controllerCommand', cmd);
             }
+            
+            ///////////////////////
+            // Private methods
+            ///////////////////////
+            
+            // Request regular port status updates
+            function wdCall() {
+                this.requestStatus();
+            }
+            
+            // status contains:
+            // - Port open: portopen
+            // - Recording: recording
+            // - Streaming: streaming
+            function processStatus(data) {
+                if (typeof(data.portopen) != 'undefined') {
+                    if (data.portopen) {
+                        connected = true;
+                        streaming = data.streaming;
+                        recording = data.recording;
+                    } else {
+                        connected = false;
+                        streaming = data.streaming;
+                        recording = data.recording;
+                    }
+                }
+                // Tell anyone who would be listening that status is updated
+                self.trigger('status', data);
+            }
+            
+            function processInput(data) {
+                self.trigger('input', data);
+            };
+
+            // Called to restore the state of the backend when the frontend
+            // connects to it (make sure the backend driver matches the frontend instrument)
+            function initConnection() {
+                if (typeof(this.driver) != undefined) {
+                    this.driver.setBackendDriver();
+                }
+            };
+            
+            function processPorts(data) {
+                self.trigger('ports',data);
+            }
+
+            function sendUniqueID(uid) {
+                self.trigger('uniqueID', uid);
+            }
 
             // Initialization code:
 
             // Whenever data arrives on the backend serial port (the instrument, in other words)
-            this.socket.on('serialEvent', this.processInput);
-
+            this.socket.on('serialEvent', processInput);
             // Updates from the backend on port (serial, server, other) status
-            this.socket.on('status', this.processStatus);
-            this.socket.on('connection', this.initConnection);
-            this.socket.on('ports', this.processPorts);
-            this.socket.on('uniqueID', this.sendUniqueID);
+            this.socket.on('status', processStatus);
+            this.socket.on('connection', initConnection);
+            this.socket.on('ports', processPorts);
+            this.socket.on('uniqueID', sendUniqueID);
             // Initialize connexion status on the remote controller
             this.socket.emit('portstatus','');
             // Start a 3-seconds interval watchdog to listen for input
             // and request regular back-end status
-            this.watchdog = setInterval(this.wdCall.bind(this), 3000);    
+            var watchdog = setInterval(wdCall.bind(this), 3000);    
         };
 
         // Add event management to our link manager, from the Backbone.Events class:
