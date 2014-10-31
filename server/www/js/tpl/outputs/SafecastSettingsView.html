@@ -9,8 +9,8 @@
     <label for="type" class="col-md-6 control-label">Use safecast instance:</label>
     <div class="input-group col-md-6">
         <select name="instance" class="form-control">
-            <option value="production" <%= metadata['instance'] == 'production' ?'selected':'' %>>Production</option>
             <option value="dev" <%= metadata['instance'] == 'dev' ?'selected':'' %>>Development</option>
+            <option value="production" <%= metadata['instance'] == 'production' ?'selected':'' %>>Production</option>
         </select>
     </div>
     </div>
