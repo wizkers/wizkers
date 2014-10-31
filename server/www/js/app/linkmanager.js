@@ -25,13 +25,15 @@ define(function(require) {
             var streaming = false;
             var recording = false;
 
+            // Driver is public because our views want to talk to it directly
+            // to use all the non-standard APIs
             this.driver = null;
 
             // Set the front-end instrument driver, and load the back-end instrument driver
             // This is called whenever we switch instrument
             this.setDriver = function(driver) {
                 this.driver = driver;
-                this.driver.setBackendDriver();
+                this.socket.emit('driver', this.driver.getBackendDriverName());
                 this.socket.emit('ports','');
                 console.log('Link manager: updated link manager driver for current instrument');
             };
@@ -110,7 +112,7 @@ define(function(require) {
                 this.socket.emit('stoprecording');
             }
 
-            this.manualCommand = function(cmd) {
+            this.sendCommand = function(cmd) {
                 this.socket.emit('controllerCommand', cmd);
             }
             

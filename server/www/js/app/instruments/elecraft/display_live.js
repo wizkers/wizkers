@@ -265,7 +265,7 @@ define(function(require) {
                 //$("#kx3 #filter-II").css("visibility", "visible");
                 var code = this.buttonCodes[e.target.id];
                 if (code != null) {
-                    linkManager.manualCommand('SW' + code + ';');
+                    linkManager.sendCommand('SW' + code + ';');
                 }        
             },
 

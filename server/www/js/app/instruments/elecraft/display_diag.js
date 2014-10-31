@@ -88,8 +88,8 @@ define(function(require) {
             // KXPA100 mode off during transfer
             taking_screenshot = true;
             $('#px3-screenshot').html('Wait...');
-            linkManager.manualCommand('MN146;');
-            linkManager.manualCommand('MP;');
+            linkManager.sendCommand('MN146;');
+            linkManager.sendCommand('MP;');
             // Now wait for the MP value to come back
         },
         
@@ -100,14 +100,14 @@ define(function(require) {
         
         queryKX3: function() {
             $("#kx3-sn",this.el).html(instrumentManager.getInstrument().get('uuid'));
-            linkManager.manualCommand("RVM;RVD;OM;");
+            linkManager.sendCommand("RVM;RVD;OM;");
             
         },
 
         sendcmd: function(event) {
             // We react both to button press & Enter key press
             if ((event.target.id == "manualcmd" && event.keyCode==13) || (event.target.id != "manualcmd"))
-                linkManager.manualCommand($('#manualcmd',this.el).val());
+                linkManager.sendCommand($('#manualcmd',this.el).val());
         },
 
         showInput: function(data) {
@@ -127,9 +127,9 @@ define(function(require) {
             if (data.screenshot != undefined) {
                 // Restore PA Mode from state before screenshot:
                 if (pamode_on) {
-                    linkManager.manualCommand('MN146;MP001;MN255;');
+                    linkManager.sendCommand('MN146;MP001;MN255;');
                     setTimeout(function() {
-                            linkManager.manualCommand('RVM;'); // Not really used, just flushes the buffer
+                            linkManager.sendCommand('RVM;'); // Not really used, just flushes the buffer
                     }, 2000);
                 }
                 // Incoming data from a screenshot
@@ -181,10 +181,11 @@ define(function(require) {
                         pamode_on = true;
                     if (taking_screenshot)  {
                         taking_screenshot = false;
-                        // PA Mode off, take screenshot, but we need to wait for the amp to settle
-                        linkManager.manualCommand('MP000;MN255;');
+                        // PA Mode off if it was on, take screenshot, but we need to wait for the amp to settle
+                        if (pamode_on)
+                            linkManager.sendCommand('MP000;MN255;');
                         setTimeout(function() {
-                            linkManager.manualCommand('#BMP;'); // PA Mode off, take Screenshot
+                            linkManager.sendCommand('#BMP;'); // PA Mode off, take Screenshot
                         }, 2000);
                     }
                 }

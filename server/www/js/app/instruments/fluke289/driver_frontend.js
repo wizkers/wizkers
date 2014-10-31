@@ -24,8 +24,8 @@ define(function(require) {
         //  Standard API:
         // All link managers need this function:
         //////
-        this.setBackendDriver = function() {
-            lm.socket.emit('driver','fluke28x');
+        this.getBackendDriverName = function() {
+            return 'fluke28x';
         }
 
         //////
@@ -38,9 +38,9 @@ define(function(require) {
 
         // Query meter for software version & serial number
         this.version = function() {
-            self.socket.emit('controllerCommand', 'IM');
-            self.socket.emit('controllerCommand', 'QCCV');
-            self.socket.emit('controllerCommand', 'QCVN');
+            lm.sendCommand('IM');
+            lm.sendCommand('QCCV');
+            lm.sendCommand('QCVN');
         }
 
         // Queries the primary measurement only. Adds battery check
@@ -48,9 +48,9 @@ define(function(require) {
         this.queryMeasurement = function() {
             self.battCheck = (self.battCheck+1)%10;
             if (self.battCheck == 0)
-                self.socket.emit('controllerCommand', 'QBL');
+                lm.sendCommand('QBL');
 
-            self.socket.emit('controllerCommand', 'QM');
+            lm.sendCommand('QM');
         }
 
         // Extended version, queries all currently displayed
@@ -58,9 +58,9 @@ define(function(require) {
         this.queryMeasurementFull = function() {
             self.battCheck = (self.battCheck+1)%10;
             if (self.battCheck == 0)
-                self.socket.emit('controllerCommand', 'QBL');
+                lm.sendCommand('QBL');
 
-            self.socket.emit('controllerCommand', 'QDDA');
+            lm.sendCommand('QDDA');
         }
 
         this.getDevInfo = function() {
@@ -69,7 +69,7 @@ define(function(require) {
             // Be nice to the device and stage the queries (our driver manages a command queue, so it
             // is not strictly necessary but hey, let's be cool).
             var caller = function() {
-                self.socket.emit('controllerCommand', callQueue[idx++]);
+                lm.sendCommand(callQueue[idx++]);
                 if (idx < callQueue.length)
                     setTimeout(caller,50);
             }
@@ -83,45 +83,45 @@ define(function(require) {
             site = site.replace(/"/g,'');
             contact = contact.replace(/"/g,'');
             if (operator != '')
-                self.socket.emit('controllerCommand', 'MPQ operator,"' + operator + '"');
+                lm.sendCommand('MPQ operator,"' + operator + '"');
             if (company != '')
-                self.socket.emit('controllerCommand', 'MPQ company,"' + company + '"');
+                lm.sendCommand('MPQ company,"' + company + '"');
             if (site != '')
-                self.socket.emit('controllerCommand', 'MPQ site,"' + site + '"');
+                lm.sendCommand('MPQ site,"' + site + '"');
             if (contact != '')
-                self.socket.emit('controllerCommand', 'MPQ contact,"' + contact + '"');
+                lm.sendCommand('MPQ contact,"' + contact + '"');
         };
 
         this.takeScreenshot = function() {
-            self.socket.emit('controllerCommand', 'QLCDBM 0');
+            lm.sendCommand('QLCDBM 0');
         }
 
         this.toggleLed = function() {
             (self.ledState == "OFF") ? self.ledState="ON":self.ledState="OFF";
-            self.socket.emit('controllerCommand', 'LEDT ' + self.ledState);
+            lm.sendCommand('LEDT ' + self.ledState);
             if (self.ledState == "ON")
                 return true;
             return false;
         }
 
         this.off = function() {
-            self.socket.emit('controllerCommand', 'OFF');
+            lm.sendCommand('OFF');
         }                                        
 
         this.sendKeypress = function(key) {
-            self.socket.emit('controllerCommand', 'PRESS ' + key);
+            lm.sendCommand('PRESS ' + key);
         }
 
 
         // Sends several queries related to memory level.
         // Note: will fail if the meter is recording something.
         this.getMemInfo = function() {
-            self.socket.emit('controllerCommand', 'QMEMLEVEL');
-            self.socket.emit('controllerCommand', 'QSLS');
+            lm.sendCommand('QMEMLEVEL');
+            lm.sendCommand('QSLS');
         }
 
         this.getTrendlogRecord = function(address,index) {
-            self.socket.emit('controllerCommand', 'QSRR ' + address + ',' + index);
+            lm.sendCommand( 'QSRR ' + address + ',' + index);
         }
 
         // Helper methods to format output:

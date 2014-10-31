@@ -36,7 +36,7 @@ define(function(require) {
 
         onClose: function() {
             console.log("[USB Geiger] Diag view closing...");
-            linkManager.manualCommand("d:0"); // Disable debug output
+            linkManager.sendCommand("d:0"); // Disable debug output
             linkManager.off('input', this.showInput);
         },
 
@@ -53,7 +53,7 @@ define(function(require) {
             this.queriesDone = false;
             if (linkManager.isConnected()) {
                 linkManager.driver.version();
-                linkManager.manualCommand("d:1"); // Enable debug output
+                linkManager.sendCommand("d:1"); // Enable debug output
                 linkManager.driver.dump_settings();
             }
         },
@@ -78,10 +78,10 @@ define(function(require) {
             if (checked) {
                 var br = parseInt($("#aux_baudrate",this.el).val());
                 if (!isNaN(br))
-                    linkManager.manualCommand("S:" + br);
+                    linkManager.sendCommand("S:" + br);
                     $("#aux_baudrate",this.el).prop("disabled",true);
             } else {
-                linkManager.manualCommand("S:0");
+                linkManager.sendCommand("S:0");
                 $("#aux_baudrate",this.el).prop("disabled",false);
             }
             
@@ -98,10 +98,10 @@ define(function(require) {
                 return;
             } 
             $("#windows_warn",this.el).empty();
-            linkManager.manualCommand("A:" + win1_size);
-            linkManager.manualCommand("B:" + win2_size);
-            linkManager.manualCommand("C:" + win2_thr);
-            linkManager.manualCommand("E:" + win1_thr);
+            linkManager.sendCommand("A:" + win1_size);
+            linkManager.sendCommand("B:" + win2_size);
+            linkManager.sendCommand("C:" + win2_thr);
+            linkManager.sendCommand("E:" + win1_thr);
             $("#windows_warn",this.el).addClass("alert-success").html("Success: Window params saved to dongle.");
             
         },
@@ -109,13 +109,13 @@ define(function(require) {
         sendcmd: function(event) {
             // We react both to button press & Enter key press
             if ((event.target.id == "manualcmd" && event.keyCode==13) || (event.target.id != "manualcmd"))
-                linkManager.manualCommand($('#manualcmd',this.el).val());
+                linkManager.sendCommand($('#manualcmd',this.el).val());
         },
         
         setdeadtime: function(event) {
             // We react both to button press & Enter key press
             if ((event.target.id == "deadtime" && event.keyCode==13) || (event.target.id != "deadtime"))
-                linkManager.manualCommand("F:" + $('#deadtime',this.el).val());
+                linkManager.sendCommand("F:" + $('#deadtime',this.el).val());
         },
 
         setdevtag: function(event) {

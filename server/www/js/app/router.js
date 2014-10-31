@@ -90,9 +90,7 @@ define(function(require) {
                     console.info('New instrument type: ' + type );
                     // Now update our Instrument manager:
                     if (closeprevious) linkManager.closeInstrument();  // Stop former link manager
-                    instrumentManager.setInstrument(ins);
-                    linkManager.setDriver(instrumentManager.getDriver(linkManager));
-                    
+                    instrumentManager.setInstrument(ins);                    
                     // Next step: retrieve the list of outputs that should be
                     // enabled for this instrument
                     outputManager.reconnectOutputs();

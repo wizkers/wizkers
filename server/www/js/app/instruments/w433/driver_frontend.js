@@ -21,8 +21,8 @@ define(function(require) {
         //  Standard API:
         // All link managers need this function:
         //////
-        this.setBackendDriver = function() {
-            lm.socket.emit('driver','w433');
+        this.getBackendDriverName = function() {
+            return 'w433';
         }
 
         //////

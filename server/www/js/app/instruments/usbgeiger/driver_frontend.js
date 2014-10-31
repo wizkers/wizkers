@@ -23,8 +23,8 @@ define(function(require) {
         //  Standard API:
         // All link managers need this function:
         //////
-        this.setBackendDriver = function() {
-            lm.socket.emit('driver','usbgeiger');
+        this.getBackendDriverName = function() {
+            return 'usbgeiger';
         }
                 
         //////
@@ -47,22 +47,22 @@ define(function(require) {
         };
 
         this.version = function() {
-                self.socket.emit('controllerCommand', 'v:');
+                lm.sendCommand('v:');
         };
 
         this.dump_settings = function() {
-                self.socket.emit('controllerCommand', 'p:');
+                lm.sendCommand('p:');
         };
 
         this.cpm_output = function(enable) {
-                self.socket.emit('controllerCommand', 'M:' + (enable ? '1' : '0') );
+                lm.sendCommand('M:' + (enable ? '1' : '0') );
         };
 
         this.pulse_enable = function(enable) {
-                self.socket.emit('controllerCommand', 'P:' + (enable ? '1' : '0') );
+                lm.sendCommand('P:' + (enable ? '1' : '0') );
         };
         this.count_enable = function(enable) {
-                self.socket.emit('controllerCommand', 'T:' + (enable ? '1' : '0') );
+                lm.sendCommand('T:' + (enable ? '1' : '0') );
         };
 
         console.log('Started USB Geiger link manager front end driver..');

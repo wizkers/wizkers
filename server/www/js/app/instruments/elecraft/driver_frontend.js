@@ -28,8 +28,8 @@ define(function(require) {
         //  Standard API:
         // All link managers need this function:
         //////
-        this.setBackendDriver = function() {
-            lm.socket.emit('driver','elecraft');
+        this.getBackendDriverName = function() {
+            return 'elecraft';
         }
 
         //////
@@ -38,7 +38,6 @@ define(function(require) {
 
         // All commands below are fully free and depend on
         // the instrument's capabilities
-
         this.startTextStream = function() {
             //        this.streamingText = true;
             this.textPoller = setInterval(this.queryTB.bind(this), 700);
@@ -54,83 +53,80 @@ define(function(require) {
         }
         
         this.sendText = function(text) {
-            this.cc('KY ' + text +';');
+            lm.sendCommand('KY ' + text +';');
         }
 
         this.queryTB = function() {
-            this.cc('TB;');
+            lm.sendCommand('TB;');
         }
 
-        this.cc = function(d) {
-            lm.socket.emit('controllerCommand',d);
-        }
 
         this.screen = function(n) {
-            lm.socket.emit('controllerCommand', 'S:' + n);
+            lm.sendCommand('S:' + n);
         }
 
         this.getRequestedPower = function() {
-            this.cc('PC;');
+            lm.sendCommand('PC;');
         }
 
         this.getMode = function() {
-            this.cc('MD;');
+            lm.sendCommand('MD;');
         }
 
         this.setMode = function(code) {
-            this.cc('MD' + code + ';');
+            lm.sendCommand('MD' + code + ';');
         }
         
         this.setSubmode = function(submode) {
             var submodes = { "DATA A":"0", "AFSK A":"1", "FSK D":"2", "PSK D":"3"};
-            this.cc('DT' + submodes[submode] + ';');
+            lm.sendCommand('DT' + submodes[submode] + ';');
         }
 
         this.setVFO = function(f, vfo) {
             var freq = ("00000000000" + (parseInt(f*1e6).toString())).slice(-11); // Nifty, eh ?
             if (freq.indexOf("N") > -1) { // detect "NaN" in the string
                 console.log("Invalid VFO spec");
-                this.cc((vfo == 'A' || vfo == 'a') ? 'FA;' : 'FB;');
+                lm.sendCommand((vfo == 'A' || vfo == 'a') ? 'FA;' : 'FB;');
             } else {
                 console.log("VFO" + vfo + ": " + freq);
-                this.cc(((vfo == 'A' || vfo == 'a') ? 'FA' : 'FB') + freq + ';');
+                lm.sendCommand(((vfo == 'A' || vfo == 'a') ? 'FA' : 'FB') + freq + ';');
             }
-            this.cc('BN;'); // Refresh band number (radio does not send it automatically)
+            lm.sendCommand('BN;'); // Refresh band number (radio does not send it automatically)
         }    
 
         this.setPower = function(p) {
             var pwr = ("000" + (parseInt(p).toString())).slice(-3); // Nifty, eh ?
             if (pwr.indexOf("N") > -1) { // detect "NaN" in the pwr
-                this.cc('PC;');
+                lm.sendCommand('PC;');
             } else {
                 console.log('PC' + pwr + ';');
-                this.cc('PC'+ pwr + ';');
+                lm.sendCommand('PC'+ pwr + ';');
             }
         }
 
         this.setAG = function(ag) {
             var gain = ("000" + ag).slice(-3);
-            this.cc('AG' + gain + ';');
+            lm.sendCommand('AG' + gain + ';');
         }
 
         this.setMG = function(mg) {
             var gain = ("000" + mg).slice(-3);
-            this.cc('MG' + gain + ';');
+            lm.sendCommand('MG' + gain + ';');
         }
 
         this.setRG = function(rg) {
             // Need to translate "-60 to 0" into "190 to 250"
-            this.cc('RG' + (rg+250) + ';');
+            lm.sendCommand('RG' + (rg+250) + ';');
         }
 
         this.setBW = function(bw) { // Bandwidth in kHz (0 to 4.0)
             var bandwidth = ("0000" + Math.floor(bw*100)).slice(-4);
-            this.cc('BW' + bandwidth + ';');
+            lm.sendCommand('BW' + bandwidth + ';');
         }
 
         this.setCT = function(ct) { // Center frequency
             var center = ("0000" + Math.floor(ct*1000)).slice(-4);
-            this.cc('IS ' + center + ';'); // Note the space!
+            lm.sendCommand('IS ' + center + ';'); // Note the space!
         }
 
         this.setBand = function(band) {
@@ -138,7 +134,7 @@ define(function(require) {
             var bands= { "160":"00", "80":"01", "60":"02", "40":"03", "30":"04", "20":"05", "17":"06", "15":"07", "12":"08", "10":"09", "6":"10", "2": "16" };
             var bandcode = bands[band];
             if (typeof(bandcode) != 'undefined') {
-                this.cc('BN' + bandcode + ';');
+                lm.sendCommand('BN' + bandcode + ';');
             }
         }
 
@@ -147,4 +143,3 @@ define(function(require) {
     };
     
 });
-

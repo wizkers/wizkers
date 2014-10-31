@@ -35,6 +35,7 @@ define(function(require) {
 
     var InstrumentManager = function() {
     
+        // current_instrument is a Backbone Model instance
         var current_instrument = null; // The instrument currently in use
 
         this.supportedInstruments = {
@@ -66,6 +67,8 @@ define(function(require) {
                 // overrides the methods)
                 var instrumentObject =new this.supportedInstruments[ins].type;
                 _.extend(this,instrumentObject);
+                linkManager.setDriver(this.getDriver(linkManager));
+
                 this.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
                 }
             }

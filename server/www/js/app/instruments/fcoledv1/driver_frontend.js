@@ -21,8 +21,8 @@ define(function(require) {
         //  Standard API:
         // All link managers need this function:
         //////
-        this.setBackendDriver = function() {
-            lm.socket.emit('driver','fcoledv1');
+        this.getBackendDriverName = function() {
+            return 'fcoledv1';
         }
 
         //////
@@ -30,19 +30,19 @@ define(function(require) {
         //////
 
         this.screen = function(n) {
-            lm.socket.emit('controllerCommand', 'S:' + n);
+            lm.sendCommand('S:' + n);
         }
 
         this.reset = function() {
-            lm.socket.emit('controllerCommand', 'Z:');
+            lm.sendCommand('Z:');
         }
 
         this.rate = function(r) {
-            lm.socket.emit('controllerCommand', 'R:' + r);
+            lm.sendCommand('R:' + r);
         }
 
         this.alarm = function(r) {
-            lm.socket.emit('controllerCommand', 'W:' + r);
+            lm.sendCommand('W:' + r);
         }
 
         // All commands below are fully free and depend on

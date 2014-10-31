@@ -77,7 +77,7 @@ define(function(require) {
         sendcmd: function(event) {
             // We react both to button press & Enter key press
             if ((event.target.id == "manualcmd" && event.keyCode==13) || (event.target.id != "manualcmd"))
-                linkManager.manualCommand($('#manualcmd',this.el).val());
+                linkManager.sendCommand($('#manualcmd',this.el).val());
         },
 
         setdevtag: function(event) {

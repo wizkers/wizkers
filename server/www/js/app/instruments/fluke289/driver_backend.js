@@ -64,8 +64,6 @@ define(function(require) {
         this.stopLiveStream = function(args) {
             if (streaming) {
                 console.log("[fluke28x] Stopping live data stream");
-                // Stop live streaming from the radio:
-                //socket.controllerCommand('AI0;');
                 clearInterval(livePoller);
                 streaming = false;
             }

@@ -50,7 +50,7 @@ define(function(require) {
 
         downloadlog: function(event) {
             $('#logModal', this.el).modal();
-            linkManager.manualCommand('LOGXFER');
+            linkManager.sendCommand('LOGXFER');
             return false;
         },
 

@@ -25,8 +25,8 @@ define(function(require) {
         //  Standard API:
         // All link managers need this function:
         //////
-        this.setBackendDriver = function() {
-            lm.socket.emit('driver','onyx');
+        this.getBackendDriverName = function() {
+            return 'onyx';
         }
                 
         //////
@@ -38,55 +38,55 @@ define(function(require) {
         // the instrument's capabilities
 
         this.ping = function() {
-                self.socket.emit('controllerCommand', 'HELLO');
+                lm.sendCommand('HELLO');
         };
 
         this.getCPM = function() {
-                self.socket.emit('controllerCommand', 'GETCPM');
+                lm.sendCommand('GETCPM');
         };
 
         this.getlog = function() {
-                self.socket.emit('controllerCommand', 'LOGPAUSE');
+                lm.sendCommand('LOGPAUSE');
                 setTimeout(function() {
-                    self.socket.emit('controllerCommand', 'LOGXFER');
+                    lm.sendCommand('LOGXFER');
                     // Note: looking @ the firmware, the Onyx does the "log resume"
                     // by itself after transfer (as well as the log pause before, actually);
                 },1000);
         };
 
         this.help = function() {
-                self.socket.emit('controllerCommand', 'HELP');
+                lm.sendCommand('HELP');
         };
 
         this.version = function() {
-                self.socket.emit('controllerCommand', '{"get": "version"}');
+                lm.sendCommand('{"get": "version"}');
         };
 
         this.guid = function() {
-                self.socket.emit('controllerCommand', '{ "get": "guid" }');
+                lm.sendCommand('{ "get": "guid" }');
         };
 
         this.logstatus = function() {
-            self.socket.emit('controllerCommand', '{ "get": "logstatus" }');
+            lm.sendCommand('{ "get": "logstatus" }');
         };
 
         this.devicetag = function() {
-                self.socket.emit('controllerCommand', '{ "get": "devicetag" }');
+                lm.sendCommand('{ "get": "devicetag" }');
         };
 
         this.setdevicetag = function(tag) {
             console.log('Device tag: ' + tag);
-            self.socket.emit('controllerCommand', '{ "set": { "devicetag": "' + tag + '"}}');
+            lm.sendCommand('{ "set": { "devicetag": "' + tag + '"}}');
         };
 
         this.displaytest = function() {
-            self.socket.emit('controllerCommand', 'DISPLAYTEST');
+            lm.sendCommand('DISPLAYTEST');
         };
 
         this.settime = function() {
                 var unixTime = Math.round((new Date()).getTime() / 1000);
                 console.log('Unix time: ' + unixTime);
-                self.socket.emit('controllerCommand', '{ "set": { "rtc": ' + unixTime + ' }}');
+                lm.sendCommand('{ "set": { "rtc": ' + unixTime + ' }}');
         };
 
 

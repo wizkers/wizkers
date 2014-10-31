@@ -85,10 +85,10 @@ define(function(require) {
                         var i=0;
                     if (key == "record") {
                         while(i < value)
-                            linkManager.manualCommand('QRSI ' + i++);
+                            linkManager.sendCommand('QRSI ' + i++);
                     } else if (key == "minmax") {
                         while(i < value)
-                            linkManager.manualCommand('QMMSI ' + i++);
+                            linkManager.sendCommand('QMMSI ' + i++);
                     }
 
                 });   

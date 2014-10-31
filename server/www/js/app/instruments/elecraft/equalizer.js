@@ -54,9 +54,9 @@ define(function(require) {
             this.bandCommands = [ 19, 27, 20, 28, 21, 29, 32, 33, 34];
             this.bandValues = [ '0.05', '0.10', '0.20', '0.40', '0.80', '1.60', '2.40', '3.20'];
             if (this.options.eq == 'rx') {
-                linkManager.manualCommand("MN008;DB;");
+                linkManager.sendCommand("MN008;DB;");
             } else {
-                linkManager.manualCommand("MN009;DB;");
+                linkManager.sendCommand("MN009;DB;");
             }
         },
 
@@ -73,7 +73,7 @@ define(function(require) {
             this.new_band_val = evt.value;
             var cmd = (this.options.eq == 'rx') ? 'MN008;' : 'MN009;';
             cmd += 'SWT' + this.bandCommands[band-1] + ';DB;';
-            linkManager.manualCommand(cmd);
+            linkManager.sendCommand(cmd);
             // Now we gotta wait for the callback
         },
      
@@ -85,7 +85,7 @@ define(function(require) {
                     // We will get this once the band is set
                     this.setting_band = false;
                     $(".eq-spinner",this.el).hide();
-                    linkManager.manualCommand('MN255;');
+                    linkManager.sendCommand('MN255;');
                     return;
                 }
                 var move = (diff > 0) ? 'UP;' : 'DN;';
@@ -93,12 +93,12 @@ define(function(require) {
                for (var i = 0; i < Math.abs(diff); i++) {
                 cmd += move;     
                }
-                linkManager.manualCommand(cmd + 'DB;');
+                linkManager.sendCommand(cmd + 'DB;');
                 return;
             } else if (this.refreshing) {
                 if (data.substr(0,7) == "DBRX EQ" ||
                     data.substr(0,7) == "DBTX EQ" ) {
-                    linkManager.manualCommand("SWT"+this.bandCommands[this.band++]+";DB;");
+                    linkManager.sendCommand("SWT"+this.bandCommands[this.band++]+";DB;");
                 } else {
                     console.log(data);
                     var band = data.substr(3,4);
@@ -109,9 +109,9 @@ define(function(require) {
                         $(".eq-" + sliderIndex, this.el).slider('setValue',val);
                     }
                     if (this.band < 9) {
-                        linkManager.manualCommand("SWT"+this.bandCommands[this.band++]+";DB;");
+                        linkManager.sendCommand("SWT"+this.bandCommands[this.band++]+";DB;");
                     } else {
-                        linkManager.manualCommand('MN255;'); // Exit menu
+                        linkManager.sendCommand('MN255;'); // Exit menu
                         this.refreshing = false;
                         this.band = 0;
                         this.trigger('initialized');
