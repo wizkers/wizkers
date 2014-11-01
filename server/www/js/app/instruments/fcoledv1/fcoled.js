@@ -58,8 +58,8 @@ define(function(require) {
         };
 
         // The instrument driver (browser-side)
-        this.getDriver = function(arg) {
-            return new driver_frontend(arg);
+        this.getDriver = function() {
+            return new driver_frontend();
         };
         
         // This is a browser implementation of the backend driver, when we

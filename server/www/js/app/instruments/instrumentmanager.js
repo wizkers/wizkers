@@ -67,7 +67,7 @@ define(function(require) {
                 // overrides the methods)
                 var instrumentObject =new this.supportedInstruments[ins].type;
                 _.extend(this,instrumentObject);
-                linkManager.setDriver(this.getDriver(linkManager));
+                linkManager.setDriver(this.getDriver());
 
                 this.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
                 }

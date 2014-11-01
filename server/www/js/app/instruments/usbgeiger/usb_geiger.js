@@ -65,8 +65,8 @@ define(function(require) {
         };
 
         // This has to be a link manager
-        this.getDriver = function(arg) {
-            return new driver_frontend(arg);
+        this.getDriver = function() {
+            return new driver_frontend();
         };
         
         // This is a browser implementation of the backend driver, when we

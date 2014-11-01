@@ -1,6 +1,5 @@
 /**
  * The controller communication manager:
- *  - manages the socket.io link
  *  - provides API to the backend device to use by views
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
@@ -12,7 +11,7 @@ define(function(require) {
 
 
     // linkManager is a reference to the parent link manager
-    return function(linkManager) {
+    return function() {
 
         var self = this;
         var lm = linkManager;

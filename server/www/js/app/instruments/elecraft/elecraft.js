@@ -49,8 +49,8 @@ define(function(require) {
         };
 
         // This is the front-end driver
-        this.getDriver = function(arg) {
-            return new frontend_driver(arg);
+        this.getDriver = function() {
+            return new frontend_driver();
         };
         
         // This is a browser implementation of the backend driver, when we

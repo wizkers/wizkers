@@ -11,11 +11,10 @@ define(function(require) {
     "use strict";
 
     // linkManager is a reference to the parent link manager
-    return function(linkManager) {
+    return function() {
 
         var self = this;
         var lm = linkManager;
-        this.socket = lm.socket;
         this.battCheck = 0;
         this.ledState = "OFF";
 

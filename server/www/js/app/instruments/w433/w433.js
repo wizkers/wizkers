@@ -49,8 +49,8 @@ define(function(require) {
         };
 
         // The browser-side instrument driver
-        this.getDriver = function(arg) {
-            return new driver_frontend(arg);
+        this.getDriver = function() {
+            return new driver_frontend();
         };
 
         // Return a Backbone view which is a mini graph
