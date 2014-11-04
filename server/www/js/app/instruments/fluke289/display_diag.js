@@ -29,7 +29,7 @@ define(function(require) {
 
         initialize:function (options) {
 
-            if (linkManager.streaming) {
+            if (linkManager.isStreaming()) {
                 linkManager.stopLiveStream();
             }
 

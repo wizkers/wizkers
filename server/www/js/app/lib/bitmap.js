@@ -541,7 +541,7 @@ Bitmap.prototype.mapColor = function(bmpBuf, bitCount){
     // We compress 32 pixels into one 32bit integer:
   if(this.BITCOUNT_2 == bitCount){
     for(var i = 0; i < length; i ++){
-       colorData.push(bmpBuf[i++] << 24 | bmpBuf[i++] << 16 | bmpBuf[i++] << 8 | bmpBuf[i]);
+       colorData.push(bmpBuf.getUint8(i++) << 24 | bmpBuf.getUint8(i++) << 16 | bmpBuf.getUint8(i++) << 8 | bmpBuf.getUint8(i));
     }
     return colorData;
   }

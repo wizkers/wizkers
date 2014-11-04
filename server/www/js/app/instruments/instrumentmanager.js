@@ -43,12 +43,11 @@ define(function(require) {
             "fcoledv1": { name: "Fried Circuits OLED backpack", type: FCOledInstrument, settings: FCOledSettingsView },
             "elecraft": { name: "Elecraft radios", type: ElecraftInstrument, settings:ElecraftSettingsView },
             "usbgeiger":{ name: "USB Geiger Dongle", type: USBGeigerInstrument, settings: USBGeigerInstrumentSettingsView },
+            "fluke28x" :{ name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView}
         };
         
         // The instruments below are not supported in Cordova or Chrome runmodes:
         if (vizapp.type == "server") {
-            this.supportedInstruments["fluke28x"] =
-                { name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView};
             this.supportedInstruments["w433"] =
                 { name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView };
         }

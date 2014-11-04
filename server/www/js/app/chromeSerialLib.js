@@ -39,8 +39,10 @@ define(function(require) {
                     closeInstrument(args);
                     break;
                    case 'controllerCommand':
-                    controllerCommand(args);
+                    controllerCommand(args, false);
                     break;
+                   case 'rawCommand':
+                    controllerCommand(args,true);
                    case 'ports':
                     getPorts(args);
                     break;
@@ -107,11 +109,16 @@ define(function(require) {
         var parser = null;
         
         // Utility function (chrome serial wants array buffers for sending)
-        // Convert string to ArrayBuffer
+        // Convert string to ArrayBuffer.
         function str2ab(str) {
+        //  some drivers already give us an Uint8Buffer, because they
+        // handle binary data. in that case
+        // this makes our job easier:
+            if (str.buffer)
+                return str.buffer;
             var buf=new ArrayBuffer(str.length);
             var bufView=new Uint8Array(buf);
-            for (var i=0; i<str.length; i++) {
+            for (var i=0, j=str.length; i<j; i++) {
                 bufView[i]=str.charCodeAt(i);
             }
             return buf;
@@ -216,11 +223,11 @@ define(function(require) {
         // we get a "pending" error. cmd_queue is a FIFO (we send the oldest command
         // and push new ones to the top. We have a "busy" flag that prevents us from sending
         // a command while we are waiting for another.
-        function controllerCommand(cmd) {
+        function controllerCommand(cmd, raw) {
             if (!self.portOpen || cmd == '')
                 return;
             
-            cmd_queue.push(cmd); // Add cmd at the end of the queue
+            cmd_queue.push({ 'command': cmd, 'raw': raw }); // Add cmd at the end of the queue
             processCmdQueue();
         };
         
@@ -228,8 +235,13 @@ define(function(require) {
             if (queue_busy)
                 return;
             queue_busy = true;
-            var cmd = cmd_queue[0]; // Get the oldest command
-            chrome.serial.send(self.connectionId, str2ab(self.driver.output(cmd)), 
+            var cmd = cmd_queue[0].command; // Get the oldest command
+            var send_raw = cmd_queue[0].raw;
+            // Some drivers format their data as Uint8Arrays because they are binary.
+            // others format the data as strings: str2ab makes sure this is turned into
+            // an arraybuffer in each case.
+            chrome.serial.send(self.connectionId, 
+                               (send_raw) ? str2ab(cmd) : str2ab(self.driver.output(cmd)), 
                                function(sendInfo) {
                                    if (sendInfo.error && sendInfo.error == "pending") {
                                        console.log("Retrying command");
