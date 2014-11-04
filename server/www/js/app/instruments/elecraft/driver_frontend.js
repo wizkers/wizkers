@@ -38,7 +38,6 @@ define(function(require) {
         // All commands below are fully free and depend on
         // the instrument's capabilities
         this.startTextStream = function() {
-            //        this.streamingText = true;
             this.textPoller = setInterval(this.queryTB.bind(this), 700);
             return true;
         }
@@ -46,7 +45,6 @@ define(function(require) {
         this.stopTextStream = function() {
             if (typeof this.textPoller != 'undefined') {
                 clearInterval(this.textPoller);
-    //            this.streamingText = false;
             }
             return true;
         }

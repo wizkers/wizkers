@@ -369,7 +369,7 @@ define(function(require) {
                 if (!ok)
                     return;
                 this.sendQSO();
-                var key = "Rig: Elecraft KX3, with End-fed antenna, 30\" wire, on temp installation ... Software is homebrew Android rig controller with PSK/RTTY support ... ";
+                var key = "Rig: Elecraft KX3. Rig Controller is Wizkers.io ... ";
                 this.queueText(key);
                 this.sendKN();
             },
