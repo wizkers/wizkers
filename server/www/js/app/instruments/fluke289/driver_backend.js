@@ -761,7 +761,7 @@ define(function(require) {
         tlength = 0;
         for (var i=0; i < bmBuffers.length; i++) {
             bmBuffer.set(bmBuffers[i],tlength);
-            tlength = bmBuffers[i].length;
+            tlength += bmBuffers[i].length;
         }
         debug("Compressed bitmap data is " + bmBuffer.length + " bytes long.");
         //debug(Hexdump.dump(bmBuffer.toString("binary")));
