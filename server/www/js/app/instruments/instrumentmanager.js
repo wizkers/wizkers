@@ -26,8 +26,8 @@ define(function(require) {
     var ElecraftInstrument = require('app/instruments/elecraft/elecraft'),
         ElecraftSettingsView = require('app/instruments/elecraft/settings');
     
-    var Fluke289Instrument = require('app/instruments/fluke289/fluke'),
-        Fluke289SettingsView = require('app/instruments/fluke289/settings');
+    var Fluke289Instrument = require('app/instruments/fluke28x/fluke'),
+        Fluke289SettingsView = require('app/instruments/fluke28x/settings');
     
     var USBGeigerInstrument = require('app/instruments/usbgeiger/usb_geiger'),
         USBGeigerInstrumentSettingsView = require('app/instruments/usbgeiger/settings');
