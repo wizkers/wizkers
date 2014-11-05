@@ -47,7 +47,7 @@ define(function(require) {
         // Returns the Geiger counter GUID.
         this.sendUniqueID = function() {
             this.uidrequested = true;
-            lm.sendCommand('{ "get": "guid" }');
+            linkManager.sendCommand('{ "get": "guid" }');
         };
         
         // period in seconds
@@ -55,7 +55,7 @@ define(function(require) {
             var self = this;
             if (!streaming) {
                 livePoller = setInterval(function() {
-                    lm.sendCommand('GETCPM');                    
+                    linkManager.sendCommand('GETCPM');                    
                 }, (period) ? period*1000: 1000);
                 streaming = true;
             }
