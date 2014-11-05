@@ -46,7 +46,7 @@ define(function(require) {
                 var theID = this.model.id;
 
                 // Detect if we clicked on a new instrument or not:
-                if (this.model.id == instrumentManager.getInstrument().id) {
+                if (instrumentManager.getInstrument() && (this.model.id == instrumentManager.getInstrument().id)) {
                     // If so, just return to main screen
                     router.navigate('/', true);
                 }

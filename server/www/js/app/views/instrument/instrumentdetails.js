@@ -192,6 +192,11 @@ define(function(require) {
         doDeleteInstrument: function () {
             self = this;
             console.log("Delete instrument " + this.model.id);
+            var ins = instrumentManager.getInstrument();
+            if (ins != undefined && ins.id == this.model.id) {
+                linkManager.closeInstrument();
+                instrumentManager.clear();
+            }
             this.model.destroy({
                 success: function () {
                     $('#deleteConfirm',self.el).modal('hide');
