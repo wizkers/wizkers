@@ -1,6 +1,6 @@
 /**
  *
- * Send data through RESTful calls
+ * Rigctld emulation for Ham radio software
  *
  * This plugin shall implement the following API
  *
@@ -22,25 +22,18 @@ define(function(require) {
     var Rest = function() {
         
         this.wantOnly = function() {
-            return [];
+            return ['transceiver'];
         }
         
+        // We want all data, override the "When to send it" tab
         this.requestAllData = function() {
-            return false;
+            return true;
         }
+
         
         // We do not enforce a strict number of fields.
         this.outputFields = function() {
-            return "variable";
-            /*
-            return { "field1": { "name": "Field 1", "required": true },
-                     "field2" : { "name": "Field 2", "required": false},
-                     "field3" : { "name": "Field 3", "required": false },
-                     "field4" : { "name": "Field 4", "required": false },
-                     "field5" : { "name": "Field 5", "required": false },
-                     "field6" : { "name": "Field 6", "required": false },
-                   }
-             */
+            return "none";
         }
     };
 

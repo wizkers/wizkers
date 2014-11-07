@@ -73,19 +73,15 @@ define(function(require) {
         this.connect = function() {return this; };
         
         /////////////
-        // Recorder API (public)
+        // Public API
         /////////////
-        this.record = function(data) {
-            // console.log("Recording " + data);
-            var entry = new DeviceLog.LogEntry({
-                timestamp: new Date().getTime(),
-                logsessionid: currentLog.id,
-                data: data
-            });
-            currentLog.entries.add(entry);
-            entry.save();
+        this.sendDataToFrontend = function(data) {
+            this.trigger('serialEvent', data);
+            if (this.recording)
+                record(data);           
+            outputManager.output(data); // And also tell the output manager
         }
-
+        
         // Needs to be public (defined with this.) because
         // it is called from a callback
         this.driver = null;
@@ -128,6 +124,16 @@ define(function(require) {
             return String.fromCharCode.apply(null, new Uint8Array(buf));
         };
         
+        function record(data) {
+            // console.log("Recording " + data);
+            var entry = new DeviceLog.LogEntry({
+                timestamp: new Date().getTime(),
+                logsessionid: currentLog.id,
+                data: data
+            });
+            currentLog.entries.add(entry);
+            entry.save();
+        }
         
         //////////////
         //

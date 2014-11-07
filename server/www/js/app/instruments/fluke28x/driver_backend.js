@@ -708,9 +708,7 @@ define(function(require) {
         
     function sendData(data, recording) {
         if (data) {
-            socket.trigger('serialEvent',data);
-            if (recording) socket.record(data);
-            outputManager.output(data);
+            socket.sendDataToFrontend(data);
         }
     };
     

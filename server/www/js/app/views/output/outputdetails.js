@@ -47,6 +47,8 @@ define(function(require) {
                                                       "required": (i==1)? true: false
                                                      };
                 }
+            } else if (this.outputfields == 'none') {
+                this.outputfields = [];
             }
         },
 
@@ -58,7 +60,7 @@ define(function(require) {
                                                                    outputfields: this.outputfields
                                                                    })));
 
-            // If the instrument type has got its own extra settings, then render those here:
+            // If the output type has got its own extra settings, then render those here:
             var outSettingsView = outputManager.supportedOutputs[this.model.get('type')].settings;
             if ( outSettingsView != null) {
                 var settingsView = new outSettingsView({model: this.model});
@@ -66,8 +68,14 @@ define(function(require) {
                 settingsView.render();
             }
             
+            // Some outputs want all the data: in that case, override the "When to Send it" tab
+            if ( outputManager.pluginWantsAllData(this.model.get('type')) ) {
+                $("#what").html("<p>This plugin requests access to all data sent by the instrument, so there is nothing to setup here.</p>");
+                $("#when").html("<p>This plugin requests access to all data sent by the instrument, so there is nothing to setup here.</p>");
+                this.model.set('wantsalldata', true);
+            }
+            
             this.renderMappingsTable();
-
                         
             // Now, we want to listen to the instrument to display a nice table of all fields
             // that the instrument outputs, so that the user can select those he wants to send to the
@@ -87,13 +95,17 @@ define(function(require) {
             
             // Gotta refresh the default outputfields each time
             this.generateOutputFields();
-            _.each(this.outputfields, function(field, fieldname) {
-                var mapped = self.devicefields[fieldname];
-                if (mapped != undefined)
-                    self.outputfields[fieldname].mappedto = mapped;
-            });
-            
-            $("#mappings", this.el).html(outputMappingsTemplate({mappings: this.outputfields}));
+            if (this.outputfields.length) {
+                _.each(this.outputfields, function(field, fieldname) {
+                    var mapped = self.devicefields[fieldname];
+                    if (mapped != undefined)
+                        self.outputfields[fieldname].mappedto = mapped;
+                });
+
+                $("#mappings", this.el).html(outputMappingsTemplate({mappings: this.outputfields}));
+            } else {
+                $("#mappings", this.el).html('<p>This plugin does not support output fields, it formats its output data by itself.</p>');
+            }
 
         },
         
@@ -221,10 +233,8 @@ define(function(require) {
             console.log("Delete output " + this.model.id);
             this.model.destroy({
                 success: function () {
-                    //alert('Controller deleted successfully');
-                    self.remove();
-                    //this.render();
-                    return false;
+                    $('#deleteConfirm',self.el).modal('hide');
+                    router.navigate('outputs', {trigger: true});
                 }
             });
             return false;

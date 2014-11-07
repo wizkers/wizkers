@@ -23,7 +23,7 @@ define(function(require) {
         // Return the type of data reading that this instrument generates. Can be used
         // by output plugins to accept data from this instrument or not.
         this.getDataType = function() {
-                    return [ "amateur radio" ];
+                    return [ "transceiver" ];
         }
 
 

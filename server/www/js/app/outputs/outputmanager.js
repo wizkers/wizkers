@@ -18,6 +18,8 @@ define(function(require) {
     var SafecastSettings = require('app/outputs/safecast/settings');
     var Rest     = require('app/outputs/rest/rest');
     var RestSettings = require('app/outputs/rest/settings');
+    var Rigctld = require('app/outputs/rigctld/rigctld');
+    var RigctldSettings = require('app/outputs/rigctld/settings');
 
     var OutputManager = function() {
         
@@ -55,87 +57,9 @@ define(function(require) {
             return false;
         }
         
-        
-        // Needs to be public because used in a callback below
-        this.activeOutputs = []; // A list of all data output plugins that are enabled (strings)
-
-        this.supportedOutputs = {
-            "safecast":  { name: "SafeCast API", plugin: Safecast, backend: 'app/outputs/safecast/driver_backend',
-                              settings: SafecastSettings },
-            "rest":      { name: "http REST calls", plugin: Rest, backend: 'app/outputs/rest/driver_backend',
-                              settings: RestSettings },
-        };
-        
-        // Called upon instrument change or output enable/disable and makes sure
-        // the output plugins are connected and ready to receive data from the
-        // instrument backend driver
-        this.reconnectOutputs = function() {
-            var outputs = instrumentManager.getInstrument().outputs;
-            // We need to make sure we have a current list, hence the "fetch"
-            outputs.fetch({
-                success: function() {
-                    console.info("[outputManager] asking link manager to connect outputs for intstrument " +
-                                instrumentManager.getInstrument().id);
-                    linkManager.setOutputs(instrumentManager.getInstrument().id);
-                }
-            });
-        }
-        
-        // Used by Chrome/Cordova: implements the same API as on the server
-        // (outputs/outputmanager.js)
-        //  id: ID of the current instrument. We do not actually need it right now
-        //      because we only have one instrument connected at a time.
-        this.enableOutputs = function(id) {
-            var self = this;
-            console.warn(id);
-            var enabled = [];
-            var outputs = instrumentManager.getInstrument().outputs;
-            
-            // Before anything else, clear the current outputs. Somehow
-            // the while loop below seems to be super fast:
-            while (this.activeOutputs.length)
-                this.activeOutputs.pop();
-            
-            // No need to fetch, because this is always called after "reconnectOutputs" above
-            outputs.each(function(output) {
-                if (output.get('enabled')) {
-                    console.warn("[outputManager] Enable output " + output.get('type'));
-                    var pluginType = self.supportedOutputs[output.get('type')];
-                    if (pluginType == undefined) {
-                        console.warn("***** WARNING ***** we were asked to enable an output plugin that is not supported but this server");
-                    } else {
-                         require([pluginType.backend], function(p) {
-                             var plugin = new p();
-                             // The plugin needs its metadata and the mapping for the data,
-                             // the output manager will take care of the alarms/regular output
-                             plugin.setup(output);
-                             self.activeOutputs.push( { "plugin": plugin, "config": output, last: new Date().getTime(), last_alarm: 0 } );
-                             // Also subscribe to events coming from the plugin
-                             self.listenTo(plugin, 'outputTriggered', self.dispatchOutputEvents );
-                        });
-                        
-                }
-                }
-            });   
-        }
-        
-        // Used in Chrome/Cordova mode
-        // Main feature of our manager: send the data
-        // to all active output plugins according to their
-        // schedule.
-        this.output = function(data) {
-            for (var idx in this.activeOutputs) {
-                var output = this.activeOutputs[idx];
-                if (this.alarm(output, data) || this.regular(output) ) {
-                    output.plugin.sendData(data);
-                    output.last = new Date().getTime();
-                }
-            }
-        };
-    
-        // Used in Chrome/Cordova mode
+                // Used in Chrome/Cordova mode
         // Do we have an alarm on this output ?
-        this.alarm = function(output, data) {
+        var alarm = function(output, data) {
             var alarm1 = output.config.get('alarm1'),
                 alarm2 = output.config.get('alarm2'),
                 alrmbool = output.config.get('alrmbool'),
@@ -172,7 +96,7 @@ define(function(require) {
     
         // Used in Chrome/Cordova mode
         // Regular output of data
-        this.regular = function(output) {
+        var regular = function(output) {
             var freq = output.config.get('frequency');
             if (freq == 0)
                 return false;
@@ -180,18 +104,116 @@ define(function(require) {
                 return true;
             return false;        
         }
+
+        
+        
+        // Needs to be public because used in a callback below
+        this.activeOutputs = []; // A list of all data output plugins that are enabled (strings)
+
+        this.supportedOutputs = {
+            "safecast":  { name: "SafeCast API", plugin: Safecast, backend: 'app/outputs/safecast/driver_backend',
+                              settings: SafecastSettings },
+            "rest":      { name: "http REST calls", plugin: Rest, backend: 'app/outputs/rest/driver_backend',
+                              settings: RestSettings },
+            "rigctld":  { name: "Rigctld emulation", plugin: Rigctld, backend: 'app/outputs/rigctld/driver_backend',
+                            settings: RigctldSettings }
+        };
+        
+        // Called upon instrument change or output enable/disable and makes sure
+        // the output plugins are connected and ready to receive data from the
+        // instrument backend driver
+        this.reconnectOutputs = function() {
+            var outputs = instrumentManager.getInstrument().outputs;
+            // We need to make sure we have a current list, hence the "fetch"
+            outputs.fetch({
+                success: function() {
+                    console.info("[outputManager] asking link manager to connect outputs for intstrument " +
+                                instrumentManager.getInstrument().id);
+                    linkManager.setOutputs(instrumentManager.getInstrument().id);
+                }
+            });
+        }
+        
+        // Used by Chrome/Cordova: implements the same API as on the server
+        // (outputs/outputmanager.js)
+        //  id: ID of the current instrument. We do not actually need it right now
+        //      because we only have one instrument connected at a time.
+        this.enableOutputs = function(id) {
+            var self = this;
+            console.warn(id);
+            var enabled = [];
+            var outputs = instrumentManager.getInstrument().outputs;
+            
+            // Before anything else, clear the current outputs.
+            while (this.activeOutputs.length) {
+                // Some plugins want to be told when they are getting closed:
+                var out = this.activeOutputs.pop();
+                if (out.plugin.onClose)
+                    out.plugin.onClose();
+            }
+            
+            // No need to fetch, because this is always called after "reconnectOutputs" above
+            outputs.each(function(output) {
+                if (output.get('enabled')) {
+                    console.warn("[outputManager] Enable output " + output.get('type'));
+                    var pluginType = self.supportedOutputs[output.get('type')];
+                    if (pluginType == undefined) {
+                        console.warn("***** WARNING ***** we were asked to enable an output plugin that is not supported but this server");
+                    } else {
+                         require([pluginType.backend], function(p) {
+                             var backend = new p();
+                             // The plugin needs its metadata and the mapping for the data,
+                             // the output manager will take care of the alarms/regular output
+                             backend.setup(output);
+                             self.activeOutputs.push( { "plugin": backend, "config": output, last: new Date().getTime(), last_alarm: 0 } );
+                             // Also subscribe to events coming from the plugin
+                             self.listenTo(backend, 'outputTriggered', self.dispatchOutputEvents );
+                        });
+                        
+                }
+                }
+            });   
+        }
+        
+        // Used in Chrome/Cordova mode
+        // Main feature of our manager: send the data
+        // to all active output plugins according to their
+        // schedule.
+        this.output = function(data) {
+            for (var idx in this.activeOutputs) {
+                var output = this.activeOutputs[idx];
+                if (alarm(output, data) || regular(output) || output.config.get('wantsalldata') ) {
+                    output.plugin.sendData(data);
+                    output.last = new Date().getTime();
+                }
+            }
+        };
+    
         
         // Returns all the fields that are required/supported by a plugin type
         //
         // If a plugin supports a dynamic number of fields, these are defined in
         // the plugin metadata as "numfields". The plugin will return "variable"
         // here instead of a json structure.
+        //
+        // Some plugins do not work with a concept of output fields, like the rigctld
+        // plugin. Those return "none" to indicate there is no mapping.
         this.getOutputFields = function(type) {
             var out = this.supportedOutputs[type];
             if (out != undefined) {
                 return new out.plugin().outputFields();
             }
             return {};
+        }
+        
+        // Check if the current plugin requests access to all data or if it wants
+        // regular/alarm  settings
+        this.pluginWantsAllData = function(type) {
+            var out = this.supportedOutputs[type];
+            if (out != undefined) {
+                return new out.plugin().requestAllData();
+            }
+            return false;
         }
         
         // Returns all output plugin names that make sense for this instrument.

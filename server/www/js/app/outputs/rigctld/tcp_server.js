@@ -84,10 +84,10 @@ define(function(require) {
      *  port is a reference to the serial port
      *  channel is the communication channel with the app (equiv to socket.io)
      */
-    var Rigctld = function() {
+    var Rigctld = function(ipaddr) {
         
         console.log("Starting Rigctld server");
-        this.addr = "127.0.0.1";
+        this.addr = ipaddr;
         this.port = 4532;
         this.maxConnections = 5;
         

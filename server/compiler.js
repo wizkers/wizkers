@@ -32,7 +32,7 @@ var compileTemplate = function(templates) {
 compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogManagementView',
                  'InstrumentDetailsView', 'InstrumentListItemView', 'OutputListItemView', 'OutputDetailsView',
                  'OutputDetailsFieldTable', 'OutputDetailsMappingTable',
-                 'outputs/SafecastSettingsView', 'outputs/RestSettingsView',
+                 'outputs/SafecastSettingsView', 'outputs/RestSettingsView', 'outputs/RigctldSettingsView',
                  'instruments/AudioWaterfall', 'instruments/USBGeigerSettingsView',
                  'instruments/W433LiveView', 'instruments/W433SettingsView', 'instruments/W433LogView', 'instruments/W433NumView',
                  'instruments/ElecraftDiagView', 'instruments/ElecraftFrequencyItemView', 'instruments/ElecraftLiveView',

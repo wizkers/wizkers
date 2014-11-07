@@ -61,6 +61,7 @@ var OutputSchema = new Schema({
         enabled: Boolean,
         mappings: Schema.Types.Mixed, // Data fields we want to send
         metadata: Schema.Types.Mixed, // Depending on output type, this metadata can include additional settings
+        wantsalldata: Boolean,
         alarm1: { field: String, comparator: String, level: String },
         alarm2: { field: String, comparator: String, level: String },
         alrmbool: String,

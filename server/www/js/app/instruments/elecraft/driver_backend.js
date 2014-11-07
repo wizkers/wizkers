@@ -19,7 +19,6 @@ define(function(require) {
     "use strict";
 
     var Serialport = require('serialport'),
-        Rigctld = require('app/instruments/elecraft/tcp_server'),
         Bitmap = require('app/lib/bitmap');
                           
     
@@ -29,20 +28,7 @@ define(function(require) {
         var serialport = null;
         var livePoller = null; // Reference to the live streaming poller
         var streaming = false;
-        
-        var rigserver = null;
-        
-        // A few driver variables: we keep track of a few things
-        // here for our bare-bones rigctld implementation.
-        //
-        // Note: we do not poll for those values ourselves, we
-        // count on the UI to do this - to be reviewed later if
-        // necessary...
-        var vfoa_frequency = 0;
-        var vfob_frequency = 0;
-        var vfoa_bandwidth = 0;
-        var radio_mode = "RTTY";
-        
+                
         // Because Elecraft radios are not 100% consistent with their protocols,
         // we need to use a pure raw parser for data input, and most of the time,
         // forward that data to a readline parser. But sometimes, we will need the
@@ -64,16 +50,7 @@ define(function(require) {
                 this.uidrequested = false;
                 return;
             }
-            var cmd = data.substr(0,2);
-            switch(cmd) {
-                    case "FA":
-                        vfoa_frequency = parseInt(data.substr(2));
-                        break;
-                    case "BW":
-                        vfoa_bandwidth = parseInt(data.substr(2));
-                        break;
-            }
-            socket.trigger('serialEvent',data);
+            socket.sendDataToFrontend(data);
         }
         
         // Send the bitmap back to the front-end
@@ -219,178 +196,16 @@ define(function(require) {
             return { tcpserverconnect: false };
         };
     
-        // Spins up a Rigctl emulation server once the radio is connected
         this.onOpen =  function(port) {
             console.log("Elecraft Driver: got a port open signal");
             serialport = port;
-            if (rigserver) {
-                rigserver.disconnect();
-            }
-            rigserver = new Rigctld.server();
-            rigserver.listen(onAcceptCallback);
-        };
-    
-        var onAcceptCallback = function (tcpConnection, socketInfo) {
-            var info="["+socketInfo.peerAddress+":"+socketInfo.peerPort+"] Connection accepted!";
-            if (socket)
-                socket.trigger('status',{ tcpserverconnect: true });                
-
-            console.log(info);
-            // We are going to use a small line parser
-            var parserCreator = function (callback) {
-                var delimiter = "\n";
-                var encoding  = "utf8";
-                // Delimiter buffer saved in closure
-                var data = "";
-                return function (buffer) {
-                    // Collect data
-                    data += buffer;
-                    // Split collected data by delimiter
-                    var parts = data.split(delimiter);
-                    data = parts.pop();
-                    parts.forEach(function (part, i, array) {
-                        callback(part,tcpConnection);
-                    });
-                };
-            };
-            var parser = parserCreator(rigctl_command).bind(this);
-          
-            tcpConnection.addDataReceivedListener(function(data) {
-                parser(data);
-            });          
-        };
-        
-        // Not used
-        this.onClose = function(success) {
-            console.log("Elecraft driver: got a port close signal");
-            if (rigserver) {
-                rigserver.disconnect();
-                if (socket)
-                    socket.trigger('status',{ tcpserverconnect: true });                
-            }
-        };
-
-        // RIGCTLD Emulation - super light, but does the trick for fldigi...
-        var rigctl_command = function(data,c) {
-            //console.log("[rigctl_command] " + data);
-            var tmpstr = [];
-            var cmd = (data.substr(0,1) == "\\") ? data.substr(0,2) : data.substr(0,1);
-            switch (cmd) {
-                    case "\\d": // "mp_state":
-                        // No f**king idea what this means, but it makes hamlib happy.
-                        c.sendMessage(hamlib_init);
-                        break;                
-                    case "f":
-                        c.sendMessage(vfoa_frequency + "\n");
-                        break;
-                    case "F": // Set Frequency (VFOA):  F 14069582.000000
-                        var freq = ("00000000000" + parseFloat(data.substr(2)).toString()).slice(-11); // Nifty, eh ?
-
-                        console.log("Rigctld emulation: set frequency to " + freq);
-                        if (serialport != null)
-                            serialport.emit('controllerCommand', "FA" + freq + ";");
-                        c.sendMessage("RPRT 0\n");
-                        break;
-                    case "m":
-                         c.sendMessage("NONE\n2500\n");
-                        break;
-                    case "M": // Set mode
-                         // Not implemented yet
-                         tmpstr = data.split(' ');
-                         radio_mode = tmpstr[1];
-                         c.sendMessage("RPRT 0\n");
-                         break;
-                    case "q":
-                        // TODO: we should close the socket here ?
-                        console.log("Rigctld emulation: quit");
-                        c.close();
-                        break;
-                    case "v": // Which VFO ?
-                        c.sendMessage("VFOA\n");
-                        break;
-                    case "T":
-                        if (data.substr(2) == "1") {
-                            if (serialport != null)
-                                serialport.emit('controllerCommand', 'TX;');
-                            // The radio does not echo this command, so we do it
-                            // ourselves, so that the UI reacts
-                            if (socket != null)
-                                socket.trigger('serialEvent','TX;');
-
-                        } else {
-                            if (serialport != null)
-                                serialport.emit('controllerCommand', "RX;");
-                            if (socket != null)
-                                socket.trigger('serialEvent','RX;');
-                        }
-                        c.sendMessage("RPRT 0\n");
-                        break;
-                    default:
-                        console.log("Unknown command: " + data);
-
-            }
-
         };
             
-        var hamlib_init =   "0\n" +
-                            "2\n" +
-                            "2\n" +
-                            "150000.000000 30000000.000000  0x900af -1 -1 0x10 000003 0x3\n" +
-                            "0 0 0 0 0 0 0\n" +
-                            "150000.000000 30000000.000000  0x900af -1 -1 0x10 000003 0x3\n" +
-                            "0 0 0 0 0 0 0\n" +
-                            "0 0\n" +
-                            "0 0\n" +
-                            "0\n" +
-                            "0\n" +
-                            "0\n" +
-                            "0\n" +
-                            "\n" +
-                            "\n" +
-                            "0x0\n" +
-                            "0x0\n" +
-                            "0x0\n" +
-                            "0x0\n" +
-                            "0x0\n" +
-                            "0\n";
-        var hamlib_init_2 = "0\n" +
-                            "229\n" +
-                           "2\n" +
-                           "500000.000000 30000000.000000 0x1bf -1 -1 0x3 0x3\n" +
-                           "48000000.000000 54000000.000000 0x1bf -1 -1 0x3 0x3\n" +
-                           "0 0 0 0 0 0 0\n" +
-                           "1800000.000000 2000000.000000 0x1bf 10 10000 0x3 0x3\n" +
-                           "3500000.000000 4000000.000000 0x1bf 10 10000 0x3 0x3\n" +
-                           "7000000.000000 7300000.000000 0x1bf 10 10000 0x3 0x3\n" +
-                           "10100000.000000 10150000.000000 0x1bf 10 10000 0x3 0x3\n" +
-                           "14000000.000000 14350000.000000 0x1bf 10 10000 0x3 0x3\n" +
-                           "18068000.000000 18168000.000000 0x1bf 10 10000 0x3 0x3\n" +
-                           "21000000.000000 21450000.000000 0x1bf 10 10000 0x3 0x3\n" +
-                           "24890000.000000 24990000.000000 0x1bf 10 10000 0x3 0x3\n" +
-                           "28000000.000000 29700000.000000 0x1bf 10 10000 0x3 0x3\n" +
-                           "50000000.000000 54000000.000000 0x1bf 10 10000 0x3 0x3\n" +
-                           "0 0 0 0 0 0 0\n" +
-                           "0x1bf 1\n" +
-                           "0 0\n" +
-                           "0xc 2500\n" +
-                           "0x82 500\n" +
-                           "0x110 500\n" +
-                           "0x1 6000\n" +
-                           "0x20 6000\n" +
-                           "0 0\n" +
-                           "9990\n" +
-                           "9990\n" +
-                           "0\n" +
-                           "0\n" +
-                           "14 \n" +
-                           "10 \n" +
-                           "0x10002\n" +
-                           "0x10002\n" +
-                           "0x4002703b\n" +
-                           "0x2703b\n" +
-                           "0x0\n" +
-                           "0x0";
-        
+    
+        this.onClose = function(success) {
+            console.log("Elecraft driver: got a port close signal");
+        };
+
         
         this.on('data', onDataReady); // when second_parser sends a 'data' message;
 

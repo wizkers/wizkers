@@ -70,7 +70,7 @@ define(function(require) {
         };
         
         // Format can act on incoming data from the counter, and then
-        // forwards the data to the app through a 'serialEvent' event.
+        // forwards the data to the app through a 'serialEvent' event on the socket.
         this.format = function(data, recording) {
 
             // All commands now return JSON
@@ -84,10 +84,7 @@ define(function(require) {
                     socket.trigger('uniqueID',response.guid);
                     this.uidrequested = false;
                 } else {
-                    socket.trigger('serialEvent', response);
-                    if (recording)
-                        socket.record(response); // 'socket' also records for in-browser impl.
-                    outputManager.output(response); // And also tell the output manager
+                    socket.sendDataToFrontend(response);
                 }
             } catch (err) {
                 console.log('Not able to parse JSON response from device:\n' + data + '\n' + err);

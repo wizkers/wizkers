@@ -25,6 +25,10 @@ define(function(require) {
         this.wantOnly = function() {
             return [ "radioactivity" ];
         }
+        
+        this.requestAllData = function() {
+            return false;
+        }
 
         this.outputFields = function() {
             return { "radiation": { "name": "Radiation Level", "required": true },
