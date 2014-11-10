@@ -149,7 +149,7 @@ define(function(require) {
         // forwards the data to the app through a 'serialEvent' event.
         //
         // data is an ArrayBuffer;
-        this.format = function(data, recording) {
+        this.format = function(data) {
             
             if (!waiting_for_bmp) {
                 second_parser(this,data);

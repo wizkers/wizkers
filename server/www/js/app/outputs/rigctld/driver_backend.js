@@ -48,13 +48,17 @@ define(function(require) {
             mappings = output.get('mappings');
             settings = output.get('metadata');
             
+            // Query the radio for basic frequency info, so that
+            // we populate our frequency variables:
+            linkManager.sendCommand('FA;FB;BW;'); // Query VFO B and VFOA Display
+
+            
             // Create a rigserver:
             if (rigserver) {
                 rigserver.disconnect();
             }
             rigserver = new Rigctld.server(settings.ipaddress);
             rigserver.listen(onAcceptCallback);
-
 
         };
         

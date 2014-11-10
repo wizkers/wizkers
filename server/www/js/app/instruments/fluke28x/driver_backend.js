@@ -87,7 +87,7 @@ define(function(require) {
         // is received, forward it to the upper layer.
         //
         // data is a buffer        
-        this.format = function(data, recording) {
+        this.format = function(data) {
             if (data) { // we sometimes get called without data, to further process the
                         // existing buffer
                         // First of all, append the incoming data to our input buffer:
@@ -197,12 +197,12 @@ define(function(require) {
             ibIdx -= stop;
         
             if (ibIdx > stop) {
-                sendData(response, recording);
+                sendData(response);
                 this.format(); // We still have data to process, so we call ourselves recursively
                 return;
             }
         
-            sendData(response, recording);
+            sendData(response);
         };
     
         // output should return a string, and is used to format
@@ -706,7 +706,7 @@ define(function(require) {
         return res;
     };
         
-    function sendData(data, recording) {
+    function sendData(data) {
         if (data) {
             socket.sendDataToFrontend(data);
         }

@@ -45,7 +45,7 @@ define(function(require) {
         
         // Format can act on incoming data from the counter, and then
         // forwards the data to the app through a 'serialEvent' event.
-        this.format = function(data, recording) {
+        this.format = function(data) {
 
             // Remove any carriage return
             data = data.replace('\n','');
@@ -55,10 +55,7 @@ define(function(require) {
             } catch (e) {
                 console.log("Error: cannot parse logger data : " + e + " - " + data);
             }
-            socket.trigger('serialEvent',fields);
-            if (recording)
-                    socket.record(fields); // 'socket' also records for in-browser impl.
-            outputManager.output(fields); // And also tell the output manager
+            socket.sendDataToFrontend(fields);
         };
     
         // output should return a string, and is used to format

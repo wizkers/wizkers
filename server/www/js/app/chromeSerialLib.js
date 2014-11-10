@@ -77,7 +77,7 @@ define(function(require) {
         /////////////
         this.sendDataToFrontend = function(data) {
             this.trigger('serialEvent', data);
-            if (this.recording)
+            if (recording)
                 record(data);           
             outputManager.output(data); // And also tell the output manager
         }
@@ -126,13 +126,11 @@ define(function(require) {
         
         function record(data) {
             // console.log("Recording " + data);
-            var entry = new DeviceLog.LogEntry({
+            currentLog.entries.create({
                 timestamp: new Date().getTime(),
                 logsessionid: currentLog.id,
                 data: data
             });
-            currentLog.entries.add(entry);
-            entry.save();
         }
         
         //////////////
@@ -330,7 +328,7 @@ define(function(require) {
         // by our instrument driver
         function onDataReady(data) {            
             // 'format' triggers a serialEvent when ready
-            self.driver.format(data, recording);
+            self.driver.format(data);
         }
 
         function onOpen(openInfo) {

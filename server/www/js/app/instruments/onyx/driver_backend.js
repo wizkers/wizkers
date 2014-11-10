@@ -3,8 +3,6 @@
  *
  * This Browser-side parser is used when running as a Chrome or Cordova app.
  *
- * Differences with server-side parser:
- *   - No recording support yet
  * 
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
@@ -71,7 +69,7 @@ define(function(require) {
         
         // Format can act on incoming data from the counter, and then
         // forwards the data to the app through a 'serialEvent' event on the socket.
-        this.format = function(data, recording) {
+        this.format = function(data) {
 
             // All commands now return JSON
             try {
