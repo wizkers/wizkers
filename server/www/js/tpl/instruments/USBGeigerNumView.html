@@ -1,0 +1,29 @@
+<span class="label label-danger" id="readingvalid" style="float:right;">INVALID</span>
+<h4 >Live reading</h4>
+<br>
+
+<span class="bigreading" id="livecpm">00.000</span> CPM<br>
+<!--
+    We do not know exactly how to convert CPM to uSv correctly, so we need
+   to remove this for now
+<span class="smallreading" id="liveusvh">0.000 &mu;Sv/h</span>
+-->
+<br>
+<h4>Sessions stats</h4>
+
+<p>Duration: <span id="sessionlength">00:00:00</span></p>
+
+<ul>
+<li>Max:&nbsp;<span id="maxreading">00</span></li>
+<li>Min:&nbsp;<span id="minreading">00</span></li>
+<!-- <li>Accumulated:<span id="accreading">00</span></li> -->
+</ul>
+
+<div style="display:none" id="total_count">
+    <h4>Total pulse counts</h4>
+    <ul>
+        <li>Counts: <span id="total_pulse_count"></span></li>
+        <li>Duration: <span id="pulse_count_duration"></span></li>
+        <li>Average: <span id="pulse_count_avg"></span></li>
+    </ul>
+</div>

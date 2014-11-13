@@ -33,12 +33,14 @@ compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogMana
                  'InstrumentDetailsView', 'InstrumentListItemView', 'OutputListItemView', 'OutputDetailsView',
                  'OutputDetailsFieldTable', 'OutputDetailsMappingTable',
                  'outputs/SafecastSettingsView', 'outputs/RestSettingsView', 'outputs/RigctldSettingsView',
-                 'instruments/AudioWaterfall', 'instruments/USBGeigerSettingsView',
+                 'instruments/AudioWaterfall', 'instruments/USBGeigerSettingsView', 'instruments/USBGeigerNumView', 
                  'instruments/W433LiveView', 'instruments/W433SettingsView', 'instruments/W433LogView', 'instruments/W433NumView',
                  'instruments/ElecraftDiagView', 'instruments/ElecraftFrequencyItemView', 'instruments/ElecraftLiveView',
                  'instruments/ElecraftNumView', 'instruments/ElecraftSettingsView',
                  'instruments/ElecraftEqualizer',
                  'instruments/FCOledLiveView', 'instruments/FCOledLogView', 'instruments/FCOledNumView',
-                 'instruments/Fluke289DiagView', 'instruments/Fluke289LiveView', 'instruments/Fluke289LogManagementView', 'instruments/Fluke289LogView', 'instruments/Fluke289NumView',
-                 'instruments/OnyxDiagView', 'instruments/OnyxLiveView', 'instruments/OnyxLogEditView', 'instruments/OnyxLogManagementView', 'instruments/OnyxLogView', 'instruments/OnyxNumView'
+                 'instruments/Fluke289DiagView', 'instruments/Fluke289LiveView', 'instruments/Fluke289LogManagementView',
+                 'instruments/Fluke289LogView', 'instruments/Fluke289NumView',
+                 'instruments/OnyxDiagView', 'instruments/OnyxLiveView', 'instruments/OnyxLogEditView',
+                 'instruments/OnyxLogManagementView', 'instruments/OnyxLogView', 'instruments/OnyxNumView'
                 ]);

@@ -82,7 +82,11 @@ define(function(require) {
                 }
             } else if (data.substr(0,10) == "USB Geiger") {
                 jsresp.version = data;
-            } else if (resp.length > 1) {
+            } else if (resp[0] == 'COUNT') {
+                jsresp.count = { value: parseInt(resp[1]),
+                                uptime: parseInt(resp[2])
+                               };
+            }else if (resp.length > 1) {
                 jsresp[resp[0]] = resp.slice(1);
             } else {
                 jsresp.raw = data;

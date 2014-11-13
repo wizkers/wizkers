@@ -47,7 +47,7 @@ define(function(require) {
         // This is a Backbone view
         // This is a numeric display
         this.getNumDisplay = function(arg, callback) {
-            require(['app/instruments/onyx/display_numeric'], function(view) {
+            require(['app/instruments/usbgeiger/display_numeric'], function(view) {
                 callback(new view(arg));
             });
         };
