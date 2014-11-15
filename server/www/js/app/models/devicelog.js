@@ -2,6 +2,9 @@
  * Where we define the device log data
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
+ *
+ * This model uses indexeddb in Chrome mode, because localstorage cannot
+ * cope with large amounts of data - nor is it designed for that purpose
  */
 
 
@@ -11,23 +14,46 @@ define(function(require) {
     
     var $   = require('jquery'),
         Backbone = require('backbone');
+    var bidb = null;
 
     if (vizapp.type == "cordova" || vizapp.type == "chrome") {
         Backbone.LocalStorage = require('localstorage');
+        var bidb = require('bbindexeddb');
     }
+    
+    var logs_database = {
+        id: "wizkers-logs",
+        description: "Wizkers device logs",
+        migrations: [{
+            version: 1,
+            migrate: function (transaction, next) {
+                var store = transaction.db.createObjectStore("logs");
+                store = transaction.db.createObjectStore("entries");
+                next();
+            }
+        }]
+    };
+
 
     var LogEntry = Backbone.Model.extend({
     
             idAttribute: "_id",
 
             initialize: function() {
+                // If we run as a chrome app, the backbone indexeddb adapter also
+                // wants models to have the proper database and store properties defined
+                if (vizapp.type=="chrome") {
+                    this.database = logs_database;
+                    this.storeName = "entries";
+                }
+
             },
 
             defaults: {
-            logsessionid: 0, // Should match the ID of a log model (see below)
-            timestamp: 0,    // Javascript timestamp for that entry (milliseconds since 1970)
-            comment: "",     // We will one day support commenting any data point in a log...
-            data: null       // Will be an object that depends on the device type
+                logsessionid: 0, // Should match the ID of a log model (see below)
+                timestamp: 0,    // Javascript timestamp for that entry (milliseconds since 1970)
+                comment: "",     // We will one day support commenting any data point in a log...
+                data: null       // Will be an object that depends on the device type
             }
 
         }),
@@ -79,6 +105,14 @@ define(function(require) {
             initialize: function() {
                 var self = this;
                 
+                // If we run as a chrome app, the backbone indexeddb adapter also
+                // wants models to have the proper database and store properties defined
+                if (vizapp.type=="chrome") {
+                    this.database = logs_database;
+                    this.storeName = "logs";
+                }
+                
+                
                 // A log contains... entries (surprising, eh?). Nest
                 // the collection here:
                 this.entries = new LogEntries();
@@ -97,7 +131,7 @@ define(function(require) {
                 // sure our entries are also all deleted from the database
                 this.listenTo(this, "destroy", this.destroyEntries);
             },
-            
+                        
             updateDatapoints: function() {
                 var points = this.entries.size();
                 // console.log("Number of datapoints: " + points);
@@ -113,7 +147,13 @@ define(function(require) {
                 if (vizapp.type == "cordova") {
                     this.entries.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
                 } else if (vizapp.type == "chrome") {
-                    this.entries.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
+                    //this.entries.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
+                       this.entries.database = logs_database;
+                       this.entries.storeName = "entries";
+                        // Also set the instrumentid property of the entries
+                        if (this.id != undefined) 
+                            this.entries.instrumentid = this.id;
+
                 } else {
                     this.entries.url =  "/logs/" + this.id + "/entries";
                 }
@@ -178,6 +218,16 @@ define(function(require) {
 
             initialize: function(models, options) {
             },
+            
+            // Depending on the run mode, the "Logs" collection might have
+            // a URL where the server will only return the relevant logs, or
+            // we might be in a local indexeddb "logs" store, and in this case, we
+            // need to fetch only "log" models that match instrumentid
+            fetchLogs: function(callback) {
+                console.log("[devicelogs.js] Should fetch all logs for instrumentid " + this.instrumentid);
+                this.fetch(callback);
+            },
+
             
             // Create a new subset collection of only some log sessions
             getLogSubset: function(logSessionIDs) {

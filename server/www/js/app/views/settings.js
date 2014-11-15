@@ -86,6 +86,20 @@ define(function(require) {
         },
         
         do_reset_storage: function() {
+            
+            var dbreq = indexedDB.open("wizkers-logs",1);
+            dbreq.onsuccess = function (event) {
+                var db = event.result;
+                console.log(event);
+                console.log(dbreq);
+            };
+            dbreq.onerror = function (event) {
+                        console.error("indexedDB.delete Error: " + event.message);
+            };
+            
+            
+            
+            
             var ins = instrumentManager.getInstrument();
             if (ins != null) {
                 linkManager.closeInstrument(ins.id);

@@ -239,7 +239,8 @@ define(function(require) {
             currentLogSession.set('description', $('#description', this.el).val());
             currentLogSession.set('logtype', 'live');
             // No need to set instrument ID, it is updated when creating the
-            // log session
+            // log session on the server side. In Chrome mode, the log store is
+            // (currently) specific to the instrument, so we don't use the ID.
             this.instrument.logs.add(currentLogSession);
             currentLogSession.save(null,{
                     success: function() {

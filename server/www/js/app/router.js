@@ -77,7 +77,21 @@ define(function(require) {
             });
 
         },
-        
+    
+        /**
+         * Switchinstrument is the only location in the application where we are
+         * retrieving an instrument. Instrument models have two associated collections:
+         *  - Their logs
+         *  - Their outputs
+         *
+         *  Those two collections are nested as properties of the Instrument so that they can
+         * be lazy-loaded at a later stage. Depending on our run mode, this lazy-loading can be either
+         * super cheap (Chrome packaged App, Cordova), or more expensive in terms of latency (server App).
+         *
+         *  The strategy here is to have the Instrument model trigger the 'fetch' of its outputs and logs
+         * at initialization, because even in the case of a server app, the quantity of data won't be massive,
+         * it is only the log entries that can be large, and we fetch those only when needed..
+         */
         switchinstrument: function(insId, closeprevious) {
             var self = this;
             if (closeprevious === undefined)
@@ -133,7 +147,9 @@ define(function(require) {
                 return;
             // Initialize with the list of logs for the current device:
             var logs = ins.logs;
-            logs.fetch({
+            // Note: we use fetchLogs, not simply "fetch", see devicelog.js
+            //       for an explanation.
+            logs.fetchLogs({
                 success:function() {
                     require(['app/views/logmanagement'], function(view) {
                         self.switchView(new view({collection: logs}));

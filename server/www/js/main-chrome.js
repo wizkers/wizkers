@@ -20,6 +20,7 @@ require.config({
         jquery: 'lib/jquery-1.11.0',
         backbone: 'lib/backbone-1.1.2',
         localstorage: 'lib/backbone.chromestorage',
+        bbindexeddb: 'lib/backbone-indexeddb',
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',
         text: 'lib/text',
