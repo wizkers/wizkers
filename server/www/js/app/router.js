@@ -149,12 +149,17 @@ define(function(require) {
             var logs = ins.logs;
             // Note: we use fetchLogs, not simply "fetch", see devicelog.js
             //       for an explanation.
-            logs.fetchLogs({
+            logs.fetch({
                 success:function() {
                     require(['app/views/logmanagement'], function(view) {
                         self.switchView(new view({collection: logs}));
                         self.headerView.selectMenuItem('management-menu');
                     });
+                },
+                error: function(msg) {
+                    console.log("[logmanagement] Log fetch error: ");
+                    console.log( msg);
+                    console.log(logs);
                 }});
         },
     

@@ -28,7 +28,9 @@ define(function(require) {
             version: 1,
             migrate: function (transaction, next) {
                 var store = transaction.db.createObjectStore("logs");
+                store.createIndex("iidIndex", "instrumentid", { unique: false});
                 store = transaction.db.createObjectStore("entries");
+                store.createIndex("lsiIndex", "logsessionid", { unique: false});
                 next();
             }
         }]
@@ -67,6 +69,13 @@ define(function(require) {
             logsessionid: null,
 
             initialize: function(models, options) {
+                // If we run as a chrome app, the backbone indexeddb adapter also
+                // wants models to have the proper database and store properties defined
+                if (vizapp.type=="chrome") {
+                    this.database = logs_database;
+                    this.storeName = "entries";
+                }
+
             },
 
             //url:   is not defined by default, LogEntries is
@@ -77,6 +86,14 @@ define(function(require) {
 
             // Maintain our collection in order automatically by adding a comparator:
             comparator: 'timestamp',
+            
+            fetch: function(callback) {
+                console.log("[devicelogs.js] Should fetch all entries for logsessionid " + this.logsessionid);
+                // Add a condition for the instrumentid
+                if (vizapp.type == "chrome")
+                    callback.conditions = { logsessionid: this.logsessionid };
+                Backbone.Collection.prototype.fetch.call(this,callback);
+            },
 
             // Get all points between date X1 and date X2 (both don't have to exactly match a
             // log record).
@@ -152,7 +169,7 @@ define(function(require) {
                        this.entries.storeName = "entries";
                         // Also set the instrumentid property of the entries
                         if (this.id != undefined) 
-                            this.entries.instrumentid = this.id;
+                            this.entries.logsessionid = this.id;
 
                 } else {
                     this.entries.url =  "/logs/" + this.id + "/entries";
@@ -175,7 +192,7 @@ define(function(require) {
                     }}
                 );
 
-                        },
+            },
 
            defaults: {
                instrumentid: 0,                // Instrument for this log (not the instrument's serial number, but the ID in MongoDB)
@@ -223,9 +240,12 @@ define(function(require) {
             // a URL where the server will only return the relevant logs, or
             // we might be in a local indexeddb "logs" store, and in this case, we
             // need to fetch only "log" models that match instrumentid
-            fetchLogs: function(callback) {
+            fetch: function(callback) {
                 console.log("[devicelogs.js] Should fetch all logs for instrumentid " + this.instrumentid);
-                this.fetch(callback);
+                // Add a condition for the instrumentid
+                if (vizapp.type == "chrome")
+                    callback.conditions = { instrumentid: this.instrumentid };
+                Backbone.Collection.prototype.fetch.call(this,callback);
             },
 
             

@@ -1,4 +1,4 @@
-    /**
+/**
  * The global settings for the applications.
  *
  * 2014.03: Needs refactoring / updates
@@ -16,6 +16,29 @@ define(function(require) {
         template = require('js/tpl/SettingsView.js');
     
     require('bootstrap');
+    
+    function deleteDB(dbObj) {
+    try {
+
+        var indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB ;
+
+        var dbreq = indexedDB.deleteDatabase(dbObj.id);
+        dbreq.onsuccess = function (event) {
+            var db = event.result;
+            console.log("indexedDB: " + dbObj.id + " deleted");
+        }
+        dbreq.onerror = function (event) {
+            console.error("indexedDB.delete Error: " + event.message);
+        }
+    }
+    catch (e) {
+        console.error("Error: " + e.message);
+        //prefer change id of database to start ont new instance
+        dbObj.id = dbObj.id + "." + guid();
+        console.log("fallback to new database name :" + dbObj.id)
+    }
+    }
+
 
     return Backbone.View.extend({
 

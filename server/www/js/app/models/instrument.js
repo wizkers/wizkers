@@ -18,14 +18,16 @@ define(function(require) {
         Backbone.LocalStorage = require('localstorage');
     }
     
-        var logs_database = {
+    var logs_database = {
         id: "wizkers-logs",
         description: "Wizkers device logs",
         migrations: [{
             version: 1,
             migrate: function (transaction, next) {
                 var store = transaction.db.createObjectStore("logs");
+                store.createIndex("iidIndex", "instrumentid", { unique: false});
                 store = transaction.db.createObjectStore("entries");
+                store.createIndex("lsiIndex", "logsessionid", { unique: false});
                 next();
             }
         }]
