@@ -16,8 +16,9 @@ define(function(require) {
         Backbone = require('backbone');
     var bidb = null;
 
-    if (vizapp.type == "cordova" || vizapp.type == "chrome") {
+    if (vizapp.type == "cordova") {
         Backbone.LocalStorage = require('localstorage');
+    } else if (vizapp.type == "chrome") {
         var bidb = require('bbindexeddb');
     }
     
@@ -183,15 +184,18 @@ define(function(require) {
                 // deleting everything
                 if (vizapp.type == "server")
                     return;
+                // Stop listening to sync events on entries, otherwise once the entries are deleted,
+                // we are recreating the log by updating the data points!
+                this.stopListening(this.entries, "sync", this.updateDatapoints);
                 this.entries.fetch(
                     {success: function(results) {
                         var entry;
                         while (entry = results.first()) {
                             entry.destroy();
                         }
+                        console.log("Finished destroying all entries");
                     }}
                 );
-
             },
 
            defaults: {

@@ -147,8 +147,6 @@ define(function(require) {
                 return;
             // Initialize with the list of logs for the current device:
             var logs = ins.logs;
-            // Note: we use fetchLogs, not simply "fetch", see devicelog.js
-            //       for an explanation.
             logs.fetch({
                 success:function() {
                     require(['app/views/logmanagement'], function(view) {

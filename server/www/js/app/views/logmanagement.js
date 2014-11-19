@@ -83,7 +83,10 @@ define(function(require) {
                                 {success: function(model, response) {
                                     $('#deleteConfirm',self.el).modal('hide');
                                     self.render();
-                                    }
+                                    },
+                                 error: function(model, response) {
+                                     console.log("Log delete error" + response);
+                                 }
                                 });
         },
 
