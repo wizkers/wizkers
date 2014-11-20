@@ -48,7 +48,7 @@ define(function(require) {
                                                      };
                 }
             } else if (this.outputfields == 'none') {
-                this.outputfields = [];
+                this.outputfields = {};
             }
         },
 
@@ -95,7 +95,7 @@ define(function(require) {
             
             // Gotta refresh the default outputfields each time
             this.generateOutputFields();
-            if (this.outputfields.length) {
+            if (Object.keys(this.outputfields).length) {
                 _.each(this.outputfields, function(field, fieldname) {
                     var mapped = self.devicefields[fieldname];
                     if (mapped != undefined)
@@ -255,11 +255,10 @@ define(function(require) {
             if (this.gotdata)
                 return;
             var flat = {};
-            if (typeof(data) === "object") {                
+            if (typeof(data) === "object") {
                 // We sometimes have embedded JSON structures: flatten them
                 flat = utils.JSONflatten(data);
                 this.gotdata = true;
-                
             } else if (typeof(data) === "string") {
                 // If the instrument is sending a string, not much we can do except
                 // send that string:
@@ -267,7 +266,6 @@ define(function(require) {
                 this.gotdata = true;
             }
             $(".fieldselect", this.el).html(tableTemplate({fields: flat, outputfields: this.outputfields, selected: this.devicefields}));
-
         },
 
     });
