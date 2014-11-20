@@ -24,6 +24,7 @@ exports.startRecording = function(id) {
             console.log("[recorder] Error finding log session. " + err);
         } else {
             session.startstamp = new Date().getTime();
+            session.isrecording = true;
             session.save(function(err) {
                 if (err) console.log("[recorder] Error saving session startstamp. " + err);
             });
@@ -53,6 +54,7 @@ exports.stopRecording = function() {
             res.send({'error':'An error has occurred'});
         } else {
             session.endstamp = new Date().getTime();
+            session.isrecording = false;
             DeviceLogEntry.count({logsessionid: recordingID}, function(err,count) {
                 if (err) {
                     console.log('Error updating log session entry: ' + err);
