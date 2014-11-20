@@ -78,7 +78,7 @@ define(function(require) {
         this.sendDataToFrontend = function(data) {
             this.trigger('serialEvent', data);
             if (recording)
-                record(data);           
+                record(data);
             outputManager.output(data); // And also tell the output manager
         }
         

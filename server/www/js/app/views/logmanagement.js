@@ -73,16 +73,25 @@ define(function(require) {
         doDeleteLog: function(event) {
             var self = this;
             var logToDelete = this.deviceLogs.where({_id: $(event.currentTarget).data('id')});
-            
+            var points = logToDelete[0].entries.size();
             // Ask our user to be patient:
-            $("#deleteConfirm .modal-body", this.el).html("Deleting log, please wait...");
+            $("#deleteConfirm .modal-body .intro", this.el).html("Deleting log, please wait...");
+            
+            // We want to listen for entry deletion events, the process is async and we don't
+            // want to let the user continue while the backend is busy deleting stuff...
+            this.listenTo(logToDelete[0],"entry_destroy",function(num) {
+                $("#entries-del",self.el).width(Math.ceil((1-num/points)*100) + "%");
+                if (num <= 1) {
+                    $('#deleteConfirm',self.el).modal('hide');
+                    self.stopListening(logToDelete[0]);
+                    self.render();
+                }
+            });
             
             // the backend will take care of deleting all the log entries associated with
             // the log.
             logToDelete[0].destroy(
                                 {success: function(model, response) {
-                                    $('#deleteConfirm',self.el).modal('hide');
-                                    self.render();
                                     },
                                  error: function(model, response) {
                                      console.log("Log delete error" + response);

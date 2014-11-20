@@ -21,6 +21,7 @@ define(function(require) {
     var logs_database = {
         id: "wizkers-logs",
         description: "Wizkers device logs",
+        nolog: true,
         migrations: [{
             version: 1,
             migrate: function (transaction, next) {

@@ -25,6 +25,7 @@ define(function(require) {
     var logs_database = {
         id: "wizkers-logs",
         description: "Wizkers device logs",
+        nolog: true,
         migrations: [{
             version: 1,
             migrate: function (transaction, next) {
@@ -88,6 +89,9 @@ define(function(require) {
             // Maintain our collection in order automatically by adding a comparator:
             comparator: 'timestamp',
             
+            // We override the fetch method so that in indexeddb mode, we add a query condition
+            // on the fetch - in server mode, that condition is part of the REST API and executed
+            // on the server.
             fetch: function(callback) {
                 console.log("[devicelogs.js] Should fetch all entries for logsessionid " + this.logsessionid);
                 // Add a condition for the instrumentid
@@ -154,6 +158,8 @@ define(function(require) {
                 var points = this.entries.size();
                 // console.log("Number of datapoints: " + points);
                 this.set('datapoints',points);
+                this.set('startstamp', this.entries.getLogStart());
+                this.set('endstamp', this.entries.getLogEnd());
                 this.save();
             },
 
@@ -178,20 +184,28 @@ define(function(require) {
             },
             
             destroyEntries: function() {
+                var self = this;
                 console.log("Destroy all entries for this log");
                 // We only need to do this if we are running in Cordova or Chrome mode, where
                 // fetching all entries won't cost us much. In server mode, the backend takes care of
                 // deleting everything
-                if (vizapp.type == "server")
+                if (vizapp.type == "server") {
+                    this.trigger("entry_destroy", 0);
                     return;
+                }
                 // Stop listening to sync events on entries, otherwise once the entries are deleted,
                 // we are recreating the log by updating the data points!
                 this.stopListening(this.entries, "sync", this.updateDatapoints);
                 this.entries.fetch(
                     {success: function(results) {
                         var entry;
+                        var points = self.entries.size();
                         while (entry = results.first()) {
-                            entry.destroy();
+                            entry.destroy({
+                                success: function(model, response) {
+                                    self.trigger("entry_destroy", points--);
+                                }
+                            });
                         }
                         console.log("Finished destroying all entries");
                     }}

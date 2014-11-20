@@ -91,7 +91,7 @@ define(function(require) {
             } else {
                 jsresp.raw = data;
             }
-                socket.sendDataToFrontend(jsresp);
+            socket.sendDataToFrontend(jsresp);
             } catch (err) {
                 console.log('Not able to parse data from device:\n' + data + '\n' + err);
             }
