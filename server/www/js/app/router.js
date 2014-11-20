@@ -149,6 +149,14 @@ define(function(require) {
             var logs = ins.logs;
             logs.fetch({
                 success:function() {
+                    
+                    // Housekeeping: if the instrument is closed,
+                    // make sure the "isrecording" flag set to false on each log
+                    // (they could be still "true" if the user closed the app without
+                    // closing the instrument properly
+                    if (!linkManager.isConnected())
+                        logs.clearRecordingFlags();
+
                     require(['app/views/logmanagement'], function(view) {
                         self.switchView(new view({collection: logs}));
                         self.headerView.selectMenuItem('management-menu');

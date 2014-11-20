@@ -222,6 +222,7 @@ define(function(require) {
                startstamp: 0,
                endstamp : 0,
                datapoints: 0,
+               isrecording: false               // Flag set to indicate the log is being used by the recorder
            },
 
             // OPEN QUESTION: shall we remove the startstamp and endstamps altogether,
@@ -264,6 +265,14 @@ define(function(require) {
                 if (vizapp.type == "chrome")
                     callback.conditions = { instrumentid: this.instrumentid };
                 Backbone.Collection.prototype.fetch.call(this,callback);
+            },
+            
+            
+            // Clears the "isrecording" flag on all logs. Used at instrument open/close/stop record
+            clearRecordingFlags: function() {
+                _.each(this.models, function(log) {
+                    log.save({isrecording: false});
+                });
             },
 
             

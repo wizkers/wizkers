@@ -103,6 +103,7 @@ define(function(require) {
             var self = this;
             console.log('Main render of Log management view');
             
+            
             $(this.el).html(template({ deviceLogs: this.collection.toJSON(), selected: this.selectedLogs,
                                       instrumentid: instrumentManager.getInstrument().id}));
 

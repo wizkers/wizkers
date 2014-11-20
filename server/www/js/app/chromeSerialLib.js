@@ -183,6 +183,7 @@ define(function(require) {
         
         function openInstrument(port) {
             console.log("[chromeSerialLib] chromeSerialLib: openInstrument");
+            
             var path = instrumentManager.getInstrument().get("port");
             // TODO: support other data bit and stop bit lengths 
             chrome.serial.connect(path, { bitrate: self.portSettings.baudRate,
@@ -273,12 +274,17 @@ define(function(require) {
             console.log("[chromeSerialLib] In-browser implementation of start recording");
             currentLog = instrumentManager.getInstrument().logs.get(id);
             currentLog.fetch({success: function(){
+                currentLog.save({isrecording: true});
                 recording = true;
             } });
         }
         
         function stopRecording() {
             console.log("[chromeSerialLib] In-browser implementation of stop recording");
+            if (currentLog) {
+                currentLog.save({isrecording: false});
+                currentLog = null;
+            }
             recording = false;
         }
                 

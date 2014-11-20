@@ -125,6 +125,7 @@ var LogSession = new Schema({
        startstamp: Date,    // Start of the log. Should be the same as the date of the earliest point in the log
        endstamp : Date,     // End of the log. Should be the same as the date of the last point in the log
        datapoints: Number,  // Should be the count of log entries referencing this log.
+       isrecording: Boolean,// Indicates that the log is being used by the recorder.
        metadata: Schema.Types.Mixed, // Can be anything, used to store log metadata if relevant to the plugin
 });
 mongoose.model('LogSession', LogSession);

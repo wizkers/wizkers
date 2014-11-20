@@ -40,7 +40,10 @@
                         <td><%= log.name %></td>
                         <td><%= log.datapoints %></td>
                         <td><%= log.logtype %></td>
-                            <td><i class="glyphicon glyphicon-remove delete_log" data-id="<%=log._id%>" title="Delete"></i></td>
+                        <td><% if (!log.isrecording) { %>
+                            <i class="glyphicon glyphicon-remove delete_log" data-id="<%=log._id%>" title="Delete"></i>
+                            <% } %>
+                        </td>
                     </tr>
                     <% }) %>
                 </tbody>
