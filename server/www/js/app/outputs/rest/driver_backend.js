@@ -73,7 +73,7 @@ define(function(require) {
                     'X-Datalogger': 'wizkers.io REST plugin'
                 }
             };
-            if (settings.httprequest == "post")
+            if (settings.httprequest != "get")
                 post_options['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
             
             regexpath = decompUrl(settings.resturl).path;

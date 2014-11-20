@@ -26,8 +26,10 @@ define(function(require) {
                 // Metadata is a simple object looking like this:
                 // {  'address': 'name', 'address2': 'name2', etc... }
                 this.metadata = this.model.get('metadata');
-                if (this.metadata == null) {
-                    this.metadata = {};
+                if (Object.keys(this.metadata).length == 0) {
+                    this.metadata = {
+                        httprequest: 'get'
+                    };
                     this.model.set('metadata', this.metadata);
                 }
             },

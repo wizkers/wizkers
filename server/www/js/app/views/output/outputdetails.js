@@ -184,6 +184,8 @@ define(function(require) {
                 // If we changed the plugin type, we need to reset the view:
                 if (target.name == "type") {
                     this.gotdata = false;
+                    // Clear the medatadata
+                    this.model.set('metadata', {});
                     this.generateOutputFields();
                     this.render();
                 }
