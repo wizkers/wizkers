@@ -49,6 +49,8 @@ define(function(require) {
                    case 'driver':
                     setDriver(args);
                     break;
+                   case 'uploader':  // Alternative driver type for firmware updates
+                     setUploader(args);
                    case 'outputs':
                      setOutputs(args);
                      break;
@@ -82,6 +84,12 @@ define(function(require) {
             outputManager.output(data); // And also tell the output manager
         }
         
+        // Alternative version for the uploader: skip recording
+        // and output manager that don't make sense
+        this.sendDataToUploader = function(data) {
+            this.trigger('serialEvent', data);
+        }
+        
         // Needs to be public (defined with this.) because
         // it is called from a callback
         this.driver = null;
@@ -95,6 +103,7 @@ define(function(require) {
         var currentLog = null;
         var self = this;
         var recover_from_syserror = false;
+        var uploader_mode = false; // Will be true when we have loaded the special uploader driver.
         
         // Because Windows is fucked up, we need to keep
         // a command queue
@@ -154,7 +163,8 @@ define(function(require) {
         function portStatus() {
            self.trigger('status', {portopen: self.portOpen,
                                    recording: recording,
-                                   streaming: self.driver ? self.driver.isStreaming() : false});
+                                   streaming: self.driver ? self.driver.isStreaming() : false,
+                                   uploader: uploader_mode });
         };
         
         function uniqueID() {
@@ -173,6 +183,24 @@ define(function(require) {
                 self.driver = dr;
                 self.portSettings = self.driver.portSettings();
                 parser = self.portSettings.parser;
+                uploader_mode = false;
+                portStatus(); // send feedback
+            });
+        }
+
+        // The uploader is really an alternative driver:
+        function setUploader(driver) {
+            console.log("[chromeSerialLib] Setting uploader driver - should be " + driver);
+            
+            // We can use our instrumentManager to ask for the right driver
+            // (in server-side mode, "driver" is passed as the driver name, we
+            //  don't need it here)
+            instrumentManager.getBackendUploaderDriver(self, function(dr) {
+                self.driver = dr;
+                self.portSettings = self.driver.portSettings();
+                parser = self.portSettings.parser;
+                uploader_mode = true;
+                portStatus(); // send feedback
             });
         }
         
@@ -181,15 +209,33 @@ define(function(require) {
             outputManager.enableOutputs(outputs);
         }
         
+        /**
+         * openInstrument is the regular way of opening the serial port
+         * of an instrument.
+         *
+         * We are the Chrome mode, so "port" is not used, since we can
+         * get the info from the instrumentManager directly.
+         *
+         * If we are in uploader mode, then we delegate the opening procedure
+         * to the uploader driver: some firmware updaters require complex port opening
+         * schemes.
+         */
         function openInstrument(port) {
             console.log("[chromeSerialLib] chromeSerialLib: openInstrument");
             
             var path = instrumentManager.getInstrument().get("port");
-            // TODO: support other data bit and stop bit lengths 
-            chrome.serial.connect(path, { bitrate: self.portSettings.baudRate,
-                                        },
-                                  onOpen
-                                 );        
+            
+            if (uploader_mode) {
+                // Delegate opening to the uploader driver:
+                console.log("[chromeSerialLib] Opening firmware updater driver");
+                self.driver.openPort(path, onOpen);
+            } else {
+                // TODO: support other data bit and stop bit lengths 
+                chrome.serial.connect(path, { bitrate: self.portSettings.baudRate,
+                                            },
+                                      onOpen
+                                     );
+            }
         };
 
         function closeInstrument(port) {
@@ -340,6 +386,7 @@ define(function(require) {
         function onOpen(openInfo) {
             if (!openInfo) {
                 console.log("[chromeSerialLib] Open Failed");
+                console.log(openInfo);
                 return;
             }
             self.portOpen = true;

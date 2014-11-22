@@ -37,6 +37,7 @@ define(function(require) {
             "editlogs/:ins/:loglist": "editlogs",
             "settings"              : "settings",
             "diagnostics/:id"       : "diagnostics",
+            "upgrader/:id"          : "upgrader",
             "profile"               : "profile",
             "about"                 : "about",
         },
@@ -137,6 +138,15 @@ define(function(require) {
                 this.navigate('/',true);
             }
         },
+        
+        upgrader: function(id) {
+            var self = this;
+            console.log('Switching to the instrument upgrader view');
+            instrumentManager.getUpgrader({model: settings}, function(view) {
+                self.switchView(view);
+                self.headerView.selectMenuItem('home-menu');
+            });
+        },
     
         // Display all logs known for the current instrument
         logmanagement: function() {
@@ -154,7 +164,7 @@ define(function(require) {
                     // make sure the "isrecording" flag set to false on each log
                     // (they could be still "true" if the user closed the app without
                     // closing the instrument properly
-                    if (!linkManager.isConnected())
+                    if (!linkManager.isRecording())
                         logs.clearRecordingFlags();
 
                     require(['app/views/logmanagement'], function(view) {

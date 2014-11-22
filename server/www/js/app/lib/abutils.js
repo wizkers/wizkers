@@ -4,13 +4,54 @@
  * Original code (c) 2014 Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
  *
- * Some parts of this code come from Christophe Coenraets, license unclear ? TODO
+ * hexdump code: Matt Mower <self@mattmower.com
+ * 08-02-2011
+ * License: MIT
+ *
  */
 
 define(function(require) {
     
     "use strict";
     
+    function to_hex( number ) {
+            var r = number.toString(16);
+            if( r.length < 2 ) {
+                return "0" + r;
+            } else {
+                return r;
+            }
+    };
+
+    function dump_chunk( chunk ) {
+        var dumped = "";
+        for( var i = 0; i < 4; i++ ) {
+            if( i < chunk.length ) {
+                dumped += to_hex( chunk.charCodeAt( i ) );
+            } else {
+                dumped += "..";
+            }
+        }
+        return dumped;
+    };
+
+    function dump_block( block ) {
+        var dumped = "";
+        var chunks = block.match( /[\s\S.]{1,4}/g );
+        for( var i = 0; i < 4; i++ ) {
+            if( i < chunks.length ) {
+                dumped += dump_chunk( chunks[i] );
+            } else {
+                dumped += "........";
+            }
+            dumped += " ";
+        }
+
+        dumped += "    " + block.replace( /[\x00-\x1F]/g, "." );
+
+        return dumped;
+    };
+	
     return {
         
         // Utility function (chrome serial wants array buffers for sending)
@@ -37,7 +78,7 @@ define(function(require) {
         /// Converts a Hex string to a UInt8Array
         // For instance "010203efab23" as input
         hextoab: function(str) {
-            if (!str.length%2)
+            if (str.length%2 != 0)
                 throw "Not an even number of characters"; // We need an even number
             var ab = new Uint8Array(str.length/2);
             for (var i=0;  i < str.length; i +=2) {
@@ -54,8 +95,35 @@ define(function(require) {
                 bufView[i]=str.charCodeAt(i);
             }
             return bufView;
-        }
+        },
 
+        // Dump a binary string or Uint8Array
+        hexdump: function( s ) {
+            var dumped = "";
+            if (typeof s != "string")
+                s = this.ab2str(s);
+            var blocks = s.match( /[\s\S.]{1,16}/g );
+            for( var block in blocks ) {
+                dumped += dump_block( blocks[block] ) + "\n";
+            }
+
+            return dumped;
+        },
+        
+        // Pad a buffer (a type array)
+        pad: function (buf, padding) {
+            
+            if (buf.byteLength % padding == 0)
+                return buf;
+            var missing = padding - (buf.byteLength%padding);
+            // Now extend the buffer by the missing characters:
+            var b2 = new Uint8Array(buf.byteLength + missing);
+            b2.set(buf);
+            for (var i=buf.byteLength; i < b2.byteLength; i++) {
+                b2[i] = 0xff;
+            }
+            return b2;
+        }
 
         
     }

@@ -16,6 +16,7 @@
     "storage",
     "unlimitedStorage",
     "audioCapture",
+    "fileSystem",
     "http://*/*",
     "https://*/*"
   ],

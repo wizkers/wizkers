@@ -66,6 +66,7 @@ define(function(require) {
             "click #reset_storage" : "reset_storage_ask",
             "click #do-delete" : "do_reset_storage",
             "click .cpmcolor": "selectColor",
+            "click #device_upgrade": "device_upgrade"
         },
 
         change: function(event) {
@@ -78,6 +79,13 @@ define(function(require) {
             this.model.save();
             this.render();
 
+        },
+        
+        device_upgrade: function() {
+            var caps = instrumentManager.getCaps();
+            if (caps.indexOf("Upgrader") > -1) {
+                router.navigate('upgrader/' + instrumentManager.getInstrument().id, true);
+            }
         },
 
         selectColor: function(event) {

@@ -61,7 +61,7 @@ define(function(require) {
             for (var ins in this.supportedInstruments) {
             if (ins == type) {
                 current_instrument = instrument;
-                // Nifty: we extend our link manager with the methods of our instrument.
+                // Nifty: we extend our instrument manager with the methods of our instrument.
                 // (since all instruments support the same API, a change of instrument
                 // overrides the methods)
                 var instrumentObject =new this.supportedInstruments[ins].type;
@@ -72,6 +72,14 @@ define(function(require) {
                 }
             }
         }
+        
+        this.startUploader = function() {
+            linkManager.setUploader(this.getUploader());
+        }
+        
+        this.stopUploader = function() {
+            linkManager.setDriver(this.getDriver());
+        };
 
         // Get the currently loaded instrument
         this.getInstrument = function() {

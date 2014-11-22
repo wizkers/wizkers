@@ -42,7 +42,13 @@ define(function(require) {
                 socket.emit('ports','');
                 console.log('Link manager: updated link manager driver for current instrument');
             };
-            
+
+            this.setUploader = function(driver) {
+                this.driver = driver;
+                socket.emit('uploader', this.driver.getBackendDriverName());
+                console.log('Link manager: updated link manager uploader driver for current instrument');
+            };
+
             /**
              * Tells our backend to refresh the outputs for an instrument
              */
