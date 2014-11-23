@@ -166,14 +166,17 @@ define(function(require) {
             retries = 0;
             function to() {
                 if (retries < 2) {
+                    retries++;
                     watchdog = setTimeout(to, delay);
                     console.log("Timeout, trying again");
                     socket.emit('rawCommand',data);
                 } else {
-                    readCb({ status: timeout,
+                    readCb({ status: 'timeout',
                             data: '' });
                 }
             }
+            console.log("Writing data");
+            console.log(data);
             watchdog = setTimeout(to, delay);
             socket.emit('rawCommand',data);
         }
@@ -197,12 +200,8 @@ define(function(require) {
             
             // Now enter program mode on the board:
             write("P", 1, 100, function(resp) {
-                if (resp.status != 'OK') {
+                if (resp.status != 'OK' || resp.data[0] != 0x0d) {
                     socket.sendDataToFrontend( { 'status': 'Error: board did not enter programming mode' });
-                    return;
-                }
-                if (resp.data[0] != 0x0d) {
-                    socket.sendDataToFrontend( { 'status': 'Error: bad response from board when entering programming mode' });
                     return;
                 }
                 // We are good now, start programming:
@@ -223,16 +222,12 @@ define(function(require) {
             cmd[1] = (address >>9) & 0xff;
             cmd[2] = (address >>1) & 0xff;
             write(cmd, 1, 100, function(resp) {
-                if (resp.status != 'OK') {
-                    socket.sendDataToFrontend( { 'status': 'Error: unable to set programming address to ' + address });
-                    return;
-                }
-                if (resp.data[0] != 0x0d) {
-                    socket.sendDataToFrontend( { 'status': 'Error: bad response from board when setting prog address to ' + address });
+                if (resp.status != 'OK' || resp.data[0] != 0x0d) {
+                    socket.sendDataToFrontend( { 'status': 'Error: unable to set address to ' + address });
                     return;
                 }
                 // We are good now, write our pages:
-                writePage(0,data);
+                writePage(0,data,address);
             });
         };
         
@@ -240,7 +235,7 @@ define(function(require) {
          * writePage is a recursive function that writes all the data, page by page.
          * Again, the Leonardo bootloader auto increments the current page
          */
-        var writePage = function(pageNumber,data) {
+        var writePage = function(pageNumber,data,startAddress) {
             var pages = data.byteLength/128;
             socket.sendDataToFrontend({'writing': {'current': pageNumber, 'total': pages}});
             
@@ -253,39 +248,85 @@ define(function(require) {
             packet.set(data.subarray(pageNumber*128, (pageNumber+1)*128),4);
             console.log(abu.hexdump(packet));
             write(packet, 1, 200, function(resp) {
-                if (resp.status != 'OK') {
+                if (resp.status != 'OK'  || resp.data[0] != 0x0d) {
                     socket.sendDataToFrontend( { 'status': 'Error: error while writing flash at page ' + pageNumber });
                     return;
                 }
-                if (resp.data[0] != 0x0d) {
-                    socket.sendDataToFrontend( { 'status': 'Error: bad response while writing flash at page ' + pageNumber });
-                    return;
-                }
                 if (pageNumber < pages-1) {
-                    writePage(pageNumber+1,data);
+                    writePage(pageNumber+1,data,startAddress);
                 } else {
-                    verifyProgramming();
+                    verifyProgramming(startAddress, data);
                 }
             });
         }
         
-        var verifyProgramming = function() {
+        var verifyProgramming = function(address, data) {
+            // Build a "Set address" command ("A" + address)
+            var cmd = new Uint8Array([ 65, 0, 0]);
+            // Check the leonardo catarina bootloader source for explanation
+            // of the shifts:
+            cmd[1] = (address >>9) & 0xff;
+            cmd[2] = (address >>1) & 0xff;
+            write(cmd, 1, 200, function(resp) {
+                if (resp.status != 'OK' || resp.data[0] != 0x0d) {
+                    socket.sendDataToFrontend( { 'status': 'Error: unable to set address to ' + address });
+                    return;
+                }
+                // We are good now, write our pages:
+                verifyPage(0,data);
+            });
+
+        }
+        
+        // Very similar to writePage, except that we read instead of writing
+        var verifyPage = function(pageNumber, data) {
+            var pages = data.byteLength/128;
+            socket.sendDataToFrontend({'verifying': {'current': pageNumber, 'total': pages}});
+            
+            var packet = new Uint8Array(4);
+            packet[0] = 103; // 0x67, 'g'
+            packet[1] = 0;
+            packet[2] = 128; // We are writing with a 128 byte page size
+            packet[3] = 70; // 'F' (flash memory)
+            write(packet, 128, 500, function(resp) {
+                if (resp.status != 'OK') {
+                    socket.sendDataToFrontend( { 'status': 'Error: error while reading flash at page ' + pageNumber });
+                    return;
+                }
+                // Now check the contents:
+                for (var i=0; i < 128; i++) {
+                    if (resp.data[i] != data[pageNumber*128+i]) {
+                        socket.sendDataToFrontend( { 'status': 'Error: data verification error at page ' + pageNumber });
+                        return;
+                    }
+                }
+                console.log("Page " + pageNumber + " verified OK");
+                if (pageNumber < pages-1) {
+                    verifyPage(pageNumber+1,data);
+                } else {
+                    socket.sendDataToFrontend( { 'status': 'Success: flash verified successfully.' });
+                    exitProgramming();;
+                }
+            });
+
+            
         }
         
         var exitProgramming = function() {
             // Leave programming mode
             write("L", 1, 100, function(resp) {
-                if (resp.status != 'OK') {
+                if (resp.status != 'OK'  || resp.data[0] != 0x0d) {
                     socket.sendDataToFrontend( { 'status': 'Error: board did not leave programming mode' });
-                    return;
-                }
-                if (resp.data[0] != 0x0d) {
-                    socket.sendDataToFrontend( { 'status': 'Error: bad response from board when leaving programming mode' });
                     return;
                 }
                 socket.sendDataToFrontend( { 'status': 'Success: board left programming mode' });
                 // Exit Bootloader
                 write("E", 1, 100, function(resp) {
+                if (resp.status != 'OK'  || resp.data[0] != 0x0d) {
+                    socket.sendDataToFrontend( { 'status': 'Error: board did not exit bootloader' });
+                    return;
+                }
+                socket.sendDataToFrontend( { status: 'Success: board left bootloader mode', run_mode: 'firmware' });
                 });
             });
         };

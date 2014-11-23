@@ -27,6 +27,7 @@ define(function(require) {
         onClose: function() {
             console.log("Upgraded view closing...");
             linkManager.off('input', this.showInput);
+            instrumentManager.stopUploader();
         },
 
         
