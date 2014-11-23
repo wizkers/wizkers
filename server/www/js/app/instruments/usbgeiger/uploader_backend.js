@@ -245,7 +245,9 @@ define(function(require) {
          */
         var writePage = function(pageNumber,data,startAddress) {
             var pages = data.byteLength/128;
-            socket.sendDataToFrontend({'writing': {'current': pageNumber, 'total': pages}});
+            if (Math.ceil(pageNumber/pages*100) % 5 == 0) {
+                socket.sendDataToFrontend({'writing': Math.ceil(pageNumber/pages*100)});
+            }
             
             var packet = new Uint8Array(132);
             packet[0] = 66; // 0x41, 'B'
@@ -290,8 +292,9 @@ define(function(require) {
         // Very similar to writePage, except that we read instead of writing
         var verifyPage = function(pageNumber, data) {
             var pages = data.byteLength/128;
-            socket.sendDataToFrontend({'verifying': {'current': pageNumber, 'total': pages}});
-            
+            if (Math.ceil(pageNumber/pages*100) % 5 == 0) {
+                socket.sendDataToFrontend({'verifying': Math.ceil(pageNumber/pages*100)});
+            }
             var packet = new Uint8Array(4);
             packet[0] = 103; // 0x67, 'g'
             packet[1] = 0;

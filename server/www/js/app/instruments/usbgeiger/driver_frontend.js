@@ -63,6 +63,9 @@ define(function(require) {
         this.count_enable = function(enable) {
                 lm.sendCommand('T:' + (enable ? '1' : '0') );
         };
+        this.dual_enable = function(enable) {
+                lm.sendCommand('I:' + (enable ? '2' : '1') );
+        };
 
         console.log('Started USB Geiger link manager front end driver..');
     }

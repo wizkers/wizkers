@@ -36,21 +36,28 @@
         <div class="col-md-12">
         <div class="form-horizontal" id="output_control">
             <div class="form-group">
-                <label class="col-md-3 control-label">Output control:</label>
-                <div class="checkbox col-md-3">
-                    <label>
-                        <input  id="cpm_output" type="checkbox"> Enable CPM Output
-                    </label>
-                </div>
-                <div class="checkbox col-md-3">
-                    <label>
-                        <input id="count_enable" type="checkbox"> Enable COUNT Output
-                    </label>
-                </div>
-                <div class="checkbox col-md-3">
-                    <label>
-                        <input id="pulse_enable" type="checkbox"> Enable PULSE Output
-                    </label>
+                <label class="col-md-2 control-label">Output control:</label>
+                <div class="col-md-10">
+                    <div class="checkbox col-md-3">
+                        <label>
+                            <input  id="cpm_enable" type="checkbox"> Enable CPM Output
+                        </label>
+                    </div>
+                    <div class="checkbox col-md-3">
+                        <label>
+                            <input id="count_enable" type="checkbox"> Enable COUNT Output
+                        </label>
+                    </div>
+                    <div class="checkbox col-md-3">
+                        <label>
+                            <input id="pulse_enable" type="checkbox"> Enable PULSE Output
+                        </label>
+                    </div>
+                    <div class="checkbox col-md-3">
+                        <label>
+                            <input id="dual_enable" type="checkbox"> Enable Dual Input
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -61,11 +68,20 @@
         <div class="col-md-12">
         <div class="form-horizontal" id="output_control">
             <div class="form-group">
-                <label for="deadtime" class="col-md-3 control-label">Tube settings:</label>
-                <div class="col-md-6">
+                <label for="deadtime" class="col-md-2 control-label">Tube settings:</label>
+                <div class="col-md-5">
                 <div class="input-group input-margin">
-                    <span class="input-group-addon">Dead time factor</span>
-                    <input id="deadtime" value="" class="form-control" type="text" maxlength="32">
+                    <span class="input-group-addon">Dead time factor input 1</span>
+                    <input id="deadtime1" value="" class="form-control" type="text" maxlength="32">
+                    <span class="input-group-btn">
+                            <button class="btn btn-default" id="deadset" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                    </span>
+                 </div>  
+                </div>
+                <div class="col-md-5">
+                <div class="input-group input-margin">
+                    <span class="input-group-addon">Dead time factor input 2</span>
+                    <input id="deadtime2" value="" class="form-control" type="text" maxlength="32">
                     <span class="input-group-btn">
                             <button class="btn btn-default" id="deadset" type="button"><span class="glyphicon glyphicon-check"></span></button>
                     </span>
@@ -117,7 +133,7 @@
                 </div>
                 <div class="col-md-2">
                     <div class="input-group input-margin">
-                        <input id="window1_size" value="" class="form-control" type="text" maxlength="32">
+                        <input id="input1_window1_size" value="" class="form-control" type="text" maxlength="32">
                         <span class="input-group-addon">
                                 sec.
                         </span>
@@ -125,7 +141,7 @@
                 </div>
                 <div class="col-md-2">
                     <div class="input-group input-margin">
-                        <input id="window1_threshold" value="" class="form-control" type="text" maxlength="32">
+                        <input id="input1_window1_threshold" value="" class="form-control" type="text" maxlength="32">
                         <span class="input-group-addon">
                                 CPM
                         </span>
@@ -133,7 +149,7 @@
                 </div>
                 <div class="col-md-2">
                     <div class="input-group input-margin">
-                        <input id="window2_size" value="" class="form-control" type="text" maxlength="32">
+                        <input id="input1_window2_size" value="" class="form-control" type="text" maxlength="32">
                         <span class="input-group-addon">
                                 sec.
                         </span>
@@ -141,7 +157,7 @@
                 </div>
                 <div class="col-md-2">
                     <div class="input-group input-margin">
-                        <input id="window2_threshold" value="" class="form-control" type="text" maxlength="32">
+                        <input id="input1_window2_threshold" value="" class="form-control" type="text" maxlength="32">
                         <span class="input-group-addon">
                                 CPM
                         </span>
@@ -149,7 +165,7 @@
                 </div>
                 <div class="col-md-2">
                     <div class="input-group input-margin">
-                        <input id="window3_size" disabled value="" class="form-control" type="text" maxlength="32">
+                        <input id="input1_window3_size" disabled value="" class="form-control" type="text" maxlength="32">
                         <span class="input-group-addon">
                                 sec.
                         </span>
@@ -157,6 +173,58 @@
                 </div>
 
             </div>
+                        <div class="form-group">
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input value="0" disabled class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                CPM
+                        </span>
+                     </div>  
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input id="input2_window1_size" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                sec.
+                        </span>
+                     </div>  
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input id="input2_window1_threshold" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                CPM
+                        </span>
+                     </div>  
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input id="input2_window2_size" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                sec.
+                        </span>
+                     </div>  
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input id="input2_window2_threshold" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                CPM
+                        </span>
+                     </div>  
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group input-margin">
+                        <input id="input2_window3_size" disabled value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">
+                                sec.
+                        </span>
+                     </div>  
+                </div>
+
+            </div>
+
         </div>
         </div>
     </div>
@@ -189,7 +257,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="well">
-                <textarea id="input" style="height:100px; width:98%;"></textarea>
+                <textarea id="input" style="height:50px; width:98%;"></textarea>
             </div>
         </div>
     </div>

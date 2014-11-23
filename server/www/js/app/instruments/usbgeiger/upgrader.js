@@ -111,9 +111,10 @@ define(function(require) {
             if (data.sw_version) {
                 linkManager.sendCommand({'upload_hex': this.firmware});
             } else if (data.writing) {
-                $("#prog-flash",this.el).width(Math.ceil((data.writing.current/data.writing.total)*100) + "%");
+                console.log(data.writing);
+                $("#prog-flash",this.el).width(data.writing + "%");
             } else if (data.verifying) {
-                $("#prog-flash",this.el).width(Math.ceil((data.verifying.current/data.verifying.total)*100) + "%");
+                $("#prog-flash",this.el).width(data.verifying + "%");
             } else if (data.run_mode) {
                 if (data.run_mode == 'firmware')
                     utils.showAlert('Success','Firmware Upgrade was successful, device is restarting', 'bg-success');

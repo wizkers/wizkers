@@ -23,7 +23,7 @@ define(function(require) {
         //////
         
         this.getBackendDriverName = function() {
-            return 'stk500-leo';
+            return 'avr109-leo';
         }
         
         //////

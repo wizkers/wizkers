@@ -70,6 +70,9 @@ define(function(require) {
                 case 'count_enable':
                     linkManager.driver.count_enable(checked);
                 break;
+                case 'dual_enable':
+                    linkManager.driver.dual_enable(checked);
+                break;
             }
         },
         
@@ -88,20 +91,27 @@ define(function(require) {
         },
         
         save_windows: function(evt) {
-            var win1_size = parseInt($("#window1_size",this.el).val());
-            var win1_thr = parseInt($("#window1_threshold",this.el).val());
-            var win2_size = parseInt($("#window2_size",this.el).val());
-            var win2_thr = parseInt($("#window2_threshold",this.el).val());
-            
-            if (win1_thr > win2_thr) {
+            var i1_win1_size = parseInt($("#input1_window1_size",this.el).val());
+            var i1_win1_thr = parseInt($("#input1_window1_threshold",this.el).val());
+            var i1_win2_size = parseInt($("#input1_window2_size",this.el).val());
+            var i1_win2_thr = parseInt($("#input1_window2_threshold",this.el).val());
+
+            var i2_win1_size = parseInt($("#input2_window1_size",this.el).val());
+            var i2_win1_thr = parseInt($("#input2_window1_threshold",this.el).val());
+            var i2_win2_size = parseInt($("#input2_window2_size",this.el).val());
+            var i2_win2_thr = parseInt($("#input2_window2_threshold",this.el).val());
+
+            if (i1_win1_thr > i1_win2_thr ||
+                i2_win1_thr > i2_win2_thr) {
                 $("#windows_warn",this.el).addClass("alert-danger").html("Error: Window 1 limit must be lower than Window 2 limit");
                 return;
             } 
             $("#windows_warn",this.el).empty();
-            linkManager.sendCommand("A:" + win1_size);
-            linkManager.sendCommand("B:" + win2_size);
-            linkManager.sendCommand("C:" + win2_thr);
-            linkManager.sendCommand("E:" + win1_thr);
+            linkManager.sendCommand("A:" + i1_win1_size + ":" + i1_win2_size + ":" +
+                                           i1_win1_thr + ":" + i1_win2_thr);
+            linkManager.sendCommand("B:" + i2_win1_size + ":" + i2_win2_size + ":" +
+                                           i2_win1_thr + ":" + i2_win2_thr);
+            
             $("#windows_warn",this.el).addClass("alert-success").html("Success: Window params saved to dongle.");
             
         },
@@ -141,24 +151,24 @@ define(function(require) {
             } else if (data.version != undefined) {
                 $('#version',this.el).html(data.version);
                 linkManager.driver.guid();
-            } else if (data.cpm_output != undefined) {
-                $("#cpm_output",this.el).prop("checked",(data.cpm_output[0] == "1"));
+            } else if (data.cpm_enable != undefined) {
+                $("#cpm_enable",this.el).prop("checked",(data.cpm_enable[0] == "1"));
+            } else if (data.dual_enable != undefined) {
+                $("#dual_enable",this.el).prop("checked",(data.dual_enable[0] == "1"));
             } else if (data.count_enable != undefined) {
                 $("#count_enable",this.el).prop("checked",(data.count_enable[0] == "1"));
             } else if (data.pulse_enable != undefined) {
                 $("#pulse_enable",this.el).prop("checked",(data.pulse_enable[0] == "1"));
-            } else if (data.cpm_factor != undefined) {
-                $("#deadtime",this.el).val(data.cpm_factor[0]);
-            } else if (data.window1_size != undefined) {
-                $("#window1_size",this.el).val(data.window1_size[0]);
-            } else if (data.window2_size != undefined) {
-                $("#window2_size",this.el).val(data.window2_size[0]);
-            } else if (data.window3_size != undefined) {
-                $("#window3_size",this.el).val(data.window3_size[0]);
-            } else if (data.window1_threshold != undefined) {
-                $("#window1_threshold",this.el).val(data.window1_threshold[0]);
-            } else if (data.window2_threshold != undefined) {
-                $("#window2_threshold",this.el).val(data.window2_threshold[0]);
+            } else if (data.cpm_factor1 != undefined) {
+                $("#deadtime1",this.el).val(data.cpm_factor1[0]);
+            } else if (data.cpm_factor2 != undefined) {
+                $("#deadtime2",this.el).val(data.cpm_factor2[0]);
+            } else if (Object.keys(data)[0].indexOf("input") == 0) {
+                // This autopopulates all settings starting with "input",
+                // but we have to be careful the ID of the html element matches
+                // the name of the setting:
+                var key = Object.keys(data)[0];
+                $("#" + key, this.el).val(data[key][0]);
             } else if (data.aux_port_enable != undefined) {
                 $("#aux_enable",this.el).prop("checked",(data.aux_port_enable[0] == "1"));
                 $("#aux_baudrate",this.el).prop("disabled",(data.aux_port_enable == "1"));
