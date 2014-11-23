@@ -8,6 +8,7 @@ define(function(require) {
     var $        = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
+        utils   = require('app/utils'),
         template = require('js/tpl/instruments/USBGeigerUpgrader.js');
     
     // Upgrader view
@@ -21,6 +22,8 @@ define(function(require) {
         firmware: "",
         
         initialize: function() {
+            if (linkManager.isConnected())
+                linkManager.closeInstrument();
             linkManager.on('input', this.showInput, this);
         },
         
@@ -58,8 +61,11 @@ define(function(require) {
         },
         
         go: function() {
-            if (linkManager.isConnected())
-                linkManager.closeInstrument();
+            if (this.firmware.length == 0) {
+                utils.showAlert('Error', 'No file selected', 'alert-danger');
+                return;
+            }
+            utils.hideAlert();
             // Switch to our uploader driver
             instrumentManager.startUploader();
             // Wait until we get a confirmation of driver change and

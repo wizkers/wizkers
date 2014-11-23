@@ -142,7 +142,7 @@ define(function(require) {
          */
         this.onOpen =  function(success) {
             console.log("We have the board in uploader mode now");
-            write("S",7,300,getSWVersion)
+            write("S",7,300,getSWVersion);
         };
         
     
