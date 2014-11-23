@@ -206,15 +206,22 @@ define(function(require) {
                     return;
                 }
                 // We are good now, start programming:
-                startProgramming(address,data);
+                writePage(address,data);
             });
         };
         
-        var startProgramming = function(address,data) {
+        /**
+         * The Catarina bootloader auto increments the current address after
+         * writing a page, so we don't need to call setAddress after each page
+         * write
+         **/
+        var setAddress = function(address,data) {
             // Build a "Set address" command ("A" + address)
             var cmd = new Uint8Array([ 65, 0, 0]);
-            cmd[1] = (address >>8) & 0xff;
-            cmd[2] = address & 0xff;
+            // Check the leonardo catarina bootloader source for explanation
+            // of the shifts:
+            cmd[1] = (address >>9) & 0xff;
+            cmd[2] = (address >>1) & 0xff;
             write(cmd, 1, 100, function(resp) {
                 if (resp.status != 'OK') {
                     socket.sendDataToFrontend( { 'status': 'Error: unable to set programming address to ' + address });
@@ -224,14 +231,49 @@ define(function(require) {
                     socket.sendDataToFrontend( { 'status': 'Error: bad response from board when setting prog address to ' + address });
                     return;
                 }
-                // We are good now, start programming:
-                exitProgramming();;
+                // We are good now, write our pages:
+                writePage(0,data);
             });
-                
-            
         };
         
+        /**
+         * writePage is a recursive function that writes all the data, page by page.
+         * Again, the Leonardo bootloader auto increments the current page
+         */
+        var writePage = function(pageNumber,data) {
+            var pages = data.byteLength/128;
+            socket.sendDataToFrontend({'writing': {'current': pageNumber, 'total': pages}});
+            
+            var packet = new Uint8Array(132);
+            packet[0] = 66; // 0x41, 'B'
+            packet[1] = 0;
+            packet[2] = 128; // We are writing with a 128 byte page size
+            packet[3] = 70; // 'F' (flash memory)
+            // Copy the page to write into the buffer:
+            packet.set(data.subarray(pageNumber*128, (pageNumber+1)*128),4);
+            console.log(abu.hexdump(packet));
+            write(packet, 1, 200, function(resp) {
+                if (resp.status != 'OK') {
+                    socket.sendDataToFrontend( { 'status': 'Error: error while writing flash at page ' + pageNumber });
+                    return;
+                }
+                if (resp.data[0] != 0x0d) {
+                    socket.sendDataToFrontend( { 'status': 'Error: bad response while writing flash at page ' + pageNumber });
+                    return;
+                }
+                if (pageNumber < pages-1) {
+                    writePage(pageNumber+1,data);
+                } else {
+                    verifyProgramming();
+                }
+            });
+        }
+        
+        var verifyProgramming = function() {
+        }
+        
         var exitProgramming = function() {
+            // Leave programming mode
             write("L", 1, 100, function(resp) {
                 if (resp.status != 'OK') {
                     socket.sendDataToFrontend( { 'status': 'Error: board did not leave programming mode' });
@@ -241,8 +283,10 @@ define(function(require) {
                     socket.sendDataToFrontend( { 'status': 'Error: bad response from board when leaving programming mode' });
                     return;
                 }
-                // We are good now, start programming:
                 socket.sendDataToFrontend( { 'status': 'Success: board left programming mode' });
+                // Exit Bootloader
+                write("E", 1, 100, function(resp) {
+                });
             });
         };
 
