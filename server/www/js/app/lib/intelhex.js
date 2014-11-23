@@ -1,7 +1,7 @@
 /**
  *  IntelHex parser.
  *
- * Some code from https://github.com/bminer/intel-hex.js/blob/master/index.js (MIT License)
+ * Algorithm from https://github.com/bminer/intel-hex.js/blob/master/index.js (MIT License)
  *
  * Adapted for proper Javascript ArrayBuffers
  *

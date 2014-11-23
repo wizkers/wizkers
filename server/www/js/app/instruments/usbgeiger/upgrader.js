@@ -1,4 +1,7 @@
 /*
+ *  An firmware upgrader interface for the Geiger Link.
+ *
+ *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
  */
@@ -9,6 +12,8 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         utils   = require('app/utils'),
+        abu = require('app/lib/abutils'),
+        intelhex = require('app/lib/intelhex'),
         template = require('js/tpl/instruments/USBGeigerUpgrader.js');
     
     // Upgrader view
@@ -28,7 +33,7 @@ define(function(require) {
         },
         
         onClose: function() {
-            console.log("Upgraded view closing...");
+            console.log("Upgrader view closing...");
             linkManager.off('input', this.showInput);
             instrumentManager.stopUploader();
         },
@@ -52,8 +57,17 @@ define(function(require) {
                     };
                     reader.onloadend = function(e) {
                         self.firmware = e.target.result;
-                        //console.log(self.firmware);
-                        //console.log(abu.hexdump(intelhex.parse(self.firmware).data));
+                        try {
+                            intelhex.parse(self.firmware).data;
+                            utils.showAlert('Success', 'Firmware seems valid, click on "Upgrade Firmware" to start the upgrade.',
+                                           'bg-success');
+                            $("#device_upgrade",self.el).attr('disabled', false).removeClass('btn-danger').addClass('btn-success');
+                            
+                        } catch (e) {
+                            utils.showAlert('Error', 'Invalid firmware file, are you sure you picked the right ".hex" firmware file?',
+                                            'bg-danger');
+                        }
+                        
                     };
                     reader.readAsText(file);
                 });
@@ -62,10 +76,11 @@ define(function(require) {
         
         go: function() {
             if (this.firmware.length == 0) {
-                utils.showAlert('Error', 'No file selected', 'alert-danger');
+                utils.showAlert('Error', 'No file selected', 'bg-danger');
                 return;
             }
             utils.hideAlert();
+            utils.showAlert('Info', "Starting upgrade, please wait", 'bg-info');
             // Switch to our uploader driver
             instrumentManager.startUploader();
             // Wait until we get a confirmation of driver change and
@@ -90,9 +105,21 @@ define(function(require) {
             // Autoscroll:
             i.scrollTop(i[0].scrollHeight - i.height());
             
+            // The backend issues a sw_version string as soon as
+            // the bootloader is online, we take this as a cue to upload
+            // the firmware to the device.
             if (data.sw_version) {
                 linkManager.sendCommand({'upload_hex': this.firmware});
-            }
+            } else if (data.writing) {
+                $("#prog-flash",this.el).width(Math.ceil((data.writing.current/data.writing.total)*100) + "%");
+            } else if (data.verifying) {
+                $("#prog-flash",this.el).width(Math.ceil((data.verifying.current/data.verifying.total)*100) + "%");
+            } else if (data.run_mode) {
+                if (data.run_mode == 'firmware')
+                    utils.showAlert('Success','Firmware Upgrade was successful, device is restarting', 'bg-success');
+            } else if (data.status) {
+                utils.showAlert('Info', data.status, 'bg-info');
+            } 
         }
     });
 });

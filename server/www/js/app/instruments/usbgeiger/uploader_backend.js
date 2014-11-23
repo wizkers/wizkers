@@ -1,5 +1,9 @@
 /*
- * Browser-side Parser for IMI Geiger Link devices (firmware uploader).
+ *  An firmware upgrader interface for the Geiger Link.
+ *
+ * This is actually a generic Arduino Leo-compatible AVR109-like
+ * protocol implementation, and can be used with other devices too.
+ *
  *
  * This Browser-side parser is used when running as a Chrome or Cordova app.
  * 
@@ -20,16 +24,15 @@ define(function(require) {
         var portOpenCallback = null;
         var portPath = "";
         
-        var AVR = {
-            SOFTWARE_ID:        0x53,
-            SOFTWARE_VERSION:   0x56,
-            ENTER_PROGRAM_MODE: 0x50,
-            LEAVE_PROGRAM_MODE: 0x4c,
-            SET_ADDRESS:        0x41,
-            WRITE:              0x42,
-            TYPE_FLASH:         0x46,
-            EXIT_BOOTLOADER:    0x45,
-            READ_PAGE:          0x67,
+        var AVR109 = {
+            SET_ADDRESS:            "A",
+            WRITE_PAGE:             "B",
+            EXIT_BOOTLOADER:        "E",
+            LEAVE_PROGRAMMING_MODE: "L",
+            ENTER_PROGRAMMING_MODE: "P",
+            SOFTWARE_ID:            "S",
+            SOFTWARE_VERSION:       "V",
+            READ_PAGE:              "g",
         };
         
         var inputBuffer = new Uint8Array(1024); // Receive buffer
@@ -45,16 +48,16 @@ define(function(require) {
          */
         var onOpenPort = function(openInfo) {
             if (!openInfo) {
-                console.log("[Geiger Link uploader] Open Failed");
+                console.log("[AVR109 uploader] Open Failed");
                 return;
             }
             var cid = openInfo.connectionId;
             // Wait 500ms and close the port
-            console.log("[stk500] Opened port at 1200");
+            console.log("[avr109] Opened port at 1200");
             setTimeout(function() {
                 chrome.serial.disconnect( cid, function(success) {
                     // And reopen right away, at 115200 baud:
-                    console.log("[stk500] Closed port at 1200, reopening " + portPath + " at 57600");
+                    console.log("[avr109] Closed port at 1200, reopening " + portPath + " at 57600");
                     // 800ms is an empirical delay that gives the Arduino time to start the bootloader
                     // The right way would be to detect the port properly
                     setTimeout( function() {
@@ -101,7 +104,7 @@ define(function(require) {
         // forwards the data to the app through a 'serialEvent' event.
         this.format = function(data) {
             var d = new Uint8Array(data);
-            console.log(d);
+            //console.log(d);
             inputBuffer.set(new Uint8Array(data),ibIdx);
             ibIdx += data.byteLength;
             
@@ -122,7 +125,7 @@ define(function(require) {
         // use it as the entry point for higher level commands
         // coming from the front-end, such as firmware upload etc...
         this.output = function(data) {
-            console.log(data);
+            //console.log(data);
             if (data.upload_hex) {
                 // We got an IntelHex file to upload to the board
                 var bindata = intelhex.parse(data.upload_hex).data;
@@ -142,23 +145,27 @@ define(function(require) {
          */
         this.onOpen =  function(success) {
             console.log("We have the board in uploader mode now");
-            write("S",7,300,getSWVersion);
+            write(AVR109.SOFTWARE_ID,7,300,getSWVersion);
         };
         
     
         // Not used
         this.onClose = function(success) {
-            console.log("USB Geiger in-browser Driver: got a port close signal");
+            console.log("ARV109 upgrader: got a port close signal");
         };
         
         ///////////////////////////////////
         //  Private methods
         ///////////////////////////////////
         
-        // data : the data to write (string)
-        // btr: bytes to read, the number of bytes we expect in response
-        // delay: a timeout before calling the callback with an error message
-        // callback: function that expects the response
+        /**
+         * Write data, with the number of bytes expected in return,
+         * a timeout and a callback
+         * data : the data to write (string)
+         * btr: bytes to read, the number of bytes we expect in response
+         * delay: a timeout before calling the callback with an error message
+         * callback: function that expects the response
+         */
         var write = function(data, btr, delay, callback) {
             readCb = callback;
             bytesExpected = btr;
@@ -175,8 +182,8 @@ define(function(require) {
                             data: '' });
                 }
             }
-            console.log("Writing data");
-            console.log(data);
+            // console.log("Writing data");
+            // console.log(data);
             watchdog = setTimeout(to, delay);
             socket.emit('rawCommand',data);
         }
@@ -199,13 +206,13 @@ define(function(require) {
             }
             
             // Now enter program mode on the board:
-            write("P", 1, 100, function(resp) {
+            write(AVR109.ENTER_PROGRAMMING_MODE, 1, 100, function(resp) {
                 if (resp.status != 'OK' || resp.data[0] != 0x0d) {
                     socket.sendDataToFrontend( { 'status': 'Error: board did not enter programming mode' });
                     return;
                 }
                 // We are good now, start programming:
-                writePage(address,data);
+                setAddress(address,data);
             });
         };
         
@@ -227,6 +234,7 @@ define(function(require) {
                     return;
                 }
                 // We are good now, write our pages:
+                socket.sendDataToFrontend( { 'status': 'Flashing firmware.' });
                 writePage(0,data,address);
             });
         };
@@ -246,7 +254,7 @@ define(function(require) {
             packet[3] = 70; // 'F' (flash memory)
             // Copy the page to write into the buffer:
             packet.set(data.subarray(pageNumber*128, (pageNumber+1)*128),4);
-            console.log(abu.hexdump(packet));
+            //console.log(abu.hexdump(packet));
             write(packet, 1, 200, function(resp) {
                 if (resp.status != 'OK'  || resp.data[0] != 0x0d) {
                     socket.sendDataToFrontend( { 'status': 'Error: error while writing flash at page ' + pageNumber });
@@ -273,6 +281,7 @@ define(function(require) {
                     return;
                 }
                 // We are good now, write our pages:
+                socket.sendDataToFrontend( { 'status': 'Verifying firmware.' });
                 verifyPage(0,data);
             });
 
@@ -300,7 +309,7 @@ define(function(require) {
                         return;
                     }
                 }
-                console.log("Page " + pageNumber + " verified OK");
+                //console.log("Page " + pageNumber + " verified OK");
                 if (pageNumber < pages-1) {
                     verifyPage(pageNumber+1,data);
                 } else {
@@ -314,19 +323,19 @@ define(function(require) {
         
         var exitProgramming = function() {
             // Leave programming mode
-            write("L", 1, 100, function(resp) {
+            write(AVR109.LEAVE_PROGRAMMING_MODE, 1, 100, function(resp) {
                 if (resp.status != 'OK'  || resp.data[0] != 0x0d) {
                     socket.sendDataToFrontend( { 'status': 'Error: board did not leave programming mode' });
                     return;
                 }
                 socket.sendDataToFrontend( { 'status': 'Success: board left programming mode' });
                 // Exit Bootloader
-                write("E", 1, 100, function(resp) {
+                write(AVR109.EXIT_BOOTLOADER, 1, 100, function(resp) {
                 if (resp.status != 'OK'  || resp.data[0] != 0x0d) {
                     socket.sendDataToFrontend( { 'status': 'Error: board did not exit bootloader' });
                     return;
                 }
-                socket.sendDataToFrontend( { status: 'Success: board left bootloader mode', run_mode: 'firmware' });
+                socket.sendDataToFrontend( { status: 'Success: Firmware upgrade successful', run_mode: 'firmware' });
                 });
             });
         };

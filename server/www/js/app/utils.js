@@ -48,7 +48,7 @@ define(function(require) {
         },
 
         showAlert: function(title, text, klass) {
-            $('.alert').removeClass("alert-error alert-warning alert-success alert-info");
+            $('.alert').removeClass("alert-error alert-warning alert-success alert-info bg-error bg-warning bg-success bg-info bg-danger alert-danger");
             $('.alert').addClass(klass);
             $('.alert').html('<strong>' + title + '</strong> ' + text);
             $('.alert').show();
