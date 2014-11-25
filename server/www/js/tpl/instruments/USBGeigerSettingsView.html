@@ -74,7 +74,7 @@
                     <span class="input-group-addon">Dead time factor input 1</span>
                     <input id="deadtime1" value="" class="form-control" type="text" maxlength="32">
                     <span class="input-group-btn">
-                            <button class="btn btn-default" id="deadset" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                            <button class="btn btn-default" id="deadset1" type="button"><span class="glyphicon glyphicon-check"></span></button>
                     </span>
                  </div>  
                 </div>
@@ -83,7 +83,7 @@
                     <span class="input-group-addon">Dead time factor input 2</span>
                     <input id="deadtime2" value="" class="form-control" type="text" maxlength="32">
                     <span class="input-group-btn">
-                            <button class="btn btn-default" id="deadset" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                            <button class="btn btn-default" id="deadset2" type="button"><span class="glyphicon glyphicon-check"></span></button>
                     </span>
                  </div>  
                 </div>
@@ -96,11 +96,11 @@
         <div class="col-md-12">
         <div class="form-horizontal" id="window_settings">
             <div class="form-group">
-                <label class="col-md-3 control-label">Counter windows:</label>
+                <label class="col-md-2 control-label">Counter windows:</label>
                 <div class="col-md-3">
                 <button class="btn btn-info windows-update" title="Update" type="button" ><span class="glyphicon glyphicon-save">     </span>&nbsp;Save</button>
                 </div>
-                <div class="col-md-6"><span id="windows_warn"></span></div>
+                <div class="col-md-7"><span id="windows_warn"></span></div>
             </div>
             <div class="form-group">
             <div class="col-md-2" style="text-align:center;">
@@ -232,16 +232,26 @@
         <div class="col-md-12">
         <div class="form-horizontal" id="output_control">
             <div class="form-group">
-                <label class="col-md-3 control-label">Auxiliary port:</label>
-                <div class="checkbox col-md-3">
+                <label class="col-md-2 control-label">Auxiliary port:</label>
+                <div class="checkbox col-md-1">
                     <label>
                         <input  id="aux_enable" type="checkbox"> Enable
                     </label>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                 <div class="input-group input-margin">
                     <span class="input-group-addon">Baudrate</span>
                     <input id="aux_baudrate" disabled value="" class="form-control" type="text" maxlength="32">
+                 </div>  
+                </div>
+                <label class="col-md-3 control-label">Serial output rate (sec.):</label>
+                <div class="col-md-3">
+                <div class="input-group input-margin">
+                    <input id="output_rate" value="" class="form-control" type="text" maxlength="32">
+                    <span class="input-group-btn">
+                            <button class="btn btn-default" id="rateset" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                    </span>
+
                  </div>  
                 </div>
 

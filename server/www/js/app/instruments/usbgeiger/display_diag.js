@@ -27,10 +27,14 @@ define(function(require) {
             "click .refresh": "refresh",
             "click #cmdsend": "sendcmd",
             "keypress input#manualcmd": "sendcmd",
-            "click #deadset": "setdeadtime",
-            "keypress input#deadtime" : "setdeadtime",
+            "click #deadset1": "setdeadtime",
+            "keypress input#deadtime1" : "setdeadtime",
+            "click #deadset2": "setdeadtime2",
+            "keypress input#deadtime2" : "setdeadtime2",
             "change #output_control input": "setup_outputs",
             "click .windows-update" : "save_windows",
+            "click #rateset": "rateset",
+            "keypress input#output_rate" : "rateset",
             "change #aux_enable": "setup_auxport"
         },
 
@@ -124,10 +128,22 @@ define(function(require) {
         
         setdeadtime: function(event) {
             // We react both to button press & Enter key press
-            if ((event.target.id == "deadtime" && event.keyCode==13) || (event.target.id != "deadtime"))
-                linkManager.sendCommand("F:" + $('#deadtime',this.el).val());
+            if ((event.target.id == "deadtime1" && event.keyCode==13) || (event.target.id != "deadtime1"))
+                linkManager.sendCommand("F:" + $('#deadtime1',this.el).val());
         },
 
+        setdeadtime2: function(event) {
+            // We react both to button press & Enter key press
+            if ((event.target.id == "deadtime2" && event.keyCode==13) || (event.target.id != "deadtime2"))
+                linkManager.sendCommand("G:" + $('#deadtime2',this.el).val());
+        },
+
+        rateset: function(event) {
+            // We react both to button press & Enter key press
+            if ((event.target.id == "output_rate" && event.keyCode==13) || (event.target.id != "output_rate"))
+                linkManager.sendCommand("R:" + $('#output_rate',this.el).val());
+        },
+        
         setdevtag: function(event) {
             if ((event.target.id == "devname" && event.keyCode==13) || (event.target.id != "devname"))
                 linkManager.driver.setdevicetag($('#devname',this.el).val());
@@ -151,6 +167,8 @@ define(function(require) {
             } else if (data.version != undefined) {
                 $('#version',this.el).html(data.version);
                 linkManager.driver.guid();
+            } else if (data.output_rate != undefined) {
+                $("#output_rate",this.el).val(data.output_rate[0]);
             } else if (data.cpm_enable != undefined) {
                 $("#cpm_enable",this.el).prop("checked",(data.cpm_enable[0] == "1"));
             } else if (data.dual_enable != undefined) {
