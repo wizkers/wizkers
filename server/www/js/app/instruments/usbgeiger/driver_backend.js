@@ -69,8 +69,10 @@ define(function(require) {
             var resp = data.split(':');
             var jsresp = {};
             if (resp[0] == "CPM") {
-                jsresp.cpm = { value: parseInt(resp[1]) };
-                switch (resp[2]) {
+                var inputs = parseInt(resp[1]);
+                
+                jsresp.cpm = { value: parseInt(resp[2]) };
+                switch (resp[3]) {
                         case 'X':
                         jsresp.cpm.valid = false;
                         break;
@@ -80,12 +82,30 @@ define(function(require) {
                         default:
                         break;
                 }
+                if (inputs == 2) {
+                    jsresp.cpm2 = { value: parseInt(resp[4]) };
+                    switch (resp[5]) {
+                            case 'X':
+                            jsresp.cpm2.valid = false;
+                            break;
+                            case 'V':
+                            jsresp.cpm2.valid = true;
+                            break;
+                            default:
+                            break;
+                    }
+                }
             } else if (data.substr(0,10) == "USB Geiger") {
                 jsresp.version = data;
-            } else if (resp[0] == 'COUNT') {
-                jsresp.count = { value: parseInt(resp[1]),
-                                uptime: parseInt(resp[2])
-                               };
+            } else if (resp[0] == 'COUNTS') {
+                var inputs = parseInt(resp[1]);
+                jsresp.counts = { input1: parseInt(resp[2])};
+                if (inputs == 2) {
+                    jsresp.counts.input2 = parseInt(resp[3]);
+                    jsresp.counts.uptime = parseInt(resp[4]);
+                } else {
+                    jsresp.counts.uptime = parseInt(resp[3]);
+                }   
             }else if (resp.length > 1) {
                 jsresp[resp[0]] = resp.slice(1);
             } else {

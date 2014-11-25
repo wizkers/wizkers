@@ -50,7 +50,8 @@ define(function(require) {
             // In Live view, we fix this at 1 minute. In log management, we will
             // make this configurable
             this.movingAvgPoints = 60;
-            this.movingAvgData = [];  // Note: used for the graph, this stores the result of the moving average
+            this.movingAvgData =  [];  // Note: used for the graph, this stores the result of the moving average
+            this.movingAvgData2 = [];  // Note: used for the graph, this stores the result of the moving average
 
             this.prevStamp = 0;
 
@@ -120,20 +121,20 @@ define(function(require) {
             */
         },
 
-        movingAverager: function(newpoint) {
+        movingAverager: function(newpoint, buffer) {
             
-            this.movingAvgData.push(newpoint);
+            buffer.push(newpoint);
 
             // Keep our data to the length we want
-            if (this.movingAvgData.length >= this.movingAvgPoints)
-                this.movingAvgData = this.movingAvgData.slice(1);
+            if (buffer.length >= this.movingAvgPoints)
+                buffer = buffer.slice(1);
 
             // Now compute the average
             var avg = 0;
-            for (var i= 0; i < this.movingAvgData.length; i++) {
-                avg += this.movingAvgData[i];
+            for (var i= 0; i < buffer.length; i++) {
+                avg += buffer[i];
             }
-            return avg/this.movingAvgData.length;
+            return avg/buffer.length;
             
         },
 
@@ -192,9 +193,17 @@ define(function(require) {
                     var cpm = parseFloat(data.cpm.value);
                     
                     this.plot.appendPoint({'name': "CPM", 'value': cpm});
-                    this.plot.appendPoint({'name': "AVG", 'value': this.movingAverager(cpm) });
+                    this.plot.appendPoint({'name': "AVG", 'value': this.movingAverager(cpm, this.movingAvgData) });
 
                 }
+                if (data.cpm2 != undefined) {
+                    var cpm2 = parseFloat(data.cpm2.value);
+                    
+                    this.plot.appendPoint({'name': "CPM2", 'value': cpm2});
+                    this.plot.appendPoint({'name': "AVG2", 'value': this.movingAverager(cpm, this.movingAvgData2) });
+
+                }
+
             } 
         },
     });

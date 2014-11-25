@@ -1,8 +1,14 @@
 <span class="label label-danger" id="readingvalid" style="float:right;">INVALID</span>
+<div style="display:none" class="dual_input">
+<span class="label label-danger" id="readingvalid_2" style="float:right;">INVALID</span>
+</div>
 <h4 >Live reading</h4>
 <br>
 
 <span class="bigreading" id="livecpm">00.000</span> CPM<br>
+<div style="display:none" class="dual_input">
+<span class="bigreading" id="livecpm_2">00.000</span> CPM<br>
+</div>
 <!--
     We do not know exactly how to convert CPM to uSv correctly, so we need
    to remove this for now
@@ -16,14 +22,29 @@
 <ul>
 <li>Max:&nbsp;<span id="maxreading">00</span></li>
 <li>Min:&nbsp;<span id="minreading">00</span></li>
-<!-- <li>Accumulated:<span id="accreading">00</span></li> -->
 </ul>
+
+<div style="display:none" class="dual_input">
+<p>Input 2:</p>
+<ul>
+<li>Max:&nbsp;<span id="maxreading_2">00</span></li>
+<li>Min:&nbsp;<span id="minreading_2">00</span></li>
+</ul>
+</div>
 
 <div style="display:none" id="total_count">
     <h4>Total pulse counts</h4>
+    <p>Duration: <span id="pulse_count_duration"></span>
+    </p>
     <ul>
         <li>Counts: <span id="total_pulse_count"></span></li>
-        <li>Duration: <span id="pulse_count_duration"></span></li>
         <li>Average: <span id="pulse_count_avg"></span></li>
     </ul>
+<div style="display:none" class="dual_input">
+    <h4>Input 2</h4>
+    <ul>
+        <li>Counts: <span id="total_pulse_count_2"></span></li>
+        <li>Average: <span id="pulse_count_avg_2"></span></li>
+    </ul>
+</div>    
 </div>

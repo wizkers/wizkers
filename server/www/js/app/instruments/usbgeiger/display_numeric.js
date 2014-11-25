@@ -23,6 +23,8 @@ define(function(require) {
             this.sessionStartStamp = new Date().getTime();
             this.maxreading = 0;
             this.minreading = -1;
+            this.maxreading_2 = 0;
+            this.minreading_2 = -1;
             this.valid = false;
             this.validinit = false;
             linkManager.on('input', this.showInput, this);
@@ -48,8 +50,7 @@ define(function(require) {
             if (data.cpm) {
                 var cpm = parseFloat(data.cpm.value);
                 $('#livecpm', this.el).html(cpm.toFixed(3));
-                $('#liveusvh', this.el).html((cpm*0.00294).toFixed(3) + "&nbsp;&mu;Sv/h");
-
+                //$('#liveusvh', this.el).html((cpm*0.00294).toFixed(3) + "&nbsp;&mu;Sv/h");
                 if (data.cpm.valid)
                      $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('VALID');
                 else
@@ -67,13 +68,42 @@ define(function(require) {
                     this.minreading = cpm;
                     $('#minreading', this.el).html(cpm);
                 }
-            } else if (data.count) {
+                
+                if (data.cpm2) {
+                    $('.dual_input', this.el).show();
+                    cpm = parseFloat(data.cpm2.value);
+                    $('#livecpm_2', this.el).html(cpm.toFixed(3));
+                    //$('#liveusvh', this.el).html((cpm*0.00294).toFixed(3) + "&nbsp;&mu;Sv/h");
+                    if (data.cpm2.valid)
+                         $('#readingvalid_2', this.el).removeClass('label-danger').addClass('label-success').html('VALID (2)');
+                    else
+                        $('#readingvalid_2', this.el).removeClass('label-success').addClass('label-danger').html('INVALID (2)');
+
+                    if (cpm > this.maxreading_2) {
+                        this.maxreading_2 = cpm;
+                        $('#maxreading_2', this.el).html(cpm);
+                    }
+                    if (cpm < this.minreading_2 || this.minreading_2 == -1) {
+                        this.minreading_2 = cpm;
+                        $('#minreading_2', this.el).html(cpm);
+                    }
+
+                } else {
+                    $('.dual_input', this.el).hide();
+                }
+                
+            } else if (data.counts) {
                 $('#total_count', this.el).show();
-                var count = data.count.value; // Note: should be an integer in the json structure
-                var duration = data.count.uptime/1000;
+                var count = data.counts.input1; // Note: should be an integer in the json structure
+                var duration = data.counts.uptime/1000;
                 $('#total_pulse_count', this.el).html(count);
                 $('#pulse_count_duration', this.el).html(utils.hms(duration));
                 $('#pulse_count_avg',this.el).html((count/duration*60).toFixed(3) + " CPM");
+                if (data.counts.input2) {
+                    count = data.counts.input2;
+                    $('#total_pulse_count_2', this.el).html(count);
+                    $('#pulse_count_avg_2',this.el).html((count/duration*60).toFixed(3) + " CPM");
+                }
             }
 
         },
