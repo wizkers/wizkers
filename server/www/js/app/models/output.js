@@ -15,7 +15,8 @@ define(function(require) {
         Backbone = require('backbone');
 
     if (vizapp.type == "cordova" || vizapp.type == "chrome") {
-        Backbone.LocalStorage = require('localstorage');
+        require(['localstorage'], function(loc) {
+            Backbone.LocalStorage = loc; });
     }
     
     var Output = Backbone.Model.extend({

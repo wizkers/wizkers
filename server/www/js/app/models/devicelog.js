@@ -17,9 +17,12 @@ define(function(require) {
     var bidb = null;
 
     if (vizapp.type == "cordova") {
-        Backbone.LocalStorage = require('localstorage');
+        require(['localstorage'], function(loc) {
+            Backbone.LocalStorage = loc;
+        });
     } else if (vizapp.type == "chrome") {
-        var bidb = require('bbindexeddb');
+        require(['bbindexeddb'],function(bb) {
+            bidb = bb;});
     }
     
     var logs_database = {
