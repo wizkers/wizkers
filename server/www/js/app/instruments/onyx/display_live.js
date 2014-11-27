@@ -200,7 +200,7 @@ define(function(require) {
                     var cpm2 = parseFloat(data.cpm2.value);
                     
                     this.plot.appendPoint({'name': "CPM2", 'value': cpm2});
-                    this.plot.appendPoint({'name': "AVG2", 'value': this.movingAverager(cpm, this.movingAvgData2) });
+                    this.plot.appendPoint({'name': "AVG2", 'value': this.movingAverager(cpm2, this.movingAvgData2) });
 
                 }
 
