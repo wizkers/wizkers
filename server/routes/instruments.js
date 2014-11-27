@@ -58,7 +58,7 @@ exports.addInstrument = function(req, res) {
                 res.send({'error':'An error has occurred'});
             } else {
                 console.log('Success: ' + JSON.stringify(result));
-                res.send(result);
+                res.send({ _id: result.id, _rev: result.rev});
             }
     });    
 };

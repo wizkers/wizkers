@@ -5,8 +5,7 @@
  * All rights reserved.
  */
 
-var mongoose = require('mongoose'),
-    querystring = require('querystring'),
+var querystring = require('querystring'),
     utils = require('../utils.js'),
     http = require('http');
 
