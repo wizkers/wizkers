@@ -14,11 +14,6 @@ define(function(require) {
         Devicelog = require('app/models/devicelog'),
         Output = require('app/models/output');
 
-    if (vizapp.type == "cordova" || vizapp.type == "chrome") {
-        require(['localstorage'], function(loc) {
-            Backbone.LocalStorage = loc; });
-    }
-    
     var logs_database = {
         id: "wizkers-logs",
         description: "Wizkers device logs",
@@ -59,7 +54,7 @@ define(function(require) {
                 if (vizapp.type == "cordova") {
                     this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
                 } else if (vizapp.type == "chrome") {
-                    this.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument");
+                    this.chromeStorage = new Backbone.ChromeStorage("org.aerodynes.vizapp.Instrument");
                 } else {
                     this.urlRoot = "/instruments";
                 }
@@ -92,7 +87,7 @@ define(function(require) {
                     this.logs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
                     this.outputs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Outputs-" + this.id);
                 } else if (vizapp.type == "chrome") {
-                    this.outputs.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Outputs-" + this.id);
+                    this.outputs.chromeStorage = new Backbone.ChromeStorage("org.aerodynes.vizapp.Outputs-" + this.id);
                     //this.logs.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
                     this.logs.database = logs_database;
                     this.logs.storeName = "logs";
@@ -151,7 +146,7 @@ define(function(require) {
                 if (vizapp.type == "cordova") {
                     this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
                 } else if (vizapp.type =="chrome") {
-                    this.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
+                    this.chromeStorage = new Backbone.ChromeStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
                 } else {
                     this.url = "/instruments";
                 }

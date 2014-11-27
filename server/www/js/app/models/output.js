@@ -13,11 +13,6 @@ define(function(require) {
     
     var $   = require('jquery'),
         Backbone = require('backbone');
-
-    if (vizapp.type == "cordova" || vizapp.type == "chrome") {
-        require(['localstorage'], function(loc) {
-            Backbone.LocalStorage = loc; });
-    }
     
     var Output = Backbone.Model.extend({
 

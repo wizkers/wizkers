@@ -19,7 +19,7 @@ require.config({
         // we can upgrade easily
         jquery: 'lib/jquery-1.11.0',
         backbone: 'lib/backbone-1.1.2',
-        localstorage: 'lib/backbone.chromestorage',
+        chromestorage: 'lib/backbone.chromestorage',
         bbindexeddb: 'lib/backbone-indexeddb',
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',
@@ -119,7 +119,7 @@ var vizapp = {
 var router;
 
 require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instruments/instrumentmanager', 'app/linkmanager',
-         'app/outputs/outputmanager', 'app/models/instrument'], function($, Backbone, Router, Settings,InstrumentManager,
+         'app/outputs/outputmanager', 'app/models/instrument', 'chromestorage'], function($, Backbone, Router, Settings,InstrumentManager,
                                                                           LinkManager, OutputManager, Instrument) {
        // Get our settings here, and
         // share them afterwards, rather than requesting it

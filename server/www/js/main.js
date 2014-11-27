@@ -20,7 +20,7 @@ require.config({
         // we can upgrade easily
         jquery: 'lib/jquery-1.11.0',
         backbone: 'lib/backbone-1.1.2',
-        localstorage: 'lib/backbone.localStorage-1.1.7',
+        localstorage: 'lib/backbone.localStorage-1.1.14',
 
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',

@@ -16,11 +16,7 @@ define(function(require) {
         Backbone = require('backbone');
     var bidb = null;
 
-    if (vizapp.type == "cordova") {
-        require(['localstorage'], function(loc) {
-            Backbone.LocalStorage = loc;
-        });
-    } else if (vizapp.type == "chrome") {
+    if (vizapp.type == "chrome") {
         require(['bbindexeddb'],function(bb) {
             bidb = bb;});
     }
