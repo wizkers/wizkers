@@ -20,6 +20,7 @@
  */
 var serialport = require('serialport'),
     SerialPort  = serialport.SerialPort,
+    PouchDB = require('pouchdb'),
     flash = require('connect-flash');
 
 
@@ -52,28 +53,12 @@ deviceTypes.push(Elecraft);
 var USBGeiger = require('./parsers/usb_geiger.js');
 deviceTypes.push(USBGeiger);
 
-/**
- * Debug: get a list of available serial
- * ports on the server - we'll use this later
- * to populate options on controller settings
- * on the application
- */
-serialport.list(function (err, ports) {
-    ports.forEach(function(port) {
-      console.log(port.comName);
-      console.log(port.pnpId);
-      console.log(port.manufacturer);
-    });
-  });
 
 /**
  * Setup Db connection before anything else
  */
-require('./db.js');
-var mongoose = require('mongoose');
-var Instrument = mongoose.model('Instrument');
-var User = mongoose.model('User');
-var Settings = mongoose.model('Settings');
+// Returns an object containing all databases we use
+var dbs = require('./pouch-config.js');
 
 
 /**
@@ -123,23 +108,26 @@ app.configure(function () {
 
 
 // Before starting our server, make sure we reset any stale authentication token:
-Settings.findOne({}, function(err, item) {
+dbs.settings.get('coresettings', function (err, item) {
+    console.log(item);
     if (err) {
         console.log('Issue finding my own settings ' + err);
     }
     if (item == null) {
-      item = new Settings(); // First run
+      item = dbs.defaults.settings;
     }
-    console.log("Settings ID: " + item._id);
+
     item.token = "_invalid_";
-    item.save(function(err) {
+    dbs.settings.put(item, 'coresettings', function(err,response) {
         if (err) {
             console.log('***** WARNING ****** Could not reset socket.io session token at server startup');
             console.log(err);
             return;
         }
+        console.log(response);
         server.listen(8090);
     });
+    
 });
 
 
@@ -179,18 +167,16 @@ app.get ('/',
 
 app.get('/login', function(req, res) {
     // Before logging in, we need to make sure there are users defined on our system.
-    // Checking this each time has a marginal performance hit on the server, but we
-    // are not designed to handle huge loads since this runs on a small embedded Linux
-    // or a laptop - just a couple of users altogether.
-    User.find({}, function(err, users) {
-      if (users.length == 0) {
-        var adm = new User();
+    dbs.users.info( function(err, info) {
+      if (info.doc_count == 0) {
+        var adm = dbs.defaults.user;
         adm.local.email = "admin";
-        adm.local.password = adm.generateHash('admin');
+        adm.local.password = dbs.utils.users.generateHash('admin');
         adm.role = 'admin';
-        adm.save(function(err) {
+        dbs.users.post(adm, function(err, response) {
            if (err)
-              console.log("Error during first user creation");
+                console.log("Error during first user creation " + err);
+            console.log(response);
             res.render('login.ejs', { message: 'Welcome! Your default login/password is admin/admin'  });
        });
       } else {
