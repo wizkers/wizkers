@@ -18,15 +18,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var mongoose = require('mongoose');
-var Output = mongoose.model('Output');
+var dbs = require('../pouch-config');
 
 // Get all outputs for a given instrument
 exports.findByInstrumentId = function(req, res) {
     var id = req.params.id;
     console.log('Retrieving Outputs for Instrument ID: ' + id);
-    Output.find({ instrumentid: id} , function(err,items) {
-        res.send(items);
+    
+    // TODO
+    //  - Move to persistent queries (http://pouchdb.com/guides/queries.html)
+    //  - Update entries count in the log (views ??)
+    dbs.outputs.query(function(doc) {
+        emit(doc.instrumentid);
+    }, {key: id, include_docs:true}, function(err,items) {
+        if (err && err.status == 404) {
+            res.send([]);
+            return;
+        }
+        console.log(items);
+        var resp = [];
+        for (item in items.rows) {
+            console.log(item);
+            resp.push(items.rows[item].doc) ;
+        }
+        res.send(resp);
     });
 };
 
@@ -34,7 +49,12 @@ exports.findByInstrumentId = function(req, res) {
 exports.findById = function(req, res) {
     var id = req.params.id;
     console.log('Retrieving output: ' + id);
-    Output.findById(id, function(err,item) {
+    dbs.outputs.get(id, function(err,item) {
+        if (err && err.status == 404) {
+            res.send([]);
+            return;
+        }
+        console.log(item);
         res.send(item);
     });
 };
@@ -44,7 +64,7 @@ exports.findById = function(req, res) {
 exports.addOutput = function(req, res) {
     var output = req.body;
     console.log('Adding output: ' + JSON.stringify(output));
-    new Output(output).save( function(err, result) {
+    dbs.outputs.post(output, function(err, result) {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
@@ -58,31 +78,38 @@ exports.addOutput = function(req, res) {
 exports.updateOutput = function(req, res) {
     var id = req.params.id;
     var output = req.body;
-    console.log(JSON.stringify(output));
-    delete output._id;
     console.log('Updating output: ' + id);
-    console.log(JSON.stringify(output));
-    Output.findByIdAndUpdate(id, output, {safe:true}, function(err, result) {
+    console.log(JSON.stringify(output));    
+    dbs.outputs.put(req.body, function(err, result) {
             if (err) {
                 console.log('Error updating output: ' + err);
                 res.send({'error':'An error has occurred'});
             } else {
-                console.log('' + result + ' output was updated');
+                console.log('' + result + ' document(s) updated');
                 res.send(result);
             }
-    });    
+    });
 }
 
 exports.deleteOutput = function(req, res) {
     var id = req.params.id;
     console.log('Deleting output: ' + id);
-    Output.findByIdAndRemove(id, {safe:true}, function(err,result) {
-            if (err) {
-                res.send({'error':'An error has occurred - ' + err});
-            } else {
-                console.log('' + result + ' output deleted');
-                res.send(req.body);
-            }
-    });    
+    dbs.outputs.get(id, function(err,ins) {
+        if (err) {
+            console.log('Error - ' + err);
+            res.send({'error':'An error has occurred - ' + err});
+        } else {
+            dbs.outputs.remove(ins, function(err,result) {
+                if (err) {
+                    console.log('Error - ' + err);
+                    res.send({'error':'An error has occurred - ' + err});
+                } else {
+                    console.log('' + result + ' document(s) deleted');
+                    res.send(req.body);
+                }
+            });
+        }
+    });
+
 }
 

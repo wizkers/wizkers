@@ -535,7 +535,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('openinstrument', function(data) {
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
             console.log('Instrument open request for instrument ID ' + data);
-            Instrument.findById(data, function(err,item) {
+            dbs.instruments.get(data, function(err,item) {
                 currentInstrument = item;
                 driver.setInstrumentRef(currentInstrument);
                 openPort(item.port, socket);
@@ -551,7 +551,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('closeinstrument', function(data) {
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
             console.log('Instrument close request for instrument ID ' + data);
-            Instrument.findById(data, function(err,item) {
+            dbs.instruments.get(data, function(err,item) {
                 if(portOpen) {
                     recorder.stopRecording();
                     driver.stopLiveStream();

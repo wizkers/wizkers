@@ -18,18 +18,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var mongoose = require('mongoose');
-var LogSession = mongoose.model('LogSession');
-var DeviceLogEntry = mongoose.model('DeviceLogEntry');
+var dbs = require('../pouch-config');
 var recorder = require('../recorder.js');
 
 // Get all log sessions for a given instrument
 exports.findByInstrumentId = function(req, res) {
     var id = req.params.id;
     console.log('Retrieving Logs for Instrument ID: ' + id);
-    // Refresh number of datapoints for all logs. Won't fix the issue
-    // immediately if logs are broken, but at next display. Hey, better than nothing,
-    // this is a last resort attempt to fix records...
+
+    // TODO
+    //  - Move to persistent queries (http://pouchdb.com/guides/queries.html)
+    //  - Update entries count in the log (views ??)
+    dbs.logs.query(function(doc) {
+        emit(doc.instrumentid);
+    }, {key: id}, function(err,items) {
+        if (err && err.status == 404) {
+            res.send([]);
+            return;
+        }
+        console.log(items);
+        var resp = [];
+        for (item in items.rows) {
+            console.log(item);
+            resp.push(items.rows[item].doc) ;
+        }
+        res.send(resp);
+    });
+
+    /*
     LogSession.find({ instrumentid:id }, function(err,logstofix) {
         var fixEntries = function(log,index,array) {
             DeviceLogEntry.count({logsessionid: log.id}, function(err,count) {
@@ -50,13 +66,19 @@ exports.findByInstrumentId = function(req, res) {
     LogSession.find({ instrumentid: id} , function(err,item) {
         res.send(item);
     });
+    */
 };
 
 // Get a log session
 exports.findById = function(req, res) {
     var id = req.params.id;
     console.log('Retrieving Log session ID: ' + id);
-    LogSession.findById(id, function(err,item) {
+    dbs.logs.get(id, function(err,item) {
+        if (err && err.status == 404) {
+            res.send([]);
+            return;
+        }
+        console.log(item);
         res.send(item);
     });
 }

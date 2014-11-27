@@ -39,14 +39,20 @@ exports.findById = function(req, res) {
 
 exports.findAll = function(req, res) {
     dbs.instruments.allDocs({include_docs: true}, function(err, items) {
-        res.send(items.rows);
+        var resp = [];
+        for (item in items.rows) {
+            console.log(item);
+            resp.push(items.rows[item].doc) ;
+        }
+        console.log(resp);
+        res.send(resp);
     });
 };
 
 exports.addInstrument = function(req, res) {
     var instrument = req.body;
     console.log('Adding instrument: ' + JSON.stringify(instrument));
-    new Instrument(instrument).save( function(err, result) {
+    dbs.instruments.post(req.body, function(err, result) {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
@@ -59,10 +65,9 @@ exports.addInstrument = function(req, res) {
 exports.updateInstrument = function(req, res) {
     var id = req.params.id;
     var instrument = req.body;
-    delete instrument._id;
     console.log('Updating instrument: ' + id);
     console.log(JSON.stringify(instrument));
-    Instrument.findByIdAndUpdate(id, instrument, {safe:true}, function(err, result) {
+    dbs.instruments.put(req.body, function(err, result) {
             if (err) {
                 console.log('Error updating instrument: ' + err);
                 res.send({'error':'An error has occurred'});
@@ -76,14 +81,22 @@ exports.updateInstrument = function(req, res) {
 exports.deleteInstrument = function(req, res) {
     var id = req.params.id;
     console.log('Deleting instrument: ' + id);
-    Instrument.findByIdAndRemove(id, {safe:true}, function(err,result) {
-            if (err) {
-                res.send({'error':'An error has occurred - ' + err});
-            } else {
-                console.log('' + result + ' document(s) deleted');
-                res.send(req.body);
-            }
-    });    
+    dbs.instruments.get(id, function(err,ins) {
+        if (err) {
+            console.log('Error - ' + err);
+            res.send({'error':'An error has occurred - ' + err});
+        } else {
+            dbs.instruments.remove(ins, function(err,result) {
+                if (err) {
+                    console.log('Error - ' + err);
+                    res.send({'error':'An error has occurred - ' + err});
+                } else {
+                    console.log('' + result + ' document(s) deleted');
+                    res.send(req.body);
+                }
+            });
+        }
+    });
 }
     
 exports.uploadPic = function(req,res) {
