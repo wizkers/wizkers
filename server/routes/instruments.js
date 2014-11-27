@@ -25,22 +25,21 @@
  */
 
 
-var mongoose = require('mongoose');
-var Instrument = mongoose.model('Instrument');
+var dbs = require('../pouch-config');
 var fs = require('fs');
 
 
 exports.findById = function(req, res) {
     var id = req.params.id;
     console.log('Retrieving instrument: ' + id);
-    Instrument.findById(id, function(err,item) {
+    dbs.instruments.get(id, function(err,item) {
         res.send(item);
     });
 };
 
 exports.findAll = function(req, res) {
-    Instrument.find({}, function(err, items) {
-        res.send(items);
+    dbs.instruments.allDocs({include_docs: true}, function(err, items) {
+        res.send(items.rows);
     });
 };
 

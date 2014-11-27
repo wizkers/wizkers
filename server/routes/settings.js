@@ -18,38 +18,23 @@
  */
 
 
-var mongoose = require('mongoose');
-var Settings = mongoose.model('Settings');
-
+var dbs = require('../pouch-config');
 
 exports.getSettings = function(req, res) {
-    Settings.findOne({}, function(err, item) {
-        // We have only one settings object, so we find one and that's it.
-        // TODO: make use we handle a case where there would be several ?
-        if (item) {
-            item.currentUserRole = req.user.role;
-            res.send(item);
-        } else {
-            // Create our default settings
-            new Settings().save(function(err, result) {
-                if (err) {
-                    res.send({'error':'An error has occurred creating settings'});
-                } else {
-                    console.log('Default settings created: ' + JSON.stringify(result));
-                    res.send(result);
-                }
-            });
-        }
-     
+    // Note: 'coresettings' always exists since it is created/
+    // refreshed at application startup.
+    dbs.settings.get('coresettings', function(err, item) {
+        item.currentUserRole = req.user.role;
+        res.send(item);
     });
 };
 
 exports.updateSettings = function(req, res) {
     var settings = req.body;
-    delete settings._id;
+    //delete settings._id;
     console.log('Updating settings.');
     console.log(JSON.stringify(settings));
-    Settings.findOneAndUpdate({}, settings, {safe:true}, function(err, result) {
+    dbs.settings.put(settings,function(err, result) {
             if (err) {
                 console.log('Error updating settings: ' + err);
                 res.send({'error':'An error has occurred'});
