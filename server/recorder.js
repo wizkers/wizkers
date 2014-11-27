@@ -5,10 +5,8 @@
  * All rights reserved.
  */
 
-var mongoose = require('mongoose');
-var db = require('./db.js');
-var DeviceLogEntry = mongoose.model('DeviceLogEntry');
-var LogSession = mongoose.model('LogSession');
+var PouchDB = require('pouchdb');
+var dbs = require('./pouch-config');
  
 var recording = false;
 var recordingID = null;
@@ -19,19 +17,17 @@ exports.startRecording = function(id) {
     recordingID = id;    
     recording = true;
     
-    LogSession.findById(recordingID, function(err,session) {
+    dbs.logs.get(recordingID, function(err,session) {
         if (err) {
             console.log("[recorder] Error finding log session. " + err);
         } else {
             session.startstamp = new Date().getTime();
             session.isrecording = true;
-            session.save(function(err) {
+            dbs.logs.put(session, function(err, result) {
                 if (err) console.log("[recorder] Error saving session startstamp. " + err);
             });
         }
-    });
-    
-//    res.send({"recording": true});
+    });    
 };
 
 exports.isRecording = function() {
@@ -48,7 +44,7 @@ exports.stopRecording = function() {
     if (recordingID == null)
         return;
 
-    LogSession.findById(recordingID, function(err, session) {
+    dbs.logs.get(recordingID, function(err, session) {
         if (err) {
             console.log('Error updating log session entry: ' + err);
             res.send({'error':'An error has occurred'});
@@ -69,7 +65,6 @@ exports.stopRecording = function() {
             });
         }
     });
-    // res.send({"recording": false});
 };
     
 

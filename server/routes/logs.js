@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var PouchDB = require('pouchdb');
 var dbs = require('../pouch-config');
 var recorder = require('../recorder.js');
 
@@ -44,29 +45,6 @@ exports.findByInstrumentId = function(req, res) {
         }
         res.send(resp);
     });
-
-    /*
-    LogSession.find({ instrumentid:id }, function(err,logstofix) {
-        var fixEntries = function(log,index,array) {
-            DeviceLogEntry.count({logsessionid: log.id}, function(err,count) {
-                if (err) {
-                    console.log('Error updating log session entry: ' + err);
-                } else {
-                    log.datapoints = count;
-                    console.log("This log has " + count + " datapoints.");
-                    log.save(function(err) {
-                        if (err) console.log("[logs / findInstrumentByID] Error fixing datapoint count for logs");
-                    });
-                }
-            });
-        };
-        logstofix.forEach(fixEntries);        
-    });
-    
-    LogSession.find({ instrumentid: id} , function(err,item) {
-        res.send(item);
-    });
-    */
 };
 
 // Get a log session
@@ -81,7 +59,19 @@ exports.findById = function(req, res) {
         console.log(item);
         res.send(item);
     });
-}
+};
+
+exports.findAll = function(req, res) {
+    dbs.logs.allDocs({include_docs: true}, function(err, items) {
+        var resp = [];
+        for (item in items.rows) {
+            console.log(item);
+            resp.push(items.rows[item].doc) ;
+        }
+        console.log(resp);
+        res.send(resp);
+    });
+};
 
 // Get all entries for a log session. These can be very large,
 // so we have to stream the results back so that we don't get out
@@ -90,6 +80,9 @@ exports.getLogEntries = function(req, res) {
     // Empty for now...
     var id = req.params.id;
     console.log("Retrieving entries of log ID: " + id);
+    // TODO: Now, create a new database that will contain the data points for
+    // this log with the format "datapoints/[log ID]"
+    var db = new PouchDB('./ldb/datapoints/' + result.id);
     var stream = DeviceLogEntry.find({logsessionid: id}).lean().batchSize(500).stream();
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write("[");
@@ -163,21 +156,13 @@ exports.addLogEntry = function(req, res) {
     });
 }
 
-exports.findAll = function(req, res) {
-    LogSession.find({}, function(err, items) {
-        res.send(items);
-    });
-};
-
 // Add a new log session entry
-exports.addEntry = function(req, res) {
+exports.addLog = function(req, res) {
     var entry = req.body;
-    delete entry._id;       // _id is sent from Backbone and is null, we
-                            // don't want that
     var instrumentid = req.params.id;
     entry.instrumentid = instrumentid;
     console.log('Adding log entry for Instrument ID: ' + instrumentid + ' - ' + JSON.stringify(entry));
-    new LogSession(entry).save( function(err, result) {
+    dbs.logs.post(entry, function(err, result) {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {

@@ -304,7 +304,7 @@ app.delete('/instruments/:iid/outputs/:id', isLoggedIn, user.is('operator'), out
  * Interface for managing instrument logs (summary)
  */
 app.get('/instruments/:id/logs', isLoggedIn, deviceLogs.findByInstrumentId);
-app.post('/instruments/:id/logs', isLoggedIn, user.is('operator'), deviceLogs.addEntry);
+app.post('/instruments/:id/logs', isLoggedIn, user.is('operator'), deviceLogs.addLog);
 app.get('/logs/', isLoggedIn, deviceLogs.findAll);
 app.get('/logs/:id', isLoggedIn, deviceLogs.findById);
 app.get('/logs/:id/entries', isLoggedIn, deviceLogs.getLogEntries);

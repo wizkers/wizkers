@@ -51,6 +51,7 @@ exports.findAll = function(req, res) {
 
 exports.addInstrument = function(req, res) {
     var instrument = req.body;
+    console.log(instrument);
     console.log('Adding instrument: ' + JSON.stringify(instrument));
     dbs.instruments.post(req.body, function(err, result) {
             if (err) {
