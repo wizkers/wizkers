@@ -15,6 +15,7 @@
 
 var serialport = require('serialport'),
     recorder = require('../recorder.js'),
+    dbs = require('../pouch-config'),
     outputmanager = require('../outputs/outputmanager.js');
 
 module.exports = {
@@ -206,13 +207,22 @@ module.exports = {
         // Now: sensor addresses are all nice, but what we really want, is a sensor name: look up in our current
         // instrument whether we have a name for the sensor. If no name, use the address as the name.
         var name = this.instrument.metadata[res.sensor_address];
+	console.log("Sensor name: " + name);
         if (name != undefined) {
             res.sensor_name = name;
         } else {
             this.instrument.metadata[res.sensor_address] = res.sensor_address;
-            this.instrument.markModified('metadata');
             res.sensor_name = res.sensor_address;
-            this.instrument.save();
+	    dbs.instruments.get(this.instrument._id, function(err,result) {
+		if (err) {
+			console.log("Error updating sensor name: " + err);
+		}
+		result.metadata[res.sensor_address] = res.sensor_address;
+                dbs.instruments.put(result, function(err, result) {
+			if (err)
+				console.log(err);
+		});
+	  });
         }
         
         // Last: smart detection of battery replacement. When a sensor gets a new battery, it will
