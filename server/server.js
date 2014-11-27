@@ -173,7 +173,8 @@ app.get('/login', function(req, res) {
         adm.local.email = "admin";
         adm.local.password = dbs.utils.users.generateHash('admin');
         adm.role = 'admin';
-        dbs.users.post(adm, function(err, response) {
+        adm._id = 'admin'; // The userID has to be unique, we can use this as the CouchDB ID
+        dbs.users.put(adm, function(err, response) {
            if (err)
                 console.log("Error during first user creation " + err);
             console.log(response);
@@ -221,14 +222,15 @@ app.post('/login', passport.authenticate('local-login', {
     // we are sending the profile in the token
     var token = jwt.sign(profile, 'superSecretYesYesYes' + secret_salt);
 
+    
     // Now store our token into the settings, so that the app can get it when it starts:
-    Settings.findOne({}, function(err, item) {
+    dbs.settings.get('coresettings', function (err, item) {
         if (err) {
             console.log('Issue finding my own settings ' + err);
             res.redirect('/login');
         }
         item.token = token;
-        item.save(function(err) {
+        dbs.settings.put(item, function(err) {
             if (err)
                 res.redirect('/login');
             res.redirect('/');
@@ -242,10 +244,10 @@ app.get('/profile', isLoggedIn, function(req,res) {
     res.render('profile.ejs', { user: req.user, message: '' });
 });
 app.post('/profile', isLoggedIn, function(req,res) {
-     User.findOne({ 'local.email': req.user.local.email }, function(err, record) {
+     dbs.users.get(req.user.local.email, function(err, record) {
          console.log(record);
-         record.local.password = record.generateHash(req.body.password);
-         record.save(function(err) {
+         record.local.password = dbs.utils.users.generateHash(req.body.password);
+         dbs.users.put(record, function(err) {
              var msg  = (err) ? 'Error changing password': 'Password changed';
              res.render('profile.ejs', {user: req.user, message: msg});
          });
@@ -254,23 +256,23 @@ app.post('/profile', isLoggedIn, function(req,res) {
 });
 
 app.get('/admin', isLoggedIn, user.is('admin'), function(req,res) {
-    User.find({}, function(err, users) {
-        res.render('admin.ejs', {user: req.user, users: users, message: '' });
+    dbs.users.allDocs({include_docs:true}, function(err, users) {
+        res.render('admin.ejs', {user: req.user, users: users.rows, message: '' });
     });
 });
 app.post('/admin', isLoggedIn, user.is('admin'), function(req,res) {
     console.log(req.body);
-    User.findOne({_id: req.body.id}, function(err, user) {
+    dbs.users.get( req.body.id, function(err, user) {
         var msg = "Role updated to " + req.body.newrole + " for user " + user.local.email;
         if (err)
             msg = "Someting went wrong, no change was made.";
         
         user.role = req.body.newrole;
-        user.save(function(err) {
+        dbs.users.put(user, function(err) {
             if (err)
                 msg = "Something went wrong, no change was made.";
-            User.find({}, function(err, users) {
-                res.render('admin.ejs', {user: req.user, users: users, message: msg });
+            dbs.users.allDocs({include_docs:true}, function(err, users) {
+                res.render('admin.ejs', {user: req.user, users: users.rows, message: msg });
             });
         });
     });

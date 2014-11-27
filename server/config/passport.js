@@ -105,22 +105,13 @@ module.exports = function(passport) {
     function(req, email, password, done) { // callback with email and password from our form
 		// find a user whose email is the same as the forms email
 		// we are checking to see if the user trying to login already exists
-        var map = function(doc) {
-                emit(doc.local.email)
-                };
-
-        dbs.users.query(map, { key: email, include_docs: true }, function(err, result) {
-            // if there are any errors, return the error before anything else
-            if (err)
-                return done(err);
-            
-            console.log(result);
-            
+        dbs.users.get(email, function(err, user) {
+            // if there are any errors, return the error before anything 
             // if no user is found, return the message
-            if (result.rows.length != 1 )
+            if (err && err.status == 404 )
                 return done(null, false, req.flash('loginMessage', 'Username or password incorrect.'));
                 // req.flash is the way to set flashdata using connect-flash
-            var user = result.rows[0].doc;
+            
             console.log(user);
             
             // if the user is found but the password is wrong
