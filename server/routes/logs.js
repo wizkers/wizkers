@@ -32,7 +32,7 @@ exports.findByInstrumentId = function(req, res) {
     //  - Update entries count in the log (views ??)
     dbs.logs.query(function(doc) {
         emit(doc.instrumentid);
-    }, {key: id}, function(err,items) {
+    }, {key: id, include_docs:true}, function(err,items) {
         if (err && err.status == 404) {
             res.send([]);
             return;
@@ -40,7 +40,6 @@ exports.findByInstrumentId = function(req, res) {
         console.log(items);
         var resp = [];
         for (item in items.rows) {
-            console.log(item);
             resp.push(items.rows[item].doc) ;
         }
         res.send(resp);
@@ -83,7 +82,7 @@ exports.getLogEntries = function(req, res) {
     // TODO: Now, create a new database that will contain the data points for
     // this log with the format "datapoints/[log ID]"
     var db = new PouchDB('./ldb/datapoints/' + result.id);
-    var stream = DeviceLogEntry.find({logsessionid: id}).lean().batchSize(500).stream();
+    var stream = db.allDocs({include_docs: true}).lean().batchSize(500).stream();
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write("[");
     var ok = false;
@@ -178,16 +177,17 @@ exports.updateEntry = function(req, res) {
     var id = req.params.id;
     var iid = req.params.iid;
     var entry = req.body;
-    delete entry._id;
     console.log('Updating log session entry: ' + id + ' for instrument ' + iid);
     console.log(JSON.stringify(entry));
-    
-    LogSession.findByIdAndUpdate(id, entry, {safe:true}, function(err, result) {
+
+    // TODO: error checking on structure !!!
+    //  -> CouchDB validation
+    dbs.logs.put(entry, function(err, result) {
                     if (err) {
                         console.log('Error updating log session entry: ' + err);
                         res.send({'error':'An error has occurred'});
                     } else {
-                        res.send(result);
+                        res.send({ _id: result.id, _rev: result.rev} );
                     }
                 }
                                 );
@@ -208,25 +208,31 @@ exports.deleteLogEntry = function(req, res) {
 }
 
 
-// This deletes a LOG Session (i.e. a collection of log entries)
-exports.deleteEntry = function(req, res) {
+// This deletes a log
+exports.deleteLog= function(req, res) {
     var id = req.params.id;
     console.log('Deleting log: ' + id);
-    LogSession.findByIdAndRemove(id, {safe:true}, function(err,result) {
-            if (err) {
-                res.send({'error':'An error has occurred - ' + err});
-            } else {
-                console.log('' + result + ' document(s) deleted');
-                // Now, delete every entry that was linked to this log
-                // TODO: no error handling, not that we really should need it?
-                DeviceLogEntry.find({logsessionid: id}, function(err,items) {
-                        items.forEach(function(item) {
-                            console.log('Log entry deleted...');
-                            item.remove();
-                        });
-                        // Don't send the reply until we are done with all deletions
+    dbs.logs.get(id, function(err,log) {
+        if (err) {
+            console.log('Error - ' + err);
+            res.send({'error':'An error has occurred - ' + err});
+        } else {
+            dbs.logs.remove(log, function(err,result) {
+                if (err) {
+                    console.log('Error - ' + err);
+                    res.send({'error':'An error has occurred - ' + err});
+                } else {
+                    console.log('' + result + ' document(s) deleted');
+                    // Now delete the database of log points
+                    PouchDB.destroy('./ldb/datapoints/' + id, function(err,res2) {
+                        console.log("Destroyed datapoints");
+                        console.log(err);
+                        console.log(res2);
                         res.send(req.body);
-                        });
-            }
-    });    
+                    });
+
+                }
+            });
+        }
+    });
 }

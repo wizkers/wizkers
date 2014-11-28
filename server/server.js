@@ -310,7 +310,7 @@ app.get('/logs/:id', isLoggedIn, deviceLogs.findById);
 app.get('/logs/:id/entries', isLoggedIn, deviceLogs.getLogEntries);
 app.post('/logs/:id/entries', isLoggedIn, user.is('operator'), deviceLogs.addLogEntry);
 app.put('/instruments/:iid/logs/:id', isLoggedIn, user.is('operator'), deviceLogs.updateEntry);
-app.delete('/instruments/:idd/logs/:id', isLoggedIn, user.is('operator'), deviceLogs.deleteEntry);
+app.delete('/instruments/:idd/logs/:id', isLoggedIn, user.is('operator'), deviceLogs.deleteLog);
 app.delete('/logs/:lid/entries/:id', isLoggedIn, user.is('operator'), deviceLogs.deleteLogEntry);
 
 
