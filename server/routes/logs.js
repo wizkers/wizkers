@@ -108,31 +108,38 @@ exports.getLogEntries = function(req, res) {
 // XX minutes
 exports.getLive = function(req,res) {
     console.log("Request to get extract of live recording for the last " + req.params.period + " minutes");
-    var rid = recorder.getRecordingID();
+    var rid = recorder.logID();
     if (rid == null) {
         res.send('{"error": "Not recording" }');
         return;
     }
-    var minstamp = new Date( new Date().getTime() - req.params.period* 60000);
-    var stream = DeviceLogEntry.find({logsessionid: rid, timestamp: {"$gte": minstamp} }).lean().batchSize(500).stream();
+    
+    // TODO : use a persistent view here!
+    var map = function(doc) {
+        emit (doc.timestamp);
+    }
+    
+    var minstamp = new Date().getTime() - req.params.period* 60000;
+    console.log(" Min Stamp: " + minstamp);
+    var db = new PouchDB('./ldb/datapoints/' + rid);
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write("[");
     var ok = false;
-    stream.on('data', function(item) {
-                         if (ok) res.write(",");
-                         ok = true;
-                         console.log(item);
-                         delete item._id;
-                         delete item.__v;
-                         delete item.logsessionid;
-                         console.log("---------- AFTER --------");
-                         console.log(item);
-                         res.write(JSON.stringify(item));
-                        }
-             ).on('error', function(err) {
-    }).on('close', function() {
-        res.write("]");
-        res.end();
+    db.query(map, {startkey: minstamp, include_docs:true}, function(err,entries) {
+        console.log(entries);
+        for (row in entries.rows) {
+            var item = entries.rows[row];            
+            if (ok) res.write(",");
+            ok = true;
+            // Clean up the log data: we don't need a lot of stuff that takes
+            // lots of space:
+            delete item.doc._rev;
+            delete item.doc._id;
+            console.log(item);
+            res.write(JSON.stringify(item.doc));
+        }
+        res.write(']');
+        res.end();    
     });
 }
 
