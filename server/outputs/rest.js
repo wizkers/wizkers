@@ -7,6 +7,7 @@
 
 var querystring = require('querystring'),
     utils = require('../utils.js'),
+    dbs = require('../pouch-config'),
     http = require('http');
 
 
@@ -102,7 +103,6 @@ module.exports = function rest() {
         }
 
         output_ref.last = new Date().getTime();
-        output_ref.save();
         var post_request = http.request(post_options, function(res) {
             var err = true;
             console.log("[REST Output Plugin] REST Request result");
@@ -120,12 +120,21 @@ module.exports = function rest() {
                         break;
             }
             // self.trigger('outputTriggered', { 'name': 'rest', 'error': err, 'message': this.statusText } );
+            dbs.outputs.get(output_ref._id, function(err,result) {
+                output_ref._rev = result._rev;
+                dbs.outputs.put(output_ref, function(err,result) {
+                });
+            });
             output_ref.save();
             res.on('data', function(data) {
                 console.log("API Request result");
                 console.log(data);
                 output_ref.lastmessage = data;
-                output_ref.save();
+                dbs.outputs.get(output_ref._id, function(err,result) {
+                    output_ref._rev = result._rev;
+                    dbs.outputs.put(output_ref, function(err,result) {
+                });
+            });
             });
 
         });

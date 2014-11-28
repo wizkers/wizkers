@@ -66,7 +66,11 @@ module.exports = function safecast() {
             console.log("[Safecast Output]  Data error, some required fields are empty");
             console.log(data);
             output_ref.lastmessage = 'Missing required fields in the data';
-            output_ref.save();
+            dbs.outputs.get(output_ref._id, function(err,result) {
+                output_ref._rev = result._rev;
+                dbs.outputs.put(output_ref, function(err,result) {
+                });
+            });
             return;
         }
         
@@ -94,19 +98,26 @@ module.exports = function safecast() {
             res.setEncoding('utf8');
             if (res.statusCode == 201 || res.statusCode == 200) {
                 output_ref.lastsuccess = new Date().getTime();
-                output_ref.save();
             }
             res.on('data', function(data) {
                 console.log("API Request result");
                 console.log(data);
                 output_ref.lastmessage = data;
-                output_ref.save();
+                dbs.outputs.get(output_ref._id, function(err,result) {
+                    output_ref._rev = result._rev;
+                    dbs.outputs.put(output_ref, function(err,result) {
+                });
+            });
             });
         });
         
         console.log("[Safecast Output] Sending data to " + post_options.host);
         output_ref.last = new Date().getTime();
-        output_ref.save();
+        dbs.outputs.get(output_ref._id, function(err,result) {
+            output_ref._rev = result._rev;
+            dbs.outputs.put(output_ref, function(err,result) {
+            });
+        });
         console.log(post_data);
         post_request.write(post_data);
         post_request.end();
