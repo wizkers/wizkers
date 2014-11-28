@@ -125,7 +125,7 @@ module.exports = function rest() {
                 dbs.outputs.put(output_ref, function(err,result) {
                 });
             });
-            output_ref.save();
+
             res.on('data', function(data) {
                 console.log("API Request result");
                 console.log(data);
