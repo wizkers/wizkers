@@ -51,17 +51,12 @@ exports.stopRecording = function() {
         } else {
             session.endstamp = new Date().getTime();
             session.isrecording = false;
-            DeviceLogEntry.count({logsessionid: logID}, function(err,count) {
-                if (err) {
-                    console.log('Error updating log session entry: ' + err);
-                    // res.send({'error': 'Error updating log session entry'});
-                } else {
-                    session.datapoints = count;
-                    console.log("This log has " + count + " datapoints.");
-                    session.save(function(err) {
-                        if (err) console.log("[recorder] Error updating log session upon recording stop");
-                    });
-                }
+            // TODO: update the number of points in 
+            // the log object
+            dbs.logs.put(session,function(err,session) {
+                if (err)
+                    console.log("Error saving log");
+                logID = null;
             });
         }
     });
