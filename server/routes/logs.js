@@ -29,7 +29,6 @@ exports.findByInstrumentId = function(req, res) {
 
     // TODO
     //  - Move to persistent queries (http://pouchdb.com/guides/queries.html)
-    //  - Update entries count in the log (views ??)
     dbs.logs.query(function(doc) {
         emit(doc.instrumentid);
     }, {key: id, include_docs:true}, function(err,items) {
@@ -42,7 +41,6 @@ exports.findByInstrumentId = function(req, res) {
         for (item in items.rows) {
             resp.push(items.rows[item].doc) ;
         }
-        
         res.send(resp);
     });
 };

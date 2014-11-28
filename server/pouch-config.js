@@ -31,11 +31,14 @@ var bcrypt = require('bcrypt-nodejs');
 // Log
 // User
 
-var instruments = new PouchDB('./ldb/instruments');
-var outputs = new PouchDB('./ldb/outputs');
-var settings = new PouchDB('./ldb/settings');
-var users = new PouchDB('./ldb/users');
-var logs = new PouchDB('./ldb/logs');
+// auto_compaction is important because we update the documents often,
+// and P/CouchDB keeps previous revisions otherwise. This option is only
+// effective for local DBs, not remote (CouchDB manages that on its own).
+var instruments = new PouchDB('./ldb/instruments', {auto_compaction: true});
+var outputs = new PouchDB('./ldb/outputs', {auto_compaction: true});
+var settings = new PouchDB('./ldb/settings', {auto_compaction: true});
+var users = new PouchDB('./ldb/users', {auto_compaction: true});
+var logs = new PouchDB('./ldb/logs', {auto_compaction: true});
 
 // Create the design docs we need for our various databases in order to get
 // decent performance on large datasets:
