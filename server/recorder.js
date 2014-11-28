@@ -71,14 +71,24 @@ exports.record = function(data) {
 
     console.log("*** Recording new entry in the log ***");
     var db = new PouchDB('./ldb/datapoints/' + logID);
+    var ts = new Date().getTime();
     var entry = {
-            timestamp: new Date().getTime(),
+            timestamp: ts,
             data: data
     };
     console.log(entry);
     db.post(entry, function(err,entry) {
         if (err)
             console.log("Error saving entry: " + err);
+        // Keep the number of log entries up to date in the log DB
+        db.info(function(err,res) {
+            var c = res.doc_count;
+            dbs.logs.get(logID, function(err,res2) {
+                res2.datapoints = c;
+                res2.endstamp = ts;
+                dbs.logs.put(res2, function(err,res3) {});
+            })
+        });
     });
     
 };

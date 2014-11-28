@@ -37,8 +37,25 @@ var settings = new PouchDB('./ldb/settings');
 var users = new PouchDB('./ldb/users');
 var logs = new PouchDB('./ldb/logs');
 
-// Create the design docs we need for our various databases
+// Create the design docs we need for our various databases in order to get
+// decent performance on large datasets:
 
+/**
+var myIndex = {
+  _id: '_design/my_index',
+  views: {
+    'my_index': {
+      map: function (doc) { emit(doc.name); }.toString()
+    }
+  }
+};
+// save it
+pouch.put(myIndex).then(function () {
+  // success!
+}).catch(function (err) {
+  // some error (maybe a 409, because it already exists?)
+});
+*/
 
 
 

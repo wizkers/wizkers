@@ -74,7 +74,7 @@ exports.updateInstrument = function(req, res) {
                 res.send({'error':'An error has occurred'});
             } else {
                 console.log('' + result + ' document(s) updated');
-                res.send(instrument);
+                res.send({ _id: result.id, _rev: result.rev});
             }
     });    
 }

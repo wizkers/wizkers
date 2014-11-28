@@ -42,6 +42,7 @@ exports.findByInstrumentId = function(req, res) {
         for (item in items.rows) {
             resp.push(items.rows[item].doc) ;
         }
+        
         res.send(resp);
     });
 };
