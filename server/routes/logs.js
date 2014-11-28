@@ -78,29 +78,30 @@ exports.findAll = function(req, res) {
 exports.getLogEntries = function(req, res) {
     // Empty for now...
     var id = req.params.id;
+    var count = 0;
     console.log("Retrieving entries of log ID: " + id);
     // TODO: Now, create a new database that will contain the data points for
     // this log with the format "datapoints/[log ID]"
-    var db = new PouchDB('./ldb/datapoints/' + result.id);
-    var stream = db.allDocs({include_docs: true}).lean().batchSize(500).stream();
+    var db = new PouchDB('./ldb/datapoints/' + id);
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write("[");
     var ok = false;
-    stream.on('data', function(item) {
-                         if (ok) res.write(",");
-                         ok = true;
-                         // Clean up the log data: we don't need a lot of stuff that takes
-                         // lots of space:
-                        // delete item._id;  // Don't delete the _id, otherwise our front-end loses sync with backend!
-                        delete item.__v;
-                        delete item.logsessionid;
-                         res.write(JSON.stringify(item));
-                        }
-             ).on('error', function(err) {
-    }).on('close', function() {
-        res.write("]");
+    db.allDocs({include_docs:true}, function(err,entries) {
+        for (row in entries.rows) {
+            var item = entries.rows[row];            
+            if (ok) res.write(",");
+            ok = true;
+            // Clean up the log data: we don't need a lot of stuff that takes
+            // lots of space:
+            // delete item._id;  // Don't delete the _id, otherwise our front-end loses sync with backend!            
+            console.log(item);
+            delete item.doc._rev;
+            res.write(JSON.stringify(item.doc));
+        }
+        res.write(']');
         res.end();
     });
+
 }
 
 // Get log entries for the current live recording: we only get data for the last
@@ -136,6 +137,9 @@ exports.getLive = function(req,res) {
 }
 
 
+////////////////
+//  This call is deprecated (log entries are created through the recorder now
+////////////////
 // Add a new log entry for a log:
 // TODO : create a library to store logs in a more sophisticated
 // manner - 1 hour granularity w/ 59 minute objects containing all measurements inside ? 
