@@ -70,17 +70,19 @@ module.exports = {
     
     format: function(data, recording) {        
         
+        // All commands now return JSON
         try {
+            if (data.length < 2)
+                return;
             data = data.replace('\n','');
-            console.log(Hexdump.dump(data));
-            // We are going to format the output in a manner similar
-            // to the Onyx data output format, so that we can reuse the
-            // same visualisation plugins for both.
+            
             var resp = data.split(':');
             var jsresp = {};
             if (resp[0] == "CPM") {
-                jsresp.cpm = { value: parseInt(resp[1]) };
-                switch (resp[2]) {
+                var inputs = parseInt(resp[1]);
+                
+                jsresp.cpm = { value: parseInt(resp[2]) };
+                switch (resp[3]) {
                         case 'X':
                         jsresp.cpm.valid = false;
                         break;
@@ -90,24 +92,44 @@ module.exports = {
                         default:
                         break;
                 }
+                if (inputs == 2) {
+                    jsresp.cpm2 = { value: parseInt(resp[4]) };
+                    switch (resp[5]) {
+                            case 'X':
+                            jsresp.cpm2.valid = false;
+                            break;
+                            case 'V':
+                            jsresp.cpm2.valid = true;
+                            break;
+                            default:
+                            break;
+                    }
+                }
             } else if (data.substr(0,10) == "USB Geiger") {
                 jsresp.version = data;
-            } else if (resp.length > 1) {
+            } else if (resp[0] == 'COUNTS') {
+                var inputs = parseInt(resp[1]);
+                jsresp.counts = { input1: parseInt(resp[2])};
+                if (inputs == 2) {
+                    jsresp.counts.input2 = parseInt(resp[3]);
+                    jsresp.counts.uptime = parseInt(resp[4]);
+                } else {
+                    jsresp.counts.uptime = parseInt(resp[3]);
+                }   
+            }else if (resp.length > 1) {
                 jsresp[resp[0]] = resp.slice(1);
             } else {
                 jsresp.raw = data;
             }
-            
             // Send the response to the front-end
             this.socket.emit('serialEvent', jsresp);
             // Send our response to the recorder and the output manager
             // as well
             recorder.record(jsresp);
             outputmanager.output(jsresp);
-        } catch (err) {
-            console.log('Not able to parse data from device:\n' + data);
-            console.log('Error code: ' + err);
-        }
+            } catch (err) {
+                console.log('Not able to parse data from device:\n' + data + '\n' + err);
+            }
     },
     
     output: function(data) {
