@@ -22,6 +22,7 @@ var PouchDB = require('pouchdb');
 var bcrypt = require('bcrypt-nodejs');
 
 
+console.log("Requiring pouch-config.js");
 // Databases we have on our system:
 
 // Instrument

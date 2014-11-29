@@ -5,11 +5,15 @@
  * All rights reserved.
  */
 
-var PouchDB = require('pouchdb');
-var dbs = require('./pouch-config');
+var PouchDB = require('pouchdb')
+    dbs = require('./pouch-config'),
+    microtime = require('./lib/microtime');
  
 var recording = false;
 var logID = null; // recordingID is the ID of the log we are working with
+
+
+
 
 
 exports.startRecording = function(id) {
@@ -69,18 +73,21 @@ exports.record = function(data) {
     if (!recording || logID == null)
         return;
 
-    console.log("*** Recording new entry in the log ***");
+    // console.log("*** Recording new entry in the log ***");
     var db = new PouchDB('./ldb/datapoints/' + logID);
-    var ts = new Date().getTime();
-    var entry = {
-            timestamp: ts,
-            data: data
-    };
-    console.log(entry);
-    db.post(entry, function(err,entry) {
+
+    // We need microsecond precisions, because we can get
+    // several recording calls within the same millisecond
+    var ts = microtime.nowDouble();
+    // Use the timestamp as the _id
+    // we keep a "timestamp" entry for compatibility with
+    // standalone front-end which uses indedxeddb for now, and has a separate
+    // ID system.
+    db.put({data: data, timestamp: ts}, '' + ts, function(err,entry) {
         if (err)
-            console.log("Error saving entry: " + err);
+            console.log("Error saving entry: " + err + " ID is: " + ts);
         // Keep the number of log entries up to date in the log DB
+        /*
         db.info(function(err,res) {
             var c = res.doc_count;
             dbs.logs.get(logID, function(err,res2) {
@@ -89,6 +96,7 @@ exports.record = function(data) {
                 dbs.logs.put(res2, function(err,res3) {});
             })
         });
+        */
     });
     
 };

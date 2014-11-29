@@ -74,17 +74,26 @@ define(function(require) {
             var self = this;
             var logToDelete = this.deviceLogs.where({_id: $(event.currentTarget).data('id')});
             var points = logToDelete[0].entries.size();
+            var log_destroyed = false;
+            var entries_destroyed = false;
+            
             // Ask our user to be patient:
             $("#deleteConfirm .modal-body .intro", this.el).html("Deleting log, please wait...");
             
             // We want to listen for entry deletion events, the process is async and we don't
             // want to let the user continue while the backend is busy deleting stuff...
             this.listenTo(logToDelete[0],"entry_destroy",function(num) {
+                entries_destroyed = true;
+                console.log("Entry destroy callback");
                 $("#entries-del",self.el).width(Math.ceil((1-num/points)*100) + "%");
                 if (num <= 1) {
-                    $('#deleteConfirm',self.el).modal('hide');
                     self.stopListening(logToDelete[0]);
-                    self.render();
+                    // Depending on the situation, we might get there before
+                    // actual log destoy success (see below)
+                    if (log_destroyed) {
+                        $('#deleteConfirm',self.el).modal('hide');
+                        self.render();
+                    }
                 }
             });
             
@@ -92,6 +101,14 @@ define(function(require) {
             // the log.
             logToDelete[0].destroy(
                                 {success: function(model, response) {
+                                    log_destroyed = true;
+                                    // Depending on the situation, we might get there before
+                                    // actual log entries destroy success (see above)
+                                    if (entries_destroyed) {
+                                        $('#deleteConfirm',self.el).modal('hide');
+                                        self.render();
+                                    }
+                                    console.log("Log destroy finished");
                                     },
                                  error: function(model, response) {
                                      console.log("Log delete error" + response);
@@ -102,7 +119,6 @@ define(function(require) {
         render:function () {
             var self = this;
             console.log('Main render of Log management view');
-            
             
             $(this.el).html(template({ deviceLogs: this.collection.toJSON(), selected: this.selectedLogs,
                                       instrumentid: instrumentManager.getInstrument().id}));

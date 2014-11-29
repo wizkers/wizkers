@@ -117,7 +117,7 @@ define(function(require) {
         
         render:function () {
             var self = this;
-            console.log('Main render of Log management view');
+            console.log('Main render of Log details view');
 
             $(this.el).html(template());
 

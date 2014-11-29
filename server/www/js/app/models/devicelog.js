@@ -152,10 +152,13 @@ define(function(require) {
                 // sure our entries are also all deleted from the database
                 this.listenTo(this, "destroy", this.destroyEntries);
             },
-                        
+                
+            // In practice, this will only be used when the app is running in Chrome App or
+            // Cordova mode. In server mode, entries is only modified on the server side, unless
+            // we delete points.
             updateDatapoints: function() {
                 var points = this.entries.size();
-                // console.log("Number of datapoints: " + points);
+                console.log("*****  Updating Log entries datapoints  " + points);
                 this.set('datapoints',points);
                 this.set('startstamp', this.entries.getLogStart());
                 this.set('endstamp', this.entries.getLogEnd());
@@ -269,8 +272,13 @@ define(function(require) {
             
             // Clears the "isrecording" flag on all logs. Used at instrument open/close/stop record
             clearRecordingFlags: function() {
+                console.log("Clearing recording flags if required");
                 _.each(this.models, function(log) {
-                    log.save({isrecording: false});
+                    // Don't set it again if it is false already, because
+                    // this will do a useless save operation (Backbone does not seem
+                    // to catch that).
+                    if (log.get('isrecording'))
+                        log.save({isrecording: false});
                 });
             },
 

@@ -18,9 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var PouchDB = require('pouchdb');
-var dbs = require('../pouch-config');
-var recorder = require('../recorder.js');
+var PouchDB = require('pouchdb'),
+    dbs = require('../pouch-config'),
+    _ = require('underscore'),
+    recorder = require('../recorder.js');
 
 // Get all log sessions for a given instrument
 exports.findByInstrumentId = function(req, res) {
@@ -38,10 +39,26 @@ exports.findByInstrumentId = function(req, res) {
         }
         console.log(items);
         var resp = [];
-        for (item in items.rows) {
-            resp.push(items.rows[item].doc) ;
+        
+        var sendResp = function() {
+            res.send(resp);
         }
-        res.send(resp);
+
+        var recID = recorder.logID();
+
+        // Query the number of data points and insert them into
+        // the log (this avoids having to save the log document all the time
+        // at each new recording and add tons of revisions on CouchDB).
+        var af = _.after(items.rows.length,sendResp);
+        _.each(items.rows, function(item) {
+            var db = new PouchDB('./ldb/datapoints/' + item.doc._id);
+            db.info(function(err,info) {
+                item.doc.datapoints = info.doc_count;
+                item.doc.isrecording = (item.doc._id == recID);
+                resp.push(item.doc) ;
+                af();
+            });
+        });        
     });
 };
 
@@ -75,16 +92,15 @@ exports.findAll = function(req, res) {
 // so we have to stream the results back so that we don't get out
 // of memory or let the client app hanging waiting for data
 exports.getLogEntries = function(req, res) {
-    // Empty for now...
     var id = req.params.id;
     var count = 0;
     console.log("Retrieving entries of log ID: " + id);
-    // TODO: Now, create a new database that will contain the data points for
-    // this log with the format "datapoints/[log ID]"
     var db = new PouchDB('./ldb/datapoints/' + id);
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write("[");
     var ok = false;
+    // TODO: paginate those queries by 500 records to limit
+    // memory usage
     db.allDocs({include_docs:true}, function(err,entries) {
         for (row in entries.rows) {
             var item = entries.rows[row];            
@@ -93,7 +109,6 @@ exports.getLogEntries = function(req, res) {
             // Clean up the log data: we don't need a lot of stuff that takes
             // lots of space:
             // delete item._id;  // Don't delete the _id, otherwise our front-end loses sync with backend!            
-            console.log(item);
             delete item.doc._rev;
             res.write(JSON.stringify(item.doc));
         }
@@ -113,18 +128,13 @@ exports.getLive = function(req,res) {
         return;
     }
     
-    // TODO : use a persistent view here!
-    var map = function(doc) {
-        emit (doc.timestamp);
-    }
-    
     var minstamp = new Date().getTime() - req.params.period* 60000;
     console.log(" Min Stamp: " + minstamp);
     var db = new PouchDB('./ldb/datapoints/' + rid);
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write("[");
     var ok = false;
-    db.query(map, {startkey: minstamp, include_docs:true}, function(err,entries) {
+    db.allDocs({startkey: minstamp, include_docs:true}, function(err,entries) {
         console.log(entries);
         for (row in entries.rows) {
             var item = entries.rows[row];            
@@ -143,28 +153,6 @@ exports.getLive = function(req,res) {
 }
 
 
-////////////////
-//  This call is deprecated (log entries are created through the recorder now
-////////////////
-// Add a new log entry for a log:
-// TODO : create a library to store logs in a more sophisticated
-// manner - 1 hour granularity w/ 59 minute objects containing all measurements inside ? 
-exports.addLogEntry = function(req, res) {
-    var logID = req.params.id;
-    var entry = req.body;
-    delete entry._id;
-    entry.logsessionid = logID;
-    console.log(entry);
-    new DeviceLogEntry(entry).save(function(err,entry) {
-        if (err) {
-            console.log("Error saving entry: " + err);
-            res.send({'error': 'Error saving entry - ' + err});
-        } else {
-        res.send(entry);
-        }
-    });
-}
-
 // Add a new log session entry
 exports.addLog = function(req, res) {
     var entry = req.body;
@@ -182,12 +170,12 @@ exports.addLog = function(req, res) {
     
 };
 
-// Update the contents of a log session
+// Update the contents of a log
 exports.updateEntry = function(req, res) {
     var id = req.params.id;
     var iid = req.params.iid;
     var entry = req.body;
-    console.log('Updating log session entry: ' + id + ' for instrument ' + iid);
+    console.log('Updating log : ' + id + ' for instrument ' + iid);
     console.log(JSON.stringify(entry));
 
     // TODO: error checking on structure !!!

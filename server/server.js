@@ -88,7 +88,7 @@ var express = require('express'),
 
 var app = express(),
     server = require('http').createServer(app),
-    io = require('socket.io').listen(server, { log: true });
+    io = require('socket.io').listen(server, { log: false });
 
 app.configure(function () {
     app.use(express.logger('dev'));     // 'default', 'short', 'tiny', 'dev'
@@ -308,7 +308,6 @@ app.post('/instruments/:id/logs', isLoggedIn, user.is('operator'), deviceLogs.ad
 app.get('/logs/', isLoggedIn, deviceLogs.findAll);
 app.get('/logs/:id', isLoggedIn, deviceLogs.findById);
 app.get('/logs/:id/entries', isLoggedIn, deviceLogs.getLogEntries);
-app.post('/logs/:id/entries', isLoggedIn, user.is('operator'), deviceLogs.addLogEntry);
 app.put('/instruments/:iid/logs/:id', isLoggedIn, user.is('operator'), deviceLogs.updateEntry);
 app.delete('/instruments/:idd/logs/:id', isLoggedIn, user.is('operator'), deviceLogs.deleteLog);
 app.delete('/logs/:lid/entries/:id', isLoggedIn, user.is('operator'), deviceLogs.deleteLogEntry);
