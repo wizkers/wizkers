@@ -28,11 +28,8 @@ exports.findByInstrumentId = function(req, res) {
     var id = req.params.id;
     console.log('Retrieving Logs for Instrument ID: ' + id);
 
-    // TODO
-    //  - Move to persistent queries (http://pouchdb.com/guides/queries.html)
-    dbs.logs.query(function(doc) {
-        emit(doc.instrumentid);
-    }, {key: id, include_docs:true}, function(err,items) {
+    dbs.logs.query('by_instrument', {key: id, include_docs:true}, function(err,items) {
+        console.log(items);
         if (err && err.status == 404) {
             res.send([]);
             return;

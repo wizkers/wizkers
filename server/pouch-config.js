@@ -45,21 +45,27 @@ var logs = new PouchDB('./ldb/logs', {auto_compaction: true});
 // decent performance on large datasets:
 
 /**
-var myIndex = {
-  _id: '_design/my_index',
+ * View of logs by instrument ID
+ */
+var logByInstrument = {
+  _id: '_design/by_instrument',
   views: {
-    'my_index': {
-      map: function (doc) { emit(doc.name); }.toString()
+    'by_instrument': {
+      map: function (doc) { emit(doc.instrumentid); }.toString()
     }
   }
 };
 // save it
-pouch.put(myIndex).then(function () {
+logs.put(logByInstrument).then(function () {
   // success!
+    console.log("Created Instruments DB 'by instrument' view");
 }).catch(function (err) {
+    console.log("Error creating design doc: " + err);
+    if (err.status == 409)
+        console.log("... but that's OK, it was there already");
   // some error (maybe a 409, because it already exists?)
 });
-*/
+
 
 
 
