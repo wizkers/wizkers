@@ -111,6 +111,16 @@ module.exports = function safecast() {
             });
         });
         
+        post_request.on('error', function(err) {
+            output_ref.lastmessage = 'Error:' + err;err
+            dbs.outputs.get(output_ref._id, function(err,result) {
+                output_ref._rev = result._rev;
+                dbs.outputs.put(output_ref, function(err,result) {
+                });
+            });
+        });
+
+        
         console.log("[Safecast Output] Sending data to " + post_options.host);
         output_ref.last = new Date().getTime();
         dbs.outputs.get(output_ref._id, function(err,result) {

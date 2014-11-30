@@ -138,6 +138,17 @@ module.exports = function rest() {
             });
 
         });
+        // We absolutely need to catch errors, otherwise http.request throws
+        // them and crashes the server
+        post_request.on('error', function(err) {
+            output_ref.lastmessage = 'Error:' + err;err
+            dbs.outputs.get(output_ref._id, function(err,result) {
+                output_ref._rev = result._rev;
+                dbs.outputs.put(output_ref, function(err,result) {
+                });
+            });
+        });
+
         if (post_options.method == 'POST') {
             post_request.write(post_data);
         }
