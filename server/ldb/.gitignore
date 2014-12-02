@@ -3,3 +3,5 @@ users
 logs
 settings
 outputs
+datapoints/*
+!datapoints/README.md

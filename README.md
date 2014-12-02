@@ -1,25 +1,16 @@
-Big Whiskers
+Wizkers
 ============
 
-Big Whiskers extends the reach of your measurement instruments.
+Wizkers extends the reach of your measurement instruments.
 
-Web-based display, log management, recording and config application for measurement instruments.
+Wizkers is both an application and a framework, written entirely in Javascript and HTML5, which runs either as a Chrome Packaged App, a Cordova 'native' Android application, or even as a server app. All using one single codebase!
 
-Displays the content of the logs, synchronises the internal clock with the computer, and
-displays a few additional infos.
+You can use Wizkers with supported devices, and visualize their data, save it into logs, and forward it to backend web  services. Depending on the device, Wizkers can also go pretty far when it comes to editing the settings, downloading on-device logs, etc.
 
+You will find all the information you need on www.wizkers.io.
 
 Installing
 ----------
 
-This tool was tested on:
+Please refer to the official documentation on http://wizkers.io/ for all the details!
 
-	- MacOS X, with Node 0.8.18
-	- Linux Ubuntu Quantal, with Node 0.10.5 (not the old NodeJS that comes with that version of Ubuntu)
-
-MacOS: 
-
-
-Linux:
-   Download nodeJS from nodejs.org. You should download the binary package, and install build-essential through
-   apt as well.
