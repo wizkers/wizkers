@@ -496,7 +496,7 @@ var secret_salt = new Date().getMilliseconds();
 
 // Setup Socket.io authorization based on JSON Web Tokens so that we get
 // authorization info from our login process:
-io.set('authorization', socketioJwt.authorize({
+io.use(socketioJwt.authorize({
   secret: 'superSecretYesYesYes' + secret_salt,
   handshake: true,
 }));
@@ -504,8 +504,8 @@ io.set('authorization', socketioJwt.authorize({
 // listen for new socket.io connections:
 io.sockets.on('connection', function (socket) {
     
-    console.log(socket.handshake.decoded_token.role, 'connected');
-    var userinfo = socket.handshake.decoded_token;
+    console.log(socket.decoded_token.role, 'connected');
+    var userinfo = socket.decoded_token;
     
 	// if the client connects:
 	if (!connected) {
