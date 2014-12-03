@@ -104,7 +104,11 @@ define(function(require) {
                     var type = ins.get('type');
                     console.info('New instrument type: ' + type );
                     // Now update our Instrument manager:
-                    if (closeprevious) linkManager.closeInstrument();  // Stop former link manager
+                    // We don't want to close instruments upon instrument change
+                    // when we are in server mode, because we support multiple open
+                    // instruments at the same time.
+                    if (vizapp.type != "server")
+                        if (closeprevious) linkManager.closeInstrument();  // Stop former link manager
                     instrumentManager.setInstrument(ins);                    
                     // Next step: retrieve the list of outputs that should be
                     // enabled for this instrument

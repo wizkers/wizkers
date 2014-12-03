@@ -22,9 +22,7 @@ var Elecraft = function() {
     // Init the EventEmitter
     events.EventEmitter.call(this);
 
-    
     this.name = "elecraft";
-    
     
     var uidrequested = false;
     
@@ -46,9 +44,6 @@ var Elecraft = function() {
     var port = null,
         streaming = false,
         livePoller = null;
-    
-
-
     
     this.setPortRef = function(s) {
         port = s;
@@ -184,6 +179,7 @@ var Elecraft = function() {
     // We serve rigctld commands through a TCP socket too:    
     this.onOpen = function(success) {
         
+        var driver_ref = this;
         console.log("Elecraft Driver: got a port open signal");
         if (server == null) {
             server = net.createServer(function(c) { //'connection' listener
@@ -252,12 +248,12 @@ var Elecraft = function() {
                             port.write('TX;');
                         // The radio does not echo this command, so we do it
                         // ourselves, so that the UI reacts
-                        this.emit('data','TX;');
+                        driver_ref.emit('data','TX;');
                      
                     } else {
                         if (port != null)
                             port.write("RX;");
-                        this.emit('data','RX;');
+                        driver_ref.emit('data','RX;');
                     }
                     c.write("RPRT 0\n");
                     break;

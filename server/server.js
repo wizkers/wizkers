@@ -350,9 +350,7 @@ app.use(express.static(__dirname + '/www'));
 function Collect(ob1, ob1) {
     var ret = {},
     len = arguments.length,
-    arg,
-    i = 0,
-    p;
+    arg, i = 0, p;
  
     for (i = 0; i < len; i++) {
       arg = arguments[i];
@@ -534,6 +532,10 @@ io.sockets.on('connection', function (socket) {
     // instrument is being used by the app.
     socket.on('openinstrument', function(data) {
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
+            
+            // TODO: need to find a way to query (something) and understand
+            // whether the instrument is open
+            
             console.log('Instrument open request for instrument ID ' + data);
             dbs.instruments.get(data, function(err,item) {
                 currentInstrument = item;

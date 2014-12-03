@@ -45,7 +45,7 @@ var FCOled = function() {
     // This particular device does not support this concept, so we
     // always return the same
     this.sendUniqueID = function() {
-        this.socket.emit('data',{ uniqueID:'00000000 (n.a.)'});
+        this.emit('data',{ uniqueID:'00000000 (n.a.)'});
     };
     
     this.isStreaming = function() {
