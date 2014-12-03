@@ -30,9 +30,6 @@ module.exports = {
     setSocketRef: function(s) {
         this.socket = s;
     },
-    setRecorderRef: function(s) {
-        console.log("DELETE THIS Setting recorder reference.");
-    },
     setInstrumentRef: function(i) {
     },
 

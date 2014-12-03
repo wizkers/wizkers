@@ -7,7 +7,9 @@
  * All rights reserved.
  */
 
-var serialport = require('serialport');
+var serialport = require('serialport'),
+    recorder = require('../recorder.js'),
+    outputmanager = require('../outputs/outputmanager.js');
 
 module.exports = {
     
@@ -15,16 +17,12 @@ module.exports = {
     
     // Set a reference to the socket.io socket and port
     socket: null,
-    recorder: null,
     streaming: false,
     
     setPortRef: function(s) {
     },
     setSocketRef: function(s) {
         this.socket = s;
-    },
-    setRecorderRef: function(s) {
-        this.recorder = s;
     },
     setInstrumentRef: function(i) {
     },
@@ -80,7 +78,8 @@ module.exports = {
             console.log("Error: cannot parse logger data : " + e + " - " + data);
         }
         this.socket.emit('serialEvent',fields);
-        this.recorder.record(fields);
+        recorder.record(fields);
+        outputmanager.output(fields);
     },
     
     // output should return a string, and is used to format

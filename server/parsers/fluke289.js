@@ -20,7 +20,8 @@
 var serialport = require('serialport'),
     crcCalc = require('./lib/crc-calc.js'),
     recorder = require('../recorder.js'),
-    zlib = require('zlib');
+    zlib = require('zlib'),
+    outputmanager = require('../outputs/outputmanager.js');
 
 Hexdump = require('../hexdump.js');
 Bitmap = require('./lib/bitmap.js');
@@ -124,11 +125,6 @@ module.exports = {
         this.resetState();
     },
     
-    setRecorderRef: function(s) {
-        this.debug("Setting recorder reference.");
-       // this.recorder = s;
-    },
-    
     setInstrumentRef: function(i) {
     },
     
@@ -147,6 +143,7 @@ module.exports = {
         if (data) {
             this.socket.emit('serialEvent',data);
             recorder.record(data);
+            outputmanager.output(data);
         }
     },
     

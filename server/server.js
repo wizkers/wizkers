@@ -445,7 +445,6 @@ openPort = function(data, socket) {
        portOpen = true;
        driver.setPortRef(myPort); // We need this for drivers that manage a command queue...
        driver.setSocketRef(socket);
-       driver.setRecorderRef(recorder);
        if (driver.onOpen) {
            driver.onOpen(true);
        }
@@ -478,15 +477,12 @@ openPort = function(data, socket) {
         portOpen = false;
        driver.setPortRef(null);
        driver.setSocketRef(null);
-       driver.setRecorderRef(null);
        if (driver.onClose) {
            driver.onClose(true);
        }
         socket.emit('status', {portopen: portOpen});
     });
 }
-
-
 
 //////////////////
 // Socket management: supporting one client at a time for now

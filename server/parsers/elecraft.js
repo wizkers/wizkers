@@ -36,7 +36,6 @@ module.exports = {
         
     // Set a reference to the socket.io socket and port
     socket: null,
-    recorder: null,
     port: null,
     streaming: false,
     livePoller: null,
@@ -47,9 +46,6 @@ module.exports = {
     },
     setSocketRef: function(s) {
         this.socket = s;
-    },
-    setRecorderRef: function(s) {
-        this.recorder = s;
     },
     setInstrumentRef: function(i) {
     },

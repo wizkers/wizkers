@@ -28,10 +28,6 @@ module.exports = {
     setSocketRef: function(s) {
         this.socket = s;
     },
-    setRecorderRef: function(s) {
-        this.debug("Setting recorder reference.");
-        this.recorder = s;
-    },
     setInstrumentRef: function(i) {
     },
 
