@@ -31,7 +31,6 @@ var fs = require('fs');
 
 exports.findById = function(req, res) {
     var id = req.params.id;
-    console.log('Retrieving instrument: ' + id);
     dbs.instruments.get(id, function(err,item) {
         res.send(item);
     });
@@ -41,23 +40,19 @@ exports.findAll = function(req, res) {
     dbs.instruments.allDocs({include_docs: true}, function(err, items) {
         var resp = [];
         for (item in items.rows) {
-            console.log(item);
             resp.push(items.rows[item].doc) ;
         }
-        console.log(resp);
         res.send(resp);
     });
 };
 
 exports.addInstrument = function(req, res) {
     var instrument = req.body;
-    console.log(instrument);
     console.log('Adding instrument: ' + JSON.stringify(instrument));
     dbs.instruments.post(req.body, function(err, result) {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
-                console.log('Success: ' + JSON.stringify(result));
                 res.send({ _id: result.id, _rev: result.rev});
             }
     });    
@@ -67,13 +62,12 @@ exports.updateInstrument = function(req, res) {
     var id = req.params.id;
     var instrument = req.body;
     console.log('Updating instrument: ' + id);
-    console.log(JSON.stringify(instrument));
+//    console.log(JSON.stringify(instrument));
     dbs.instruments.put(req.body, function(err, result) {
             if (err) {
                 console.log('Error updating instrument: ' + err);
                 res.send({'error':'An error has occurred'});
             } else {
-                console.log('' + result + ' document(s) updated');
                 res.send({ _id: result.id, _rev: result.rev});
             }
     });    
@@ -89,10 +83,8 @@ exports.deleteInstrument = function(req, res) {
         } else {
             dbs.instruments.remove(ins, function(err,result) {
                 if (err) {
-                    console.log('Error - ' + err);
                     res.send({'error':'An error has occurred - ' + err});
                 } else {
-                    console.log('' + result + ' document(s) deleted');
                     res.send(req.body);
                 }
             });

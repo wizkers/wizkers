@@ -72,9 +72,7 @@ module.exports = {
                                     console.log("No enabled outputs");
                                     return;
                                 }
-            console.log(outputs);
             _.each(outputs.rows, function(output) {
-                console.log(output.doc);
                 // Now we need to configure the output and put it into our activeOutputs list
                 var pluginType = self.availableOutputs[output.doc.type];
                 if (pluginType == undefined) {

@@ -7,24 +7,46 @@
  */
 
 var serialport = require('serialport'),
-    SerialPort  = serialport.SerialPort,
     events = require('events'),
     recorder = require('../recorder.js'),
+    serialconnection = require('../connections/serial');
     outputmanager = require('../outputs/outputmanager.js');
 
 
 var USBGeiger = function() {
-        
+    
+    // Driver initialization
     events.EventEmitter.call(this);
+    
+    /////////
+    // Private variables
+    /////////
+    var port = null;
+    var isopen = false;
 
+    /////////
+    // Private methods
+    /////////
+    var processPortStatusChange = function(status) {
+        console.log(status);
+    };
+    
+    /////////
+    // Public variables
+    /////////
     this.name = "usbgeiger";
     
-    // Set a reference to the port
-    this.port = null;
+    /////////
+    // Public API
+    /////////
     
-    this.setPortRef = function(s) {
-        this.port = s;
-    };
+    // Creates and opens the connection to the instrument.
+    // for all practical purposes, this is really the init method of the
+    // driver
+    this.openPort = function(path) {
+        port = new serialconnection(path);
+        port.on('status', processPortStatusChange);
+    }
         
     this.setInstrumentRef = function(i) {
     };
@@ -60,6 +82,10 @@ var USBGeiger = function() {
     // stream.
     this.stopLiveStream = function(period) {
     };
+    
+    this.isOpen = function() {
+        return isopen;
+    }
     
     this.format = function(data, recording) {        
         
@@ -131,7 +157,7 @@ var USBGeiger = function() {
             this.emit('data', {devicetag: 'Not supported'});
             return '\n';
         }
-        return data + '\n';
+        port.write(data + '\n');
     }
 
 };

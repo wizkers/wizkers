@@ -27,7 +27,6 @@ exports.findByInstrumentId = function(req, res) {
     
     // TODO
     //  - Move to persistent queries (http://pouchdb.com/guides/queries.html)
-    //  - Update entries count in the log (views ??)
     dbs.outputs.query(function(doc) {
         emit(doc.instrumentid);
     }, {key: id, include_docs:true}, function(err,items) {
@@ -35,10 +34,8 @@ exports.findByInstrumentId = function(req, res) {
             res.send([]);
             return;
         }
-        console.log(items);
         var resp = [];
         for (item in items.rows) {
-            console.log(item);
             resp.push(items.rows[item].doc) ;
         }
         res.send(resp);
@@ -54,7 +51,6 @@ exports.findById = function(req, res) {
             res.send([]);
             return;
         }
-        console.log(item);
         res.send(item);
     });
 };
@@ -68,7 +64,6 @@ exports.addOutput = function(req, res) {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
-                console.log('Success: ' + JSON.stringify(result));
                 res.send({ _id: result.id, _rev: result.rev} );
             }
     });    
@@ -79,13 +74,12 @@ exports.updateOutput = function(req, res) {
     var id = req.params.id;
     var output = req.body;
     console.log('Updating output: ' + id);
-    console.log(JSON.stringify(output));    
+//    console.log(JSON.stringify(output));    
     dbs.outputs.put(req.body, function(err, result) {
             if (err) {
                 console.log('Error updating output: ' + err);
                 res.send({'error':'An error has occurred'});
             } else {
-                console.log('' + result + ' document(s) updated');
                 res.send({ _id: result.id, _rev: result.rev} );
             }
     });
@@ -104,12 +98,9 @@ exports.deleteOutput = function(req, res) {
                     console.log('Error - ' + err);
                     res.send({'error':'An error has occurred - ' + err});
                 } else {
-                    console.log('' + result + ' document(s) deleted');
                     res.send(req.body);
                 }
             });
         }
     });
-
 }
-

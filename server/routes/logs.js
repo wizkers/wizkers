@@ -29,32 +29,31 @@ exports.findByInstrumentId = function(req, res) {
     console.log('Retrieving Logs for Instrument ID: ' + id);
 
     dbs.logs.query('by_instrument', {key: id, include_docs:true}, function(err,items) {
-        console.log(items);
         if (err && err.status == 404) {
             res.send([]);
             return;
         }
-        console.log(items);
         var resp = [];
-        
         var sendResp = function() {
             res.send(resp);
         }
-
-        var recID = recorder.logID();
-
         // Query the number of data points and insert them into
         // the log (this avoids having to save the log document all the time
         // at each new recording and add tons of revisions on CouchDB).
         var af = _.after(items.rows.length,sendResp);
         _.each(items.rows, function(item) {
-            var db = new PouchDB('./ldb/datapoints/' + item.doc._id);
-            db.info(function(err,info) {
-                item.doc.datapoints = info.doc_count;
-                item.doc.isrecording = (item.doc._id == recID);
-                resp.push(item.doc) ;
-                af();
-            });
+            // Double check there is a doc. In the extreme case something happened
+            // at log creation where no keys were stored in the log, we can have an
+            // empty entry (seen this in production).
+            if (item.doc) {
+                var db = new PouchDB('./ldb/datapoints/' + item.doc._id);
+                db.info(function(err,info) {
+                    item.doc.datapoints = info.doc_count;
+                    item.doc.isrecording = (item.doc._id == recorder.logID());
+                    resp.push(item.doc) ;
+                    af();
+                });
+            } else { af(); }
         });        
     });
 };

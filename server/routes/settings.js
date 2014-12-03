@@ -31,15 +31,12 @@ exports.getSettings = function(req, res) {
 
 exports.updateSettings = function(req, res) {
     var settings = req.body;
-    //delete settings._id;
     console.log('Updating settings.');
-    console.log(JSON.stringify(settings));
     dbs.settings.put(settings,function(err, result) {
             if (err) {
                 console.log('Error updating settings: ' + err);
                 res.send({'error':'An error has occurred'});
             } else {
-                console.log('' + result + ' document(s) updated');
                 res.send({ _id: result.id, _rev: result.rev});
             }
     });    

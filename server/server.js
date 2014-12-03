@@ -21,6 +21,7 @@
 var serialport = require('serialport'),
     SerialPort  = serialport.SerialPort,
     PouchDB = require('pouchdb'),
+    ConnectionManager = require('./connectionmanager'),
     flash = require('connect-flash');
 
 
@@ -28,14 +29,6 @@ var serialport = require('serialport'),
 // Utility function to get a Hex dump
 var Hexdump = require('./hexdump.js');
 var Debug = false;
-
-// Preload the parsers we know about:
-var Fluke289 = require('./parsers/fluke289.js');
-var Onyx = require('./parsers/safecast_onyx.js');
-var FCOled = require('./parsers/fried_usb_tester.js');
-var W433 = require('./parsers/w433.js');
-var Elecraft = require('./parsers/elecraft.js');
-var USBGeiger = require('./parsers/usb_geiger.js');
 
 /**
  * Setup Db connection before anything else
@@ -74,7 +67,7 @@ var app = express(),
     io = require('socket.io').listen(server, { log: false });
 
 app.configure(function () {
-    app.use(express.logger('dev'));     // 'default', 'short', 'tiny', 'dev'
+    //app.use(express.logger('dev'));     // 'default', 'short', 'tiny', 'dev'
     app.use(express.cookieParser());    // passport authentication needs to read cookies
     app.use(express.favicon());         
     app.use(express.bodyParser({ keepExtensions: true }));
@@ -366,17 +359,6 @@ function Collect(ob1, ob1) {
     return ret;
 }
 
-//
-// For now, we are supporting only one communication
-// port on the server, but in the future we need to
-// extend this to support multiple simultaneous
-// connections to several devices.
-var portsList = new Array();
-var myPort = null;
-var portOpen = false;
-
-var driver = null;
-
 // Output plugin management: we have an outputmanager, whose role
 // is to send data to various third parties (twitter, Safecast, HTTP REST calls
 // etc... 
@@ -387,6 +369,10 @@ var outputmanager = require('./outputs/outputmanager.js');
 // the database by itself, so we keep a global variable for doing this
 var recorder = require('./recorder.js');
 
+// And last, the Connection manager, which keeps track of what device is open/closed
+var connectionmanager = new ConnectionManager();
+
+
 var recordingSessionId = 0; // Is set by the front-end when pressing the 'Record' button.
 
 //
@@ -395,73 +381,6 @@ var recordingSessionId = 0; // Is set by the front-end when pressing the 'Record
 // server-side that an instrument is selected, unfortunately.
 var currentInstrument = null;
 
-
-//////////////////
-// Port management
-//////////////////
-openPort = function(data, socket) {
-     //  This opens the serial port:
-    if (myPort && portOpen) {
-           try { 
-               myPort.close();
-           } catch (e) { console.log("Port close attempt error: " + e); }
-	}
-    
-    myPort = new SerialPort(data,
-                            driver.portSettings(),
-                            true, 
-                            function(err, result) {
-                                if (err) {
-                                    console.log("Open attempt error: " + err);
-                                    socket.emit('status', {portopen: portOpen});
-                                }
-                            });    
-    console.log('Result of port open attempt:'); console.log(myPort);
-        
-    // Callback once the port is actually open: 
-   myPort.on("open", function () {
-       console.log('Port open');
-       myPort.flush(function(err,result){ console.log(err + " - " + result); });
-       myPort.resume();
-       portOpen = true;
-       driver.setPortRef(myPort); // We need this for drivers that manage a command queue...
-       if (driver.onOpen) {
-           driver.onOpen(true);
-       }
-       socket.emit('status', {portopen: portOpen});
-   });
-
-    // listen for new serial data:
-   myPort.on('data', function (data) {
-       // if (Debug) console.log('.');
-       // Pass this data to on our driver
-       if (Debug) { try {
-            // console.log('Raw input:\n' + Hexdump.dump(data));
-           console.log("Data: " + data);
-       } catch(e){}}
-        driver.format(data);
-   });
-    
-    myPort.on('error', function(err) {
-        console.log("Serial port error: "  + err);
-        portOpen = false;
-       if (driver.onClose) {
-           driver.onClose(true);
-       }
-        socket.emit('status', {portopen: portOpen});
-    });
-        
-    myPort.on("close", function() {
-        console.log("Port closing");
-        console.log(myPort);
-        portOpen = false;
-       driver.setPortRef(null);
-       if (driver.onClose) {
-           driver.onClose(true);
-       }
-        socket.emit('status', {portopen: portOpen});
-    });
-}
 
 //////////////////
 // Socket management: supporting one client at a time for now
@@ -480,6 +399,10 @@ io.use(socketioJwt.authorize({
 io.sockets.on('connection', function (socket) {
     
     var self = this;
+    
+    // Reference to the instrument driver for this socket.
+    // it is returned by the connection manager.
+    var driver = null;
     
     console.log(socket.decoded_token.role, 'connected');
     var userinfo = socket.decoded_token;
@@ -502,18 +425,9 @@ io.sockets.on('connection', function (socket) {
         socket.emit('serialEvent', data);
     }
     
-    // If we have an existing open port, we need to update the socket
-    // reference for its driver:
-    if (driver != null) {
-        console.log('Driver name:',driver.name);
-        driver.on('data',sendDataToFrontEnd);
-    }
-    
-    
     socket.on('disconnect', function(data) {
         console.log('This socket got disconnected');
         if (driver != null) {
-            console.log('Removing driver data callback');
             driver.removeListener('data',sendDataToFrontEnd);
         }
     });
@@ -532,41 +446,28 @@ io.sockets.on('connection', function (socket) {
     // instrument is being used by the app.
     socket.on('openinstrument', function(data) {
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
-            
-            // TODO: need to find a way to query (something) and understand
-            // whether the instrument is open
-            
-            console.log('Instrument open request for instrument ID ' + data);
-            dbs.instruments.get(data, function(err,item) {
-                currentInstrument = item;
-                driver.setInstrumentRef(currentInstrument);
-                openPort(item.port, socket);
+            connectionmanager.openInstrument(data, function(d) {
+                driver = d;
+                // Listen for data coming in from our driver
+                driver.on('data',sendDataToFrontEnd);
             });
         } else
             console.log("Unauthorized attempt to open instrument");
     });
     
-    // TODO: support multiple ports, right now we
-    // discard 'data' completely.
-    // I assume closing the port will remove
-    // the listeners ?? NOPE! To be checked.
     socket.on('closeinstrument', function(data) {
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
             console.log('Instrument close request for instrument ID ' + data);
-            dbs.instruments.get(data, function(err,item) {
-                if(portOpen) {
-                    recorder.stopRecording();
-                    driver.stopLiveStream();
-                    myPort.close();
-                    portOpen = false;
-                }
-            });
+            driver.removeListener('data',sendDataToFrontEnd);
+            connectionmanager.closeInstrument(data);
         } else
             console.log("Unauthorized attempt to open instrument");
     });
 
     socket.on('portstatus', function() {
-        var s = {portopen: portOpen, recording: recorder.isRecording(), streaming: (driver)? driver.isStreaming() : false};
+        var s = {portopen: (driver)? driver.isOpen() : false,
+                 recording: recorder.isRecording(),
+                 streaming: (driver)? driver.isStreaming() : false};
         var ds = {};
         if (driver && driver.status)
             ds= driver.status();
@@ -575,8 +476,7 @@ io.sockets.on('connection', function (socket) {
         
     socket.on('controllerCommand', function(data) {
         if (Debug) console.log('Controller command: ' + data);
-        if (portOpen)
-            myPort.write(driver.output(data));
+        driver.output(data);
     });
     
     socket.on('startrecording', function(id) {
@@ -588,12 +488,10 @@ io.sockets.on('connection', function (socket) {
     });
     
     socket.on('startlivestream', function(data) {
-        if (portOpen)
             driver.startLiveStream(data);
     });
     
     socket.on('stoplivestream', function() {
-        if (portOpen)
             driver.stopLiveStream();
     });
     
@@ -627,45 +525,7 @@ io.sockets.on('connection', function (socket) {
             console.log('Unauthorized attempt to change instrument driver');
             return;
         }
-        console.log('Request to update our serial driver to ' + data);
-        
-        // No need to reselect the driver if it is already selected:
-        if (driver && (data == driver.name))
-            return;
-        
-        // If we already had a driver, we need to stop listening to events from
-        // the old one so that it can be garbage collected
-        if (driver != null) {
-            driver.removeListener('data',sendDataToFrontEnd);
-        }
-        
-        // Close the serial port if it is open and the driver has changed:
-        if (portOpen && data != driver.name) {
-            console.log("Driver changed! closing port");
-            portOpen = false;
-            myPort.close();
-        }
-        
-        socket.emit('status', {portopen: portOpen, streaming: false, recording: false});
-        
-        // For now, we have only a few drivers, so let's just hardcode...
-        if (data == "onyx") {
-            driver = new Onyx();
-        } else if ( data == "fcoledv1" ) {
-            driver = new FCOled();
-        } else if ( data == "fluke28x") {
-            driver = new Fluke289();
-        } else if ( data == "w433") {
-            driver = new W433();
-        } else if ( data == "elecraft") {
-            driver = new Elecraft();
-        } else if ( data == "usbgeiger") {
-            driver = new USBGeiger();
-        }
-        
-        // And listen for data coming in from our driver
-        driver.on('data',sendDataToFrontEnd);
-        
+        console.log('[Deprecated] Socket asked to select the driver (now done automatically at instrument open)');
     });
     
 });
