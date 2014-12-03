@@ -9,28 +9,24 @@
 
 var serialport = require('serialport'),
     recorder = require('../recorder.js'),
+    events = require('events'),
     outputmanager = require('../outputs/outputmanager.js');
 
-module.exports = {
-    
-    name: "fcoledv1",
-    
-    // Set a reference to the socket.io socket and port
-    socket: null,
-    streaming: false,
-    
-    setPortRef: function(s) {
-    },
-    setSocketRef: function(s) {
-        this.socket = s;
-    },
-    setInstrumentRef: function(i) {
-    },
+var FCOled = function() {
 
+    // Init the EventEmitter
+    events.EventEmitter.call(this);
 
+    this.name = "fcoledv1";
+    
+    this.setPortRef = function(s) {
+    };
+    
+    this.setInstrumentRef = function(i) {
+    };
 
     // How the device is connected on the serial port            
-    portSettings: function() {
+    this.portSettings = function() {
         return  {
             baudRate: 115200,
             dataBits: 8,
@@ -42,32 +38,30 @@ module.exports = {
             // the default readline parser works fine (it separates on \r)
             parser: serialport.parsers.readline('\n'),
         }
-    },
+    };
     
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
     // This particular device does not support this concept, so we
     // always return the same
-    sendUniqueID: function() {
-        this.socket.emit('uniqueID','00000000 (n.a.)');
-    },
+    this.sendUniqueID = function() {
+        this.socket.emit('data',{ uniqueID:'00000000 (n.a.)'});
+    };
     
-    isStreaming: function() {
-        return this.streaming;
-    },
+    this.isStreaming = function() {
+        return true;
+    };
     
     // period is in seconds
     // The sensor sends data by itself, so those functions are empty...
-    startLiveStream: function(period) {
-        this.streaming = true;
-    },
+    this.startLiveStream = function(period) {
+    };
     
-    stopLiveStream: function(period) {
-        this.streaming = true;
-    },
+    this.stopLiveStream = function(period) {
+    };
         
     // format should return a JSON structure.
-    format: function(data, recording) {
+    this.format = function(data, recording) {
         // console.log('FC Oled Backpack - format output');
         // Remove any carriage return
         data = data.replace('\n','');
@@ -77,16 +71,21 @@ module.exports = {
         } catch (e) {
             console.log("Error: cannot parse logger data : " + e + " - " + data);
         }
-        this.socket.emit('serialEvent',fields);
+        this.emit('data',fields);
         recorder.record(fields);
         outputmanager.output(fields);
-    },
+    };
     
     // output should return a string, and is used to format
     // the data that is sent on the serial port, coming from the
     // HTML interface.
-    output: function(data) {
+    this.output = function(data) {
         return data + '\n';
     }
 
 };
+
+
+FCOled.prototype.__proto__ = events.EventEmitter.prototype;
+
+module.exports = FCOled;

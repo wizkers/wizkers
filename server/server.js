@@ -29,30 +29,13 @@ var serialport = require('serialport'),
 var Hexdump = require('./hexdump.js');
 var Debug = false;
 
-
-var deviceTypes = [];
-
 // Preload the parsers we know about:
-
-// TODO: automate this by parsing the "parsers" directory listing
 var Fluke289 = require('./parsers/fluke289.js');
-deviceTypes.push(Fluke289);
-
 var Onyx = require('./parsers/safecast_onyx.js');
-deviceTypes.push(Onyx);
-
 var FCOled = require('./parsers/fried_usb_tester.js');
-deviceTypes.push(FCOled);
-
 var W433 = require('./parsers/w433.js');
-deviceTypes.push(W433);
-
 var Elecraft = require('./parsers/elecraft.js');
-deviceTypes.push(Elecraft);
-
 var USBGeiger = require('./parsers/usb_geiger.js');
-deviceTypes.push(USBGeiger);
-
 
 /**
  * Setup Db connection before anything else
@@ -394,7 +377,7 @@ var portsList = new Array();
 var myPort = null;
 var portOpen = false;
 
-var driver = Onyx;
+var driver = null;
 
 // Output plugin management: we have an outputmanager, whose role
 // is to send data to various third parties (twitter, Safecast, HTTP REST calls
@@ -444,7 +427,6 @@ openPort = function(data, socket) {
        myPort.resume();
        portOpen = true;
        driver.setPortRef(myPort); // We need this for drivers that manage a command queue...
-       driver.setSocketRef(socket);
        if (driver.onOpen) {
            driver.onOpen(true);
        }
@@ -476,7 +458,6 @@ openPort = function(data, socket) {
         console.log(myPort);
         portOpen = false;
        driver.setPortRef(null);
-       driver.setSocketRef(null);
        if (driver.onClose) {
            driver.onClose(true);
        }
@@ -500,6 +481,8 @@ io.use(socketioJwt.authorize({
 // listen for new socket.io connections:
 io.sockets.on('connection', function (socket) {
     
+    var self = this;
+    
     console.log(socket.decoded_token.role, 'connected');
     var userinfo = socket.decoded_token;
     
@@ -509,12 +492,34 @@ io.sockets.on('connection', function (socket) {
             connected = true;
     }
     
-    // If we have an existing open port, we need to update the socket
-    // reference for its driver:
-    if (portOpen && driver != null) {
-       driver.setSocketRef(socket);
+    // We want to listen for data coming in from drivers:
+    var sendDataToFrontEnd = function(data) {
+        console.log('data coming in for socket ' + socket.id, data);
+        
+        // Temporary: detect "uniqueID" key and send as 'uniqueID' message
+        if (data.uniqueID) {
+            socket.emit('uniqueID', data.uniqueID);
+            return;
+        }
+        socket.emit('serialEvent', data);
     }
     
+    // If we have an existing open port, we need to update the socket
+    // reference for its driver:
+    if (driver != null) {
+        console.log('Driver name:',driver.name);
+        driver.on('data',sendDataToFrontEnd);
+    }
+    
+    
+    socket.on('disconnect', function(data) {
+        console.log('This socket got disconnected');
+        if (driver != null) {
+            console.log('Removing driver data callback');
+            driver.removeListener('data',sendDataToFrontEnd);
+        }
+    });
+
     // Get information on the current user:
     //   - username
     //   - role
@@ -559,9 +564,9 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('portstatus', function() {
-        var s = {portopen: portOpen, recording: recorder.isRecording(), streaming: driver.isStreaming()};
+        var s = {portopen: portOpen, recording: recorder.isRecording(), streaming: (driver)? driver.isStreaming() : false};
         var ds = {};
-        if (driver.status)
+        if (driver && driver.status)
             ds= driver.status();
         socket.emit('status', Collect(s,ds));
     });
@@ -622,6 +627,16 @@ io.sockets.on('connection', function (socket) {
         }
         console.log('Request to update our serial driver to ' + data);
         
+        // No need to reselect the driver if it is already selected:
+        if (driver && (data == driver.name))
+            return;
+        
+        // If we already had a driver, we need to stop listening to events from
+        // the old one so that it can be garbage collected
+        if (driver != null) {
+            driver.removeListener('data',sendDataToFrontEnd);
+        }
+        
         // Close the serial port if it is open and the driver has changed:
         if (portOpen && data != driver.name) {
             console.log("Driver changed! closing port");
@@ -633,18 +648,21 @@ io.sockets.on('connection', function (socket) {
         
         // For now, we have only a few drivers, so let's just hardcode...
         if (data == "onyx") {
-            driver = Onyx;
+            driver = new Onyx();
         } else if ( data == "fcoledv1" ) {
-            driver = FCOled;
+            driver = new FCOled();
         } else if ( data == "fluke28x") {
-            driver = Fluke289;
+            driver = new Fluke289();
         } else if ( data == "w433") {
-            driver = W433;
+            driver = new W433();
         } else if ( data == "elecraft") {
-            driver = Elecraft;
+            driver = new Elecraft();
         } else if ( data == "usbgeiger") {
-            driver = USBGeiger;
+            driver = new USBGeiger();
         }
+        
+        // And listen for data coming in from our driver
+        driver.on('data',sendDataToFrontEnd);
         
     });
     

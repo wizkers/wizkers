@@ -14,41 +14,35 @@
  */
 
 var serialport = require('serialport'),
-    recorder = require('../recorder.js'),
     dbs = require('../pouch-config'),
+    events = require('events'),
+    recorder = require('../recorder.js'),
     outputmanager = require('../outputs/outputmanager.js');
 
-module.exports = {
+var W433 = function() {
     
-    name: "w433",
+    this.name = "w433";
     
-    // Set a reference to the socket.io socket and port
-    socket: null,
-    instrument: null,
-    streaming: false,
+    // Our private variables:
+    var instrument =  null;
+    var lastStamp = new Date().getTime();
+    var prevRes = [];
+    var sensor_types_tx3 = ['temperature', '1', '2', '3', '4', '5', '6',
+                        '7', '8', '9', '10', '11', '12', '13','humidity', '15'];
     
-    setPortRef: function(s) {
-    },
-    setSocketRef: function(s) {
-        this.socket = s;
-    },
-    setInstrumentRef: function(i) {
+    this.setPortRef = function(s) {
+    };
+
+    this.setInstrumentRef = function(i) {
         this.instrument = i;
         console.log("W433: instrument reference passed, instrument data is: ");
         console.log(i.metadata);
 	if (this.instrument.metadata == null)
 		this.instrument.metadata = {};
-    },
-
-    
-    lastStamp: new Date().getTime(),
-    prevRes: [],
-    
-    sensor_types_tx3: ['temperature', '1', '2', '3', '4', '5', '6',
-                        '7', '8', '9', '10', '11', '12', '13','humidity', '15'],
+    };
 
     // How the device is connected on the serial port            
-    portSettings: function() {
+    this.portSettings = function() {
         return  {
             baudRate: 9600,
             dataBits: 8,
@@ -57,33 +51,30 @@ module.exports = {
             flowControl: false,
             parser: serialport.parsers.readline('\n'),
         }
-    },
+    };
     
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
     // This particular device does not support this concept, so we
     // always return the same ID
-    sendUniqueID: function() {
-        this.socket.emit('uniqueID','00000000 (n.a.)');
-    },
+    this.sendUniqueID = function() {
+        this.emit('data',{ uniqueID:'00000000 (n.a.)'});
+    };
 
-    isStreaming: function() {
-        return this.streaming;
-    },
+    this.isStreaming = function() {
+        return true;
+    };
     
     // period is in seconds
     // The sensor sends data by itself, so those functions are empty...
-    startLiveStream: function(period) {
-        this.streaming = true;
-    },
+    this.startLiveStream = function(period) {
+    };
     
-    stopLiveStream: function(period) {
-        this.streaming = false;
-    },
-
+    this.stopLiveStream = function(period) {
+    };
         
     // format should emit a JSON structure.
-    format: function(data, recording) {
+    this.format = function(data, recording) {
         // Remove any carriage return
         data = data.replace('\n','');
         var res = {};
@@ -92,9 +83,9 @@ module.exports = {
         res.raw = data;
 
         if (data.length == 12) {
-            if (this.check_ok_tx3(data)) {
+            if (check_ok_tx3(data)) {
                 valid = true;
-                res.reading_type = this.sensor_types_tx3[parseInt(data.substr(3,1),16)];
+                res.reading_type = sensor_types_tx3[parseInt(data.substr(3,1),16)];
                 res.sensor_address = parseInt(data.substr(4,2),16) & 0xFE;
                 switch (res.reading_type) {
                     case 'temperature':
@@ -108,7 +99,7 @@ module.exports = {
                 }
             }
         } else if (data.length == 14) {
-            if (this.check_ok_tx19(data) ) {
+            if (check_ok_tx19(data) ) {
                 valid = true;
                 res.reading_type = parseInt(data.substr(3,1),16);
                 res.sensor_address = parseInt(data.substr(4,2),16);
@@ -177,15 +168,15 @@ module.exports = {
         // if we got exactly the same reading less than 1.5 second ago, then
         // discard it.
         var stamp = new Date().getTime();
-        if ( (stamp-this.prevStamp) < 1500 ) {            
+        if ( (stamp-prevStamp) < 1500 ) {            
             // Loop in the last four measurements:
-            for (var i = 0; i < this.prevRes.length; i++) {
-                if ((stamp - this.prevRes[i].stamp) < 1500 &&
-                    res.sensor_address == this.prevRes[i].res.sensor_address &&
-                    res.sensor_type == this.prevRes[i].res.sensor_type &&
-                    ((res.value == this.prevRes[i].res.value) || 
-                     ((typeof(res.value) == "object") && (typeof(this.prevRes[i].value) == "object") &&
-                       (res.value.dir == this.prevRes[i].value.dir) && (res.value.speed == this.prevRes[i].value.speed)
+            for (var i = 0; i < prevRes.length; i++) {
+                if ((stamp - prevRes[i].stamp) < 1500 &&
+                    res.sensor_address == prevRes[i].res.sensor_address &&
+                    res.sensor_type == prevRes[i].res.sensor_type &&
+                    ((res.value == prevRes[i].res.value) || 
+                     ((typeof(res.value) == "object") && (typeof(prevRes[i].value) == "object") &&
+                       (res.value.dir == prevRes[i].value.dir) && (res.value.speed == prevRes[i].value.speed)
                      ))
                    )
                     return;
@@ -194,22 +185,22 @@ module.exports = {
         
         // We have some sensors that interleave their burst: temp / humidity then temp/humidity
         // therefore we are going to keep the last six stamps
-        this.prevRes.push({ stamp: stamp, res: res});
-        if (this.prevRes.length > 6)
-            this.prevRes = this.prevRes.slice(1);
+        prevRes.push({ stamp: stamp, res: res});
+        if (prevRes.length > 6)
+            prevRes = prevRes.slice(1);
 
-        this.prevStamp = stamp;
+        prevStamp = stamp;
         
         // Now: sensor addresses are all nice, but what we really want, is a sensor name: look up in our current
         // instrument whether we have a name for the sensor. If no name, use the address as the name.
-        var name = this.instrument.metadata[res.sensor_address];
-	console.log("Sensor name: " + name);
+        var name = instrument.metadata[res.sensor_address];
+	    console.log("Sensor name: " + name);
         if (name != undefined) {
             res.sensor_name = name;
         } else {
-            this.instrument.metadata[res.sensor_address] = res.sensor_address;
+            instrument.metadata[res.sensor_address] = res.sensor_address;
             res.sensor_name = res.sensor_address;
-	    dbs.instruments.get(this.instrument._id, function(err,result) {
+	    dbs.instruments.get(instrument._id, function(err,result) {
 		if (err) {
 			console.log("Error updating sensor name: " + err);
 		}
@@ -233,18 +224,25 @@ module.exports = {
         
         // Send our response to the recorder and the output manager
         // as well
-        recorder.record(res);
-        outputmanager.output(res);
-        this.socket.emit('serialEvent',res);
-    },
+        this.emit('data',res);
+        // Send our response to the recorder and the output manager
+        // as well
+        recorder.record(data);
+        outputmanager.output(data);
+
+    };
     
     // output should return a string, and is used to format
     // the data that is sent on the serial port, coming from the
     // HTML interface.
-    output: function(data) {
+    this.output = function(data) {
         return data + '\n';
-    },
+    };
     
+    
+    /////////////////////////////////////////////
+    //  Our private methods below:
+    /////////////////////////////////////////////
     
     /**
      * The following two subroutines check two things
@@ -253,7 +251,7 @@ module.exports = {
      *    TX3 and TX19 sensors)
      **/
     
-    check_ok_tx3: function(data) {
+    var check_ok_tx3 = function(data) {
         var sum = 0;
         var s = data.split('');
         var chk = s.pop();
@@ -264,9 +262,9 @@ module.exports = {
         // console.log(chk + " - " + sum%16);
         return (parseInt(chk,16) == sum%16) &&
             (data.substr(6,2) == data.substr(9,2));        
-    },
+    };
     
-    check_ok_tx19: function(data) {
+    var check_ok_tx19 = function(data) {
         var sum = 0;
         var s = data.split('');
         var chk = s.pop();
@@ -278,6 +276,10 @@ module.exports = {
         var v2 = ~(parseInt(data.substr(11,2),16))  & 0xff;
         return (parseInt(chk,16) == sum%16) &&
             (v1 == v2);
-    },
+    };
 
 };
+
+W433.prototype.__proto__ = events.EventEmitter.prototype;
+
+module.exports = W433;

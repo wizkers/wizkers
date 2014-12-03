@@ -8,31 +8,29 @@
 
 var serialport = require('serialport'),
     SerialPort  = serialport.SerialPort,
+    events = require('events'),
     recorder = require('../recorder.js'),
     outputmanager = require('../outputs/outputmanager.js');
 
-module.exports = {
+
+var USBGeiger = function() {
+        
+    events.EventEmitter.call(this);
+
+    this.name = "usbgeiger";
     
-    name: "usbgeiger",
+    // Set a reference to the port
+    this.port = null;
     
-    // Set a reference to the socket.io socket and port
-    socket: null,
-    port: null,
-    uidrequested: false,
-    streaming: true,  // The dongle always streams data
-    livePoller: null,
-    
-    setPortRef: function(s) {
+    this.setPortRef = function(s) {
         this.port = s;
-    },
-    setSocketRef: function(s) {
-        this.socket = s;
-    },
-    setInstrumentRef: function(i) {
-    },
+    };
+        
+    this.setInstrumentRef = function(i) {
+    };
 
     // How the device is connected on the serial port            
-    portSettings: function() {
+    this.portSettings = function() {
         return  {
             baudRate: 115200,
             dataBits: 8,
@@ -41,31 +39,29 @@ module.exports = {
             flowControl: false,
             parser: serialport.parsers.readline(),
         }
-    },
+    };
     
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
-    sendUniqueID: function() {
+    this.sendUniqueID = function() {
         // TODO: implement serial number query here
-        this.socket.emit('uniqueID','00000000 (n.a.)');
-    },
+        this.emit('data', { uniqueID:'00000000 (n.a.)'});
+    };
     
-    isStreaming: function() {
-        return this.streaming;
-    },
+    this.isStreaming = function() {
+        return true;
+    };
     
     // This dongle always outputs CPM value on the serial port
-    startLiveStream: function(period) {
-        this.streaming = true;
-    },
+    this.startLiveStream = function(period) {
+    };
     
     // Even though we ask to stop streaming, the dongle will still
     // stream.
-    stopLiveStream: function(period) {
-        this.streaming = true;
-    },
+    this.stopLiveStream = function(period) {
+    };
     
-    format: function(data, recording) {        
+    this.format = function(data, recording) {        
         
         // All commands now return JSON
         try {
@@ -119,23 +115,27 @@ module.exports = {
                 jsresp.raw = data;
             }
             // Send the response to the front-end
-            this.socket.emit('serialEvent', jsresp);
+            this.emit('data', jsresp);
             // Send our response to the recorder and the output manager
             // as well
-            recorder.record(jsresp);
-            outputmanager.output(jsresp);
-            } catch (err) {
-                console.log('Not able to parse data from device:\n' + data + '\n' + err);
-            }
-    },
+            recorder.record(data);
+            outputmanager.output(data);
+        } catch (err) {
+            console.log('Not able to parse data from device:\n' + data + '\n' + err);
+        }
+    };
     
-    output: function(data) {
+    this.output = function(data) {
         console.log("[USB Geiger] Command sent to dongle: " + data);
         if (data == "TAG") {
-            this.socket.emit('serialEvent', {devicetag: 'Not supported'});
+            this.emit('data', {devicetag: 'Not supported'});
             return '\n';
         }
         return data + '\n';
     }
 
 };
+
+USBGeiger.prototype.__proto__ = events.EventEmitter.prototype;
+
+module.exports = USBGeiger;

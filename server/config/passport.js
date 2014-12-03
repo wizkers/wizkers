@@ -63,7 +63,7 @@ module.exports = function(passport) {
                 return done(err);
 
             // check to see if theres already a user with that email
-            if (user.rows.length) {
+            if (result.rows.length) {
                 return done(null, false, req.flash('signupMessage', 'That email is already registered.'));
             } else {
 
