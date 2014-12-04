@@ -32,7 +32,7 @@ var USBGeiger = function() {
     /////////
 
     var status = function(stat) {
-        debug('[usb_geiger] Port status change', stat);
+        debug('Port status change', stat);
         isopen = stat.portopen;
         
         if (isopen) {

@@ -22,7 +22,8 @@ var serialport = require('serialport'),
     recorder = require('../recorder.js'),
     zlib = require('zlib'),
     events = require('events'),
-    outputmanager = require('../outputs/outputmanager.js');
+    outputmanager = require('../outputs/outputmanager.js'),
+    debug = require('debug')('parsers:fluke289');
 
 Hexdump = require('../hexdump.js');
 Bitmap = require('./lib/bitmap.js');
@@ -34,15 +35,18 @@ var Fluke289 = function() {
     // Init the EventEmitter
     events.EventEmitter.call(this);
 
-    
+    /////////
+    // Public variables
+    /////////
     this.name = "fluke28x";
+
+    /////////
+    // Private variables
+    /////////
 
     // We have a lot of internal variables to manage
     // the link protocol:
     
-    // TODO: is there a better way to manage states than
-    //       those ugly objects ?
-
     // Session layer. Whenever a command is sent, the DMM
     // replies first with a response code ('ACK' below) then
     // the actual response if needed.
@@ -64,7 +68,7 @@ var Fluke289 = function() {
                };
     
     // Tables that contain the mapping of various fields in binary structures:
-    var mapReadingID = []
+    var mapReadingID = [],
         mapUnit = [],
         mapState = [],
         mapAttribute = [],
@@ -94,6 +98,9 @@ var Fluke289 = function() {
         recording = false,     // to call the main app in case we need to record readings
         streaming = false,
         livePoller = null,
+        port_close_requested = false,
+        self = this,
+
     
     // Link state handling
         currentLinkstate = 0,     // see linkstate above
@@ -109,15 +116,38 @@ var Fluke289 = function() {
         tmpBitmap = [],
         tmpBitmapIndex = 0;
     
-    // Set a reference to the serial port, used for the command
-    // queue.
-    this.setPortRef = function(s) {
-        debug("Setting port reference.");
-        port = s;
+    /////////
+    // Private methods
+    /////////
+
+    var status = function(stat) {
+        debug('Port status change', stat);
+        isopen = stat.portopen;
+        
+        if (isopen) {
+            // Should run any "onOpen" initialization routine here if
+            // necessary.
+        } else {
+            // We remove the listener so that the serial port can be GC'ed
+            if (port_close_requested) {
+                port.removeListener('status', status);
+                port_close_requested = false;
+            }
+        }
+    };
+
+// How the device is connected on the serial port            
+    var portSettings = function() {
+        return  {
+            baudRate: 115200,
+            dataBits: 8,
+            parity: 'none',
+            stopBits: 1,
+            flowControl: false,
+            parser: serialport.parsers.raw,
+        }
     };
     
-    this.setInstrumentRef = function(i) {
-    };
     
     var resetState = function() {
         currentLinkstate = 0;
@@ -135,18 +165,6 @@ var Fluke289 = function() {
             this.emit('data',data);
             recorder.record(data);
             outputmanager.output(data);
-        }
-    };
-    
-    // How the device is connected on the serial port            
-    this.portSettings = function() {
-        return  {
-            baudRate: 115200,
-            dataBits: 8,
-            parity: 'none',
-            stopBits: 1,
-            flowControl: false,
-            parser: serialport.parsers.raw,
         }
     };
     
@@ -190,64 +208,17 @@ var Fluke289 = function() {
         tmpBuffer.copy(retBuffer,0,0,writeIdx);
         return retBuffer;
     };
-    
-    var debug = function(data) {
-        //return;
-        console.log(data);
-    };
-    
-    // Called when the HTML app needs a unique identifier.
-    // this is a standardized call across all drivers.
-    // For the Fluke, the UID is the serial number, so this is
-    // what we will request, but we will return it inside a special
-    // message.
-    this.sendUniqueID = function() {
-        debug("[fluke289] Asking for serial number for UID request");
-        uidrequested = true;
-        // TODO: handle port write within this.output
-        try {
-            port.write(this.output("QSN"));
-        } catch (err) {
-            console.log("Error on serial port while requesting UID : " + err);
-        }
-    };
-    
+
     var queryMeasurementFull = function() {
-        try {
-            port.write(this.output("QDDA"));        
-        } catch (err) {
-            console.log("[fluke289] Error while writing to serial port in live streaming");
-        }
+        this.output("QDDA");        
     };
     
-    this.isStreaming = function() {
-        return streaming;
-    };
-    
-    // period is in seconds
-    this.startLiveStream = function(period) {
-        if (!streaming) {
-            console.log("[fluke289] Starting live data stream");
-            livePoller = setInterval(queryMeasurementFull.bind(this), (period) ? period*1000: 1000);
-            streaming = true;
-        }
-    };
-    
-    this.stopLiveStream = function(period) {
-        if (streaming) {
-            console.log("[fluke289] Stopping live data stream");
-            clearInterval(livePoller);
-            this.streaming = false;
-        }
-    };
-
-
     // Link layer protocol management: receives raw data from
     // the serial port, saves it and as soon as a complete data packet
     // is received, forward it to the upper layer.
     //
     // data is a buffer
-    this.format = function(data) {
+    var format = function(data) {
         
         if (data) { // we sometimes get called without data, to further process the
                     // existing buffer
@@ -320,7 +291,7 @@ var Fluke289 = function() {
                 // - just send the prepackaged data...
                 debug("LLP: Sending ACK");
                 try {port.write(Buffer("10022110032138","hex")); }catch (err) {
-                        console.log("Error on serial port while writing : " + err);
+                        debug("Error on serial port while writing : " + err);
                 }
                 currentStatusByte = 0x40;
                 break;
@@ -329,7 +300,7 @@ var Fluke289 = function() {
                 // - just send the prepackaged data...
                 debug("LLP: Sending ACK");
                 try { port.write(Buffer("1002611003573e","hex")); }catch (err) {
-                        console.log("Error on serial port while writing : " + err);
+                        debug("Error on serial port while writing : " + err);
                 }
                 currentStatusByte = 0x00;
                 break;
@@ -350,20 +321,19 @@ var Fluke289 = function() {
         } else if (controlByte == 0x07) {
             response = processPacket();
         }
-        
 
         inputBuffer.copy(inputBuffer,0,stop);
         ibIdx -= stop;
-        
+
         if (ibIdx > stop) {
             sendData(response);
             format(); // We still have data to process, so we call ourselves recursively
             return;
         }
-        
+
         sendData(response);
     };
-        
+
     // processPacket is called by format once a packet is received, for actual
     // processing and sending over the socket.io pipe
     var processPacket = function(buffer) {    
@@ -454,7 +424,7 @@ var Fluke289 = function() {
                     case "QSMR":
                         commandProcessed = true;
                         // Query Saved Measurement Reading
-                        console.log(Hexdump.dump(buffer.toString('binary')));
+                        debug(Hexdump.dump(buffer.toString('binary')));
                         break;
                     case "QRSI":
                         commandProcessed = true;
@@ -473,11 +443,11 @@ var Fluke289 = function() {
                         commandProcessed = true;
                         response = processMinMaxRecording(buffer);
                         response.minmaxRecordingID = pendingCommandArgument;
-                        console.log(Hexdump.dump(buffer.toString('binary')));
+                        debug(Hexdump.dump(buffer.toString('binary')));
                         break;
                     case "QPSI":
                         commandProcessed = true;
-                        console.log(Hexdump.dump(buffer.toString('binary')));
+                        debug(Hexdump.dump(buffer.toString('binary')));
                         break;
                     default:
                         commandProcessed = false;
@@ -545,7 +515,7 @@ var Fluke289 = function() {
                         case "QSN":
                             response.serial = data[1];
                             if (uidrequested) {
-                                console.log("Sending uniqueID message");
+                                debug("Sending uniqueID message");
                                 this.emit('data', {uniqueID: data[1]});
                                 uidrequested = false;
                             }
@@ -578,7 +548,7 @@ var Fluke289 = function() {
                 }
             }
             if (data[1] == undefined) {
-                    console.log("WARNING: no return value for " + pendingCommand + ", you should add it to the noReplyCommands list");
+                    debug("WARNING: no return value for " + pendingCommand + ", you should add it to the noReplyCommands list");
             }
             currentState = state.idle;
         }
@@ -587,17 +557,14 @@ var Fluke289 = function() {
         if (commandQueue.length && currentState == state.idle) {
             var cmd = commandQueue.pop();
             debug("Command queue: dequeuing command " + cmd );
-            try { port.write(this.output(cmd)); } catch (err) {
-                        console.log("Error on serial port while writing : " + err);
-            }
+            this.output(cmd);
         }
         debug("Sending response ");
         debug(response);
         // TODO: move sending on socket in here
         return response;
     };
-    
-    
+
     // Sends back a JSON-formatted structure describing the complete meter reading.
     // This is also what can/should be recorded in logs
     // { primaryFunction:   ,
@@ -658,7 +625,7 @@ var Fluke289 = function() {
         return res;
     };
         
-    var waitTimeout = function(self) {
+    var waitTimeout = function() {
         debug("Timeout waiting for command response");
         sendData({error:true});
         currentState = state.idle;
@@ -666,78 +633,14 @@ var Fluke289 = function() {
         if (commandQueue.length) {
             var cmd = commandQueue.pop();
             debug("Command queue: dequeuing command " + cmd );
-            try { self.port.write(self.output(cmd, self)); }catch (err) {
-                        console.log("Error on serial port while writing : " + err);
-                }
+            self.output(cmd);
         }        
-    };
-    
-    // output should return a string, and is used to format
-    // the data that is sent on the serial port, coming from the
-    // HTML interface.
-    this.output = function(data, context) {
-        var self = this;
-        if (context != undefined)
-            self = context;
-        
-        // before being able to send commands, we need to ask to open
-        // the link by sending status byte 0x03:
-        if (currentLinkstate == linkstate.closed) {
-            currentLinkstate = linkstate.wantconnect;
-            var buf = new Buffer("1002031003a28e","hex");
-            commandQueue.push(data);
-            debug("Link closed: requested link open, queued command (" + data + ")");
-            return buf;
-        }
-        if (currentLinkstate == linkstate.wantconnect) {
-            debug("Waiting for link to open, queue command");
-            commandQueue.push(data);
-            return '';
-        }
-
-        if (currentState == null)
-            currentState = state.idle;
-        
-        if (currentState != state.idle) {
-            // We are working on a command, so queue this one
-            commandQueue.push(data);
-            debug("Waiting for command response, queuing command - " + data);
-            return "";
-        }
-        // We need to save the previous command name because the meter does
-        // not echo the command we send
-        pendingCommand = data.split(" ")[0];
-        pendingCommandArgument = data.split(" ")[1];
-        debug("Sending command " + data );
-        currentState = state.wait_ack;
-        // We'll wait for 300ms for a response, otherwise we reset.
-        timeoutTimer = setTimeout(waitTimeout, 300, self);
-
-        //var tmp = new Buffer("1002407172736920341003","hex");
-        var cmdToBuffer = new Buffer(data,'ascii'); // Turn our command to a buffer
-        var tmp = new Buffer(cmdToBuffer.length+5);
-        tmp.writeUInt16BE(0x1002,0);
-        tmp.writeUInt8(currentStatusByte,2);
-        cmdToBuffer.copy(tmp,3);
-        tmp.writeUInt16BE(0x1003,tmp.length-2);
-        
-        //tmp = new Buffer("1002031003","hex");
-        var crc = crcCalc.fluke_crc(tmp);
-        //console.log('crc: ' + crc.toString(16));
-        var finalBuffer = new Buffer(tmp.length+2);
-        tmp.copy(finalBuffer,0);
-        finalBuffer.writeUInt16LE(crc,finalBuffer.length-2);
-        debug(finalBuffer);
-        
-        return finalBuffer;
-
     };
 
     // We now have a gzipped BMP contained in those two buffers
     // we need to decompress it, turn it into a structure that is intelligible
     // to a browser.
     var processBitmap = function() {
-        var self = this;
         var bmBuffers = [];
         // First of all, we need to remove the remaining framing:
         for (var i=0; i < tmpBitmap.length; i++) {
@@ -749,7 +652,7 @@ var Fluke289 = function() {
                 idx++;
             }
             var bmBuffer = new Buffer(tmpBitmap[i].length-(idx+2));
-            this.tmpBitmap[i].copy(bmBuffer,0,idx+2);
+            tmpBitmap[i].copy(bmBuffer,0,idx+2);
             bmBuffers.push(bmBuffer);
             //this.debug("GZipped data buffer length is " + bmBuffer.length);
             //this.debug(Hexdump.dump(bmBuffer2.toString("binary")));
@@ -988,6 +891,124 @@ var Fluke289 = function() {
         }
         return { emap : {id: pendingCommandArgument, props: emap }};
     }   
+
+    
+    /////////
+    // Public API
+    /////////
+    
+    // Creates and opens the connection to the instrument.
+    // for all practical purposes, this is really the init method of the
+    // driver
+    this.openPort = function(path) {
+        port = new serialconnection(path, portSettings());
+        port.on('data', format);
+        port.on('status', status);
+    }
+    
+    this.closePort = function(data) {
+        // We need to remove all listeners otherwise the serial port
+        // will never be GC'ed
+        port.removeListener('data', format);
+        port_close_requested = true;
+        port.close();
+    }
+
+    this.setInstrumentRef = function(i) {
+    };
+    
+    // Called when the HTML app needs a unique identifier.
+    // this is a standardized call across all drivers.
+    // For the Fluke, the UID is the serial number, so this is
+    // what we will request, but we will return it inside a special
+    // message.
+    this.sendUniqueID = function() {
+        debug("[fluke289] Asking for serial number for UID request");
+        uidrequested = true;
+        this.output("QSN");
+    };
+        
+    this.isStreaming = function() {
+        return streaming;
+    };
+    
+    // period is in seconds
+    this.startLiveStream = function(period) {
+        if (!streaming) {
+            debug("Starting live data stream");
+            livePoller = setInterval(queryMeasurementFull.bind(this), (period) ? period*1000: 1000);
+            streaming = true;
+        }
+    };
+    
+    this.stopLiveStream = function(period) {
+        if (streaming) {
+            debug("[fluke289] Stopping live data stream");
+            clearInterval(livePoller);
+            this.streaming = false;
+        }
+    };
+
+    // output takes data and sends it to the port after
+    // protocol encapsulation. For this driver, this is fairly
+    // complex because we have a queue of commands, etc...
+    this.output = function(data) {
+        
+        // before being able to send commands, we need to ask to open
+        // the link by sending status byte 0x03:
+        if (currentLinkstate == linkstate.closed) {
+            currentLinkstate = linkstate.wantconnect;
+            var buf = new Buffer("1002031003a28e","hex");
+            commandQueue.push(data);
+            debug("Link closed: requested link open, queued command (" + data + ")");
+            port.write(buf);
+            return;
+        }
+        if (currentLinkstate == linkstate.wantconnect) {
+            debug("Waiting for link to open, queue command");
+            commandQueue.push(data);
+            return;
+        }
+
+        if (currentState == null)
+            currentState = state.idle;
+        
+        if (currentState != state.idle) {
+            // We are working on a command, so queue this one
+            commandQueue.push(data);
+            debug("Waiting for command response, queuing command - " + data);
+            return;
+        }
+        // We need to save the previous command name because the meter does
+        // not echo the command we send
+        pendingCommand = data.split(" ")[0];
+        pendingCommandArgument = data.split(" ")[1];
+        debug("Sending command " + data );
+        currentState = state.wait_ack;
+        // We'll wait for 300ms for a response, otherwise we reset.
+        timeoutTimer = setTimeout(waitTimeout, 300);
+
+        var cmdToBuffer = new Buffer(data,'ascii'); // Turn our command to a buffer
+        var tmp = new Buffer(cmdToBuffer.length+5);
+        tmp.writeUInt16BE(0x1002,0);
+        tmp.writeUInt8(currentStatusByte,2);
+        cmdToBuffer.copy(tmp,3);
+        tmp.writeUInt16BE(0x1003,tmp.length-2);
+
+        var crc = crcCalc.fluke_crc(tmp);
+        //console.log('crc: ' + crc.toString(16));
+        var finalBuffer = new Buffer(tmp.length+2);
+        tmp.copy(finalBuffer,0);
+        finalBuffer.writeUInt16LE(crc,finalBuffer.length-2);
+        debug(finalBuffer);
+        
+        try {
+            port.write(finalBuffer);
+        } catch (err) {
+            debug("Error on serial port while writing data : " + err);
+        }
+    };
+
 }
 
 Fluke289.prototype.__proto__ = events.EventEmitter.prototype;

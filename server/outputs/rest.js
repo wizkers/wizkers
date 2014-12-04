@@ -8,7 +8,8 @@
 var querystring = require('querystring'),
     utils = require('../utils.js'),
     dbs = require('../pouch-config'),
-    http = require('http');
+    http = require('http'),
+    debug = require('debug')('output:rest');
 
 
 module.exports = function rest() {
@@ -43,7 +44,7 @@ module.exports = function rest() {
     // Load the settings for this plugin
     this.setup = function(output) {
         
-        console.log("[REST Output plugin] Setup a new instance");
+        debug("Setup a new instance");
         mappings = output.mappings;
         settings = output.metadata;
         output_ref = output;
@@ -85,7 +86,7 @@ module.exports = function rest() {
         var self = this;
         var post_data = '';
         
-        console.log("[REST Output plugin] Send data");
+        debug("Send data");
 
         // Step one: prepare the structure
         var fields = {};
@@ -105,7 +106,7 @@ module.exports = function rest() {
         output_ref.last = new Date().getTime();
         var post_request = http.request(post_options, function(res) {
             var err = true;
-            console.log("[REST Output Plugin] REST Request result");
+            debug("[REST Output Plugin] REST Request result");
             // this is the xmlhttprequest
             switch (res.statusCode) {
                     case 0:  // Cannot connect
@@ -127,8 +128,8 @@ module.exports = function rest() {
             });
 
             res.on('data', function(data) {
-                console.log("API Request result");
-                console.log(data);
+                debug("API Request result");
+                debug(data);
                 output_ref.lastmessage = data;
                 dbs.outputs.get(output_ref._id, function(err,result) {
                     output_ref._rev = result._rev;
@@ -153,11 +154,5 @@ module.exports = function rest() {
             post_request.write(post_data);
         }
         post_request.end();
-    };
-    
-
-        
+    };      
 };
-    
-
-
