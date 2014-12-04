@@ -108,8 +108,8 @@ var USBGeiger = function() {
             self.emit('data', jsresp);
             // Send our response to the recorder and the output manager
             // as well
-            recorder.record(data);
-            outputmanager.output(data);
+            recorder.record(jsresp);
+            outputmanager.output(jsresp);
         } catch (err) {
             debug('Not able to parse data from device:\n' + data + '\n' + err);
         }

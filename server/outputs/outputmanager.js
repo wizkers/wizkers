@@ -7,8 +7,9 @@
  */
 
 
-var dbs = require('../pouch-config');
-var _ = require("underscore")._;
+var dbs = require('../pouch-config'),
+    _ = require("underscore")._,
+    debug = require('debug')('outputmanager');
 
 
 var Safecast = require('./safecast.js');
@@ -57,7 +58,7 @@ module.exports = {
     // and more importantly, all the settings for those.
     enableOutputs: function(id) {
         var self = this;
-        console.log('Retrieving Outputs for Instrument ID: ' + id);
+        debug('Retrieving Outputs for Instrument ID: ' + id);
         
         // TODO: nicely disable previously active outputs ?
         this.activeOutputs = [];
@@ -70,14 +71,14 @@ module.exports = {
                           {key: id, include_docs: true},
                           function(err,outputs) {
                                 if (err && err.status == 404) {
-                                    console.log("No enabled outputs");
+                                    debug("No enabled outputs");
                                     return;
                                 }
             _.each(outputs.rows, function(output) {
                 // Now we need to configure the output and put it into our activeOutputs list
                 var pluginType = self.availableOutputs[output.doc.type];
                 if (pluginType == undefined) {
-                    console.log("***** WARNING ***** we were asked to enable an output plugin that is not supported but this server");
+                    debug("***** WARNING ***** we were asked to enable an output plugin that is not supported but this server");
                 } else {
                     var plugin = new pluginType();
                     // The plugin needs its metadata and the mapping for the data,
@@ -96,6 +97,7 @@ module.exports = {
         for (idx in this.activeOutputs) {
             var output = this.activeOutputs[idx];
             if (this.alarm(output,data) || this.regular(output) ) {
+                debug("Output triggered with this data " + data);
                 output.plugin.sendData(data);
                 output.last = new Date().getTime();
             }
