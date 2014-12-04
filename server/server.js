@@ -513,17 +513,20 @@ io.sockets.on('connection', function (socket) {
     });
     
     socket.on('startlivestream', function(data) {
+        if (driver)
             driver.startLiveStream(data);
     });
     
     socket.on('stoplivestream', function() {
+        if (driver)
             driver.stopLiveStream();
     });
     
     // Request a unique identifier to our driver
     socket.on('uniqueID', function() {
         socket_debug("Unique ID requested by HTML app");
-        driver.sendUniqueID();
+        if (driver)
+            driver.sendUniqueID();
     });
 
     // Return a list of serial ports available on the

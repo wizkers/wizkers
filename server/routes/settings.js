@@ -19,6 +19,8 @@
 
 
 var dbs = require('../pouch-config');
+var debug = require('debug')('wizkers:routes:settings');
+
 
 exports.getSettings = function(req, res) {
     // Note: 'coresettings' always exists since it is created/
@@ -31,10 +33,10 @@ exports.getSettings = function(req, res) {
 
 exports.updateSettings = function(req, res) {
     var settings = req.body;
-    console.log('Updating settings.');
+    debug('Updating settings.');
     dbs.settings.put(settings,function(err, result) {
             if (err) {
-                console.log('Error updating settings: ' + err);
+                debug('Error updating settings: ' + err);
                 res.send({'error':'An error has occurred'});
             } else {
                 res.send({ _id: result.id, _rev: result.rev});

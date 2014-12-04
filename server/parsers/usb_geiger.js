@@ -9,7 +9,7 @@
 var serialport = require('serialport'),
     events = require('events'),
     recorder = require('../recorder.js'),
-    serialconnection = require('../connections/serial');
+    serialconnection = require('../connections/serial'),
     outputmanager = require('../outputs/outputmanager.js'),
     debug = require('debug')('wizkers:parsers:usb_geiger');
 
@@ -154,6 +154,10 @@ var USBGeiger = function() {
         port_close_requested = true;
         port.close();
     }
+    
+    this.isOpen = function() {
+        return isopen;
+    }
         
     this.setInstrumentRef = function(i) {
     };
@@ -177,12 +181,9 @@ var USBGeiger = function() {
     this.stopLiveStream = function(period) {
     };
     
-    this.isOpen = function() {
-        return isopen;
-    }
         
     this.output = function(data) {
-        debug("[USB Geiger] Command sent to dongle: " + data);
+        debug("Command sent to dongle: " + data);
         if (data == "TAG") {
             this.emit('data', {devicetag: 'Not supported'});
             return '\n';

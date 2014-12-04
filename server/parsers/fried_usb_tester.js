@@ -11,6 +11,7 @@ var serialport = require('serialport'),
     recorder = require('../recorder.js'),
     events = require('events'),
     serialconnection = require('../connections/serial'),
+    debug = require('debug')('wizkers:parsers:fcoled'),
     outputmanager = require('../outputs/outputmanager.js');
 
 var FCOled = function() {
@@ -106,7 +107,6 @@ var FCOled = function() {
     this.isOpen = function() {
         return isopen;
     }
-
 
     this.setInstrumentRef = function(i) {
     };

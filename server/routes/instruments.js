@@ -27,6 +27,8 @@
 
 var dbs = require('../pouch-config');
 var fs = require('fs');
+var debug = require('debug')('wizkers:routes:instruments');
+
 
 
 exports.findById = function(req, res) {
@@ -48,7 +50,7 @@ exports.findAll = function(req, res) {
 
 exports.addInstrument = function(req, res) {
     var instrument = req.body;
-    console.log('Adding instrument: ' + JSON.stringify(instrument));
+    debug('Adding instrument: ' + JSON.stringify(instrument));
     dbs.instruments.post(req.body, function(err, result) {
             if (err) {
                 res.send({'error':'An error has occurred'});
@@ -61,11 +63,11 @@ exports.addInstrument = function(req, res) {
 exports.updateInstrument = function(req, res) {
     var id = req.params.id;
     var instrument = req.body;
-    console.log('Updating instrument: ' + id);
-//    console.log(JSON.stringify(instrument));
+    debug('Updating instrument: ' + id);
+//    debug(JSON.stringify(instrument));
     dbs.instruments.put(req.body, function(err, result) {
             if (err) {
-                console.log('Error updating instrument: ' + err);
+                debug('Error updating instrument: ' + err);
                 res.send({'error':'An error has occurred'});
             } else {
                 res.send({ _id: result.id, _rev: result.rev});
@@ -75,10 +77,10 @@ exports.updateInstrument = function(req, res) {
 
 exports.deleteInstrument = function(req, res) {
     var id = req.params.id;
-    console.log('Deleting instrument: ' + id);
+    debug('Deleting instrument: ' + id);
     dbs.instruments.get(id, function(err,ins) {
         if (err) {
-            console.log('Error - ' + err);
+            debug('Error - ' + err);
             res.send({'error':'An error has occurred - ' + err});
         } else {
             dbs.instruments.remove(ins, function(err,result) {
@@ -95,10 +97,10 @@ exports.deleteInstrument = function(req, res) {
 exports.uploadPic = function(req,res) {
     var id= req.params.id;
     if (req.files) {
-        console.log('Will save picture ' + JSON.stringify(req.files) + ' for Instrument ID: ' + id);
+        debug('Will save picture ' + JSON.stringify(req.files) + ' for Instrument ID: ' + id);
         // We use an 'upload' dir on our server to ensure we're on the same FS
         var filenameExt = req.files.file.path.split(".").pop();
-        console.log('Debug: ' + './public/pics/instruments/' + id + '.' + filenameExt);
+        debug('Debug: ' + './public/pics/instruments/' + id + '.' + filenameExt);
         // Note: we reference the target filename relative to the path where the server
         // was started. One trick though: we can be in a situation where we are on two different
         // filesystems (who know?) and fs.rename won't work and return a "EXDEV" error. For this
@@ -112,7 +114,7 @@ exports.uploadPic = function(req,res) {
                     });
             } catch (err) {
                         fs.unlinkSync(req.files.file.path);
-                        console.log('Error saving file, deleted temporary upload - ' + err);                        
+                        debug('Error saving file, deleted temporary upload - ' + err);                        
         };
     } else {
         res.send(false);

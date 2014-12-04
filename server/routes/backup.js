@@ -8,6 +8,7 @@
 var spawn = require('child_process').spawn;
 var path = require('path');
 var fs = require('fs');
+var debug = require('debug')('wizkers:routes:backup');
 
 
 /**

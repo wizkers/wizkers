@@ -17,6 +17,7 @@ var serialport = require('serialport'),
     dbs = require('../pouch-config'),
     events = require('events'),
     recorder = require('../recorder.js'),
+    debug = require('debug')('wizkers:parsers:w433'),
     outputmanager = require('../outputs/outputmanager.js');
 
 var W433 = function() {
@@ -50,7 +51,7 @@ var W433 = function() {
     /////////
 
     var status = function(stat) {
-        console.log('[usb_geiger] Port status change', stat);
+        debug('Port status change', stat);
         isopen = stat.portopen;
         
         if (isopen) {
@@ -198,7 +199,7 @@ var W433 = function() {
         // Now: sensor addresses are all nice, but what we really want, is a sensor name: look up in our current
         // instrument whether we have a name for the sensor. If no name, use the address as the name.
         var name = instrument.metadata[res.sensor_address];
-	    console.log("Sensor name: " + name);
+	    debug("Sensor name: " + name);
         if (name != undefined) {
             res.sensor_name = name;
         } else {
@@ -206,12 +207,12 @@ var W433 = function() {
             res.sensor_name = res.sensor_address;
 	    dbs.instruments.get(instrument._id, function(err,result) {
 		if (err) {
-			console.log("Error updating sensor name: " + err);
+			debug("Error updating sensor name: " + err);
 		}
 		result.metadata[res.sensor_address] = res.sensor_address;
                 dbs.instruments.put(result, function(err, result) {
 			if (err)
-				console.log(err);
+				debug(err);
 		});
 	  });
         }
@@ -254,7 +255,7 @@ var W433 = function() {
             sum += parseInt(element,16);
         }
         s.forEach(add);
-        // console.log(chk + " - " + sum%16);
+        // debug(chk + " - " + sum%16);
         return (parseInt(chk,16) == sum%16) &&
             (data.substr(6,2) == data.substr(9,2));        
     };
@@ -299,8 +300,8 @@ var W433 = function() {
     
     this.setInstrumentRef = function(i) {
         this.instrument = i;
-        console.log("W433: instrument reference passed, instrument data is: ");
-        console.log(i.metadata);
+        debug("W433: instrument reference passed, instrument data is: ");
+        debug(i.metadata);
 	if (this.instrument.metadata == null)
 		this.instrument.metadata = {};
     };

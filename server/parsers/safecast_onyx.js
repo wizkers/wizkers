@@ -12,6 +12,8 @@ var serialport = require('serialport'),
     SerialPort  = serialport.SerialPort,
     recorder = require('../recorder.js'),
     events = require('events'),
+    debug = require('debug')('wizkers:parsers:onyx'),
+    serialconnection = require('../connections/serial'),
     outputmanager = require('../outputs/outputmanager.js');
 
 var Onyx = function() {
@@ -41,7 +43,7 @@ var Onyx = function() {
     /////////
 
     var status = function(stat) {
-        console.log('[onyx] Port status change', stat);
+        debug('Port status change', stat);
         isopen = stat.portopen;
         
         if (isopen) {
@@ -74,7 +76,7 @@ var Onyx = function() {
     var format = function(data) {
         // All commands now return JSON
         try {
-            //console.log(Hexdump.dump(data.substr(0,5)));
+            //debug(Hexdump.dump(data.substr(0,5)));
             if (data.substr(0,2) == "\n>")
                 return;
             if (data.length < 2)
@@ -92,8 +94,8 @@ var Onyx = function() {
                 outputmanager.output(response);
             }
         } catch (err) {
-            console.log('Not able to parse JSON response from device:\n' + data);
-            console.log('Error code: ' + err);
+            debug('Not able to parse JSON response from device:\n' + data);
+            debug('Error code: ' + err);
         }
     };
 
@@ -102,6 +104,27 @@ var Onyx = function() {
     /////////
     // Public methods
     /////////
+    
+        // Creates and opens the connection to the instrument.
+    // for all practical purposes, this is really the init method of the
+    // driver
+    this.openPort = function(path) {
+        port = new serialconnection(path, portSettings());
+        port.on('data', format);
+        port.on('status', status);
+    }
+    
+    this.closePort = function(data) {
+        // We need to remove all listeners otherwise the serial port
+        // will never be GC'ed
+        port.removeListener('data', format);
+        port_close_requested = true;
+        port.close();
+    }
+
+    this.isOpen = function() {
+        return isopen;
+    }
     
     this.setInstrumentRef = function(i) {
     };
@@ -122,7 +145,7 @@ var Onyx = function() {
     this.startLiveStream = function(period) {
         var self = this;
         if (!this.streaming) {
-            console.log("[Onyx] Starting live data stream");
+            debug("Starting live data stream");
             this.livePoller = setInterval(function() {
                         self.port.write(self.output('GETCPM'));
                     }, (period) ? period*1000: 1000);
@@ -132,7 +155,7 @@ var Onyx = function() {
     
     this.stopLiveStream = function(period) {
         if (this.streaming) {
-            console.log("[Onyx] Stopping live data stream");
+            debug("Stopping live data stream");
             clearInterval(this.livePoller);
             this.streaming = false;
         }

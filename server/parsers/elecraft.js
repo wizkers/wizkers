@@ -16,6 +16,7 @@ var serialport = require('serialport'),
     readline = require('readline'),
     events = require('events'),
     net = require('net'),
+    debug = require('debug')('wizkers:parsers:elecraft'),
     serialconnection = require('../connections/serial');
 
 
@@ -61,7 +62,7 @@ var Elecraft = function() {
     /////////
     
     var status = function(stat) {
-        console.log('[elecraft] Port status change', stat);
+        debug('[elecraft] Port status change', stat);
         isopen = stat.portopen;
         
         if (isopen) {
@@ -101,7 +102,7 @@ var Elecraft = function() {
         
         if (uidrequested && data.substr(0,5) == "DS@@@") {
             // We have a Unique ID
-            console.log("Sending uniqueID message");
+            debug("Sending uniqueID message");
             self.emit('data',{uniqueID: data.substr(5,5)});
             uidrequested = false;
             return;
@@ -120,7 +121,7 @@ var Elecraft = function() {
         if (cmd != "DB" && cmd != "DS" && cmd != "PO" && lcmd != "^PI" && lcmd != "^PF" && lcmd != "^TM" &&
             lcmd != "^PV" && lcmd != "^PC" && lcmd != "^SV"  && cmd != "BN" ) {
             // Additional output besides regular polling, print it
-            console.log("******  " + data);
+            debug("******  " + data);
         }
         
         self.emit('data',data);
@@ -168,6 +169,10 @@ var Elecraft = function() {
         port.close();
     }
 
+    this.isOpen = function() {
+        return isopen;
+    }
+    
     this.setInstrumentRef = function(i) {
     };
         
@@ -180,7 +185,7 @@ var Elecraft = function() {
         try {
             port.write("MN026;ds;MN255;");
         } catch (err) {
-            console.log("Error on serial port while requesting Elecraft UID : " + err);
+            debug("Error on serial port while requesting Elecraft UID : " + err);
         }
     };
     
@@ -190,7 +195,7 @@ var Elecraft = function() {
     
     // period is in seconds
     this.startLiveStream = function(period) {        
-        console.log("[Elecraft] Starting live data stream");
+        debug("[Elecraft] Starting live data stream");
         // The radio can do live streaming to an extent, so we definitely will
         // take advantage:
         // K31 enables extended values such as proper BPF reporting
@@ -205,7 +210,7 @@ var Elecraft = function() {
     
     this.stopLiveStream = function(period) {
         if (streaming) {
-            console.log("[Elecraft] Stopping live data stream");
+            debug("[Elecraft] Stopping live data stream");
             // Stop live streaming from the radio:
             port.write('AI0;');
             clearInterval(livePoller);
@@ -231,16 +236,16 @@ var Elecraft = function() {
     this.onOpen = function(success) {
         
         var driver_ref = this;
-        console.log("Elecraft Driver: got a port open signal");
+        debug("Elecraft Driver: got a port open signal");
         if (server == null) {
             server = net.createServer(function(c) { //'connection' listener
-                console.log('server connected');
+                debug('server connected');
 //                if (self.socket)
 //                    self.socket.emit('status',{ tcpserverconnect: true });
                 serverconnected = true;
                 
                 c.on('end', function() {
-                    console.log('Server disconnected');
+                    debug('Server disconnected');
 //                    if (self.socket)
 //                        self.socket.emit('status',{ tcpserverconnect: false });
                     serverconnected = false;
@@ -252,19 +257,19 @@ var Elecraft = function() {
             });
         }
         server.listen(4532, function() { //'listening' listener
-            console.log('Rigctld emulation server started');
+            debug('Rigctld emulation server started');
         });
     },
     
     this.onClose = function(success) {
-        console.log("Closing TCP rigctld emulation server");
+        debug("Closing TCP rigctld emulation server");
         if (server)
             server.close();
     };
     
     // RIGCTLD Emulation - super light, but does the trick for fldigi...
     var rigctl_command = function(data,c) {
-        // console.log(data);
+        // debug(data);
         var cmd = (data.substr(0,1) == "\\") ? data.substr(0,2) : data.substr(0,1);
         switch (cmd) {
                 case "\\d": // "mp_state":
@@ -277,7 +282,7 @@ var Elecraft = function() {
                 case "F": // Set Frequency (VFOA):  F 14069582.000000
                     var freq = ("00000000000" + parseFloat(data.substr(2)).toString()).slice(-11); // Nifty, eh ?
                     
-                    console.log("Rigctld emulation: set frequency to " + freq);
+                    debug("Rigctld emulation: set frequency to " + freq);
                     if (port != null)
                         port.write("FA" + freq + ";");
                     c.write("RPRT 0\n");
@@ -288,7 +293,7 @@ var Elecraft = function() {
                     break;
                 case "q":
                     // TODO: we should close the socket here ?
-                    console.log("Rigctld emulation: quit");
+                    debug("Rigctld emulation: quit");
                     break;
                 case "v": // Which VFO ?
                     c.write("VFOA\n");
@@ -309,7 +314,7 @@ var Elecraft = function() {
                     c.write("RPRT 0\n");
                     break;
                 default:
-                    console.log("Unknown command: " + data);
+                    debug("Unknown command: " + data);
                 
         }
         

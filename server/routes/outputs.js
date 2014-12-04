@@ -19,11 +19,13 @@
  */
 
 var dbs = require('../pouch-config');
+var debug = require('debug')('wizkers:routes:outputs');
+
 
 // Get all outputs for a given instrument
 exports.findByInstrumentId = function(req, res) {
     var id = req.params.id;
-    console.log('Retrieving Outputs for Instrument ID: ' + id);
+    debug('Retrieving Outputs for Instrument ID: ' + id);
     
     // TODO
     //  - Move to persistent queries (http://pouchdb.com/guides/queries.html)
@@ -45,7 +47,7 @@ exports.findByInstrumentId = function(req, res) {
 // Get a specific output
 exports.findById = function(req, res) {
     var id = req.params.id;
-    console.log('Retrieving output: ' + id);
+    debug('Retrieving output: ' + id);
     dbs.outputs.get(id, function(err,item) {
         if (err && err.status == 404) {
             res.send([]);
@@ -59,7 +61,7 @@ exports.findById = function(req, res) {
 // Create a new output
 exports.addOutput = function(req, res) {
     var output = req.body;
-    console.log('Adding output: ' + JSON.stringify(output));
+    debug('Adding output: ' + JSON.stringify(output));
     dbs.outputs.post(output, function(err, result) {
             if (err) {
                 res.send({'error':'An error has occurred'});
@@ -73,11 +75,11 @@ exports.addOutput = function(req, res) {
 exports.updateOutput = function(req, res) {
     var id = req.params.id;
     var output = req.body;
-    console.log('Updating output: ' + id);
-//    console.log(JSON.stringify(output));    
+    debug('Updating output: ' + id);
+//    debug(JSON.stringify(output));    
     dbs.outputs.put(req.body, function(err, result) {
             if (err) {
-                console.log('Error updating output: ' + err);
+                debug('Error updating output: ' + err);
                 res.send({'error':'An error has occurred'});
             } else {
                 res.send({ _id: result.id, _rev: result.rev} );
@@ -87,15 +89,15 @@ exports.updateOutput = function(req, res) {
 
 exports.deleteOutput = function(req, res) {
     var id = req.params.id;
-    console.log('Deleting output: ' + id);
+    debug('Deleting output: ' + id);
     dbs.outputs.get(id, function(err,ins) {
         if (err) {
-            console.log('Error - ' + err);
+            debug('Error - ' + err);
             res.send({'error':'An error has occurred - ' + err});
         } else {
             dbs.outputs.remove(ins, function(err,result) {
                 if (err) {
-                    console.log('Error - ' + err);
+                    debug('Error - ' + err);
                     res.send({'error':'An error has occurred - ' + err});
                 } else {
                     res.send(req.body);

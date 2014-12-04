@@ -22,6 +22,7 @@ var serialport = require('serialport'),
     recorder = require('../recorder.js'),
     zlib = require('zlib'),
     events = require('events'),
+    serialconnection = require('../connections/serial'),
     outputmanager = require('../outputs/outputmanager.js'),
     debug = require('debug')('wizkers:parsers:fluke289');
 
@@ -912,6 +913,10 @@ var Fluke289 = function() {
         port.removeListener('data', format);
         port_close_requested = true;
         port.close();
+    }
+
+    this.isOpen = function() {
+        return isopen;
     }
 
     this.setInstrumentRef = function(i) {

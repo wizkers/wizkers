@@ -23,10 +23,13 @@ var PouchDB = require('pouchdb'),
     _ = require('underscore'),
     recorder = require('../recorder.js');
 
+var debug = require('debug')('wizkers:routes:logs');
+
+
 // Get all log sessions for a given instrument
 exports.findByInstrumentId = function(req, res) {
     var id = req.params.id;
-    console.log('Retrieving Logs for Instrument ID: ' + id);
+    debug('Retrieving Logs for Instrument ID: ' + id);
 
     dbs.logs.query('by_instrument', {key: id, include_docs:true}, function(err,items) {
         if (err && err.status == 404) {
@@ -61,13 +64,13 @@ exports.findByInstrumentId = function(req, res) {
 // Get a log session
 exports.findById = function(req, res) {
     var id = req.params.id;
-    console.log('Retrieving Log session ID: ' + id);
+    debug('Retrieving Log session ID: ' + id);
     dbs.logs.get(id, function(err,item) {
         if (err && err.status == 404) {
             res.send([]);
             return;
         }
-        console.log(item);
+        debug(item);
         res.send(item);
     });
 };
@@ -76,10 +79,10 @@ exports.findAll = function(req, res) {
     dbs.logs.allDocs({include_docs: true}, function(err, items) {
         var resp = [];
         for (item in items.rows) {
-            console.log(item);
+            debug(item);
             resp.push(items.rows[item].doc) ;
         }
-        console.log(resp);
+        debug(resp);
         res.send(resp);
     });
 };
@@ -90,7 +93,7 @@ exports.findAll = function(req, res) {
 exports.getLogEntries = function(req, res) {
     var id = req.params.id;
     var count = 0;
-    console.log("Retrieving entries of log ID: " + id);
+    debug("Retrieving entries of log ID: " + id);
     var db = new PouchDB('./ldb/datapoints/' + id);
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write("[");
@@ -117,7 +120,7 @@ exports.getLogEntries = function(req, res) {
 // Get log entries for the current live recording: we only get data for the last
 // XX minutes
 exports.getLive = function(req,res) {
-    console.log("Request to get extract of live recording for the last " + req.params.period + " minutes");
+    debug("Request to get extract of live recording for the last " + req.params.period + " minutes");
     var rid = recorder.logID();
     if (rid == null) {
         res.send('{"error": "Not recording" }');
@@ -125,13 +128,13 @@ exports.getLive = function(req,res) {
     }
     
     var minstamp = new Date().getTime() - req.params.period* 60000;
-    console.log(" Min Stamp: " + minstamp);
+    debug(" Min Stamp: " + minstamp);
     var db = new PouchDB('./ldb/datapoints/' + rid);
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write("[");
     var ok = false;
     db.allDocs({startkey: minstamp, include_docs:true}, function(err,entries) {
-        console.log(entries);
+        debug(entries);
         for (row in entries.rows) {
             var item = entries.rows[row];            
             if (ok) res.write(",");
@@ -140,7 +143,7 @@ exports.getLive = function(req,res) {
             // lots of space:
             delete item.doc._rev;
             delete item.doc._id;
-            console.log(item);
+            debug(item);
             res.write(JSON.stringify(item.doc));
         }
         res.write(']');
@@ -154,12 +157,12 @@ exports.addLog = function(req, res) {
     var entry = req.body;
     var instrumentid = req.params.id;
     entry.instrumentid = instrumentid;
-    console.log('Adding log entry for Instrument ID: ' + instrumentid + ' - ' + JSON.stringify(entry));
+    debug('Adding log entry for Instrument ID: ' + instrumentid + ' - ' + JSON.stringify(entry));
     dbs.logs.post(entry, function(err, result) {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
-                console.log('Success - result: ' + JSON.stringify(result));
+                debug('Success - result: ' + JSON.stringify(result));
                 res.send({ _id: result.id, _rev: result.rev} );
             }
     });
@@ -171,14 +174,14 @@ exports.updateEntry = function(req, res) {
     var id = req.params.id;
     var iid = req.params.iid;
     var entry = req.body;
-    console.log('Updating log : ' + id + ' for instrument ' + iid);
-    console.log(JSON.stringify(entry));
+    debug('Updating log : ' + id + ' for instrument ' + iid);
+    debug(JSON.stringify(entry));
 
     // TODO: error checking on structure !!!
     //  -> CouchDB validation
     dbs.logs.put(entry, function(err, result) {
                     if (err) {
-                        console.log('Error updating log session entry: ' + err);
+                        debug('Error updating log session entry: ' + err);
                         res.send({'error':'An error has occurred'});
                     } else {
                         res.send({ _id: result.id, _rev: result.rev} );
@@ -190,12 +193,12 @@ exports.updateEntry = function(req, res) {
 // This deletes a LOG Entry
 exports.deleteLogEntry = function(req, res) {
     var id = req.params.id;
-    console.log('Deleting log entry: ' + id);
+    debug('Deleting log entry: ' + id);
     DeviceLogEntry.findByIdAndRemove(id, {safe:true}, function(err,result) {
             if (err) {
                 res.send({'error':'An error has occurred - ' + err});
             } else {
-                console.log('' + result + ' document(s) deleted');
+                debug('' + result + ' document(s) deleted');
                 res.send(req.body);
             }
     });    
@@ -205,21 +208,21 @@ exports.deleteLogEntry = function(req, res) {
 // This deletes a log
 exports.deleteLog= function(req, res) {
     var id = req.params.id;
-    console.log('Deleting log: ' + id);
+    debug('Deleting log: ' + id);
     dbs.logs.get(id, function(err,log) {
         if (err) {
-            console.log('Error - ' + err);
+            debug('Error - ' + err);
             res.send({'error':'An error has occurred - ' + err});
         } else {
             dbs.logs.remove(log, function(err,result) {
                 if (err) {
-                    console.log('Error - ' + err);
+                    debug('Error - ' + err);
                     res.send({'error':'An error has occurred - ' + err});
                 } else {
-                    console.log('' + result + ' document(s) deleted');
+                    debug('' + result + ' document(s) deleted');
                     // Now delete the database of log points
                     PouchDB.destroy('./ldb/datapoints/' + id, function(err,res2) {
-                        console.log("Destroyed datapoints");
+                        debug("Destroyed datapoints");
                         res.send(req.body);
                     });
                 }
