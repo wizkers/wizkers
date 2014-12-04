@@ -9,9 +9,12 @@
  *
  */
 
-var SerialPort = require('serialport').SerialPort,
+var serialport = require('serialport'),
+    SerialPort = serialport.SerialPort,
     events = require('events'),
     dbs = require('../pouch-config');
+
+var Debug = false;
 
 //////////////////
 // Serial port interface:
@@ -44,10 +47,7 @@ var SerialConnection = function(path, settings) {
 
     // listen for new serial data:
    myPort.on('data', function (data) {
-       // if (Debug) console.log('.');
-       // Pass this data to on our driver
        if (Debug) { try {
-            // console.log('Raw input:\n' + Hexdump.dump(data));
            console.log("Data: " + data);
        } catch(e){}}
         self.emit('data',data);
@@ -56,9 +56,9 @@ var SerialConnection = function(path, settings) {
     myPort.on('error', function(err) {
         console.log("Serial port error: "  + err);
         portOpen = false;
-       if (driver.onClose) {
-           driver.onClose(true);
-       }
+       //if (driver.onClose) {
+       //   driver.onClose(true);
+       //}
         self.emit('status', {portopen: portOpen});
     });
         
@@ -67,9 +67,9 @@ var SerialConnection = function(path, settings) {
         console.log(myPort);
         portOpen = false;
        
-       if (driver.onClose) {
-           driver.onClose(true);
-       }
+       //if (driver.onClose) {
+        //driver.onClose(true);
+       //}
         self.emit('status', {portopen: portOpen});
     });
     

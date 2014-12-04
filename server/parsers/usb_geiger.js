@@ -44,15 +44,16 @@ var USBGeiger = function() {
     // for all practical purposes, this is really the init method of the
     // driver
     this.openPort = function(path) {
-        port = new serialconnection(path);
+        port = new serialconnection(path, portSettings());
         port.on('status', processPortStatusChange);
+        port.on('data', format);
     }
         
     this.setInstrumentRef = function(i) {
     };
 
     // How the device is connected on the serial port            
-    this.portSettings = function() {
+    var portSettings = function() {
         return  {
             baudRate: 115200,
             dataBits: 8,
@@ -66,7 +67,6 @@ var USBGeiger = function() {
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
     this.sendUniqueID = function() {
-        // TODO: implement serial number query here
         this.emit('data', { uniqueID:'00000000 (n.a.)'});
     };
     
@@ -87,7 +87,7 @@ var USBGeiger = function() {
         return isopen;
     }
     
-    this.format = function(data, recording) {        
+    var format = function(data) {
         
         // All commands now return JSON
         try {
