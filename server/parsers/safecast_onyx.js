@@ -19,23 +19,45 @@ var Onyx = function() {
     // Init the EventEmitter
     events.EventEmitter.call(this);
 
+    /////////
+    // Public variables
+    /////////    
     this.name = "onyx";
     
-    // Our private variables
+    /////////
+    // Private variables
+    /////////    
     var port = null;
+    var isopen = false;
+    var port_close_requested = false;
+    var self = this;
+
     var uidrequested = false;
     var streaming = false;
     var livePoller = null;
     
-    this.setPortRef = function(s) {
-        this.port = s;
-    };
+    /////////
+    // Private methods
+    /////////
 
-    this.setInstrumentRef = function(i) {
+    var status = function(stat) {
+        console.log('[onyx] Port status change', stat);
+        isopen = stat.portopen;
+        
+        if (isopen) {
+            // Should run any "onOpen" initialization routine here if
+            // necessary.
+        } else {
+            // We remove the listener so that the serial port can be GC'ed
+            if (port_close_requested) {
+                port.removeListener('status', status);
+                port_close_requested = false;
+            }
+        }
     };
 
     // How the device is connected on the serial port            
-    this.portSettings = function() {
+    var portSettings = function() {
         return  {
             baudRate: 115200,
             dataBits: 8,
@@ -49,6 +71,41 @@ var Onyx = function() {
         }
     };
     
+    var format = function(data) {
+        // All commands now return JSON
+        try {
+            //console.log(Hexdump.dump(data.substr(0,5)));
+            if (data.substr(0,2) == "\n>")
+                return;
+            if (data.length < 2)
+                return;
+            var response = JSON.parse(data);
+            if (this.uidrequested && response.guid != undefined) {
+                this.socket.emit('data',{uniqueID: response.guid});
+                this.uidrequested = false;
+            } else {
+                // Send the response to the front-end
+                self.emit('data', response);
+                // Send our response to the recorder and the output manager
+                // as well
+                recorder.record(response);
+                outputmanager.output(response);
+            }
+        } catch (err) {
+            console.log('Not able to parse JSON response from device:\n' + data);
+            console.log('Error code: ' + err);
+        }
+    };
+
+    
+
+    /////////
+    // Public methods
+    /////////
+    
+    this.setInstrumentRef = function(i) {
+    };
+
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
     // This particular device does not support this concept, so we
@@ -80,35 +137,9 @@ var Onyx = function() {
             this.streaming = false;
         }
     };
-    
-    this.format = function(data, recording) {
-        // All commands now return JSON
-        try {
-            //console.log(Hexdump.dump(data.substr(0,5)));
-            if (data.substr(0,2) == "\n>")
-                return;
-            if (data.length < 2)
-                return;
-            var response = JSON.parse(data);
-            if (this.uidrequested && response.guid != undefined) {
-                this.socket.emit('data',{uniqueID: response.guid});
-                this.uidrequested = false;
-            } else {
-                // Send the response to the front-end
-                this.emit('data', response);
-                // Send our response to the recorder and the output manager
-                // as well
-                recorder.record(response);
-                outputmanager.output(response);
-            }
-        } catch (err) {
-            console.log('Not able to parse JSON response from device:\n' + data);
-            console.log('Error code: ' + err);
-        }
-    };
-    
+        
     this.output = function(data) {
-        return data + '\n\n';
+        port.write(data + '\n\n');
     };
 
 };

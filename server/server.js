@@ -403,6 +403,12 @@ io.sockets.on('connection', function (socket) {
     // Reference to the instrument driver for this socket.
     // it is returned by the connection manager.
     var driver = null;
+    // We want to track the current instrument ID, in case
+    // we switch instrument during the same session, and need to
+    // subscribe/unsubscribe to events coming from the old/previous
+    // instruments
+    var currentinstrumentid = null;
+    
     console.log(socket.decoded_token.role, 'connected');
     var userinfo = socket.decoded_token;    
     
@@ -421,6 +427,7 @@ io.sockets.on('connection', function (socket) {
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
             connectionmanager.openInstrument(insid, function(d) {
                 driver = d;
+                currentinstrumentid = insid;
                 // Listen for data coming in from our driver
                 driver.on('data',sendDataToFrontEnd);
             });
@@ -454,6 +461,7 @@ io.sockets.on('connection', function (socket) {
             console.log('Instrument close request for instrument ID ' + data);
             driver.removeListener('data',sendDataToFrontEnd);
             connectionmanager.closeInstrument(data);
+            currentInstrument= null;
         } else
             console.log("Unauthorized attempt to open instrument");
     });
@@ -462,7 +470,21 @@ io.sockets.on('connection', function (socket) {
         if (instrumentid) {
             // In case we are asked to check a particular
             // instrument, we can restore the driver state
-            // in case the instrument is already open:
+            // in case the instrument is already open.
+            //
+            // But if the instrumentid is different from our
+            // current instrument, then we need to unsubscribe
+            // to events coming from our previous instrument, as they
+            // don't make sense for the new one
+            if (instrumentid != currentInstrument) {
+                console.log('We are switching to a new instrument ID: ' + instrumentid);
+                if (driver) {
+                    driver.removeListener('data',sendDataToFrontEnd);
+                    // Clear our reference to the instrument driver, it is
+                    // not relevant anymore
+                    driver = null;
+                }
+            }
             if (connectionmanager.isOpen(instrumentid))
                 openInstrument(instrumentid);
         }

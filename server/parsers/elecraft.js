@@ -15,16 +15,32 @@
 var serialport = require('serialport'),
     readline = require('readline'),
     events = require('events'),
-    net = require('net');
+    net = require('net'),
+    serialconnection = require('../connections/serial');
+
 
 var Elecraft = function() {
     
     // Init the EventEmitter
     events.EventEmitter.call(this);
 
+    /////////
+    // Public variables
+    /////////
+
     this.name = "elecraft";
     
-    var uidrequested = false;
+    /////////
+    // Private variables
+    /////////
+    
+    var uidrequested = false,
+        port = null,
+        isopen = false,
+        port_close_requested = false,
+        self = this,
+        streaming = false,
+        livePoller = null;
     
     // A few driver variables: we keep track of a few things
     // here for our bare-bones rigctld implementation.
@@ -40,23 +56,81 @@ var Elecraft = function() {
     var server = null;
     var serverconnected = false;
         
-    // Set a reference to the socket.io socket and port
-    var port = null,
-        streaming = false,
-        livePoller = null;
+    /////////
+    // Private methods
+    /////////
     
-    this.setPortRef = function(s) {
-        port = s;
+    var status = function(stat) {
+        console.log('[elecraft] Port status change', stat);
+        isopen = stat.portopen;
+        
+        if (isopen) {
+            // Should run any "onOpen" initialization routine here if
+            // necessary.
+        } else {
+            // We remove the listener so that the serial port can be GC'ed
+            if (port_close_requested) {
+                port.removeListener('status', status);
+                port_close_requested = false;
+            }
+        }
     };
 
-    this.setInstrumentRef = function(i) {
+    var queryRadio = function() {
+        // TODO: follow radio state over here, so that we only query power
+        // when the radio transmits, makes much more sense
+
+        // This is queried every second - we stage our queries in order
+        // to avoid overloading the radio, not sure that is totally necessary, but
+        // it won't hurt
+
+        // Query displays and band (does not update by itself)
+        port.write('DB;DS;BN;'); // Query VFO B and VFOA Display
+
+        // Then ask the radio for current figures:
+        port.write('PO;'); // Query actual power output
+
+        // And if we have an amp, then we can get a lot more data:
+        port.write('^PI;^PF;^PV;^TM;');
+        port.write('^PC;^SV;'); // Query voltage & current
     };
         
+    // Format returns an ASCII string - or a buffer ? Radio replies with
+    // non-ASCII values on some important commands (VFO A text, Icons, etc)
+    var format = function(data, recording) {
+        
+        if (uidrequested && data.substr(0,5) == "DS@@@") {
+            // We have a Unique ID
+            console.log("Sending uniqueID message");
+            self.emit('data',{uniqueID: data.substr(5,5)});
+            uidrequested = false;
+            return;
+        }
+        
+        var cmd = data.substr(0,2);
+        switch(cmd) {
+                case "FA":
+                    vfoa_frequency = parseInt(data.substr(2));
+                    break;
+                case "BW":
+                    vfoa_bandwidth = parseInt(data.substr(2));
+                    break;
+        }
+        var lcmd = data.substr(0,3);
+        if (cmd != "DB" && cmd != "DS" && cmd != "PO" && lcmd != "^PI" && lcmd != "^PF" && lcmd != "^TM" &&
+            lcmd != "^PV" && lcmd != "^PC" && lcmd != "^SV"  && cmd != "BN" ) {
+            // Additional output besides regular polling, print it
+            console.log("******  " + data);
+        }
+        
+        self.emit('data',data);
+    };
+
     // How the device is connected on the serial port.
     // This HAS to be a function that returns a new port settings objet, and not
     // a static object, otherwise multiple port open/close will fail because the portSettings
     // object is changed by SerialPort and its reference become obsolete when closing/reopening...
-    this.portSettings =  function() {
+    var portSettings =  function() {
         return  {
             baudRate: 38400,
             dataBits: 8,
@@ -71,6 +145,32 @@ var Elecraft = function() {
         }
     };
     
+    
+    /////////
+    // Public API
+    // Implemented on all instrument parsers
+    /////////
+    
+    // Creates and opens the connection to the instrument.
+    // for all practical purposes, this is really the init method of the
+    // driver
+    this.openPort = function(path) {
+        port = new serialconnection(path, portSettings());
+        port.on('data', format);
+        port.on('status', status);
+    }
+    
+    this.closePort = function(data) {
+        // We need to remove all listeners otherwise the serial port
+        // will never be GC'ed
+        port.removeListener('data', format);
+        port_close_requested = true;
+        port.close();
+    }
+
+    this.setInstrumentRef = function(i) {
+    };
+        
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
     // 
@@ -113,61 +213,12 @@ var Elecraft = function() {
         }
     };
     
-    var queryRadio = function() {
-        // TODO: follow radio state over here, so that we only query power
-        // when the radio transmits, makes much more sense
-
-        // This is queried every second - we stage our queries in order
-        // to avoid overloading the radio, not sure that is totally necessary, but
-        // it won't hurt
-
-        // Query displays and band (does not update by itself)
-        port.write('DB;DS;BN;'); // Query VFO B and VFOA Display
-
-        // Then ask the radio for current figures:
-        port.write('PO;'); // Query actual power output
-
-        // And if we have an amp, then we can get a lot more data:
-        port.write('^PI;^PF;^PV;^TM;');
-        port.write('^PC;^SV;'); // Query voltage & current
-    };
-        
-    // Format returns an ASCII string - or a buffer ? Radio replies with
-    // non-ASCII values on some important commands (VFO A text, Icons, etc)
-    this.format = function(data, recording) {
-        
-        if (uidrequested && data.substr(0,5) == "DS@@@") {
-            // We have a Unique ID
-            console.log("Sending uniqueID message");
-            this.emit('data',{uniqueID: data.substr(5,5)});
-            uidrequested = false;
-            return;
-        }
-        
-        var cmd = data.substr(0,2);
-        switch(cmd) {
-                case "FA":
-                    vfoa_frequency = parseInt(data.substr(2));
-                    break;
-                case "BW":
-                    vfoa_bandwidth = parseInt(data.substr(2));
-                    break;
-        }
-        var lcmd = data.substr(0,3);
-        if (cmd != "DB" && cmd != "DS" && cmd != "PO" && lcmd != "^PI" && lcmd != "^PF" && lcmd != "^TM" &&
-            lcmd != "^PV" && lcmd != "^PC" && lcmd != "^SV"  && cmd != "BN" ) {
-            // Additional output besides regular polling, print it
-            console.log("******  " + data);
-        }
-        
-        this.emit('data',data);
-    };
     
-    // output should return a string, and is used to format
-    // the data that is sent on the serial port, coming from the
-    // HTML interface.
+    // output does whatever formatting is needed on the data
+    // (none for this driver) and sends it onwards to the
+    // port
     this.output = function(data) {
-        return data;
+        port.write(data);
     };
         
     // Status returns an object that is concatenated with the
