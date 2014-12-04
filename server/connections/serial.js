@@ -20,6 +20,7 @@ var serialport = require('serialport'),
     SerialPort = serialport.SerialPort,
     EventEmitter = require('events').EventEmitter,
     util = require('util'),
+    debug = require('debug')('wizkers:connections:serial'),
     dbs = require('../pouch-config');
 
 var Debug = false;
@@ -38,7 +39,7 @@ var SerialConnection = function(path, settings) {
                             true, 
                             function(err, result) {
                                 if (err) {
-                                    console.log("Open attempt error: " + err);
+                                    debug("Open attempt error: " + err);
                                     self.emit('status', {portopen: portOpen});
                                 }
                             });    
@@ -53,30 +54,27 @@ var SerialConnection = function(path, settings) {
         
     // Callback once the port is actually open: 
    myPort.on('open', function () {
-       myPort.flush(function(err,result){ console.log(err + " - " + result); });
+       myPort.flush(function(err,result){ debug(err + " - " + result); });
        myPort.resume();
        portOpen = true;
-       console.log('Port open');
+       debug('Port open');
        self.emit('status', {portopen: portOpen});
    });
 
     // listen for new serial data:
    myPort.on('data', function (data) {
-       if (Debug) { try {
-           console.log("Data: ", data[0]);
-       } catch(e){}}
         self.emit('data',data);
    });
     
     myPort.on('error', function(err) {
-        console.log("Serial port error: "  + err);
+        debug("Serial port error: "  + err);
         portOpen = false;
         self.emit('status', {portopen: portOpen});
     });
         
     myPort.on('close', function() {
-        console.log('Port closing');
-        console.log(myPort);
+        debug('Port closing');
+        debug(myPort);
         portOpen = false;
         self.emit('status', {portopen: portOpen});
     });

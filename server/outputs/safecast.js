@@ -7,7 +7,8 @@
 
 var querystring = require('querystring'),
     utils = require('../utils.js'),
-    http = require('http');
+    http = require('http'),
+    debug = require('debug')('wizkers:output:safecast');
 
 module.exports = function safecast() {
     
@@ -19,7 +20,7 @@ module.exports = function safecast() {
     // Load the settings for this plugin
     this.setup = function(output) {
         
-        console.log("[Safecast Output plugin] Setup a new instance");
+        debug("[Safecast Output plugin] Setup a new instance");
         mappings = output.mappings;
         settings = output.metadata;
         output_ref = output;
@@ -37,7 +38,7 @@ module.exports = function safecast() {
                 'Content-Type': 'application/x-www-form-urlencoded',
             }
         };
-        console.log(post_options);
+        debug(post_options);
     };
     
     this.resolveMapping = function(key,data) {
@@ -52,7 +53,7 @@ module.exports = function safecast() {
     
     
     this.sendData = function(data) {
-        console.log("[Safecast Output plugin] ToDo: send data to Safecast");
+        debug("[Safecast Output plugin] ToDo: send data to Safecast");
         
         // Step one: prepare the structure
         var unit = this.resolveMapping("unit",data);
@@ -63,8 +64,8 @@ module.exports = function safecast() {
         
         // If any of those are empty, abort:
         if (unit == undefined || radiation == undefined || lat == undefined || lon == undefined) {
-            console.log("[Safecast Output]  Data error, some required fields are empty");
-            console.log(data);
+            debug("[Safecast Output]  Data error, some required fields are empty");
+            debug(data);
             output_ref.lastmessage = 'Missing required fields in the data';
             dbs.outputs.get(output_ref._id, function(err,result) {
                 output_ref._rev = result._rev;
@@ -100,8 +101,8 @@ module.exports = function safecast() {
                 output_ref.lastsuccess = new Date().getTime();
             }
             res.on('data', function(data) {
-                console.log("API Request result");
-                console.log(data);
+                debug("API Request result");
+                debug(data);
                 output_ref.lastmessage = data;
                 dbs.outputs.get(output_ref._id, function(err,result) {
                     output_ref._rev = result._rev;
@@ -121,14 +122,14 @@ module.exports = function safecast() {
         });
 
         
-        console.log("[Safecast Output] Sending data to " + post_options.host);
+        debug("[Safecast Output] Sending data to " + post_options.host);
         output_ref.last = new Date().getTime();
         dbs.outputs.get(output_ref._id, function(err,result) {
             output_ref._rev = result._rev;
             dbs.outputs.put(output_ref, function(err,result) {
             });
         });
-        console.log(post_data);
+        debug(post_data);
         post_request.write(post_data);
         post_request.end();
         

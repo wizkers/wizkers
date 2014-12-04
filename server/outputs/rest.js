@@ -9,7 +9,7 @@ var querystring = require('querystring'),
     utils = require('../utils.js'),
     dbs = require('../pouch-config'),
     http = require('http'),
-    debug = require('debug')('output:rest');
+    debug = require('debug')('wizkers:output:rest');
 
 
 module.exports = function rest() {

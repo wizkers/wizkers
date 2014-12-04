@@ -9,7 +9,8 @@
 
 // load all the things we need
 var LocalStrategy   = require('passport-local').Strategy,
-    dbs = require('../pouch-config');
+    dbs = require('../pouch-config'),
+    debug = require('debug')('wizkers:auth');
 
 
 // expose this function to our app using module.exports
@@ -79,7 +80,7 @@ module.exports = function(passport) {
                 dbs.users.post(newUser,function(err, result) {
                     if (err)
                         throw err;
-                    console.log(result)
+                    debug(result)
                     return done(null, result);
                 });
             }
@@ -112,7 +113,7 @@ module.exports = function(passport) {
                 return done(null, false, req.flash('loginMessage', 'Username or password incorrect.'));
                 // req.flash is the way to set flashdata using connect-flash
             
-            console.log(user);
+            debug(user);
             
             // if the user is found but the password is wrong
             if (!dbs.utils.users.validPassword(password, user.local.password))

@@ -23,8 +23,8 @@ var serialport = require('serialport'),
     PouchDB = require('pouchdb'),
     ConnectionManager = require('./connectionmanager'),
     flash = require('connect-flash'),
-    debug = require('debug')('server'),
-    socket_debug = require('debug')('server:socket');
+    debug = require('debug')('wizkers:server'),
+    socket_debug = require('debug')('wizkers:server:socket');
 
 
 

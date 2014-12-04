@@ -12,7 +12,7 @@
 
 var Serial = require('./connections/serial'),
     dbs = require('./pouch-config'),
-    debug = require('debug')('connectionmanager');
+    debug = require('debug')('wizkers:connectionmanager');
 
 
 // Preload the parsers we know about:
@@ -66,9 +66,17 @@ var ConnectionManager = function() {
     this.openInstrument = function(instrumentid, callback) {
         debug('Instrument open request for instrument ID ' + instrumentid);
         if (openinstruments.hasOwnProperty(instrumentid)) {
-            debug('That instrument is already open');
+            debug('That instrument is already loaded');
+            var driver = openinstruments[instrumentid];
+            // Maybe the instrument is loaded but the port is closed: test
+            // and act accordingly
+            if (!driver.isOpen()) {
+                dbs.instruments.get(instrumentid, function(err,item) {
+                    driver.openPort(item.port);
+                });
+            }
             // Return a pointer to the instrument's existing driver:
-            callback(openinstruments[instrumentid]);
+            callback(driver);
         } else {
             // Create the relevant driver for the instrument, and ask to
             // open it:

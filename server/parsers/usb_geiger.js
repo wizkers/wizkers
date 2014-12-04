@@ -11,7 +11,7 @@ var serialport = require('serialport'),
     recorder = require('../recorder.js'),
     serialconnection = require('../connections/serial');
     outputmanager = require('../outputs/outputmanager.js'),
-    debug = require('debug')('parsers:usb_geiger');
+    debug = require('debug')('wizkers:parsers:usb_geiger');
 
 
 var USBGeiger = function() {

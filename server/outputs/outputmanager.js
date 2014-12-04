@@ -9,7 +9,7 @@
 
 var dbs = require('../pouch-config'),
     _ = require("underscore")._,
-    debug = require('debug')('output');
+    debug = require('debug')('wizkers:output');
 
 
 var Safecast = require('./safecast.js');

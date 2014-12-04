@@ -23,7 +23,7 @@ var serialport = require('serialport'),
     zlib = require('zlib'),
     events = require('events'),
     outputmanager = require('../outputs/outputmanager.js'),
-    debug = require('debug')('parsers:fluke289');
+    debug = require('debug')('wizkers:parsers:fluke289');
 
 Hexdump = require('../hexdump.js');
 Bitmap = require('./lib/bitmap.js');

@@ -20,9 +20,10 @@
 
 var PouchDB = require('pouchdb');
 var bcrypt = require('bcrypt-nodejs');
+var debug = require('debug')('pouchdb');
 
 
-console.log("Requiring pouch-config.js");
+debug("Requiring pouch-config.js");
 // Databases we have on our system:
 
 // Instrument
@@ -58,12 +59,11 @@ var logByInstrument = {
 // save it
 logs.put(logByInstrument).then(function () {
   // success!
-    console.log("Created Instruments DB 'by instrument' view");
+    debug("Created Instruments DB 'by instrument' view");
 }).catch(function (err) {
-    console.log("Error creating design doc: " + err);
+    debug("Error creating design doc: " + err);
     if (err.status == 409)
-        console.log("... but that's OK, it was there already");
-  // some error (maybe a 409, because it already exists?)
+        debug("... but that's OK, it was there already");
 });
 
 
