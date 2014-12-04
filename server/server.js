@@ -403,15 +403,8 @@ io.sockets.on('connection', function (socket) {
     // Reference to the instrument driver for this socket.
     // it is returned by the connection manager.
     var driver = null;
-    
     console.log(socket.decoded_token.role, 'connected');
-    var userinfo = socket.decoded_token;
-    
-	// if the client connects:
-	if (!connected) {
-            console.log('User connected');
-            connected = true;
-    }
+    var userinfo = socket.decoded_token;    
     
     // We want to listen for data coming in from drivers:
     var sendDataToFrontEnd = function(data) {
@@ -423,7 +416,18 @@ io.sockets.on('connection', function (socket) {
         }
         socket.emit('serialEvent', data);
     }
-
+    
+    var openInstrument = function(insid) {
+        if (userinfo.role == 'operator' || userinfo.role == 'admin') {
+            connectionmanager.openInstrument(insid, function(d) {
+                driver = d;
+                // Listen for data coming in from our driver
+                driver.on('data',sendDataToFrontEnd);
+            });
+        } else
+            console.log("Unauthorized attempt to open instrument");
+    };
+    
     socket.on('disconnect', function(data) {
         console.log('This socket got disconnected ', data);
         if (driver != null) {
@@ -443,16 +447,7 @@ io.sockets.on('connection', function (socket) {
 
     // Open a port by instrument ID: this way we can track which
     // instrument is being used by the app.
-    socket.on('openinstrument', function(data) {
-        if (userinfo.role == 'operator' || userinfo.role == 'admin') {
-            connectionmanager.openInstrument(data, function(d) {
-                driver = d;
-                // Listen for data coming in from our driver
-                driver.on('data',sendDataToFrontEnd);
-            });
-        } else
-            console.log("Unauthorized attempt to open instrument");
-    });
+    socket.on('openinstrument', openInstrument);
     
     socket.on('closeinstrument', function(data) {
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
@@ -463,7 +458,14 @@ io.sockets.on('connection', function (socket) {
             console.log("Unauthorized attempt to open instrument");
     });
 
-    socket.on('portstatus', function() {
+    socket.on('portstatus', function(instrumentid) {
+        if (instrumentid) {
+            // In case we are asked to check a particular
+            // instrument, we can restore the driver state
+            // in case the instrument is already open:
+            if (connectionmanager.isOpen(instrumentid))
+                openInstrument(instrumentid);
+        }
         var s = {portopen: (driver)? driver.isOpen() : false,
                  recording: recorder.isRecording(),
                  streaming: (driver)? driver.isStreaming() : false};

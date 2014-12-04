@@ -72,8 +72,11 @@ define(function(require) {
             this.controllerCommandResponse = function() {
             }
 
+            // data will usually be empty/undefined, but
+            // if it contains an instrumentID, the server
+            // will check that specific instrument.
             this.requestStatus = function(data) {
-                socket.emit('portstatus','');
+                socket.emit('portstatus',data);
             }
 
 
