@@ -2,7 +2,14 @@
  *  Serial port connection
  *
  * Opens at create, sends 'data' events,
- * 'status' events
+ * and 'status' events.
+ *
+ * Supports a "write" method.
+ *
+ * At this point, this is just a simple wrapper around
+ * serialport, it just gives us a bit of abstraction in
+ * case we want to implement other kinds of connections/drivers
+ * later on.
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
@@ -11,7 +18,8 @@
 
 var serialport = require('serialport'),
     SerialPort = serialport.SerialPort,
-    events = require('events'),
+    EventEmitter = require('events').EventEmitter,
+    util = require('util'),
     dbs = require('../pouch-config');
 
 var Debug = false;
@@ -21,7 +29,7 @@ var Debug = false;
 //////////////////
 var SerialConnection = function(path, settings) {
     
-    events.EventEmitter.call(this);
+    EventEmitter.call(this);
     var portOpen = false;
     var self = this;
 
@@ -34,21 +42,28 @@ var SerialConnection = function(path, settings) {
                                     self.emit('status', {portopen: portOpen});
                                 }
                             });    
-    console.log('Result of port open attempt:'); console.log(myPort);
+    
+    this.write = function(data) {
+        myPort.write(data);
+    }
+    
+    this.close = function() {
+        myPort.close();
+    }
         
     // Callback once the port is actually open: 
    myPort.on('open', function () {
-       console.log('Port open');
        myPort.flush(function(err,result){ console.log(err + " - " + result); });
        myPort.resume();
        portOpen = true;
+       console.log('Port open');
        self.emit('status', {portopen: portOpen});
    });
 
     // listen for new serial data:
    myPort.on('data', function (data) {
        if (Debug) { try {
-           console.log("Data: " + data);
+           console.log("Data: ", data[0]);
        } catch(e){}}
         self.emit('data',data);
    });
@@ -56,9 +71,6 @@ var SerialConnection = function(path, settings) {
     myPort.on('error', function(err) {
         console.log("Serial port error: "  + err);
         portOpen = false;
-       //if (driver.onClose) {
-       //   driver.onClose(true);
-       //}
         self.emit('status', {portopen: portOpen});
     });
         
@@ -66,17 +78,13 @@ var SerialConnection = function(path, settings) {
         console.log('Port closing');
         console.log(myPort);
         portOpen = false;
-       
-       //if (driver.onClose) {
-        //driver.onClose(true);
-       //}
         self.emit('status', {portopen: portOpen});
     });
     
-    return myPort;
+    return this;
 }
 
-SerialConnection.prototype.__proto__ = events.EventEmitter.prototype;
+util.inherits(SerialConnection, EventEmitter);
 
 module.exports = SerialConnection;
 

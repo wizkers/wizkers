@@ -18,7 +18,7 @@
 	    "connect-roles": "latest",
         "bcrypt-nodejs": "latest",
         "jsonwebtoken": "latest",
-        "socket.io": "~1.0.0",
+        "socket.io": "~1.2.*",
         "socketio-jwt": "latest",
         "serialport": "https://github.com/voodootikigod/node-serialport/tarball/master"
     },

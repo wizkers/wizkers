@@ -67,7 +67,7 @@ var ConnectionManager = function() {
         if (openinstruments.hasOwnProperty(instrumentid)) {
             console.log('That instrument is already open');
             // Return a pointer to the instrument's existing driver:
-            return openinstruments[instrumentid];
+            callback(openinstruments[instrumentid]);
         } else {
             // Create the relevant driver for the instrument, and ask to
             // open it:
@@ -103,18 +103,8 @@ var ConnectionManager = function() {
                 delete openinstruments[instrumentid];
             return;
         }
-        /*
-                    dbs.instruments.get(data, function(err,item) {
-                if(portOpen) {
-                    recorder.stopRecording();
-                    driver.stopLiveStream();
-                    myPort.close();
-                    portOpen = false;
-                }
-            });
-        */
-        
-        driver.onClose();
+        // Ask the driver to close its port:
+        driver.closePort();
         delete openinstruments[instrumentid];
         
     }

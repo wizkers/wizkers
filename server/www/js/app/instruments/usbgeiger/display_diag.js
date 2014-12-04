@@ -166,7 +166,6 @@ define(function(require) {
                 $("#current_window",this.el).html(" (" + data.HZ[4] + " sec window)");
             } else if (data.version != undefined) {
                 $('#version',this.el).html(data.version);
-                linkManager.driver.guid();
             } else if (data.output_rate != undefined) {
                 $("#output_rate",this.el).val(data.output_rate[0]);
             } else if (data.cpm_enable != undefined) {

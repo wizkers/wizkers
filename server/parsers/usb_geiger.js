@@ -23,72 +23,32 @@ var USBGeiger = function() {
     /////////
     var port = null;
     var isopen = false;
+    var port_close_requested = false;
+    var self = this;
 
     /////////
     // Private methods
     /////////
-    var processPortStatusChange = function(status) {
-        console.log(status);
-    };
-    
-    /////////
-    // Public variables
-    /////////
-    this.name = "usbgeiger";
-    
-    /////////
-    // Public API
-    /////////
-    
-    // Creates and opens the connection to the instrument.
-    // for all practical purposes, this is really the init method of the
-    // driver
-    this.openPort = function(path) {
-        port = new serialconnection(path, portSettings());
-        port.on('status', processPortStatusChange);
-        port.on('data', format);
-    }
-        
-    this.setInstrumentRef = function(i) {
-    };
 
-    // How the device is connected on the serial port            
-    var portSettings = function() {
-        return  {
-            baudRate: 115200,
-            dataBits: 8,
-            parity: 'none',
-            stopBits: 1,
-            flowControl: false,
-            parser: serialport.parsers.readline(),
+    var status = function(stat) {
+        console.log('[usb_geiger] Port status change', stat);
+        isopen = stat.portopen;
+        
+        if (isopen) {
+            // Should run any "onOpen" initialization routine here if
+            // necessary.
+        } else {
+            // We remove the listener so that the serial port can be GC'ed
+            if (port_close_requested) {
+                port.removeListener('status', status);
+                port_close_requested = false;
+            }
         }
     };
     
-    // Called when the HTML app needs a unique identifier.
-    // this is a standardized call across all drivers.
-    this.sendUniqueID = function() {
-        this.emit('data', { uniqueID:'00000000 (n.a.)'});
-    };
-    
-    this.isStreaming = function() {
-        return true;
-    };
-    
-    // This dongle always outputs CPM value on the serial port
-    this.startLiveStream = function(period) {
-    };
-    
-    // Even though we ask to stop streaming, the dongle will still
-    // stream.
-    this.stopLiveStream = function(period) {
-    };
-    
-    this.isOpen = function() {
-        return isopen;
-    }
-    
+        // Format is called as a callback by the serial port, so
+    // 'this' is the serial object, not this driver!
     var format = function(data) {
-        
         // All commands now return JSON
         try {
             if (data.length < 2)
@@ -141,7 +101,10 @@ var USBGeiger = function() {
                 jsresp.raw = data;
             }
             // Send the response to the front-end
-            this.emit('data', jsresp);
+            // Why 'self' below ?
+            // 'format' is called as a callback by the serial port, so
+            // 'this' is the serial object, not this driver!
+            self.emit('data', jsresp);
             // Send our response to the recorder and the output manager
             // as well
             recorder.record(data);
@@ -150,7 +113,73 @@ var USBGeiger = function() {
             console.log('Not able to parse data from device:\n' + data + '\n' + err);
         }
     };
+
+
+    // How the device is connected on the serial port            
+    var portSettings = function() {
+        return  {
+            baudRate: 115200,
+            dataBits: 8,
+            parity: 'none',
+            stopBits: 1,
+            flowControl: false,
+            parser: serialport.parsers.readline(),
+        }
+    };
+
     
+    /////////
+    // Public variables
+    /////////
+    this.name = "usbgeiger";
+    
+    /////////
+    // Public API
+    /////////
+    
+    // Creates and opens the connection to the instrument.
+    // for all practical purposes, this is really the init method of the
+    // driver
+    this.openPort = function(path) {
+        port = new serialconnection(path, portSettings());
+        port.on('data', format);
+        port.on('status', status);
+    }
+    
+    this.closePort = function(data) {
+        // We need to remove all listeners otherwise the serial port
+        // will never be GC'ed
+        port.removeListener('data', format);
+        port_close_requested = true;
+        port.close();
+    }
+        
+    this.setInstrumentRef = function(i) {
+    };
+    
+    // Called when the HTML app needs a unique identifier.
+    // this is a standardized call across all drivers.
+    this.sendUniqueID = function() {
+        this.emit('data', { uniqueID:'00000000 (n.a.)'});
+    };
+    
+    this.isStreaming = function() {
+        return true;
+    };
+    
+    // This dongle always outputs CPM value on the serial port
+    this.startLiveStream = function(period) {
+    };
+    
+    // Even though we ask to stop streaming, the dongle will still
+    // stream.
+    this.stopLiveStream = function(period) {
+    };
+    
+    this.isOpen = function() {
+        return isopen;
+    }
+        
     this.output = function(data) {
         console.log("[USB Geiger] Command sent to dongle: " + data);
         if (data == "TAG") {

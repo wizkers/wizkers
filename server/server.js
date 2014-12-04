@@ -416,7 +416,6 @@ io.sockets.on('connection', function (socket) {
     // We want to listen for data coming in from drivers:
     var sendDataToFrontEnd = function(data) {
         console.log('data coming in for socket ' + socket.id, data);
-        
         // Temporary: detect "uniqueID" key and send as 'uniqueID' message
         if (data.uniqueID) {
             socket.emit('uniqueID', data.uniqueID);
@@ -424,9 +423,9 @@ io.sockets.on('connection', function (socket) {
         }
         socket.emit('serialEvent', data);
     }
-    
+
     socket.on('disconnect', function(data) {
-        console.log('This socket got disconnected');
+        console.log('This socket got disconnected ', data);
         if (driver != null) {
             driver.removeListener('data',sendDataToFrontEnd);
         }
