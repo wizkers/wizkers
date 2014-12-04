@@ -11,7 +11,8 @@
  */
 
 var Serial = require('./connections/serial'),
-    dbs = require('./pouch-config');
+    dbs = require('./pouch-config'),
+    debug = require('debug')('connectionmanager');
 
 
 // Preload the parsers we know about:
@@ -63,9 +64,9 @@ var ConnectionManager = function() {
      * in charge of making sure it is authorized.
      */
     this.openInstrument = function(instrumentid, callback) {
-        console.log('[connectionmanager] Instrument open request for instrument ID ' + instrumentid);
+        debug('Instrument open request for instrument ID ' + instrumentid);
         if (openinstruments.hasOwnProperty(instrumentid)) {
-            console.log('That instrument is already open');
+            debug('That instrument is already open');
             // Return a pointer to the instrument's existing driver:
             callback(openinstruments[instrumentid]);
         } else {
@@ -75,14 +76,14 @@ var ConnectionManager = function() {
                 var driver = getDriver(item.type);
                 if (driver == undefined) {
                     // Something is very wrong here!
-                    console.log("[connectionmanager] Was asked to open an instrument with unknown driver");
+                    debug("Was asked to open an instrument with unknown driver");
                     return;
                 }
                 driver.setInstrumentRef(instrumentid);
                 openinstruments[instrumentid] = driver;
                 // Now ask the instrument to open its port
                 driver.openPort(item.port);
-                console.log('[connectionmanager] Instrument is opening');
+                debug('Instrument is opening');
                 callback(driver);
             });
         }

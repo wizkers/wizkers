@@ -10,7 +10,8 @@ var serialport = require('serialport'),
     events = require('events'),
     recorder = require('../recorder.js'),
     serialconnection = require('../connections/serial');
-    outputmanager = require('../outputs/outputmanager.js');
+    outputmanager = require('../outputs/outputmanager.js'),
+    debug = require('debug')('parsers:usb_geiger');
 
 
 var USBGeiger = function() {
@@ -31,7 +32,7 @@ var USBGeiger = function() {
     /////////
 
     var status = function(stat) {
-        console.log('[usb_geiger] Port status change', stat);
+        debug('[usb_geiger] Port status change', stat);
         isopen = stat.portopen;
         
         if (isopen) {
@@ -110,7 +111,7 @@ var USBGeiger = function() {
             recorder.record(data);
             outputmanager.output(data);
         } catch (err) {
-            console.log('Not able to parse data from device:\n' + data + '\n' + err);
+            debug('Not able to parse data from device:\n' + data + '\n' + err);
         }
     };
 
@@ -181,7 +182,7 @@ var USBGeiger = function() {
     }
         
     this.output = function(data) {
-        console.log("[USB Geiger] Command sent to dongle: " + data);
+        debug("[USB Geiger] Command sent to dongle: " + data);
         if (data == "TAG") {
             this.emit('data', {devicetag: 'Not supported'});
             return '\n';

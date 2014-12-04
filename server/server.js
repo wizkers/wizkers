@@ -22,7 +22,9 @@ var serialport = require('serialport'),
     SerialPort  = serialport.SerialPort,
     PouchDB = require('pouchdb'),
     ConnectionManager = require('./connectionmanager'),
-    flash = require('connect-flash');
+    flash = require('connect-flash'),
+    debug = require('debug')('server'),
+    socket_debug = require('debug')('server:socket');
 
 
 
@@ -85,9 +87,9 @@ app.configure(function () {
 
 // Before starting our server, make sure we reset any stale authentication token:
 dbs.settings.get('coresettings', function (err, item) {
-    console.log(item);
+    debug("Getting settings: " + item);
     if (err) {
-        console.log('Issue finding my own settings ' + err);
+        debug('Issue finding my own settings ' + err);
     }
     if (item == null) {
       item = dbs.defaults.settings;
@@ -100,14 +102,14 @@ dbs.settings.get('coresettings', function (err, item) {
             console.log(err);
             return;
         }
-        console.log(response);
+        debug(response);
         server.listen(8090);
     });
     
 });
 
 
-console.log("Listening for new clients on port 8090");
+debug("Listening for new clients on port 8090");
 var connected = false;
 
 /****************
@@ -152,8 +154,8 @@ app.get('/login', function(req, res) {
         adm._id = 'admin'; // The userID has to be unique, we can use this as the CouchDB ID
         dbs.users.put(adm, function(err, response) {
            if (err)
-                console.log("Error during first user creation " + err);
-            console.log(response);
+                debug("Error during first user creation " + err);
+            debug(response);
             res.render('login.ejs', { message: 'Welcome! Your default login/password is admin/admin'  });
        });
       } else {
@@ -184,7 +186,7 @@ app.post('/login', passport.authenticate('local-login', {
     // first
     var w = req.flash('warningMessage');
     if (w != '') {
-        console.log("Warning: " + w);
+        debug("Warning: " + w);
         res.render('warning.ejs', { message: w });
         return;
     }
@@ -202,7 +204,7 @@ app.post('/login', passport.authenticate('local-login', {
     // Now store our token into the settings, so that the app can get it when it starts:
     dbs.settings.get('coresettings', function (err, item) {
         if (err) {
-            console.log('Issue finding my own settings ' + err);
+            debug('Issue finding my own settings ' + err);
             res.redirect('/login');
         }
         item.token = token;
@@ -221,7 +223,7 @@ app.get('/profile', isLoggedIn, function(req,res) {
 });
 app.post('/profile', isLoggedIn, function(req,res) {
      dbs.users.get(req.user.local.email, function(err, record) {
-         console.log(record);
+         debug(record);
          record.local.password = dbs.utils.users.generateHash(req.body.password);
          dbs.users.put(record, function(err) {
              var msg  = (err) ? 'Error changing password': 'Password changed';
@@ -237,7 +239,7 @@ app.get('/admin', isLoggedIn, user.is('admin'), function(req,res) {
     });
 });
 app.post('/admin', isLoggedIn, user.is('admin'), function(req,res) {
-    console.log(req.body);
+    debug(req.body);
     dbs.users.get( req.body.id, function(err, user) {
         var msg = "Role updated to " + req.body.newrole + " for user " + user.local.email;
         if (err)
@@ -321,7 +323,7 @@ app.post('/restore', isLoggedIn, user.is('admin'), backup.restoreBackup);
 // Everything static should be authenticated: therefore we are inserting a checkpoint middleware
 // at this point
 app.use(function(req,res,next) {
-    // console.log("*** checkpoint ***");
+    // debug("*** checkpoint ***");
     if (req.isAuthenticated())
         return next();
     
@@ -409,12 +411,12 @@ io.sockets.on('connection', function (socket) {
     // instruments
     var currentinstrumentid = null;
     
-    console.log(socket.decoded_token.role, 'connected');
+    socket_debug(socket.decoded_token.role, 'connected');
     var userinfo = socket.decoded_token;    
     
     // We want to listen for data coming in from drivers:
     var sendDataToFrontEnd = function(data) {
-        console.log('data coming in for socket ' + socket.id, data);
+        socket_debug('data coming in for socket ' + socket.id, data);
         // Temporary: detect "uniqueID" key and send as 'uniqueID' message
         if (data.uniqueID) {
             socket.emit('uniqueID', data.uniqueID);
@@ -432,11 +434,11 @@ io.sockets.on('connection', function (socket) {
                 driver.on('data',sendDataToFrontEnd);
             });
         } else
-            console.log("Unauthorized attempt to open instrument");
+            socket_debug("Unauthorized attempt to open instrument");
     };
     
     socket.on('disconnect', function(data) {
-        console.log('This socket got disconnected ', data);
+        socket_debug('This socket got disconnected ', data);
         if (driver != null) {
             driver.removeListener('data',sendDataToFrontEnd);
         }
@@ -458,12 +460,12 @@ io.sockets.on('connection', function (socket) {
     
     socket.on('closeinstrument', function(data) {
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
-            console.log('Instrument close request for instrument ID ' + data);
+            socket_debug('Instrument close request for instrument ID ' + data);
             driver.removeListener('data',sendDataToFrontEnd);
             connectionmanager.closeInstrument(data);
             currentInstrument= null;
         } else
-            console.log("Unauthorized attempt to open instrument");
+            socket_debug("Unauthorized attempt to open instrument");
     });
 
     socket.on('portstatus', function(instrumentid) {
@@ -477,7 +479,7 @@ io.sockets.on('connection', function (socket) {
             // to events coming from our previous instrument, as they
             // don't make sense for the new one
             if (instrumentid != currentInstrument) {
-                console.log('We are switching to a new instrument ID: ' + instrumentid);
+                socket_debug('We are switching to a new instrument ID: ' + instrumentid);
                 if (driver) {
                     driver.removeListener('data',sendDataToFrontEnd);
                     // Clear our reference to the instrument driver, it is
@@ -498,7 +500,7 @@ io.sockets.on('connection', function (socket) {
     });
         
     socket.on('controllerCommand', function(data) {
-        if (Debug) console.log('Controller command: ' + data);
+        if (Debug) socket_debug('Controller command: ' + data);
         driver.output(data);
     });
     
@@ -520,14 +522,14 @@ io.sockets.on('connection', function (socket) {
     
     // Request a unique identifier to our driver
     socket.on('uniqueID', function() {
-        console.log("Unique ID requested by HTML app");
+        socket_debug("Unique ID requested by HTML app");
         driver.sendUniqueID();
     });
 
     // Return a list of serial ports available on the
     // server    
     socket.on('ports', function() {
-        console.log('Request for a list of serial ports');
+        socket_debug('Request for a list of serial ports');
         serialport.list(function (err, ports) {
             var portlist = [];
             for (var i=0; i < ports.length; i++) {
@@ -538,17 +540,17 @@ io.sockets.on('connection', function (socket) {
      });
     
     socket.on('outputs', function(instrumentId) {
-        console.log("[server.js]  Update the outputs for this instrument");
+        socket_debug("[server.js]  Update the outputs for this instrument");
         outputmanager.enableOutputs(instrumentId);
     });
 
     socket.on('driver', function(data) {
         
         if (!(userinfo.role == 'operator' || userinfo.role == 'admin')) {
-            console.log('Unauthorized attempt to change instrument driver');
+            socket_debug('Unauthorized attempt to change instrument driver');
             return;
         }
-        console.log('[Deprecated] Socket asked to select the driver (now done automatically at instrument open)');
+        socket_debug('[Deprecated] Socket asked to select the driver (now done automatically at instrument open)');
     });
     
 });
