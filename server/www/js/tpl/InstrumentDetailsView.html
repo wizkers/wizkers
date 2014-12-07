@@ -28,21 +28,9 @@
                             <span class="help-inline"></span>
                         </div>
                 </div>
-                <div class="form-group">
-                    <label for="port" class="col-md-3 control-label">Port:</label>
-                    <div class="col-md-4">
-                        <input type="text" class="form-control" id="port" name="port" value="<%= port %>"/>
-                    </div>
-                    <div class="col-md-5">
-                            <select id="otherports" name="otherports" class="form-control">
-                                <option>New port...</option>
-                                <% for(var i=0; i < ports.length; i++) { %>
-                                <option
-                                    <%= port == ports[i] ? 'selected':'' %>
-                                    value="<%= ports[i] %>"><%= ports[i] %></option>
-                                <% } %>
-                            </select>
-                    </div>
+                <div class="form-group" id="portsettings">
+                    <!-- Start Connection DIV -->
+                    <!-- End Connection DIV -->
                 </div>      
                 <div class="form-group">
                     <label for="liveviewspan" class="col-md-3 control-label">Live view length:</label>

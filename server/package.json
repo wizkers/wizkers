@@ -11,7 +11,9 @@
     "debug": "^2.1.0",
     "ejs": "latest",
     "express": "3.x",
+    "helium": "https://github.com/elafargue/nodhelium/tarball/master",
     "jsonwebtoken": "latest",
+    "msgpack5": "^1.3.5",
     "passport": "latest",
     "passport-facebook": "~1.0.2",
     "passport-google-oauth": "~0.1.5",
@@ -21,7 +23,8 @@
     "serialport": "https://github.com/voodootikigod/node-serialport/tarball/master",
     "socket.io": "~1.2.*",
     "socketio-jwt": "latest",
-    "underscore": "latest"
+    "underscore": "latest",
+    "underscore.string": "^2.4.0"
   },
   "engines": {
     "node": "0.10.33",

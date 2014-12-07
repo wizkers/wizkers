@@ -45,7 +45,11 @@ var SerialConnection = function(path, settings) {
                             });    
     
     this.write = function(data) {
-        myPort.write(data);
+        try {
+            myPort.write(data);
+        } catch (err) {
+            debug('Port write error! ' + err);
+        }
     }
     
     this.close = function() {

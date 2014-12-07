@@ -1,8 +1,5 @@
 /**
- * A Medcom USB Geiger instrument
- *
- * This shares a lot with the Onyx visualization plugin, in a way it is
- * a "child" plugin.
+ * A Medcom Haw Radius probe connected through Helium
  *
  * (c) 2014 Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
@@ -11,8 +8,7 @@
 define(function(require) {
     "use strict";
     
-    var driver_frontend = require('app/instruments/usbgeiger/driver_frontend');
-    var uploader_frontend = require('app/instruments/usbgeiger/uploader_frontend');
+    var driver_frontend = require('app/instruments/heliumgeiger/driver_frontend');
     
     return  function() {
 
@@ -20,7 +16,7 @@ define(function(require) {
         // returns a simple array of capabilities    
         this.getCaps = function() {
             return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView",
-                    "LogManagementView", "Upgrader"
+                    "LogManagementView"
                    ];
         };
         
@@ -30,19 +26,13 @@ define(function(require) {
                     return [ "radioactivity" ];
         }
         
-        this.getUpgrader = function(arg,callback) {
-            require(['app/instruments/usbgeiger/upgrader'], function(view) {
+        // This has to be a backbone view
+        this.getSettings = function(arg, callback) {
+            require(['app/instruments/heliumgeiger/settings'], function(view) {
                 callback(new view(arg));
             });
         };
 
-        // This has to be a backbone view
-        this.getSettings = function(arg, callback) {
-            require(['app/instruments/usbgeiger/settings'], function(view) {
-                callback(new view(arg));
-            });
-        };
-        
         // This has to be a Backbone view
         // This is the full screen live view graph (not a small widget)
         this.getLiveDisplay = function(arg, callback) {
@@ -66,7 +56,7 @@ define(function(require) {
 
         // A diagnostics/device setup screen
         this.getDiagDisplay = function(arg, callback) {
-            require(['app/instruments/usbgeiger/display_diag'], function(view) {
+            require(['app/instruments/heliumgeiger/display_diag'], function(view) {
                 callback(new view(arg));
             });
         };
@@ -83,17 +73,10 @@ define(function(require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.
         this.getBackendDriver = function(arg, callback) {
-            require(['app/instruments/usbgeiger/driver_backend'], function(driver) {
+            require(['app/instruments/heliumgeiger/driver_backend'], function(driver) {
                 callback(new driver(arg));
             });
         };
-
-        this.getBackendUploaderDriver = function(arg, callback) {
-            require(['app/instruments/usbgeiger/uploader_backend'], function(driver) {
-                callback(new driver(arg));
-            });
-        };
-
         
         // Return a Backbone view which is a mini graph
         this.getMiniLogview = function(arg, callback) {

@@ -22,6 +22,7 @@ var FCOled = require('./parsers/fried_usb_tester.js');
 var W433 = require('./parsers/w433.js');
 var Elecraft = require('./parsers/elecraft.js');
 var USBGeiger = require('./parsers/usb_geiger.js');
+var HeliumGeiger = require('./parsers/helium_geiger.js');
 
 var ConnectionManager = function() {
  
@@ -42,6 +43,8 @@ var ConnectionManager = function() {
             driver = new Elecraft();
         } else if ( type == "usbgeiger") {
             driver = new USBGeiger();
+        } else if ( type == "heliumgeiger") {
+            driver = new HeliumGeiger();
         }
         return driver;
     }
@@ -60,6 +63,8 @@ var ConnectionManager = function() {
      * If the instrument was already open, returns the reference to the 
      * existing driver, otherwise create it.
      *
+     * 
+     *
      * Note: connection manager does not handle authorization, the caller is
      * in charge of making sure it is authorized.
      */
@@ -71,10 +76,8 @@ var ConnectionManager = function() {
             // Maybe the instrument is loaded but the port is closed: test
             // and act accordingly
             if (!driver.isOpen()) {
-                dbs.instruments.get(instrumentid, function(err,item) {
-                    driver.openPort(item.port);
-                });
-            }
+                    driver.openPort(instrumentid);
+                }
             // Return a pointer to the instrument's existing driver:
             callback(driver);
         } else {
@@ -87,11 +90,14 @@ var ConnectionManager = function() {
                     debug("Was asked to open an instrument with unknown driver");
                     return;
                 }
-                driver.setInstrumentRef(instrumentid);
                 openinstruments[instrumentid] = driver;
                 // Now ask the instrument to open its port
-                driver.openPort(item.port);
+                driver.openPort(instrumentid);
                 debug('Instrument is opening');
+                // TODO
+                // -> We need to tell the recorder and output manager that
+                // we just instanciated a new instrument driver, so that they
+                // can start to listen to data events coming from that instrument.
                 callback(driver);
             });
         }

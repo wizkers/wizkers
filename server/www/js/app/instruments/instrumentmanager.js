@@ -30,8 +30,11 @@ define(function(require) {
         Fluke289SettingsView = require('app/instruments/fluke28x/settings');
     
     var USBGeigerInstrument = require('app/instruments/usbgeiger/usb_geiger'),
-        USBGeigerInstrumentSettingsView = require('app/instruments/usbgeiger/settings');
-    
+        USBGeigerSettingsView = require('app/instruments/usbgeiger/settings');
+
+    var HeliumGeigerInstrument = require('app/instruments/heliumgeiger/heliumgeiger'),
+        HeliumGeigerSettingsView = require('app/instruments/heliumgeiger/settings');
+
 
     var InstrumentManager = function() {
     
@@ -39,17 +42,32 @@ define(function(require) {
         var current_instrument = null; // The instrument currently in use
 
         this.supportedInstruments = {
-            "onyx":     { name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView},
-            "fcoledv1": { name: "Fried Circuits OLED backpack", type: FCOledInstrument, settings: FCOledSettingsView },
-            "elecraft": { name: "Elecraft radios", type: ElecraftInstrument, settings:ElecraftSettingsView },
-            "usbgeiger":{ name: "USB Geiger Dongle", type: USBGeigerInstrument, settings: USBGeigerInstrumentSettingsView },
-            "fluke28x" :{ name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView}
+            "onyx":     { name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView,
+                          connectionsettings: 'app/views/instrument/serialport'},
+            "fcoledv1": { name: "Fried Circuits OLED backpack", type: FCOledInstrument, settings: FCOledSettingsView,
+                          connectionsettings: 'app/views/instrument/serialport' },
+            "elecraft": { name: "Elecraft radios", type: ElecraftInstrument, settings:ElecraftSettingsView,
+                          connectionsettings: 'app/views/instrument/serialport' },
+            "usbgeiger":{ name: "USB Geiger Dongle", type: USBGeigerInstrument, settings: USBGeigerSettingsView,
+                          connectionsettings: 'app/views/instrument/serialport'},
+            "fluke28x" :{ name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView,
+                          connectionsettings: 'app/views/instrument/serialport'}
         };
         
         // The instruments below are not supported in Cordova or Chrome runmodes:
         if (vizapp.type == "server") {
             this.supportedInstruments["w433"] =
-                { name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView };
+                { name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView,
+                          connectionsettings: 'app/views/instrument/serialport' };
+            this.supportedInstruments["heliumgeiger"] =
+                { name: "Radius Hawk (Helium)", type: HeliumGeigerInstrument, settings: HeliumGeigerSettingsView,
+                          connectionsettings: 'app/views/instrument/helium' };
+        }
+        
+        this.getConnectionSettingsFor =  function(instrument, arg, callback) {
+            require([this.supportedInstruments[instrument].connectionsettings], function(view) {
+                callback(new view(arg));
+            });
         }
         
         this.clear = function() {

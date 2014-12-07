@@ -25,18 +25,30 @@ define(function(require) {
         id: "instrument-details",
 
         render: function () {
+            var self=this;
             console.log("Render instrument details");
             linkManager.once('ports', function(portlist) {
                 $(this.el).html(template(_.extend(this.model.toJSON(), {instypes: instrumentManager.supportedInstruments,
                                                                         ports: portlist})));
+                
+                var insType = this.model.get('type');
 
                 // If the instrument type has got its own extra settings, then render those here:
-                var insSettingsView = instrumentManager.supportedInstruments[this.model.get('type')].settings;
+                var insSettingsView = instrumentManager.supportedInstruments[insType].settings;
                 if ( insSettingsView != null) {
                     var settingsView = new insSettingsView({model: this.model});
                     $('#metadata',this.el).html(settingsView.el);
                     settingsView.render();
                 }
+                
+                // Last, load the port settings view: Wizkers now supports various kinds of connections, now
+                // only serial ports. This means that instruments plugins are in charge of telling Wizkers
+                // what sort of connection selector they want to use.
+                instrumentManager.getConnectionSettingsFor(insType, {model: this.model, ports: portlist}, function(view) {
+                    $('#portsettings',self.el).html(view.el);
+                    view.render();
+                });
+                
             }, this);
             linkManager.getPorts();
             return this;
@@ -86,13 +98,23 @@ define(function(require) {
             // Apply the change to the model
             var target = event.target;
             var change = {};
-
-            // Our Spinedit control returns values as strings even
-            // when they are numbers (uses .val() in the setvalue method),
-            // so we have to attempt to convert it back to a number if it makes
-            // sense:
-            var numval = parseFloat(target.value);
-            change[target.name] = isNaN(numval) ? target.value : numval;
+                        
+            // Another refinement since I was not able to find another way:
+            // sometimes in templates we are coding objects with object.key. The
+            // target.name will then by a string called "object.key": catch this
+            // and translate it into a proper reference to object.key (and not
+            // a new key called "object.key". We only support one level of embedding
+            var parts = target.name.split(".");
+            if (parts.length > 1) {
+                change[parts[0]] = this.model.get(parts[0]);
+                if (change[parts[0]] == undefined)
+                    change[parts[0]] = {};
+                change[parts[0]][parts[1]] = target.value;
+            } else {
+                change[target.name] = target.value;
+            }
+            
+            
             this.model.set(change);
 
             // Run validation rule (if any) on changed item
