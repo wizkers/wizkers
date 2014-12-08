@@ -54,17 +54,10 @@ module.exports = function(passport) {
 
 		// find a user whose email is the same as the forms email
 		// we are checking to see if the user trying to login already exists
-        var map = function(doc) {
-                emit(doc.local.email)
-                };
-
-        dbs.users.query(map, { key: email, include_docs: true }, function(err, result) {
-            // if there are any errors, return the error
-            if (err)
-                return done(err);
-
+        dbs.users.get(email, function(err, result) {
+            // If we don't get a 404 error, this means the username is not available
             // check to see if theres already a user with that email
-            if (result.rows.length) {
+            if (!err || err.status != 404) {
                 return done(null, false, req.flash('signupMessage', 'That email is already registered.'));
             } else {
 
@@ -73,15 +66,21 @@ module.exports = function(passport) {
                 var newUser = dbs.defaults.user;
 
                 // set the user's local credentials
+                newUser._id = email;
                 newUser.local.email    = email;
                 newUser.local.password = dbs.utils.users.generateHash(password);
 
 				// save the user
-                dbs.users.post(newUser,function(err, result) {
+                dbs.users.put(newUser,function(err, result) {
                     if (err)
-                        throw err;
+                        return err;
                     debug(result)
-                    return done(null, result);
+                    // And Get the user back for serialization:
+                    dbs.users.get(result.id, function(err, user) {
+                        debug("New user created");
+                        debug(user);
+                        return done(null, user);
+                    });
                 });
             }
 
