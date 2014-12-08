@@ -10,6 +10,7 @@ var events = require('events'),
     recorder = require('../recorder.js'),
     heliumconnection = require('../connections/helium'),
     outputmanager = require('../outputs/outputmanager.js'),
+    dbs = require('../pouch-config'),
     debug = require('debug')('wizkers:parsers:helium_geiger');
 
 
@@ -26,6 +27,7 @@ var HeliumGeiger = function() {
     var port_close_requested = false;
     var self = this;
     var instrumentid;
+    var heliuminfo;
 
     /////////
     // Private methods
@@ -81,6 +83,7 @@ var HeliumGeiger = function() {
     this.openPort = function(id) {
         instrumentid = id;
         dbs.instruments.get(id, function(err,item) {
+            heliuminfo = item.helium; // Save for later use (close esp.)
             port = new heliumconnection(item.helium);
             port.on('data', format);
             port.on('status', status);
@@ -89,11 +92,13 @@ var HeliumGeiger = function() {
     }
     
     this.closePort = function(data) {
+        if (!isopen)
+            return;
         // We need to remove all listeners otherwise the serial port
         // will never be GC'ed
         port.removeListener('data', format);
         port_close_requested = true;
-        port.close();
+        port.close(heliuminfo.mac);
     }
     
     this.isOpen = function() {

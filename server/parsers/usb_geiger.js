@@ -11,6 +11,7 @@ var serialport = require('serialport'),
     recorder = require('../recorder.js'),
     serialconnection = require('../connections/serial'),
     outputmanager = require('../outputs/outputmanager.js'),
+    dbs = require('../pouch-config'),
     debug = require('debug')('wizkers:parsers:usb_geiger');
 
 
@@ -141,10 +142,13 @@ var USBGeiger = function() {
     // Creates and opens the connection to the instrument.
     // for all practical purposes, this is really the init method of the
     // driver
-    this.openPort = function(path) {
-        port = new serialconnection(path, portSettings());
-        port.on('data', format);
-        port.on('status', status);
+    this.openPort = function(id) {
+        instrumentid = id;
+        dbs.instruments.get(id, function(err,item) {
+            port = new serialconnection(item.port, portSettings());
+            port.on('data', format);
+            port.on('status', status);
+        });
     }
     
     this.closePort = function(data) {

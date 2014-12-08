@@ -18,8 +18,7 @@
 var helium = require('helium'),
     EventEmitter = require('events').EventEmitter,
     util = require('util'),
-    debug = require('debug')('wizkers:connections:helium'),
-    dbs = require('../pouch-config');
+    debug = require('debug')('wizkers:connections:helium');
 
 var msgpack = require('msgpack5')() // namespace our extensions
   , encode  = msgpack.encode
@@ -65,7 +64,7 @@ var HeliumConnection = function(path) {
     this.write = function(data) {
     }
     
-    this.close = function() {
+    this.close = function(mac) {
         myHelium.unsubscribe(mac);
         myHelium.close();
         portOpen = false;

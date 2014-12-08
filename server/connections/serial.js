@@ -20,8 +20,7 @@ var serialport = require('serialport'),
     SerialPort = serialport.SerialPort,
     EventEmitter = require('events').EventEmitter,
     util = require('util'),
-    debug = require('debug')('wizkers:connections:serial'),
-    dbs = require('../pouch-config');
+    debug = require('debug')('wizkers:connections:serial');
 
 var Debug = false;
 
@@ -34,6 +33,7 @@ var SerialConnection = function(path, settings) {
     var portOpen = false;
     var self = this;
 
+    debug("Opening serial device at " + path);
     var myPort = new SerialPort(path,
                             settings,
                             true, 
