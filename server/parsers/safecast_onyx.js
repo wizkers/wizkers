@@ -9,9 +9,9 @@
  */
 
 var serialport = require('serialport'),
-    SerialPort  = serialport.SerialPort,
     recorder = require('../recorder.js'),
     events = require('events'),
+    dbs = require('../pouch-config'),    
     debug = require('debug')('wizkers:parsers:onyx'),
     serialconnection = require('../connections/serial'),
     outputmanager = require('../outputs/outputmanager.js');
@@ -31,6 +31,7 @@ var Onyx = function() {
     /////////    
     var port = null;
     var isopen = false;
+    var instrumentid = null;
     var port_close_requested = false;
     var self = this;
 
@@ -108,10 +109,13 @@ var Onyx = function() {
         // Creates and opens the connection to the instrument.
     // for all practical purposes, this is really the init method of the
     // driver
-    this.openPort = function(path) {
-        port = new serialconnection(path, portSettings());
-        port.on('data', format);
-        port.on('status', status);
+    this.openPort = function(id) {
+        instrumentid = id;
+        dbs.instruments.get(id, function(err,item) {
+            port = new serialconnection(item.port, portSettings());
+            port.on('data', format);
+            port.on('status', status);
+        });
     }
     
     this.closePort = function(data) {

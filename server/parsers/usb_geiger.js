@@ -6,6 +6,8 @@
  *
  */
 
+"use strict";
+
 var serialport = require('serialport'),
     events = require('events'),
     recorder = require('../recorder.js'),
@@ -25,6 +27,7 @@ var USBGeiger = function() {
     /////////
     var port = null;
     var isopen = false;
+    var instrumentid;
     var port_close_requested = false;
     var self = this;
 
@@ -109,7 +112,6 @@ var USBGeiger = function() {
             self.emit('data', jsresp);
             // Send our response to the recorder and the output manager
             // as well
-            recorder.record(jsresp);
             outputmanager.output(jsresp);
         } catch (err) {
             debug('Not able to parse data from device:\n' + data + '\n' + err);
@@ -162,8 +164,9 @@ var USBGeiger = function() {
     this.isOpen = function() {
         return isopen;
     }
-        
-    this.setInstrumentRef = function(i) {
+
+    this.getInstrumentId = function(format) {
+        return instrumentid;
     };
     
     // Called when the HTML app needs a unique identifier.

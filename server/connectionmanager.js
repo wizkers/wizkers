@@ -12,6 +12,8 @@
 
 var Serial = require('./connections/serial'),
     dbs = require('./pouch-config'),
+    outputmanager = require('./outputs/outputmanager'),
+    recorder = require('./recorder'),
     debug = require('debug')('wizkers:connectionmanager');
 
 
@@ -94,10 +96,6 @@ var ConnectionManager = function() {
                 // Now ask the instrument to open its port
                 driver.openPort(instrumentid);
                 debug('Instrument is opening');
-                // TODO
-                // -> We need to tell the recorder and output manager that
-                // we just instanciated a new instrument driver, so that they
-                // can start to listen to data events coming from that instrument.
                 callback(driver);
             });
         }

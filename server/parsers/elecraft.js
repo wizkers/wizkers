@@ -16,6 +16,7 @@ var serialport = require('serialport'),
     readline = require('readline'),
     events = require('events'),
     net = require('net'),
+    dbs = require('../pouch-config'),
     debug = require('debug')('wizkers:parsers:elecraft'),
     serialconnection = require('../connections/serial');
 
@@ -38,6 +39,7 @@ var Elecraft = function() {
     var uidrequested = false,
         port = null,
         isopen = false,
+        instrumentid = null,
         port_close_requested = false,
         self = this,
         streaming = false,
@@ -155,10 +157,13 @@ var Elecraft = function() {
     // Creates and opens the connection to the instrument.
     // for all practical purposes, this is really the init method of the
     // driver
-    this.openPort = function(path) {
-        port = new serialconnection(path, portSettings());
-        port.on('data', format);
-        port.on('status', status);
+    this.openPort = function(id) {
+        instrumentid = id;
+        dbs.instruments.get(id, function(err,item) {
+            port = new serialconnection(item.port, portSettings());
+            port.on('data', format);
+            port.on('status', status);
+        });
     }
     
     this.closePort = function(data) {

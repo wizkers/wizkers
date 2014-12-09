@@ -363,26 +363,16 @@ function Collect(ob1, ob1) {
 
 // Output plugin management: we have an outputmanager, whose role
 // is to send data to various third parties (twitter, Safecast, HTTP REST calls
-// etc... 
+// etc. There is one single instance for the application.
 var outputmanager = require('./outputs/outputmanager.js');
 
-//
 // Backend logging: we want to let the backend record stuff into
-// the database by itself, so we keep a global variable for doing this
+// the database by itself, this object is in charge of precisely that.
+// Unique instance available throughout the application.
 var recorder = require('./recorder.js');
 
 // And last, the Connection manager, which keeps track of what device is open/closed
 var connectionmanager = new ConnectionManager();
-
-
-var recordingSessionId = 0; // Is set by the front-end when pressing the 'Record' button.
-
-//
-// In order to be more flexible, we are also going to keep track globally of a few things
-// such as the currently selected instrument. At the moment there is no good way to know
-// server-side that an instrument is selected, unfortunately.
-var currentInstrument = null;
-
 
 //////////////////
 // Socket management: supporting one client at a time for now
@@ -409,7 +399,7 @@ io.sockets.on('connection', function (socket) {
     // we switch instrument during the same session, and need to
     // subscribe/unsubscribe to events coming from the old/previous
     // instruments
-    var currentinstrumentid = null;
+    var currentInstrumentid = null;
     
     socket_debug(socket.decoded_token.role, 'connected');
     var userinfo = socket.decoded_token;    
@@ -429,7 +419,7 @@ io.sockets.on('connection', function (socket) {
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
             connectionmanager.openInstrument(insid, function(d) {
                 driver = d;
-                currentinstrumentid = insid;
+                currentInstrumentid = insid;
                 // Listen for data coming in from our driver
                 driver.on('data',sendDataToFrontEnd);
             });
@@ -458,12 +448,17 @@ io.sockets.on('connection', function (socket) {
     // instrument is being used by the app.
     socket.on('openinstrument', openInstrument);
     
-    socket.on('closeinstrument', function(data) {
+    socket.on('closeinstrument', function(insid) {
+        if (insid != currentInstrumentid) {
+            debug("**** ERROR, the socket asked to close an instrument that is not the current instrument on this socket.");
+            return;
+        }
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
-            socket_debug('Instrument close request for instrument ID ' + data);
+            socket_debug('Instrument close request for instrument ID ' + insid);
             driver.removeListener('data',sendDataToFrontEnd);
-            connectionmanager.closeInstrument(data);
-            currentInstrument= null;
+            recorder.stopRecording(insid);
+            connectionmanager.closeInstrument(insid);
+            currentInstrumentid= null;
         } else
             socket_debug("Unauthorized attempt to open instrument");
     });
@@ -478,7 +473,7 @@ io.sockets.on('connection', function (socket) {
             // current instrument, then we need to unsubscribe
             // to events coming from our previous instrument, as they
             // don't make sense for the new one
-            if (instrumentid != currentInstrument) {
+            if (instrumentid != currentInstrumentid) {
                 socket_debug('We are switching to a new instrument ID: ' + instrumentid);
                 if (driver) {
                     driver.removeListener('data',sendDataToFrontEnd);
@@ -486,12 +481,13 @@ io.sockets.on('connection', function (socket) {
                     // not relevant anymore
                     driver = null;
                 }
+                currentInstrumentid = instrumentid;
             }
             if (connectionmanager.isOpen(instrumentid))
                 openInstrument(instrumentid);
         }
         var s = {portopen: (driver)? driver.isOpen() : false,
-                 recording: recorder.isRecording(),
+                 recording: recorder.isRecording(currentInstrumentid),
                  streaming: (driver)? driver.isStreaming() : false};
         var ds = {};
         if (driver && driver.status)
@@ -504,12 +500,12 @@ io.sockets.on('connection', function (socket) {
         driver.output(data);
     });
     
-    socket.on('startrecording', function(id) {
-        recorder.startRecording(id);
+    socket.on('startrecording', function(logid) {
+        recorder.startRecording(logid, driver);
     });
     
     socket.on('stoprecording', function() {
-        recorder.stopRecording();
+        recorder.stopRecording(currentInstrumentid);
     });
     
     socket.on('startlivestream', function(data) {

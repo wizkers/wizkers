@@ -37,6 +37,10 @@ exports.findByInstrumentId = function(req, res) {
             return;
         }
         var resp = [];
+        if (items.rows && items.rows.length==0) {
+            res.send([]);
+            return;
+        }
         var sendResp = function() {
             res.send(resp);
         }

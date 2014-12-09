@@ -20,6 +20,7 @@
 var serialport = require('serialport'),
     crcCalc = require('./lib/crc-calc.js'),
     recorder = require('../recorder.js'),
+    dbs = require('../pouch-config'),
     zlib = require('zlib'),
     events = require('events'),
     serialconnection = require('../connections/serial'),
@@ -96,6 +97,7 @@ var Fluke289 = function() {
     // some protocol link layer operations and command queue management
     var port = null,
         uidrequested = false,
+        instrumentid = null,
         recording = false,     // to call the main app in case we need to record readings
         streaming = false,
         livePoller = null,
@@ -901,11 +903,16 @@ var Fluke289 = function() {
     // Creates and opens the connection to the instrument.
     // for all practical purposes, this is really the init method of the
     // driver
-    this.openPort = function(path) {
-        port = new serialconnection(path, portSettings());
-        port.on('data', format);
-        port.on('status', status);
+    
+    this.openPort = function(id) {
+        instrumentid = id;
+        dbs.instruments.get(id, function(err,item) {
+            port = new serialconnection(item.port, portSettings());
+            port.on('data', format);
+            port.on('status', status);
+        });
     }
+
     
     this.closePort = function(data) {
         // We need to remove all listeners otherwise the serial port

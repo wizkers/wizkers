@@ -7,11 +7,14 @@
  * All rights reserved.
  */
 
+"use strict";
+
 var serialport = require('serialport'),
     recorder = require('../recorder.js'),
     events = require('events'),
     serialconnection = require('../connections/serial'),
     debug = require('debug')('wizkers:parsers:fcoled'),
+    dbs = require('../pouch-config'),
     outputmanager = require('../outputs/outputmanager.js');
 
 var FCOled = function() {
@@ -29,6 +32,7 @@ var FCOled = function() {
     /////////
     var port = null;
     var isopen = false;
+    var instrumentid = null;
     var port_close_requested = false;
     var self = this;
 
@@ -79,7 +83,6 @@ var FCOled = function() {
             console.log("Error: cannot parse logger data : " + e + " - " + data);
         }
         self.emit('data',fields);
-        recorder.record(fields);
         outputmanager.output(fields);
     };
 
@@ -90,10 +93,13 @@ var FCOled = function() {
     // Creates and opens the connection to the instrument.
     // for all practical purposes, this is really the init method of the
     // driver
-    this.openPort = function(path) {
-        port = new serialconnection(path, portSettings());
-        port.on('data', format);
-        port.on('status', status);
+    this.openPort = function(id) {
+        instrumentid = id;
+        dbs.instruments.get(id, function(err,item) {
+            port = new serialconnection(item.port, portSettings());
+            port.on('data', format);
+            port.on('status', status);
+        });
     }
 
     this.closePort = function(data) {
@@ -108,7 +114,8 @@ var FCOled = function() {
         return isopen;
     }
 
-    this.setInstrumentRef = function(i) {
+    this.getInstrumentId = function(format) {
+        return instrumentid;
     };
 
     // Called when the HTML app needs a unique identifier.
