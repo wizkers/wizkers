@@ -80,9 +80,8 @@ var HeliumGeiger = function() {
                     break;
         }
         self.emit('data', jsresp);
-        // Send our response to the recorder and the output manager
+        // Send our response to output manager
         // as well
-        recorder.record(jsresp);
         outputmanager.output(jsresp);
     };
 
@@ -122,6 +121,11 @@ var HeliumGeiger = function() {
     this.isOpen = function() {
         return isopen;
     }
+    
+    this.getInstrumentId = function(format) {
+        return instrumentid;
+    };
+
     
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.

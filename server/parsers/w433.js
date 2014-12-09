@@ -13,6 +13,8 @@
  * All rights reserved.
  */
 
+"use strict"
+
 var serialport = require('serialport'),
     dbs = require('../pouch-config'),
     events = require('events'),
@@ -37,10 +39,11 @@ var W433 = function() {
     
     var port = null;
     var isopen = false;
+    var instrumentid = null;
     var port_close_requested = false;
     var self = this;
     
-    var instrument =  null;
+    var instrument = null;
     var lastStamp = new Date().getTime();
     var prevRes = [];
     var sensor_types_tx3 = ['temperature', '1', '2', '3', '4', '5', '6',
@@ -283,10 +286,18 @@ var W433 = function() {
     // Creates and opens the connection to the instrument.
     // for all practical purposes, this is really the init method of the
     // driver
-    this.openPort = function(path) {
-        port = new serialconnection(path, portSettings());
-        port.on('data', format);
-        port.on('status', status);
+    this.openPort = function(id) {
+        instrumentid = id;
+        dbs.instruments.get(id, function(err,item) {
+            port = new serialconnection(item.port, portSettings());
+            port.on('data', format);
+            port.on('status', status);
+            // Save instrument contents:
+            instrument = item;
+            // Get the instrument's metadata too:
+            if (instrument.metadata == null)
+		          instrument.metadata = {};
+        });
     }
     
     this.closePort = function(data) {
@@ -296,16 +307,14 @@ var W433 = function() {
         port_close_requested = true;
         port.close();
     }
-
     
-    this.setInstrumentRef = function(i) {
-        this.instrument = i;
-        debug("W433: instrument reference passed, instrument data is: ");
-        debug(i.metadata);
-	if (this.instrument.metadata == null)
-		this.instrument.metadata = {};
-    };
+    this.isOpen = function() {
+        return isopen;
+    }
 
+    this.getInstrumentId = function(format) {
+        return instrumentid;
+    };
     
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
