@@ -52,22 +52,40 @@ var HeliumGeiger = function() {
     // Format is called as a callback by the serial port, so
     // 'this' is the serial object, not this driver!
     var format = function(data) {
-        // All commands now return JSON
+        var jsresp;
         debug(data);
-        
-        var jsresp = { cpm: { value: data.message[0], valid: data.message[1] },
-                    cpm2: { value: data.message[2], valid: data.message[3] }
+        switch (data.message[0]) {
+                case 0: // CPM Message
+                    jsresp = { cpm: { value: data.message[1], valid: data.message[2] },
+                    cpm2: { value: data.message[3], valid: data.message[4] }
                    };
+                    break;
+                case 1: // COUNT Message
+                    jsresp = {counts : { input1: data.message[1],
+                                     input2: data.message[2],
+                                     uptime: data.message[3]
+                                    }
+                             };
+                    break;
+                case 2: // String: parse like a Geiger Link
+                    jsresp = {};
+                    var resp = data.message[1].split(':');
+                    if (data.message[1].substr(0,10) == "Geiger Link") {
+                        jsresp.version = data.message[1];
+                    } else if (resp.length > 1) {
+                        jsresp[resp[0]] = resp.slice(1);
+                    } else {
+                        jsresp.raw = data;
+                    }
+                    break;
+        }
         self.emit('data', jsresp);
         // Send our response to the recorder and the output manager
         // as well
         recorder.record(jsresp);
         outputmanager.output(jsresp);
-
     };
 
-
-    
     /////////
     // Public variables
     /////////
