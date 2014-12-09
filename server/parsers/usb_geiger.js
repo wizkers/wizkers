@@ -10,9 +10,7 @@
 
 var serialport = require('serialport'),
     events = require('events'),
-    recorder = require('../recorder.js'),
     serialconnection = require('../connections/serial'),
-    outputmanager = require('../outputs/outputmanager.js'),
     dbs = require('../pouch-config'),
     debug = require('debug')('wizkers:parsers:usb_geiger');
 
@@ -110,9 +108,6 @@ var USBGeiger = function() {
             // 'format' is called as a callback by the serial port, so
             // 'this' is the serial object, not this driver!
             self.emit('data', jsresp);
-            // Send our response to the recorder and the output manager
-            // as well
-            outputmanager.output(jsresp);
         } catch (err) {
             debug('Not able to parse data from device:\n' + data + '\n' + err);
         }

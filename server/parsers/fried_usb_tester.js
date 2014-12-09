@@ -10,12 +10,10 @@
 "use strict";
 
 var serialport = require('serialport'),
-    recorder = require('../recorder.js'),
     events = require('events'),
     serialconnection = require('../connections/serial'),
     debug = require('debug')('wizkers:parsers:fcoled'),
-    dbs = require('../pouch-config'),
-    outputmanager = require('../outputs/outputmanager.js');
+    dbs = require('../pouch-config');
 
 var FCOled = function() {
 
@@ -83,7 +81,6 @@ var FCOled = function() {
             console.log("Error: cannot parse logger data : " + e + " - " + data);
         }
         self.emit('data',fields);
-        outputmanager.output(fields);
     };
 
     /////////

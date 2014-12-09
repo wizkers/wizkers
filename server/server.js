@@ -422,6 +422,8 @@ io.sockets.on('connection', function (socket) {
                 currentInstrumentid = insid;
                 // Listen for data coming in from our driver
                 driver.on('data',sendDataToFrontEnd);
+                // Reconnect the outputs for the instrument
+                outputmanager.enableOutputs(insid,driver);
             });
         } else
             socket_debug("Unauthorized attempt to open instrument");
@@ -457,6 +459,7 @@ io.sockets.on('connection', function (socket) {
             socket_debug('Instrument close request for instrument ID ' + insid);
             driver.removeListener('data',sendDataToFrontEnd);
             recorder.stopRecording(insid);
+            outputmanager.disconnectOutputs(insid);
             connectionmanager.closeInstrument(insid);
             currentInstrumentid= null;
         } else
@@ -538,9 +541,16 @@ io.sockets.on('connection', function (socket) {
         });
      });
     
+    // This call is required, because the user can change the outputs
+    // while an instrument is connected, and uses this command to get the
+    // server outputs to refresh.
     socket.on('outputs', function(instrumentId) {
         socket_debug("[server.js]  Update the outputs for this instrument");
-        outputmanager.enableOutputs(instrumentId,driver);
+        if (driver) {
+            outputmanager.enableOutputs(instrumentId,driver);
+        } else {
+            socket_debug("Skipped updating outputs because we have no driver (instrument is closed?)");
+        }
     });
 
     socket.on('driver', function(data) {

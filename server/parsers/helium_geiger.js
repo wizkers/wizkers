@@ -7,9 +7,7 @@
  */
 
 var events = require('events'),
-    recorder = require('../recorder.js'),
     heliumconnection = require('../connections/helium'),
-    outputmanager = require('../outputs/outputmanager.js'),
     dbs = require('../pouch-config'),
     debug = require('debug')('wizkers:parsers:helium_geiger');
 
@@ -80,9 +78,6 @@ var HeliumGeiger = function() {
                     break;
         }
         self.emit('data', jsresp);
-        // Send our response to output manager
-        // as well
-        outputmanager.output(jsresp);
     };
 
     /////////

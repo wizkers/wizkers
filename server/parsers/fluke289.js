@@ -19,12 +19,10 @@
  */
 var serialport = require('serialport'),
     crcCalc = require('./lib/crc-calc.js'),
-    recorder = require('../recorder.js'),
     dbs = require('../pouch-config'),
     zlib = require('zlib'),
     events = require('events'),
     serialconnection = require('../connections/serial'),
-    outputmanager = require('../outputs/outputmanager.js'),
     debug = require('debug')('wizkers:parsers:fluke289');
 
 Hexdump = require('../hexdump.js');
@@ -166,8 +164,6 @@ var Fluke289 = function() {
     var sendData = function(data) {
         if (data) {
             this.emit('data',data);
-            recorder.record(data);
-            outputmanager.output(data);
         }
     };
     

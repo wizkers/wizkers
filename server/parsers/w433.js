@@ -18,9 +18,7 @@
 var serialport = require('serialport'),
     dbs = require('../pouch-config'),
     events = require('events'),
-    recorder = require('../recorder.js'),
-    debug = require('debug')('wizkers:parsers:w433'),
-    outputmanager = require('../outputs/outputmanager.js');
+    debug = require('debug')('wizkers:parsers:w433');
 
 var W433 = function() {
     
@@ -230,16 +228,11 @@ var W433 = function() {
         
         // TODO :-)
         
-        // Send our response to the recorder and the output manager
-        // as well (careful to use 'self' because we are called as a
+        // (careful to use 'self' because we are called as a
         // callback from the serial port object, so we need to get the
         // scope from the closure, not the 'this' that will be the serial
         // port.
         self.emit('data',res);
-        // Send our response to the recorder and the output manager
-        // as well
-        recorder.record(data);
-        outputmanager.output(data);
 
     };
     

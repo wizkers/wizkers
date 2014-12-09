@@ -9,12 +9,10 @@
  */
 
 var serialport = require('serialport'),
-    recorder = require('../recorder.js'),
     events = require('events'),
     dbs = require('../pouch-config'),    
     debug = require('debug')('wizkers:parsers:onyx'),
-    serialconnection = require('../connections/serial'),
-    outputmanager = require('../outputs/outputmanager.js');
+    serialconnection = require('../connections/serial');
 
 var Onyx = function() {
     
