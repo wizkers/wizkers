@@ -540,7 +540,7 @@ io.sockets.on('connection', function (socket) {
     
     socket.on('outputs', function(instrumentId) {
         socket_debug("[server.js]  Update the outputs for this instrument");
-        outputmanager.enableOutputs(instrumentId);
+        outputmanager.enableOutputs(instrumentId,driver);
     });
 
     socket.on('driver', function(data) {

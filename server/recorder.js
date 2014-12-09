@@ -104,8 +104,19 @@ exports.isRecording = function(insid) {
     return drivers.hasOwnProperty(insid);
 }
 
-exports.logID = function() {
-    debug("Asked to logID [deprecated]");
+/**
+ * Used by the "logs" router, to update the "recording" flag of all
+ * logs before sending them to the front-end - we can have situations where the
+ * app stopped/crashed, etc, and the recording flags are not consistent.
+ *
+ * Returns either -1 or the logID currently open for instrument ID "insid"
+ */
+exports.logID = function(insid) {
+    if (drivers.hasOwnProperty(insid)) {
+        return drivers[insid].logid;
+    } else {
+        return -1;
+    }
 }
 
 exports.stopRecording = function(insid) {

@@ -6,6 +6,7 @@
  * All rights reserved.
  */
 
+"use strict"
 
 var dbs = require('../pouch-config'),
     _ = require("underscore")._,
@@ -15,6 +16,16 @@ var dbs = require('../pouch-config'),
 var Safecast = require('./safecast.js');
 var Rest     = require('./rest.js');
 
+/////////////////
+// Private variales
+/////////////////
+
+var drivers = {};
+
+
+////////////////
+// Private methods
+////////////////
 
 // Returns 'true' if alarm is triggered
 var check_alarm = function(output, alarm, data) {
@@ -48,6 +59,25 @@ var check_alarm = function(output, alarm, data) {
     return false;
 }
 
+
+/**
+ * Register a new instrument driver.
+ */
+var register = function(driver, cb) {
+    var instrumentid = driver.getInstrumentId();
+    if (drivers.hasOwnProperty(instrumentid)) {
+            debug('WARNING, this driver is already registered, this should not happen');
+    } else {
+        drivers[instrumentid] = { driver:driver, logid:logid, cb:cb };
+    }
+}
+
+
+////////////////
+// Private public
+////////////////
+
+
 module.exports = {
     
     activeOutputs: [],
@@ -56,7 +86,7 @@ module.exports = {
     // Selects the active output plugins. Note that we only require
     // the instrument ID, since it stores its own list of enabled outputs,
     // and more importantly, all the settings for those.
-    enableOutputs: function(id) {
+    enableOutputs: function(id, driver) {
         var self = this;
         debug('Retrieving Outputs for Instrument ID: ' + id);
         

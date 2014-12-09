@@ -56,7 +56,8 @@ exports.findByInstrumentId = function(req, res) {
                 var db = new PouchDB('./ldb/datapoints/' + item.doc._id);
                 db.info(function(err,info) {
                     item.doc.datapoints = info.doc_count;
-                    item.doc.isrecording = (item.doc._id == recorder.logID());
+                    // A simple consistency check:
+                    item.doc.isrecording = (item.doc._id == recorder.logID(id));
                     resp.push(item.doc) ;
                     af();
                 });
