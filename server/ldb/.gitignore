@@ -1,6 +1,6 @@
 instruments
 users
-logs
+logs*
 settings
 outputs
 datapoints/*

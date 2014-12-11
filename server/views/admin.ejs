@@ -60,20 +60,23 @@
                 </thead>
                 <tbody>
                 <% var selectedType = "";
-                  for (user in users) {
+                  for (usr in users) {
                         /* Make sure we can only select identical log types */
                 %>
                 <tr>
                     <form method="post">
-                        <input type=hidden name="id" value="<%= users[user].doc._id %>">
+                        <input type=hidden name="id" value="<%= users[usr].doc._id %>">
 
-                    <td><%= users[user].doc.local.email %></td>
-                    <td><%= users[user].doc.role %></td>
+                    <td><%= users[usr].doc.local.email %></td>
+                    <td><%= users[usr].doc.role %></td>
                     <td><select name="newrole" onchange="this.form.submit();">
-                        <option value="pending" <%= users[user].doc.role === 'pending' ? 'selected' : '' %> >Pending</option>
-                        <option value="viewer" <%= users[user].doc.role === 'viewer' ? 'selected' : '' %>>Viewer</option>
-                        <option value="operator" <%= users[user].doc.role === 'operator' ? 'selected' : '' %>>Operator</option>
-                        <option value="admin"  <%= users[user].doc.role === 'admin' ? 'selected' : '' %>>Administrator</option>
+                        <option value="pending" <%= users[usr].doc.role === 'pending' ? 'selected' : '' %> >Pending</option>
+                        <option value="viewer" <%= users[usr].doc.role === 'viewer' ? 'selected' : '' %>>Viewer</option>
+                        <option value="operator" <%= users[usr].doc.role === 'operator' ? 'selected' : '' %>>Operator</option>
+                        <option value="admin"  <%= users[usr].doc.role === 'admin' ? 'selected' : '' %>>Administrator</option>
+                        <% if (user._id != users[usr].doc._id) { %>
+                        <option value="delete" >Delete</option>
+                        <% } %>
                         </select>
                     </td>
                         </form>

@@ -244,17 +244,27 @@ app.post('/admin', isLoggedIn, user.is('admin'), function(req,res) {
         var msg = "Role updated to " + req.body.newrole + " for user " + user.local.email;
         if (err)
             msg = "Someting went wrong, no change was made.";
-        
-        user.role = req.body.newrole;
-        dbs.users.put(user, function(err) {
-            if (err)
-                msg = "Something went wrong, no change was made.";
-            dbs.users.allDocs({include_docs:true}, function(err, users) {
-                res.render('admin.ejs', {user: req.user, users: users.rows, message: msg });
+        if (req.body.newrole == 'delete') {
+            dbs.users.remove(user, function(err,result) {
+                if (err)
+                    debug(err);
+                debug('User ' + req.body.id + ' deleted');
+                var msg = 'User ' + req.body.id + " deleted";
+                dbs.users.allDocs({include_docs:true}, function(err, users) {
+                    res.render('admin.ejs', {user: req.user, users: users.rows, message: msg });
+                });            
             });
-        });
+        } else {
+            user.role = req.body.newrole;
+            dbs.users.put(user, function(err) {
+                if (err)
+                    msg = "Something went wrong, no change was made.";
+                dbs.users.allDocs({include_docs:true}, function(err, users) {
+                    res.render('admin.ejs', {user: req.user, users: users.rows, message: msg });
+                });
+            });
+        }
     });
-    
 });
 
 
