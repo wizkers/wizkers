@@ -388,7 +388,7 @@ var recorder = require('./recorder.js');
 var connectionmanager = new ConnectionManager();
 
 //////////////////
-// Socket management: supporting one client at a time for now
+// Socket management: supporting multiple clients at a time now!
 //////////////////
 
 var secret_salt = new Date().getMilliseconds();

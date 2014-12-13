@@ -154,8 +154,15 @@ module.exports = {
     enableOutputs: function(insid, driver) {
         debug('Retrieving Outputs for Instrument ID: ' + insid);
         
-        // TODO: nicely disable previously active outputs ?
+        // Destroy the previous list of active outputs,
         activeOutputs[insid] = [];
+        if (drivers.hasOwnProperty(insid)) {
+            // and also reset the driver callbacks for the
+            // previous set of outputs
+            debug("Unregistering previous driver data callback");
+            var driver = drivers[insid].driver;
+            driver.removeListener('data', drivers[insid].cb);
+        }
         
         // TODO: user persistent queries before going to prod
         dbs.outputs.query(function(doc) {
@@ -168,6 +175,7 @@ module.exports = {
                                     debug("No enabled outputs");
                                     return;
                                 }
+            var gotOutputs = false;
             _.each(outputs.rows, function(out) {
                 // Now we need to configure the output and put it into our activeOutputs list
                 var pluginType = availableOutputs[out.doc.type];
@@ -179,15 +187,20 @@ module.exports = {
                     // the output manager will take care of the alarms/regular output
                     plugin.setup(out.doc);
                     activeOutputs[insid].push( { "plugin": plugin, "config": out.doc, last: new Date().getTime() } );
-                    // Now, register a callback on data events coming from the driver to
-                    // trigger outputs:
-                    var cb = function(data) {
-                        output(data,insid);
-                    }
-                    register(driver,cb); // Keep track for later use when we stop recording
-                    driver.on('data', cb);
+                    gotOutputs = true;
                 }
             });
+            if (gotOutputs) {
+                debug("Adding a callback for driver data");
+                // Now, register a callback on data events coming from the driver to
+                // trigger outputs:
+                var cb = function(data) {
+                        output(data,insid);
+                        };
+                register(driver,cb); // Keep track for later use when we stop recording
+                driver.on('data', cb);
+            }
+
         });
     },
     
