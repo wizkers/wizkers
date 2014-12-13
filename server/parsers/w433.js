@@ -18,7 +18,8 @@
 var serialport = require('serialport'),
     dbs = require('../pouch-config'),
     events = require('events'),
-    debug = require('debug')('wizkers:parsers:w433');
+    debug = require('debug')('wizkers:parsers:w433'),
+    serialconnection = require('../connections/serial');
 
 var W433 = function() {
     
