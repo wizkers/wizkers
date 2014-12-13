@@ -43,7 +43,7 @@ var W433 = function() {
     var self = this;
     
     var instrument = null;
-    var lastStamp = new Date().getTime();
+    var prevStamp = new Date().getTime();
     var prevRes = [];
     var sensor_types_tx3 = ['temperature', '1', '2', '3', '4', '5', '6',
                         '7', '8', '9', '10', '11', '12', '13','humidity', '15'];
