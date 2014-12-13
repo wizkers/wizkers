@@ -305,11 +305,11 @@ app.delete('/logs/:lid/entries/:id', isLoggedIn, user.is('operator'), deviceLogs
  * Interface for extracting logs in json format
  *
  * /export/:id/:start/:end/:format (need API key in URL ?)
- *     Extract a particular log ID with a start & end timestamp
+ *     Extract a particular instrument log with a start & end timestamp
  * /live/:period : period being in minutes
  *     Get the current live recording for the last ':period'
  */
-app.get('/live/:period', deviceLogs.getLive);
+app.get('/live/:id/:period', deviceLogs.getLive);
  
 
 /**

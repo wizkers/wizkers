@@ -126,8 +126,8 @@ exports.getLogEntries = function(req, res) {
 // XX minutes
 exports.getLive = function(req,res) {
     debug("Request to get extract of live recording for the last " + req.params.period + " minutes");
-    var rid = recorder.logID();
-    if (rid == null) {
+    var rid = recorder.logID(req.params.id);
+    if (rid == -1) {
         res.send('{"error": "Not recording" }');
         return;
     }
