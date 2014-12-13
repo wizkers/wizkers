@@ -446,7 +446,10 @@ io.sockets.on('connection', function (socket) {
                 // Listen for data coming in from our driver
                 driver.on('data',sendDataToFrontEnd);
                 // Reconnect the outputs for the instrument
-                outputmanager.enableOutputs(insid,driver);
+                // only if we are operator or admin, viewer should
+                // not touch the outputs
+                if (userinfo.role == 'operator' || userinfo.role == 'admin')
+                    outputmanager.enableOutputs(insid,driver);
             });
         } else
             socket_debug("Unauthorized attempt to open instrument");
@@ -569,10 +572,14 @@ io.sockets.on('connection', function (socket) {
     // server outputs to refresh.
     socket.on('outputs', function(instrumentId) {
         socket_debug("[server.js]  Update the outputs for this instrument");
-        if (driver) {
-            outputmanager.enableOutputs(instrumentId,driver);
+        if (userinfo.role == 'operator' || userinfo.role == 'admin') {
+            if (driver) {
+                outputmanager.enableOutputs(instrumentId,driver);
+            } else {
+                socket_debug("Skipped updating outputs because we have no driver (instrument is closed?)");
+            }
         } else {
-            socket_debug("Skipped updating outputs because we have no driver (instrument is closed?)");
+            socket_debug('Unauthorized attempt to reconnect outputs');
         }
     });
 

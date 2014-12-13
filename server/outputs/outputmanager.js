@@ -133,10 +133,10 @@ var regular = function(output) {
 var register = function(driver, cb) {
     var instrumentid = driver.getInstrumentId();
     if (drivers.hasOwnProperty(instrumentid)) {
-            debug('WARNING, this driver is already registered, this should not happen');
-    } else {
-        drivers[instrumentid] = { driver:driver, cb:cb };
+        debug('We already knew this driver, we will unregister the previous callback');
+        drivers[instrumentid].driver.removeListener('data', drivers[instrumentid].cb);
     }
+    drivers[instrumentid] = { driver:driver, cb:cb };
 }
 
 
@@ -156,13 +156,6 @@ module.exports = {
         
         // Destroy the previous list of active outputs,
         activeOutputs[insid] = [];
-        if (drivers.hasOwnProperty(insid)) {
-            // and also reset the driver callbacks for the
-            // previous set of outputs
-            debug("Unregistering previous driver data callback");
-            var driver = drivers[insid].driver;
-            driver.removeListener('data', drivers[insid].cb);
-        }
         
         // TODO: user persistent queries before going to prod
         dbs.outputs.query(function(doc) {
@@ -199,6 +192,11 @@ module.exports = {
                         };
                 register(driver,cb); // Keep track for later use when we stop recording
                 driver.on('data', cb);
+            } else {
+                if (drivers.hasOwnProperty(insid)) {
+                    debug('We don\'t have outputs, we will unregister any previous driver callback');
+                    drivers[insid].driver.removeListener('data', drivers[insid].cb);
+                }
             }
 
         });
