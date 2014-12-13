@@ -180,7 +180,7 @@ app.post('/signup', passport.authenticate('local-signup', {
 app.post('/login', passport.authenticate('local-login', {
     failureRedirect : '/login', // redirect back to the signup page if there is an error
     failureFlash : true         // allow flash messages
-}), function(req,res) {
+    }), function(req,res) {
     
     // If the login process generated a flash message, go to the warning page
     // first
@@ -198,17 +198,20 @@ app.post('/login', passport.authenticate('local-login', {
     };
 
     // we are sending the profile in the token
-    var token = jwt.sign(profile, 'superSecretYesYesYes' + secret_salt);
+    var token = jwt.sign(profile, 'asdfKJHSADFkh876234879876sdfllKJsPOIU' + secret_salt);
 
     
     // Now store our token into the settings, so that the app can get it when it starts:
-    dbs.settings.get('coresettings', function (err, item) {
-        if (err) {
+    dbs.settings.get(req.user.local.email, function (err, item) {
+        if (err && err.status !=404) {
             debug('Issue finding my own settings ' + err);
             res.redirect('/login');
         }
+        if (item == null) {
+            item = dbs.defaults.settings;
+        }
         item.token = token;
-        dbs.settings.put(item, function(err) {
+        dbs.settings.put(item, req.user.local.email, function(err) {
             if (err)
                 res.redirect('/login');
             res.redirect('/');
@@ -393,7 +396,7 @@ var secret_salt = new Date().getMilliseconds();
 // Setup Socket.io authorization based on JSON Web Tokens so that we get
 // authorization info from our login process:
 io.use(socketioJwt.authorize({
-  secret: 'superSecretYesYesYes' + secret_salt,
+  secret: 'asdfKJHSADFkh876234879876sdfllKJsPOIU' + secret_salt,
   handshake: true,
 }));
 

@@ -25,7 +25,7 @@ var debug = require('debug')('wizkers:routes:settings');
 exports.getSettings = function(req, res) {
     // Note: 'coresettings' always exists since it is created/
     // refreshed at application startup.
-    dbs.settings.get('coresettings', function(err, item) {
+    dbs.settings.get(req.user.local.email, function(err, item) {
         item.currentUserRole = req.user.role;
         res.send(item);
     });
