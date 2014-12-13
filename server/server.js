@@ -318,7 +318,7 @@ app.get('/live/:period', deviceLogs.getLive);
  * in-browser rather than on-server.
  */
 app.get('/settings', isLoggedIn, settings.getSettings);
-app.put('/settings', isLoggedIn, user.is('operator'),  settings.updateSettings);
+app.put('/settings', isLoggedIn,  settings.updateSettings);
 
 /**
  * Interface for triggering a backup and a restore
@@ -412,7 +412,14 @@ io.sockets.on('connection', function (socket) {
     var currentInstrumentid = null;
     
     socket_debug(socket.decoded_token.role, 'connected');
-    var userinfo = socket.decoded_token;    
+    var userinfo = socket.decoded_token;
+    // For security purposes, load the role of the user from our server-side
+    // database, and don't trust the role given to us by the client. In theory
+    // the client only has an encrypted token, but better safe than sorry
+    dbs.users.get(userinfo.username, function(err,user) {
+        userinfo.role = user.role;
+        debug("Updated userinfo role to " + user.role);
+    });
     
     // We want to listen for data coming in from drivers:
     var sendDataToFrontEnd = function(data) {
@@ -426,7 +433,10 @@ io.sockets.on('connection', function (socket) {
     }
     
     var openInstrument = function(insid) {
-        if (userinfo.role == 'operator' || userinfo.role == 'admin') {
+        // Only let "admin" and "operator" open an instrument, unless the
+        // instrument is already open:
+        if (userinfo.role == 'operator' || userinfo.role == 'admin' ||
+            connectionmanager.isOpen(insid)) {
             connectionmanager.openInstrument(insid, function(d) {
                 driver = d;
                 currentInstrumentid = insid;
@@ -564,11 +574,6 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('driver', function(data) {
-        
-        if (!(userinfo.role == 'operator' || userinfo.role == 'admin')) {
-            socket_debug('Unauthorized attempt to change instrument driver');
-            return;
-        }
         socket_debug('[Deprecated] Socket asked to select the driver (now done automatically at instrument open)');
     });
     

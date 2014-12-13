@@ -20,13 +20,14 @@ define(function(require) {
             tagName: "div",
             className: "col-md-3 col-sm-2",
 
-            initialize: function () {
+            initialize: function (options) {
                 this.model.bind("change", this.render, this);
                 this.model.bind("destroy", this.close, this);
+                this.edit = options.edit;
             },
 
             render: function () {
-                $(this.el).html(template(this.model.toJSON()));
+                $(this.el).html(template({instrument:this.model.toJSON(), edit: this.edit}));
                 return this;
             },
 
@@ -82,9 +83,16 @@ define(function(require) {
             var endPos = Math.min(startPos + items, len);
 
             $(this.el).html('<div class="col-md-12"><div class="row thumbnails"></div></div>');
+            var editok = true;
+            // Ask to hide the instrument setting in case we are a viewer or operator in server mode, because
+            // the server won't let us retrieve the instrument parmeters anyway
+            if (vizapp.type == 'server') {
+                if (settings.get('currentUserRole') == 'viewer')
+                    editok = false;
+            }
 
             for (var i = startPos; i < endPos; i++) {
-                $('.thumbnails', this.el).append(new InstrumentListItemView({model: instruments[i]}).render().el);
+                $('.thumbnails', this.el).append(new InstrumentListItemView({model: instruments[i], edit: editok}).render().el);
             }
 
             $(this.el).append(new Paginator({model: this.model, page: this.options.page, viewname: 'instruments', items: items}).render().el);

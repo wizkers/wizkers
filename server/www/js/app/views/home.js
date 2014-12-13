@@ -80,16 +80,15 @@ define(function(require) {
             var self = this;
             console.log('Main render of Home view');
             $(this.el).html(template(this.model.toJSON()));
-            
+
             if (vizapp.type == 'server') {
-                // If we're running with a backend server, we need to hide some elements
+                // If we're running with a backend server, we need to disable some elements
                 // in case we are only a 'viewer'. This is not relevant if we're running as an app,
                 // since we're always an admin there
                 if (settings.get('currentUserRole') == 'viewer') {
-                    $('#control-area', this.el).hide();
+                    $('#control-area button', this.el).attr('disabled', true);
                 }
             }
-
             if (this.instrumentLiveView != null)
                 this.instrumentLiveView.onClose();
 
@@ -118,7 +117,7 @@ define(function(require) {
                 });
 
                 // Enable the "Connect" button now that we are ready
-                $('.ctrl-connect', this.el).removeAttr('disabled');
+                //$('.ctrl-connect', this.el).removeAttr('disabled');
             }
 
             linkManager.requestStatus();
@@ -167,6 +166,21 @@ define(function(require) {
             // First of all, if we don't have an instrument, no need to update our status:
             if (this.instrument == null)
                 return;
+            
+            // If we are just a 'viewer' in server mode, then disable all buttons.
+            if (vizapp.type == 'server' && (settings.get('currentUserRole') == 'viewer')) {
+                if (linkManager.isConnected()) {
+                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;' +
+                                                     this.instrument.get('name') + ' connected')
+                    .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning');
+                } else {
+                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>' +
+                                                     this.instrument.get('name') + ' not connected')
+                    .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning');
+                }
+                return;
+            } 
+            
             // Depending on port status, update our controller
             // connect button:
             if (linkManager.isConnected()) {

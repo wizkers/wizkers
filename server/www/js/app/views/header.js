@@ -25,7 +25,7 @@ define(function(require) {
                 // in case we are only a 'viewer'. This is not relevant if we're running as an app,
                 // since we're always an admin there
                 if (settings.get('currentUserRole') == 'viewer') {
-                    $('.instrument-menu', this.el).hide();
+                    //$('.instrument-menu', this.el).hide();
                     $('.settings-menu', this.el).hide();
                 }
             }
