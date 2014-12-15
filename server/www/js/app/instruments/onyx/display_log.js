@@ -13,6 +13,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
+        simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/OnyxLogView.js');
     
     // Load the flot library & flot time plugin:
@@ -44,33 +45,35 @@ define(function(require) {
                                         return xhr;
                                     }});
             });
+            
+                        // We will pass this when we create plots, this is the global
+            // config for the look and feel of the plot
+            this.plotSettings = {
+                selectable: true,
+                plot_options: {
+                                xaxis: { mode: "time", show:true,
+                                        timezone: settings.get("timezone"),                  
+                                       },
+                                yaxis: {},
+                                grid: {
+                                    hoverable: true,
+                                    clickable: true
+                                },  
+                                legend: { position: "ne" },
+                                colors: this.palette,
+                            }
+            };
+
 
             // TODO: save color palette in settings ?
             // My own nice color palette:
             this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ],
 
 
-            this.plotOptions = {
-                xaxis: { mode: "time", show:true,
-                        timezone: settings.get("timezone"),                  
-                       },
-                grid: {
-                    hoverable: true,
-                    clickable: true
-                },
-                legend: { position: "ne" },
-                selection: {
-                    mode: "xy"
-                },
-
-                colors: this.palette,
-            };        
-
             this.overviewOptions = {
                 legend: { show: false },
                 xaxis: { mode: "time", show:false, ticks:4 },
                 yaxis: { ticks:4 },
-                selection: { mode: "xy" },
                 colors: this.palette,
             };  
 
@@ -89,11 +92,14 @@ define(function(require) {
 
         resetZoom: function() {
             delete this.ranges;
-            this.addPlot();
+            this.plot.plotOptions = this.plotSettings.plot_options;
+            this.plot.addPlot();
+            this.plot.redraw();
             return false;
         },
 
         cpmScaleToggle: function(event) {
+            return;
             var change = {};
             if (event.target.checked) {
                 change["cpmscale"]="log";
@@ -121,30 +127,13 @@ define(function(require) {
 
             $(this.el).html(template());
 
+            this.addPlot();
             if (this.packedData == null || this.packedData.length==0)
                 this.packedData = this.packData();
 
             if (this.packedData.length == 0)
                 return;
 
-
-            if (settings.get("cpmscale") == "log")
-                $("#cpmscale",this.el).attr("checked",true);
-            if (settings.get('cpmscale')=="log") {
-                this.plotOptions.yaxis = {
-                            min:1,
-                            //ticks: [1,10,30,50,100,500,1000,1500],
-                            transform: function (v) { return Math.log(v+10); },
-                            inverseTransform: function (v) { return Math.exp(v)-10;}
-                        };
-                this.overviewOptions.yaxis = this.plotOptions.yaxis;
-            } else if ('yaxis' in this.plotOptions){
-                delete this.plotOptions.yaxis.min;
-                delete this.plotOptions.yaxis.transform;
-                delete this.plotOptions.yaxis.inverseTransform;
-            }
-
-            this.addPlot();
 
             return this;
         },
@@ -223,77 +212,29 @@ define(function(require) {
             $('#log_start',this.el).html(new Date(this.deviceLogs.getLogsStart()).toString());
             $('#log_end',this.el).html(new Date(this.deviceLogs.getLogsEnd()).toString());
 
+            this.plot = new simpleplot({model: this.model, settings: this.plotSettings});
+            if (this.plot != null) {
+                $('.locochart', this.el).empty().append(this.plot.el);
+                this.plot.render();
+            }
+            
+            this.overview = new simpleplot({model: this.model, setting:this.plotSettings});
+            if (this.overview != null) {
+                $('#overview', this.el).empty().append(this.overview.el);
+                this.overview.render();
+            }
+
             // Restore current zoom level if it exists:
             if (this.ranges) {
-                this.plot = $.plot($(".locochart",this.el), this.packedData,
-                    $.extend(true, {}, this.plotOptions, {
+                this.plot.plotOptions =  $.extend(true, {}, this.plotSettings.plot_options, {
                         xaxis: { min: this.ranges.xaxis.from, max: this.ranges.xaxis.to },
                         yaxis: { min: this.ranges.yaxis.from, max: this.ranges.yaxis.to }
-                    })
-                 );
+                    });
+            }
 
-            } else {
-                this.plot = $.plot($(".locochart", this.el), this.packedData, this.plotOptions);
-            };
-
-            $(".locochart", this.el).bind("plothover", function (event, pos, item) {
-                if (item) {
-                    if (self.previousPoint != item.dataIndex) {
-                        self.previousPoint = item.dataIndex;
-
-                        $("#tooltip").remove();
-                        var x = item.datapoint[0],
-                        y = item.datapoint[1];
-
-                        self.showTooltip(item.pageX, item.pageY,
-                            "<small>" + ((settings.get('timezone') === 'UTC') ? 
-                                            new Date(x).toUTCString() :
-                                            new Date(x).toString()) + "</small><br>" + item.series.label + ": <strong>" + y + "</strong>");
-                    }
-                } else {
-                    $("#tooltip").remove();
-                    self.previousPoint = null;            
-                }
-            });
-
-            // Create the overview chart:
-            this.overview = $.plot($("#overview",this.el), this.packedData, this.overviewOptions);
-
-            // Connect overview and main charts
-            $(".locochart",this.el).bind("plotselected", function (event, ranges) {
-
-                // clamp the zooming to prevent eternal zoom
-
-                if (ranges.xaxis.to - ranges.xaxis.from < 0.00001) {
-                    ranges.xaxis.to = ranges.xaxis.from + 0.00001;
-                }
-
-                if (ranges.yaxis.to - ranges.yaxis.from < 0.00001) {
-                    ranges.yaxis.to = ranges.yaxis.from + 0.00001;
-                }
-
-                // Save the current range so that switching plot scale (log/linear)
-                // can preserve the zoom level:
-                self.ranges = ranges;
-
-                // do the zooming
-                this.plot = $.plot($(".locochart",this.el), self.packedData,
-                    $.extend(true, {}, self.plotOptions, {
-                        xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
-                        yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
-                    })
-                 );
-
-                // don't fire event on the overview to prevent eternal loop
-                self.overview.setSelection(ranges, true);
-            });
-
-            $("#overview",this.el).bind("plotselected", function (event, ranges) {
-                 self.plot.setSelection(ranges);
-              });
-
-            // Last, update the save data URL to point to the data we just displayed:
-            // this.saveDataUrl();
+//            $("#overview",this.el).bind("plotselected", function (event, ranges) {
+//                 self.plot.setSelection(ranges);
+//              });
 
         },
 
@@ -313,15 +254,23 @@ define(function(require) {
                     var entry = value.at(i);
                     // Be sure we only plot CPM entries (we might have anything in the
                     // log...
+                    var stamp = new Date(entry.get('timestamp')).getTime();
                     if (entry.get('data').cpm != undefined) {
-
-                        ret.push([new Date(entry.get('timestamp')).getTime(), 
-                                  (type =='onyxlog') ? entry.get('data').cpm : entry.get('data').cpm.value]);
+                        var cpm = parseFloat((type =='onyxlog') ? entry.get('data').cpm : entry.get('data').cpm.value);
+                        this.plot.fastAppendPoint({name: 'CPM', value: cpm, timestamp: stamp});
+                        this.overview.fastAppendPoint({name: 'CPM', value: cpm, timestamp: stamp});
+                    }
+                    if (entry.get('data').cpm2 != undefined) {
+                        var cpm2 = parseFloat(entry.get('data').cpm2.value);
+                        this.plot.fastAppendPoint({'name': "CPM2", 'value': cpm2, timestamp:stamp});
+                        this.overview.fastAppendPoint({'name': "CPM2", 'value': cpm2, timestamp:stamp});
                     }
                 }
                 if (ret.length)
                     data.push({ data:ret, label:"CPM"});
             }
+            this.plot.redraw();
+            this.overview.redraw();
             return data;
         },
 

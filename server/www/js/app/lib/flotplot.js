@@ -24,6 +24,7 @@ define(function(require) {
             points: 150,
             log: false,
             showtips: true,
+            selectable: false,
             plot_options: {
                 xaxis: { mode: "time", show:true, timezone: settings.get("timezone")},
                 grid: {
@@ -57,6 +58,12 @@ define(function(require) {
             this.previousPoint = null;
             
             this.plotOptions = this.settings.plot_options;
+            
+            if (this.settings.selectable) {
+                // Extend the plot options to make it possible to do XY selections
+                this.plotOptions.selection = { mode: "xy" };
+
+            }
 
         },
 
@@ -106,6 +113,38 @@ define(function(require) {
                 }
             });
             
+            // Connect overview and main charts
+            if (this.settings.selectable) {
+                $(".chart",this.el).on("plotselected", function (event, ranges) {
+
+                    // clamp the zooming to prevent eternal zoom
+
+                    if (ranges.xaxis.to - ranges.xaxis.from < 0.00001) {
+                        ranges.xaxis.to = ranges.xaxis.from + 0.00001;
+                    }
+
+                    if (ranges.yaxis.to - ranges.yaxis.from < 0.00001) {
+                        ranges.yaxis.to = ranges.yaxis.from + 0.00001;
+                    }
+
+                    // Save the current range so that switching plot scale (log/linear)
+                    // can preserve the zoom level:
+                    self.ranges = ranges;
+
+                    // do the zooming
+                    self.plotOptions =  $.extend(true, {}, self.plotOptions, {
+                            xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
+                            yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
+                        });
+
+                    self.render();
+                    self.redraw();
+
+                    // Pass event onwards
+                    self.trigger("plotselected",event,ranges);
+                });
+            }
+                        
             $('.chart', this.el).css('height', $(this.el).parent().css('height'));
         },
         
