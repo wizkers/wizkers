@@ -1,35 +1,53 @@
+/**
+ * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ *
+ * This file is part of Wizkers.
+ *
+ * Wizkers is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Wizkers is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /*
  * Live view for the Fried Circuits OLED backpack
  *
  * Our model is the settings object.
- * 
- * (c) 2014 Edouard Lafargue, ed@lafargue.name
- * All rights reserved.
+ *
+ * @author Edouard Lafargue, ed@lafargue.name
  */
 
-define(function(require) {
+define(function (require) {
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
         Backbone = require('backbone'),
-        utils    = require('app/utils'),
-        tpl     = require('text!tpl/instruments/FCOledLiveView.html'),
+        utils = require('app/utils'),
+        tpl = require('text!tpl/instruments/FCOledLiveView.html'),
         template = null;
-                
+
+    try {
+        template = _.template(tpl);
+        console.log("Loaded direct template");
+    } catch (e) {
+        // Will happen if we are packaged in a Chrome app
         try {
-            template =  _.template(tpl);
-            console.log("Loaded direct template");
+            console.log("Trying compiled template");
+            template = require('js/tpl/instruments/FCOledLiveView.js');
         } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            try {
-                console.log("Trying compiled template");
-                template = require('js/tpl/instruments/FCOledLiveView.js');
-            } catch (e) {
             console.log(e);
-            }
         }
-    
+    }
+
     // Load the flot library & flot time plugin:
     require('flot');
     require('flot_time');
@@ -38,7 +56,7 @@ define(function(require) {
 
     return Backbone.View.extend({
 
-        initialize:function (options) {
+        initialize: function (options) {
 
             this.currentDevice = null;
 
@@ -58,18 +76,24 @@ define(function(require) {
 
             // TODO: save color palette in settings ?
             // My own nice color palette:
-            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ],
+            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
 
             this.plotOptions = {
-                xaxes: [{ mode: "time", show:true, timezone: settings.get("timezone") },
+                xaxes: [{
+                        mode: "time",
+                        show: true,
+                        timezone: settings.get("timezone")
+                    },
                        ],
                 grid: {
                     hoverable: true,
                     clickable: true
                 },
-                legend: { position: "ne" },
+                legend: {
+                    position: "ne"
+                },
                 colors: this.palette,
-            };        
+            };
 
             this.prevStamp = 0;
 
@@ -77,7 +101,7 @@ define(function(require) {
             linkManager.on('input', this.showInput, this);
         },
 
-        render:function () {
+        render: function () {
             var self = this;
             console.log('Main render of OLED Backpack live view');
             $(this.el).html(template());
@@ -90,26 +114,46 @@ define(function(require) {
             return this;
         },
 
-        addPlot: function() {
-            var self=this;
+        addPlot: function () {
+            var self = this;
             // Now initialize the plot area:
             console.log('Plot chart size: ' + this.$('.datachart').width());
-            this.voltplot = $.plot($(".datachart", this.el), [ {data:[], label:"V", color:this.color},
-                                                           {data:[], label:"Vmin"},
-                                                           {data:[], label:"Vmax"},
+            this.voltplot = $.plot($(".datachart", this.el), [{
+                    data: [],
+                    label: "V",
+                    color: this.color
+                },
+                {
+                    data: [],
+                    label: "Vmin"
+                },
+                {
+                    data: [],
+                    label: "Vmax"
+                },
                                                          ], this.plotOptions);
-            this.ampplot = $.plot($(".datachart2", this.el), [ {data:[], label:"mA", color:this.color},
-                                                           {data:[], label:"mAmin"},
-                                                           {data:[], label:"mAmax"}
+            this.ampplot = $.plot($(".datachart2", this.el), [{
+                    data: [],
+                    label: "mA",
+                    color: this.color
+                },
+                {
+                    data: [],
+                    label: "mAmin"
+                },
+                {
+                    data: [],
+                    label: "mAmax"
+                }
                                                          ], this.plotOptions);
 
         },
 
-        onClose: function() {
+        onClose: function () {
             console.log("OLED Backpack view closing...");
 
-            linkManager.off('status', this.updatestatus,this);
-            linkManager.off('input', this.showInput,this);
+            linkManager.off('status', this.updatestatus, this);
+            linkManager.off('input', this.showInput, this);
 
             // Stop the live stream before leaving
             linkManager.stopLiveStream();
@@ -117,13 +161,13 @@ define(function(require) {
         },
 
 
-        updatestatus: function(data) {
+        updatestatus: function (data) {
             console.log("OLED live display: serial status update");
         },
 
 
         // We get there whenever we receive something from the serial port
-        showInput: function(data) {
+        showInput: function (data) {
             var self = this;
 
             if (data.v != undefined && data.a != undefined) {
@@ -151,21 +195,54 @@ define(function(require) {
                 this.liveamp_min.push([stamp, a_min]);
                 this.liveamp_max.push([stamp, a_max]);
                 this.voltplot.setData([
-                                    { data:this.livevolt, label: "V", color: this.color },
-                                    { data: this.livevolt_min, label: "Vmin", id: "vmin"},
-                                    { data: this.livevolt_max, label: "Vmax", id: "vmax", lines: { show: true, fill: true }, fillBetween: "vmin"}
+                    {
+                        data: this.livevolt,
+                        label: "V",
+                        color: this.color
+                    },
+                    {
+                        data: this.livevolt_min,
+                        label: "Vmin",
+                        id: "vmin"
+                    },
+                    {
+                        data: this.livevolt_max,
+                        label: "Vmax",
+                        id: "vmax",
+                        lines: {
+                            show: true,
+                            fill: true
+                        },
+                        fillBetween: "vmin"
+                    }
                                     ]);
                 this.ampplot.setData([
-                                    { data:this.liveamp, label: "mA" },
-                                    { data: this.liveamp_min, label: "Amin",id: "amin"},
-                                    { data: this.liveamp_max, label: "Amax",id: "amax", lines: { show: true, fill: true }, fillBetween: "amin"}
+                    {
+                        data: this.liveamp,
+                        label: "mA"
+                    },
+                    {
+                        data: this.liveamp_min,
+                        label: "Amin",
+                        id: "amin"
+                    },
+                    {
+                        data: this.liveamp_max,
+                        label: "Amax",
+                        id: "amax",
+                        lines: {
+                            show: true,
+                            fill: true
+                        },
+                        fillBetween: "amin"
+                    }
                                     ]);
                 this.voltplot.setupGrid(); // Time plots require this.
                 this.voltplot.draw();
                 this.ampplot.setupGrid(); // Time plots require this.
                 this.ampplot.draw();
-                }
+            }
         },
     });
-    
+
 });

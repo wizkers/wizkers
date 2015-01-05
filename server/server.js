@@ -1,3 +1,21 @@
+/** (c) 2015 Edouard Lafargue, ed@lafargue.name
+ *
+ * This file is part of Wizkers.
+ *
+ * Wizkers is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Wizkers is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
  * The Node.js backend server that communicates with the hardware and serves the
  * HTML web app.
@@ -7,11 +25,8 @@
  * - Handles call to the various instruments on the local serial port.
  * - Parses instrument responses into JSON dta structures
  * - Does the actual recording of live logs
- * -
  *
- * (c) 2014 Edouard Lafargue, ed@lafargue.name
- * All rights reserved.
- *
+ * @author Edouard Lafargue
  */
 
 
@@ -19,7 +34,7 @@
  *   Setup access to serial ports
  */
 var serialport = require('serialport'),
-    SerialPort  = serialport.SerialPort,
+    SerialPort = serialport.SerialPort,
     PouchDB = require('pouchdb'),
     ConnectionManager = require('./connectionmanager'),
     flash = require('connect-flash'),
@@ -49,7 +64,7 @@ var passport = require('passport'),
 var user = new ConnectRoles();
 
 require('./config/passport')(passport); // Our Passport configuration
-require('./config/roles')(user);        // Configure user roles
+require('./config/roles')(user); // Configure user roles
 
 var jwt = require('jsonwebtoken');
 var socketioJwt = require('socketio-jwt');
@@ -66,21 +81,27 @@ var express = require('express'),
 
 var app = express(),
     server = require('http').createServer(app),
-    io = require('socket.io').listen(server, { log: false });
+    io = require('socket.io').listen(server, {
+        log: false
+    });
 
 app.configure(function () {
     //app.use(express.logger('dev'));     // 'default', 'short', 'tiny', 'dev'
-    app.use(express.cookieParser());    // passport authentication needs to read cookies
-    app.use(express.favicon());         
-    app.use(express.bodyParser({ keepExtensions: true }));
-    
+    app.use(express.cookieParser()); // passport authentication needs to read cookies
+    app.use(express.favicon());
+    app.use(express.bodyParser({
+        keepExtensions: true
+    }));
+
     app.set('view engine', 'ejs'); // Setup templating for login forms
-    
+
     // Configure Passport
-    app.use(express.session({secret: 'LKJQDHFGLKJHpiusdhfgpsidf!à§98769876654è§!ç' }));
+    app.use(express.session({
+        secret: 'LKJQDHFGLKJHpiusdhfgpsidf!à§98769876654è§!ç'
+    }));
     app.use(passport.initialize());
-    app.use(passport.session());     // Persistent login sessions, makes user life easier
-    app.use(flash());                // Flash messages upon login, stored in session
+    app.use(passport.session()); // Persistent login sessions, makes user life easier
+    app.use(flash()); // Flash messages upon login, stored in session
 });
 
 
@@ -92,11 +113,11 @@ dbs.settings.get('coresettings', function (err, item) {
         debug('Issue finding my own settings ' + err);
     }
     if (item == null) {
-      item = dbs.defaults.settings;
+        item = dbs.defaults.settings;
     }
 
     item.token = "_invalid_";
-    dbs.settings.put(item, 'coresettings', function(err,response) {
+    dbs.settings.put(item, 'coresettings', function (err, response) {
         if (err) {
             console.log('***** WARNING ****** Could not reset socket.io session token at server startup');
             console.log(err);
@@ -105,7 +126,7 @@ dbs.settings.get('coresettings', function (err, item) {
         debug(response);
         server.listen(8090);
     });
-    
+
 });
 
 
@@ -118,11 +139,14 @@ var connected = false;
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-    
+
     // if user is authenticated in the session, carry on 
     if (req.isAuthenticated()) {
         if (req.user.role === 'pending') {
-            res.render('profile.ejs', {user: req.user, message: 'Your account is created, access approval is pending.'});
+            res.render('profile.ejs', {
+                user: req.user,
+                message: 'Your account is created, access approval is pending.'
+            });
             return;
         }
         return next();
@@ -137,60 +161,68 @@ function isLoggedIn(req, res, next) {
  * request to our root are authenticated:
  */
 
-app.get ('/',
-         isLoggedIn,
-         function(req,res) {
-             res.sendfile('www/index.html');
-         });
+app.get('/',
+    isLoggedIn,
+    function (req, res) {
+        res.sendfile('www/index.html');
+    });
 
-app.get('/login', function(req, res) {
+app.get('/login', function (req, res) {
     // Before logging in, we need to make sure there are users defined on our system.
-    dbs.users.info( function(err, info) {
-      if (info.doc_count == 0) {
-        var adm = dbs.defaults.user;
-        adm.local.email = "admin";
-        adm.local.password = dbs.utils.users.generateHash('admin');
-        adm.role = 'admin';
-        adm._id = 'admin'; // The userID has to be unique, we can use this as the CouchDB ID
-        dbs.users.put(adm, function(err, response) {
-           if (err)
-                debug("Error during first user creation " + err);
-            debug(response);
-            res.render('login.ejs', { message: 'Welcome! Your default login/password is admin/admin'  });
-       });
-      } else {
-       res.render('login.ejs', { message: req.flash('loginMessage') }); 
-     }
+    dbs.users.info(function (err, info) {
+        if (info.doc_count == 0) {
+            var adm = dbs.defaults.user;
+            adm.local.email = "admin";
+            adm.local.password = dbs.utils.users.generateHash('admin');
+            adm.role = 'admin';
+            adm._id = 'admin'; // The userID has to be unique, we can use this as the CouchDB ID
+            dbs.users.put(adm, function (err, response) {
+                if (err)
+                    debug("Error during first user creation " + err);
+                debug(response);
+                res.render('login.ejs', {
+                    message: 'Welcome! Your default login/password is admin/admin'
+                });
+            });
+        } else {
+            res.render('login.ejs', {
+                message: req.flash('loginMessage')
+            });
+        }
     });
 });
-app.get('/signup', function(req,res) {
-    res.render('signup.ejs', { message: req.flash('signupMessage')});
+app.get('/signup', function (req, res) {
+    res.render('signup.ejs', {
+        message: req.flash('signupMessage')
+    });
 });
-app.get('/logout', function(req,res) {
+app.get('/logout', function (req, res) {
     req.logout();
     res.redirect('/');
 });
 // process the signup form
 app.post('/signup', passport.authenticate('local-signup', {
-    successRedirect : '/profile', // redirect to the secure profile section
-    failureRedirect : '/signup',  // redirect back to the signup page if there is an error
-    failureFlash : true           // allow flash messages
+    successRedirect: '/profile', // redirect to the secure profile section
+    failureRedirect: '/signup', // redirect back to the signup page if there is an error
+    failureFlash: true // allow flash messages
 }));
 // process the login form
 app.post('/login', passport.authenticate('local-login', {
-    failureRedirect : '/login', // redirect back to the signup page if there is an error
-    failureFlash : true         // allow flash messages
-    }), function(req,res) {
-    
+    failureRedirect: '/login', // redirect back to the signup page if there is an error
+    failureFlash: true // allow flash messages
+}), function (req, res) {
+
     // If the login process generated a flash message, go to the warning page
     // first
     var w = req.flash('warningMessage');
     if (w != '') {
         debug("Warning: " + w);
-        res.render('warning.ejs', { message: w });
+        res.render('warning.ejs', {
+            message: w
+        });
         return;
     }
-    
+
     // We're good: we gotta generate a json web token
     var profile = {
         username: req.user.local.email,
@@ -200,10 +232,10 @@ app.post('/login', passport.authenticate('local-login', {
     // we are sending the profile in the token
     var token = jwt.sign(profile, 'asdfKJHSADFkh876234879876sdfllKJsPOIU' + secret_salt);
 
-    
+
     // Now store our token into the settings, so that the app can get it when it starts:
     dbs.settings.get(req.user.local.email, function (err, item) {
-        if (err && err.status !=404) {
+        if (err && err.status != 404) {
             debug('Issue finding my own settings ' + err);
             res.redirect('/login');
         }
@@ -211,59 +243,83 @@ app.post('/login', passport.authenticate('local-login', {
             item = dbs.defaults.settings;
         }
         item.token = token;
-        dbs.settings.put(item, req.user.local.email, function(err) {
+        dbs.settings.put(item, req.user.local.email, function (err) {
             if (err)
                 res.redirect('/login');
             res.redirect('/');
         });
     });
 
-    
+
 });
 
-app.get('/profile', isLoggedIn, function(req,res) {
-    res.render('profile.ejs', { user: req.user, message: '' });
-});
-app.post('/profile', isLoggedIn, function(req,res) {
-     dbs.users.get(req.user.local.email, function(err, record) {
-         debug(record);
-         record.local.password = dbs.utils.users.generateHash(req.body.password);
-         dbs.users.put(record, function(err) {
-             var msg  = (err) ? 'Error changing password': 'Password changed';
-             res.render('profile.ejs', {user: req.user, message: msg});
-         });
-
-     });
-});
-
-app.get('/admin', isLoggedIn, user.is('admin'), function(req,res) {
-    dbs.users.allDocs({include_docs:true}, function(err, users) {
-        res.render('admin.ejs', {user: req.user, users: users.rows, message: '' });
+app.get('/profile', isLoggedIn, function (req, res) {
+    res.render('profile.ejs', {
+        user: req.user,
+        message: ''
     });
 });
-app.post('/admin', isLoggedIn, user.is('admin'), function(req,res) {
+app.post('/profile', isLoggedIn, function (req, res) {
+    dbs.users.get(req.user.local.email, function (err, record) {
+        debug(record);
+        record.local.password = dbs.utils.users.generateHash(req.body.password);
+        dbs.users.put(record, function (err) {
+            var msg = (err) ? 'Error changing password' : 'Password changed';
+            res.render('profile.ejs', {
+                user: req.user,
+                message: msg
+            });
+        });
+
+    });
+});
+
+app.get('/admin', isLoggedIn, user.is('admin'), function (req, res) {
+    dbs.users.allDocs({
+        include_docs: true
+    }, function (err, users) {
+        res.render('admin.ejs', {
+            user: req.user,
+            users: users.rows,
+            message: ''
+        });
+    });
+});
+app.post('/admin', isLoggedIn, user.is('admin'), function (req, res) {
     debug(req.body);
-    dbs.users.get( req.body.id, function(err, user) {
+    dbs.users.get(req.body.id, function (err, user) {
         var msg = "Role updated to " + req.body.newrole + " for user " + user.local.email;
         if (err)
             msg = "Someting went wrong, no change was made.";
         if (req.body.newrole == 'delete') {
-            dbs.users.remove(user, function(err,result) {
+            dbs.users.remove(user, function (err, result) {
                 if (err)
                     debug(err);
                 debug('User ' + req.body.id + ' deleted');
                 var msg = 'User ' + req.body.id + " deleted";
-                dbs.users.allDocs({include_docs:true}, function(err, users) {
-                    res.render('admin.ejs', {user: req.user, users: users.rows, message: msg });
-                });            
+                dbs.users.allDocs({
+                    include_docs: true
+                }, function (err, users) {
+                    res.render('admin.ejs', {
+                        user: req.user,
+                        users: users.rows,
+                        message: msg
+                    });
+                });
             });
         } else {
             user.role = req.body.newrole;
-            dbs.users.put(user, function(err) {
+            dbs.users.put(user, function (err) {
                 if (err)
                     msg = "Something went wrong, no change was made.";
-                dbs.users.allDocs({include_docs:true}, function(err, users) {
-                    res.render('admin.ejs', {user: req.user, users: users.rows, message: msg });
+                dbs.users.allDocs({
+                    include_docs: true
+                }, function (err, users) {
+                    res.render('admin.ejs', {
+                        user: req.user,
+                        users: users.rows,
+                        message: msg
+                    });
                 });
             });
         }
@@ -313,7 +369,7 @@ app.delete('/logs/:lid/entries/:id', isLoggedIn, user.is('operator'), deviceLogs
  *     Get the current live recording for the last ':period'
  */
 app.get('/live/:id/:period', deviceLogs.getLive);
- 
+
 
 /**
  * Interface for our settings. Only one settings object,
@@ -321,7 +377,7 @@ app.get('/live/:id/:period', deviceLogs.getLive);
  * in-browser rather than on-server.
  */
 app.get('/settings', isLoggedIn, settings.getSettings);
-app.put('/settings', isLoggedIn,  settings.updateSettings);
+app.put('/settings', isLoggedIn, settings.updateSettings);
 
 /**
  * Interface for triggering a backup and a restore
@@ -335,15 +391,15 @@ app.post('/restore', isLoggedIn, user.is('admin'), backup.restoreBackup);
 // GET /favicon.ico
 // Everything static should be authenticated: therefore we are inserting a checkpoint middleware
 // at this point
-app.use(function(req,res,next) {
+app.use(function (req, res, next) {
     // debug("*** checkpoint ***");
     if (req.isAuthenticated())
         return next();
-    
+
     // We are allowing CSS and img folders
     if (req.path.indexOf("/css") == 0 || req.path.indexOf("/fonts") == 0)
         return next();
-    
+
     res.redirect('/');
 });
 
@@ -354,22 +410,23 @@ app.use(express.static(__dirname + '/www'));
 // A small utility here (to be moved elswhere...)
 /////////
 //http://stackoverflow.com/questions/2454295/javascript-concatenate-properties-from-multiple-objects-associative-array
- 
+
 function Collect(ob1, ob1) {
     var ret = {},
-    len = arguments.length,
-    arg, i = 0, p;
- 
+        len = arguments.length,
+        arg, i = 0,
+        p;
+
     for (i = 0; i < len; i++) {
-      arg = arguments[i];
-      if (typeof arg !== "object") {
-        continue;
-      }
-      for (p in arg) {
-        if (arg.hasOwnProperty(p)) {
-          ret[p] = arg[p];
+        arg = arguments[i];
+        if (typeof arg !== "object") {
+            continue;
         }
-      }
+        for (p in arg) {
+            if (arg.hasOwnProperty(p)) {
+                ret[p] = arg[p];
+            }
+        }
     }
     return ret;
 }
@@ -396,15 +453,15 @@ var secret_salt = new Date().getMilliseconds();
 // Setup Socket.io authorization based on JSON Web Tokens so that we get
 // authorization info from our login process:
 io.use(socketioJwt.authorize({
-  secret: 'asdfKJHSADFkh876234879876sdfllKJsPOIU' + secret_salt,
-  handshake: true,
+    secret: 'asdfKJHSADFkh876234879876sdfllKJsPOIU' + secret_salt,
+    handshake: true,
 }));
 
 // listen for new socket.io connections:
 io.sockets.on('connection', function (socket) {
-    
+
     var self = this;
-    
+
     // Reference to the instrument driver for this socket.
     // it is returned by the connection manager.
     var driver = null;
@@ -413,19 +470,19 @@ io.sockets.on('connection', function (socket) {
     // subscribe/unsubscribe to events coming from the old/previous
     // instruments
     var currentInstrumentid = null;
-    
+
     socket_debug(socket.decoded_token.role, 'connected');
     var userinfo = socket.decoded_token;
     // For security purposes, load the role of the user from our server-side
     // database, and don't trust the role given to us by the client. In theory
     // the client only has an encrypted token, but better safe than sorry
-    dbs.users.get(userinfo.username, function(err,user) {
+    dbs.users.get(userinfo.username, function (err, user) {
         userinfo.role = user.role;
         debug("Updated userinfo role to " + user.role);
     });
-    
+
     // We want to listen for data coming in from drivers:
-    var sendDataToFrontEnd = function(data) {
+    var sendDataToFrontEnd = function (data) {
         socket_debug('data coming in for socket ' + socket.id, data);
         // Temporary: detect "uniqueID" key and send as 'uniqueID' message
         if (data.uniqueID) {
@@ -434,31 +491,31 @@ io.sockets.on('connection', function (socket) {
         }
         socket.emit('serialEvent', data);
     }
-    
-    var openInstrument = function(insid) {
+
+    var openInstrument = function (insid) {
         // Only let "admin" and "operator" open an instrument, unless the
         // instrument is already open:
         if (userinfo.role == 'operator' || userinfo.role == 'admin' ||
             connectionmanager.isOpen(insid)) {
-            connectionmanager.openInstrument(insid, function(d) {
+            connectionmanager.openInstrument(insid, function (d) {
                 driver = d;
                 currentInstrumentid = insid;
                 // Listen for data coming in from our driver
-                driver.on('data',sendDataToFrontEnd);
+                driver.on('data', sendDataToFrontEnd);
                 // Reconnect the outputs for the instrument
                 // only if we are operator or admin, viewer should
                 // not touch the outputs
                 if (userinfo.role == 'operator' || userinfo.role == 'admin')
-                    outputmanager.enableOutputs(insid,driver);
+                    outputmanager.enableOutputs(insid, driver);
             });
         } else
             socket_debug("Unauthorized attempt to open instrument");
     };
-    
-    socket.on('disconnect', function(data) {
+
+    socket.on('disconnect', function (data) {
         socket_debug('This socket got disconnected ', data);
         if (driver != null) {
-            driver.removeListener('data',sendDataToFrontEnd);
+            driver.removeListener('data', sendDataToFrontEnd);
         }
     });
 
@@ -468,31 +525,31 @@ io.sockets.on('connection', function (socket) {
     //
     // Note: html5 UI will use this to remove some links that don't make sense
     // for certain roles, but this backend enforces access, not the HTML5 UI.
-    socket.on('userinfo', function() {
+    socket.on('userinfo', function () {
         socket.emit('userinfo', userinfo);
     });
 
     // Open a port by instrument ID: this way we can track which
     // instrument is being used by the app.
     socket.on('openinstrument', openInstrument);
-    
-    socket.on('closeinstrument', function(insid) {
+
+    socket.on('closeinstrument', function (insid) {
         if (insid != currentInstrumentid) {
             debug("**** ERROR, the socket asked to close an instrument that is not the current instrument on this socket.");
             return;
         }
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
             socket_debug('Instrument close request for instrument ID ' + insid);
-            driver.removeListener('data',sendDataToFrontEnd);
+            driver.removeListener('data', sendDataToFrontEnd);
             recorder.stopRecording(insid);
             outputmanager.disconnectOutputs(insid);
             connectionmanager.closeInstrument(insid);
-            currentInstrumentid= null;
+            currentInstrumentid = null;
         } else
             socket_debug("Unauthorized attempt to open instrument");
     });
 
-    socket.on('portstatus', function(instrumentid) {
+    socket.on('portstatus', function (instrumentid) {
         if (instrumentid) {
             // In case we are asked to check a particular
             // instrument, we can restore the driver state
@@ -505,7 +562,7 @@ io.sockets.on('connection', function (socket) {
             if (instrumentid != currentInstrumentid) {
                 socket_debug('We are switching to a new instrument ID: ' + instrumentid);
                 if (driver) {
-                    driver.removeListener('data',sendDataToFrontEnd);
+                    driver.removeListener('data', sendDataToFrontEnd);
                     // Clear our reference to the instrument driver, it is
                     // not relevant anymore
                     driver = null;
@@ -515,40 +572,42 @@ io.sockets.on('connection', function (socket) {
             if (connectionmanager.isOpen(instrumentid))
                 openInstrument(instrumentid);
         }
-        var s = {portopen: (driver)? driver.isOpen() : false,
-                 recording: recorder.isRecording(currentInstrumentid),
-                 streaming: (driver)? driver.isStreaming() : false};
+        var s = {
+            portopen: (driver) ? driver.isOpen() : false,
+            recording: recorder.isRecording(currentInstrumentid),
+            streaming: (driver) ? driver.isStreaming() : false
+        };
         var ds = {};
         if (driver && driver.status)
-            ds= driver.status();
-        socket.emit('status', Collect(s,ds));
+            ds = driver.status();
+        socket.emit('status', Collect(s, ds));
     });
-        
-    socket.on('controllerCommand', function(data) {
+
+    socket.on('controllerCommand', function (data) {
         if (Debug) socket_debug('Controller command: ' + data);
         driver.output(data);
     });
-    
-    socket.on('startrecording', function(logid) {
+
+    socket.on('startrecording', function (logid) {
         recorder.startRecording(logid, driver);
     });
-    
-    socket.on('stoprecording', function() {
+
+    socket.on('stoprecording', function () {
         recorder.stopRecording(currentInstrumentid);
     });
-    
-    socket.on('startlivestream', function(data) {
+
+    socket.on('startlivestream', function (data) {
         if (driver)
             driver.startLiveStream(data);
     });
-    
-    socket.on('stoplivestream', function() {
+
+    socket.on('stoplivestream', function () {
         if (driver)
             driver.stopLiveStream();
     });
-    
+
     // Request a unique identifier to our driver
-    socket.on('uniqueID', function() {
+    socket.on('uniqueID', function () {
         socket_debug("Unique ID requested by HTML app");
         if (driver)
             driver.sendUniqueID();
@@ -556,25 +615,25 @@ io.sockets.on('connection', function (socket) {
 
     // Return a list of serial ports available on the
     // server    
-    socket.on('ports', function() {
+    socket.on('ports', function () {
         socket_debug('Request for a list of serial ports');
         serialport.list(function (err, ports) {
             var portlist = [];
-            for (var i=0; i < ports.length; i++) {
+            for (var i = 0; i < ports.length; i++) {
                 portlist.push(ports[i].comName);
             }
             socket.emit('ports', portlist);
         });
-     });
-    
+    });
+
     // This call is required, because the user can change the outputs
     // while an instrument is connected, and uses this command to get the
     // server outputs to refresh.
-    socket.on('outputs', function(instrumentId) {
+    socket.on('outputs', function (instrumentId) {
         socket_debug("[server.js]  Update the outputs for this instrument");
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
             if (driver) {
-                outputmanager.enableOutputs(instrumentId,driver);
+                outputmanager.enableOutputs(instrumentId, driver);
             } else {
                 socket_debug("Skipped updating outputs because we have no driver (instrument is closed?)");
             }
@@ -583,9 +642,8 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
-    socket.on('driver', function(data) {
+    socket.on('driver', function (data) {
         socket_debug('[Deprecated] Socket asked to select the driver (now done automatically at instrument open)');
     });
-    
+
 });
-    

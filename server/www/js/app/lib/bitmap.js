@@ -1,7 +1,28 @@
 /**
+ * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ *
+ * This file is part of Wizkers.
+ *
+ * Wizkers is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Wizkers is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
 
   Customised version of javascript BMP reading lib. B&W bitmap is optimized as
   an array of 32bit integers that map to individual pixels (32 pixels per integer).
+  Adapted to be compliant with pure Javascript implementation, and not only Node.JS Buffer
+  objects
   
   https://github.com/nowelium/node-bitmap
 

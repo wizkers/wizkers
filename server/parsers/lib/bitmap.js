@@ -3,6 +3,8 @@
   Customised version of javascript BMP reading lib. B&W bitmap is optimized as
   an array of 32bit integers that map to individual pixels (32 pixels per integer).
   
+  Modifications by E. Lafargue
+  
   https://github.com/nowelium/node-bitmap
 
 (The MIT License)

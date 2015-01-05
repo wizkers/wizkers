@@ -1,7 +1,25 @@
 /**
+ * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ *
+ * This file is part of Wizkers.
+ *
+ * Wizkers is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Wizkers is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
  * Where we define the device log data
- * (c) 2014 Edouard Lafargue, ed@lafargue.name
- * All rights reserved.
+ * @author Edouard Lafargue, ed@lafargue.name
  *
  * This model uses indexeddb in Chrome mode, because localstorage cannot
  * cope with large amounts of data - nor is it designed for that purpose

@@ -1,17 +1,19 @@
 {
-  "manifest_version": 2,
-  "name": "Wizkers",
-  "description": "Extend the reach of your devices",
-  "version": "0.8.1",
-  "app": {
-    "background": {
-      "scripts": ["background.js"]
-    }
-  },
-  "icons": { "16": "icons/icon16.png",
-           "48": "icons/icon48.png",
-          "128": "icons/icon128.png" },
-  "permissions": [
+    "manifest_version": 2,
+    "name": "Wizkers",
+    "description": "Extend the reach of your devices",
+    "version": "0.8.1",
+    "app": {
+        "background": {
+            "scripts": ["background.js"]
+        }
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "permissions": [
     "serial",
     "storage",
     "unlimitedStorage",
@@ -20,12 +22,12 @@
     "http://*/*",
     "https://*/*"
   ],
-  "sockets": {
-      "tcpServer": {
-        "listen": ":4532"
-      }
-  },
-  "sandbox": {
-    "pages": [ "public/tpl/HomeView.html" ]
-  }
+    "sockets": {
+        "tcpServer": {
+            "listen": ":4532"
+        }
+    },
+    "sandbox": {
+        "pages": ["public/tpl/HomeView.html"]
+    }
 }
