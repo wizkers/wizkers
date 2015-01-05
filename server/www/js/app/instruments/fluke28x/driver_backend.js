@@ -81,6 +81,7 @@ define(function(require) {
         this.startLiveStream = function(period) {
             if (!streaming) {
                 console.log("[fluke289] Starting live data stream");
+                socket.emit('controllerCommand', 'QBL');
                 livePoller = setInterval(queryMeasurementFull.bind(this), (period) ? period*1000: 1000);
                 streaming = true;
             }
@@ -427,6 +428,10 @@ define(function(require) {
 
         function queryMeasurementFull() {
             socket.emit('controllerCommand', 'QDDA');
+            // Query battery level every minute
+            if (new Date().getSeconds() == 0) {
+                socket.emit('controllerCommand', 'QBL');
+            }
         };
 
         // processPacket is called by format once a packet is received, for actual

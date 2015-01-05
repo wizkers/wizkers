@@ -230,7 +230,11 @@ var Fluke289 = function() {
     };
 
     var queryMeasurementFull = function() {
-        self.output("QDDA");        
+        self.output("QDDA");
+        // Query battery level every minute
+        if (new Date().getSeconds() == 0) {
+            self.output("QBL");
+        }
     };
     
     // Link layer protocol management: receives raw data from
@@ -968,6 +972,7 @@ var Fluke289 = function() {
     this.startLiveStream = function(period) {
         if (!streaming) {
             debug("Starting live data stream");
+            this.output("QBL"); // Query battery level first
             livePoller = setInterval(queryMeasurementFull.bind(this), (period) ? period*1000: 1000);
             streaming = true;
         }
