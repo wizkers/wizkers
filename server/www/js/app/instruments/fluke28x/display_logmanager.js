@@ -131,7 +131,7 @@ define(function(require) {
                                           '</div><div>' +
                                           '<%= alreadyThere %>' +
                                           '</div></div>');
-                    var startStamp = new Date(data.startTime).toISOString();
+                    var startStamp = data.startTime;
                     var knownLog = this.deviceLogs.where({startstamp: startStamp});
                     // A given device can only record one log at a time, so if we already have a log for this device
                     // in our database, that starts at the same time as this one, we can safely assume this means that
