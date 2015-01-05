@@ -1,7 +1,7 @@
 {
-  "name": "Viewer",
-  "description": "A web interface for Measurement instruments",
-  "version": "0.0.1",
+  "name": "Wizkers",
+  "description": "A framework for Measurement instruments",
+  "version": "0.9.0",
   "private": true,
   "dependencies": {
     "bcrypt-nodejs": "latest",

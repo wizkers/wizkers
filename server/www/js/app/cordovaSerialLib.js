@@ -17,6 +17,10 @@
  */
 
 /**
+ * TODO: this file is not up to date, needs to be ported to the current API level
+ */
+
+/**
  * This serial lib simulates the behaviour of the node server socket
  * in the case of a Cordova application.
  *
