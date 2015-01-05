@@ -34,6 +34,9 @@
  * @author Edouard Lafargue, ed@lafargue.name
  *
  */
+
+"use strict";
+
 var serialport = require('serialport'),
     crcCalc = require('./lib/crc-calc.js'),
     dbs = require('../pouch-config'),
@@ -42,9 +45,9 @@ var serialport = require('serialport'),
     serialconnection = require('../connections/serial'),
     debug = require('debug')('wizkers:parsers:fluke289');
 
-Hexdump = require('../hexdump.js');
-Bitmap = require('./lib/bitmap.js');
-fs = require('fs');
+var Hexdump = require('../hexdump.js'),
+    Bitmap = require('./lib/bitmap.js'),
+    fs = require('fs');
 
 
 var Fluke289 = function() {
@@ -113,6 +116,7 @@ var Fluke289 = function() {
     var port = null,
         uidrequested = false,
         instrumentid = null,
+        isopen = false,
         recording = false,     // to call the main app in case we need to record readings
         streaming = false,
         livePoller = null,
@@ -180,7 +184,7 @@ var Fluke289 = function() {
     
     var sendData = function(data) {
         if (data) {
-            this.emit('data',data);
+            self.emit('data',data);
         }
     };
     
@@ -226,7 +230,7 @@ var Fluke289 = function() {
     };
 
     var queryMeasurementFull = function() {
-        this.output("QDDA");        
+        self.output("QDDA");        
     };
     
     // Link layer protocol management: receives raw data from
@@ -240,7 +244,7 @@ var Fluke289 = function() {
                     // existing buffer
             // First of all, append the incoming data to our input buffer:
             debug("LLP: Received new serial data, appended at index " + ibIdx);
-            data.copy(this.inputBuffer,this.ibIdx);
+            data.copy(inputBuffer,ibIdx);
             ibIdx += data.length;
         }
         var start=-1, stop=-1;
@@ -477,7 +481,7 @@ var Fluke289 = function() {
                 // Below are ASCII replies, so it's time to
                 // do the split on CSV fields:
                 var fields = data[1].split(',');
-                switch (this.pendingCommand) {                
+                switch (pendingCommand) {                
                         case "ID": // Short Identification of meter
                             response.model = fields[0];
                             response.version = fields[1];
@@ -532,7 +536,7 @@ var Fluke289 = function() {
                             response.serial = data[1];
                             if (uidrequested) {
                                 debug("Sending uniqueID message");
-                                this.emit('data', {uniqueID: data[1]});
+                                self.emit('data', {uniqueID: data[1]});
                                 uidrequested = false;
                             }
                             break;
@@ -573,7 +577,7 @@ var Fluke289 = function() {
         if (commandQueue.length && currentState == state.idle) {
             var cmd = commandQueue.pop();
             debug("Command queue: dequeuing command " + cmd );
-            this.output(cmd);
+            self.output(cmd);
         }
         debug("Sending response ");
         debug(response);
@@ -621,7 +625,7 @@ var Fluke289 = function() {
         res.readings = [];
         var j = 0;
         while (j < numberOfReadings) {
-            res.readings.push(this.decodeReading(fields.slice(10+i+j*9, 19+i+j*9)));
+            res.readings.push(decodeReading(fields.slice(10+i+j*9, 19+i+j*9)));
             j++;
         }
         return { reading:res };
@@ -722,7 +726,7 @@ var Fluke289 = function() {
         // Find start of data (after #0)
         var idx = syncBuffer(buffer);
 
-        summary = {
+        var summary = {
             address0:  buffer.readUInt32LE(idx),
             // We use Unix timestamps for our stamps:
             startTime: Math.floor(decodeFloat(buffer,idx +=4)*1000),
@@ -774,7 +778,7 @@ var Fluke289 = function() {
     // returns an object containing the decoded reading + the updated index.
     var decodeBinaryReading = function(buffer, idx) {
         
-        reading = {
+        var reading = {
             primaryFunction: mapPrimFunction[buffer.readUInt16LE(idx)],
             secondaryFunction: mapSecFunction[buffer.readUInt16LE(idx += 2)] ,
             rangeData: {

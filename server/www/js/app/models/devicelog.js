@@ -128,11 +128,19 @@ define(function(require) {
     
             // Our collection is sorted, it makes our life easier:
             getLogStart: function() {
-                return this.at(0).get('timestamp');
+                if (this.length) {
+                    return this.at(0).get('timestamp');
+                } else {
+                    return 0;
+                }
             },
 
             getLogEnd: function() {
-                return this.at(this.length-1).get('timestamp');
+                if (this.length) {
+                    return this.at(this.length-1).get('timestamp');
+                } else {
+                    return 0;
+                }
             },
         }),
 
