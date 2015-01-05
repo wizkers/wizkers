@@ -145,7 +145,8 @@ var Onyx = function() {
         return isopen;
     }
     
-    this.setInstrumentRef = function(i) {
+    this.getInstrumentId = function(format) {
+        return instrumentid;
     };
 
     // Called when the HTML app needs a unique identifier.

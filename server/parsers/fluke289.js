@@ -934,6 +934,7 @@ var Fluke289 = function() {
     this.closePort = function(data) {
         // We need to remove all listeners otherwise the serial port
         // will never be GC'ed
+        this.stopLiveStream();
         port.removeListener('data', format);
         port_close_requested = true;
         port.close();
@@ -943,8 +944,10 @@ var Fluke289 = function() {
         return isopen;
     }
 
-    this.setInstrumentRef = function(i) {
+    this.getInstrumentId = function(format) {
+        return instrumentid;
     };
+
     
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
