@@ -51,6 +51,8 @@ define(function(require) {
             // the meter returns
             this.livedata = [[]];
             this.plotData = [];
+            
+            this.showstream = settings.get('showstream');
 
             // TODO: save color palette in settings ?
             // My own nice color palette:
@@ -76,6 +78,13 @@ define(function(require) {
             var self = this;
             console.log('Main render of Fluke289 live view');
             $(this.el).html(template());
+            
+            // Hide the raw data stream if we don't want it
+            if (!this.showstream) {
+                $('#showstream',this.el).css('visibility', 'hidden');
+            }
+
+            
             linkManager.requestStatus();
             this.color = this.palette[0];
             this.addPlot();
@@ -108,16 +117,18 @@ define(function(require) {
 
             var self = this;
 
-            // Update our raw data monitor
-            var i = $('#input',this.el);
-            var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-            // Keep max 50 lines:
-            if (scroll.length > 50) {
-                scroll = scroll.slice(scroll.length-50);
+            if (this.showstream) {
+                // Update our raw data monitor
+                var i = $('#input',this.el);
+                var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
+                // Keep max 50 lines:
+                if (scroll.length > 50) {
+                    scroll = scroll.slice(scroll.length-50);
+                }
+                i.val(scroll.join('\n'));
+                // Autoscroll:
+                i.scrollTop(i[0].scrollHeight - i.height());
             }
-            i.val(scroll.join('\n'));
-            // Autoscroll:
-            i.scrollTop(i[0].scrollHeight - i.height());
 
             // Have we read all we need from the device?
             // TODO : read more info @ startup...
