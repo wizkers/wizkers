@@ -32,7 +32,7 @@ define(function(require) {
         // Helper function: get driver capabilites.
         // returns a simple array of capabilities    
         this.getCaps = function() {
-            return ["LiveDisplay",  "NumDisplay", ];
+            return ["LiveDisplay",  "NumDisplay", "LogView"];
         };
                     
         // Return the type of data reading that this instrument generates. Can be used
