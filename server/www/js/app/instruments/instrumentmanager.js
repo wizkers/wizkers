@@ -52,6 +52,9 @@ define(function(require) {
 
     var HeliumGeigerInstrument = require('app/instruments/heliumgeiger/heliumgeiger'),
         HeliumGeigerSettingsView = require('app/instruments/heliumgeiger/settings');
+    
+    var HawkNestInstrument = require('app/instruments/hawknest/hawknest'),
+        HawkNestSettingsView = require('app/instruments/hawknest/settings');
 
 
     var InstrumentManager = function() {
@@ -80,6 +83,9 @@ define(function(require) {
             this.supportedInstruments["heliumgeiger"] =
                 { name: "Radius Hawk (Helium)", type: HeliumGeigerInstrument, settings: HeliumGeigerSettingsView,
                           connectionsettings: 'app/views/instrument/helium' };
+            this.supportedInstruments["hawknest"] =
+                { name: "Hawk Nest (Pinocc.io)", type: HawkNestInstrument, settings: HawkNestSettingsView,
+                          connectionsettings: 'app/views/instrument/pinoccio' };
         }
         
         this.getConnectionSettingsFor =  function(instrument, arg, callback) {

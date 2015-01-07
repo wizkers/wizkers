@@ -18,7 +18,7 @@
  */
 
 /**
- * A Medcom Haw Radius probe connected through Helium
+ * A Medcom Haw Nest probe connected through the Pinocc.io HQ IoT service
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -26,7 +26,7 @@
 define(function(require) {
     "use strict";
     
-    var driver_frontend = require('app/instruments/heliumgeiger/driver_frontend');
+    var driver_frontend = require('app/instruments/hawknest/driver_frontend');
     
     return  function() {
 
@@ -46,7 +46,7 @@ define(function(require) {
         
         // This has to be a backbone view
         this.getSettings = function(arg, callback) {
-            require(['app/instruments/heliumgeiger/settings'], function(view) {
+            require(['app/instruments/hawknest/settings'], function(view) {
                 callback(new view(arg));
             });
         };

@@ -62,5 +62,5 @@ compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogMana
                  'instruments/OnyxDiagView', 'instruments/OnyxLiveView', 'instruments/OnyxLogEditView',
                  'instruments/OnyxLogManagementView', 'instruments/OnyxLogView', 'instruments/OnyxNumView',
                  'instruments/USBGeigerUpgrader',
-                 'connections/serialport', 'connections/helium',
+                 'connections/serialport', 'connections/helium', 'connections/pinoccio'
                 ]);
