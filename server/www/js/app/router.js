@@ -61,7 +61,8 @@ define(function(require) {
     
         currentView: null,
 
-        switchView: function(view) {
+        switchView: function(view, skiprender) {
+            skiprender = skiprender || false;
             if (this.currentView) {
                 this.currentView.remove();
                 if (this.currentView.onClose){
@@ -69,7 +70,8 @@ define(function(require) {
                 }
             }
             $('#content').html(view.el);
-            view.render();
+            if (!skiprender)
+                view.render();
             this.currentView = view;
         },
 
@@ -214,7 +216,8 @@ define(function(require) {
             allLogs.fetch({success:function(){
                 var myLogs = allLogs.getLogSubset(logarray);
                 instrumentManager.getLogView({collection:myLogs}, function(view) {
-                    self.switchView(view);
+                    self.switchView(view,true); // Second arg is skiprender=true to avoid rendering twice
+                                                // (expensive on large logs)
                 });
             }});
         },

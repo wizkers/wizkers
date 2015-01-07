@@ -154,7 +154,6 @@ define(function(require) {
                 change["cpmscale"]="linear";
             }
             settings.set(change);
-            this.render();
             this.addPlot();
 
         },
@@ -174,25 +173,8 @@ define(function(require) {
             if (this.selectedData.length == 0)
                 return;
 
-            if (settings.get("cpmscale") == "log")
-                $("#cpmscale",this.el).attr("checked",true);
-            if (settings.get('cpmscale')=="log") {
-                this.plotOptions.yaxis = {
-                            min:1,
-                            //ticks: [1,10,30,50,100,500,1000,1500],
-                            transform: function (v) { return Math.log(v+10); },
-                            inverseTransform: function (v) { return Math.exp(v)-10;}
-                        };
-                this.overviewOptions.yaxis = this.plotOptions.yaxis;
-            } else if ('yaxis' in this.plotOptions){
-                delete this.plotOptions.yaxis.min;
-                delete this.plotOptions.yaxis.transform;
-                delete this.plotOptions.yaxis.inverseTransform;
-            }
-
             if (this.deviceLogs == null || this.deviceLogs.length == 0)
                 return;
-
 
             this.addPlot();
 
@@ -226,6 +208,23 @@ define(function(require) {
         // attached to the DOM, so this function has to be called from the home view.
         addPlot: function() {
             var self=this;
+            
+            if (settings.get("cpmscale") == "log") {
+                $("#cpmscale",this.el).attr("checked",true);
+                this.plotOptions.yaxis = {
+                            min:1,
+                            //ticks: [1,10,30,50,100,500,1000,1500],
+                            transform: function (v) { return Math.log(v+10); },
+                            inverseTransform: function (v) { return Math.exp(v)-10;}
+                        };
+                this.overviewOptions.yaxis = this.plotOptions.yaxis;
+            } else if ('yaxis' in this.plotOptions){
+                delete this.plotOptions.yaxis.min;
+                delete this.plotOptions.yaxis.transform;
+                delete this.plotOptions.yaxis.inverseTransform;
+            }
+
+
 
             // TODO: only valid for 1st log, not the whole set
             $('#log_size',this.el).html(this.deviceLogs.getOverallLength());
@@ -372,11 +371,13 @@ define(function(require) {
             var readings = [ entry.maxReading, entry.minReading, entry.primaryReading];
             data.push( [], [], [] );
             // Populate the name of the dataunits table:
-            dataunits.push(linkManager.driver.mapUnit(readings[2].baseUnit) + " - " + readings[2].readingID);
+            dataunits.push(linkManager.driver.mapUnit(readings[2].baseUnit, readings[2].unitMultiplier) + " - " + readings[2].readingID);
             for (var i=0; i < readings.length; i++) {
                 var reading = readings[i];
                 if (reading.readingState != "NORMAL")
                     continue;
+                if (reading.readingValue < 0)
+                    settings.set("cpmscale", "linear");
                 data[i].push([reading.timeStamp, reading.readingValue]);        
             }
         },
@@ -399,7 +400,7 @@ define(function(require) {
                     // Get the unit of this reading: if we already have it in the data
                     // table, then append it. Otherwise we have to add a new entry in our
                     // data table:
-                    var unit = linkManager.driver.mapUnit(reading.baseUnit) + " - " + reading.readingID;
+                    var unit = linkManager.driver.mapUnit(reading.baseUnit, reading.unitMultiplier) + " - " + reading.readingID;
                     var idx = dataunits.indexOf(unit);
 
                     // Now find out whether the user wants us to plot this:
@@ -412,6 +413,9 @@ define(function(require) {
                     if (idx > -1) {
                         // If the reading's timestamp is zero, then we gotta use the timestamp
                         // of the log entry instead
+                        if (reading.readingValue < 0)
+                            settings.set("cpmscale", "linear");
+
                         data[idx].push([(reading.timeStamp == 0) ?
                                         new Date(entry.get('timestamp')).getTime()-tzOffset : reading.timeStamp,reading.readingValue]);
                     } else {

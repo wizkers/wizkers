@@ -66,7 +66,7 @@ define(function(require) {
                           connectionsettings: 'app/views/instrument/serialport' },
             "elecraft": { name: "Elecraft radios", type: ElecraftInstrument, settings:ElecraftSettingsView,
                           connectionsettings: 'app/views/instrument/serialport' },
-            "usbgeiger":{ name: "USB Geiger Dongle", type: USBGeigerInstrument, settings: USBGeigerSettingsView,
+            "usbgeiger":{ name: "USB Geiger", type: USBGeigerInstrument, settings: USBGeigerSettingsView,
                           connectionsettings: 'app/views/instrument/serialport'},
             "fluke28x" :{ name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView,
                           connectionsettings: 'app/views/instrument/serialport'}
