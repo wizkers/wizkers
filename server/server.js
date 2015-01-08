@@ -485,6 +485,10 @@ io.sockets.on('connection', function (socket) {
     // We want to listen for data coming in from drivers:
     var sendDataToFrontEnd = function (data) {
         socket_debug('data coming in for socket ' + socket.id, data);
+        if (data === undefined) {
+            debug('Warning, we were just asked to send empty data to the front-end');
+            return;
+        }
         // Temporary: detect "uniqueID" key and send as 'uniqueID' message
         if (data.uniqueID) {
             socket.emit('uniqueID', data.uniqueID);
