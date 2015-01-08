@@ -23,6 +23,8 @@
  *
  */
 
+"use strict";
+
 var events = require('events'),
     pinoconnection = require('../connections/pinoccio'),
     dbs = require('../pouch-config'),
@@ -64,21 +66,40 @@ var HawkNest = function () {
         }
     };
 
-    // Format is called as a callback by the serial port, so
-    // 'this' is the serial object, not this driver!
+    /**
+     * format receives incoming data, and formats it before sending to the
+     * front-end. Usually, the recorder, outputmanager and the server will
+     * listen for 'data' events emitted by 'format'
+     * Format is called as a callback by the serial port, so 'this' is
+     * the serial object, not this driver!
+     * @param {Object} data the data
+     */
     var format = function (data) {
         var jsresp;
         debug(data);
 
         // Now extract what we really are interested into:
-        if (data.data.type == 'Hawk' || data.data.type == 'temp') {
-            var jsresp = {
+        if (data.data.type == 'Hawk') {
+            var val = data.data.value;
+            jsresp = {
+                cpm: {
+                    value: val.ch1,
+                    valid: true
+                },
+                cpm2: {
+                    value: val.ch2,
+                    valid: true
+                }
+            }
+        } else if (data.data.type == 'temp') {
+            jsresp = {
                 'troop': data.data.troop,
                 'scout': data.data.scout,
                 'value': data.data.value
             };
-            self.emit('data', jsresp);
         }
+        if (jsresp !== undefined)
+            self.emit('data', jsresp);
     };
 
     /////////
