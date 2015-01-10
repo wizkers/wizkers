@@ -57,11 +57,7 @@ var HeliumConnection = function(path) {
     var self = this;
     
     var token = path.token;
-    // Javascript cannot handle 64bit numbers, so we
-    // split the MAC address in two 32bit numbers.
-    // Example for 0x0011223344556677 as the full MAC:
-    var mac_h = parseInt(path.mac.substr(0,8),16);
-    var mac_l = parseInt(path.mac.substr(8,16),16);
+    var mac = path.mac;
 
     debug("Creating Helium object with the following info:");
     debug(path);
@@ -71,7 +67,7 @@ var HeliumConnection = function(path) {
         myHelium.open();
 
         debug("Starting subscription");
-        myHelium.subscribe(mac_h, mac_l, token);
+        myHelium.subscribe(mac, token);
 
         portOpen = true;
         debug('Port open');
