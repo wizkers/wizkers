@@ -30,7 +30,7 @@ microtime = require('./lib/microtime'),
 debug = require('debug')('wizkers:recorder');
 
 var drivers = {};
-
+var openlogs = {};
 
 //////////////
 //  Private methods
@@ -42,7 +42,7 @@ var drivers = {};
  * @param {String}   logid  UniqueID of the log database
  * @param {Function} cb     Callback
  */
-var register = function (driver, logid, cb) {
+var register = function (driver, logid, cb, db) {
     var instrumentid = driver.getInstrumentId();
     if (drivers.hasOwnProperty(instrumentid)) {
         debug('WARNING, this driver is already registered, this should not happen');
@@ -50,8 +50,9 @@ var register = function (driver, logid, cb) {
         drivers[instrumentid] = {
             driver: driver,
             logid: logid,
-            cb: cb
+            cb: cb,
         };
+        openlogs[logid] = db;
     }
 }
 
@@ -66,7 +67,11 @@ var register = function (driver, logid, cb) {
 var record = function (data, logID) {
 
     // console.log("*** Recording new entry in the log ***");
-    var db = new PouchDB('./ldb/datapoints/' + logID);
+    if (openlogs[logID] === undefined) {
+        debug("Error, trying to record but no open database");
+        return;
+    }
+    var db = openlogs[logID];
     debug("Log record in " + logID);
     debug(data);
 
@@ -123,7 +128,8 @@ exports.startRecording = function (logid, driver) {
             var cb = function (data) {
                 record(data, logid);
             }
-            register(driver, logid, cb); // Keep track for later use when we stop recording
+            var db = new PouchDB('./ldb/datapoints/' + logid);
+            register(driver, logid, cb, db); // Keep track for later use when we stop recording
             driver.on('data', cb);
         }
     });
@@ -165,6 +171,7 @@ exports.stopRecording = function (insid) {
         } else {
             driver.removeListener('data', drivers[insid].cb);
             delete drivers[insid];
+            delete openlogs[logID];
             session.endstamp = new Date().getTime();
             session.isrecording = false;
             // TODO: update the number of points in 
