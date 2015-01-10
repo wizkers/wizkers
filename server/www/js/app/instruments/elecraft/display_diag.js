@@ -196,10 +196,7 @@ define(function (require) {
                     setLabel("#opt-kxbc3", this.el, (data.charAt(10) == 'B'));
                     setLabel("#opt-kx3-2m", this.el, (data.charAt(11) == 'X'));
                 } else if (da2 == 'MP') {
-                    if (data.substr(3) === '000') {
-                        pamode_on = false;
-                    } else
-                        pamode_on = true;
+                    pamode_on = (data.substr(2) === '000') ? false : true;
                     if (taking_screenshot) {
                         taking_screenshot = false;
                         // PA Mode off if it was on, take screenshot, but we need to wait for the amp to settle
