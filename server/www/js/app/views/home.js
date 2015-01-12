@@ -133,9 +133,6 @@ define(function(require) {
                         view.render();
                     }
                 });
-
-                // Enable the "Connect" button now that we are ready
-                //$('.ctrl-connect', this.el).removeAttr('disabled');
             }
 
             linkManager.requestStatus();

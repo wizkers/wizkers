@@ -61,7 +61,7 @@ define(function(require) {
     
         // current_instrument is a Backbone Model instance
         var current_instrument = null; // The instrument currently in use
-
+        
         this.supportedInstruments = {
             "onyx":     { name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView,
                           connectionsettings: 'app/views/instrument/serialport'},

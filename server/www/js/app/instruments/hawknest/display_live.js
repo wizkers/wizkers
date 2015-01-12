@@ -88,7 +88,9 @@ define(function (require) {
             linkManager.on('input', this.showInput, this);
         },
 
-        events: {},
+        events: {
+            "click .probe-tab": "selectProbe"
+        },
 
         render: function () {
             var self = this;
@@ -123,14 +125,9 @@ define(function (require) {
                 if (self.showstream)
                     chartheight -= $('#showstream').height() + 20;
 
-                $('.geigerchart').css('height',
+                $('.chart').css('height',
                     chartheight + 'px'
                 );
-                // The simpleplot lib embeds the chart into .geigerchart
-                $('.geigerchart .chart').css('height',
-                    chartheight + 'px'
-                );
-
             }
 
             $(window).resize(rsc);
@@ -140,6 +137,13 @@ define(function (require) {
         onClose: function () {
             console.log("Hawk Nest live view closing...");
             linkManager.off('input', this.showInput);
+        },
+        
+        selectProbe: function(evt) {
+            var pid = evt.target.firstChild.nodeValue;
+            console.log("Probe Selected", pid);
+            // We need to tell the num view we got a new probe ID:
+            instrumentManager.numViewRef().selectProbe(pid);
         },
 
         movingAverager: function (newpoint, buffer) {
@@ -181,7 +185,7 @@ define(function (require) {
                     model: this.model,
                     settings: this.plotoptions
                 });
-                $('#probes-select', this.el).append('<li role="presentation" ><a data-toggle="tab" href="#probes-' + data.probeid + '">' + data.probeid + '</a></li>');
+                $('#probes-select', this.el).append('<li role="presentation" class="probe-tab" ><a data-toggle="tab" href="#probes-' + data.probeid + '">' + data.probeid + '</a></li>');
                 $('#probes-content', this.el).append('<div class="tab-pane" id="probes-' + data.probeid + '"><div class="thumbnail">' +
                     '<div class="chart" id="chart-' + data.probeid + '" style="position: relative; height:400px;"></div></div></div>');
                 // Need to activate the tab before adding the plot, otherwise we get a "invalid plot dimensions" error
@@ -189,6 +193,7 @@ define(function (require) {
                 $('#probes-select a:last', this.el).tab('show');
                 $('#chart-' + data.probeid, this.el).append(this.probes[data.probeid].el);
                 this.probes[data.probeid].render();
+                instrumentManager.numViewRef().selectProbe(data.probeid);
             }
 
             if (data.cpm != undefined) {

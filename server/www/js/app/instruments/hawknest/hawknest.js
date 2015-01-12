@@ -27,8 +27,20 @@ define(function(require) {
     "use strict";
     
     var driver_frontend = require('app/instruments/hawknest/driver_frontend');
-    
+    // Convenient function when views want to talk to each other: keep a central
+    // reference to those here
+    var current_liveview = null;
+    var current_numview = null;
+
     return  function() {
+        
+        this.liveViewRef = function() {
+            return current_liveview;
+        };
+        
+        this.numViewRef = function() {
+            return current_numview;
+        };
 
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities    
@@ -55,15 +67,17 @@ define(function(require) {
         // This is the full screen live view graph (not a small widget)
         this.getLiveDisplay = function(arg, callback) {
             require(['app/instruments/hawknest/display_live'], function(view) {
-                callback(new view(arg));
+                current_liveview = new view(arg);
+                callback(current_liveview);
             });
         };
 
         // This is a Backbone view
         // This is a numeric display
         this.getNumDisplay = function(arg, callback) {
-            require(['app/instruments/usbgeiger/display_numeric'], function(view) {
-                callback(new view(arg));
+            require(['app/instruments/hawknest/display_numeric'], function(view) {
+                current_numview = new view(arg);
+                callback(current_numview);
             });
         };
 
