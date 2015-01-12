@@ -53,7 +53,6 @@ define(function(require) {
 
         render:function () {
             var self = this;
-            console.log('Main render of Hawk Nest numeric view');
             $(this.el).html(template());
             if (probeid != '-') {
                 $("#probeid",this.el).html(probeid);
@@ -71,7 +70,6 @@ define(function(require) {
         },
         
         selectProbe: function(pid) {
-            console.log("Num View select probe ID", pid);
             probeid = pid;
             this.render();
         },
@@ -81,12 +79,13 @@ define(function(require) {
             if (typeof(data.cpm) == 'undefined')
                 return;
             
+            var cpm = parseFloat(data.cpm.value).toFixed(3);
+            var cpm2 = parseFloat(data.cpm2.value).toFixed(3);
+            readings[data.probeid] = { cpm: cpm, cpm2: cpm2};
+
             if (data.probeid != probeid)
                 return;
             
-            var cpm = parseFloat(data.cpm.value).toFixed(3);
-            var cpm2 = parseFloat(data.cpm2.value).toFixed(3);
-            readings[probeid] = { cpm: cpm, cpm2: cpm2};
             $('#livecpm', this.el).html(cpm);
             $('#livecpm2', this.el).html(cpm2);
             

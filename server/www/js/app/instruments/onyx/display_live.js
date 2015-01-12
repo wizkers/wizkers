@@ -61,7 +61,8 @@ define(function(require) {
             // We will pass this when we create plots, this is the global
             // config for the look and feel of the plot
             this.plotoptions = {
-                points: livepoints
+                points: livepoints,
+                vertical_stretch: true
             };
 
             // Keep an array for moving average over the last X samples
@@ -106,25 +107,6 @@ define(function(require) {
                   $('.geigerchart', this.el).append(this.plot.el);
                   this.plot.render();
               }
-
-            // Make sure the chart takes all the window height:
-            var rsc = function() {
-                var chartheight = window.innerHeight - $('#control-area').height() - $('.header .container').height() - 45;
-                if (self.showstream)
-                    chartheight -= $('#showstream').height() + 20;
-
-                $('.geigerchart').css('height',
-                                           chartheight + 'px'
-                                                );
-                // The simpleplot lib embeds the chart into .geigerchart
-                $('.geigerchart .chart').css('height',
-                                           chartheight + 'px'
-                                                );
-
-            }
-
-            $(window).resize(rsc);
-            rsc();
         },
 
         onClose: function() {

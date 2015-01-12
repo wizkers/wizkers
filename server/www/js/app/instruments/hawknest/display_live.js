@@ -39,8 +39,7 @@ define(function (require) {
     require('flot_time');
     require('flot_resize');
     require('bootstrap');
-
-
+    
     return Backbone.View.extend({
 
         initialize: function (options) {
@@ -65,11 +64,15 @@ define(function (require) {
             // config for the look and feel of the plot
             this.plotoptions = {
                 points: livepoints,
+                vertical_stretch: true,
                 plot_options: {
                     xaxis: {
                         mode: "time",
                         show: true,
                         timezone: settings.get("timezone")
+                    },
+                    grid: {
+                        hoverable: true
                     },
                     legend: {
                         position: "ne"
@@ -110,38 +113,27 @@ define(function (require) {
         addPlot: function () {
             var self = this;
 
-            this.plot = new simpleplot({
+            this.probes['All'] = new simpleplot({
                 model: this.model,
                 settings: this.plotoptions
             });
-            if (this.plot != null) {
-                $('.geigerchart', this.el).append(this.plot.el);
-                this.plot.render();
+            if (this.probes['All'] != null) {
+                $('.geigerchart', this.el).append(this.probes['All'].el);
+                this.probes['All'].render();
             }
-
-            // Make sure the chart takes all the window height:
-            var rsc = function () {
-                var chartheight = window.innerHeight - $('#control-area').height() - $('.header .container').height() - 75;
-                if (self.showstream)
-                    chartheight -= $('#showstream').height() + 20;
-
-                $('.chart').css('height',
-                    chartheight + 'px'
-                );
-            }
-
-            $(window).resize(rsc);
-            rsc();
         },
 
         onClose: function () {
             console.log("Hawk Nest live view closing...");
             linkManager.off('input', this.showInput);
+            // Dispose of all simpleplots nicely (see onClose in flotplot.js for explanations)
+            for (var pl in this.probes) {
+                this.probes[pl].onClose();
+            }
         },
-        
-        selectProbe: function(evt) {
+
+        selectProbe: function (evt) {
             var pid = evt.target.firstChild.nodeValue;
-            console.log("Probe Selected", pid);
             // We need to tell the num view we got a new probe ID:
             instrumentManager.numViewRef().selectProbe(pid);
         },
@@ -187,7 +179,7 @@ define(function (require) {
                 });
                 $('#probes-select', this.el).append('<li role="presentation" class="probe-tab" ><a data-toggle="tab" href="#probes-' + data.probeid + '">' + data.probeid + '</a></li>');
                 $('#probes-content', this.el).append('<div class="tab-pane" id="probes-' + data.probeid + '"><div class="thumbnail">' +
-                    '<div class="chart" id="chart-' + data.probeid + '" style="position: relative; height:400px;"></div></div></div>');
+                    '<div class="chart" id="chart-' + data.probeid + '"></div></div></div>');
                 // Need to activate the tab before adding the plot, otherwise we get a "invalid plot dimensions" error
                 // when rendering the plot
                 $('#probes-select a:last', this.el).tab('show');
@@ -203,7 +195,7 @@ define(function (require) {
                     'value': cpm,
                     'timestamp': data.timestamp
                 };
-                this.plot.appendPoint(datapoint);
+                this.probes['All'].appendPoint(datapoint);
                 this.probes[data.probeid].appendPoint(datapoint);
             }
             if (data.cpm2 != undefined) {
@@ -213,7 +205,7 @@ define(function (require) {
                     'value': cpm2,
                     'timestamp': data.timestamp
                 };
-                this.plot.appendPoint(datapoint);
+                this.probes['All'].appendPoint(datapoint);
                 this.probes[data.probeid].appendPoint(datapoint);
 
             }
