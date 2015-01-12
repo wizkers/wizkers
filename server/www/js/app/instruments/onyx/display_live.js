@@ -48,7 +48,7 @@ define(function(require) {
 
             this.deviceinitdone = false;
             this.plotavg = false;
-            
+
             // Get frequency and span if specified:
             var span = this.model.get('liveviewspan');     // In seconds
             var period = this.model.get('liveviewperiod'); // Polling frequency
@@ -133,10 +133,6 @@ define(function(require) {
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
             
-            /*
-            if (!linkManager.isRecording())
-                linkManager.stopLiveStream();
-            */
         },
 
         movingAverager: function(newpoint, buffer) {

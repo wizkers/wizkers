@@ -89,15 +89,12 @@ var HawkNest = function () {
                 cpm2: {
                     value: val.ch2,
                     valid: true
-                }
+                },
+                probeid: data.data.troop + '-' + data.data.scout,
+                timestamp: data.data.time
+
             }
-        } else if (data.data.type == 'temp') {
-            jsresp = {
-                'troop': data.data.troop,
-                'scout': data.data.scout,
-                'value': data.data.value
-            };
-        }
+        } 
         if (jsresp !== undefined)
             self.emit('data', jsresp);
     };

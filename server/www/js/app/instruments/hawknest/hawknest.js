@@ -54,7 +54,7 @@ define(function(require) {
         // This has to be a Backbone view
         // This is the full screen live view graph (not a small widget)
         this.getLiveDisplay = function(arg, callback) {
-            require(['app/instruments/onyx/display_live'], function(view) {
+            require(['app/instruments/hawknest/display_live'], function(view) {
                 callback(new view(arg));
             });
         };

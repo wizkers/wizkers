@@ -187,7 +187,7 @@ define(function(require) {
         
         // Append a data point. Data should be in the form of
         // { name: "measurement_name", value: value } or
-        // { name: "measurement°name", value: value, timestamp: timestamp }
+        // { name: "measurement_name", value: value, timestamp: timestamp }
         fastAppendPoint: function(data) {
             var sensor = data.name;
             var idx = this.sensors.indexOf(sensor);
