@@ -114,6 +114,7 @@ define(function(require) {
 
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
+            this.plot.onClose();
             
         },
 

@@ -186,6 +186,9 @@ define(function (require) {
         onClose: function () {
             console.log("Log management view closing...");
 
+            // Remove the window resize bindings on our plots:
+            this.plot.onClose();
+            this.overview.onClose();
             // Restore the settings since we don't want them to be saved when changed from
             // the home screen
             settings.fetch();

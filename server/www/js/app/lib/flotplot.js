@@ -209,7 +209,7 @@ define(function (require) {
             if (this.flotplot_settings.vertical_stretch) {
                 var self = this;
                 var rsc = function () {
-                    //console.log("Window resized (Flot plot)");
+                    console.log("Window resized (Flot plot)");
                     var chartheight = window.innerHeight - $(self.el).offset().top - 20;
                     if (settings.get("showstream"))
                         chartheight -= ($('#showstream').height() + 20);
