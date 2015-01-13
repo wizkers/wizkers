@@ -50,7 +50,7 @@ var compileTemplate = function (templates) {
 compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogManagementView',
                  'InstrumentDetailsView', 'InstrumentListItemView', 'OutputListItemView', 'OutputDetailsView',
                  'OutputDetailsFieldTable', 'OutputDetailsMappingTable', 'instruments/HawkNestLiveView',
-                 'instruments/HawkNestNumView',
+                 'instruments/HawkNestNumView', 'instruments/HawkNestLogView',
                  'outputs/SafecastSettingsView', 'outputs/RestSettingsView', 'outputs/RigctldSettingsView',
                  'instruments/AudioWaterfall', 'instruments/USBGeigerSettingsView', 'instruments/USBGeigerNumView',
                  'instruments/W433LiveView', 'instruments/W433SettingsView', 'instruments/W433LogView', 'instruments/W433NumView',

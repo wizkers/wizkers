@@ -34,10 +34,6 @@ define(function (require) {
         simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/HawkNestLiveView.js');
 
-    // Load the flot library & flot time plugin:
-    require('flot');
-    require('flot_time');
-    require('flot_resize');
     require('bootstrap');
     
     return Backbone.View.extend({

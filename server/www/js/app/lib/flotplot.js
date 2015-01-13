@@ -233,6 +233,12 @@ define(function (require) {
                 opacity: 0.90
             }).appendTo("body").fadeIn(200);
         },
+        
+        // Clears all graph data
+        clearData: function() {
+            this.livedata = [[]];
+            this.sensors = [];
+        },
 
 
         trimLiveData: function (idx) {

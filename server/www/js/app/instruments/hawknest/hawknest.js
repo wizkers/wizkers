@@ -45,8 +45,7 @@ define(function(require) {
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities    
         this.getCaps = function() {
-            return ["LiveDisplay", "NumDisplay", "LogView",
-                    "LogManagementView"
+            return ["LiveDisplay", "NumDisplay", "LogView"
                    ];
         };
         
@@ -124,7 +123,7 @@ define(function(require) {
 
         // Render a log (or list of logs) for the device.
         this.getLogView = function(arg, callback) {
-            require(['app/instruments/onyx/display_log'], function(view) {
+            require(['app/instruments/hawknest/display_log'], function(view) {
                 callback(new view(arg));
             });
         }
