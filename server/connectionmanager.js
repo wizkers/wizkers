@@ -44,6 +44,7 @@ var Elecraft = require('./parsers/elecraft.js');
 var USBGeiger = require('./parsers/usb_geiger.js');
 var HeliumGeiger = require('./parsers/helium_geiger.js');
 var HawkNest = require('./parsers/hawknest.js');
+var SimpleSerial = require('./parsers/simple_serial.js');
 
 var ConnectionManager = function () {
 
@@ -52,22 +53,24 @@ var ConnectionManager = function () {
 
     var getDriver = function (type) {
         var driver;
-        if (type == "onyx") {
+        if (type == 'onyx') {
             driver = new Onyx();
-        } else if (type == "fcoledv1") {
+        } else if (type == 'fcoledv1') {
             driver = new FCOled();
-        } else if (type == "fluke28x") {
+        } else if (type == 'fluke28x') {
             driver = new Fluke289();
-        } else if (type == "w433") {
+        } else if (type == 'w433') {
             driver = new W433();
-        } else if (type == "elecraft") {
+        } else if (type == 'elecraft') {
             driver = new Elecraft();
-        } else if (type == "usbgeiger") {
+        } else if (type == 'usbgeiger') {
             driver = new USBGeiger();
-        } else if (type == "heliumgeiger") {
+        } else if (type == 'heliumgeiger') {
             driver = new HeliumGeiger();
-        } else if (type == "hawknest") {
+        } else if (type == 'hawknest') {
             driver = new HawkNest();
+        } else if (type == 'simple_serial') {
+            driver = new SimpleSerial();
         }
         return driver;
     }
@@ -110,7 +113,7 @@ var ConnectionManager = function () {
                 var driver = getDriver(item.type);
                 if (driver == undefined) {
                     // Something is very wrong here!
-                    debug("Was asked to open an instrument with unknown driver");
+                    debug('Was asked to open an instrument with unknown driver');
                     return;
                 }
                 openinstruments[instrumentid] = driver;

@@ -56,6 +56,9 @@ define(function(require) {
     var HawkNestInstrument = require('app/instruments/hawknest/hawknest'),
         HawkNestSettingsView = require('app/instruments/hawknest/settings');
 
+    var SimpleSerialInstrument = require('app/instruments/simple_serial/simple_serial'),
+        SimpleSerialSettingsView = require('app/instruments/simple_serial/settings');
+
 
     var InstrumentManager = function() {
     
@@ -72,7 +75,9 @@ define(function(require) {
             "usbgeiger":{ name: "USB Geiger", type: USBGeigerInstrument, settings: USBGeigerSettingsView,
                           connectionsettings: 'app/views/instrument/serialport'},
             "fluke28x" :{ name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView,
-                          connectionsettings: 'app/views/instrument/serialport'}
+                          connectionsettings: 'app/views/instrument/serialport'},
+            "simple_serial": {name: "Simple serial terminal", type:SimpleSerialInstrument, settings: SimpleSerialSettingsView,
+                          connectionsettings: 'app/views/instrument/serialport'},
         };
         
         // The instruments below are not supported in Cordova or Chrome runmodes:

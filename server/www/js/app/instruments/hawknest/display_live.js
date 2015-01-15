@@ -65,6 +65,7 @@ define(function (require) {
                     xaxis: {
                         mode: "time",
                         show: true,
+                        timeformat: "%Y.%m.%d<br>%H:%M",
                         timezone: settings.get("timezone")
                     },
                     grid: {

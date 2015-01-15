@@ -17,7 +17,8 @@
  * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * A simple GPS NMEA viewer.
+ * A simple serial scroller, mainly meant as an example, but can be useful
+ * in its own right.
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -25,7 +26,7 @@
 define(function(require) {
     "use strict";
     
-    var driver_frontend = require('app/instruments/nmea/driver_frontend');
+    var driver_frontend = require('app/instruments/simple_serial/driver_frontend');
     // Convenient function when views want to talk to each other: keep a central
     // reference to those here
     var current_liveview = null;
@@ -51,12 +52,12 @@ define(function(require) {
         // Return the type of data reading that this instrument generates. Can be used
         // by output plugins to accept data from this instrument or not.
         this.getDataType = function() {
-                    return [ "position" ];
+                    return [];
         }
         
         // This has to be a backbone view
         this.getSettings = function(arg, callback) {
-            require(['app/instruments/nmea/settings'], function(view) {
+            require(['app/instruments/simple_serial/settings'], function(view) {
                 callback(new view(arg));
             });
         };
@@ -64,7 +65,7 @@ define(function(require) {
         // This has to be a Backbone view
         // This is the full screen live view graph (not a small widget)
         this.getLiveDisplay = function(arg, callback) {
-            require(['app/instruments/nmea/display_live'], function(view) {
+            require(['app/instruments/simple_serial/display_live'], function(view) {
                 current_liveview = new view(arg);
                 callback(current_liveview);
             });
@@ -73,7 +74,7 @@ define(function(require) {
         // This is a Backbone view
         // This is a numeric display
         this.getNumDisplay = function(arg, callback) {
-            require(['app/instruments/nmea/display_numeric'], function(view) {
+            require(['app/instruments/simple_serial/display_numeric'], function(view) {
                 current_numview = new view(arg);
                 callback(current_numview);
             });
@@ -86,7 +87,7 @@ define(function(require) {
 
         // A diagnostics/device setup screen
         this.getDiagDisplay = function(arg, callback) {
-            require(['app/instruments/nmea/display_diag'], function(view) {
+            require(['app/instruments/simple_serial/display_diag'], function(view) {
                 callback(new view(arg));
             });
         };
@@ -115,21 +116,21 @@ define(function(require) {
 
         // Return a device log management view
         this.getLogManagementView = function(arg, callback) {
-            require(['app/instruments/nmea/display_logmanager'], function(view) {
+            require(['app/instruments/simple_serial/display_logmanager'], function(view) {
                 callback(new view(arg));
             });
         }
 
         // Render a log (or list of logs) for the device.
         this.getLogView = function(arg, callback) {
-            require(['app/instruments/nmea/display_log'], function(view) {
+            require(['app/instruments/simple_serial/display_log'], function(view) {
                 callback(new view(arg));
             });
         }
 
         // Render a log edit table for a log collection for the device
         this.getLogEditView = function(arg, callback) {
-            require(['app/instruments/nmea/display_logedit'], function(view) {
+            require(['app/instruments/simple_serial/display_logedit'], function(view) {
                 callback(new view(arg));
             });
         }

@@ -104,7 +104,7 @@ define(function(require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.
         //
-        // There is no support for Helium in Chrome of Cordova for now, so this
+        // There is no support for Pinocc.io in Chrome of Cordova for now, so this
         // method is empty.
         this.getBackendDriver = function(arg, callback) {
         };
