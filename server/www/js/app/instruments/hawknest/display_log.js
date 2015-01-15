@@ -18,7 +18,7 @@
  */
 
 /*
- * Log view for the Onyx.
+ * Log view for the Hawk Nest sensor board.
  *
  * Our model is a collection of Logs
  *
@@ -66,10 +66,12 @@ define(function (require) {
             this.plotSettings = {
                 selectable: true,
                 vertical_stretch: true,
+                points: 0, // Disable truncation
                 plot_options: {
                     xaxis: {
                         mode: "time",
                         show: true,
+                        timeformat: "%Y.%m.%d<br>%H:%M",
                         timezone: settings.get("timezone"),
                     },
                     yaxis: {},
@@ -84,13 +86,16 @@ define(function (require) {
                 }
             };
 
-            this.plotOveriewSettings = {
+            this.plotOverviewSettings = {
                 selectable: true,
                 vertical_stretch: false,
+                points: 0, // Disable truncation
                 plot_options: {
                     xaxis: {
                         mode: "time",
                         show: true,
+                        timeformat: "%m.%d",
+                        ticks: 4,
                         timezone: settings.get("timezone"),
                     },
                     yaxis: {},
@@ -279,7 +284,7 @@ define(function (require) {
 
             this.overview = new simpleplot({
                 model: this.model,
-                setting: this.plotOverviewSettings
+                settings: this.plotOverviewSettings
             });
             if (this.overview != null) {
                 $('#overview', this.el).empty().append(this.overview.el);

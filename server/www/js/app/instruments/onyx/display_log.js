@@ -71,10 +71,12 @@ define(function (require) {
             this.plotSettings = {
                 selectable: true,
                 vertical_stretch: true,
+                points: 0,
                 plot_options: {
                     xaxis: {
                         mode: "time",
                         show: true,
+                        timeformat: "%Y.%m.%d<br>%H:%M",
                         timezone: settings.get("timezone"),
                     },
                     yaxis: {},
@@ -92,10 +94,12 @@ define(function (require) {
             this.plotOveriewSettings = {
                 selectable: true,
                 vertical_stretch: false,
+                points: 0,
                 plot_options: {
                     xaxis: {
                         mode: "time",
                         show: true,
+                        timeformat: "%m.%d",
                         timezone: settings.get("timezone"),
                     },
                     yaxis: {},
