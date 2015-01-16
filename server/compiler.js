@@ -51,7 +51,7 @@ compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogMana
                  'InstrumentDetailsView', 'InstrumentListItemView', 'OutputListItemView', 'OutputDetailsView',
                  'OutputDetailsFieldTable', 'OutputDetailsMappingTable', 'instruments/HawkNestLiveView',
                  'instruments/HawkNestNumView', 'instruments/HawkNestLogView', 'instruments/SimpleSerialLiveView',
-                 'instruments/SimpleSerialNumView',
+                 'instruments/SimpleSerialNumView', 'instruments/SimpleSerialSettingsView',
                  'outputs/SafecastSettingsView', 'outputs/RestSettingsView', 'outputs/RigctldSettingsView',
                  'instruments/AudioWaterfall', 'instruments/USBGeigerSettingsView', 'instruments/USBGeigerNumView',
                  'instruments/W433LiveView', 'instruments/W433SettingsView', 'instruments/W433LogView', 'instruments/W433NumView',

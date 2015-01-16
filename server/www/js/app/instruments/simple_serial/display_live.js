@@ -35,6 +35,7 @@ define(function(require) {
     return Backbone.View.extend({
 
         initialize:function (options) {
+            this.scrollback = this.model.get('metadata').lines;
             linkManager.on('status', this.updatestatus, this);
             linkManager.on('input', this.showInput, this);
         },
@@ -64,13 +65,11 @@ define(function(require) {
         showInput: function(data) {
             // Update our raw data monitor
             var i = $('#ss-output',this.el);
-            var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-            /**
-                // Keep max 50 lines:
-                if (scroll.length > 50) {
-                    scroll = scroll.slice(scroll.length-50);
-                }
-            */
+            var scroll = (i.val() + data + '\n').split('\n');
+            // Keep max not more than 'scrollback' lines:
+            if (scroll.length > this.scrollback) {
+                scroll = scroll.slice(scroll.length-this.scrollback);
+            }
             i.val(scroll.join('\n'));
             // Autoscroll:
             i.scrollTop(i[0].scrollHeight - i.height());

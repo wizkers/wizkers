@@ -45,6 +45,7 @@ var SimpleSerial = function() {
     // Private variables
     /////////
     var port = null;
+    var baudrate = 115200;
     var isopen = false;
     var instrumentid = null;
     var port_close_requested = false;
@@ -72,8 +73,8 @@ var SimpleSerial = function() {
 
     // How the device is connected on the serial port            
     var portSettings = function() {
-        return  {
-            baudRate: 9600,
+        var ps =  {
+            baudRate: baudrate,
             dataBits: 8,
             parity: 'none',
             stopBits: 1,
@@ -82,7 +83,9 @@ var SimpleSerial = function() {
             // Note: the Onyx outputs json with \n at the end, so
             // the default readline parser works fine (it separates on \r)
             parser: serialport.parsers.readline('\n'),
-        }
+        };
+        
+        return ps;
     };
 
     // format should return a JSON structure.
@@ -100,6 +103,10 @@ var SimpleSerial = function() {
     this.openPort = function(id) {
         instrumentid = id;
         dbs.instruments.get(id, function(err,item) {
+            if (item.metadata && item.metadata.baudrate) {
+                debug('Baud rate: ' + item.metadata.baudrate);
+                baudrate = item.metadata.baudrate;
+            }
             port = new serialconnection(item.port, portSettings());
             port.on('data', format);
             port.on('status', status);
