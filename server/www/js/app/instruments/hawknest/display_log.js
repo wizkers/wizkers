@@ -137,8 +137,8 @@ define(function (require) {
             "click #download-csv": "downloadCSV",
             "change #probelist input": "refreshGraphs",
         },
-        
-        refreshGraphs: function(event) {
+
+        refreshGraphs: function (event) {
             this.plot.clearData();
             this.overview.clearData();
             this.packData();
@@ -225,12 +225,7 @@ define(function (require) {
             var csv = header + "Timestamp (UTC), ";
             for (var i = 0; i < this.deviceLogs.length; i++) {
                 var entries = this.deviceLogs.at(i).entries;
-                var type = this.deviceLogs.at(i).get('logtype');
-                if (type == 'live') {
-                    csv += "CPM, CPM30, CPMRAW, Valid\n";
-                } else {
-                    csv += "accel_x_end, accel_x_start, accel_y_end, accel_y_start, accel_z_end, accel_z_start, cpm, duration (min), time (ISO String)\n";
-                }
+                csv += "ProbeID, Channel1, Channel2\n";
                 for (var j = 0; j < entries.length; j++) {
                     var entry = entries.at(j);
                     var data = entry.get('data');
@@ -239,20 +234,18 @@ define(function (require) {
                         // No known spreadsheet software handles ISO8601 dates
                         // properly (like 2014-06-17T18:00:04.067Z ) so we
                         // convert the timestamp to a string that is recognized by
-                        // Excel or Google Docs. The whole new Date + toISOString
+                        // Excel and Google Docs. The whole new Date + toISOString
                         // is here to guarantee that we do get a proper formatted
                         // time stamp whenever we are running as an embedded app or a server
                         // app.
-                        var ts = new Date(entry.get('timestamp')).toISOString().replace(/[TZ]/g, ' ');
-                        csv += ts;
-                        // Our live data is packed a bit differently than onyxlog data:
-                        if (type == 'live') {
-                            data = data.cpm;
+                        if (this.knownProbes[data.probeid]) {
+                            var ts = new Date(entry.get('timestamp')).toISOString().replace(/[TZ]/g, ' ');
+                            csv += ts;
+                            csv += ',' + data.probeid;
+                            csv += ',' + data.cpm.value;
+                            csv += ',' + data.cpm2.value;
+                            csv += '\n';
                         }
-                        for (var key in data) {
-                            csv += ',' + data[key];
-                        }
-                        csv += '\n';
                     }
                 }
             }
@@ -314,12 +307,12 @@ define(function (require) {
             // Create a table of Y values with the x values from our collection
             var data = [];
             var logs = this.deviceLogs;
-            
+
             // Prepare a list of the probes we want to display,
             // to avoid doing jquery
             var probesToDisplay = [];
             for (var pid in this.knownProbes) {
-                var cb = $('#probelist',this.el).find('.' + pid);
+                var cb = $('#probelist', this.el).find('.' + pid);
                 this.knownProbes[pid] = (cb.find('input').is(':checked')) ? true : false;
             }
             // At this stage we know the logs are already fetched, btw
