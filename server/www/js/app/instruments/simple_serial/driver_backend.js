@@ -38,8 +38,14 @@ define(function(require) {
         var socket = socket;
         
         this.portSettings = function() {
+            var baud = 115200;
+            var ins = instrumentManager.getInstrument();
+            if (ins && ins.get('metadata')) {
+                baud = parseInt(ins.get('metadata').baudrate);
+            }
+            
             return  {
-                baudRate: 115200,
+                baudRate: baud,
                 dataBits: 8,
                 parity: 'none',
                 stopBits: 1,

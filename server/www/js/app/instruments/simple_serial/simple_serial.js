@@ -107,6 +107,9 @@ define(function(require) {
         // There is no support for Helium in Chrome of Cordova for now, so this
         // method is empty.
         this.getBackendDriver = function(arg, callback) {
+            require(['app/instruments/simple_serial/driver_backend'], function(view) {
+                callback(new view(arg));
+            });
         };
         
         // Return a Backbone view which is a mini graph
