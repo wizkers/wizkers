@@ -1,0 +1,48 @@
+<div class="col-md-2">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="thumbnail">
+                <p>Data points: <span id="log_size">0</span></p>
+                <p>Log start:<br><small><span id="log_start">0</span></small></p>
+                <p>Log end:<br><small><span id="log_end">0</span></small></p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+              <p><button type="button" id="download-csv" class="btn btn-primary">Download as CSV</button></p>
+              <p><a role="button" class="btn btn-info ctrl-edit">Edit Log Entries</a></p>
+        </div>
+    </div>
+</div>
+<div class="col-md-10">
+    <div class="row">
+        <div class="col-md-10">
+            <div class="thumbnail">
+                <div id="overview" class="chart" style="z-index: 0; height:100px;cursor:crosshair;"></div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <a href="#" role="button" class="resetZoom btn btn-default">Reset Zoom</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="thumbnail">
+                <div class="geigerchart chart" style="cursor:crosshair;">
+                    <div class="spinner circles">
+                         <div></div>
+                         <div></div>
+                         <div></div>
+                         <div></div>
+                         <div></div>
+                         <div></div>
+                         <div></div>
+                         <div></div>
+                    </div>
+                    <p id="loadtext" style="text-align:center;">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

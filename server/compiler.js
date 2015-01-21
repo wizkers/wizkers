@@ -63,6 +63,6 @@ compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogMana
                  'instruments/Fluke289LogView', 'instruments/Fluke289NumView',
                  'instruments/OnyxDiagView', 'instruments/OnyxLiveView', 'instruments/OnyxLogEditView',
                  'instruments/OnyxLogManagementView', 'instruments/OnyxLogView', 'instruments/OnyxNumView',
-                 'instruments/USBGeigerUpgrader',
+                 'instruments/USBGeigerUpgrader', 'instruments/USBGeigerLogView',
                  'connections/serialport', 'connections/helium', 'connections/pinoccio'
                 ]);

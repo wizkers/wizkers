@@ -110,7 +110,7 @@ define(function(require) {
 
         // Render a log (or list of logs) for the device.
         this.getLogView = function(arg, callback) {
-            require(['app/instruments/onyx/display_log'], function(view) {
+            require(['app/instruments/usbgeiger/display_log'], function(view) {
                 callback(new view(arg));
             });
         }
