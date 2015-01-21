@@ -2,9 +2,10 @@
     <div class="row">
         <div class="col-md-12">
             <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
-              <li class="active"><a href="#kx3" role="tab" data-toggle="tab">KX3</a></li>
-              <li><a href="#kxpa100" role="tab" data-toggle="tab">KXPA100</a></li>
-              <li><a href="#px3" role="tab" data-toggle="tab">PX3</a></li>
+              <li class="active" role="presentation"><a href="#general" data-toggle="tab">Diagnostics</a></li></li>
+              <li role="presentation"><a href="#kx3" data-toggle="tab">KX3</a></li>
+              <li role="presentation"><a href="#kxpa100" data-toggle="tab">KXPA100</a></li>
+              <li role="presentation"><a href="#px3" data-toggle="tab">PX3</a></li>
             </ul>
             <br>
         </div>
@@ -13,14 +14,15 @@
         <div class="col-md-12">
             <!-- Tab panes -->
             <div class="tab-content">
-                <div class="tab-pane active" id="kx3">
+                <div class="tab-pane active" id="general">                
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <p>Radio Serial number: <span id="kx3-sn"></span></p>
                             <p>Firmware versions: MCU v<span id="kx3-fw-mcu"></span>, DSP v<span id="kx3-fw-dsp"></span></p>
                         </div>
-                        <div class="col-md-5">
-                            <p>Options installed/enabled:
+                        <div class="col-md-4">
+                            <p>Options installed/enabled:</p>
+                            <p>
                                 <span class="label label-default" id="opt-kxat3">KXAT3</span>
                                 <span class="label label-default" id="opt-kxpa100">KXPA100</span>
                                 <span class="label label-default" id="opt-kxfl3">KXLF3</span>
@@ -29,7 +31,13 @@
                                 <span class="label label-default" id="opt-kx3-2m">KX3-2M</span>
                             </p>
                         </div>
+                        <div class="col-md-4">
+                            <p>KXPA100 Serial number: <span id="kxpa-sn">not enabled</span></p>
+                            <p>Firmware revision: <span id="kxpa-fwrv">not available</span></p>
+                        </div>
                     </div>
+                </div>
+                <div class="tab-pane" id="kx3">
                     <div class="row">
                         <div class="col-md-12">
                             <legend>Audio</legend>
@@ -46,6 +54,10 @@
                         </div>
                     </div>
                     <div class="row">
+                        <p>&nbsp;</p>
+                    </div>
+                    <!--
+                    <div class="row">
                         <div class="col-md-12">
                             <legend>Calibration</legend>
                         </div>
@@ -55,10 +67,11 @@
                             RX Calibration freq: <span id="kx3-refcal"></span>
                         </div>
                     </div>
+                    -->
                 </div>
                 <div class="tab-pane" id="kxpa100">
                     <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="row">
                             <div class="col-md-12">
                                 <h4>Amplifier</h4>
@@ -69,18 +82,18 @@
                                 <div class="panel panel-default">
                                     <div class="panel-body">
                                         <div class="col-md-4">
-                                            Input Power: 0.0 <br>
-                                            Drain Current: 0.0 <br>
-                                            Supply Voltage: 0.0 <br>
-                                            Dissipater Power: 0.0 <br>
-                                            Temperature: 0.0 <br>
+                                            Input Power:    <span id="kxpa-inputpower">0.0</span><br>
+                                            Drain Current:  <span id="kxpa-inputcurrent">0.0</span><br>
+                                            Supply Voltage: <span id="kxpa-inputvoltage">.0</span><br>
+                                            Dissipater Power: <span id="kxpa-dissipatedpower">0.0</span><br>
+                                            Temperature: <span id="kxpa-temperature">0.0</span><br>
                                         </div>
                                         <div class="col-md-4">
-                                            Forward Power: 0.0 <br>
-                                            Reflected Power: 0.0 <br>
-                                            Last SWR: 0.0 <br>
-                                            Frequency: <br>
-                                            Band: <br>
+                                            Forward Power: <span id="kxpa-forwardpower">0.0</span><br>
+                                            Reflected Power: <span id="kxpa-reflectedpower">0.0</span><br>
+                                            Last SWR: <span id="kxpa-lastswr">0.0</span><br>
+                                            Frequency: <span id="kxpa-frequency"></span><br>
+                                            Band: <span id="kxpa-band"></span><br>
                                         </div>
                                         <div class="col-md-4">
                                             Fault <br>                            
@@ -90,7 +103,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="row">
                             <div class="col-md-12">
                                 <h4>Antenna Tuner</h4>
@@ -151,8 +164,10 @@
                 
                 
             </div>
-    
-    <div class="row">
+
+        </div>
+    </div>
+    <div class="row showstream">
         <div class="col-md-12">
              <div class="input-group">
                  <span class="input-group-addon">Manual Command</span>
@@ -163,7 +178,8 @@
             <br>
         </div>
     </div>
-    <div class="row">
+            
+<div class="row showstream">
         <div class="col-md-12">
             <div class="well">
                 <h6>Raw data stream</h6>

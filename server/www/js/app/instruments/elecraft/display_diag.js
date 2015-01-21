@@ -47,13 +47,22 @@ define(function (require) {
     return Backbone.View.extend({
 
         initialize: function () {
+            // Don't stop the live stream anymore because we use it to monitor
+            // the amplifier
             linkManager.stopLiveStream();
             linkManager.on('input', this.showInput, this);
+            this.showstream = settings.get('showstream');
+            this.KXPAPoller = null;
         },
 
         render: function () {
             var self = this;
             $(this.el).html(template());
+            
+            // Hide the raw data stream if we don't want it
+            if (!this.showstream) {
+                $('.showstream',this.el).css('visibility', 'hidden');
+            }
 
             require(['app/instruments/elecraft/equalizer'], function (view) {
                 self.elecraftRXEQ = new view({
@@ -70,7 +79,7 @@ define(function (require) {
 
             // Force rendering of KX3 tab, somehow the drawing on the tab does not work
             // very well until I click, otherwise
-            $("#kx3").tab();
+            $("#settingsTabs a:first", this.el).tab('show');
 
             return this;
         },
@@ -80,15 +89,25 @@ define(function (require) {
             linkManager.off('input', this.showInput, this);
             this.elecraftTXEQ.onClose();
             this.elecraftRXEQ.onClose();
+            clearInterval(this.KXPAPoller);
         },
 
         events: {
             "click #cmdsend": "sendcmd",
             "keypress input#manualcmd": "sendcmd",
             "click #px3-screenshot": "take_screenshot",
-            "click #screenshot": "save_screenshot"
+            "click #screenshot": "save_screenshot",
+            'shown.bs.tab a[data-toggle="tab"]': "tab_shown"
         },
 
+        tab_shown: function(e) {
+            if (e.target.innerText == 'KXPA100') {
+                this.KXPAPoller = setInterval(this.queryKXPA.bind(this), 1000);
+            } else {
+                clearInterval(this.KXPAPoller);
+            }
+        },
+        
         makeTXEQ: function () {
             var self = this;
             require(['app/instruments/elecraft/equalizer'], function (view) {
@@ -122,7 +141,11 @@ define(function (require) {
         queryKX3: function () {
             $("#kx3-sn", this.el).html(instrumentManager.getInstrument().get('uuid'));
             linkManager.sendCommand("RVM;RVD;OM;");
-
+        },
+        
+        queryKXPA: function() {
+            linkManager.sendCommand('^PI;^PF;^PV;^TM;^SW;');
+            linkManager.sendCommand('^PC;^SV;^F;^BN;');
         },
 
         sendcmd: function (event) {
@@ -132,19 +155,20 @@ define(function (require) {
         },
 
         showInput: function (data) {
-            // Update our raw data monitor
-            var i = $('#input', this.el);
-            var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-            // Keep max 50 lines:
-            if (scroll.length > 50) {
-                scroll = scroll.slice(scroll.length - 50);
+            
+            if (this.showstream) {
+                // Update our raw data monitor
+                var i = $('#input', this.el);
+                var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
+                // Keep max 50 lines:
+                if (scroll.length > 50) {
+                    scroll = scroll.slice(scroll.length - 50);
+                }
+                i.val(scroll.join('\n'));
+                // Autoscroll:
+                i.scrollTop(i[0].scrollHeight - i.height());
             }
-            i.val(scroll.join('\n'));
-            // Autoscroll:
-            i.scrollTop(i[0].scrollHeight - i.height());
-
-
-
+            
             if (data.screenshot != undefined) {
                 // Restore PA Mode from state before screenshot:
                 if (pamode_on) {
@@ -179,6 +203,34 @@ define(function (require) {
                 $('#px3-screenshot').html('Take Screenshot');
             } else if (data.downloading != undefined) {
                 $('#bmdownload', this.el).width(data.downloading + "%");
+            } else if (data.charAt(0) == '^') {
+                var cmd = data.substr(1, 2);
+                var val = parseInt(data.substr(3)) / 10;
+                var stamp = new Date().getTime();
+                if (cmd == "PI") {
+                    $("#kxpa-inputpower").html(val);
+                } else if (cmd == "PF") {
+                    $("#kxpa-forwardpower").html(val);
+                } else if (cmd == "PV") {
+                    $("#kxpa-reflectedpower").html(val);
+                } else if (cmd == "TM") {
+                    $("#kxpa-temperature").html(val);
+                } else if (cmd == "PC") {
+                    $("#kxpa-inputcurrent").html(val);
+                } else if (cmd == "SV") {
+                    var val = Math.floor(val) / 100;
+                    $("#kxpa-inputvoltage").html(val);
+                } else if (cmd == 'SN') {
+                    $("#kxpa-sn",this.el).html(data.substr(3));
+                } else if (cmd == 'RV') {
+                    $("#kxpa-fwrv",this.el).html(data.substr(3));
+                } else if (cmd == 'BN') {
+                    $("#kxpa-band",this.el).html(data.substr(3));
+                } else if (cmd == 'SW') {
+                    $("#kxpa-lastswr",this.el).html(data.substr(3));
+                } else if (data.charAt(1) == 'F') {
+                   $("#kxpa-frequency",this.el).html(data.substr(2));
+                }
             } else {
                 // Populate fields depending on what we get:
                 var da2 = data.substr(0, 2);
@@ -195,6 +247,11 @@ define(function (require) {
                     setLabel("#opt-kxat100", this.el, (data.charAt(9) == 'T'));
                     setLabel("#opt-kxbc3", this.el, (data.charAt(10) == 'B'));
                     setLabel("#opt-kx3-2m", this.el, (data.charAt(11) == 'X'));
+                    
+                    if (data.charAt(4) == 'P') {
+                        // Query the KXPA100 for its serial number
+                        linkManager.sendCommand('^SN;^RV;');
+                    }
                 } else if (da2 == 'MP') {
                     pamode_on = (data.substr(2) === '000') ? false : true;
                     if (taking_screenshot) {
