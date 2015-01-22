@@ -91,7 +91,7 @@ define(function (require) {
                 }
             };
             
-            this.plotOveriewSettings = {
+            this.plotOverviewSettings = {
                 selectable: true,
                 vertical_stretch: false,
                 points: 0,
@@ -110,24 +110,7 @@ define(function (require) {
 
             // TODO: save color palette in settings ?
             // My own nice color palette:
-            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
-
-
-            this.overviewOptions = {
-                legend: {
-                    show: false
-                },
-                xaxis: {
-                    mode: "time",
-                    show: false,
-                    ticks: 4
-                },
-                yaxis: {
-                    ticks: 4
-                },
-                colors: this.palette,
-            };
-
+            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"];
         },
 
         handleProgress: function (e) {
@@ -277,7 +260,7 @@ define(function (require) {
 
             this.overview = new simpleplot({
                 model: this.model,
-                setting: this.plotOverviewSettings
+                settings: this.plotOverviewSettings
             });
             if (this.overview != null) {
                 $('#overview', this.el).empty().append(this.overview.el);

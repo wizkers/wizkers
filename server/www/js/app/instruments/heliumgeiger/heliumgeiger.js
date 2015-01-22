@@ -33,8 +33,7 @@ define(function(require) {
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities    
         this.getCaps = function() {
-            return ["LiveDisplay", "NumDisplay", "LogView",
-                    "LogManagementView"
+            return ["LiveDisplay", "NumDisplay", "LogView"
                    ];
         };
         
@@ -103,9 +102,6 @@ define(function(require) {
 
         // Return a device log management view
         this.getLogManagementView = function(arg, callback) {
-            require(['app/instruments/onyx/display_logmanager'], function(view) {
-                callback(new view(arg));
-            });
         }
 
         // Render a log (or list of logs) for the device.
@@ -117,9 +113,6 @@ define(function(require) {
 
         // Render a log edit table for a log collection for the device
         this.getLogEditView = function(arg, callback) {
-            require(['app/instruments/onyx/display_logedit'], function(view) {
-                callback(new view(arg));
-            });
         }
     };
 });
