@@ -27,6 +27,7 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
+        simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/ElecraftDiagView.js');
 
     // Need to load these, but no related variables.
@@ -53,6 +54,35 @@ define(function (require) {
             linkManager.on('input', this.showInput, this);
             this.showstream = settings.get('showstream');
             this.KXPAPoller = null;
+            
+            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
+
+            // We will pass this when we create plots, this is the global
+            // config for the look and feel of the plot
+            this.plotoptions = {
+                points: 150, // 2.5 minutes @ 1 Hz
+                plot_options: {
+                    xaxes: [{
+                            mode: "time",
+                            show: true,
+                            timeformat: "%M:%S",
+                            timezone: settings.get("timezone")
+                        },
+                       ],
+                    yaxis: {
+                        min: 0
+                    },
+                    grid: {
+                        hoverable: true,
+                        clickable: true
+                    },
+                    legend: {
+                        position: "ne"
+                    },
+                    colors: this.palette,
+                }
+            };
+
         },
 
         render: function () {
@@ -80,7 +110,8 @@ define(function (require) {
             // Force rendering of KX3 tab, somehow the drawing on the tab does not work
             // very well until I click, otherwise
             $("#settingsTabs a:first", this.el).tab('show');
-
+            
+            this.addPlot();
             return this;
         },
 
@@ -89,6 +120,11 @@ define(function (require) {
             linkManager.off('input', this.showInput, this);
             this.elecraftTXEQ.onClose();
             this.elecraftRXEQ.onClose();
+            // Remove the window resize bindings on our plots:
+            this.tempplot.onClose();
+            this.amppowerplot.onClose();
+            this.voltplot.onClose();
+            this.swrplot.onClose();
             clearInterval(this.KXPAPoller);
         },
 
@@ -98,6 +134,42 @@ define(function (require) {
             "click #px3-screenshot": "take_screenshot",
             "click #screenshot": "save_screenshot",
             'shown.bs.tab a[data-toggle="tab"]': "tab_shown"
+        },
+        
+        addPlot: function () {
+            // Now initialize the plot areas:
+            this.tempplot = new simpleplot({
+                model: this.model,
+                settings: this.plotoptions
+            });
+            if (this.tempplot != null) {
+                $('.amptempchart', this.el).append(this.tempplot.el);
+                this.tempplot.render();
+            }
+            this.amppowerplot = new simpleplot({
+                model: this.model,
+                settings: this.plotoptions
+            });
+            if (this.amppowerplot != null) {
+                $('.amppowerchart', this.el).append(this.amppowerplot.el);
+                this.amppowerplot.render();
+            }
+            this.voltplot = new simpleplot({
+                model: this.model,
+                settings: this.plotoptions
+            });
+            if (this.voltplot != null) {
+                $('.ampvoltagechart', this.el).append(this.voltplot.el);
+                this.voltplot.render();
+            }
+            this.swrplot = new simpleplot({
+                model: this.model,
+                settings: this.plotoptions
+            });
+            if (this.swrplot != null) {
+                $('.ampswrchart', this.el).append(this.swrplot.el);
+                this.swrplot.render();
+            }
         },
 
         tab_shown: function(e) {
@@ -209,17 +281,41 @@ define(function (require) {
                 var stamp = new Date().getTime();
                 if (cmd == "PI") {
                     $("#kxpa-inputpower").html(val);
+                    this.amppowerplot.appendPoint({
+                        'name': "In",
+                        'value': val
+                    });
                 } else if (cmd == "PF") {
                     $("#kxpa-forwardpower").html(val);
+                    this.amppowerplot.appendPoint({
+                        'name': "Fwd",
+                        'value': val
+                    });
                 } else if (cmd == "PV") {
                     $("#kxpa-reflectedpower").html(val);
+                    this.amppowerplot.appendPoint({
+                        'name': "Rev",
+                        'value': val
+                    });
                 } else if (cmd == "TM") {
                     $("#kxpa-temperature").html(val);
+                    this.tempplot.appendPoint({
+                        'name': "PA.X",
+                        'value': val
+                    });
                 } else if (cmd == "PC") {
                     $("#kxpa-inputcurrent").html(val);
+                    this.voltplot.appendPoint({
+                        'name': "A",
+                        'value': val
+                    });
                 } else if (cmd == "SV") {
                     var val = Math.floor(val) / 100;
                     $("#kxpa-inputvoltage").html(val);
+                    this.voltplot.appendPoint({
+                        'name': "V",
+                        'value': val
+                    });
                 } else if (cmd == 'SN') {
                     $("#kxpa-sn",this.el).html(data.substr(3));
                 } else if (cmd == 'RV') {
@@ -228,6 +324,10 @@ define(function (require) {
                     $("#kxpa-band",this.el).html(data.substr(3));
                 } else if (cmd == 'SW') {
                     $("#kxpa-lastswr",this.el).html(data.substr(3));
+                    this.swrplot.appendPoint({
+                        'name': "SWR",
+                        'value': val
+                    });
                 } else if (data.charAt(1) == 'F') {
                    $("#kxpa-frequency",this.el).html(data.substr(2));
                 }

@@ -96,7 +96,7 @@
                                             Band: <span id="kxpa-band"></span><br>
                                         </div>
                                         <div class="col-md-4">
-                                            Fault <br>                            
+                                            Fault (not implemented)<br>                            
                                         </div>
                                     </div>
                                 </div>
@@ -113,7 +113,29 @@
                             <div class="col-md-12">
                                 <div class="panel panel-default">
                                     <div class="panel-body">
-                                        <p>Mode, Antenna (1/2), Capacitance (pF), Inductance (nH), ATU Bypassed, Caps on TX Side</p>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <p>Mode:</p>
+                                                <p>Antenna:</p>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <p>Capacitance (pF)</p>
+                                                        <p><span id="kxpa-cap"></span></p>
+                                                        <p>
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p>Inductance (nH)</p>
+                                                        <p><span id="kxpa-ind"></span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <p>Tune</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -122,18 +144,40 @@
                     </div>
                     <div class="row">
                         <div class="col-md-3">
-                            <p>Input Power, Forward Power, Reflected Power, Dissipated Power</p>
+                            <h4>Power</h4>
                         </div>
                         <div class="col-md-3">
-                            <p>Temperature</p>
+                            <h4>Temperature</h4>
                         </div>
                         <div class="col-md-3">
-                            <p>Supply Voltage, Drain Current</p>
+                            <h4>Supply</h4>
                         </div>
                         <div class="col-md-3">
-                            <p>SWR</p>
+                            <h4>SWR</h4>
                         </div>
                     </div> <!-- Add here Amplifier graphs -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="thumbnail">
+                                <div class="amppowerchart chart" style="position: relative; height:200px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="thumbnail">
+                                <div class="amptempchart chart" style="position: relative; height:200px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="thumbnail">
+                                <div class="ampvoltagechart chart" style="position: relative; height:200px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="thumbnail">
+                                <div class="ampswrchart chart" style="position: relative; height:200px;"></div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
                 <div class="tab-pane" id="px3">

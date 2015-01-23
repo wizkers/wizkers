@@ -113,6 +113,10 @@ define(function (require) {
             console.log("Elecraft numeric view closing...");
             linkManager.off('input', this.showInput, this);
             linkManager.off('status', this.updateStatus, this);
+            // Remove the window resize bindings on our plots:
+            this.tempplot.onClose();
+            this.amppowerplot.onClose();
+            this.voltplot.onClose();
         },
 
         updateStatus: function (data) {

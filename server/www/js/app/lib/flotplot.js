@@ -116,7 +116,7 @@ define(function (require) {
 
         render: function () {
             console.log("Rendering a simple chart widget");
-            $(this.el).html('<div class="chart" style="position: relative; min-height: 100px;"></div>');
+            $(this.el).html('<div class="chart" style="position: relative; width:100%; height: 100px;"></div>');
             this.addPlot();
             return this;
         },
