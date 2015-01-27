@@ -89,7 +89,7 @@ define(function(require) {
         console.log("Starting Rigctld server");
         this.addr = ipaddr;
         this.port = 4532;
-        this.maxConnections = 5;
+        this.maxConnections = 10;
         
         // Chrome requires a bunch of callbacks with their TCP Server stack
         this.callbacks = {

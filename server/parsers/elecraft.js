@@ -60,6 +60,7 @@ var Elecraft = function() {
         port_close_requested = false,
         self = this,
         streaming = false,
+        previouscmd = '',
         livePoller = null;
     
     // A few driver variables: we keep track of a few things
@@ -293,6 +294,9 @@ var Elecraft = function() {
     var rigctl_command = function(data,c) {
         // debug(data);
         var cmd = (data.substr(0,1) == "\\") ? data.substr(0,2) : data.substr(0,1);
+        if (cmd == previouscmd)
+            return;
+        previouscmd = cmd;
         switch (cmd) {
                 case "\\d": // "mp_state":
                     // No f**king idea what this means, but it makes hamlib happy.
