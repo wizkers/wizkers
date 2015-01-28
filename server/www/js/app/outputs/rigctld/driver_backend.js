@@ -146,10 +146,13 @@ define(function (require) {
 
         // RIGCTLD Emulation - super light, but does the trick for fldigi...
         var rigctl_command = function (data, c) {
-            console.log("[rig cmd] " + data);
+            //console.log("[rig cmd] " + data);
             var tmpstr = [];
             var cmd = (data.substr(0, 1) == "\\") ? data.substr(0, 2) : data.substr(0, 1);
-            if (cmd == previouscmd)
+            // makes communication more reliable if we start missing data,
+            // but sometimes, software sends "T" commands twice in a row, hence the
+            // test below:
+            if (cmd == previouscmd && cmd != "T")
                 return;
             previouscmd = cmd;
             switch (cmd) {

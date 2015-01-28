@@ -54,7 +54,9 @@ define(function (require) {
             linkManager.on('input', this.showInput, this);
             this.showstream = settings.get('showstream');
             this.KXPAPoller = null;
-            
+            this.currentCR = 0;
+            this.currentLR = 0;
+
             this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
 
             // We will pass this when we create plots, this is the global
@@ -88,10 +90,10 @@ define(function (require) {
         render: function () {
             var self = this;
             $(this.el).html(template());
-            
+
             // Hide the raw data stream if we don't want it
             if (!this.showstream) {
-                $('.showstream',this.el).css('visibility', 'hidden');
+                $('.showstream', this.el).css('visibility', 'hidden');
             }
 
             require(['app/instruments/elecraft/equalizer'], function (view) {
@@ -110,7 +112,7 @@ define(function (require) {
             // Force rendering of KX3 tab, somehow the drawing on the tab does not work
             // very well until I click, otherwise
             $("#settingsTabs a:first", this.el).tab('show');
-            
+
             this.addPlot();
             return this;
         },
@@ -129,13 +131,21 @@ define(function (require) {
         },
 
         events: {
-            "click #cmdsend": "sendcmd",
-            "keypress input#manualcmd": "sendcmd",
-            "click #px3-screenshot": "take_screenshot",
-            "click #screenshot": "save_screenshot",
-            'shown.bs.tab a[data-toggle="tab"]': "tab_shown"
+            'click #cmdsend': "sendcmd",
+            'keypress input#manualcmd': "sendcmd",
+            'click #px3-screenshot': "take_screenshot",
+            'click #screenshot': "save_screenshot",
+            'shown.bs.tab a[data-toggle="tab"]': "tab_shown",
+            'click input[id*="kxpa-cap"]': 'cap_click',
+            'click input[id*="kxpa-ind"]': 'ind_click',
+            'click input[id="kxpa-pa-attenuator"]': 'at_click',
+            'click input[id="kxpa-atu-bypass"]': 'atub_click',
+            'click input[id="kxpa-caps-tx"]': 'capstx_click',
+            'click input[id="kxpa-pa-bypass"]': 'pabypass_click',
+            'change #kxpa-antenna': 'change_ant',
+            'change #kxpa-mode': 'change_mode',
         },
-        
+
         addPlot: function () {
             // Now initialize the plot areas:
             this.tempplot = new simpleplot({
@@ -172,14 +182,104 @@ define(function (require) {
             }
         },
 
-        tab_shown: function(e) {
+        tab_shown: function (e) {
             if (e.target.innerText == 'KXPA100') {
+                linkManager.sendCommand('^CR;^LR;');
+                linkManager.sendCommand('^AT;^AN;');
+                linkManager.sendCommand('^BY;^MD;');
+                linkManager.sendCommand('^OP;^SI;');
                 this.KXPAPoller = setInterval(this.queryKXPA.bind(this), 1000);
             } else {
                 clearInterval(this.KXPAPoller);
             }
         },
         
+        cap_click: function(e) {
+            var val = parseInt(e.target.id.substr(e.target.id.lastIndexOf('-')+1));
+            var caps = [ 10, 22, 40, 82, 150, 300, 660, 1360 ];
+            var cr = this.currentCR;
+            if (e.target.checked) {
+                cr = cr | 1 << (caps.indexOf(val));
+            } else {
+                cr = cr & ~(1<< caps.indexOf(val));
+            }
+            this.currentCR = cr;
+            cr = cr.toString(16);
+            if (cr.length<2) { cr = '0' + cr; }
+            linkManager.sendCommand('^CR' + cr + ';');
+            setTimeout(function(){linkManager.sendCommand('^CR;')},50);
+        },
+        
+        ind_click: function(e) {
+            var val = parseInt(e.target.id.substr(e.target.id.lastIndexOf('-')+1));
+            var inds = [ 50, 110, 230, 480, 1000, 2100, 4400, 9000 ];
+            var lr = this.currentLR;
+            if (e.target.checked) {
+                lr = lr | 1 << (inds.indexOf(val));
+            } else {
+                lr = lr & ~(1<< inds.indexOf(val));
+            }
+            this.currentLR = lr;
+            lr = lr.toString(16);
+            if (lr.length<2) { lr = '0' + lr; }
+            linkManager.sendCommand('^LR' + lr + ';');
+            setTimeout(function(){linkManager.sendCommand('^LR;')},50);
+        },
+        
+        at_click: function(e) {
+            if (e.target.checked) {
+                linkManager.sendCommand('^AT1;');
+            } else {
+                linkManager.sendCommand('^AT0;');
+            }
+            setTimeout(function(){linkManager.sendCommand('^AT;')},50);
+        },
+        
+        capstx_click: function(e) {
+            if (e.target.checked) {
+                linkManager.sendCommand('^SIT;');
+            } else {
+                linkManager.sendCommand('^SIA;');
+            }
+            setTimeout(function(){linkManager.sendCommand('^SI;')},50);
+        },
+
+        change_ant: function(e) {
+            if ( $(e.target).val() == "ant2") {
+                linkManager.sendCommand('^AN2;');
+            } else {
+                linkManager.sendCommand('^AN1;');
+            }
+            setTimeout(function(){linkManager.sendCommand('^AN;')},50);
+        },
+        
+        atub_click: function(e) {
+            if (e.target.checked) {
+                linkManager.sendCommand('^BYB;');
+            } else {
+                linkManager.sendCommand('^BYN;');
+            }
+            setTimeout(function(){linkManager.sendCommand('^BY;^CR;^LR;')},50);
+        },
+
+        pabypass_click: function(e) {
+            if (e.target.checked) {
+                linkManager.sendCommand('^OP0;');
+            } else {
+                linkManager.sendCommand('^OP1;');
+            }
+            // The radio will usually set the Amplifier back to Bypass if it's switched
+            // on, so we double check the change here:
+            setTimeout(function(){linkManager.sendCommand('^OP;')},500);
+            setTimeout(function(){linkManager.sendCommand('^OP;')},2000);
+        },
+
+        change_mode: function(e) {
+            var md = $(e.target).val().substr(-1);
+            linkManager.sendCommand('^MD' + md + ';');
+            setTimeout(function(){linkManager.sendCommand('^MD;^BY;^CR;^LR;')},50);
+        },
+
         makeTXEQ: function () {
             var self = this;
             require(['app/instruments/elecraft/equalizer'], function (view) {
@@ -214,9 +314,14 @@ define(function (require) {
             $("#kx3-sn", this.el).html(instrumentManager.getInstrument().get('uuid'));
             linkManager.sendCommand("RVM;RVD;OM;");
         },
-        
-        queryKXPA: function() {
-            linkManager.sendCommand('^PI;^PF;^PV;^TM;^SW;');
+
+        // Called every second when the KXPA100 tab is shown
+        queryKXPA: function () {
+            // Split in several smaller strings, otherwise the KX3 and Wizkers
+            // compete for KXPA100 access. The best way would be to only send the next command when
+            // response to the previous is received.
+            linkManager.sendCommand('^PI;^PF;');
+            linkManager.sendCommand('^PV;^TM;^SW;');
             linkManager.sendCommand('^PC;^SV;^F;^BN;');
         },
 
@@ -226,8 +331,108 @@ define(function (require) {
                 linkManager.sendCommand($('#manualcmd', this.el).val());
         },
 
+        // All the UI updates related to KXPA100
+        handleKXAInput: function (data) {
+            var cmd = data.substr(1, 2);
+            var val = parseInt(data.substr(3)) / 10;
+            var stamp = new Date().getTime();
+            if (cmd == "PI") {
+                $("#kxpa-inputpower").html(val);
+                this.amppowerplot.appendPoint({
+                    'name': "In",
+                    'value': val
+                });
+            } else if (cmd == "PF") {
+                $("#kxpa-forwardpower").html(val);
+                this.amppowerplot.appendPoint({
+                    'name': "Fwd",
+                    'value': val
+                });
+            } else if (cmd == "PV") {
+                $("#kxpa-reflectedpower").html(val);
+                this.amppowerplot.appendPoint({
+                    'name': "Rev",
+                    'value': val
+                });
+            } else if (cmd == "TM") {
+                $("#kxpa-temperature").html(val);
+                this.tempplot.appendPoint({
+                    'name': "PA.X",
+                    'value': val
+                });
+            } else if (cmd == "PC") {
+                $("#kxpa-inputcurrent").html(val);
+                this.voltplot.appendPoint({
+                    'name': "A",
+                    'value': val
+                });
+            } else if (cmd == "SV") {
+                var val = Math.floor(val) / 100;
+                $("#kxpa-inputvoltage").html(val);
+                this.voltplot.appendPoint({
+                    'name': "V",
+                    'value': val
+                });
+            } else if (cmd == 'SN') {
+                $("#kxpa-sn", this.el).html(data.substr(3));
+            } else if (cmd == 'RV') {
+                $("#kxpa-fwrv", this.el).html(data.substr(3));
+            } else if (cmd == 'BN') {
+                $("#kxpa-band", this.el).html(data.substr(3));
+            } else if (cmd == 'SW') {
+                $("#kxpa-lastswr", this.el).html(data.substr(3));
+                this.swrplot.appendPoint({
+                    'name': "SWR",
+                    'value': val
+                });
+            } else if (data.charAt(1) == 'F') {
+                $("#kxpa-frequency", this.el).html(data.substr(2));
+            } else if (cmd == 'CR') {
+                var val = parseInt(data.substr(3),16);
+                this.currentCR = val;
+                var sum = 0;
+                var caps = [ 10, 22, 40, 82, 150, 300, 660, 1360 ];
+                for (var i=0; i < 8; i++) {
+                    if ( val & (1<<i) ) {
+                        $('#kxpa-cap-' + caps[i], this.el).prop('checked',true);
+                        sum += caps[i];
+                    } else {
+                        $('#kxpa-cap-' + caps[i], this.el).prop('checked',false);
+                    }
+                }
+                $('#kxpa-cap',this.el).html(sum);
+            } else if (cmd == 'LR') {
+                var val = parseInt(data.substr(3),16);
+                this.currentLR = val;
+                var sum = 0;
+                var inds = [ 50, 110, 230, 480, 1000, 2100, 4400, 9000 ];
+                for (var i=0; i < 8; i++) {
+                    if ( val & (1<<i) ) {
+                        $('#kxpa-ind-' + inds[i], this.el).prop('checked',true);
+                        sum += inds[i];
+                    } else {
+                        $('#kxpa-ind-' + inds[i], this.el).prop('checked',false);
+                    }
+                }
+                $('#kxpa-ind',this.el).html(sum);
+            } else if (cmd == 'AT') {
+                $('#kxpa-pa-attenuator',this.el).prop('checked', (data.substr(-1,1) == "1"));
+            } else if (cmd == 'AN') {
+                $('#kxpa-antenna',this.el).val('ant' + data.substr(-1,1));
+            } else if (cmd == 'BY') {
+                $('#kxpa-atu-bypass',this.el).prop('checked', (data.substr(-1,1) == "B"));
+            } else if (cmd == 'MD') {
+                $('#kxpa-mode',this.el).val('kxpa-mode-' + data.substr(-1,1));
+            } else if (cmd == 'SI') {
+                $('#kxpa-caps-tx',this.el).prop('checked', (data.substr(-1,1) == "T"));
+            } else if (cmd == 'OP') {
+                $('#kxpa-pa-bypass',this.el).prop('checked', (data.substr(-1,1) == "0"));
+            }
+
+        },
+
         showInput: function (data) {
-            
+
             if (this.showstream) {
                 // Update our raw data monitor
                 var i = $('#input', this.el);
@@ -240,7 +445,7 @@ define(function (require) {
                 // Autoscroll:
                 i.scrollTop(i[0].scrollHeight - i.height());
             }
-            
+
             if (data.screenshot != undefined) {
                 // Restore PA Mode from state before screenshot:
                 if (pamode_on) {
@@ -276,61 +481,7 @@ define(function (require) {
             } else if (data.downloading != undefined) {
                 $('#bmdownload', this.el).width(data.downloading + "%");
             } else if (data.charAt(0) == '^') {
-                var cmd = data.substr(1, 2);
-                var val = parseInt(data.substr(3)) / 10;
-                var stamp = new Date().getTime();
-                if (cmd == "PI") {
-                    $("#kxpa-inputpower").html(val);
-                    this.amppowerplot.appendPoint({
-                        'name': "In",
-                        'value': val
-                    });
-                } else if (cmd == "PF") {
-                    $("#kxpa-forwardpower").html(val);
-                    this.amppowerplot.appendPoint({
-                        'name': "Fwd",
-                        'value': val
-                    });
-                } else if (cmd == "PV") {
-                    $("#kxpa-reflectedpower").html(val);
-                    this.amppowerplot.appendPoint({
-                        'name': "Rev",
-                        'value': val
-                    });
-                } else if (cmd == "TM") {
-                    $("#kxpa-temperature").html(val);
-                    this.tempplot.appendPoint({
-                        'name': "PA.X",
-                        'value': val
-                    });
-                } else if (cmd == "PC") {
-                    $("#kxpa-inputcurrent").html(val);
-                    this.voltplot.appendPoint({
-                        'name': "A",
-                        'value': val
-                    });
-                } else if (cmd == "SV") {
-                    var val = Math.floor(val) / 100;
-                    $("#kxpa-inputvoltage").html(val);
-                    this.voltplot.appendPoint({
-                        'name': "V",
-                        'value': val
-                    });
-                } else if (cmd == 'SN') {
-                    $("#kxpa-sn",this.el).html(data.substr(3));
-                } else if (cmd == 'RV') {
-                    $("#kxpa-fwrv",this.el).html(data.substr(3));
-                } else if (cmd == 'BN') {
-                    $("#kxpa-band",this.el).html(data.substr(3));
-                } else if (cmd == 'SW') {
-                    $("#kxpa-lastswr",this.el).html(data.substr(3));
-                    this.swrplot.appendPoint({
-                        'name': "SWR",
-                        'value': val
-                    });
-                } else if (data.charAt(1) == 'F') {
-                   $("#kxpa-frequency",this.el).html(data.substr(2));
-                }
+                this.handleKXAInput(data);
             } else {
                 // Populate fields depending on what we get:
                 var da2 = data.substr(0, 2);
@@ -347,7 +498,7 @@ define(function (require) {
                     setLabel("#opt-kxat100", this.el, (data.charAt(9) == 'T'));
                     setLabel("#opt-kxbc3", this.el, (data.charAt(10) == 'B'));
                     setLabel("#opt-kx3-2m", this.el, (data.charAt(11) == 'X'));
-                    
+
                     if (data.charAt(4) == 'P') {
                         // Query the KXPA100 for its serial number
                         linkManager.sendCommand('^SN;^RV;');
