@@ -268,10 +268,7 @@ define(function (require) {
             } else {
                 linkManager.sendCommand('^OP1;');
             }
-            // The radio will usually set the Amplifier back to Bypass if it's switched
-            // on, so we double check the change here:
-            setTimeout(function(){linkManager.sendCommand('^OP;')},500);
-            setTimeout(function(){linkManager.sendCommand('^OP;')},2000);
+            // We query OP status in the regular calls
         },
 
         change_mode: function(e) {
@@ -320,7 +317,7 @@ define(function (require) {
             // Split in several smaller strings, otherwise the KX3 and Wizkers
             // compete for KXPA100 access. The best way would be to only send the next command when
             // response to the previous is received.
-            linkManager.sendCommand('^PI;^PF;');
+            linkManager.sendCommand('^PI;^PF;^OP;');
             linkManager.sendCommand('^PV;^TM;^SW;');
             linkManager.sendCommand('^PC;^SV;^F;^BN;');
         },

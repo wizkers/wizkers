@@ -47,7 +47,9 @@ require.config({
         dsp: 'lib/dsp',
         chroma: 'lib/chroma',
         resampler: 'lib/resampler',
-
+        
+        // jQuery Terminal plugin
+        terminal: 'lib/jquery.terminal-0.8.8',
         
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
