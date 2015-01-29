@@ -40,7 +40,7 @@ define(function (require) {
     return Backbone.View.extend({
 
         initialize: function (options) {
-            this.scrollback = this.model.get('metadata').lines;
+            this.scrollback = parseInt(this.model.get('metadata').lines) || 200;
             this.parser_option = "raw";
             linkManager.on('status', this.updatestatus, this);
             linkManager.on('input', this.showInput, this);
