@@ -31,7 +31,8 @@
 define(function(require) {
     "use strict";
 
-    var Serialport = require('serialport');
+    var Serialport = require('serialport'),
+        abutils = require('app/lib/abutils');
     
     var parser = function(socket) {
         
@@ -55,7 +56,7 @@ define(function(require) {
                 // we have to make sure we use "binary" encoding below,
                 // otherwise the parser will assume Unicode and mess up the
                 // values.
-                parser: Serialport.parsers.readline('\n'),
+                parser: Serialport.parsers.raw,
             }
         };
 
@@ -70,14 +71,14 @@ define(function(require) {
         // Format can act on incoming data from the counter, and then
         // forwards the data to the app through a 'serialEvent' event.
         this.format = function(data) {
-            socket.sendDataToFrontend(data);
+            socket.sendDataToFrontend(abutils.ab2str(data));
         };
     
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
         // HTML interface.
         this.output = function(data) {
-            return data + '\n';
+            return data;
         };
         
         // Status returns an object that is concatenated with the
