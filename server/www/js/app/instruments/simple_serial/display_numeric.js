@@ -41,6 +41,7 @@ define(function(require) {
         },
 
         events: {
+            "change #serial-display": "update_parser",
         },
 
         render:function () {
@@ -48,6 +49,11 @@ define(function(require) {
             console.log('Main render of Simple Serial numeric view');
             $(this.el).html(template());
             return this;
+        },
+        
+        update_parser: function(e) {
+            console.log("Update parser");
+            instrumentManager.liveViewRef().update_parser(e);
         },
 
         onClose: function() {

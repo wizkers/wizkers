@@ -29,7 +29,7 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        utils = require('app/utils'),
+        abutils = require('app/lib/abutils'),
         template = require('js/tpl/instruments/SimpleSerialLiveView.js');
 
     // Load the jQuery terminal plugin
@@ -40,6 +40,7 @@ define(function (require) {
 
         initialize: function (options) {
             this.scrollback = this.model.get('metadata').lines;
+            this.parser_option = "raw";
             linkManager.on('status', this.updatestatus, this);
             linkManager.on('input', this.showInput, this);
         },
@@ -57,7 +58,11 @@ define(function (require) {
             var self = this;
             console.log('Main render of Simple Serial live view');
             $(this.el).html(template());
-            this.term = $('#terminal').terminal(this.handleTerminal, {});
+            this.term = $('#terminal').terminal(this.handleTerminal, {
+                historySize: this.scrollback,
+                greetings: '',
+                prompt: '',
+            });
 
             linkManager.requestStatus();
             return this;
@@ -70,12 +75,25 @@ define(function (require) {
         },
 
         updatestatus: function (data) {
-            console.log("Simple Serial live display: serial status update");
+        },
+        
+        // Called by the Num View
+        update_parser: function(e) {
+            this.parser_option = $(e.target).val();
         },
 
         // We get there whenever we receive something from the serial port
         showInput: function (data) {
-            this.term.echo(data);
+            var output = '';
+            switch (this.parser_option) {
+                    case 'Hexadecimal':
+                        output = abutils.hexdump(data);
+                        break;
+                    default:
+                        output = data;
+                        break;
+            }
+            this.term.echo(output);
         },
     });
 

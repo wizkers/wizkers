@@ -131,7 +131,12 @@ a.plain:hover {
    /* min-height: 200px; */
 }
 
-
+/**
+ * Terminal plugin: enable text selection
+ */
+#terminal {
+    -webkit-user-select: text
+}
 
 
 @media only screen and ( max-width : 1000px ) {
