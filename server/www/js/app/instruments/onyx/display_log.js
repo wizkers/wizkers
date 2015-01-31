@@ -90,7 +90,7 @@ define(function (require) {
                     colors: this.palette,
                 }
             };
-            
+
             this.plotOverviewSettings = {
                 selectable: true,
                 vertical_stretch: false,
@@ -205,7 +205,7 @@ define(function (require) {
                 if (type == 'live') {
                     csv += "CPM, CPM30, CPMRAW, Valid\n";
                 } else {
-                    csv += "accel_x_end, accel_x_start, accel_y_end, accel_y_start, accel_z_end, accel_z_start, cpm, duration (min), time (ISO String)\n";
+                    csv += "accel_x_start, accel_x_end, accel_y_start, accel_y_end, accel_z_start, accel_z_end, cpm, duration (min), time on device (ISO String)\n";
                 }
                 for (var j = 0; j < entries.length; j++) {
                     var entry = entries.at(j);
@@ -221,12 +221,25 @@ define(function (require) {
                         // app.
                         var ts = new Date(entry.get('timestamp')).toISOString().replace(/[TZ]/g, ' ');
                         csv += ts;
-                        // Our live data is packed a bit differently than onyxlog data:
+                        // Our live data is packed a bit differently than onyxlog data
+                        // Note: I tried a generic "for key in data" but the order
+                        // the keys are returned can change randomly, leading to wrong outout, which is
+                        // why I am using explicit key names:
                         if (type == 'live') {
-                            data = data.cpm;
-                        }
-                        for (var key in data) {
-                            csv += ',' + data[key];
+                            csv += ',' + data.cpm.value +
+                                ',' + data.cpm.cpm30 +
+                                ',' + data.cpm.raw +
+                                ',' + data.cpm.valid;
+                        } else {
+                            csv += ',' + data.accel_x_start +
+                                ',' + data.accel_x_end +
+                                ',' + data.accel_y_start +
+                                ',' + data.accel_y_end +
+                                ',' + data.accel_z_start +
+                                ',' + data.accel_z_end + 
+                                ',' + data.cpm +
+                                ',' + data.duration +
+                                ',' + data.time;
                         }
                         csv += '\n';
                     }
