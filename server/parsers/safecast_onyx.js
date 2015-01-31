@@ -27,12 +27,12 @@
 
 var serialport = require('serialport'),
     events = require('events'),
-    dbs = require('../pouch-config'),    
+    dbs = require('../pouch-config'),
     debug = require('debug')('wizkers:parsers:onyx'),
     serialconnection = require('../connections/serial');
 
-var Onyx = function() {
-    
+var Onyx = function () {
+
     // Init the EventEmitter
     events.EventEmitter.call(this);
 
@@ -40,7 +40,7 @@ var Onyx = function() {
     // Public variables
     /////////    
     this.name = "onyx";
-    
+
     /////////
     // Private variables
     /////////    
@@ -53,15 +53,15 @@ var Onyx = function() {
     var uidrequested = false;
     var streaming = false;
     var livePoller = null;
-    
+
     /////////
     // Private methods
     /////////
 
-    var status = function(stat) {
+    var status = function (stat) {
         debug('Port status change', stat);
         isopen = stat.portopen;
-        
+
         if (isopen) {
             // Should run any "onOpen" initialization routine here if
             // necessary.
@@ -75,8 +75,8 @@ var Onyx = function() {
     };
 
     // How the device is connected on the serial port            
-    var portSettings = function() {
-        return  {
+    var portSettings = function () {
+        return {
             baudRate: 115200,
             dataBits: 8,
             parity: 'none',
@@ -88,26 +88,24 @@ var Onyx = function() {
             parser: serialport.parsers.readline()
         }
     };
-    
-    var format = function(data) {
+
+    var format = function (data) {
         // All commands now return JSON
         try {
             //debug(Hexdump.dump(data.substr(0,5)));
-            if (data.substr(0,2) == "\n>")
+            if (data.substr(0, 2) == "\n>")
                 return;
             if (data.length < 2)
                 return;
             var response = JSON.parse(data);
-            if (this.uidrequested && response.guid != undefined) {
-                this.socket.emit('data',{uniqueID: response.guid});
-                this.uidrequested = false;
+            if (uidrequested && response.guid != undefined) {
+                self.emit('data', {
+                    uniqueID: response.guid
+                });
+                uidrequested = false;
             } else {
                 // Send the response to the front-end
                 self.emit('data', response);
-                // Send our response to the recorder and the output manager
-                // as well
-                recorder.record(response);
-                outputmanager.output(response);
             }
         } catch (err) {
             debug('Not able to parse JSON response from device:\n' + data);
@@ -115,25 +113,26 @@ var Onyx = function() {
         }
     };
 
-    
+
 
     /////////
     // Public methods
     /////////
-    
-        // Creates and opens the connection to the instrument.
+
+    // Creates and opens the connection to the instrument.
     // for all practical purposes, this is really the init method of the
     // driver
-    this.openPort = function(id) {
+    this.openPort = function (id) {
         instrumentid = id;
-        dbs.instruments.get(id, function(err,item) {
+        dbs.instruments.get(id, function (err, item) {
             port = new serialconnection(item.port, portSettings());
             port.on('data', format);
             port.on('status', status);
         });
     }
-    
-    this.closePort = function(data) {
+
+    this.closePort = function (data) {
+        this.stopLiveStream();
         // We need to remove all listeners otherwise the serial port
         // will never be GC'ed
         port.removeListener('data', format);
@@ -141,11 +140,11 @@ var Onyx = function() {
         port.close();
     }
 
-    this.isOpen = function() {
+    this.isOpen = function () {
         return isopen;
     }
-    
-    this.getInstrumentId = function(format) {
+
+    this.getInstrumentId = function (format) {
         return instrumentid;
     };
 
@@ -153,35 +152,34 @@ var Onyx = function() {
     // this is a standardized call across all drivers.
     // This particular device does not support this concept, so we
     // always return the same
-    this.sendUniqueID = function() {
-        this.uidrequested = true;
-        this.port.write(this.output('{ "get": "guid" }'));
+    this.sendUniqueID = function () {
+        uidrequested = true;
+        port.write(this.output('{ "get": "guid" }'));
     };
-    
-    this.isStreaming = function() {
-        return this.streaming;
+
+    this.isStreaming = function () {
+        return streaming;
     };
-    
-    this.startLiveStream = function(period) {
-        var self = this;
-        if (!this.streaming) {
+
+    this.startLiveStream = function (period) {
+        if (!streaming) {
             debug("Starting live data stream");
-            this.livePoller = setInterval(function() {
-                        self.port.write(self.output('GETCPM'));
-                    }, (period) ? period*1000: 1000);
-            this.streaming = true;
+            livePoller = setInterval(function () {
+                self.output('GETCPM');
+            }, (period) ? period * 1000 : 1000);
+            streaming = true;
         }
     };
-    
-    this.stopLiveStream = function(period) {
-        if (this.streaming) {
+
+    this.stopLiveStream = function (period) {
+        if (streaming) {
             debug("Stopping live data stream");
-            clearInterval(this.livePoller);
-            this.streaming = false;
+            clearInterval(livePoller);
+            streaming = false;
         }
     };
-        
-    this.output = function(data) {
+
+    this.output = function (data) {
         port.write(data + '\n\n');
     };
 
