@@ -79,18 +79,16 @@ var SimpleSerial = function() {
             parity: 'none',
             stopBits: 1,
             flowControl: false,
-            // simply pass each line to our JSON streaming parser
-            // Note: the Onyx outputs json with \n at the end, so
-            // the default readline parser works fine (it separates on \r)
-            parser: serialport.parsers.readline('\n'),
+            parser: serialport.parsers.raw,
         };
         
         return ps;
     };
 
-    // format should return a JSON structure.
+    // format just sends the raw data back, nothing more, nothing less, but translated
+    // into a string:
     var format = function(data) {
-        self.emit('data',data);
+        self.emit('data',data.toString());
     };
 
     /////////
@@ -153,7 +151,7 @@ var SimpleSerial = function() {
     // the data that is sent on the serial port, coming from the
     // HTML interface.
     this.output = function(data) {
-        port.write(data + '\n');
+        port.write(data);
     }
 };
 
