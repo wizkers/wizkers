@@ -430,5 +430,4 @@ define(function(require) {
     // Add event management to our serial lib, from the Backbone.Events class:
     _.extend(serialLib.prototype, Backbone.Events);    
     return new serialLib;
-    f
 });

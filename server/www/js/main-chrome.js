@@ -66,7 +66,7 @@ require.config({
      */
     map: {
         '*': {
-            'socketio': 'app/chromeSerialLib',
+            'socketio': 'app/chromeSocket',
             'serialport': 'app/lib/serialport',
         }
     },
