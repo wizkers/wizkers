@@ -43,12 +43,10 @@ define(function (require) {
         }
 
         this.getUpgrader = function (arg, callback) {
-            require(['app/instruments/usbgeiger/upgrader'], function (view) {
+            require(['app/instruments/fcoledv1/upgrader'], function (view) {
                 callback(new view(arg));
             });
         };
-
-
 
         // This has to be a backbone view
         this.getSettings = function (arg, callback) {
@@ -91,7 +89,6 @@ define(function (require) {
         this.getUploader = function () {
             return new uploader_frontend();
         };
-
 
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.

@@ -57,7 +57,7 @@ compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogMana
                  'instruments/W433LiveView', 'instruments/W433SettingsView', 'instruments/W433LogView', 'instruments/W433NumView',
                  'instruments/ElecraftDiagView', 'instruments/ElecraftFrequencyItemView', 'instruments/ElecraftLiveView',
                  'instruments/ElecraftNumView', 'instruments/ElecraftSettingsView',
-                 'instruments/ElecraftEqualizer',
+                 'instruments/ElecraftEqualizer', 'instruments/FCOledUpgrader', 
                  'instruments/FCOledLiveView', 'instruments/FCOledLogView', 'instruments/FCOledNumView',
                  'instruments/Fluke289DiagView', 'instruments/Fluke289LiveView', 'instruments/Fluke289LogManagementView',
                  'instruments/Fluke289LogView', 'instruments/Fluke289NumView',
