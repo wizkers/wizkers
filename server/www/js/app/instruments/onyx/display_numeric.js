@@ -67,8 +67,11 @@ define(function(require) {
             if (typeof(data.cpm) == 'undefined')
                 return;
             var cpm = parseFloat(data.cpm.value);
+            var usv = parseFloat(data.cpm.usv);
             $('#livecpm', this.el).html(cpm.toFixed(3));
-            $('#liveusvh', this.el).html((cpm*0.00294).toFixed(3) + "&nbsp;&mu;Sv/h");
+            if (usv) {
+                $('#liveusvh', this.el).html(usv.toFixed(3) + "&nbsp;&mu;Sv/h");
+            }
             
             if (data.cpm.valid)
                  $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('VALID');

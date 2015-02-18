@@ -66,7 +66,7 @@ define(function (require) {
                     },
                     legend: {
                         position: "ne",
-                        container: $('#legend')
+                        // container: $('#legend')
                     },
                     colors: ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
                 },
