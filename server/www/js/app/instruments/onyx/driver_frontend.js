@@ -100,6 +100,10 @@ define(function(require) {
             lm.sendCommand('DISPLAYTEST');
         };
 
+        this.getRTC = function() {
+            lm.sendCommand('{"get":"rtc"}');
+        }
+        
         this.settime = function() {
                 var unixTime = Math.round((new Date()).getTime() / 1000);
                 console.log('Unix time: ' + unixTime);

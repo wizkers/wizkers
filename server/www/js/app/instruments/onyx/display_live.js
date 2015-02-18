@@ -139,6 +139,7 @@ define(function(require) {
             var tag = $('#devicetagfield',this.el).val();
             linkManager.driver.setdevicetag(tag);
             $('#dtModal',this.el).modal('hide');
+            linkManager.driver.devicetag();
         },
 
 
@@ -177,13 +178,23 @@ define(function(require) {
                 linkManager.driver.devicetag();
             }
             
+            if (data.rtc != undefined) {
+                var date = new Date(parseInt(data.rtc)*1000);
+                if (date.getFullYear() < new Date().getFullYear()) {
+                    // We have a RTC that is wrong, need to sync it.
+                    linkManager.driver.settime();
+                    $('#stModal', this.el).modal('show');
+                }
+            }
+            
             if (data.devicetag != undefined) {
+                this.deviceinitdone = true;
                 if (data.devicetag == "No device tag set") {
                     // Show the device tag set dialog
                     $('#dtModal',this.el).modal('show');
                 } else {
+                    linkManager.driver.getRTC();
                     linkManager.startLiveStream(this.model.get('liveviewperiod'));
-                    this.deviceinitdone = true;
                 }
             } else {
                 if (data.cpm != undefined) {

@@ -167,7 +167,7 @@ define(function(require) {
                 this.instrument.save();
             } else
             if (savedUID != uid) {
-                alert("Oops, this is a new instrument of the same model, please create another entry in the instruments screen");
+                //alert("Oops, this is a new instrument of the same model, please create another entry in the instruments screen");
             }
             // Now, we are sure our instrument is linked to a UID, so we are able to save logs
             // in our backend database, that are uniquely linked to this instrument.

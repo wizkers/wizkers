@@ -122,8 +122,11 @@ define(function(require) {
             }
             if (data.devicetag != undefined) {
                 $('#devname', this.el).val(data.devicetag);
+                linkManager.driver.getRTC();
             }
-
+            if (data.rtc != undefined) {
+                $('#time', this.el).html(new Date(parseInt(data.rtc)*1000).toUTCString());
+            }
         }
     });
 });
