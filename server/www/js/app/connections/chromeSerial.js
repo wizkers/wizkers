@@ -71,8 +71,17 @@ define(function (require) {
             if (!self.portOpen ||  cmd == '')
                 return;
 
-            if (typeof cmd == "string")
-                cmd = abu.str2ab(cmd);
+            // We try to be a bit accomodating: detect strings, and
+            // ArrayBuffer-assimilated objects
+            switch (typeof cmd) {
+                    case 'string':
+                        cmd = abu.str2ab(cmd);
+                        break;
+                    case 'object': // Probably UInt8Array or similar
+                        if (cmd.buffer)
+                            cmd = cmd.buffer;
+                        break;
+            }
 
             cmd_queue.push({
                 'command': cmd,
