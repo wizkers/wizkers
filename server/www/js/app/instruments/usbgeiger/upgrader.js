@@ -45,8 +45,9 @@ define(function(require) {
         firmware: "",
         
         initialize: function() {
-            if (linkManager.isConnected())
+            if (linkManager.isConnected()) {
                 linkManager.closeInstrument();
+            }
             linkManager.on('input', this.showInput, this);
         },
         

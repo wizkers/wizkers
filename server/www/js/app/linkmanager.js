@@ -106,6 +106,8 @@ define(function(require) {
             }
 
             this.closeInstrument = function(id) {
+                if (id == undefined && instrumentManager.getInstrument())
+                    id = instrumentManager.getInstrument().id;
                 // Note: this will also close recording and streaming
                 // on the backend.
                 socket.emit('closeinstrument', id);

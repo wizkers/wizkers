@@ -156,7 +156,8 @@ define(function(require) {
         // (outputs/outputmanager.js)
         //  id: ID of the current instrument. We do not actually need it right now
         //      because we only have one instrument connected at a time.
-        this.enableOutputs = function(id) {
+        // driver: this one emits data, we need to subscribe to those data events
+        this.enableOutputs = function(id, driver) {
             var self = this;
             console.warn(id);
             var enabled = [];

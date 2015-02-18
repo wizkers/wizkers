@@ -42,11 +42,14 @@ define(function (require) {
         var self = this,
             driver = null,
             currentInstrumentid = null,
+            currentLog = null,
+            recording = false,
             uploader_mode = false; // Will be true when we have loaded the special uploader driver.
 
+        ////////////////////
         // Public methods
-
-        // Same API as for the socket object... pretty basic implementation, I know
+        // Same API as for the socket object on server.js (Node application)
+        //////////////////// 
         this.emit = function (cmd, args) {
             switch (cmd) {
             case 'portstatus':
@@ -70,7 +73,7 @@ define(function (require) {
                 getPorts(args);
                 break;
             case 'driver':
-                setDriver(args);
+                console.log("Legacy call to 'driver'");
                 break;
             case 'uploader': // Alternative driver type for firmware updates
                 setUploader(args);
@@ -104,18 +107,30 @@ define(function (require) {
         //  Private methods
         ////////
 
+        // Implementation of recording is kept here because we only
+        // have one instrument open at a time, so no need for the more
+        // complex implementation of the node.js version:
+        var record = function (data) {
+            // console.log("Recording " + data);
+            currentLog.entries.create({
+                timestamp: new Date().getTime(),
+                logsessionid: currentLog.id,
+                data: data
+            });
+        }
+
+
         var portStatus = function (insid) {
             if (insid)
                 console.log('portStatus', insid);
             var s = {
                 portopen: (driver) ? driver.isOpen() : false,
-                recording: false,
+                recording: recording,
                 streaming: (driver) ? driver.isStreaming() : false,
                 uploader: uploader_mode
             };
             self.trigger('status', s);
         }
-
 
         var openInstrument = function (insid) {
             connectionmanager.openInstrument(insid, function (d) {
@@ -124,13 +139,15 @@ define(function (require) {
                 // Listen for data coming in from our driver
                 driver.on('data', sendDataToFrontEnd);
                 // Reconnect the outputs for the instrument
-                // outputmanager.enableOutputs(insid, driver);
+                outputManager.enableOutputs(insid, driver);
             });
         }
 
         var closeInstrument = function (insid) {
             if (insid != currentInstrumentid) {
-                console.log("**** ERROR, the socket asked to close an instrument that is not the current instrument on this socket.", insid);
+                console.log(
+                    "**** ERROR, the socket asked to close an instrument that is not the current instrument on this socket.",
+                    insid);
                 return;
             }
 
@@ -146,23 +163,41 @@ define(function (require) {
         }
 
         var controllerCommand = function (data) {
-            console.log('controllerCommand');
+            driver.output(data);
         }
 
         var startRecording = function (logid) {
-            console.log('startRecording');
+            console.log("[chromeSocket] In-browser implementation of start recording");
+            currentLog = instrumentManager.getInstrument().logs.get(logid);
+            currentLog.fetch({
+                success: function () {
+                    currentLog.save({
+                        isrecording: true
+                    });
+                    recording = true;
+                }
+            });
         }
 
         var stopRecording = function () {
-            console.log('stopRecording');
+            console.log("[chromeSocket] In-browser implementation of stop recording");
+            if (currentLog) {
+                currentLog.save({
+                    isrecording: false
+                });
+                currentLog = null;
+            }
+            recording = false;
         }
 
         var startLiveStream = function (data) {
-            console.log('startLiveStream');
+            if (driver)
+                driver.startLiveStream(data);
         }
 
         var stopLiveStream = function () {
-            console.log('stopLiveStream');
+            if (driver)
+                driver.stopLiveStream();
         }
 
         var uniqueID = function () {
@@ -177,10 +212,19 @@ define(function (require) {
 
         var setOutputs = function (insid) {
             console.log('setOutputs');
+            if (driver) {
+                outputmanager.enableOutputs(insid, driver);
+            } else {
+                console.log("Skipped updating outputs because we have no driver (instrument is closed?)");
+            }
         }
 
         var setUploader = function (insid) {
-            console.log('setUploader');
+            // We can use our instrumentManager to ask for the right uploader driver
+            instrumentManager.getBackendUploaderDriver(self, function (d) {
+                driver = dr;
+                uploader_mode = true;
+            });
         }
 
         ///////////
@@ -198,6 +242,9 @@ define(function (require) {
                 self.trigger('uniqueID', data.uniqueID);
                 return;
             }
+            if (recording)
+                record(data);
+            outputManager.output(data);
             self.trigger('serialEvent', data);
         }
 
