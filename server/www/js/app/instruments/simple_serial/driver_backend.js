@@ -79,8 +79,6 @@ define(function (require) {
             self.trigger('data', abutils.ab2str(data));
         };
 
-        // Status returns an object that is concatenated with the
-        // global server status
         var status = function (stat) {
             console.log('Port status change', stat);
             isopen = stat.portopen;

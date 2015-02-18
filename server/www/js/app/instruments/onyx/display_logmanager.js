@@ -90,7 +90,7 @@ define(function (require) {
                 var time_left = (total - used) * interval / 3600;
                 // Make the user's life easier: above 48 hours, display in days/hours
                 if (time_left < 49) {
-                    $('$#timeleft', this.el).html(time_left + " hours");
+                    $('#timeleft', this.el).html(time_left + " hours");
                 } else {
                     var days = Math.floor(time_left / 24).toFixed(0);
                     var hours = Math.floor(time_left % 24).toFixed(0);

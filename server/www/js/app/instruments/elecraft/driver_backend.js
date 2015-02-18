@@ -29,67 +29,59 @@
  * Differences with server-side parser:
  *
  *   - 'socket' uses "trigger" to emit events, not "emit"
- * 
+ *
  *  @author Edouard Lafargue, ed@lafargue.name
  */
 
-define(function(require) {
+define(function (require) {
     "use strict";
 
     var Serialport = require('serialport'),
+        serialConnection = require('connections_serial'),
         Bitmap = require('app/lib/bitmap');
-                          
-    
-    var parser = function(socket) {
-        
-        var socket = socket;
+
+
+    var parser = function (socket) {
+
+        var socket = socket,
+            self = this;
         var serialport = null;
         var livePoller = null; // Reference to the live streaming poller
-        var streaming = false;
-                
+        var streaming = false,
+            port = null,
+            port_close_requested = false,
+            isopen = false;
+
         // Because Elecraft radios are not 100% consistent with their protocols,
         // we need to use a pure raw parser for data input, and most of the time,
         // forward that data to a readline parser. But sometimes, we will need the
         // raw input, for instance for Bitmap requests
-        var second_parser =  Serialport.parsers.readline(';','binary');
-        
+        var second_parser = Serialport.parsers.readline(';', 'binary');
+
         // Flag to indicate we are receiving a bitmap
         var waiting_for_bmp = false;
         var bitmap = new Uint8Array(131768);
         var bitmap_index = 0;
         var oldpercent = 0;
-        
-        // Private functions:
-        function onDataReady(data) {
-            if (this.uidrequested && data.substr(0,5) == "DS@@@") {
-                // We have a Unique ID
-                console.log("Sending uniqueID message");
-                socket.trigger('uniqueID','' + data.substr(5,5));
-                this.uidrequested = false;
-                return;
-            }
-            socket.sendDataToFrontend(data);
-        }
-        
+
+        /////////////
+        // Private methods
+        /////////////
+
         // Send the bitmap back to the front-end
         function sendBitmap() {
-                    var bm = new Bitmap(bitmap);
-                    bm.init();
-                    var data = bm.getData();
-                    socket.trigger('serialEvent', {screenshot: data, width:bm.getWidth(), height: bm.getHeight()});
+            var bm = new Bitmap(bitmap);
+            bm.init();
+            var data = bm.getData();
+            socket.trigger('serialEvent', {
+                screenshot: data,
+                width: bm.getWidth(),
+                height: bm.getHeight()
+            });
         };
-                
 
-        
-        
-        // Standard Driver API below
-
-        this.isStreaming = function() {
-            return streaming;
-        }
-        
-        this.portSettings = function() {
-            return  {
+        var portSettings = function () {
+            return {
                 baudRate: 38400,
                 dataBits: 8,
                 parity: 'none',
@@ -100,50 +92,60 @@ define(function(require) {
                 // we have to make sure we use "binary" encoding below,
                 // otherwise the parser will assume Unicode and mess up the
                 // values.
-                //parser: Serialport.parsers.readline(';','binary'),
                 parser: Serialport.parsers.raw,
             }
         };
 
-        // Called when the app needs a unique identifier.
-        // this is a standardized call across all drivers.
+
+        // Format can act on incoming data from the radio, and then
+        // forwards the data to the app through a 'data' event.
         //
-        // Returns the Radio serial number.
-        this.sendUniqueID = function() {
-            this.uidrequested = true;
-            try {
-                socket.emit('controllerCommand', "MN026;ds;MN255;");
-            } catch (err) {
-                console.log("Error on serial port while requesting Elecraft UID : " + err);
+        // data is an ArrayBuffer;
+        var format = function (data) {
+
+            if (!waiting_for_bmp) {
+                second_parser(self, data); // Careful not to use 'this' since 'this' in this context
+                // is chromeSerial !!
+                return;
+            }
+
+            // We are receiving a Bitmap: we know it is 131638 bytes plus a checksum
+            // Copy the data we received into our bitmap array buffer:
+            var tmpArray = new Uint8Array(data);
+            bitmap.set(tmpArray, bitmap_index);
+            bitmap_index += data.byteLength;
+            var percent = Math.floor(bitmap_index / 1000 / 132 * 100);
+            if (percent != oldpercent) {
+                self.trigger('data', {
+                    downloading: percent
+                });
+                oldpercent = percent;
+            }
+            if (bitmap_index > 131638) {
+                waiting_for_bmp = false;
+                console.log('[elecraft driver] Got the bitmap!');
+                sendBitmap();
+            }
+
+        };
+
+        var status = function (stat) {
+            console.log('Port status change', stat);
+            isopen = stat.portopen;
+
+            if (isopen) {
+                // Should run any "onOpen" initialization routine here if
+                // necessary.
+            } else {
+                // We remove the listener so that the serial port can be GC'ed
+                if (port_close_requested) {
+                    port.off('status', stat);
+                    port_close_requested = false;
+                }
             }
         };
-        
-        // period in seconds
-        this.startLiveStream = function(period) {
-            var self = this;
-            if (!streaming) {
-                console.log("[Elecraft] Starting live data stream");
-                // The radio can do live streaming to an extent, so we definitely will
-                // take advantage:
-                // K31 enables extended values such as proper BPF reporting
-                // AI2 does not send an initial report, so we ask for the initial data
-                // before...
-                socket.emit('controllerCommand','K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
-                livePoller = setInterval(queryRadio, (period) ? period*1000: 1000);
-                streaming = true;
-            }
-        };
-        
-        this.stopLiveStream = function(args) {
-            if (streaming) {
-                console.log("[Elecraft] Stopping live data stream");
-                // Stop live streaming from the radio:
-                socket.emit('controllerCommand','AI0;');
-                clearInterval(livePoller);
-                streaming = false;
-            }
-        };
-        
+
+
         function queryRadio() {
             // TODO: follow radio state over here, so that we only query power
             // when the radio transmits, makes much more sense
@@ -153,50 +155,104 @@ define(function(require) {
             // it won't hurt
 
             // Query displays and band (does not update by itself)
-            socket.emit('controllerCommand','DB;DS;BN;'); // Query VFO B and VFOA Display
+            port.write('DB;DS;BN;'); // Query VFO B and VFOA Display
 
             // Then ask the radio for current figures:
-            socket.emit('controllerCommand','PO;'); // Query actual power output
+            port.write('PO;'); // Query actual power output
 
             // And if we have an amp, then we can get a lot more data:
-            socket.emit('controllerCommand','^PI;^PF;^PV;^TM;');
-            socket.emit('controllerCommand','^PC;^SV;'); // Query voltage & current
+            port.write('^PI;^PF;^PV;^TM;');
+            port.write('^PC;^SV;'); // Query voltage & current
         };
-        
-        // Format can act on incoming data from the radio, and then
-        // forwards the data to the app through a 'serialEvent' event.
+
+        /////////////
+        // Public methods
+        /////////////
+
+        this.openPort = function (insid) {
+            var ins = instrumentManager.getInstrument();
+            port = new serialConnection(ins.get('port'), portSettings());
+            port.on('data', format);
+            port.on('status', status);
+
+        };
+
+        this.closePort = function (data) {
+            // We need to remove all listeners otherwise the serial port
+            // will never be GC'ed
+            port.off('data', format);
+            port_close_requested = true;
+            port.close();
+        }
+
+        this.isOpen = function () {
+            return isopen;
+        }
+
+        this.getInstrumentId = function (arg) {};
+
+        this.isStreaming = function () {
+            return streaming;
+        }
+
+        // Called when the app needs a unique identifier.
+        // this is a standardized call across all drivers.
         //
-        // data is an ArrayBuffer;
-        this.format = function(data) {
-            
-            if (!waiting_for_bmp) {
-                second_parser(this,data);
+        // Returns the Radio serial number.
+        this.sendUniqueID = function () {
+            this.uidrequested = true;
+            try {
+                port.write("MN026;ds;MN255;");
+            } catch (err) {
+                console.log("Error on serial port while requesting Elecraft UID : " + err);
+            }
+        };
+
+        // period in seconds
+        this.startLiveStream = function (period) {
+            var self = this;
+            if (!streaming) {
+                console.log("[Elecraft] Starting live data stream");
+                // The radio can do live streaming to an extent, so we definitely will
+                // take advantage:
+                // K31 enables extended values such as proper BPF reporting
+                // AI2 does not send an initial report, so we ask for the initial data
+                // before...
+                port.write('K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
+                livePoller = setInterval(queryRadio.bind(this), (period) ? period * 1000 : 1000);
+                streaming = true;
+            }
+        };
+
+        this.stopLiveStream = function (args) {
+            if (streaming) {
+                console.log("[Elecraft] Stopping live data stream");
+                // Stop live streaming from the radio:
+                port.write('AI0;');
+                clearInterval(livePoller);
+                streaming = false;
+            }
+        };
+
+        // Called by the serial parser, cannot be private
+        this.onDataReady = function (data) {
+            if (this.uidrequested && data.substr(0, 5) == "DS@@@") {
+                // We have a Unique ID
+                console.log("Sending uniqueID message");
+                self.trigger('data', {
+                    uniqueID: '' + data.substr(5, 5)
+                });
+                this.uidrequested = false;
                 return;
             }
-            
-            // We are receiving a Bitmap: we know it is 131638 bytes plus a checksum
-            // Copy the data we received into our bitmap array buffer:
-            var tmpArray = new Uint8Array(data);
-            bitmap.set(tmpArray,bitmap_index);
-            bitmap_index += data.byteLength;
-            var percent = Math.floor(bitmap_index/1000/132*100);
-            if (percent != oldpercent) {
-                socket.trigger('serialEvent', {downloading: percent});
-                oldpercent = percent;
-            }
-            if (bitmap_index > 131638) {
-                waiting_for_bmp = false;
-                console.log('[elecraft driver] Got the bitmap!');
-                sendBitmap();
-            }
-            
-        };
-    
+            self.trigger('data', data);
+        }
+
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
         // HTML interface.
-        this.output = function(data) {
-            
+        this.output = function (data) {
+
             // We want to catch the '#BMP' command to the P3/PX3, because
             // the data returned if not semicolon-terminated at all..
             if (data.indexOf('#BMP') != -1) {
@@ -204,33 +260,14 @@ define(function(require) {
                 bitmap_index = 0;
                 console.log('Got a bitmap request, need to switch parsers for a while!');
             }
-            
-            return data;
-        };
-        
-        // Status returns an object that is concatenated with the
-        // global server status
-        this.status = function() {
-            return { tcpserverconnect: false };
-        };
-    
-        this.onOpen =  function(port) {
-            console.log("Elecraft Driver: got a port open signal");
-            serialport = port;
-        };
-            
-    
-        this.onClose = function(success) {
-            console.log("Elecraft driver: got a port close signal");
-        };
 
-        
-        this.on('data', onDataReady); // when second_parser sends a 'data' message;
+            port.write(data);
+        };
 
     }
 
-   // Add event management to our parser, from the Backbone.Events class:
-    _.extend(parser.prototype, Backbone.Events);    
-    
+    // Add event management to our parser, from the Backbone.Events class:
+    _.extend(parser.prototype, Backbone.Events);
+
     return parser;
 });

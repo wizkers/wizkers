@@ -123,7 +123,7 @@ define(function(require) {
                 s = this.ab2str(s);
             var blocks = s.match( /[\s\S.]{1,16}/g );
             for( var block in blocks ) {
-                dumped += dump_block( blocks[block] ) + "\n";
+                dumped += dump_block( blocks[block] ) + "\r\n";
             }
 
             return dumped;

@@ -40,6 +40,7 @@ define(function (require) {
             socket = socket,
             livePoller = null, // Reference to the live streaming poller
             streaming = false,
+            uidrequested = false,
             port = null,
             port_close_requested = false,
             isopen = false;
@@ -72,11 +73,11 @@ define(function (require) {
                 if (data.length < 2)
                     return;
                 var response = JSON.parse(data);
-                if (this.uidrequested && response.guid != undefined) {
+                if (uidrequested && response.guid != undefined) {
                     self.trigger('data', {
-                        'uniqueID': response.guid
+                        uniqueID: response.guid
                     });
-                    this.uidrequested = false;
+                    uidrequested = false;
                 } else {
                     self.trigger('data', response);
                 }
@@ -140,7 +141,7 @@ define(function (require) {
         //
         // Returns the Geiger counter GUID.
         this.sendUniqueID = function () {
-            this.uidrequested = true;
+            uidrequested = true;
             this.output('{ "get": "guid" }');
         };
 
@@ -162,7 +163,6 @@ define(function (require) {
                 streaming = false;
             }
         };
-
 
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
