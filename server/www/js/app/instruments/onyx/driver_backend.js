@@ -49,8 +49,6 @@ define(function (require) {
         /////////////
 
         var portSettings = function () {
-            var ins = instrumentManager.getInstrument();
-
             return {
                 baudRate: 115200,
                 dataBits: 8,
@@ -92,7 +90,6 @@ define(function (require) {
         var status = function (stat) {
             console.log('Port status change', stat);
             isopen = stat.portopen;
-
             if (isopen) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
@@ -152,7 +149,7 @@ define(function (require) {
             var self = this;
             if (!streaming) {
                 livePoller = setInterval(function () {
-                    this.output('GETCPM');
+                    self.output('GETCPM');
                 }, (period) ? period * 1000 : 1000);
                 streaming = true;
             }
