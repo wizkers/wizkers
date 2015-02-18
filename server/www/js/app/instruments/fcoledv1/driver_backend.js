@@ -28,17 +28,30 @@
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
-define(function(require) {
+define(function (require) {
     "use strict";
 
-    var Serialport = require('serialport');
-    
-    var parser = function(socket) {
-        
+    var Backbone = require('backbone'),
+        Serialport = require('serialport'),
+        serialConnection = require('connections_serial'),
+        abutils = require('app/lib/abutils');
+
+    var parser = function (socket) {
+
+
+        /////////////
+        // Private methods
+        /////////////
+
         var socket = socket;
-        
-        this.portSettings = function() {
-            return  {
+
+        var self = this,
+            port = null,
+            port_close_requested = false,
+            isopen = false;
+
+        var portSettings = function () {
+            return {
                 baudRate: 115200,
                 dataBits: 8,
                 parity: 'none',
@@ -53,18 +66,11 @@ define(function(require) {
             }
         };
 
-        // Called when the app needs a unique identifier.
-        // this is a standardized call across all drivers.
-        //
-        // Returns the Geiger counter GUID.
-        this.sendUniqueID = function() {
-            socket.trigger('uniqueID','00000000 (n.a.)');
-        };
-        
         // Format can act on incoming data from the counter, and then
-        // forwards the data to the app through a 'serialEvent' event.
-        this.format = function(data) {
-
+        // forwards the data to the chromeSocket/cordovaSocket through
+        // a 'data' event.
+        var format = function (data) {
+            
             // Remove any carriage return
             data = data.replace('\n','');
             var fields = {};
@@ -73,37 +79,83 @@ define(function(require) {
             } catch (e) {
                 console.log("Error: cannot parse logger data : " + e + " - " + data);
             }
-            socket.sendDataToFrontend(fields);
+            self.trigger('data', fields);
         };
-    
+
+        // Status returns an object that is concatenated with the
+        // global server status
+        var status = function (stat) {
+            console.log('Port status change', stat);
+            isopen = stat.portopen;
+
+            if (isopen) {
+                // Should run any "onOpen" initialization routine here if
+                // necessary.
+            } else {
+                // We remove the listener so that the serial port can be GC'ed
+                if (port_close_requested) {
+                    port.off('status', stat);
+                    port_close_requested = false;
+                }
+            }
+        };
+
+
+        /////////////
+        // Public methods
+        /////////////
+
+        this.openPort = function (insid) {
+            var ins = instrumentManager.getInstrument();
+            port = new serialConnection(ins.get('port'), portSettings());
+            port.on('data', format);
+            port.on('status', status);
+
+        };
+
+        this.closePort = function (data) {
+            // We need to remove all listeners otherwise the serial port
+            // will never be GC'ed
+            port.off('data', format);
+            port_close_requested = true;
+            port.close();
+        }
+
+        this.isOpen = function () {
+            return isopen;
+        }
+
+        this.getInstrumentId = function (arg) {};
+
+        // Called when the app needs a unique identifier.
+        // this is a standardized call across all drivers.
+        //
+        // Returns the Geiger counter GUID.
+        this.sendUniqueID = function () {
+            self.trigger('data', {
+                uniqueID: '00000000 (n.a.)'
+            });
+        };
+
+        this.isStreaming = function () {
+            return true;
+        };
+        
+        this.startLiveStream = function() {
+        };
+        
+        this.stopLiveStream = function() {
+        };
+
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
         // HTML interface.
-        this.output = function(data) {
-            return data + '\n';
-        };
-        
-        // Status returns an object that is concatenated with the
-        // global server status
-        this.status = function() {
-            return { };
-        };
-        
-        this.isStreaming = function() {
-            return true;
-        };
-    
-        // Not used
-        this.onOpen =  function(success) {
-            console.log("FriedCircuits OLED Driver: got a port open signal");
-        };
-    
-        // Not used
-        this.onClose = function(success) {
-            console.log("FriedCircuits OLED driver: got a port close signal");
+        this.output = function (data) {
+            port.write(data + '\n');
         };
 
     }
-    
+
+    _.extend(parser.prototype, Backbone.Events);
     return parser;
 });

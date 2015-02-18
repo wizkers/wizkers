@@ -30,7 +30,6 @@ define(function (require) {
 
     var Backbone = require('backbone'),
         Serialport = require('serialport'),
-        abu = require('app/lib/abutils'),
         serialConnection = require('connections_serial');
 
     var parser = function (socket) {

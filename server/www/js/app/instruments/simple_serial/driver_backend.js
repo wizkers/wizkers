@@ -73,9 +73,10 @@ define(function (require) {
         };
 
         // Format can act on incoming data from the counter, and then
-        // forwards the data to the app through a 'serialEvent' event.
+        // forwards the data to the chromeSocket/cordovaSocket through
+        // a 'data' event.
         var format = function (data) {
-            self.trigger('data', data);
+            self.trigger('data', abutils.ab2str(data));
         };
 
         // Status returns an object that is concatenated with the
@@ -123,7 +124,6 @@ define(function (require) {
 
         this.getInstrumentId = function (arg) {};
 
-
         // Called when the app needs a unique identifier.
         // this is a standardized call across all drivers.
         //
@@ -137,8 +137,6 @@ define(function (require) {
         this.isStreaming = function () {
             return true;
         };
-
-
 
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
