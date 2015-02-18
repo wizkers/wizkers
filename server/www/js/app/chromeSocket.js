@@ -65,10 +65,11 @@ define(function (require) {
                 closeInstrument(args);
                 break;
             case 'controllerCommand':
-                controllerCommand(args, false);
+                controllerCommand(args);
                 break;
             case 'rawCommand':
-                controllerCommand(args, true);
+                console.log("Legacy call to 'rawCommand'");
+                break;
             case 'ports':
                 getPorts(args);
                 break;
@@ -140,16 +141,19 @@ define(function (require) {
                 driver.on('data', sendDataToFrontEnd);
                 // Reconnect the outputs for the instrument
                 outputManager.enableOutputs(insid, driver);
-            });
+            }, false);
         }
 
         var closeInstrument = function (insid) {
+            /**
+              Remove this in Chrome mode, since we only have one open intrument open at a time
             if (insid != currentInstrumentid) {
                 console.log(
                     "**** ERROR, the socket asked to close an instrument that is not the current instrument on this socket.",
                     insid);
                 return;
             }
+            */
 
             console.log('Instrument close request for instrument ID ' + insid);
             if (driver)
@@ -213,18 +217,20 @@ define(function (require) {
         var setOutputs = function (insid) {
             console.log('setOutputs');
             if (driver) {
-                outputmanager.enableOutputs(insid, driver);
+                outputManager.enableOutputs(insid, driver);
             } else {
                 console.log("Skipped updating outputs because we have no driver (instrument is closed?)");
             }
         }
 
         var setUploader = function (insid) {
-            // We can use our instrumentManager to ask for the right uploader driver
-            instrumentManager.getBackendUploaderDriver(self, function (d) {
-                driver = dr;
-                uploader_mode = true;
-            });
+            // Open the instrument with uploader driver, not regular ('true' as 3rd arg)
+            connectionmanager.openInstrument(insid, function (d) {
+                driver = d;
+                currentInstrumentid = insid;
+                // Listen for data coming in from our driver
+                driver.on('data', sendDataToFrontEnd);
+            }, true);
         }
 
         ///////////

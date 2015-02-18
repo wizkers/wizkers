@@ -29,8 +29,9 @@ define(function (require) {
 
     "use strict";
 
-    var Backbone = require('backbone');
-    var Serialport = require('serialport');
+    var Backbone = require('backbone'),
+        Serialport = require('serialport'),
+        abu = require('app/lib/abutils');
 
     var chromeSerial = function (path, settings) {
 
@@ -40,6 +41,8 @@ define(function (require) {
 
         var portOpen = false,
             self = this;
+
+        var parser = settings.parser;
 
         chrome.serial.connect(path, {
                 bitrate: settings.baudRate,
@@ -51,10 +54,12 @@ define(function (require) {
         // Public methods
         ///////////
 
-        // cmd is the data to send. 'raw' indicates the return value should be
-        // an ArrayBuffer, not a String. TODO To be changed, we need to use
-        // ArrayBuffers everytime.
-        this.write = function (cmd, raw) {
+        /**
+         * Send data to the serial port.
+         * cmd has to be either a String or an ArrayBuffer
+         * @param {ArrayBuffer} cmd The command, already formatted for sending.
+         */
+        this.write = function (cmd) {
             // On Unices (Linux, MacOS, ChromeOS etc), everything works fine,
             // but Windows is much slower and will regularly trigger "pending" errors
             // if we send too many commands one after another.
@@ -66,15 +71,18 @@ define(function (require) {
             if (!self.portOpen ||  cmd == '')
                 return;
 
+            if (typeof cmd == "string")
+                cmd = abu.str2ab(cmd);
+
             cmd_queue.push({
                 'command': cmd,
-                'raw': raw
+                'raw': true
             }); // Add cmd at the end of the queue
             processCmdQueue();
         };
 
 
-        this.close = function closeInstrument(port) {
+        this.close = function (port) {
             console.log("[chromeSerial] chromeSerialLib: closeInstrument");
             if (!self.portOpen)
                 return;
@@ -116,36 +124,15 @@ define(function (require) {
 
         this.connectionId = -1;
 
-        // Utility function (chrome serial wants array buffers for sending)
-        // Convert string to ArrayBuffer.
-        function str2ab(str) {
-            //  some drivers already give us an Uint8Buffer, because they
-            // handle binary data. in that case
-            // this makes our job easier:
-            if (str.buffer)
-                return str.buffer;
-            var buf = new ArrayBuffer(str.length);
-            var bufView = new Uint8Array(buf);
-            for (var i = 0, j = str.length; i < j; i++) {
-                bufView[i] = str.charCodeAt(i);
-            }
-            return buf;
-        };
-
-        function ab2str(buf) {
-            return String.fromCharCode.apply(null, new Uint8Array(buf));
-        };
-
         function processCmdQueue() {
             if (queue_busy)
                 return;
             queue_busy = true;
             var cmd = cmd_queue[0].command; // Get the oldest command
-            var send_raw = cmd_queue[0].raw;
             // Some drivers format their data as Uint8Arrays because they are binary.
             // others format the data as strings: str2ab makes sure this is turned into
             // an arraybuffer in each case.
-            chrome.serial.send(self.connectionId, (send_raw) ? str2ab(cmd) : str2ab(self.driver.output(cmd)),
+            chrome.serial.send(self.connectionId, cmd,
                 function (sendInfo) {
                     if (sendInfo.error && sendInfo.error == "pending") {
                         console.log("Retrying command");
@@ -173,15 +160,28 @@ define(function (require) {
             self.trigger('ports', portlist);
         }
 
-        // This gets called whenever something is ready on the serial port
+        /**
+         * Callback whenever something is ready on the serial port. It is
+         * received by the instrument driver's 'format' method.
+         * @param {Object} readInfo The data that was just received on the serial port
+         */
         function onRead(readInfo) {
             if (readInfo.connectionId == self.connectionId && readInfo.data) {
                 // Pass this over to the parser.
                 // the parser will trigger a "data" even when it is ready
                 //console.log("R: " + ab2str(readInfo.data));
-                self.trigger('data', ab2str(readInfo.data));
+                //self.trigger('data', readInfo.data);
+                parser(self, readInfo.data);
             }
         };
+
+        // Called by the parser whenever data is ready to be formatted
+        // by our instrument driver
+        this.onDataReady = function (data) {
+            // 'format' triggers a serialEvent when ready
+            self.trigger('data', data);
+        }
+
 
         // onError is called on Windows in some situations, when the serial device
         // generates a "Break" signal. In that case, we wait for 200ms and we try
@@ -194,23 +194,14 @@ define(function (require) {
             case "system_error":
                 if (!self.portOpen)
                     break;
-                closeInstrument();
+                self.close();
                 setTimeout(openInstrument, 500);
                 break;
             case "device_lost":
-                closeInstrument();
+                self.close();
                 break;
             }
         };
-
-        // Called by the parser whenever data is ready to be formatted
-        // by our instrument driver
-        /**
-function onDataReady(data) {
-            // 'format' triggers a serialEvent when ready
-            self.trigger('data', data);
-        }
-        */
 
         function onOpen(openInfo) {
             if (!openInfo) {

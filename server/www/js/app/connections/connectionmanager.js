@@ -38,7 +38,13 @@ define(function (require) {
         // Public methods
         /////
 
-        this.openInstrument = function (instrumentid, callback) {
+        /**
+         * Opens an instrument and sets up the instrument driver.
+         * @param {String}   instrumentid The Instrument ID
+         * @param {Function} callback     Callback with the driver reference
+         * @param {Boolean}  uploader     'true' if we want to the firmware uploader, not the regular driver
+         */
+        this.openInstrument = function (instrumentid, callback, uploader) {
             console.log('Instrument open request for instrument ID ' + instrumentid);
             if (openinstruments.hasOwnProperty(instrumentid)) {
                 console.log('That instrument is already loaded');
@@ -53,7 +59,7 @@ define(function (require) {
             } else {
                 // Create the relevant driver for the instrument, and ask to
                 // open it:
-                instrumentManager.getBackendDriver(socket, function (driver) {
+                var open_cb = function (driver) {
                     if (driver == undefined) {
                         // Something is very wrong here!
                         debug('Was asked to open an instrument with unknown driver');
@@ -64,7 +70,13 @@ define(function (require) {
                     driver.openPort(instrumentid);
                     console.log('Instrument is opening');
                     callback(driver);
-                });
+                };
+
+                if (uploader) {
+                    instrumentManager.getBackendUploaderDriver(socket, open_cb);
+                } else {
+                    instrumentManager.getBackendDriver(socket, open_cb);
+                }
             }
         }
 

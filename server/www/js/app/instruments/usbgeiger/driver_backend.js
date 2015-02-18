@@ -30,6 +30,7 @@ define(function (require) {
 
     var Backbone = require('backbone'),
         Serialport = require('serialport'),
+        abu = require('app/lib/abutils'),
         serialConnection = require('connections_serial');
 
     var parser = function (socket) {
@@ -192,12 +193,9 @@ define(function (require) {
 
         // period in seconds
         this.startLiveStream = function (period) {
-            streaming = true;
         };
 
         this.stopLiveStream = function (args) {
-            streaming = true;
-
         };
 
         // output should return a string, and is used to format

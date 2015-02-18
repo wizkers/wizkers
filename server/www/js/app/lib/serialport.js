@@ -68,7 +68,7 @@ define(function(require) {
               var parts = data.split(delimiter);
               data = parts.pop();
               parts.forEach(function (part, i, array) {
-                emitter.trigger('data', part);
+                emitter.onDataReady(part);
               });
             };
           }
