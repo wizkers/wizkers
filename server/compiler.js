@@ -57,12 +57,13 @@ compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogMana
                  'instruments/W433LiveView', 'instruments/W433SettingsView', 'instruments/W433LogView', 'instruments/W433NumView',
                  'instruments/ElecraftDiagView', 'instruments/ElecraftFrequencyItemView', 'instruments/ElecraftLiveView',
                  'instruments/ElecraftNumView', 'instruments/ElecraftSettingsView',
-                 'instruments/ElecraftEqualizer', 'instruments/FCOledUpgrader', 
+                 'instruments/ElecraftEqualizer', 'instruments/FCOledUpgrader', 'instruments/sark110/Sark110LiveView',
+                 'instruments/sark110/Sark110NumView', 'instruments/sark110/Sark110DiagView', 
                  'instruments/FCOledLiveView', 'instruments/FCOledLogView', 'instruments/FCOledNumView',
                  'instruments/Fluke289DiagView', 'instruments/Fluke289LiveView', 'instruments/Fluke289LogManagementView',
-                 'instruments/Fluke289LogView', 'instruments/Fluke289NumView',
+                 'instruments/Fluke289LogView', 'instruments/Fluke289NumView', 'instruments/Sark110SettingsView',
                  'instruments/OnyxDiagView', 'instruments/OnyxLiveView', 'instruments/OnyxLogEditView',
                  'instruments/OnyxLogManagementView', 'instruments/OnyxLogView', 'instruments/OnyxNumView',
                  'instruments/USBGeigerUpgrader', 'instruments/USBGeigerLogView',
-                 'connections/serialport', 'connections/helium', 'connections/pinoccio'
+                 'connections/serialport', 'connections/helium', 'connections/pinoccio', 'connections/usbhid'
                 ]);

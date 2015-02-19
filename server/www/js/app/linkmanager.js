@@ -85,7 +85,6 @@ define(function(require) {
                 return connected;
             }
 
-
             this.controllerCommandResponse = function() {
             }
 
@@ -95,7 +94,6 @@ define(function(require) {
             this.requestStatus = function(data) {
                 socket.emit('portstatus',data);
             }
-
 
             this.getPorts = function() {
                 socket.emit('ports','');        
@@ -122,7 +120,6 @@ define(function(require) {
             this.getUniqueID = function() {
                 socket.emit('uniqueID');
             }
-
 
             this.startLiveStream = function(period) {
                 console.log("[Link Manager] Starting live data stream");

@@ -109,6 +109,10 @@ define(function (require) {
             return false;
         };
 
+        this.startLiveStream = function () {};
+
+        this.stopLiveStream = function () {};
+
         // output does not change anything here, but we
         // use it as the entry point for higher level commands
         // coming from the front-end, such as firmware upload etc...

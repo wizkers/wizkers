@@ -101,7 +101,6 @@ define(function(require) {
 
         addPlot: function() {
             var self = this;
-            
             this.plot = new simpleplot({model: this.model, settings:this.plotoptions});
             if (this.plot != null) {
                   $('.geigerchart', this.el).append(this.plot.el);

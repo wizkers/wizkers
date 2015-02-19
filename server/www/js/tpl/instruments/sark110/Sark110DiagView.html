@@ -1,0 +1,56 @@
+<div class="col-md-9">
+    <div class="well" id="diags-area">
+        <div class="row">
+            <div class="col-md-7">
+                <legend>Settings
+                </legend>
+            </div>
+            <div class="col-md-5">
+                <button class="btn btn-info refresh" title="Refresh" type="button"><span class="glyphicon glyphicon-refresh">     </span>
+                </button>
+                <button class="btn comlink" type="button" style="float:right;">Data</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <ul>
+                    <li>Software version: <span id="version">waiting...</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <div class="thumbnail">
+                    <h4>Manual impedance measurement:</h4>
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">Frequency</span>
+                        <input id="manualcmd" value="" class="form-control" type="text" maxlength="64">
+                        <span class="input-group-btn">
+                        <button class="btn btn-default" id="cmdsend" type="button"><span class="glyphicon glyphicon-check"></span>
+                        </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="well">
+                <textarea id="input" style="height:50px; width:98%;"></textarea>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!--/col-md-9-->
+
+<div class="col-md-3">
+    <div class="well" id="port-diags">
+        <h4>Help</h4>
+        <p>You can test commands on the analyzer here. Type "?" to get started..</p>
+
+    </div>
+    <!--/.well -->
+</div>
+<!--/col-md--->

@@ -104,7 +104,15 @@ define(function(require) {
                 ab[i/2] = parseInt(str.substr(i,2), 16);
             }
             return ab;
-
+        },
+        
+        // Convert Uint8Array to hex string
+        ui8tohex: function(ui8) {
+            var str = '';
+            for (var i=0; i < ui8.length; i++) {
+                str += ('0' + ui8[i].toString(16)).slice(-2);
+            }
+            return str;
         },
 
         // Create an Uint8Array from an ASCII string

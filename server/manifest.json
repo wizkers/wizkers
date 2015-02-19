@@ -20,7 +20,17 @@
     "audioCapture",
     "fileSystem",
     "http://*/*",
-    "https://*/*"
+    "https://*/*",
+    "hid",
+        {
+            "usbDevices": [
+                {
+                    "vendorId": 1155,
+                    "productId": 22352
+                }
+    ]
+  }
+
   ],
     "sockets": {
         "tcpServer": {

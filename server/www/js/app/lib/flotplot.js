@@ -160,9 +160,10 @@ define(function (require) {
                         y = item.datapoint[1];
 
                     self.showTooltip(item.pageX, item.pageY,
-                        "<small>" + ((settings.get('timezone') === 'UTC') ?
+                        "<small>" + ((self.plotOptions.xaxis.timezone ) ?
+                                     ((self.plotOptions.xaxis.timezone === 'UTC') ?
                             new Date(x).toUTCString() :
-                            new Date(x).toString()) + "</small><br>" + item.series.label + ": <strong>" + y + "</strong>");
+                            new Date(x).toString()) : x ) + "</small><br>" + item.series.label + ": <strong>" + y + "</strong>");
                 } else {
                     $("#tooltip").remove();
                 }

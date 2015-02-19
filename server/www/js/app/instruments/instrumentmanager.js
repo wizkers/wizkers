@@ -59,6 +59,8 @@ define(function(require) {
     var SimpleSerialInstrument = require('app/instruments/simple_serial/simple_serial'),
         SimpleSerialSettingsView = require('app/instruments/simple_serial/settings');
 
+    var Sark110Instrument = require('app/instruments/sark110/sark110'),
+        Sark110SettingsView = require('app/instruments/sark110/settings');
 
     var InstrumentManager = function() {
     
@@ -91,6 +93,12 @@ define(function(require) {
             this.supportedInstruments["hawknest"] =
                 { name: "Hawk Nest (Pinocc.io)", type: HawkNestInstrument, settings: HawkNestSettingsView,
                           connectionsettings: 'app/views/instrument/pinoccio' };
+        }
+        
+        if (vizapp.type == "chrome") {
+            this.supportedInstruments["sark110"] =
+                { name: "Sark110 Antenna Analyzer", type: Sark110Instrument, settings: Sark110SettingsView,
+                          connectionsettings: 'app/views/instrument/usbhid' };
         }
         
         this.getConnectionSettingsFor =  function(instrument, arg, callback) {
