@@ -40,11 +40,12 @@ define(function (require) {
 
         var SARK_FRAME_LEN = 18;
         var PAR_SARK_CAL = 1; /* OSL calibrated val */
+        var PAR_SARK_UNCAL = 2; /* Raw val */
         var CMD_SARK_VERSION = 1; /* Returns version of the protocol */
         var CMD_SARK_MEAS_RX = 2; /* Measures R and X */
+        var CMD_SARK_MEAS_VECTOR = 3; /* Measures raw vector data */
         var ANS_SARK_OK = 0x4f;
         var ANS_SARK_ERR = 0x45;
-
 
         var socket = socket;
 

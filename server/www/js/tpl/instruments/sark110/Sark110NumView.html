@@ -1,13 +1,21 @@
 <h4>Sark 110</h4>
 
+<div class="input-group input-margin">
+    <span class="input-group-addon">Center Frequency</span>
+    <input id="centerfreq" value="" class="form-control" step="100000" type="number">
+</div>
+<div class="input-group input-margin">
+    <span class="input-group-addon">Span</span>
+    <input id="spanfreq" value="" class="form-control" step="100000" type="number" >
+</div>
 
 <div class="input-group input-margin">
     <span class="input-group-addon">Start Frequency</span>
-    <input id="startfreq" value="" class="form-control" type="text" maxlength="64">
+    <input id="startfreq" value="" class="form-control" step="100000" type="number">
 </div>
 <div class="input-group input-margin">
     <span class="input-group-addon">End Frequency</span>
-    <input id="endfreq" value="" class="form-control" type="text" maxlength="64">
+    <input id="endfreq" value="" class="form-control" step="100000" type="number" >
 </div>
 
 <button class="btn btn-default" id="cmd_sweep" type="button">Sweep</button>

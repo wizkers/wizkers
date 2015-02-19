@@ -271,7 +271,8 @@ define(function (require) {
             for (var i = 0; i < this.sensors.length; i++) {
                 plotData.push({
                     data: this.livedata[i],
-                    label: this.sensors[i]
+                    label: this.sensors[i],
+                    yaxis: i+1
                 });
             }
             // Now update our plot

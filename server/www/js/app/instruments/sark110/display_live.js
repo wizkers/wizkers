@@ -16,27 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
- *
- * This file is part of Wizkers.
- *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 /*
- * Live view display of the output of the Onyx
+ * Live view display of the output of the Sark 110
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -54,6 +36,11 @@ define(function (require) {
     // Load the flot library & flot time plugin:
     require('flot');
     require('flot_resize');
+
+    var gamma = function (r, x) {
+        // Reflection coefficient
+        return Math.sqrt(Math.pow(r - 50, 2) + Math.pow(x, 2)) / Math.sqrt(Math.pow(r + 50, 2) + Math.pow(x, 2));
+    }
 
 
     return Backbone.View.extend({
@@ -76,7 +63,17 @@ define(function (require) {
                 plot_options: {
                     xaxis: {
                         show: true,
+                        tickDecimals: 6,
+                        tickFormatter: function(val,axis) {
+                            return (val/1e6).toFixed(axis.tickDecimals);
+                        }
                     },
+                    yaxes: [{
+                            position: 'left'
+                    },
+                        {
+                            position: 'right'
+                    }],
                     grid: {
                         hoverable: true,
                         clickable: true
@@ -150,14 +147,24 @@ define(function (require) {
                 // Autoscroll:
                 i.scrollTop(i[0].scrollHeight - i.height());
             }
-            
+
             if (data.R) {
-                var Z = Math.sqrt(Math.pow(data.R,2)+Math.pow(data.X,2));
-                this.plot.appendPoint({ name: "Z", value: Z, timestamp: data.F });
+                var Z = Math.sqrt(Math.pow(data.R, 2) + Math.pow(data.X, 2));
+                var VSWR = (1 + gamma(data.R, data.X)) / (1 - gamma(data.R, data.X));
+                this.plot.appendPoint({
+                    name: "Z",
+                    value: Z,
+                    timestamp: data.F
+                });
+                this.plot.appendPoint({
+                    name: "VSWR",
+                    value: VSWR,
+                    timestamp: data.F
+                });
             }
             if (data.version) {
                 this.plot.redraw();
-            }      
+            }
         },
     });
 
