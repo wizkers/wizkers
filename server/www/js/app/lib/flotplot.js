@@ -273,7 +273,7 @@ define(function (require) {
                 plotData.push({
                     data: this.livedata[i],
                     label: this.sensors[i],
-                    yaxis: (multiple_yaxis) ? i+1 : 1
+                    yaxis: (this.flotplot_settings.multiple_yaxis) ? i+1 : 1
                 });
             }
             // Now update our plot
