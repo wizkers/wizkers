@@ -174,7 +174,7 @@ module.exports = {
         // Destroy the previous list of active outputs,
         activeOutputs[insid] = [];
         
-        // TODO: user persistent queries before going to prod
+        // TODO: use persistent queries before going to prod
         dbs.outputs.query(function(doc) {
                             if (doc.enabled == true)
                                 emit(doc.instrumentid);

@@ -70,7 +70,7 @@ module.exports = function safecast() {
     
     
     this.sendData = function(data) {
-        debug("[Safecast Output plugin] ToDo: send data to Safecast");
+        debug("[Safecast Output plugin] Sending data to Safecast");
         
         // Step one: prepare the structure
         var unit = this.resolveMapping("unit",data);

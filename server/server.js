@@ -500,8 +500,10 @@ io.sockets.on('connection', function (socket) {
     var openInstrument = function (insid) {
         // Only let "admin" and "operator" open an instrument, unless the
         // instrument is already open:
+        debug("Open instrument request from front-end for " + insid);
+        var isopen = connectionmanager.isOpen(insid);
         if (userinfo.role == 'operator' || userinfo.role == 'admin' ||
-            connectionmanager.isOpen(insid)) {
+            isopen) {
             connectionmanager.openInstrument(insid, function (d) {
                 driver = d;
                 currentInstrumentid = insid;
@@ -509,8 +511,9 @@ io.sockets.on('connection', function (socket) {
                 driver.on('data', sendDataToFrontEnd);
                 // Reconnect the outputs for the instrument
                 // only if we are operator or admin, viewer should
-                // not touch the outputs
-                if (userinfo.role == 'operator' || userinfo.role == 'admin')
+                // not touch the outputs. If the instrument was already open,
+                // do not ask to enable the outputs again either...
+                if ((userinfo.role == 'operator' || userinfo.role == 'admin') && !isopen)
                     outputmanager.enableOutputs(insid, driver);
             });
         } else
@@ -635,7 +638,7 @@ io.sockets.on('connection', function (socket) {
     // while an instrument is connected, and uses this command to get the
     // server outputs to refresh.
     socket.on('outputs', function (instrumentId) {
-        socket_debug("[server.js]  Update the outputs for this instrument");
+        socket_debug("Front-end request to update the outputs for this instrument");
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
             if (driver) {
                 outputmanager.enableOutputs(instrumentId, driver);

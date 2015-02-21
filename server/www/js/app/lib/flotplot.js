@@ -53,6 +53,7 @@ define(function (require) {
                 showtips: true,
                 selectable: false,
                 vertical_stretch: false,
+                multiple_yaxis: false,
                 plot_options: {
                     xaxis: {
                         mode: "time",
@@ -272,7 +273,7 @@ define(function (require) {
                 plotData.push({
                     data: this.livedata[i],
                     label: this.sensors[i],
-                    yaxis: i+1
+                    yaxis: (multiple_yaxis) ? i+1 : 1
                 });
             }
             // Now update our plot

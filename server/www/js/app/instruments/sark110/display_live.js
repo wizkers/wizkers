@@ -57,6 +57,7 @@ define(function (require) {
             this.plotoptions = {
                 points: 256,
                 vertical_stretch: true,
+                multiple_yaxis: true,
                 log: false,
                 showtips: true,
                 selectable: false,
