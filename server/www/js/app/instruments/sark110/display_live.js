@@ -149,7 +149,7 @@ define(function (require) {
                 i.scrollTop(i[0].scrollHeight - i.height());
             }
 
-            if (data.R) {
+            if (data.R != undefined) {
                 var Z = Math.sqrt(Math.pow(data.R, 2) + Math.pow(data.X, 2));
                 var VSWR = (1 + gamma(data.R, data.X)) / (1 - gamma(data.R, data.X));
                 this.plot.appendPoint({
