@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Wizkers",
     "description": "A framework for Measurement instruments",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "app": {
         "background": {
             "scripts": ["background.js"]

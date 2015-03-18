@@ -90,6 +90,10 @@ define(function(require) {
         this.devicetag = function() {
                 lm.sendCommand('{ "get": "devicetag" }');
         };
+        
+        this.debug_enable = function(en) {
+                lm.sendCommand('{ "set": { "debug":' + (en ? 1 : 0) + '}}');
+        };
 
         this.setdevicetag = function(tag) {
             console.log('Device tag: ' + tag);

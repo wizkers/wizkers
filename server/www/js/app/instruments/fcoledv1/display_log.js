@@ -123,6 +123,7 @@ define(function (require) {
 
         events: {
             "click .resetZoom": "resetZoom",
+            "click #download-csv": "downloadCSV"
         },
 
         resetZoom: function () {
@@ -313,6 +314,41 @@ define(function (require) {
         },
 
         onClose: function () {},
+
+        downloadCSV: function () {
+            var header = 'data:text/csv; charset=utf-8,';
+            var csv = header + "Timestamp (UTC), ";
+            for (var i = 0; i < this.deviceLogs.length; i++) {
+                var entries = this.deviceLogs.at(i).entries;
+                csv += "Vmin, Vmax, Vavg, Amin, Amax, Aavg\n";
+                for (var j = 0; j < entries.length; j++) {
+                    var entry = entries.at(j);
+                    var data = entry.get('data');
+                    // Sometimes, we get entries without a valid reading reading, detect this
+                    if (data.a != undefined) {
+                        // No known spreadsheet software handles ISO8601 dates
+                        // properly (like 2014-06-17T18:00:04.067Z ) so we
+                        // convert the timestamp to a string that is recognized by
+                        // Excel and Google Docs. The whole new Date + toISOString
+                        // is here to guarantee that we do get a proper formatted
+                        // time stamp whenever we are running as an embedded app or a server
+                        // app.
+                        var ts = new Date(entry.get('timestamp')).toISOString().replace(/[TZ]/g, ' ');
+                        csv += ts;
+                        csv += ',' + data.v.min;
+                        csv += ',' + data.v.max;
+                        csv += ',' + data.v.avg;
+                        csv += ',' + data.a.min;
+                        csv += ',' + data.a.max;
+                        csv += ',' + data.a.avg;
+                        csv += '\n';
+                    }
+                }
+            }
+            var uri = encodeURI(csv);
+            window.open(uri);
+        },
+
 
         // At the moment we only have one log type for this device: "live"
         packData: function () {

@@ -24,25 +24,25 @@
  *
  */
 
-define(function(require) {
+define(function (require) {
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
         Backbone = require('backbone'),
-        tpl     = require('text!tpl/instruments/OnyxDiagView.html'),
+        tpl = require('text!tpl/instruments/OnyxDiagView.html'),
         template = null;
-        
-        try {
-            template = _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/OnyxDiagView.js');
-        }
+
+    try {
+        template = _.template(tpl);
+    } catch (e) {
+        // Will happen if we are packaged in a Chrome app
+        template = require('js/tpl/instruments/OnyxDiagView.js');
+    }
 
     return Backbone.View.extend({
 
-        initialize:function () {
+        initialize: function () {
             linkManager.on('input', this.showInput, this);
 
             if (!linkManager.isRecording())
@@ -57,14 +57,15 @@ define(function(require) {
             "keypress input#manualcmd": "sendcmd",
             "click #nameset": "setdevtag",
             "keypress input#devname": "setdevtag",
+            "change #advanced_settings input": "settings_advanced",
         },
 
-        onClose: function() {
+        onClose: function () {
             console.log("Onyx Diag view closing...");
             linkManager.off('input', this.showInput);
         },
 
-        render:function () {
+        render: function () {
             var self = this;
             this.$el.html(template(this.model.toJSON()));
 
@@ -72,52 +73,62 @@ define(function(require) {
             return this;
         },
 
-        refresh: function() {
-            $('#accessorydetect',this.el).empty();
-            $('#post',this.el).removeClass('badge-success').removeClass('badge-important');
-            $('#post',this.el).html("Waiting...");
-            $('#post2',this.el).html('');
+        refresh: function () {
+            $('#accessorydetect', this.el).empty();
+            $('#post', this.el).removeClass('badge-success').removeClass('badge-important');
+            $('#post', this.el).html("Waiting...");
+            $('#post2', this.el).html('');
             // Query controller for various info:
             this.queriesDone = false;
             if (linkManager.isConnected()) {
-                linkManager.driver.version();            
+                linkManager.driver.version();
             }
         },
 
-        disptest: function() {
+        settings_advanced: function (evt) {
+            var checked = $(evt.target).is(':checked');
+            switch (evt.target.id) {
+            case 'debug_enable':
+                linkManager.driver.debug_enable(checked);
+                break;
+            }
+        },
+
+
+        disptest: function () {
             linkManager.driver.displaytest();
         },
 
-        setrtc: function() {
+        setrtc: function () {
             linkManager.driver.settime();
         },
 
-        sendcmd: function(event) {
+        sendcmd: function (event) {
             // We react both to button press & Enter key press
-            if ((event.target.id == "manualcmd" && event.keyCode==13) || (event.target.id != "manualcmd"))
-                linkManager.sendCommand($('#manualcmd',this.el).val());
+            if ((event.target.id == "manualcmd" && event.keyCode == 13) || (event.target.id != "manualcmd"))
+                linkManager.sendCommand($('#manualcmd', this.el).val());
         },
 
-        setdevtag: function(event) {
-            if ((event.target.id == "devname" && event.keyCode==13) || (event.target.id != "devname"))
-                linkManager.driver.setdevicetag($('#devname',this.el).val());
+        setdevtag: function (event) {
+            if ((event.target.id == "devname" && event.keyCode == 13) || (event.target.id != "devname"))
+                linkManager.driver.setdevicetag($('#devname', this.el).val());
         },
 
 
-        showInput: function(data) {
+        showInput: function (data) {
             // Blink the indicator to show we're getting data
             $('.comlink', this.el).toggleClass('btn-success');
-            var i = $('#input',this.el);
+            var i = $('#input', this.el);
             i.val(i.val() + JSON.stringify(data) + '\n');
             // Autoscroll:
             i.scrollTop(i[0].scrollHeight - i.height());
 
             if (data.version != undefined) {
-                $('#version',this.el).html(data.version);
+                $('#version', this.el).html(data.version);
                 linkManager.driver.guid();
             }
             if (data.guid != undefined) {
-                $('#guid',this.el).html(data.guid);
+                $('#guid', this.el).html(data.guid);
                 linkManager.driver.devicetag();
             }
             if (data.devicetag != undefined) {
@@ -125,7 +136,7 @@ define(function(require) {
                 linkManager.driver.getRTC();
             }
             if (data.rtc != undefined) {
-                $('#time', this.el).html(new Date(parseInt(data.rtc)*1000).toUTCString());
+                $('#time', this.el).html(new Date(parseInt(data.rtc) * 1000).toUTCString());
             }
         }
     });
