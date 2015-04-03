@@ -179,9 +179,15 @@ define(function(require) {
             if (data.cpm != undefined) {
                 $("#cpmvalue", this.el).html(" " + data.cpm.value + " CPM");
                 $("#freqvalue",this.el).html((data.cpm.value/60).toFixed(3) + " Hz");
-            } else if (data.HZ != undefined) {
-                $("#rawfreqvalue", this.el).html(data.HZ[0] + " Hz");
-                $("#current_window",this.el).html(" (" + data.HZ[4] + " sec window)");
+                if (data.cpm2 != undefined) {
+                    $("#cpm2value", this.el).html(" " + data.cpm2.value + " CPM");
+                    $("#freqvalue2",this.el).html((data.cpm2.value/60).toFixed(3) + " Hz");
+                }
+            }
+            else if (data.HZ != undefined) {
+                $("#rawfreqvalue", this.el).html(data.HZ.I1 + " / " + data.HZ.I2 + " Hz");
+                $("#current_window",this.el).html(" (" + data.WIN1 + " sec window)");
+                $("#current_window2",this.el).html(" (" + data.WIN2 + " sec window)");
             } else if (data.version != undefined) {
                 $('#version',this.el).html(data.version);
             } else if (data.output_rate != undefined) {
