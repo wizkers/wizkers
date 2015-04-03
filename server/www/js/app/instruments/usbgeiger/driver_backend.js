@@ -117,6 +117,12 @@ define(function (require) {
                     } else {
                         jsresp.counts.uptime = parseInt(resp[3]);
                     }
+                } else if (resp[0] == 'HZ1') {
+                    // Debug output
+                    jsresp.HZ = { I1: resp[1], I2: resp[3] };
+                    jsresp.RAM = resp[5];
+                    jsresp.WIN1 = resp[7];
+                    jsresp.WIN2 = resp[9];
                 } else if (resp.length > 1) {
                     jsresp[resp[0]] = resp.slice(1);
                 } else {
