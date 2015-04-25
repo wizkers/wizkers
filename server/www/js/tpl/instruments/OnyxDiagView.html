@@ -1,80 +1,106 @@
 <div class="col-md-9">
-    <div class="row">
-        <div class="well" id="diags-area">
-            <div class="row">
-                <div class="col-md-12">
-                    <button class="btn comlink" type="button" style="float:right;">Link active</button>
-                    <h2>Diagnostics <button class="btn btn-info refresh" title="Refresh" type="button" ><span class="glyphicon glyphicon-refresh"></span></button>
-</h2>
-                </div>
+    <div class="well" id="diags-area">
+        <div class="row">
+            <div class="col-md-12">
+                <button class="btn comlink" type="button" style="float:right;">Link active</button>
+                <h4>Diagnostics <button class="btn btn-info refresh" title="Refresh" type="button" ><span class="glyphicon glyphicon-refresh"></span></button>
+</h4>
             </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <h4>Current status</h4>
-                    <ul>
-                        <li>Software version: <span id="version">n.a.</span>
-                        </li>
-                        <li>Device GUID: <span id="guid">n.a.</span>
-                        </li>
-                        <li>Device time: <span id="time"></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-md-6  thumbnail">
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Current status</h4>
+                <ul>
+                    <li>Software version: <span id="version">n.a.</span>
+                    </li>
+                    <li>Device GUID: <span id="guid">n.a.</span>
+                    </li>
+                    <li>Device time: <span id="time"></span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6  thumbnail">
 
-                    <h4>Device name:</h4>
+                <h4>Device name:</h4>
 
-                    <div class="input-group input-margin">
-                        <span class="input-group-addon">Name</span>
-                        <input id="devname" value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-btn">
+                <div class="input-group input-margin">
+                    <span class="input-group-addon">Name</span>
+                    <input id="devname" value="" class="form-control" type="text" maxlength="32">
+                    <span class="input-group-btn">
                             <button class="btn btn-default" id="nameset" type="button"><span class="glyphicon glyphicon-check"></span>
-                        </button>
-                        </span>
-                    </div>
-                    <h4>Manual command:</h4>
-                    <div class="input-group input-margin">
-                        <span class="input-group-addon">Command</span>
-                        <input id="manualcmd" value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-btn">
+                    </button>
+                    </span>
+                </div>
+                <h4>Manual command:</h4>
+                <div class="input-group input-margin">
+                    <span class="input-group-addon">Command</span>
+                    <input id="manualcmd" value="" class="form-control" type="text" maxlength="32">
+                    <span class="input-group-btn">
                         <button class="btn btn-default" id="cmdsend" type="button"><span class="glyphicon glyphicon-check"></span>
-                        </button>
-                        </span>
-                    </div>
+                    </button>
+                    </span>
                 </div>
             </div>
+        </div>
 
         <div class="row">
-        <div class="col-md-12">
-        <div class="form-horizontal" id="advanced_settings">
-            <div class="form-group">
-                <label class="col-md-2 control-label">Advanced settings:</label>
-                <div class="col-md-10">
-                    <div class="checkbox col-md-3">
-                        <label>
-                            <input  id="debug_enable" type="checkbox"> Enable audio (morse) debug
-                        </label>
+            <div class="col-md-6">
+                <div class="form-horizontal" id="advanced_settings">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Advanced settings:</label>
+                        <div class="col-md-10">
+                            <div class="checkbox">
+                                <label>
+                                    <input id="debug_enable" type="checkbox">Enable audio (morse) debug
+                                </label>
+                            </div>
+                        </div>
                     </div>
+                </div>
+                <h4>Device diagnostics</h4>
+                <p>
+                    <button class="btn disptest" type="button">Display test</button>
+                    <button class="btn setrtc" type="button">Sync device time</button>
+                </p>
+            </div>
+            <div class="col-md-6  thumbnail">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4>Calibration:</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <p><strong>Current reading:</strong>&nbsp;Raw: <span id="currentusv">0.000</span>. Calibrated: <span id="currentusvcalibrated">0.000</span>.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">Desired reading:</span>
+                        <input id="targetusv" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-addon">µSv/h</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn" id="calccal" type="button">Calc. factor</button>
+                </div>
+                <div class="input-group input-margin">
+                    <span class="input-group-addon">Calibration factor:</span>
+                    <input id="calfactor" value="" class="form-control" type="text" maxlength="32">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" id="cmdsavecal" type="button">Save&nbsp;<span class="glyphicon glyphicon-check"></span>
+                    </button>
+
                 </div>
             </div>
         </div>
-        </div>
-    </div>
-
-            
-            
-            
-            <h4>Device diagnostics</h4>
-            <p>
-                <button class="btn disptest" type="button">Display test</button>
-                <button class="btn setrtc" type="button">Sync device time</button>
-            </p>
-
-        </div>
     </div>
     <div class="row">
-        <div class="well">
-            <textarea id="input" style="height:200px; width:98%;"></textarea>
+        <div class="col-md-12">
+            <div class="well">
+                <textarea id="input" style="height:100px; width:98%;"></textarea>
+            </div>
         </div>
     </div>
 </div>
@@ -82,8 +108,9 @@
 
 <div class="col-md-3">
     <div class="well" id="port-diags">
-        <h4>Help</h4>
+        <h3>Help</h3>
         <p>You can manually set you device's asset tag here ("Device name"), send manual commands as well as synchronize its internal real time clock.</p>
+
     </div>
     <!--/.well -->
 </div>

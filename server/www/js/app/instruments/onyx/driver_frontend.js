@@ -82,6 +82,14 @@ define(function(require) {
         this.guid = function() {
                 lm.sendCommand('{ "get": "guid" }');
         };
+        
+        this.getcalibration = function() {
+            lm.sendCommand('{"get":"cal"}');
+        }
+        
+        this.setcalibration = function(cal) {
+            lm.sendCommand('{"set":{"cal":' + cal + '}}');
+        }
 
         this.logstatus = function() {
             lm.sendCommand('{ "get": "logstatus" }');

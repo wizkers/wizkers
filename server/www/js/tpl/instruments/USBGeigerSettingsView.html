@@ -1,270 +1,280 @@
 <div class="col-md-9">
-<div class="well" id="diags-area">
-    <div class="row">
-      <div class="col-md-7">
-        <legend>Settings
-          </legend>
-      </div>
-        <div class="col-md-5">
-            <button class="btn btn-info refresh" title="Refresh" type="button" ><span class="glyphicon glyphicon-refresh">     </span></button>
-            <button class="btn comlink" type="button" style="float:right;">Data</button>
-        </div>
-    </div>
-  <div class="row">
-      <div class="col-md-6">
-              <ul>
-                  <li>Software version: <span id="version">waiting...</span></li>
-                  <li>Input 1 CPM Reading: <span id="cpmvalue">waiting...</span><span id="current_window"></span></li>
-                  <li>Input 2 CPM Reading: <span id="cpm2value">waiting...</span><span id="current_window2"></span></li>
-                  <li>Equivalent frequency: <span id="freqvalue">waiting...</span>/ <span id="freqvalue2">waiting...</span> (Hz)</li>
-                  <li>Raw frequency: <span id="rawfreqvalue">waiting...</span></li>
-              </ul>
-      </div>
-      <div class="col-md-6">
-          <div class="thumbnail">        
-             <h4>Manual command:</h4>
-             <div class="input-group input-margin">
-                <span class="input-group-addon">Command</span>
-                <input id="manualcmd" value="" class="form-control" type="text" maxlength="32">
-                <span class="input-group-btn">
-                        <button class="btn btn-default" id="cmdsend" type="button"><span class="glyphicon glyphicon-check"></span></button>
-                </span>
-             </div>  
-          </div>
-      </div>  
-  </div>
-    <div class="row">
-        <div class="col-md-12">
-        <div class="form-horizontal" id="output_control">
-            <div class="form-group">
-                <label class="col-md-2 control-label">Output control:</label>
-                <div class="col-md-10">
-                    <div class="checkbox col-md-3">
-                        <label>
-                            <input  id="cpm_enable" type="checkbox"> Enable CPM Output
-                        </label>
-                    </div>
-                    <div class="checkbox col-md-3">
-                        <label>
-                            <input id="count_enable" type="checkbox"> Enable COUNT Output
-                        </label>
-                    </div>
-                    <div class="checkbox col-md-3">
-                        <label>
-                            <input id="pulse_enable" type="checkbox"> Enable PULSE Output
-                        </label>
-                    </div>
-                    <div class="checkbox col-md-3">
-                        <label>
-                            <input id="dual_enable" type="checkbox"> Enable Dual Input
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        </div>
-    </div>
-    
-    <div class="row">
-        <div class="col-md-12">
-        <div class="form-horizontal" id="output_control">
-            <div class="form-group">
-                <label for="deadtime" class="col-md-2 control-label">Tube settings:</label>
-                <div class="col-md-5">
-                <div class="input-group input-margin">
-                    <span class="input-group-addon">Dead time factor input 1</span>
-                    <input id="deadtime1" value="" class="form-control" type="text" maxlength="32">
-                    <span class="input-group-btn">
-                            <button class="btn btn-default" id="deadset1" type="button"><span class="glyphicon glyphicon-check"></span></button>
-                    </span>
-                 </div>  
-                </div>
-                <div class="col-md-5">
-                <div class="input-group input-margin">
-                    <span class="input-group-addon">Dead time factor input 2</span>
-                    <input id="deadtime2" value="" class="form-control" type="text" maxlength="32">
-                    <span class="input-group-btn">
-                            <button class="btn btn-default" id="deadset2" type="button"><span class="glyphicon glyphicon-check"></span></button>
-                    </span>
-                 </div>  
-                </div>
-                </div>
-        </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-        <div class="form-horizontal" id="window_settings">
-            <div class="form-group">
-                <label class="col-md-2 control-label">Counter windows:</label>
-                <div class="col-md-3">
-                <button class="btn btn-info windows-update" title="Update" type="button" ><span class="glyphicon glyphicon-save">     </span>&nbsp;Save</button>
-                </div>
-                <div class="col-md-7"><span id="windows_warn"></span></div>
-            </div>
-            <div class="form-group">
-            <div class="col-md-2" style="text-align:center;">
-                Min
-                </div>
-            <div class="col-md-2" style="text-align:center;">
-                Window 1
-                </div>
-            <div class="col-md-2" style="text-align:center;">
-                Limit
-                </div>
-            <div class="col-md-2" style="text-align:center;">
-                Window 2
-                </div>
-            <div class="col-md-2" style="text-align:center;">
-                Limit
-                </div>
-            <div class="col-md-2" style="text-align:center;">
-                Window 3
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input value="0" disabled class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                CPM
-                        </span>
-                     </div>  
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input id="input1_window1_size" value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                sec.
-                        </span>
-                     </div>  
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input id="input1_window1_threshold" value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                CPM
-                        </span>
-                     </div>  
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input id="input1_window2_size" value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                sec.
-                        </span>
-                     </div>  
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input id="input1_window2_threshold" value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                CPM
-                        </span>
-                     </div>  
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input id="input1_window3_size" disabled value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                sec.
-                        </span>
-                     </div>  
-                </div>
-
-            </div>
-                        <div class="form-group">
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input value="0" disabled class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                CPM
-                        </span>
-                     </div>  
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input id="input2_window1_size" value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                sec.
-                        </span>
-                     </div>  
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input id="input2_window1_threshold" value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                CPM
-                        </span>
-                     </div>  
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input id="input2_window2_size" value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                sec.
-                        </span>
-                     </div>  
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input id="input2_window2_threshold" value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                CPM
-                        </span>
-                     </div>  
-                </div>
-                <div class="col-md-2">
-                    <div class="input-group input-margin">
-                        <input id="input2_window3_size" disabled value="" class="form-control" type="text" maxlength="32">
-                        <span class="input-group-addon">
-                                sec.
-                        </span>
-                     </div>  
-                </div>
-
-            </div>
-
-        </div>
-        </div>
-    </div>
+    <div class="well" id="diags-area">
         <div class="row">
-        <div class="col-md-12">
-        <div class="form-horizontal" id="output_control">
-            <div class="form-group">
-                <label class="col-md-2 control-label">Auxiliary port:</label>
-                <div class="checkbox col-md-1">
-                    <label>
-                        <input  id="aux_enable" type="checkbox"> Enable
-                    </label>
-                </div>
-                <div class="col-md-3">
-                <div class="input-group input-margin">
-                    <span class="input-group-addon">Baudrate</span>
-                    <input id="aux_baudrate" disabled value="" class="form-control" type="text" maxlength="32">
-                 </div>  
-                </div>
-                <label class="col-md-3 control-label">Serial output rate (sec.):</label>
-                <div class="col-md-3">
-                <div class="input-group input-margin">
-                    <input id="output_rate" value="" class="form-control" type="text" maxlength="32">
-                    <span class="input-group-btn">
-                            <button class="btn btn-default" id="rateset" type="button"><span class="glyphicon glyphicon-check"></span></button>
-                    </span>
-
-                 </div>  
-                </div>
-
+            <div class="col-md-7">
+                <legend>Settings
+                </legend>
+            </div>
+            <div class="col-md-5">
+                <button class="btn btn-info refresh" title="Refresh" type="button"><span class="glyphicon glyphicon-refresh">     </span>
+                </button>
+                <button class="btn comlink" type="button" style="float:right;">Data</button>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-6">
+                <ul>
+                    <li>Software version: <span id="version">waiting...</span>
+                    </li>
+                    <li>Input 1 CPM Reading: <span id="cpmvalue">waiting...</span><span id="current_window"></span>
+                    </li>
+                    <li>Input 2 CPM Reading: <span id="cpm2value">waiting...</span><span id="current_window2"></span>
+                    </li>
+                    <li>Equivalent frequency: <span id="freqvalue">waiting...</span>/ <span id="freqvalue2">waiting...</span> (Hz)</li>
+                    <li>Raw frequency: <span id="rawfreqvalue">waiting...</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <div class="thumbnail">
+                    <h4>Manual command:</h4>
+                    <div class="input-group input-margin">
+                        <span class="input-group-addon">Command</span>
+                        <input id="manualcmd" value="" class="form-control" type="text" maxlength="32">
+                        <span class="input-group-btn">
+                        <button class="btn btn-default" id="cmdsend" type="button"><span class="glyphicon glyphicon-check"></span>
+                        </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-horizontal" id="output_control">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Output control:</label>
+                        <div class="col-md-10">
+                            <div class="checkbox col-md-3">
+                                <label>
+                                    <input id="cpm_enable" type="checkbox">Enable CPM Output
+                                </label>
+                            </div>
+                            <div class="checkbox col-md-3">
+                                <label>
+                                    <input id="count_enable" type="checkbox">Enable COUNT Output
+                                </label>
+                            </div>
+                            <div class="checkbox col-md-3">
+                                <label>
+                                    <input id="pulse_enable" type="checkbox">Enable PULSE Output
+                                </label>
+                            </div>
+                            <div class="checkbox col-md-3">
+                                <label>
+                                    <input id="dual_enable" type="checkbox">Enable Dual Input
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-horizontal" id="output_control">
+                    <div class="form-group">
+                        <label for="deadtime" class="col-md-2 control-label">Tube settings:</label>
+                        <div class="col-md-5">
+                            <div class="input-group input-margin">
+                                <span class="input-group-addon">Dead time factor input 1</span>
+                                <input id="deadtime1" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-btn">
+                            <button class="btn btn-default" id="deadset1" type="button"><span class="glyphicon glyphicon-check"></span>
+                                </button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="input-group input-margin">
+                                <span class="input-group-addon">Dead time factor input 2</span>
+                                <input id="deadtime2" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-btn">
+                            <button class="btn btn-default" id="deadset2" type="button"><span class="glyphicon glyphicon-check"></span>
+                                </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-horizontal" id="window_settings">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Counter windows:</label>
+                        <div class="col-md-3">
+                            <button class="btn btn-info windows-update" title="Update" type="button"><span class="glyphicon glyphicon-save">     </span>&nbsp;Save</button>
+                        </div>
+                        <div class="col-md-7"><span id="windows_warn"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2" style="text-align:center;">
+                            Min
+                        </div>
+                        <div class="col-md-2" style="text-align:center;">
+                            Window 1
+                        </div>
+                        <div class="col-md-2" style="text-align:center;">
+                            Limit
+                        </div>
+                        <div class="col-md-2" style="text-align:center;">
+                            Window 2
+                        </div>
+                        <div class="col-md-2" style="text-align:center;">
+                            Limit
+                        </div>
+                        <div class="col-md-2" style="text-align:center;">
+                            Window 3
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input value="0" disabled class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                CPM
+                        </span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input id="input1_window1_size" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                sec.
+                        </span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input id="input1_window1_threshold" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                CPM
+                        </span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input id="input1_window2_size" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                sec.
+                        </span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input id="input1_window2_threshold" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                CPM
+                        </span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input id="input1_window3_size" disabled value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                sec.
+                        </span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input value="0" disabled class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                CPM
+                        </span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input id="input2_window1_size" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                sec.
+                        </span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input id="input2_window1_threshold" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                CPM
+                        </span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input id="input2_window2_size" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                sec.
+                        </span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input id="input2_window2_threshold" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                CPM
+                        </span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-margin">
+                                <input id="input2_window3_size" disabled value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-addon">
+                                sec.
+                        </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-horizontal" id="output_control">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Auxiliary port:</label>
+                        <div class="checkbox col-md-1">
+                            <label>
+                                <input id="aux_enable" type="checkbox">Enable
+                            </label>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group input-margin">
+                                <span class="input-group-addon">Baudrate</span>
+                                <input id="aux_baudrate" disabled value="" class="form-control" type="text" maxlength="32">
+                            </div>
+                        </div>
+                        <label class="col-md-3 control-label">Serial output rate (sec.):</label>
+                        <div class="col-md-3">
+                            <div class="input-group input-margin">
+                                <input id="output_rate" value="" class="form-control" type="text" maxlength="32">
+                                <span class="input-group-btn">
+                            <button class="btn btn-default" id="rateset" type="button"><span class="glyphicon glyphicon-check"></span>
+                                </button>
+                                </span>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
     </div>
 
-    
-    
-    </div>
-    
     <div class="row">
         <div class="col-md-12">
             <div class="well">
@@ -273,17 +283,20 @@
         </div>
     </div>
 
-</div><!--/col-md-9-->
+</div>
+<!--/col-md-9-->
 
-  <div class="col-md-3">
-  <div class="well" id="port-diags">
-      <h4>Help</h4>
-      <p>You can test commands on the dongle here. Type "?" to get started..</p>
-      
-      <p><b>Equivalent Frequency</b>: this converts the current CPM value into a frequency in Hz, which will be different from Raw frequency unless the dead time factor is zero.</p>
-      <p><b>Raw Frequency</b>: the raw frequency measured on input over the last 3 seconds.</p>
-      
-      <p><b>Counter Windows:</b> depending on the current CPM count, the counter will calculate the CPM using a sliding time window: the higher the CPM, the shorter the window. The dongle supports three windows that can be setup here. Window 3 duration is fixed.</p>
+<div class="col-md-3">
+    <div class="well" id="port-diags">
+        <h4>Help</h4>
+        <p>You can test commands on the dongle here. Type "?" to get started..</p>
 
-      </div><!--/.well -->
-</div><!--/col-md--->
+        <p><b>Equivalent Frequency</b>: this converts the current CPM value into a frequency in Hz, which will be different from Raw frequency unless the dead time factor is zero.</p>
+        <p><b>Raw Frequency</b>: the raw frequency measured on input over the last 3 seconds.</p>
+
+        <p><b>Counter Windows:</b> depending on the current CPM count, the counter will calculate the CPM using a sliding time window: the higher the CPM, the shorter the window. The dongle supports three windows that can be setup here. Window 3 duration is fixed.</p>
+
+    </div>
+    <!--/.well -->
+</div>
+<!--/col-md--->

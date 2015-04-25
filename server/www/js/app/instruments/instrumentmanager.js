@@ -67,6 +67,7 @@ define(function(require) {
         // current_instrument is a Backbone Model instance
         var current_instrument = null; // The instrument currently in use
         
+        // Instruments supported in all runmodes:
         this.supportedInstruments = {
             "onyx":     { name: "SafeCast Onyx", type: OnyxInstrument, settings: OnyxSettingsView,
                           connectionsettings: 'app/views/instrument/serialport'},
@@ -82,7 +83,7 @@ define(function(require) {
                           connectionsettings: 'app/views/instrument/serialport'},
         };
         
-        // The instruments below are not supported in Cordova or Chrome runmodes:
+        // The instruments below are only supported in Server runmode:
         if (vizapp.type == "server") {
             this.supportedInstruments["w433"] =
                 { name: "Aerodynes W433 Weather receiver", type: W433Instrument, settings: W433SettingsView,
@@ -95,6 +96,7 @@ define(function(require) {
                           connectionsettings: 'app/views/instrument/pinoccio' };
         }
         
+        // The instruments below are only supported in Chrome runmode:
         if (vizapp.type == "chrome") {
             this.supportedInstruments["sark110"] =
                 { name: "Sark110 Antenna Analyzer", type: Sark110Instrument, settings: Sark110SettingsView,

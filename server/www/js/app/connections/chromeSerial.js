@@ -43,10 +43,21 @@ define(function (require) {
             self = this;
 
         var parser = settings.parser;
+        
+        // We try to use the same API as the Node serialport API, so we need to
+        // translate some of the arguments:
+        var chromeSerialSettings = {
+            bitrate: settings.baudRate,
+            dataBits: 'eight'
+        };
+        
+        if (settings.parity) {
+            if (settings.parity == 'none')
+                settings.parity = 'no';
+            chromeSerialSettings.parityBit = settings.parity;
+        }
 
-        chrome.serial.connect(path, {
-                bitrate: settings.baudRate,
-            },
+        chrome.serial.connect(path, chromeSerialSettings,
             onOpen
         );
 

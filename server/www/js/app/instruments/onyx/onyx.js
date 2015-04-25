@@ -23,97 +23,117 @@
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
-define(function(require) {
+define(function (require) {
     "use strict";
-    
+
     var driver_frontend = require('app/instruments/onyx/driver_frontend');
-    
-    return  function() {
+    var uploader_frontend = require('app/instruments/usbgeiger/uploader_frontend');
+
+    return function () {
 
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities    
-        this.getCaps = function() {
+        this.getCaps = function () {
             return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView",
-                    "LogManagementView",
+                    "LogManagementView", "Upgrader"
                    ];
         };
-        
+
         // Return the type of data reading that this instrument generates. Can be used
         // by output plugins to accept data from this instrument or not.
-        this.getDataType = function() {
-                    return [ "radioactivity" ];
+        this.getDataType = function () {
+            return ["radioactivity"];
         }
 
+
+        this.getUpgrader = function (arg, callback) {
+            require(['app/instruments/onyx/upgrader'], function (view) {
+                callback(new view(arg));
+            });
+        };
+
         // This has to be a backbone view
-        this.getSettings = function(arg, callback) {
-            require(['app/instruments/onyx/settings'], function(view) {
+        this.getSettings = function (arg, callback) {
+            require(['app/instruments/onyx/settings'], function (view) {
                 callback(new view(arg));
             });
         };
 
         // This has to be a Backbone view
         // This is the full screen live view graph (not a small widget)
-        this.getLiveDisplay = function(arg, callback) {
-            require(['app/instruments/onyx/display_live'], function(view) {
+        this.getLiveDisplay = function (arg, callback) {
+            require(['app/instruments/onyx/display_live'], function (view) {
                 callback(new view(arg));
             });
         };
 
         // This is a Backbone view
         // This is a numeric display
-        this.getNumDisplay = function(arg, callback) {
-            require(['app/instruments/onyx/display_numeric'], function(view) {
+        this.getNumDisplay = function (arg, callback) {
+            require(['app/instruments/onyx/display_numeric'], function (view) {
                 callback(new view(arg));
             });
         };
 
         // A smaller widget (just a graph)
-        this.getLiveWidget = function(arg, callback) {
+        this.getLiveWidget = function (arg, callback) {
             return null;
         };
 
         // A diagnostics/device setup screen
-        this.getDiagDisplay = function(arg, callback) {
-            require(['app/instruments/onyx/display_diag'], function(view) {
+        this.getDiagDisplay = function (arg, callback) {
+            require(['app/instruments/onyx/display_diag'], function (view) {
                 callback(new view(arg));
             });
         };
 
         // This has to be a link manager
-        this.getDriver = function() {
+        this.getDriver = function () {
             return new driver_frontend();
         };
-        
+
+        this.getUploader = function () {
+            return new uploader_frontend();
+        };
+
         // This is a browser implementation of the backend driver, when we
-        // run the app fully in-browser on as a Cordova native app.
-        this.getBackendDriver = function(arg, callback) {
-            require(['app/instruments/onyx/driver_backend'], function(driver) {
+        // run the app fully in-browser or as a Cordova native app.
+        this.getBackendDriver = function (arg, callback) {
+            require(['app/instruments/onyx/driver_backend'], function (driver) {
+                callback(new driver(arg));
+            });
+        };
+
+        // Browser implementation of the backend firmware uploader, when we
+        // run the app fullun in-browser or as a Cordova native app.
+        this.getBackendUploaderDriver = function (arg, callback) {
+            require(['app/instruments/onyx/uploader_backend'], function (driver) {
                 callback(new driver(arg));
             });
         };
 
         // Return a Backbone view which is a mini graph
-        this.getMiniLogview = function(arg, callback) {
+        this.getMiniLogview = function (arg, callback) {
             return null;
         };
 
         // Return a device log management view
-        this.getLogManagementView = function(arg, callback) {
-            require(['app/instruments/onyx/display_logmanager'], function(view) {
+        this.getLogManagementView = function (arg, callback) {
+            require(['app/instruments/onyx/display_logmanager'], function (view) {
                 callback(new view(arg));
             });
         }
 
         // Render a log (or list of logs) for the device.
-        this.getLogView = function(arg, callback) {
-            require(['app/instruments/onyx/display_log'], function(view) {
+        this.getLogView = function (arg, callback) {
+            require(['app/instruments/onyx/display_log'], function (view) {
                 callback(new view(arg));
             });
         }
 
         // Render a log edit table for a log collection for the device
-        this.getLogEditView = function(arg, callback) {
-            require(['app/instruments/onyx/display_logedit'], function(view) {
+        this.getLogEditView = function (arg, callback) {
+            require(['app/instruments/onyx/display_logedit'], function (view) {
                 callback(new view(arg));
             });
         }

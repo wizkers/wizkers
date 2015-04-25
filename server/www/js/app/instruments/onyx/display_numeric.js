@@ -68,7 +68,7 @@ define(function(require) {
                 return;
             var cpm = parseFloat(data.cpm.value);
             var usv = parseFloat(data.cpm.usv);
-            $('#livecpm', this.el).html(cpm.toFixed(3));
+            $('#livecpm', this.el).html(cpm.toFixed(0));
             if (usv) {
                 $('#liveusvh', this.el).html(usv.toFixed(3) + "&nbsp;&mu;Sv/h");
             }
