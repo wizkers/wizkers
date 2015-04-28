@@ -209,7 +209,7 @@ define(function (require) {
             // both situations, which is why we do not break after each case statement.
             switch (current_state) {
             case States.WAIT_DOUBLE_ACK:
-                console.log('WAIT_DOUBLE_ACK', inputBuffer[0]);
+                //console.log('WAIT_DOUBLE_ACK', inputBuffer[0]);
                 if (inputBuffer[0] != STM32.ACK && inputBuffer[0] != STM32.NACK) {
                     var res = {
                         status: 'error'
@@ -228,7 +228,7 @@ define(function (require) {
             case States.WAIT_ACK:
                 clearTimeout(watchdog);
                 current_state = States.IDLE;
-                console.log('WAIT_ACK', inputBuffer[0]);
+                //console.log('WAIT_ACK', inputBuffer[0]);
                 if (readCb) {
                     var res = {};
                     if (inputBuffer[ack_idx] != STM32.ACK && inputBuffer[ack_idx] != STM32.NACK) {
@@ -242,7 +242,7 @@ define(function (require) {
                 }
                 break;
             case States.WAIT_ACK_AND_SIZE:
-                console.log('WAIT_ACK_AND_SIZE', inputBuffer[0]);
+                //console.log('WAIT_ACK_AND_SIZE', inputBuffer[0]);
                 var b = inputBuffer[0];
                 current_state = States.WAIT_SIZE;
                 if (b != STM32.ACK) {
@@ -261,11 +261,11 @@ define(function (require) {
                 var s = inputBuffer[1];
                 bytesExpected = s + 2; // +2 because of ACK and Length bytes
                 current_state = States.RECEIVING;
-                console.log('WAIT_SIZE', bytesExpected);
+                //console.log('WAIT_SIZE', bytesExpected);
                 // break;  // Don't break, the byte may already be waiting for us
 
             case States.RECEIVING:
-                console.log('RECEIVING');
+                //console.log('RECEIVING');
                 if (ibIdx >= bytesExpected - 1) {
                     current_state = States.WAIT_FINAL_ACK;
                 }
@@ -284,7 +284,7 @@ define(function (require) {
                 if (readCb) {
                     // We return the complete buffer (including acks etc)
                     var resp = inputBuffer.subarray(0, ibIdx);
-                    console.log('WAIT_FINAL_ACK', resp);
+                    //console.log('WAIT_FINAL_ACK', resp);
                     readCb({
                         status: 'ok',
                         data: resp
@@ -547,10 +547,6 @@ define(function (require) {
          * @param {Number} offset offset within the firmware file (a Uint8Array)
          */
         var writeFlash = function (offset) {
-            self.trigger('data', {
-                'writing': Math.ceil(offset / firmware_binary.byteLength * 100)
-            });
-
             var last_write = false;
 
             // 1. Prepare the data buffer:
@@ -565,8 +561,8 @@ define(function (require) {
                 buf.set(firmware_binary.subarray(offset, offset + STM32.BUF_SIZE), 1);
                 buf[0] = 0xff; // STM32.BUF_SIZE -1
             } else {
-                // We are reaching the end of the binary:
-                // resize the buffer and fill it
+                // We are reaching the end of the binary (less than 256 bytes left)
+                // resize the buffer and fill it with the remaining data
                 buf = new Uint8Array(firmware_binary.byteLength - offset + 2);
                 buf.set(firmware_binary.subarray(offset, firmware_binary.byteLength - 1), 1);
                 buf[0] = firmware_binary.byteLength - offset - 1;
@@ -591,7 +587,7 @@ define(function (require) {
                     return; // Abort
                 }
 
-                // 3. Send address
+                // 3. Send address to write
                 var flash_addr = makeAddress(STM32.FLASH_START + offset);
                 //console.log('Address', flash_addr);
                 write(flash_addr, States.WAIT_ACK, 500, function (res) {
@@ -614,12 +610,15 @@ define(function (require) {
                             });
                             return; // Abort
                         }
+                        self.trigger('data', {
+                            'writing': Math.ceil(offset / firmware_binary.byteLength * 100)
+                        });
                         if (last_write) {
                             self.trigger('data', {
                                 status: 'ok',
                                 msg: 'firmware flashed'
                             });
-
+                            goCommand();
                         } else {
                             writeFlash(offset + STM32.BUF_SIZE);
                         }
@@ -629,7 +628,38 @@ define(function (require) {
         }
 
         /**
-         * Flash the Onyx. Steps are as follows:
+         * Issue a "go" command to start the firmware
+         */
+        var goCommand = function () {
+            write(makeCommand(STM32.GO), States.WAIT_ACK, 500, function (res) {
+                if (res.status != 'ok') {
+                    // We are in deep trouble here, flashing is not going well
+                    self.trigger('data', {
+                        status: 'error',
+                        msg: 'go: could not issue "go" command'
+                    });
+                    return; // Abort
+                }
+                write(makeAddress(STM32.FLASH_START), States.WAIT_ACK, 500, function (res) {
+                    if (res.status != 'ok') {
+                        // We are in deep trouble here, flashing is not going well
+                        self.trigger('data', {
+                            status: 'error',
+                            msg: 'go: could not issue "go" command'
+                        });
+                        return; // Abort
+                    }
+                    self.trigger('data', {
+                        status: 'ok',
+                        msg: 'Firmware flashed and device restarting'
+                    });
+                });
+            });
+        }
+
+
+        /**
+         * Flash the device. Steps are as follows:
          *    1. Init Bootloader
          *    2. Get/Check Version
          *    3. Get/Check ChipID
@@ -638,8 +668,6 @@ define(function (require) {
          *    6. Erase Flash
          *    7. Program Flash
          *    8. Issue GO command to start FW (?)
-         * @param {[[Type]]} address [[Description]]
-         * @param {[[Type]]} data    [[Description]]
          */
         var flashBoard = function () {
             console.log('***************** Start Flashing ********************');

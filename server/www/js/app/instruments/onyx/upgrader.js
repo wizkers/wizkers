@@ -54,6 +54,7 @@ define(function (require) {
         onClose: function () {
             console.log("Upgrader view closing...");
             linkManager.off('input', this.showInput);
+            linkManager.closeInstrument();
             instrumentManager.stopUploader();
         },
 
@@ -65,12 +66,14 @@ define(function (require) {
 
         download_fw: function () {
             var self = this;
+            $('#fw_dl', this.el).html('Downloading...').addClass('btn-warning');
             var xhr = new XMLHttpRequest();
             xhr.open('GET', 'http://www.wizkers.io/download/780/', true);
-            xhr.responseType = 'text';
+            xhr.responseType = 'arraybuffer';
 
             xhr.onload = function (e) {
                 if (this.status == 200) {
+                    $('#fw_dl', this.el).html('Downloaded').addClass('btn-success').removeClass('btn-warning');
                     self.firmware = this.response;
                     self.validate_fw();
                 }
@@ -122,6 +125,7 @@ define(function (require) {
                 utils.showAlert('Error', 'No file selected', 'bg-danger');
                 return;
             }
+            $("#device_upgrade", this.el).attr('disabled', true);
             utils.hideAlert();
             utils.showAlert('Info', "Starting upgrade, please wait", 'bg-info');
             // Switch to our uploader driver
@@ -177,7 +181,15 @@ define(function (require) {
             }
 
             if (data.status) {
-                utils.showAlert('Info', data.status + '<br>' + ((data.msg) ? data.msg : ''), 'bg-info');
+                var t = 'bg-info';
+                switch (data.status) {
+                case 'ok':
+                    t = 'bg-success';
+                    break;
+                case 'error':
+                    t = 'bg-danger';
+                }
+                utils.showAlert('Info', data.status + '<br>' + ((data.msg) ? data.msg : ''), t);
 
                 if (data.msg) {
                     if (data.msg == 'flash write protection disabled, device is resetting') {}
@@ -188,6 +200,9 @@ define(function (require) {
                 }
                 if (data.msg == 'firmware flashed') {
                     $('#flashprogrammed', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
+                    // We need to tell the driver to close the port too:
+                    linkManager.closeInstrument();
+                    instrumentManager.stopUploader();
                 }
             }
         }

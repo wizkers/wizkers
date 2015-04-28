@@ -70,7 +70,7 @@ define(function (require) {
             try {
                 if (data.substr(0, 2) == "\n>")
                     return;
-                if (data.length < 2)
+                if (data.length < 3)
                     return;
                 var response = JSON.parse(data);
                 if (uidrequested && response.guid != undefined) {

@@ -244,7 +244,7 @@ define(function (require) {
                 return;
             }
             // Temporary: detect "uniqueID" key and send as 'uniqueID' message
-            if (data.uniqueID) {
+            if (data.uniqueID != undefined) {
                 self.trigger('uniqueID', data.uniqueID);
                 return;
             }
