@@ -19,23 +19,23 @@
 
 /*
  * Display output of Geiger counter in numeric format
- * 
+ *
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
-define(function(require) {
+define(function (require) {
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
         Backbone = require('backbone'),
-        utils    = require('app/utils'),
+        utils = require('app/utils'),
         template = require('js/tpl/instruments/OnyxNumView.js');
 
 
     return Backbone.View.extend({
 
-        initialize:function (options) {
+        initialize: function (options) {
             this.sessionStartStamp = new Date().getTime();
             this.maxreading = 0;
             this.minreading = -1;
@@ -44,43 +44,47 @@ define(function(require) {
             linkManager.on('input', this.showInput, this);
         },
 
-        events: {
-        },
+        events: {},
 
-        render:function () {
+        render: function () {
             var self = this;
             console.log('Main render of Onyx numeric view');
             $(this.el).html(template());
             return this;
         },
 
-        onClose: function() {
+        onClose: function () {
             console.log("Onyx numeric view closing...");
             linkManager.off('input', this.showInput, this);
         },
 
-        showInput: function(data) {
-            
-            if (typeof(data.devicetag) != 'undefined')
-                $('#devicetag',this.el).html(data.devicetag);
+        showInput: function (data) {
 
-            if (typeof(data.cpm) == 'undefined')
+            if (typeof (data.devicetag) != 'undefined')
+                $('#devicetag', this.el).html(data.devicetag);
+
+            if (typeof (data.cpm) == 'undefined')
                 return;
             var cpm = parseFloat(data.cpm.value);
             var usv = parseFloat(data.cpm.usv);
+            var count = parseInt(data.cpm.count);
             $('#livecpm', this.el).html(cpm.toFixed(0));
             if (usv) {
                 $('#liveusvh', this.el).html(usv.toFixed(3) + "&nbsp;&mu;Sv/h");
             }
-            
+
             if (data.cpm.valid)
-                 $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('VALID');
+                $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('VALID');
             else
                 $('#readingvalid', this.el).removeClass('label-success').addClass('label-danger').html('INVALID');
 
+            if (count) {
+                $('#count', this.el).html(count);
+            }
+
             // Update statistics:
-            var sessionDuration = (new Date().getTime() - this.sessionStartStamp)/1000;
-            $('#sessionlength',this.el).html(utils.hms(sessionDuration));
+            var sessionDuration = (new Date().getTime() - this.sessionStartStamp) / 1000;
+            $('#sessionlength', this.el).html(utils.hms(sessionDuration));
 
             if (cpm > this.maxreading) {
                 this.maxreading = cpm;
