@@ -1,71 +1,80 @@
 <div class="col-md-8 ">
     <h4>Instrument Settings</h4>
-    
-    
-    <p>Work in progress: put instrument settings here. These are stored in the "metadata" field of the instrument record. In this alpha version, this is not implemented.</p>
-    
+
+
+    <p>Depending on instrument model, this screen can give you access to more operations on the instrument, such as firmware upgrades.</p>
+
     <button type="button" class="btn btn-danger" style="display:none;" id="device_upgrade">Upgrade firmware</button>
-    
+
 </div>
-    
+
 <div class="col-md-4 well">
     <div class="row">
         <div class="col-md-12">
             <h4>Application settings</h4>
             <p>
                 <a href="#" role="button" id="reset" class="btn btn-danger">Reset all settings.</a>
-                <% if (vizapp.type == "chrome") { %>
-                <button type="button" class="btn btn-danger" id="reset_storage">Reset all storage</button>
-                <% } %>
+                <% if (vizapp.type=="chrome" ) { %>
+                    <button type="button" class="btn btn-danger" id="reset_storage">Reset all storage</button>
+                    <% } %>
             </p>
         </div>
     </div>
     <div class="row">
-            <div class="col-md-12"><h4>User interface</h4></div>
+        <div class="col-md-12">
+            <h4>User interface</h4>
+        </div>
     </div>
     <div class="row">
-            <div class="col-md-12">
+        <div class="col-md-12">
             Display time in:&nbsp;
-            <select style="width:65%" name="timezone" >
-                <option value="UTC" <%= timezone == "GMT" ? 'selected="selected"'  : '' %>>GMT</option>
-                <option value="browser" <%= timezone == "browser" ? 'selected="selected"'  : '' %>>Browser timezone</option>
+            <select style="width:65%" name="timezone">
+                <option value="UTC" <%=t imezone=="GMT" ? 'selected="selected"' : '' %>>GMT</option>
+                <option value="browser" <%=t imezone=="browser" ? 'selected="selected"' : '' %>>Browser timezone</option>
             </select>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12">
-            <% var palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ] %>
-            Graph color: <span id="currentcpmcolor" class="badge" style="background:<%=palette[cpmcolor]%>;width:20%;">&nbsp;</span>
-            <div class="btn-group">
-                <a class="btn dropdown-toggle"data-toggle="dropdown">        
-                    <span class="caret"></span>
-                </a>
-                <ul name="cpmcolor" class="dropdown-menu" role="menu">
-                    <li><a class="cpmcolor" role="menuitem"><span title="0" class="badge" style="background:#e27c48;width:100%;">&nbsp;</span></a></li>
-                    <li><a class="cpmcolor" role="menuitem"><span title="1" class="badge" style="background:#5a3037;width:100%;">&nbsp;</span></a></li>
-                    <li><a class="cpmcolor" role="menuitem"><span title="2" class="badge" style="background:#f1ca4f;width:100%;">&nbsp;</span></a></li>
-                    <li><a class="cpmcolor" role="menuitem"><span title="3" class="badge" style="background:#acbe80;width:100%;">&nbsp;</span></a></li>
-                    <li><a class="cpmcolor" role="menuitem"><span title="4" class="badge" style="background:#77b1a7;width:100%;">&nbsp;</span></a></li>
-                    <li><a class="cpmcolor" role="menuitem"><span title="5" class="badge" style="background:#858485;width:100%;">&nbsp;</span></a></li>
-                    <li><a class="cpmcolor" role="menuitem"><span title="6" class="badge" style="background:#d9c7ad;width:100%;">&nbsp;</span></a></li>
-                </ul>
-            </div>
+            <% var palette=[ "#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ] %>
+                Graph color: <span id="currentcpmcolor" class="badge" style="background:<%=palette[cpmcolor]%>;width:20%;">&nbsp;</span>
+                <div class="btn-group">
+                    <a class="btn dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                    </a>
+                    <ul name="cpmcolor" class="dropdown-menu" role="menu">
+                        <li><a class="cpmcolor" role="menuitem"><span title="0" class="badge" style="background:#e27c48;width:100%;">&nbsp;</span></a>
+                        </li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="1" class="badge" style="background:#5a3037;width:100%;">&nbsp;</span></a>
+                        </li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="2" class="badge" style="background:#f1ca4f;width:100%;">&nbsp;</span></a>
+                        </li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="3" class="badge" style="background:#acbe80;width:100%;">&nbsp;</span></a>
+                        </li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="4" class="badge" style="background:#77b1a7;width:100%;">&nbsp;</span></a>
+                        </li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="5" class="badge" style="background:#858485;width:100%;">&nbsp;</span></a>
+                        </li>
+                        <li><a class="cpmcolor" role="menuitem"><span title="6" class="badge" style="background:#d9c7ad;width:100%;">&nbsp;</span></a>
+                        </li>
+                    </ul>
+                </div>
         </div>
-        
+
     </div>
     <div class="row">
         <div class="col-md-12">
             Default Graph Scale:
-            <select style="width:65%" name="cpmscale" >
-                <option value="linear" <%= cpmscale == "linear" ? 'selected="selected"'  : '' %>>Linear</option>
-                <option value="log" <%= cpmscale == "log" ? 'selected="selected"'  : '' %>>Logarithmic</option>
+            <select style="width:65%" name="cpmscale">
+                <option value="linear" <%=c pmscale=="linear" ? 'selected="selected"' : '' %>>Linear</option>
+                <option value="log" <%=c pmscale=="log" ? 'selected="selected"' : '' %>>Logarithmic</option>
             </select>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-12">
-            <input type="checkbox" name="showstream" <%= showstream ? 'checked' : '' %>>&nbsp;Show debug output on interface
+            <input type="checkbox" name="showstream" <%=s howstream ? 'checked' : '' %>>&nbsp;Show debug output on interface
         </div>
     </div>
 
@@ -79,15 +88,26 @@
 
     <div class="row">
         <div class="col-md-12">
-            <br><br><hr><br>
+            <br>
+            <br>
+            <hr>
+            <br>
             <p>
                 Debug:
             </p>
             <ul>
-                <li>Timezone: <%= timezone %></li>
-                <li>Graph color: <%= cpmcolor %></li>
-                <li>CPM Scale: <%= cpmscale %></li>
-                <li>Show debug output: <%= showstream %></li>
+                <li>Timezone:
+                    <%=t imezone %>
+                </li>
+                <li>Graph color:
+                    <%=c pmcolor %>
+                </li>
+                <li>CPM Scale:
+                    <%=c pmscale %>
+                </li>
+                <li>Show debug output:
+                    <%=s howstream %>
+                </li>
             </ul>
         </div>
     </div>
@@ -96,18 +116,20 @@
 <!-- Instrument delete modal -->
 <div class="container">
     <div id="deleteConfirm" class="modal" data-backdrop="true" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog"><div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3 id="myModalLabel">Confirm reset</h3>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="myModalLabel">Confirm reset</h3>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to reset all storage? This will remove all instruments, all logs and all outputs. This cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">No</button>
+                    <button class="btn btn-primary" id="do-delete">Yes, reset it</button>
+                </div>
             </div>
-            <div class="modal-body">
-                <p>Are you sure you want to reset all storage? This will remove all instruments, all logs and all outputs. This cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">No</button>
-                <button class="btn btn-primary" id="do-delete">Yes, reset it</button>
-            </div>
-        </div></div>
+        </div>
     </div>
 </div>

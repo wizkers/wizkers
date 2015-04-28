@@ -27,7 +27,7 @@ define(function (require) {
     "use strict";
 
     var driver_frontend = require('app/instruments/onyx/driver_frontend');
-    var uploader_frontend = require('app/instruments/usbgeiger/uploader_frontend');
+    var uploader_frontend = require('app/instruments/onyx/uploader_frontend');
 
     return function () {
 

@@ -96,7 +96,9 @@ define(function (require) {
                         self.firmware = e.target.result;
                         self.validate_fw();
                     };
-                    reader.readAsText(file);
+                    // Our data is binary, so we need to put it into an
+                    // arraybuffer, will make our life better:
+                    reader.readAsArrayBuffer(file);
                 });
             });
         },
@@ -136,34 +138,59 @@ define(function (require) {
             var self = this;
 
             // Update our raw data monitor
-            var i = $('#input', this.el);
-            var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-            // Keep max 50 lines:
-            if (scroll.length > 50) {
-                scroll = scroll.slice(scroll.length - 50);
+            if (data.writing == undefined) {
+                var i = $('#input', this.el);
+                var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
+                // Keep max 50 lines:
+                if (scroll.length > 50) {
+                    scroll = scroll.slice(scroll.length - 50);
+                }
+                i.val(scroll.join('\n'));
+                // Autoscroll:
+                i.scrollTop(i[0].scrollHeight - i.height());
             }
-            i.val(scroll.join('\n'));
-            // Autoscroll:
-            i.scrollTop(i[0].scrollHeight - i.height());
 
-            // The backend issues a sw_version string as soon as
+            // The backend issues a chipID number as soon as
             // the bootloader is online, we take this as a cue to upload
             // the firmware to the device.
-            if (data.sw_version) {
-                linkManager.sendCommand({
-                    'upload_hex': this.firmware
-                });
+            if (data.chipID) {
+                if (data.chipID != 420) {
+                    $('#chipversion', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-remove');
+                    $('#chipid', this.el).html(' --- Chip ID unsupported, please contact Medcom.');
+                } else {
+                    $('#chipversion', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
+                    $('#chipid', this.el).html('(chipID 420, STM32F1)');
+                    linkManager.sendCommand({
+                        'upload_bin': this.firmware
+                    });
+                }
             } else if (data.writing) {
-                console.log(data.writing);
                 $("#prog-flash", this.el).width(data.writing + "%");
             } else if (data.verifying) {
                 $("#prog-flash", this.el).width(data.verifying + "%");
             } else if (data.run_mode) {
                 if (data.run_mode == 'firmware')
                     utils.showAlert('Success', 'Firmware Upgrade was successful, device is restarting', 'bg-success');
-            } else if (data.status) {
-                utils.showAlert('Info', data.status, 'bg-info');
+            } else if (data.version) {
+                $('#bootloader', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
+                $('#blversion', this.el).html('( version ' + parseFloat(data.version) / 10 + ')');
+            }
+
+            if (data.status) {
+                utils.showAlert('Info', data.status + '<br>' + ((data.msg) ? data.msg : ''), 'bg-info');
+
+                if (data.msg) {
+                    if (data.msg == 'flash write protection disabled, device is resetting') {}
+                    $('#writeprotect', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
+                }
+                if (data.msg == '...flash erased') {
+                    $('#flasherased', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
+                }
+                if (data.msg == 'firmware flashed') {
+                    $('#flashprogrammed', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
+                }
             }
         }
     });
+
 });

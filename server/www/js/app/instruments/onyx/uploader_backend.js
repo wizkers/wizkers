@@ -67,8 +67,8 @@ define(function (require) {
             RECEIVING: 4, // Waiting for more data
             WAIT_FINAL_ACK: 5, // Waiting for the final ACK
             BOOTLOADER_INIT: 6,
-            BOOTLADER_READY: 7
-
+            BOOTLADER_READY: 7,
+            WAIT_DOUBLE_ACK: 8, // Wait for two ACKs in a row (read/write unprotect operations)
         }
         var current_state = States.IDLE;
         var bootloader_state = States.BOOTLOADER_INIT;
@@ -88,15 +88,21 @@ define(function (require) {
             READ_PROTECT: 0x82,
             READ_UNPROTECT: 0x92,
 
+            BUF_SIZE: 256,
+
             INIT_BL: 0x7f,
             ACK: 0x79,
             NACK: 0x1f,
-            ERROR: 0xff
+            ERROR: 0xff,
+
+            FLASH_START: 0x08000000,
         }
 
         var retries = 0;
         var readCb = null; // the function that expects data from the last write
         var bytesExpected = 0;
+
+        var firmware_binary = null;
 
         /////////////
         // Public methods
@@ -149,7 +155,8 @@ define(function (require) {
             if (data.upload_bin) {
                 // We got an IntelHex file to upload to the board
                 //var bindata = intelhex.parse(data.upload_hex).data;
-                //flashBoard(0, abu.pad(bindata, 128));
+                firmware_binary = new Uint8Array(data.upload_bin);
+                flashBoard();
             }
             return '';
         };
@@ -191,20 +198,40 @@ define(function (require) {
             if (current_state != States.IDLE) {
                 inputBuffer.set(new Uint8Array(data), ibIdx);
                 ibIdx += data.byteLength;
-
-                console.log('state', current_state);
-                console.log('read', inputBuffer);
             } else {
                 console.log('read (discard)', data.buffer);
                 return;
             }
+            var ack_idx = 0; // used when checking two subsequent ACKs
+
+            // Note: depending on OS, speed, etc, we might receive all the response data
+            // at once or in multiple 'format' calls: the switch statement below supports
+            // both situations, which is why we do not break after each case statement.
             switch (current_state) {
+            case States.WAIT_DOUBLE_ACK:
+                console.log('WAIT_DOUBLE_ACK', inputBuffer[0]);
+                if (inputBuffer[0] != STM32.ACK && inputBuffer[0] != STM32.NACK) {
+                    var res = {
+                        status: 'error'
+                    };
+                    if (readCb)
+                        readCb(res);
+                    return;
+                } else {
+                    current_state = States.WAIT_ACK;
+                    if (ibIdx > 1) {
+                        ack_idx = 1;
+                    } else {
+                        break; // no extra data waiting
+                    }
+                }
             case States.WAIT_ACK:
                 clearTimeout(watchdog);
                 current_state = States.IDLE;
+                console.log('WAIT_ACK', inputBuffer[0]);
                 if (readCb) {
                     var res = {};
-                    if (inputBuffer[0] != STM32.ACK && inputBuffer[0] != STM32.NACK) {
+                    if (inputBuffer[ack_idx] != STM32.ACK && inputBuffer[ack_idx] != STM32.NACK) {
                         res.status = 'error';
                     } else {
                         res.status = 'ok';
@@ -215,6 +242,7 @@ define(function (require) {
                 }
                 break;
             case States.WAIT_ACK_AND_SIZE:
+                console.log('WAIT_ACK_AND_SIZE', inputBuffer[0]);
                 var b = inputBuffer[0];
                 current_state = States.WAIT_SIZE;
                 if (b != STM32.ACK) {
@@ -233,9 +261,11 @@ define(function (require) {
                 var s = inputBuffer[1];
                 bytesExpected = s + 2; // +2 because of ACK and Length bytes
                 current_state = States.RECEIVING;
+                console.log('WAIT_SIZE', bytesExpected);
                 // break;  // Don't break, the byte may already be waiting for us
 
             case States.RECEIVING:
+                console.log('RECEIVING');
                 if (ibIdx >= bytesExpected - 1) {
                     current_state = States.WAIT_FINAL_ACK;
                 }
@@ -253,9 +283,11 @@ define(function (require) {
                 bytesExpected = -1;
                 if (readCb) {
                     // We return the complete buffer (including acks etc)
+                    var resp = inputBuffer.subarray(0, ibIdx);
+                    console.log('WAIT_FINAL_ACK', resp);
                     readCb({
-                        status: 'OK',
-                        data: inputBuffer.subarray(0, ibIdx)
+                        status: 'ok',
+                        data: resp
                     });
                 }
                 break;
@@ -289,11 +321,10 @@ define(function (require) {
          */
         var resetToBootloader = function () {
             port.write('{"set":{"reset":"bootloader"}}\n');
-
             // Wait 500ms then get into Bootloader mode and detect
             // the protocol
             var nxt = function () {
-                initBootloader(function (res) {});
+                initBootloader(getBLVersion);
             }
             setTimeout(nxt, 500);
         }
@@ -332,7 +363,7 @@ define(function (require) {
                 });
             }
             watchdog = setTimeout(to, delay);
-            console.log('write', data);
+            // console.log('write', data);
             port.write(data);
         }
 
@@ -341,9 +372,20 @@ define(function (require) {
          * @param {Number}   command  The command (see the STM32 object above)
          */
         var makeCommand = function (command) {
-            var data = new Uint8Array(2);
-            data[0] = command;
-            data[1] = ~command;
+            return new Uint8Array([command, ~command]);
+        }
+
+        /**
+         * Create an address structure (4 bytes + checksum)
+         * @param {Number} address Address
+         */
+        var makeAddress = function (address) {
+            var data = new Uint8Array(5);
+            data[0] = address >> 24;
+            data[1] = (address >> 16) & 0xff;
+            data[2] = (address >> 8) & 0xff;
+            data[3] = address & 0xff;
+            data[4] = data[0] ^ data[1] ^ data[2] ^ data[3];
             return data;
         }
 
@@ -351,13 +393,18 @@ define(function (require) {
          * Initialize the STM32 Bootloader protocol.
          *  @param {Function} cb Callback once in bootloader mode
          */
-        var initBootloader = function () {
-            var d = new Uint8Array(1);
-            d[0] = STM32.INIT_BL;
+        var initBootloader = function (cb) {
+            console.log('initBootloader');
+            var d = new Uint8Array([STM32.INIT_BL]);
             write(d, States.WAIT_ACK, 500, function (res) {
                 if (res.data != STM32.ACK)
                     return;
-                getBLVersion();
+                // the bootloader and move on to the next step:
+                self.trigger('data', {
+                    status: 'ok',
+                    msg: 'established communication with the bootloader'
+                });
+                cb();
             });
         }
 
@@ -366,40 +413,249 @@ define(function (require) {
          * @param {Function} cb callback
          */
         var getBLVersion = function () {
+            console.log('getBLVersion');
             var minor = 0x0;
             var major = 0x0;
             var d = makeCommand(STM32.GET_VERSION)
             write(d, States.WAIT_ACK_AND_SIZE, 500, function (res) {
-                if (res.status != 'OK') {
+                if (res.status != 'ok') {
                     self.trigger('data', {
-                    'status': 'Error: could not initialize bootloader'
-                });
+                        status: 'error',
+                        msg: 'could not get Bootloader version'
+                    });
+                    return;
                 }
+                var l = res.data[1]; // Length of response (not used yet)
                 // Byte 3 is BT version
-                var version = res.data[3]
+                var version = res.data[2];
+                // The rest of the data is the command list, we don't use it for now
+                self.trigger('data', {
+                    status: 'ok',
+                    version: version
+                });
+                getChipID();
             });
         }
 
-        var getChipID = function () {}
+        /**
+         *  Get the Chip ID
+         */
+        var getChipID = function () {
+            console.log('getChipID');
+            var d = makeCommand(STM32.GET_ID);
+            write(d, States.WAIT_ACK_AND_SIZE, 500, function (res) {
+                if (res.status != 'ok') {
+                    self.trigger('data', {
+                        status: 'error',
+                        msg: 'could not get Chip ID'
+                    });
+                    return;
+                }
+                var l = res.data[1]; // PID length
+                if ((l + 4) > res.data.byteLength) {
+                    self.trigger('data', {
+                        status: 'error',
+                        msg: 'chipID response corrupted',
+                        data: res.data
+                    });
+                    return;
+                }
+                var chipID = res.data.subarray(2, 2 + l + 1);
+                if (l == 1) {
+                    // Convert to BCD-style response.
+                    var chipID = chipID[0] * 100 + chipID[1];
+                }
+                self.trigger('data', {
+                    status: 'ok',
+                    chipID: chipID
+                });
+                // At this stage, we stop: the front-end will check the ChipID and decide to
+                // send the firmware or not.
+            });
+        }
+
+        /**
+         * Remove flash write protection
+         * @param {Function} cb Callback called once the MCU is reset and re-initialized
+         */
+        var writeUnprotect = function (cb) {
+            console.log('writeUnprotect ');
+            var d = makeCommand(STM32.WRITE_UNPROTECT);
+            write(d, States.WAIT_DOUBLE_ACK, 500, function (res) {
+                if (res.status != 'ok') {
+                    self.trigger('data', {
+                        status: 'error',
+                        msg: 'could not write unprotect the flash'
+                    });
+                    return;
+                }
+                // After write unprotect, the chip resets: we need to reinit
+                // the bootloader and move on to the next step:
+                self.trigger('data', {
+                    status: 'ok',
+                    msg: 'flash write protection disabled, device is resetting'
+                });
+                initBootloader(cb);
+            });
+        };
+
+        /**
+         * Erase the device flash. note that this is the 'standard erase',
+         * which is the command supported by the Medcom Onyx. There is an
+         * extended erase comand for Bootloader version > 2 which is not
+         * implemented here.
+         */
+        var eraseFlash = function (cb) {
+            console.log('eraseFlash'); // the bootloader and move on to the next step:
+            self.trigger('data', {
+                status: 'ok',
+                msg: 'erasing flash...'
+            });
+
+            var d = makeCommand(STM32.ERASE);
+            write(d, States.WAIT_ACK, 500, function (res) {
+                if (res.status != 'ok') {
+                    self.trigger('data', {
+                        status: 'error',
+                        msg: 'could not initiate flash erase'
+                    });
+                    return;
+                }
+                // Ask for a global Chip erase:
+                d = new Uint8Array([0xff, 0x00]);
+                write(d, States.WAIT_ACK, 500, function (res) {
+                    if (res.status != 'ok') {
+                        self.trigger('data', {
+                            status: 'error',
+                            msg: 'could not global erase the flash'
+                        });
+                        return;
+                    }
+                    // We are good now, let's start with page writing at page zero
+                    // the bootloader and move on to the next step:
+                    self.trigger('data', {
+                        status: 'ok',
+                        msg: '...flash erased',
+                    });
+                    cb();
+                });
+            });
+        };
+
+        /**
+         * Write a flash page
+         * @param {Number} offset offset within the firmware file (a Uint8Array)
+         */
+        var writeFlash = function (offset) {
+            self.trigger('data', {
+                'writing': Math.ceil(offset / firmware_binary.byteLength * 100)
+            });
+
+            var last_write = false;
+
+            // 1. Prepare the data buffer:
+            // Our buffer is as follows:
+            // [0] : length - 1
+            // [1-256] : data
+            // [257] : checksum
+            var buf = new Uint8Array(STM32.BUF_SIZE + 2);
+            // We can write max 256 bytes of data on each packet (STM32.BUF_SIZE)
+            // and the size of the data has to be a multiple of four
+            if (firmware_binary.byteLength > (offset + STM32.BUF_SIZE)) {
+                buf.set(firmware_binary.subarray(offset, offset + STM32.BUF_SIZE), 1);
+                buf[0] = 0xff; // STM32.BUF_SIZE -1
+            } else {
+                // We are reaching the end of the binary:
+                // resize the buffer and fill it
+                buf = new Uint8Array(firmware_binary.byteLength - offset + 2);
+                buf.set(firmware_binary.subarray(offset, firmware_binary.byteLength - 1), 1);
+                buf[0] = firmware_binary.byteLength - offset - 1;
+                last_write = true;
+            }
+
+            // Add the checksum
+            var ck = buf[0];
+            for (var i = 1; i < buf.byteLength; i++) {
+                ck ^= buf[i];
+            }
+            buf[buf.byteLength - 1] = ck;
+
+            // 2. Start a 'write memory' operation
+            write(makeCommand(STM32.WRITE_MEMORY), States.WAIT_ACK, 500, function (res) {
+                if (res.status != 'ok') {
+                    // We are in deep trouble here, flashing is not going well
+                    self.trigger('data', {
+                        status: 'error',
+                        msg: 'flashing error: write memory command NACK at  address ' + (STM32.FLASH_START + offset)
+                    });
+                    return; // Abort
+                }
+
+                // 3. Send address
+                var flash_addr = makeAddress(STM32.FLASH_START + offset);
+                //console.log('Address', flash_addr);
+                write(flash_addr, States.WAIT_ACK, 500, function (res) {
+                    if (res.status != 'ok') {
+                        // We are in deep trouble here, flashing is not going well
+                        self.trigger('data', {
+                            status: 'error',
+                            msg: 'flashing error: memory address NACK at address ' + (STM32.FLASH_START + offset)
+                        });
+                        return; // Abort
+                    }
+
+                    // Now send the data packet
+                    write(buf, States.WAIT_ACK, 500, function (res) {
+                        if (res.status != 'ok') {
+                            // We are in deep trouble here, flashing is not going well
+                            self.trigger('data', {
+                                status: 'error',
+                                msg: 'flashing error: data packet NACK at address ' + (STM32.FLASH_START + offset)
+                            });
+                            return; // Abort
+                        }
+                        if (last_write) {
+                            self.trigger('data', {
+                                status: 'ok',
+                                msg: 'firmware flashed'
+                            });
+
+                        } else {
+                            writeFlash(offset + STM32.BUF_SIZE);
+                        }
+                    });
+                });
+            });
+        }
 
         /**
          * Flash the Onyx. Steps are as follows:
          *    1. Init Bootloader
          *    2. Get/Check Version
          *    3. Get/Check ChipID
+         *    -> Those are done right after Bootloader init.
          *    4. Write Unprotect
-         *    5. Read Unprotect
          *    6. Erase Flash
          *    7. Program Flash
          *    8. Issue GO command to start FW (?)
          * @param {[[Type]]} address [[Description]]
          * @param {[[Type]]} data    [[Description]]
          */
-        var flashBoard = function (address, data) {
-
+        var flashBoard = function () {
+            console.log('***************** Start Flashing ********************');
+            // Launch flashing by first unprotecting, then erasing,
+            // then flashing. Sometimes Async programming is just ugly
+            writeUnprotect(function () {
+                eraseFlash(function () {
+                    self.trigger('data', {
+                        status: 'ok',
+                        msg: 'Writing firmware',
+                    });
+                    writeFlash(0);
+                });
+            });
         };
-
-    }
+    };
 
     _.extend(parser.prototype, Backbone.Events);
     return parser;
