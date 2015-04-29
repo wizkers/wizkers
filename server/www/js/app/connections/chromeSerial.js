@@ -40,26 +40,12 @@ define(function (require) {
         /////////
 
         var portOpen = false,
+            mySettings = settings,
             self = this;
 
-        var parser = settings.parser;
-        
-        // We try to use the same API as the Node serialport API, so we need to
-        // translate some of the arguments:
-        var chromeSerialSettings = {
-            bitrate: settings.baudRate,
-            dataBits: 'eight'
-        };
-        
-        if (settings.parity) {
-            if (settings.parity == 'none')
-                settings.parity = 'no';
-            chromeSerialSettings.parityBit = settings.parity;
-        }
+        var parser = mySettings.parser;
 
-        chrome.serial.connect(path, chromeSerialSettings,
-            onOpen
-        );
+        openPort();
 
         ///////////
         // Public methods
@@ -85,13 +71,13 @@ define(function (require) {
             // We try to be a bit accomodating: detect strings, and
             // ArrayBuffer-assimilated objects
             switch (typeof cmd) {
-                    case 'string':
-                        cmd = abu.str2ab(cmd);
-                        break;
-                    case 'object': // Probably UInt8Array or similar
-                        if (cmd.buffer)
-                            cmd = cmd.buffer;
-                        break;
+            case 'string':
+                cmd = abu.str2ab(cmd);
+                break;
+            case 'object': // Probably UInt8Array or similar
+                if (cmd.buffer)
+                    cmd = cmd.buffer;
+                break;
             }
 
             cmd_queue.push({
@@ -143,6 +129,26 @@ define(function (require) {
             queue_busy = false;
 
         this.connectionId = -1;
+
+
+        function openPort() {
+            // We try to use the same API as the Node serialport API, so we need to
+            // translate some of the arguments:
+            var chromeSerialSettings = {
+                bitrate: mySettings.baudRate,
+                dataBits: 'eight'
+            };
+
+            if (mySettings.parity) {
+                if (mySettings.parity == 'none')
+                    mySettings.parity = 'no';
+                chromeSerialSettings.parityBit = mySettings.parity;
+            }
+
+            chrome.serial.connect(path, chromeSerialSettings,
+                onOpen
+            );
+        }
 
         function processCmdQueue() {
             if (queue_busy)
@@ -215,7 +221,7 @@ define(function (require) {
                 if (!self.portOpen)
                     break;
                 self.close();
-                setTimeout(openInstrument, 500);
+                setTimeout(openPort, 500);
                 break;
             case "device_lost":
                 self.close();

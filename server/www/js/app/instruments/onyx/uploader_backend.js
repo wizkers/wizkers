@@ -50,6 +50,8 @@ define(function (require) {
         var self = this,
             port = null,
             port_close_requested = false,
+            first_open_done = false,    // Windows generates a system error when we get
+                                        // into bootloader mode, so we need to detect it.
             isopen = false;
 
 
@@ -320,13 +322,17 @@ define(function (require) {
          * Send a command to the Onyx to get into Bootloader mode
          */
         var resetToBootloader = function () {
+            console.log('resetToBootloader');
             port.write('{"set":{"reset":"bootloader"}}\n');
+            console.log('bootloader reset done');
             // Wait 500ms then get into Bootloader mode and detect
             // the protocol
             var nxt = function () {
                 initBootloader(getBLVersion);
             }
-            setTimeout(nxt, 500);
+            // Wait 2 seconds, because on Windows, the command above triggers
+            // a driver error, so we need time to close/reopen the port.
+            setTimeout(nxt, 2000);
         }
 
         /**
@@ -334,6 +340,11 @@ define(function (require) {
          */
         var onOpen = function (success) {
             console.log("We have the board in uploader mode now");
+            if (first_open_done)
+                return;  // We end up here on Windows, where the FTDI driver generates an error
+                         // after the Onyx reboots into bootloader, and requires closing/opending the
+                         // driver again. Pretty dumb, but hey, that's Windows for you.
+            first_open_done = true;
             resetToBootloader();
         };
 

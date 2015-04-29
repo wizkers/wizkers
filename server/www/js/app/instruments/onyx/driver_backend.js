@@ -68,7 +68,7 @@ define(function (require) {
 
             // All commands now return JSON
             try {
-                if (data.substr(0, 2) == "\r>")
+                if (data.substr(0, 2) == "\n>")
                     return;
                 if (data.length < 3)
                     return;
