@@ -126,10 +126,9 @@ define(function (require) {
             instrumentManager.startUploader();
             // Wait until we get a confirmation of driver change and
             // open the instrument to put it in bootloader mode:
-            // linkManager.once('status', function() {
-            //    linkManager.openInstrument(instrumentManager.getInstrument().id);
-            // });
-
+            linkManager.once('status', function () {
+                linkManager.openBootloader(instrumentManager.getInstrument().id);
+            });
         },
 
         showInput: function (data) {

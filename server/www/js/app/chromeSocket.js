@@ -74,10 +74,11 @@ define(function (require) {
                 getPorts(args);
                 break;
             case 'driver':
-                console.log("Legacy call to 'driver'");
+            case 'uploader':
+                console.log("Legacy call to 'driver' or 'uploader'");
                 break;
-            case 'uploader': // Alternative driver type for firmware updates
-                setUploader(args);
+            case 'openbootloader': // Alternative driver type for firmware updates
+                openBootloader(args);
             case 'outputs':
                 setOutputs(args);
                 break;
@@ -223,7 +224,7 @@ define(function (require) {
             }
         }
 
-        var setUploader = function (insid) {
+        var openBootloader = function (insid) {
             // Open the instrument with uploader driver, not regular ('true' as 3rd arg)
             connectionmanager.openInstrument(insid, function (d) {
                 driver = d;

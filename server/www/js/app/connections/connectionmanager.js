@@ -31,7 +31,7 @@ define(function (require) {
         /////
         // Private variables
         /////
-        var openinstruments = [];
+        var openinstruments = {};
         var socket = s;
 
         /////

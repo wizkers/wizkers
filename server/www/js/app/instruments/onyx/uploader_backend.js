@@ -270,8 +270,10 @@ define(function (require) {
                 //console.log('RECEIVING');
                 if (ibIdx >= bytesExpected - 1) {
                     current_state = States.WAIT_FINAL_ACK;
+                } else {
+                    // We are still waiting for more data
+                    break;
                 }
-
             case States.WAIT_FINAL_ACK:
                 current_state = States.IDLE;
                 clearTimeout(watchdog);

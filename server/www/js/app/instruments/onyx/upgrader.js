@@ -132,9 +132,9 @@ define(function (require) {
             instrumentManager.startUploader();
             // Wait until we get a confirmation of driver change and
             // open the instrument to put it in bootloader mode:
-            // linkManager.once('status', function() {
-            //    linkManager.openInstrument(instrumentManager.getInstrument().id);
-            // });
+            linkManager.once('status', function() {
+                linkManager.openBootloader(instrumentManager.getInstrument().id);
+         });
 
         },
 
@@ -192,17 +192,15 @@ define(function (require) {
                 utils.showAlert('Info', data.status + '<br>' + ((data.msg) ? data.msg : ''), t);
 
                 if (data.msg) {
-                    if (data.msg == 'flash write protection disabled, device is resetting') {}
-                    $('#writeprotect', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
-                }
-                if (data.msg == '...flash erased') {
-                    $('#flasherased', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
-                }
-                if (data.msg == 'firmware flashed') {
-                    $('#flashprogrammed', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
-                    // We need to tell the driver to close the port too:
-                    linkManager.closeInstrument();
-                    instrumentManager.stopUploader();
+                    if (data.msg == 'flash write protection disabled, device is resetting') {
+                        $('#writeprotect', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
+                    }
+                    if (data.msg == '...flash erased') {
+                        $('#flasherased', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
+                    }
+                    if (data.msg == 'firmware flashed') {
+                        $('#flashprogrammed', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
+                    }
                 }
             }
         }
