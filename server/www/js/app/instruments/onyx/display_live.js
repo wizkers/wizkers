@@ -138,7 +138,8 @@ define(function(require) {
             var tag = $('#devicetagfield',this.el).val();
             linkManager.driver.setdevicetag(tag);
             $('#dtModal',this.el).modal('hide');
-            linkManager.driver.devicetag();
+            // Need a small delay to let the Onyx store the tag
+            setTimeout( linkManager.driver.devicetag, 300);
         },
 
 
