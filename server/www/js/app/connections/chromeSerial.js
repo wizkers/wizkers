@@ -102,7 +102,6 @@ define(function (require) {
             // serial data arrives after disconnect - not 100% clean on origin.
             chrome.serial.onReceive.removeListener(onRead);
             chrome.serial.onReceiveError.removeListener(onError);
-
             chrome.serial.disconnect(self.connectionId, function (success) {
                 self.portOpen = false;
                 self.trigger('status', {
@@ -145,9 +144,29 @@ define(function (require) {
                 chromeSerialSettings.parityBit = mySettings.parity;
             }
 
-            chrome.serial.connect(path, chromeSerialSettings,
-                onOpen
-            );
+            // I have not found a way to catch open port errors
+            // when ports don't exist, so we first need to ask for
+            // the list of ports and check we are trying open something
+            // that does not exist.
+            chrome.serial.getDevices(function (ports) {
+                var found = false;
+                for (var i = 0; i < ports.length; i++) {
+                    if (ports[i].path == path) {
+                        found = true;
+                    }
+                }
+
+                if (found) {
+                    chrome.serial.connect(path, chromeSerialSettings,
+                        onOpen
+                    );
+                } else {
+                    // Tell our front-end the port does not exist
+                    self.trigger('status', {
+                        openerror: true
+                    });
+                }
+            });
         }
 
         function processCmdQueue() {
@@ -208,7 +227,6 @@ define(function (require) {
             self.trigger('data', data);
         }
 
-
         // onError is called on Windows in some situations, when the serial device
         // generates a "Break" signal. In that case, we wait for 200ms and we try
         // to reconnect.
@@ -243,6 +261,7 @@ define(function (require) {
             self.trigger('status', {
                 portopen: self.portOpen
             });
+
             chrome.serial.onReceive.addListener(onRead);
             chrome.serial.onReceiveError.addListener(onError);
 

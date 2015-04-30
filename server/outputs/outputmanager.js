@@ -158,7 +158,7 @@ var register = function(driver, cb) {
 
 
 ////////////////
-// Private public
+// Public API
 ////////////////
 
 

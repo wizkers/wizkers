@@ -90,6 +90,14 @@ define(function (require) {
         // global server status
         var status = function (stat) {
             console.log('Port status change', stat);
+            if (stat.openerror) {
+                // We could not open the port: warn through
+                // a 'data' messages
+                var resp = {
+                    openerror: true
+                };
+                self.trigger('data', resp);
+            }
             isopen = stat.portopen;
             if (isopen) {
                 // Should run any "onOpen" initialization routine here if

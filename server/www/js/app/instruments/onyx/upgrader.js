@@ -45,19 +45,29 @@ define(function (require) {
         firmware: "",
 
         initialize: function () {
-            if (linkManager.isConnected()) {
-                linkManager.closeInstrument();
-            }
             linkManager.on('input', this.showInput, this);
+            linkManager.on('status', this.updateStatus, this);
+            if (!linkManager.isConnected()) {
+                var id = instrumentManager.getInstrument().id;
+                linkManager.openInstrument(id);
+            } else {
+                linkManager.driver.version();
+            }
         },
 
         onClose: function () {
             console.log("Upgrader view closing...");
             linkManager.off('input', this.showInput);
+            linkManager.off('status', this.updateStatus);
             linkManager.closeInstrument();
             instrumentManager.stopUploader();
         },
 
+        updateStatus: function (status) {
+            if (status.portopen) {
+                linkManager.driver.version();
+            }
+        },
 
         render: function () {
             $(this.el).html(template());
@@ -132,9 +142,9 @@ define(function (require) {
             instrumentManager.startUploader();
             // Wait until we get a confirmation of driver change and
             // open the instrument to put it in bootloader mode:
-            linkManager.once('status', function() {
+            linkManager.once('status', function () {
                 linkManager.openBootloader(instrumentManager.getInstrument().id);
-         });
+            });
 
         },
 
@@ -152,6 +162,27 @@ define(function (require) {
                 i.val(scroll.join('\n'));
                 // Autoscroll:
                 i.scrollTop(i[0].scrollHeight - i.height());
+            }
+
+            if (data.openerror) {
+                utils.showAlert('Error', 'Error: serial port not found - check the settings.', 'bg-danger');
+            }
+
+
+            // The first thing we do is ask for the current FW version - we
+            // can't upgrade the firmware if the Onyx is not version 12.26-b at least
+            if (data.version && data.status == undefined) {
+                if (parseFloat(data.version) >= 12.26) {
+                    $('#file_sel', this.el).attr('disabled', false);
+                    $('#fw_dl', this.el).attr('disabled', false);
+                    utils.showAlert('OK', 'Device is ready for firmware upgrade.', 'bg-success');
+
+                } else {
+                    utils.showAlert('Error', ' Warning: you can only upgrade firmware on Onyx devices already running firmware 12.26-b or higher.', 'bg-danger');
+                }
+                linkManager.closeInstrument();
+                linkManager.off('status', this.updateStatus);
+                return;
             }
 
             // The backend issues a chipID number as soon as

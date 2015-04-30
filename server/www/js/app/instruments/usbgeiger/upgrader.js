@@ -55,6 +55,7 @@ define(function (require) {
         onClose: function () {
             console.log("Upgrader view closing...");
             linkManager.off('input', this.showInput);
+            linkManager.closeInstrument();
             instrumentManager.stopUploader();
         },
 

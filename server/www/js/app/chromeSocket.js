@@ -121,7 +121,6 @@ define(function (require) {
             });
         }
 
-
         var portStatus = function (insid) {
             if (insid)
                 console.log('portStatus', insid);
