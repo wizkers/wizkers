@@ -152,6 +152,8 @@ define(function(require) {
                 liveviewspan: 600,                 // Width of live view in seconds
                 liveviewperiod: 1,                 // Period of polling if supported
                 liveviewlogscale: false,           // Should live view display as a log scale by default ?
+                autoconnect: false,                // Should the instrument autoconnect at startup ?
+                                                   // Note: only relevant in server mode, not Chrome/Cordova
                 metadata: {},                      // Freeform metadata
             }
         }),

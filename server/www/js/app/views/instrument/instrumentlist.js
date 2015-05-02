@@ -23,74 +23,111 @@
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
-define(function(require) {
-    
+define(function (require) {
+
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
         Backbone = require('backbone'),
         Paginator = require('app/views/paginator'),
         template = require('js/tpl/InstrumentListItemView.js');
-    
-        var InstrumentListItemView = Backbone.View.extend({
 
-            tagName: "div",
-            className: "col-md-3 col-sm-2",
+    var InstrumentListItemView = Backbone.View.extend({
 
-            initialize: function (options) {
-                this.model.bind("change", this.render, this);
-                this.model.bind("destroy", this.close, this);
-                this.edit = options.edit;
-            },
+        tagName: "div",
+        className: "col-md-3 col-sm-2",
 
-            render: function () {
-                $(this.el).html(template({instrument:this.model.toJSON(), edit: this.edit}));
-                return this;
-            },
+        initialize: function (options) {
+            this.model.bind("change", this.render, this);
+            this.model.bind("destroy", this.close, this);
+            this.edit = options.edit;
+            linkManager.on('instrumentStatus', this.updateStatus, this);
+        },
 
-            events: {
-                "click .select" : "selectInstrument",
-                "click .edit": "editInstrument"
-            },
+        render: function () {
+            $(this.el).html(template({
+                instrument: this.model.toJSON(),
+                edit: this.edit
+            }));
+            // Check whether the instrument is connected
+            linkManager.isInstrumentOpen(this.model.id);
+            return this;
+        },
 
-            editInstrument: function(event) {
-                var url = event.target.href.substr(event.target.baseURI.length);
-                router.navigate(url, {trigger: true});
-                event.stopPropagation();
-            },
+        onClose: function () {
+            console.log('[insdetail]',this.model.id,'close');
+            linkManager.off('instrumentStatus', this.updateStatus);
+        },
 
-            selectInstrument: function(event) {
-                console.log('Instrument selected: ' + this.model.id);
-                var theID = this.model.id;
+        updateStatus: function (status) {
+            if (status.id != this.model.id)
+                return;
+            if (status.open) {
+                $('#connected', this.el).show();
+            }
 
-                // Detect if we clicked on a new instrument or not:
-                if (instrumentManager.getInstrument() && (this.model.id == instrumentManager.getInstrument().id)) {
-                    // If so, just return to main screen
-                    router.navigate('/', true);
-                }
-                // Now store the instrument ID in our settings
-                // Note: this is only to remember it at next application start.
-                settings.set({currentInstrument:theID});
-                // If the settings changed, the router will pick this up since
-                // it listens to change events in settings, and react accordingly.
-                settings.save(null, {success: function() {
-                }});
-                return false;
-            },
-        });
+        },
+
+        events: {
+            "click .select": "selectInstrument",
+            "click .edit": "editInstrument"
+        },
+
+        editInstrument: function (event) {
+            var url = event.target.href.substr(event.target.baseURI.length);
+            router.navigate(url, {
+                trigger: true
+            });
+            event.stopPropagation();
+        },
+
+        selectInstrument: function (event) {
+            console.log('Instrument selected: ' + this.model.id);
+            var theID = this.model.id;
+
+            // Detect if we clicked on a new instrument or not:
+            if (instrumentManager.getInstrument() && (this.model.id == instrumentManager.getInstrument().id)) {
+                // If so, just return to main screen
+                router.navigate('/', true);
+            }
+            // Now store the instrument ID in our settings
+            // Note: this is only to remember it at next application start.
+            settings.set({
+                currentInstrument: theID
+            });
+            // If the settings changed, the router will pick this up since
+            // it listens to change events in settings, and react accordingly.
+            settings.save(null, {
+                success: function () {}
+            });
+            return false;
+        },
+    });
 
     return Backbone.View.extend({
 
         initialize: function (options) {
-            this.options = options || {};
+            this.options = options ||  {};
+            // We need to keep track of all the instrument thumbnail subviews so that
+            // we can call the onClose method to unsubscribe from the events, otherwise
+            // we'll get ghost events:
+            this.inslist = [];
+        },
+
+        onClose: function () {
+            console.log("[Instrument List] OnClose");
+            var s = this.inslist.length;
+            for (var i = 0; i < s; i++) {
+                this.inslist.pop().onClose();
+            }
         },
 
         render: function () {
             var instruments = this.model.models;
             var len = instruments.length;
             console.log("Instrument list: " + len + " instruments");
-            
+
             if (len == 0) {
                 $(this.el).html('<div class="col-md-12"><div class="row thumbnails"><div class="col-md-3 col-sm-2"><div class="thumbnail glowthumbnail select" style="text-align:center;"><a href="#" class="plain"><h5>No instrument</h5><p>There are no instruments setup in the application yet. Click on "Add Instrument" in the menu above to add one.</p></a></div></div></div></div>');
                 return this;
@@ -110,10 +147,19 @@ define(function(require) {
             }
 
             for (var i = startPos; i < endPos; i++) {
-                $('.thumbnails', this.el).append(new InstrumentListItemView({model: instruments[i], edit: editok}).render().el);
+                this.inslist.push(new InstrumentListItemView({
+                    model: instruments[i],
+                    edit: editok
+                }));
+                $('.thumbnails', this.el).append(this.inslist[this.inslist.length - 1].render().el);
             }
 
-            $(this.el).append(new Paginator({model: this.model, page: this.options.page, viewname: 'instruments', items: items}).render().el);
+            $(this.el).append(new Paginator({
+                model: this.model,
+                page: this.options.page,
+                viewname: 'instruments',
+                items: items
+            }).render().el);
 
             return this;
         }

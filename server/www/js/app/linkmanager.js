@@ -105,6 +105,15 @@ define(function (require) {
             this.openBootloader = function (id) {
                 socket.emit('openbootloader', id);
             }
+            
+            /**
+             * Returns the open/closed state of a given instrument. Mostly makes sense
+             * in server mode where we can have multiple open instruments.
+             * @param {String} id Instrument ID
+             */
+            this.isInstrumentOpen = function(id) {
+                socket.emit('isinstrumentopen', id);
+            }
 
             this.closeInstrument = function (id) {
                 if (id == undefined && instrumentManager.getInstrument())
@@ -197,6 +206,10 @@ define(function (require) {
             function sendUniqueID(uid) {
                 self.trigger('uniqueID', uid);
             }
+            
+            function processInstrumentStatus(status) {
+                self.trigger('instrumentStatus', status);
+            }
 
             // Initialization code:
 
@@ -207,6 +220,7 @@ define(function (require) {
             socket.on('connection', initConnection);
             socket.on('ports', processPorts);
             socket.on('uniqueID', sendUniqueID);
+            socket.on('instrumentStatus', processInstrumentStatus);
             // Initialize connexion status on the remote controller
             socket.emit('portstatus', '');
             // Start a 3-seconds interval watchdog to listen for input

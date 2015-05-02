@@ -122,6 +122,7 @@ var defaults = {
         liveviewspan: '',                 // Width of live view in seconds
         liveviewperiod: '',                 // Period of polling if supported
         liveviewlogscale: false,                // Should live view display as a log scale by default ?
+        autoconnect: false,
         metadata: null, // Depending on instrument type, this metadata can include additional settings
     }
 };

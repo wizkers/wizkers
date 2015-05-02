@@ -557,6 +557,19 @@ io.sockets.on('connection', function (socket) {
             socket_debug("Unauthorized attempt to open instrument");
     });
 
+    /**
+     * Ask whether an instrument is open (used by the instrument list display
+     * to know at a glance which instruments are open
+     */
+    socket.on('isinstrumentopen', function (insid) {
+        var isopen = connectionmanager.isOpen(insid);
+        socket.emit('instrumentStatus', {
+            id: insid,
+            open: isopen
+        });
+
+    });
+
     socket.on('portstatus', function (instrumentid) {
         if (instrumentid) {
             // In case we are asked to check a particular

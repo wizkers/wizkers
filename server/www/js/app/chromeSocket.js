@@ -94,6 +94,9 @@ define(function (require) {
             case 'stoplivestream':
                 stopLiveStream(args);
                 break;
+            case 'isinstrumentopen':
+                console.log('Call to isintrumentopen in Chrome/Cordova mode, ignoring');
+                break;
             default:
                 break;
             }
