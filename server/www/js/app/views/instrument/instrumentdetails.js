@@ -128,10 +128,11 @@ define(function(require) {
                 if (change[parts[0]] == undefined)
                     change[parts[0]] = {};
                 change[parts[0]][parts[1]] = target.value;
+            } else if (target.type == "checkbox") {
+                change[target.name] = target.checked;
             } else {
                 change[target.name] = target.value;
             }
-            
             
             this.model.set(change);
 
