@@ -445,6 +445,10 @@ var recorder = require('./recorder.js');
 // And last, the Connection manager, which keeps track of what device is open/closed
 var connectionmanager = new ConnectionManager();
 
+// Automatically connect all the instruments that have that option
+// turned on
+connectionmanager.autoConnect();
+
 //////////////////
 // Socket management: supporting multiple clients at a time now!
 //////////////////

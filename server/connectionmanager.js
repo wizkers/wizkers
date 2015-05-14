@@ -75,6 +75,27 @@ var ConnectionManager = function () {
         return driver;
     }
 
+    /**
+     * Go through all known instruments, and check if they should autoconnect.
+     * Called at startup by the server.
+     */
+    this.autoConnect = function () {
+        var self = this;
+        // Find all instruments that want autoconnect:
+        dbs.instruments.allDocs({
+            include_docs: true
+        }, function (err, items) {
+            var resp = [];
+            for (item in items.rows) {
+                var doc = items.rows[item].doc;
+                if (doc.autoconnect) {
+                    self.openInstrument(doc._id, function() { console.log("Opened"); });
+                }
+            }
+        });
+
+    }
+
 
     /**
      * Check if an instrument is open
