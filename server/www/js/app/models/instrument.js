@@ -153,6 +153,7 @@ define(function(require) {
                 liveviewperiod: 1,                 // Period of polling if supported
                 liveviewlogscale: false,           // Should live view display as a log scale by default ?
                 autoconnect: false,                // Should the instrument autoconnect at startup ?
+                autorecord: false,                 // Should the intstrument start recording at startup ?
                                                    // Note: only relevant in server mode, not Chrome/Cordova
                 metadata: {},                      // Freeform metadata
             }

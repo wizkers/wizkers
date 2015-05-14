@@ -47,13 +47,16 @@
                         <span class="input-group-addon">seconds</span>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="liveviewperiod" class="col-md-3 control-label">&nbsp;</label>
-                    <div class="col-md-9 input-group">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" name="autoconnect" <%= (autoconnect) ? 'checked' : '' %>> Autoconnect
-                            </label>
+                <div class="hide-chrome">
+                    <div class="form-group">
+                        <label for="autoconnect" class="col-md-3 control-label">&nbsp;</label>
+                        <div class="col-md-9 input-group">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="autoconnect" <%= (autoconnect) ? 'checked' : '' %>> Autoconnect<br>
+                                    <input type="checkbox" name="autorecord" <%= (autorecord) ? 'checked' : '' %>> Autorecord
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -49,6 +49,10 @@ define(function(require) {
                 $(this.el).html(template(_.extend(this.model.toJSON(), {instypes: instrumentManager.supportedInstruments,
                                                                         ports: portlist})));
                 
+                if (vizapp.type == "chrome") {
+                    $('.hide-chrome', this.el).hide();
+                }
+                
                 var insType = this.model.get('type');
 
                 // If the instrument type has got its own extra settings, then render those here:
