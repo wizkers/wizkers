@@ -21,7 +21,7 @@
         "passport-twitter": "~1.0.2",
         "pinoccio": "~0.1.35",
         "pouchdb": "latest",
-        "serialport": "https://github.com/voodootikigod/node-serialport/tarball/master",
+        "serialport": "1.6.1",
         "socket.io": "~1.2.*",
         "socketio-jwt": "latest",
         "underscore": "latest",
