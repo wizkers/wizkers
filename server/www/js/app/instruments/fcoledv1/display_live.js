@@ -32,13 +32,8 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
+        simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/FCOledLiveView.js');
-
-    // Load the flot library & flot time plugin:
-    require('flot');
-    require('flot_time');
-    require('flot_fillbetween');
-    require('flot_resize');
 
     return Backbone.View.extend({
 
@@ -60,25 +55,32 @@ define(function (require) {
             this.maxreading = 0;
             this.minreading = -1;
 
-            // TODO: save color palette in settings ?
-            // My own nice color palette:
-            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
-
-            this.plotOptions = {
-                xaxes: [{
+            // We will pass this when we create plots, this is the global
+            // config for the look and feel of the plot
+            this.plotoptions = {
+                points: 256,
+                vertical_stretch_parent: true,
+                log: false,
+                showtips: true,
+                selectable: false,
+                                plot_options: {
+                    xaxis: {
                         mode: "time",
                         show: true,
+                        timeformat: "%H:%M:%S",
                         timezone: settings.get("timezone")
                     },
-                       ],
-                grid: {
-                    hoverable: true,
-                    clickable: true
+                    grid: {
+                        hoverable: true,
+                        clickable: true
+                    },
+                    legend: {
+                        position: "ne",
+                        // container: $('#legend')
+                    },
+                    colors: ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
                 },
-                legend: {
-                    position: "ne"
-                },
-                colors: this.palette,
+
             };
 
             this.prevStamp = 0;
@@ -103,36 +105,36 @@ define(function (require) {
         addPlot: function () {
             var self = this;
             // Now initialize the plot area:
-            console.log('Plot chart size: ' + this.$('.datachart').width());
-            this.voltplot = $.plot($(".datachart", this.el), [{
-                    data: [],
-                    label: "V",
-                    color: this.color
-                },
-                {
-                    data: [],
-                    label: "Vmin"
-                },
-                {
-                    data: [],
-                    label: "Vmax"
-                },
-                                                         ], this.plotOptions);
-            this.ampplot = $.plot($(".datachart2", this.el), [{
-                    data: [],
-                    label: "mA",
-                    color: this.color
-                },
-                {
-                    data: [],
-                    label: "mAmin"
-                },
-                {
-                    data: [],
-                    label: "mAmax"
-                }
-                                                         ], this.plotOptions);
 
+            this.voltplot = new simpleplot({
+                model: this.model,
+                settings: this.plotoptions
+            });
+            if (this.voltplot != null) {
+                $('.datachart', this.el).append(this.voltplot.el);
+                this.voltplot.render();
+            }
+
+            this.ampplot = new simpleplot({
+                model: this.model,
+                settings: this.plotoptions
+            });
+            if (this.ampplot != null) {
+                $('.datachart2', this.el).append(this.ampplot.el);
+                this.ampplot.render();
+            }
+
+            // Now make the two plot areas autostretch:
+
+            var self = this;
+            var rsc = function () {
+                var chartheight = window.innerHeight /2 - $(self.el).offset().top+10;
+                $('.datachart', self.el).css('height', chartheight + 'px');
+                $('.datachart2', self.el).css('height', chartheight + 'px');
+            }
+            this.rsc = rsc;
+            $(window).on('resize', this.rsc);
+            rsc();
         },
 
         onClose: function () {
@@ -140,6 +142,10 @@ define(function (require) {
 
             linkManager.off('status', this.updatestatus, this);
             linkManager.off('input', this.showInput, this);
+
+            $(window).off('resize', this.rsc);
+            this.voltplot.onClose();
+            this.ampplot.onClose();
 
             // Stop the live stream before leaving
             linkManager.stopLiveStream();
@@ -163,70 +169,50 @@ define(function (require) {
                 var a = parseFloat(data.a.avg);
                 var a_min = parseFloat(data.a.min);
                 var a_max = parseFloat(data.a.max);
-                // All tables are updated at the same time, so we test only
-                // on the livevolt length
-                if (this.livevolt.length >= this.livepoints) {
-                    this.livevolt = this.livevolt.slice(1);
-                    this.livevolt_min = this.livevolt_min.slice(1);
-                    this.livevolt_max = this.livevolt_max.slice(1);
-                    this.liveamp = this.liveamp.slice(1);
-                    this.liveamp_min = this.liveamp_min.slice(1);
-                    this.liveamp_max = this.liveamp_max.slice(1);
-                }
-                var stamp = new Date().getTime();
-                this.livevolt.push([stamp, v]);
-                this.livevolt_min.push([stamp, v_min]);
-                this.livevolt_max.push([stamp, v_max]);
-                this.liveamp.push([stamp, a]);
-                this.liveamp_min.push([stamp, a_min]);
-                this.liveamp_max.push([stamp, a_max]);
-                this.voltplot.setData([
-                    {
-                        data: this.livevolt,
-                        label: "V",
-                        color: this.color
-                    },
-                    {
-                        data: this.livevolt_min,
-                        label: "Vmin",
+
+
+                this.voltplot.fastAppendPoint({
+                    name: "V",
+                    value: v
+                }).fastAppendPoint({
+                    name: "Vmin",
+                    value: v_min,
+                    options: {
                         id: "vmin"
-                    },
-                    {
-                        data: this.livevolt_max,
-                        label: "Vmax",
-                        id: "vmax",
+                    }
+                }).appendPoint({
+                    name: "Vmax",
+                    value: v_max,
+                    options: {
                         lines: {
                             show: true,
                             fill: true
                         },
                         fillBetween: "vmin"
                     }
-                                    ]);
-                this.ampplot.setData([
-                    {
-                        data: this.liveamp,
-                        label: "mA"
-                    },
-                    {
-                        data: this.liveamp_min,
-                        label: "Amin",
+                });
+
+                this.ampplot.fastAppendPoint({
+                    name: "mA",
+                    value: a
+                }).fastAppendPoint({
+                    name: "Amin",
+                    value: a_min,
+                    options: {
                         id: "amin"
-                    },
-                    {
-                        data: this.liveamp_max,
-                        label: "Amax",
-                        id: "amax",
+                    }
+
+                }).appendPoint({
+                    name: "Amax",
+                    value: a_max,
+                    options: {
                         lines: {
                             show: true,
                             fill: true
                         },
                         fillBetween: "amin"
                     }
-                                    ]);
-                this.voltplot.setupGrid(); // Time plots require this.
-                this.voltplot.draw();
-                this.ampplot.setupGrid(); // Time plots require this.
-                this.ampplot.draw();
+                });
             }
         },
     });

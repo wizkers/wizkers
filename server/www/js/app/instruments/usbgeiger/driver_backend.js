@@ -119,7 +119,10 @@ define(function (require) {
                     }
                 } else if (resp[0] == 'HZ1') {
                     // Debug output
-                    jsresp.HZ = { I1: resp[1], I2: resp[3] };
+                    jsresp.HZ = {
+                        I1: resp[1],
+                        I2: resp[3]
+                    };
                     jsresp.RAM = resp[5];
                     jsresp.WIN1 = resp[7];
                     jsresp.WIN2 = resp[9];
@@ -197,11 +200,9 @@ define(function (require) {
 
 
         // period in seconds
-        this.startLiveStream = function (period) {
-        };
+        this.startLiveStream = function (period) {};
 
-        this.stopLiveStream = function (args) {
-        };
+        this.stopLiveStream = function (args) {};
 
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
@@ -212,7 +213,7 @@ define(function (require) {
                     devicetag: 'Not supported'
                 });
             }
-            port.write( data + '\n');
+            port.write(data + '\n');
         };
 
     }

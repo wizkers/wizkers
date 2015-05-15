@@ -29,12 +29,14 @@ define(function (require) {
 
     var $ = require('jquery'),
         _ = require('underscore'),
+        utils = require('app/utils'),
         Backbone = require('backbone');
 
     // Load the flot library & flot time plugin:
     require('flot');
     require('flot_time');
     require('flot_selection');
+    require('flot_fillbetween');
     require('flot_resize');
 
     return Backbone.View.extend({
@@ -52,7 +54,8 @@ define(function (require) {
                 log: false,
                 showtips: true,
                 selectable: false,
-                vertical_stretch: false,
+                vertical_stretch: false, // Stretch relative to window height
+                vertical_stretch_parent: false, // Stretch relative to parent height
                 multiple_yaxis: false,
                 plot_options: {
                     xaxis: {
@@ -92,6 +95,7 @@ define(function (require) {
             // an array of arrays.
             this.livedata = [[]];
             this.sensors = [];
+            this.sensor_options = [];
             this.plotData = [];
             this.previousPoint = null;
 
@@ -161,10 +165,10 @@ define(function (require) {
                         y = item.datapoint[1];
 
                     self.showTooltip(item.pageX, item.pageY,
-                        "<small>" + ((self.plotOptions.xaxis.timezone ) ?
-                                     ((self.plotOptions.xaxis.timezone === 'UTC') ?
-                            new Date(x).toUTCString() :
-                            new Date(x).toString()) : x ) + "</small><br>" + item.series.label + ": <strong>" + y + "</strong>");
+                        "<small>" + ((self.plotOptions.xaxis.timezone) ?
+                            ((self.plotOptions.xaxis.timezone === 'UTC') ?
+                                new Date(x).toUTCString() :
+                                new Date(x).toString()) : x) + "</small><br>" + item.series.label + ": <strong>" + y + "</strong>");
                 } else {
                     $("#tooltip").remove();
                 }
@@ -209,15 +213,20 @@ define(function (require) {
             }
 
             $('.chart', this.el).css('height', $(this.el).parent().css('height'));
-            if (this.flotplot_settings.vertical_stretch) {
+            if (this.flotplot_settings.vertical_stretch ||
+                this.flotplot_settings.vertical_stretch_parent) {
                 var self = this;
                 var rsc = function () {
-                    console.log("Window resized (Flot plot)");
-                    var chartheight = window.innerHeight - $(self.el).offset().top - 20;
+                    var chartheight;
+                    if (self.flotplot_settings.vertical_stretch) {
+                        chartheight = window.innerHeight - $(self.el).offset().top - 20;
+                    } else {
+                        chartheight = $(self.el.parentElement).height() - 20;
+                    }
                     if (settings.get("showstream"))
                         chartheight -= ($('#showstream').height() + 20);
 
-                    $('.chart', self.el).css('height',chartheight + 'px');
+                    $('.chart', self.el).css('height', chartheight + 'px');
                 }
                 this.rsc = rsc;
                 $(window).on('resize', this.rsc);
@@ -236,9 +245,9 @@ define(function (require) {
                 opacity: 0.90
             }).appendTo("body").fadeIn(200);
         },
-        
+
         // Clears all graph data
-        clearData: function() {
+        clearData: function () {
             this.livedata = [[]];
             this.sensors = [];
         },
@@ -250,31 +259,40 @@ define(function (require) {
             }
         },
 
-        // Append a data point. Data should be in the form of
-        // { name: "measurement_name", value: value } or
-        // { name: "measurement_name", value: value, timestamp: timestamp }
+        /**
+         * Append a data point. Data should be in the form of
+         * { name: "measurement_name", value: value } or
+         * { name: "measurement_name", value: value, timestamp: timestamp }
+         * You can also add an "options" key to pass additional config for plotting:
+         * { name: "sensor_name", value: value, timestamp: timestamp, options: {lines: {show: true,fill: true},fillBetween: "vmin"}}
+         *  Note: you can only set the options once.
+         */
         fastAppendPoint: function (data) {
             var sensor = data.name;
             var idx = this.sensors.indexOf(sensor);
             if (idx == -1) {
                 this.sensors.push(sensor);
+                var options = data.options ? data.options : {};
+                this.sensor_options.push(options);
                 this.livedata.push([]);
                 idx = this.sensors.length - 1;
             }
             if (this.flotplot_settings.points) this.trimLiveData(idx);
             var stamp = (data.timestamp) ? new Date(data.timestamp).getTime() : new Date().getTime();
             this.livedata[idx].push([stamp, data.value]);
+            return this; // This lets us chain multiple operations
         },
 
         redraw: function () {
             var plotData = [];
             // Now pack our live data:
             for (var i = 0; i < this.sensors.length; i++) {
-                plotData.push({
+                var v = {
                     data: this.livedata[i],
                     label: this.sensors[i],
-                    yaxis: (this.flotplot_settings.multiple_yaxis) ? i+1 : 1
-                });
+                    yaxis: (this.flotplot_settings.multiple_yaxis) ? i + 1 : 1
+                };
+                plotData.push(utils.collate(v, this.sensor_options[i]));
             }
             // Now update our plot
             this.plot.setData(plotData);
@@ -287,6 +305,7 @@ define(function (require) {
         appendPoint: function (data) {
             this.fastAppendPoint(data);
             this.redraw();
+            return this; // This lets us chain multiple operations
         }
 
     });

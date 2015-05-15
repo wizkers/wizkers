@@ -126,6 +126,7 @@ define(function (require) {
             console.log("Sark110 live view closing...");
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
+            this.plot.onClose(); // Required to stop the plot from listening to window resize events
         },
 
         updatestatus: function (data) {
