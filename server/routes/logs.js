@@ -214,7 +214,7 @@ exports.addLog = function (req, res) {
     var entry = req.body;
     var instrumentid = req.params.id;
     entry.instrumentid = instrumentid;
-    debug('Adding log entry for Instrument ID: ' + instrumentid + ' - ' + JSON.stringify(entry));
+    debug('Create a new log for Instrument ID: ' + instrumentid + ' - ' + JSON.stringify(entry));
     dbs.logs.post(entry, function (err, result) {
         if (err) {
             res.send({

@@ -89,13 +89,48 @@ var ConnectionManager = function () {
             for (item in items.rows) {
                 var doc = items.rows[item].doc;
                 if (doc.autoconnect) {
-                    self.openInstrument(doc._id, function() { console.log("Opened"); });
+                    self.openInstrument(doc._id, function (driver, id) {
+                            self.autoRecord(id , driver);
+                    });
                 }
             }
         });
 
     }
 
+    /**
+     * Start to record. The instrument needs to be connected
+     * @param {String} instrumentid The InstrumentID
+     */
+    this.autoRecord = function (instrumentid, driver) {
+        dbs.instruments.get(instrumentid, function(err,item) {
+            if (err) {
+                debug('Autorecord error - ' + err);
+                return;
+            }
+            if (!item.autorecord)
+                return;
+            // We need to create a new log which we will associate to the instrument
+            var entry = {
+                instrumentid: instrumentid,
+                name: 'Autorecord',
+                description: 'Autorecord',
+                logtype: 'live'
+            };
+            debug('Starting autorecord for Instrument ID: ' + instrumentid + ' - ' + JSON.stringify(entry));
+            dbs.logs.post(entry, function (err, result) {
+                if (err) {
+                    res.send({
+                        'error': 'An error has occurred'
+                    });
+                } else {
+                    debug('Success - result: ' + JSON.stringify(result));
+                    recorder.startRecording(result.id, driver);
+                }
+            });
+        });
+
+    }
 
     /**
      * Check if an instrument is open
@@ -141,7 +176,7 @@ var ConnectionManager = function () {
                 // Now ask the instrument to open its port
                 driver.openPort(instrumentid);
                 debug('Instrument is opening');
-                callback(driver);
+                callback(driver, instrumentid);
             });
         }
     }

@@ -19,34 +19,34 @@
 
 /*
  * The main screen of our app.
- * 
+ *
  * Our model is the settings object.
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
 
-define(function(require) {
-    
+define(function (require) {
+
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
         Backbone = require('backbone'),
         Devicelog = require('app/models/devicelog'),
         template = require('js/tpl/HomeView.js');
-            
+
     // We have to require bootstrap whenever we use the Bootstrap javascript
     // library. In this file, we use it for 'modal' calls.
     require('bootstrap');
 
     return Backbone.View.extend({
 
-        initialize:function (options) {
-            linkManager.on('status', this.updatestatus, this); 
+        initialize: function (options) {
+            linkManager.on('status', this.updatestatus, this);
             linkManager.on('uniqueID', this.updateUID, this);
-            
-            this.listenTo(outputManager, 'outputTriggered', this.updateOutputStatus );
+
+            this.listenTo(outputManager, 'outputTriggered', this.updateOutputStatus);
             instrumentManager.on('instrumentChanged', this.updateInstrument, this);
 
             // Keep a reference to our instrument views to close
@@ -64,7 +64,7 @@ define(function(require) {
         },
 
         events: {
-            "click .ctrl-connect":  "ctrlConnect",
+            "click .ctrl-connect": "ctrlConnect",
             "click .ctrl-diag": "ctrlDiag",
             "click .ctrl-record": "ctrlRecord",
             "click .start-record": "startRecord",
@@ -72,29 +72,29 @@ define(function(require) {
         },
 
         /* Nice way to disable an anchor button when it is disabled */
-        handleaclicks: function(event) {
+        handleaclicks: function (event) {
             if ($(event.currentTarget).attr('disabled'))
                 event.preventDefault();
         },
 
-        updateInstrument: function() {
+        updateInstrument: function () {
             // Whenever the instrument is updated in the manager, we need to
             // re-render. In particular,the manager is usually updated after 1st rendering
             // of the home view after selecting an instrument.
             this.instrument = instrumentManager.getInstrument();
             this.render();
         },
-        
-        updateOutputStatus: function(evt) {
+
+        updateOutputStatus: function (evt) {
             console.log("[Home view] Got an update from an output plugin");
             if (evt.error) {
-                $("#outputstatus",this.el).html("Outputs Error").addClass('btn-danger').removeClass('btn-success').removeClass('btn-info')
+                $("#outputstatus", this.el).html("Outputs Error").addClass('btn-danger').removeClass('btn-success').removeClass('btn-info')
             } else {
-                $("#outputstatus",this.el).html("Outputs OK").addClass('btn-success').removeClass('btn-danger').removeClass('btn-info')
+                $("#outputstatus", this.el).html("Outputs OK").addClass('btn-success').removeClass('btn-danger').removeClass('btn-info')
             }
         },
 
-        render:function () {
+        render: function () {
             var self = this;
             console.log('Main render of Home view');
             $(this.el).html(template(this.model.toJSON()));
@@ -117,7 +117,9 @@ define(function(require) {
             if (instrumentManager.getInstrument() != null) {
                 console.log('Create the instrument live view');
 
-                instrumentManager.getLiveDisplay({model: this.instrument}, function(view) {
+                instrumentManager.getLiveDisplay({
+                    model: this.instrument
+                }, function (view) {
                     self.instrumentLiveView = view;
                     if (view != null) {
                         $('#liveview').html(view.el);
@@ -126,7 +128,9 @@ define(function(require) {
                 });
 
                 // Now start the numeric display (the one on the right)
-                instrumentManager.getNumDisplay({model: this.instrument}, function(view) {
+                instrumentManager.getNumDisplay({
+                    model: this.instrument
+                }, function (view) {
                     self.instrumentNumericView = view;
                     if (view != null) {
                         $('#numview').html(view.el);
@@ -139,7 +143,7 @@ define(function(require) {
             return this;
         },
 
-        onClose: function() {
+        onClose: function () {
             console.log("Home view closing...");
 
             linkManager.off('status', this.updatestatus, this);
@@ -157,13 +161,13 @@ define(function(require) {
             this.model.fetch();
         },
 
-        updateUID: function(uid) {
+        updateUID: function (uid) {
             console.log('Received a uniqueID for this instrument: ' + uid);
             this.instrumentUniqueID = uid;
             var savedUID = this.instrument.get('uuid');
             console.log('Our instrument type is ' + this.instrument.get('type'));
             if (savedUID == "") {
-                this.instrument.set('uuid',uid);
+                this.instrument.set('uuid', uid);
                 this.instrument.save();
             } else
             if (savedUID != uid) {
@@ -173,29 +177,29 @@ define(function(require) {
             // in our backend database, that are uniquely linked to this instrument.
         },
 
-        ctrlDiag: function() {
+        ctrlDiag: function () {
             router.navigate('diagnostics/' + this.instrument.id, true);
         },
 
-        updatestatus: function(data) {
+        updatestatus: function (data) {
             // First of all, if we don't have an instrument, no need to update our status:
             if (this.instrument == null)
                 return;
-            
+
             // If we are just a 'viewer' in server mode, then disable all buttons.
             if (vizapp.type == 'server' && (settings.get('currentUserRole') == 'viewer')) {
                 if (linkManager.isConnected()) {
                     $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;' +
-                                                     this.instrument.get('name') + ' connected')
-                    .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning');
+                            this.instrument.get('name') + ' connected')
+                        .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning');
                 } else {
                     $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>' +
-                                                     this.instrument.get('name') + ' not connected')
-                    .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning');
+                            this.instrument.get('name') + ' not connected')
+                        .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning');
                 }
                 return;
-            } 
-            
+            }
+
             // Depending on port status, update our controller
             // connect button:
             if (linkManager.isConnected()) {
@@ -207,9 +211,9 @@ define(function(require) {
                     linkManager.getUniqueID();
                 }
                 // Depending on device capabilities, enable/disable "Diag view" button
-                if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || ! linkManager.isConnected()) {
-                        $('.ctrl-diag',self.el).attr('disabled', true);
-                }            
+                if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || !linkManager.isConnected()) {
+                    $('.ctrl-diag', self.el).attr('disabled', true);
+                }
             } else {
                 $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Connect to ' + this.instrument.get('name'))
                     .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
@@ -218,67 +222,67 @@ define(function(require) {
             }
             if (data.recording) {
                 $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording...').addClass('btn-success')
-                       .removeClass('btn-danger').attr('disabled', false);
+                    .removeClass('btn-danger').attr('disabled', false);
             } else {
                 $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-download"></span>&nbsp;Record session').addClass('btn-danger')
-                           .removeClass('btn-success');
+                    .removeClass('btn-success');
             }
 
         },
 
 
-        ctrlConnect: function(event) {
+        ctrlConnect: function (event) {
             var self = this;
             if ($('.ctrl-connect', this.el).attr('disabled'))
                 return;
             $('.ctrl-connect', this.el).addClass('btn-warning')
-                                       .removeClass('btn-success').removeClass('btn-danger').attr('disabled', true);
+                .removeClass('btn-success').removeClass('btn-danger').attr('disabled', true);
             // First, get serial port settings (assume Serial for now)
             var id = instrumentManager.getInstrument().id;
-            if (id != null ) {
-                    if (!linkManager.isConnected()) {
-                        $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Opening...')
-                        self.instrumentUniqueID = null; // Just in case we change the instrument
-                        linkManager.openInstrument(id);
-                    } else {
-                        $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Closing...')
-                        linkManager.closeInstrument(id);
-                    }
+            if (id != null) {
+                if (!linkManager.isConnected()) {
+                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Opening...')
+                    self.instrumentUniqueID = null; // Just in case we change the instrument
+                    linkManager.openInstrument(id);
+                } else {
+                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Closing...')
+                    linkManager.closeInstrument(id);
+                }
             }
         },
 
-        ctrlRecord: function() {
+        ctrlRecord: function () {
             var self = this;
-            if ($('.ctrl-record', this.el).attr('disabled')){
-                    return;
+            if ($('.ctrl-record', this.el).attr('disabled')) {
+                return;
             }
             if (!linkManager.isRecording()) {
                 $('#RecordModal').modal();
             } else {
                 linkManager.stopRecording();
-            }        
+            }
         },
 
-        startRecord: function() {
+        startRecord: function () {
             var self = this;
             $('#RecordModal').modal('hide');
 
             var currentLogSession = new Devicelog.Log();
-            currentLogSession.set('name', $('#recordingname',this.el).val());
+            currentLogSession.set('name', $('#recordingname', this.el).val());
             currentLogSession.set('description', $('#description', this.el).val());
             currentLogSession.set('logtype', 'live');
             // No need to set instrument ID, it is updated when creating the
             // log session on the server side. In Chrome mode, the log store is
             // (currently) specific to the instrument, so we don't use the ID.
             this.instrument.logs.add(currentLogSession);
-            currentLogSession.save(null,{
-                    success: function() {
-                        linkManager.startRecording(currentLogSession.id); // Tell our backend to start recording.
-                      }}
-              );
+            currentLogSession.save(null, {
+                success: function () {
+                    linkManager.startRecording(currentLogSession.id); // Tell our backend to start recording.
+                }
+            });
 
             $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording...').addClass('btn-success')
-                       .removeClass('btn-danger').attr('disabled', false);
+                .removeClass('btn-danger').attr('disabled', false);
         },
 
     });
