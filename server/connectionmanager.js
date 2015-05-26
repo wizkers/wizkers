@@ -85,6 +85,10 @@ var ConnectionManager = function () {
         dbs.instruments.allDocs({
             include_docs: true
         }, function (err, items) {
+            if (err) {
+                debug('Error retrieving instruments - ' + err);
+                return;
+            }
             var resp = [];
             for (item in items.rows) {
                 var doc = items.rows[item].doc;
