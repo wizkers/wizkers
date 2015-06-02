@@ -20,6 +20,7 @@
         "passport-local": "latest",
         "passport-twitter": "~1.0.2",
         "pinoccio": "~0.1.35",
+        "pinoccio-server": "0.1.1",
         "pouchdb": "latest",
         "serialport": "1.6.1",
         "socket.io": "~1.2.*",

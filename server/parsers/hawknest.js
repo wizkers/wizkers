@@ -17,7 +17,7 @@
  */
 
 /*
- * A parser for the Medcom USB Geiger dongle
+ * A parser for the Medcom Hawk Nest Pinocc.io-based modules
  *
  * @author Edouard Lafargue, ed@lafargue.name
  *
@@ -26,7 +26,7 @@
 "use strict";
 
 var events = require('events'),
-    pinoconnection = require('../connections/pinoccio'),
+    pinoconnection = require('../connections/pinoccio-server'),
     dbs = require('../pouch-config'),
     debug = require('debug')('wizkers:parsers:hawknest');
 
@@ -79,8 +79,8 @@ var HawkNest = function () {
         debug(data);
 
         // Now extract what we really are interested into:
-        if (data.data.type == 'Hawk') {
-            var val = data.data.value;
+        if (data.report && data.report.type == 'Hawk') {
+            var val = data.report;
             jsresp = {
                 cpm: {
                     value: val.ch1,
@@ -90,8 +90,8 @@ var HawkNest = function () {
                     value: val.ch2,
                     valid: true
                 },
-                probeid: data.data.troop + '-' + data.data.scout,
-                timestamp: data.data.time
+                probeid: data.from,
+                timestamp: data.at
 
             }
         } 
