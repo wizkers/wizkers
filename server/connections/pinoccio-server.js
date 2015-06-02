@@ -28,7 +28,7 @@
  *
  */
 
-var server = require('pinoccio-server'),
+var net = require('net'),
     EventEmitter = require('events').EventEmitter,
     util = require('util'),
     debug = require('debug')('wizkers:connections:pinoccio');
@@ -49,21 +49,25 @@ var server = require('pinoccio-server'),
 var PinoConnection = function (path) {
 
     EventEmitter.call(this);
-    var portOpen = false;
-    var self = this;
+    var portOpen = false,
+        self = this,
+        server = null,
+        troop = null,
+        port = 22756;
 
     debug("Creating Pinocc.io object with the following info:");
     debug(path);
 
-    // Initialize the server (needs those, will be removed later on)
-    var opts = {
-        apiHost: 'pool.base.pinocc.io',
-        apiPort: 22756
-    };
-
     var forwardData = function (data) {
-        debug(data);
-        self.emit('data', data);
+        var jsdata = null;
+        try {
+            jsdata = JSON.parse(data);
+        } catch (e) {
+            return;
+        }
+
+        debug(jsdata);
+        self.emit('data', jsdata);
     };
 
     /**
@@ -75,23 +79,22 @@ var PinoConnection = function (path) {
         debug('Error on stream');
         debug(error);
         // Close the stream, and reopen it
-        sync.end();
-        sync.destroy();
-        sync = myPino.sync({
-            stale: 1
-        })
+        server.end();
+        server.destroy();
         self.open();
     }
 
     this.open = function () {
         debug("Listening to data stream");
 
-        server(opts, function (troop) {
+        server = net.createServer(function (newtroop) {
+            troop = newtroop;
             // Log all the data streaming in from the Troop
             troop.on('data', forwardData);
             troop.on('error', handleError);
+        });
 
-        }).on('listening', function () {
+        server.listen(port, function (err) {
             debug('local pinoccio server listening on ', this.address());
             portOpen = true;
             debug('Port open');
@@ -99,17 +102,18 @@ var PinoConnection = function (path) {
                 portopen: portOpen
             });
         });
-
     };
 
     this.write = function (data) {}
 
     this.close = function () {
-        sync.removeListener('data', forwardData);
-        sync.removeListener('error', handleError);
-        portOpen = false;
-        self.emit('status', {
-            portopen: portOpen
+        troop.removeListener('data', forwardData);
+        troop.removeListener('error', handleError);
+        server.close(function (cb) {
+            portOpen = false;
+            self.emit('status', {
+                portopen: portOpen
+            });
         });
     }
 
