@@ -101,6 +101,8 @@ var PinoConnection = function (path) {
             self.emit('status', {
                 portopen: portOpen
             });
+        }).on('error', function(err) {
+            debug('Could not start the server: ', err);
         });
     };
 
