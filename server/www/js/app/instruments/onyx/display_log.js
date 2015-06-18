@@ -203,7 +203,7 @@ define(function (require) {
                 var entries = this.deviceLogs.at(i).entries;
                 var type = this.deviceLogs.at(i).get('logtype');
                 if (type == 'live') {
-                    csv += "CPM, CPM30, CPMRAW, Valid\n";
+                    csv += "CPM, CPM30, USV, COUNT, Valid\n";
                 } else {
                     csv += "accel_x_start, accel_x_end, accel_y_start, accel_y_end, accel_z_start, accel_z_end, cpm, duration (min), time on device (ISO String)\n";
                 }
@@ -228,7 +228,8 @@ define(function (require) {
                         if (type == 'live') {
                             csv += ',' + data.cpm.value +
                                 ',' + data.cpm.cpm30 +
-                                ',' + data.cpm.raw +
+                                ',' + data.cpm.usv +
+                                ',' + data.cpm.count +
                                 ',' + data.cpm.valid;
                         } else {
                             csv += ',' + data.accel_x_start +

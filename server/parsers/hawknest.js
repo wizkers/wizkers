@@ -90,7 +90,7 @@ var HawkNest = function () {
                     value: val.ch2,
                     valid: true
                 },
-                probeid: data.from,
+                probeid: val.hwser,
                 timestamp: data.at
 
             }

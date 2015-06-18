@@ -31,6 +31,7 @@
 var net = require('net'),
     EventEmitter = require('events').EventEmitter,
     util = require('util'),
+    Scout = require('./pinoccio/scout'),
     debug = require('debug')('wizkers:connections:pinoccio');
 
 
@@ -59,14 +60,6 @@ var PinoConnection = function (path) {
     debug(path);
 
     var forwardData = function (data) {
-        var jsdata = null;
-        try {
-            jsdata = JSON.parse(data);
-        } catch (e) {
-            return;
-        }
-
-        debug(jsdata);
         self.emit('data', jsdata);
     };
 
@@ -87,11 +80,11 @@ var PinoConnection = function (path) {
     this.open = function () {
         debug("Listening to data stream");
 
-        server = net.createServer(function (newtroop) {
-            troop = newtroop;
-            // Log all the data streaming in from the Troop
-            troop.on('data', forwardData);
-            troop.on('error', handleError);
+        server = net.createServer(function (sock) {
+            var scout = new Scout(sock);
+            // Forward all the data streaming in from the Troop
+            scout.on('data', forwardData);
+            scout.on('error', handleError);
         });
 
         server.listen(port, function (err) {
