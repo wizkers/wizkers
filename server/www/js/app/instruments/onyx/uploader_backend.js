@@ -261,7 +261,8 @@ define(function (require) {
                 if (ibIdx < 2)
                     break;
                 var s = inputBuffer[1];
-                bytesExpected = s + 2; // +2 because of ACK and Length bytes
+                bytesExpected = s + 4; // +4 because of ACK + final ACK + Length byte
+                                       // and length byte is 'number of payload bytes - 1'
                 current_state = States.RECEIVING;
                 //console.log('WAIT_SIZE', bytesExpected);
                 // break;  // Don't break, the byte may already be waiting for us
@@ -483,7 +484,7 @@ define(function (require) {
                     chipID: chipID
                 });
                 // At this stage, we stop: the front-end will check the ChipID and decide to
-                // send the firmware or not.
+                // send the firmware or not.a
             });
         }
 
