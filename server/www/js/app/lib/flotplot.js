@@ -50,7 +50,9 @@ define(function (require) {
 
             // Here are all the options we can define, to pass as "settings" when creating the view:
             this.flotplot_settings = {
-                points: 150,
+                // points: 150,
+                // preload: 4096,  // Use this when creating a plot with a fixed number of data points
+                                   // (used for the Sigma-25)
                 log: false,
                 showtips: true,
                 selectable: false,
@@ -93,7 +95,7 @@ define(function (require) {
             // livedata is an array of all readings.
             // We can have multiple values plotted on the chart, so this is
             // an array of arrays.
-            this.livedata = [[]];
+            this.livedata = [];
             this.sensors = [];
             this.sensor_options = [];
             this.plotData = [];
@@ -248,7 +250,7 @@ define(function (require) {
 
         // Clears all graph data
         clearData: function () {
-            this.livedata = [[]];
+            this.livedata = [];
             this.sensors = [];
         },
 
@@ -262,7 +264,8 @@ define(function (require) {
         /**
          * Append a data point. Data should be in the form of
          * { name: "measurement_name", value: value } or
-         * { name: "measurement_name", value: value, timestamp: timestamp }
+         * { name: "measurement_name", value: value, timestamp: timestamp } or
+         * { name" "measurement_name", value: value, index: index }
          * You can also add an "options" key to pass additional config for plotting:
          * { name: "sensor_name", value: value, timestamp: timestamp, options: {lines: {show: true,fill: true},fillBetween: "vmin"}}
          *  Note: you can only set the options once.
@@ -274,12 +277,21 @@ define(function (require) {
                 this.sensors.push(sensor);
                 var options = data.options ? data.options : {};
                 this.sensor_options.push(options);
-                this.livedata.push([]);
+                var a = [];
+                if (this.flotplot_settings != undefined) {
+                    for (var i = 0; i < this.flotplot_settings.preload; i++)
+                        a[i] = [i,0];
+                }
+                this.livedata.push(a);
                 idx = this.sensors.length - 1;
             }
             if (this.flotplot_settings.points) this.trimLiveData(idx);
-            var stamp = (data.timestamp) ? new Date(data.timestamp).getTime() : new Date().getTime();
-            this.livedata[idx].push([stamp, data.value]);
+            if (data.index != undefined) {
+                this.livedata[idx][data.index] = [data.index, data.value];
+            } else {
+                var stamp = (data.timestamp) ? new Date(data.timestamp).getTime() : new Date().getTime();
+                this.livedata[idx].push([stamp, data.value]);
+            }
             return this; // This lets us chain multiple operations
         },
 

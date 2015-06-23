@@ -62,6 +62,9 @@ define(function(require) {
     var Sark110Instrument = require('app/instruments/sark110/sark110'),
         Sark110SettingsView = require('app/instruments/sark110/settings');
 
+    var Sigma25Instrument = require('app/instruments/sigma25/sigma25'),
+        Sigma25SettingsView = require('app/instruments/sigma25/settings');
+
     var InstrumentManager = function() {
     
         // current_instrument is a Backbone Model instance
@@ -80,6 +83,8 @@ define(function(require) {
             "fluke28x" :{ name: "Fluke 287/289 Series multimeter", type:Fluke289Instrument, settings: Fluke289SettingsView,
                           connectionsettings: 'app/views/instrument/serialport'},
             "simple_serial": {name: "Simple serial terminal", type:SimpleSerialInstrument, settings: SimpleSerialSettingsView,
+                          connectionsettings: 'app/views/instrument/serialport'},
+            "sigma25": {name: "Kromek Sigma25", type:Sigma25Instrument, settings: Sigma25SettingsView,
                           connectionsettings: 'app/views/instrument/serialport'},
         };
         

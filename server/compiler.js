@@ -65,5 +65,6 @@ compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogMana
                  'instruments/OnyxDiagView', 'instruments/OnyxLiveView', 'instruments/OnyxLogEditView',
                  'instruments/OnyxLogManagementView', 'instruments/OnyxLogView', 'instruments/OnyxNumView',
                  'instruments/USBGeigerUpgrader', 'instruments/USBGeigerLogView', 'instruments/OnyxUpgrader',
-                 'connections/serialport', 'connections/helium', 'connections/pinoccio', 'connections/usbhid'
+                 'connections/serialport', 'connections/helium', 'connections/pinoccio', 'connections/usbhid',
+                 'instruments/sigma25/Sigma25LiveView', 'instruments/sigma25/Sigma25NumView', 'instruments/sigma25/Sigma25SettingsView',
                 ]);

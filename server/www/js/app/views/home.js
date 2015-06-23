@@ -246,6 +246,8 @@ define(function (require) {
                     linkManager.openInstrument(id);
                 } else {
                     $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Closing...')
+                    if (linkManager.isStreaming())
+                        linkManager.stopLiveStream();
                     linkManager.closeInstrument(id);
                 }
             }
