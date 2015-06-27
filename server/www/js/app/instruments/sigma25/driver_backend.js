@@ -75,12 +75,14 @@ define(function (require) {
                     jsresp.channels = ch;
                 } else if (resp[0] == 'version') {
                     jsresp.version = resp[1];
+                } else if (resp[0] == 'serial') {
+                    jsresp.serial = resp[1];
                 } else if (resp[0] == 'gain') {
                     jsresp.gain = parseInt(resp[1]);
                 } else if (resp[0] == 'bias') {
                     jsresp.bias = parseInt(resp[1]);
                 } else if (resp[0] == 'lld_channel') {
-                    jsresp.lls_channel = parseInt(resp[1]);
+                    jsresp.lld_channel = parseInt(resp[1]);
                 } else if (resp.length > 1) {
                     jsresp[resp[0]] = resp.slice(1);
                 } else {

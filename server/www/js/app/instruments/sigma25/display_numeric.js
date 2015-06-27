@@ -52,7 +52,28 @@ define(function (require) {
             linkManager.off('input', this.showInput, this);
         },
 
-        showInput: function (data) {},
+        showInput: function (data) {
+            if (data.channels)
+                return;
+            
+            if (data.gain != undefined) {
+                $('#gain', this.el).val(parseInt(data.gain,10));
+                linkManager.sendCommand('b');  // Bias
+            } else
+            if (data.serial != undefined) {
+                $('#serial', this.el).val(data.serial);
+                linkManager.sendCommand('l');  // LLD Channel
+            } else
+            if (data.lld_channel != undefined) {
+                $('#lld_channel', this.el).val(data.lld_channel);
+                linkManager.startLiveStream(this.model.get('liveviewperiod'));
+            } else
+            if (data.bias != undefined) {
+                $('#bias', this.el).val(data.bias);
+                linkManager.sendCommand('n');  // Serial number
+            }
+        
+        },
 
 
     });

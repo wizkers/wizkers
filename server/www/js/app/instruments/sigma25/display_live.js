@@ -126,8 +126,11 @@ define(function (require) {
 
         updatestatus: function (data) {
             console.log("Sigma25 live display: link status update");
-            if (data.portopen && ! linkManager.isStreaming() )
-                linkManager.startLiveStream(this.model.get('liveviewperiod'));
+            if (data.portopen && ! linkManager.isStreaming() ) {
+                // Result will be displayed by the Numeric view
+                linkManager.sendCommand('g');  // Gain
+                // Live stream will be started from the NumView
+            }
         },
 
         // We get there whenever we receive something from the serial port
@@ -150,12 +153,14 @@ define(function (require) {
             if (data.channels) {
                 for (var i = 0; i < data.channels.length; i++) {
                     var ch = data.channels[i];
-                    this.channels[ch]++;
-                    this.plot.fastAppendPoint({
-                        name: "e",
-                        value: this.channels[ch],
-                        index: ch
-                    });
+                    if (ch < 4095) {
+                        this.channels[ch]++;
+                        this.plot.fastAppendPoint({
+                            name: "e",
+                            value: this.channels[ch],
+                            index: ch
+                        });
+                    }
                 }
                 this.plot.redraw();
             }
