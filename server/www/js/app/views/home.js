@@ -44,6 +44,7 @@ define(function (require) {
 
         initialize: function (options) {
             linkManager.on('status', this.updatestatus, this);
+            linkManager.on('input', this.parseInput, this);
             linkManager.on('uniqueID', this.updateUID, this);
 
             this.listenTo(outputManager, 'outputTriggered', this.updateOutputStatus);
@@ -147,6 +148,7 @@ define(function (require) {
             console.log("Home view closing...");
 
             linkManager.off('status', this.updatestatus, this);
+            linkManager.off('input', this.parseInput, this);
             linkManager.off('uniqueID', this.updateUID, this);
             instrumentManager.off('instrumentChanged', this.updateInstrument, this);
 
@@ -179,6 +181,18 @@ define(function (require) {
 
         ctrlDiag: function () {
             router.navigate('diagnostics/' + this.instrument.id, true);
+        },
+        
+        parseInput: function(data) {
+            if (data.openerror) {
+                // Give feedback to the user on why we could not open the device
+                if (data.reason)
+                    $('#errorreason', this.el).html(data.reason);
+                if (data.description)
+                    $('#errordetail', this.el).html(data.description);
+                
+                $('#ErrorModal').modal();
+            }
         },
 
         updatestatus: function (data) {

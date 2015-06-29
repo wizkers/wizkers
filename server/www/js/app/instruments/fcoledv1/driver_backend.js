@@ -24,7 +24,7 @@
  *
  * Differences with server-side parser:
  *   - None
- * 
+ *
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
@@ -48,6 +48,7 @@ define(function (require) {
         var self = this,
             port = null,
             port_close_requested = false,
+            port_open_requested = false,
             isopen = false;
 
         var portSettings = function () {
@@ -70,9 +71,9 @@ define(function (require) {
         // forwards the data to the chromeSocket/cordovaSocket through
         // a 'data' event.
         var format = function (data) {
-            
+
             // Remove any carriage return
-            data = data.replace('\n','');
+            data = data.replace('\n', '');
             var fields = {};
             try {
                 fields = JSON.parse(data);
@@ -85,7 +86,22 @@ define(function (require) {
         // Status returns an object that is concatenated with the
         // global server status
         var status = function (stat) {
+            port_open_requested = false;
             console.log('Port status change', stat);
+            if (stat.openerror) {
+                // We could not open the port: warn through
+                // a 'data' messages
+                var resp = {
+                    openerror: true
+                };
+                if (stat.reason != undefined)
+                    resp.reason = stat.reason;
+                if (stat.description != undefined)
+                    resp.description = stat.description;
+                self.trigger('data', resp);
+                return;
+            }
+
             isopen = stat.portopen;
 
             if (isopen) {
@@ -106,6 +122,7 @@ define(function (require) {
         /////////////
 
         this.openPort = function (insid) {
+            port_open_requested = true;
             var ins = instrumentManager.getInstrument();
             port = new serialConnection(ins.get('port'), portSettings());
             port.on('data', format);
@@ -125,6 +142,10 @@ define(function (require) {
             return isopen;
         }
 
+        this.isOpenPending = function() {
+            return port_open_requested;
+        }
+
         this.getInstrumentId = function (arg) {};
 
         // Called when the app needs a unique identifier.
@@ -140,12 +161,10 @@ define(function (require) {
         this.isStreaming = function () {
             return true;
         };
-        
-        this.startLiveStream = function() {
-        };
-        
-        this.stopLiveStream = function() {
-        };
+
+        this.startLiveStream = function () {};
+
+        this.stopLiveStream = function () {};
 
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the

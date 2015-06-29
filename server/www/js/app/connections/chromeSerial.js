@@ -163,7 +163,9 @@ define(function (require) {
                 } else {
                     // Tell our front-end the port does not exist
                     self.trigger('status', {
-                        openerror: true
+                        openerror: true,
+                        reason: 'Port not found',
+                        description: 'Please check your instrument settings, we were not able to find the serial port you specified there.'
                     });
                 }
             });

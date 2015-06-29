@@ -93,8 +93,15 @@ define(function (require) {
         /////////////
 
         function onDevicesEnumerated(devices) {
-            if (devices.length != 1)
+            if (devices.length != 1) {
+                // Tell our front-end what's happening
+                    self.trigger('status', {
+                        openerror: true,
+                        reason: 'Device not found',
+                        description: 'Please check that your device is connected to the USB port. This driver only supports one device at a time, so make sure you are not connecting several identical devices at the same time.'
+                    });
                 return;
+            }
             currentDevice = devices[0];
             chrome.hid.connect(currentDevice.deviceId, function (connectInfo) {
                 if (!connectInfo) {

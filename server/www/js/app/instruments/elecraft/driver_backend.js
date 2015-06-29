@@ -50,6 +50,7 @@ define(function (require) {
         var streaming = false,
             port = null,
             port_close_requested = false,
+            port_open_requested = true,
             isopen = false;
 
         // Because Elecraft radios are not 100% consistent with their protocols,
@@ -130,7 +131,22 @@ define(function (require) {
         };
 
         var status = function (stat) {
+            port_open_requested = false;
             console.log('Port status change', stat);
+            if (stat.openerror) {
+                // We could not open the port: warn through
+                // a 'data' messages
+                var resp = {
+                    openerror: true
+                };
+                if (stat.reason != undefined)
+                    resp.reason = stat.reason;
+                if (stat.description != undefined)
+                    resp.description = stat.description;
+                self.trigger('data', resp);
+                return;
+            }
+
             isopen = stat.portopen;
 
             if (isopen) {
@@ -170,6 +186,7 @@ define(function (require) {
         /////////////
 
         this.openPort = function (insid) {
+            port_open_requested = true;
             var ins = instrumentManager.getInstrument();
             port = new serialConnection(ins.get('port'), portSettings());
             port.on('data', format);
@@ -187,6 +204,10 @@ define(function (require) {
 
         this.isOpen = function () {
             return isopen;
+        }
+
+        this.isOpenPending = function() {
+            return port_open_requested;
         }
 
         this.getInstrumentId = function (arg) {};

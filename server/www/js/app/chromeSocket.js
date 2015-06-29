@@ -43,6 +43,7 @@ define(function (require) {
             driver = null,
             currentInstrumentid = null,
             currentLog = null,
+            openPending =false,
             recording = false,
             uploader_mode = false; // Will be true when we have loaded the special uploader driver.
 
@@ -127,6 +128,8 @@ define(function (require) {
         var portStatus = function (insid) {
             if (insid)
                 console.log('portStatus', insid);
+            if (openPending || ((driver) && driver.isOpenPending()))
+                return; // We don't update status until the instrument is open (or failed to open)
             var s = {
                 portopen: (driver) ? driver.isOpen() : false,
                 recording: recording,
@@ -137,7 +140,9 @@ define(function (require) {
         }
 
         var openInstrument = function (insid) {
+            openPending = true;
             connectionmanager.openInstrument(insid, function (d) {
+                openPending = false;
                 driver = d;
                 currentInstrumentid = insid;
                 // Listen for data coming in from our driver
