@@ -1,0 +1,23 @@
+<div class="col-md-3">
+    <div class="thumbnail glowthumbnail select" style="text-align: center;">
+        <h4><%=recordingName%></h4>
+        <small>Start&nbsp;time:</small> <%= new Date(startTime) %><br>
+        <small>Duration:</small> <%= utils.hms(Math.floor((endTime-startTime)/1000+0.5)) %><br>
+        Records: <%= numberOfRecords %>
+        <div style="text-align:left;">
+            Type: <%= reading.primaryFunction %> / <%= reading.secondaryFunction %> <br>
+            Event threshold: <%= (evtThreshold*100).toFixed(1) %>%<br>
+            Interval sample: <%= interval %>&nbsp;s
+        </div>
+        <div>
+            <button type="button" class="btn btn-mini download trendlog"
+                    data-type="trendlog" data-name="<%= recordingName %>"
+                    data-id="<%=recordingID%>" data-start="<%=startTime%>"
+                    data-end="<%=endTime%>" data-address="<%=recordingAddress%>"
+                    data-records="<%=numberOfRecords%>">Download</button>
+        </div>
+        <div>
+            <%=alreadyThere %>
+        </div>
+    </div>
+</div>

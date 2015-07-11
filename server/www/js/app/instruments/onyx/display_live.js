@@ -211,8 +211,7 @@ define(function(require) {
                     this.plot.appendPoint({'name': "AVG2", 'value': this.movingAverager(cpm2, this.movingAvgData2) });
 
                 }
-
-            } 
+            }
         },
     });
     

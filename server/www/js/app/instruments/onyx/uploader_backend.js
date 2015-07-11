@@ -50,6 +50,7 @@ define(function (require) {
         var self = this,
             port = null,
             port_close_requested = false,
+            port_open_requested = false,
             first_open_done = false,    // Windows generates a system error when we get
                                         // into bootloader mode, so we need to detect it.
             isopen = false;
@@ -111,6 +112,7 @@ define(function (require) {
         /////////////
 
         this.openPort = function (insid) {
+            port_open_requested = true;
             var ins = instrumentManager.getInstrument();
             // portOpenCallback = callback;
             portPath = ins.get('port');
@@ -132,6 +134,10 @@ define(function (require) {
 
         this.isOpen = function () {
             return isopen;
+        }
+        
+        this.isOpenPending = function() {
+            return port_open_requested;
         }
 
         this.getInstrumentId = function (arg) {};
@@ -305,6 +311,7 @@ define(function (require) {
         // Status returns an object that is concatenated with the
         // global server status
         var status = function (stat) {
+            port_open_requested = false;
             console.log('Port status change', stat);
             isopen = stat.portopen;
 

@@ -67,4 +67,5 @@ compileTemplate(['HomeView', 'HeaderView', 'AboutView', 'SettingsView', 'LogMana
                  'instruments/USBGeigerUpgrader', 'instruments/USBGeigerLogView', 'instruments/OnyxUpgrader',
                  'connections/serialport', 'connections/helium', 'connections/pinoccio', 'connections/usbhid',
                  'instruments/sigma25/Sigma25LiveView', 'instruments/sigma25/Sigma25NumView', 'instruments/sigma25/Sigma25SettingsView',
+                 'instruments/Fluke289/Fluke289TrendlogSummary', 'instruments/Fluke289/Fluke289MinMaxLogSummary'
                 ]);

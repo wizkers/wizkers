@@ -1,88 +1,100 @@
 <div class="col-md-12">
-  <div class="row">
-      <div class="col-md-3">
-        <div class="well">
-        Memory status: <span class="label" id="memlevel">Unknown</span>
-        </div>
-      </div>
-      <div class="col-md-9">
-        <div class="well">
-            Memory statistics:&nbsp;
-            <strong>Trendlog Recordings:</strong> <span id="memrecord">0</span>,
-            <strong>Peak</strong> <span id="mempeak">0</span>,
-            <strong>MinMax:</strong> <span id="memminmax">0</span>,
-            <strong>Measurements:</strong> <span id="memmeasurement">0</span>
-          </div>
-      </div>
-  </div> <!-- row -->
-  <div class="row">
-      <div class="col-md-12">
-          <div class="well">
-              <div class="row">
-                  <div class="col-md-12"><h4>Trendlog recordings</h4></div>
-              </div>
-              <div class="row thumbnails" id="records"></div>
-          </div>          
-      </div>
-  </div>
-  <div class="row">
-      <div class="col-md-12">
-          <div class="well">
-              <div class="row">
-                  <div class="col-md-12"><h4>Peak measurements</h4></div>
-              </div>
-              <div class="row thumbnails" id="peaks"></div>
-          </div>
-      </div>
-  </div>
-  <div class="row">
-      <div class="col-md-12 ">
-          <div class="well">
-              <div class="row">
-                <div class="col-md-12"><h4>Min-Max measurements</h4></div>
-              </div>
-              <div class="row thumbnails" id="minmaxs"></div>
-          </div>
-      </div>
-  </div>
-  <div class="row">
-      <div class="col-md-12">
-          <div class="well">
-            <div class="row">
-                <div class="col-md-12"><h4>Measurements</h4></div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="well">
+                Memory status: <span class="label" id="memlevel">Unknown</span>
             </div>
-            <div class="row thumbnails" id="measurements"></div>
-          </div>
-      </div>
-  </div>
-
-</div><!--/col-md-12 -->
-    
-<!-- Log download modal -->
-<div class="container">
-<div id="logModal" class="modal" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog"><div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="myModalLabel">Log download</h3>
-      </div>
-      <div class="modal-body">
-        <div class="horizontal">
-            <span>Log name:&nbsp;</span><input id="logname" name="logname" type="text" />
         </div>
-        <div>Description:
-            <textarea id="description" name="description" style="width: 90%;" rows="6"></textarea>
+        <div class="col-md-9">
+            <div class="well">
+                Memory statistics:&nbsp;
+                <strong>Trendlog Recordings:</strong> <span id="memrecord">0</span>,
+                <strong>Peak</strong> <span id="mempeak">0</span>,
+                <strong>MinMax:</strong> <span id="memminmax">0</span>,
+                <strong>Measurements:</strong> <span id="memmeasurement">0</span>
+            </div>
         </div>
-        <div class="progress">
-            <div class="progress-bar" role="progressbar" arial-valuemin="0" aria-valuemax="100" id="downloadbar" style="width: 0%;"></div>
-        </div>
-      </div>
-    <div class="modal-footer">
-        <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        <button class="btn start-download btn-primary">Start download</button>
     </div>
-  </div></div>
+    <!-- row -->
+    <div id="tablewrapper" style="overflow-y: scroll;">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="well">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4>Trendlog recordings</h4>
+                        </div>
+                    </div>
+                    <div class="row thumbnails" id="records"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="well">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4>Peak measurements</h4>
+                        </div>
+                    </div>
+                    <div class="row thumbnails" id="peaks"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 ">
+                <div class="well">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4>Min-Max measurements</h4>
+                        </div>
+                    </div>
+                    <div class="row thumbnails" id="minmaxs"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="well">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4>Measurements</h4>
+                        </div>
+                    </div>
+                    <div class="row thumbnails" id="measurements"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+<!--/col-md-12 -->
 
-
+<!-- Log download modal -->
+<div class="container">
+    <div id="logModal" class="modal" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="myModalLabel">Log download</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="horizontal">
+                        <span>Log name:&nbsp;</span>
+                        <input id="logname" name="logname" type="text" />
+                    </div>
+                    <div>Description:
+                        <textarea id="description" name="description" style="width: 90%;" rows="6"></textarea>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" arial-valuemin="0" aria-valuemax="100" id="downloadbar" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    <button class="btn start-download btn-primary">Start download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

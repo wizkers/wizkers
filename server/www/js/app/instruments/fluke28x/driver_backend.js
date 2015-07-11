@@ -607,11 +607,11 @@ define(function (require) {
                     commandProcessed = true;
                     response = processMinMaxRecording(buffer);
                     response.minmaxRecordingID = pendingCommandArgument;
-                    console.log(Hexdump.dump(buffer.toString('binary')));
+                    //console.log(Hexdump.dump(buffer.toString('binary')));
                     break;
                 case "QPSI":
                     commandProcessed = true;
-                    console.log(Hexdump.dump(buffer.toString('binary')));
+                    //console.log(Hexdump.dump(buffer.toString('binary')));
                     break;
                 default:
                     commandProcessed = false;
@@ -896,9 +896,9 @@ define(function (require) {
         function processMinMaxRecording(buffer) {
             // Find start of data (after #0)
             var idx = syncBuffer(buffer);
-
-            summary = {
-                address0: buffer.readUInt32LE(idx),
+            var dv = new DataView(buffer.buffer);
+            var summary = {
+                address0: dv.getUint32(idx, true),
                 // We use Unix timestamps for our stamps:
                 startTime: Math.floor(decodeFloat(buffer, idx += 4) * 1000),
                 endTime: Math.floor(decodeFloat(buffer, idx += 8) * 1000),
@@ -907,7 +907,7 @@ define(function (require) {
             var ret = decodeBinaryReading(buffer, idx += 8);
             summary.reading = ret[0];
             idx = ret[1];
-            summary.recordingName = buffer.toString('ascii', idx);
+            summary.recordingName =  String.fromCharCode.apply(null, new Uint8Array(buffer.buffer, idx));
             return summary;
 
         };
@@ -920,21 +920,24 @@ define(function (require) {
 
             // Find start of data (after #0)
             var idx = syncBuffer(buffer);
+            // We remap the buffer's underlying ArrayBuffer to a dataview to read all
+            // the data as various binary types:
+            var dv = new DataView(buffer.buffer);
             var summary = {
-                address0: buffer.readUInt32LE(idx),
+                address0: dv.getUint32(idx,true),
                 // We use Unix timestamps for our stamps:
                 startTime: Math.floor(decodeFloat(buffer, idx += 4) * 1000),
                 endTime: Math.floor(decodeFloat(buffer, idx += 8) * 1000),
                 interval: decodeFloat(buffer, idx += 8),
                 evtThreshold: decodeFloat(buffer, idx += 8),
-                recordingAddress: buffer.readUInt32LE(idx += 8),
-                numberOfRecords: buffer.readUInt32LE(idx += 4),
+                recordingAddress: dv.getUint32(idx += 8, true),
+                numberOfRecords: dv.getUint32(idx += 4, true),
             };
 
             var ret = decodeBinaryReading(buffer, idx += 4);
             summary.reading = ret[0];
             idx = ret[1];
-            summary.recordingName = buffer.toString('ascii', idx);
+            summary.recordingName = String.fromCharCode.apply(null, new Uint8Array(buffer.buffer, idx));
             debug(summary);
             return summary;
         };
@@ -944,24 +947,24 @@ define(function (require) {
         // idx needs to be the starting offset of the structure
         // returns an object containing the decoded reading + the updated index.
         function decodeBinaryReading(buffer, idx) {
-
-            reading = {
-                primaryFunction: mapPrimFunction[buffer.readUInt16LE(idx)],
-                secondaryFunction: mapSecFunction[buffer.readUInt16LE(idx += 2)],
+            var dv = new DataView(buffer.buffer);
+            var reading = {
+                primaryFunction: mapPrimFunction[dv.getUint16(idx, true)],
+                secondaryFunction: mapSecFunction[dv.getUint16(idx += 2, true)],
                 rangeData: {
-                    autoRangeState: mapAutoRange[buffer.readUInt16LE(idx += 2)],
-                    baseUnit: mapUnit[buffer.readUInt16LE(idx += 2)],
+                    autoRangeState: mapAutoRange[dv.getUint16(idx += 2, true)],
+                    baseUnit: mapUnit[dv.getUint16(idx += 2,true)],
                     rangeNumber: decodeFloat(buffer, idx += 2),
-                    rangeMultiplier: buffer.readInt16LE(idx += 8)
+                    rangeMultiplier: dv.getInt16(idx += 8, true)
                 },
-                lightningBolt: mapBolt[buffer.readUInt16LE(idx += 2)],
+                lightningBolt: mapBolt[dv.getUint16(idx += 2, true)],
                 minMaxStartTime: Math.floor(decodeFloat(buffer, idx += 2) * 1000),
                 // TODO: not 100% sure about the below !
-                measurementMode1: mapMode[buffer.readUInt16LE(idx += 8)],
-                measurementMode2: buffer.readUInt16LE(idx += 2),
+                measurementMode1: mapMode[dv.getUint16(idx += 8, true)],
+                measurementMode2: dv.getUint16(idx += 2, true),
             };
 
-            var numberOfReadings = buffer.readUInt16LE(idx += 2);
+            var numberOfReadings = dv.getUint16(idx += 2, true);
             // Now decode the readings:
             idx += 2;
 
@@ -977,15 +980,16 @@ define(function (require) {
 
         // Decode a readingId located at offset idx in the buffer
         function decodeBinaryReadingId(buffer, idx) {
+            var dv = new DataView(buffer.buffer);
             var reading = {
-                readingID: mapReadingID[buffer.readUInt16LE(idx)],
+                readingID: mapReadingID[dv.getUint16(idx, true)],
                 readingValue: decodeFloat(buffer, idx += 2),
-                baseUnit: mapUnit[buffer.readUInt16LE(idx += 8)],
-                unitMultiplier: buffer.readInt16LE(idx += 2),
-                decimalPlaces: buffer.readUInt16LE(idx += 2),
-                displayDigits: buffer.readUInt16LE(idx += 2),
-                readingState: mapState[buffer.readUInt16LE(idx += 2)],
-                readingAttribute: mapAttribute[buffer.readUInt16LE(idx += 2)],
+                baseUnit: mapUnit[dv.getUint16(idx += 8, true)],
+                unitMultiplier: dv.getInt16(idx += 2, true),
+                decimalPlaces: dv.getUint16(idx += 2, true),
+                displayDigits: dv.getUint16(idx += 2, true),
+                readingState: mapState[dv.getUint16(idx += 2, true)],
+                readingAttribute: mapAttribute[dv.getUint16(idx += 2, true)],
                 timeStamp: Math.floor(decodeFloat(buffer, idx += 2) * 1000)
             };
             //console.log(reading);
@@ -997,33 +1001,35 @@ define(function (require) {
             // integers, so the 64bit floats have to be reassembled as two separate
             // reversed buffers to be put back in order. Strange...
             var b2 = new Uint8Array(8);
-            var v1 = buffer.readUInt32LE(idx + 0);
-            var v2 = buffer.readUInt32LE(idx + 4);
-            b2.writeUInt32BE(v1, 0);
-            b2.writeUInt32BE(v2, 4);
+            var dv = new DataView(buffer.buffer);
+            var dv2 = new DataView(b2.buffer);
+            var v1 = dv.getUint32(idx + 0, true);
+            var v2 = dv.getUint32(idx + 4, true);
+            dv2.setUint32(0, v1);
+            dv2.setUint32(4, v2);
             //console.log(b2);
-            return b2.readDoubleBE(0);
+            return dv2.getFloat64(0);
 
         };
 
         // Decode a Trendlog entry:
         function processRecordingEntry(buffer) {
-            console.log(Hexdump.dump(buffer.toString('binary')));
+            //console.log(Hexdump.dump(buffer.toString('binary')));
 
             // Find start of data (after #0)
             var idx = syncBuffer(buffer);
-
+            var dv = new DataView(buffer.buffer);
             var record = {
                 startTime: Math.floor(decodeFloat(buffer, idx) * 1000),
                 endTime: Math.floor(decodeFloat(buffer, idx += 8) * 1000),
                 maxReading: decodeBinaryReadingId(buffer, idx += 8),
                 minReading: decodeBinaryReadingId(buffer, idx += 30),
                 averageReading: decodeBinaryReadingId(buffer, idx += 30),
-                averageSamples: buffer.readUInt32LE(idx += 30),
+                averageSamples: dv.getUint32(idx += 30, true),
                 primaryReading: decodeBinaryReadingId(buffer, idx += 4),
-                recordType: mapRecordType[buffer.readUInt16LE(idx += 30)],
-                isStableFlag: mapIsStableFlag[buffer.readUInt16LE(idx += 2)],
-                otherFlag: buffer.readUInt16LE(idx += 2),
+                recordType: mapRecordType[dv.getUint16(idx += 30, true)],
+                isStableFlag: mapIsStableFlag[dv.getUint16(idx += 2, true)],
+                otherFlag: dv.getUint16(idx += 2, true),
             };
             console.log(record);
             // Now package the trendlog record
