@@ -99,7 +99,7 @@ define(function(require) {
                  * Depending on runmode, we are either defining a URL or
                  * relying on backbone localstorage
                  */
-                console.log("[Instrument.js] The ID for this instrument is " + this.id);
+                console.log("[Instrument.js] Updating output/log references for insID " + this.id);
                 
                 if (vizapp.type == "cordova") {
                     this.logs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);

@@ -137,21 +137,6 @@ define(function(require) {
                             settings: RigctldSettings }
         };
         
-        // Called upon instrument change or output enable/disable and makes sure
-        // the output plugins are connected and ready to receive data from the
-        // instrument backend driver
-        this.reconnectOutputs = function() {
-            var outputs = instrumentManager.getInstrument().outputs;
-            // We need to make sure we have a current list, hence the "fetch"
-            outputs.fetch({
-                success: function() {
-                    console.info("[outputManager] asking link manager to connect outputs for intstrument " +
-                                instrumentManager.getInstrument().id);
-                    linkManager.setOutputs(instrumentManager.getInstrument().id);
-                }
-            });
-        }
-        
         // Used by Chrome/Cordova: implements the same API as on the server
         // (outputs/outputmanager.js)
         //  id: ID of the current instrument. We do not actually need it right now
@@ -171,27 +156,29 @@ define(function(require) {
                     out.plugin.onClose();
             }
             
-            // No need to fetch, because this is always called after "reconnectOutputs" above
-            outputs.each(function(output) {
-                if (output.get('enabled')) {
-                    console.warn("[outputManager] Enable output " + output.get('type'));
-                    var pluginType = self.supportedOutputs[output.get('type')];
-                    if (pluginType == undefined) {
-                        console.warn("***** WARNING ***** we were asked to enable an output plugin that is not supported but this server");
-                    } else {
-                         require([pluginType.backend], function(p) {
-                             var backend = new p();
-                             // The plugin needs its metadata and the mapping for the data,
-                             // the output manager will take care of the alarms/regular output
-                             backend.setup(output);
-                             self.activeOutputs.push( { "plugin": backend, "config": output, last: new Date().getTime(), last_alarm: 0 } );
-                             // Also subscribe to events coming from the plugin
-                             self.listenTo(backend, 'outputTriggered', self.dispatchOutputEvents );
-                        });
-                        
-                }
-                }
-            });   
+            outputs.fetch({
+                success: function() {
+                    outputs.each(function(output) {
+                        if (output.get('enabled')) {
+                            console.warn("[outputManager] Enable output " + output.get('type'));
+                            var pluginType = self.supportedOutputs[output.get('type')];
+                            if (pluginType == undefined) {
+                                console.warn("***** WARNING ***** we were asked to enable an output plugin that is not supported but this server");
+                            } else {
+                                 require([pluginType.backend], function(p) {
+                                     var backend = new p();
+                                     // The plugin needs its metadata and the mapping for the data,
+                                     // the output manager will take care of the alarms/regular output
+                                     backend.setup(output);
+                                     self.activeOutputs.push( { "plugin": backend, "config": output, last: new Date().getTime(), last_alarm: 0 } );
+                                     // Also subscribe to events coming from the plugin
+                                     self.listenTo(backend, 'outputTriggered', self.dispatchOutputEvents );
+                                });
+
+                        }
+                        }
+                    });
+                }});
         }
         
         // Used in Chrome/Cordova mode

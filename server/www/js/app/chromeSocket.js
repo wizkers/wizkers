@@ -147,7 +147,6 @@ define(function (require) {
                 currentInstrumentid = insid;
                 // Listen for data coming in from our driver
                 driver.on('data', sendDataToFrontEnd);
-                // Reconnect the outputs for the instrument
                 outputManager.enableOutputs(insid, driver);
             }, false);
         }

@@ -128,12 +128,7 @@ define(function(require) {
                     // instruments at the same time.
                     if (vizapp.type != "server")
                         if (closeprevious) linkManager.closeInstrument();  // Stop former link manager
-                    instrumentManager.setInstrument(ins);                    
-                    // Next step: retrieve the list of outputs that should be
-                    // enabled for this instrument
-                    // Note: this is not the right place to do it, it is up to the
-                    // server to reconnect the outputs, once the instrument is open.
-                    // outputManager.reconnectOutputs();
+                    instrumentManager.setInstrument(ins);
                     // Last, query the link manager to check the status of the port
                     // of the instrument: on a Chrome app, the result will be a closed port,
                     // but in server mode, the instrument might be open already
