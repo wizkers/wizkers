@@ -91,12 +91,29 @@ var HawkNest = function () {
                     valid: true
                 },
                 probeid: val.hwser,
-                timestamp: data.at
-
+                timestamp: val.at
             }
+            // Extract a proper date from the data:
+            var date = val.year + 2000 + '/' + val.month + '/' + val.day;
+            var time = val.hour + ':' + val.min + ':' + val.sec + ' UTC';
+            jsresp.devicestamp = Date.parse(date + ' ' + time);  // Javascript timestamp (microseconds since Jan 1 1970 UTC)
+
+            // Whenever we get data, attempt to resync the unit time to avoid any drift
+            var d = new Date();
+            // Warning: this code will break after 2100:
+            var cmd = 'nest.settimedate(\\"' + (d.getUTCFullYear()-2000) +
+                ((d.getUTCMonth() < 9) ? '0' : '') + (d.getUTCMonth()+1) +
+                ((d.getUTCDate() < 10) ? '0' : '') + d.getUTCDate() +
+                ((d.getUTCHours() < 10) ? '0' : '') + d.getUTCHours() +
+                ((d.getUTCMinutes() < 10) ? '0' : '') + d.getUTCMinutes() +
+                ((d.getUTCSeconds() < 10) ? '0' : '') + d.getUTCSeconds() +
+                '\\")';
+            debug(cmd);
+            self.output({ id: data.id, command: cmd});
         } 
         if (jsresp !== undefined)
             self.emit('data', jsresp);
+        
     };
 
     /////////
@@ -161,15 +178,21 @@ var HawkNest = function () {
     this.stopLiveStream = function (period) {};
 
 
+    /**
+     * Sends a command to the Pinocc.io board.
+     * @param   {Object} data Object containing at least a 'id' and a 'command' field,
+     *                      which are the ID of the board to send the command to, and the
+     *                      'command' to send to the board (in scoutscript syntax).
+     */
     this.output = function (data) {
-        debug("Command sent to Pinoccio: " + data);
+        debug("Command sent to Pinoccio", data);
         if (data == "TAG") {
             this.emit('data', {
                 devicetag: 'Not supported'
             });
-            return '\n';
+            return;
         }
-        port.write(data + '\n');
+        port.write(data);
     }
 
 };

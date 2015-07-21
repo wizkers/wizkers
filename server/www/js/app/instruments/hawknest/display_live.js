@@ -170,6 +170,7 @@ define(function (require) {
 
             if (data.probeid != undefined &&
                 !this.probes.hasOwnProperty(data.probeid)) {
+                // Detected a new probe on the network: configure the plot
                 this.probes[data.probeid] = new simpleplot({
                     model: this.model,
                     settings: this.plotoptions
@@ -190,7 +191,7 @@ define(function (require) {
                 var datapoint = {
                     'name': "CPM-" + data.probeid,
                     'value': cpm,
-                    'timestamp': data.timestamp
+                    'timestamp': data.devicestamp
                 };
                 this.probes['All'].appendPoint(datapoint);
                 this.probes[data.probeid].appendPoint(datapoint);
@@ -200,7 +201,7 @@ define(function (require) {
                 var datapoint = {
                     'name': "CPM2-" + data.probeid,
                     'value': cpm2,
-                    'timestamp': data.timestamp
+                    'timestamp': data.devicestamp
                 };
                 this.probes['All'].appendPoint(datapoint);
                 this.probes[data.probeid].appendPoint(datapoint);

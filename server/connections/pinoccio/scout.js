@@ -47,7 +47,9 @@ var Scout = function (sock) {
     debug(sock);
     
     var self = this,
-        serial = 0;
+        token = undefined,
+        lead_scout_id = undefined;
+        
     
     sock.on('data', function(data) {
         var strdata = data.toString().split('\n');
@@ -55,13 +57,28 @@ var Scout = function (sock) {
             try {
                 jsdata = JSON.parse(strdata[idx]);
             } catch (e) {
-                debug(data[idx]);
-                return;
+                break;
             }
 
             debug(jsdata);
+            
+            if (jsdata.from) {
+                lead_scout_id = jsdata.from;
+            }
+            
+            if (jsdata.token) {
+                token = jsdata.token;
+                self.emit('ready', token);
+            } else if (token != 0) {
+                jsdata.id = token;
+            }                
+            
             self.emit('data', jsdata);
-        }
+        }        
+    });
+    
+    sock.on('close', function(data) {
+        debug('Socket close', data);
     });
 
     /**
@@ -73,6 +90,23 @@ var Scout = function (sock) {
         debug('Error on stream');
         debug(error);
     }
+    
+    
+    /**
+     * Send a command to a Scout. won't work if we send it before we know
+     * the lead scout ID and token. Note: with the current way we use Scouts (only on Wifi),
+     * this won't cover situations where we have several scouts per troop, since it will only
+     * send commands to the lead scout.
+     * @param {[[Type]]} cmd [[Description]]
+     * @param {[[Type]]} cb  [[Description]]
+     */
+    this.sendCommand = function(cmd) {
+        if (lead_scout_id != undefined && token != undefined) {
+            sock.write('{"type":"command", "to":' + lead_scout_id + ', "id":"' + token + '",  "command":"' + cmd + '"}\n');
+        }
+    };
+    
+    
 
     return this;
 }

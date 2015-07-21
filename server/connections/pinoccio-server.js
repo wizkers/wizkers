@@ -53,7 +53,7 @@ var PinoConnection = function (path) {
     var portOpen = false,
         self = this,
         server = null,
-        troop = null,
+        troop = {},
         port = 22756;
 
     debug("Creating Pinocc.io object with the following info:");
@@ -76,6 +76,11 @@ var PinoConnection = function (path) {
         server.destroy();
         self.open();
     }
+    
+    var addScout = function(scoutID) {
+        debug('Scout ID ' + scoutID + ' is ready',this);
+        troop[scoutID]= this;
+    }
 
     this.open = function () {
         debug("Listening to data stream");
@@ -85,6 +90,8 @@ var PinoConnection = function (path) {
             // Forward all the data streaming in from the Troop
             scout.on('data', forwardData);
             scout.on('error', handleError);
+            scout.on('ready', addScout);
+
         });
 
         server.listen(port, function (err) {
@@ -99,11 +106,26 @@ var PinoConnection = function (path) {
         });
     };
 
-    this.write = function (data) {}
+    /**
+     * Write to a scout - Only scoutscript commands for now.
+     * @param {Object} data is the data to send. Needs to contain a "id" string
+     *                      to indicate which board we want to talk to, and a
+     *                      "command" key which contains the command.
+     */
+    this.write = function (data) {
+        var id = data.id;
+        if ( id != undefined) {
+            troop[id].sendCommand(data.command);
+        }
+    }
 
     this.close = function () {
-        troop.removeListener('data', forwardData);
-        troop.removeListener('error', handleError);
+        for (scout in troop) {
+            troop[scout].removeListener('data', forwardData);
+            troop[scout].removeListener('error', handleError);
+            troop[scout].removeListener('ready', addScout);
+            delete troop[scout];
+        }
         server.close(function (cb) {
             portOpen = false;
             self.emit('status', {
