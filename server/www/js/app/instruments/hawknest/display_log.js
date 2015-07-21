@@ -239,7 +239,7 @@ define(function (require) {
                         // time stamp whenever we are running as an embedded app or a server
                         // app.
                         if (this.knownProbes[data.probeid]) {
-                            var ts = new Date(entry.get('timestamp')).toISOString().replace(/[TZ]/g, ' ');
+                            var ts = new Date(entry.get('devicestamp')).toISOString().replace(/[TZ]/g, ' ');
                             csv += ts;
                             csv += ',' + data.probeid;
                             csv += ',' + data.cpm.value;
@@ -324,7 +324,7 @@ define(function (require) {
                     var entry = value.at(i);
                     // Be sure we only plot CPM entries (we might have anything in the
                     // log...
-                    var stamp = new Date(entry.get('timestamp')).getTime();
+                    var stamp = new Date(entry.get('devicestamp')).getTime();
                     if (entry.get('data').cpm != undefined) {
                         var d = entry.get('data');
                         var cpm = parseFloat(d.cpm.value);
