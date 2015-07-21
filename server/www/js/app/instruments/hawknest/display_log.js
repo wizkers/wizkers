@@ -324,10 +324,10 @@ define(function (require) {
                     var entry = value.at(i);
                     // Be sure we only plot CPM entries (we might have anything in the
                     // log...
-                    var stamp = new Date(entry.get('devicestamp')).getTime();
                     if (entry.get('data').cpm != undefined) {
                         var d = entry.get('data');
                         var cpm = parseFloat(d.cpm.value);
+                        var stamp = new Date(d.devicestamp).getTime();
 
                         // Find out if we already have this probe in the list of known probes,
                         // and if we want to display it.
