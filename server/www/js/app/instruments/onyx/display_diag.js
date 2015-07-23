@@ -56,6 +56,7 @@ define(function (require) {
             "click #cmdsend": "sendcmd",
             "click #calccal": "calccal",
             "click #cmdsavecal": "savecal",
+            "click #qrsave": "saveqr",
             "keypress input#manualcmd": "sendcmd",
             "click #nameset": "setdevtag",
             "keypress input#devname": "setdevtag",
@@ -96,6 +97,11 @@ define(function (require) {
                 linkManager.driver.debug_enable(checked);
                 break;
             }
+        },
+        
+        saveqr: function() {
+            var tmpl = $('#qr_template').val();
+            linkManager.driver.saveqr(tmpl);
         },
 
         calchanged: function () {
@@ -186,7 +192,11 @@ define(function (require) {
             }
             if (data.rtc != undefined) {
                 $('#time', this.el).html(new Date(parseInt(data.rtc) * 1000).toUTCString());
-                linkManager.driver.getcalibration();
+                linkManager.driver.getqr();
+            }
+            if (data.qr != undefined) {
+                $('#qr_template', this.el).val(data.qr);
+                linkManager.getcalibration();
             }
         }
     });

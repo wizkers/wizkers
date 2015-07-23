@@ -87,6 +87,16 @@ define(function(require) {
             lm.sendCommand('{"get":"cal"}');
         }
         
+        this.getqr = function() {
+            lm.sendCommand('{"get":"qr"}');
+        }
+        
+        this.saveqr = function(tmpl) {
+            // Simple escape of " in the template, just in case
+            tmpl = tmpl.replace('"', '\\"');
+            lm.sendCommand('{"set":{"qr":"' + tmpl + '"}}');
+        }
+        
         this.setcalibration = function(cal) {
             lm.sendCommand('{"set":{"cal":' + cal + '}}');
         }
