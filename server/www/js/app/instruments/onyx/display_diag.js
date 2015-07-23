@@ -196,7 +196,7 @@ define(function (require) {
             }
             if (data.qr != undefined) {
                 $('#qr_template', this.el).val(data.qr);
-                linkManager.getcalibration();
+                linkManager.driver.getcalibration();
             }
         }
     });
