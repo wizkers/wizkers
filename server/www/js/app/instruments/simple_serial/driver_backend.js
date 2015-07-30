@@ -120,6 +120,7 @@ define(function (require) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
             port = new serialConnection(ins.get('port'), portSettings());
+            port.open();
             port.on('data', format);
             port.on('status', status);
 

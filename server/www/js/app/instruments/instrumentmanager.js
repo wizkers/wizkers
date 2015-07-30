@@ -108,10 +108,28 @@ define(function(require) {
                           connectionsettings: 'app/views/instrument/usbhid' };
         }
         
+        /**
+         * Get a view that renders the instrument-specific port settings.
+         * @param {String}   instrument The instrument type (see supportedInstruments above)
+         * @param {Object}   arg        Argument for the view
+         * @param {Function} callback   Callback
+         */
         this.getConnectionSettingsFor =  function(instrument, arg, callback) {
             require([this.supportedInstruments[instrument].connectionsettings], function(view) {
                 callback(new view(arg));
             });
+        }
+        
+        /**
+         * Get the type of connection for a given instrument type. This is used by chromeSocket
+         * to understand what connection type to query for a port list.
+         * @param   {String} instrument Instrument type (see supportedInstruments above)
+         * @returns {String} Connection settings.
+         */
+        this.getConnectionTypeFor = function(instrument) {
+            if (this.supportedInstruments[instrument] == undefined)
+                return '';
+            return this.supportedInstruments[instrument].connectionsettings;
         }
         
         this.clear = function() {

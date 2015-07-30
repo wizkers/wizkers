@@ -94,8 +94,8 @@ define(function (require) {
                 socket.emit('portstatus', data);
             }
 
-            this.getPorts = function () {
-                socket.emit('ports', '');
+            this.getPorts = function (insType) {
+                socket.emit('ports', insType);
             }
 
             this.openInstrument = function (id) {

@@ -18,7 +18,7 @@
 
 /**
  * This chromeSocket file simulates the behaviour of socket.io API
- * in the case of a Chrome packaged application.
+ * in the case of a Chrome packaged application, or a Cordova app too.
  *
  * Essentially, it has the same role as "server.js" in the Node version
  *
@@ -216,9 +216,28 @@ define(function (require) {
                 driver.sendUniqueID();
         }
 
-        var getPorts = function () {
+        /**
+         * Ask for a list of ports. This depends on the instrument type.
+         * @param {String} insType Instrument type (serial, HID etc)
+         */
+        var getPorts = function (insType) {
             console.log('ports');
-            chrome.serial.getDevices(onGetDevices);
+            // I'm sure this could be a lot more elegant, but at least it avoids
+            // complicated patterns and it can in theory support various port types:
+            var ct = instrumentManager.getConnectionTypeFor(insType);
+            if (ct == 'app/views/instrument/serialport') {
+                switch (vizapp.type) {
+                        case 'chrome':
+                            chrome.serial.getDevices(onGetDevices);
+                            break;
+                        case 'cordova':
+                            self.trigger('ports', ["OTG Serial"]);
+                            break;
+                }
+            } else {
+                self.trigger('ports', [ "Not available"]);
+            }
+                
         }
 
         var setOutputs = function (insid) {
@@ -273,8 +292,7 @@ define(function (require) {
 
     }
 
-
-    // Add event management to our serial lib, from the Backbone.Events class:
+    // Add event management to our the Chrome socket, from the Backbone.Events class:
     _.extend(socketImpl.prototype, Backbone.Events);
     return new socketImpl;
 });

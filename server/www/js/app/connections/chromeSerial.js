@@ -45,8 +45,6 @@ define(function (require) {
 
         var parser = mySettings.parser;
 
-        openPort();
-
         ///////////
         // Public methods
         ///////////
@@ -117,20 +115,8 @@ define(function (require) {
             chrome.serial.getDevices(onGetDevices);
         }
 
-        ///////////
-        // Private methods and variables
-        ///////////
-
-
-        // Because Windows is fucked up, we need to keep
-        // a command queue
-        var cmd_queue = [],
-            queue_busy = false;
-
-        this.connectionId = -1;
-
-
-        function openPort() {
+        // Has to be called by the backend_driver to actually open the port.
+        this.open = function() {
             // We try to use the same API as the Node serialport API, so we need to
             // translate some of the arguments:
             var chromeSerialSettings = {
@@ -170,6 +156,18 @@ define(function (require) {
                 }
             });
         }
+
+        ///////////
+        // Private methods and variables
+        ///////////
+
+
+        // Because Windows is fucked up, we need to keep
+        // a command queue
+        var cmd_queue = [],
+            queue_busy = false;
+
+        this.connectionId = -1;
 
         function processCmdQueue() {
             if (queue_busy)

@@ -25,80 +25,89 @@
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
-define(function(require) {
-    
+define(function (require) {
+
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
         Backbone = require('backbone'),
-        utils   = require('app/utils'),
+        utils = require('app/utils'),
         template = require('js/tpl/InstrumentDetailsView.js');
-    
+
     require('bootstrap');
 
 
     return Backbone.View.extend({
-        
+
         id: "instrument-details",
 
         render: function () {
-            var self=this;
+            var self = this;
             console.log("Render instrument details");
-            linkManager.once('ports', function(portlist) {
-                $(this.el).html(template(_.extend(this.model.toJSON(), {instypes: instrumentManager.supportedInstruments,
-                                                                        ports: portlist})));
-                
+            var insType = this.model.get('type');
+            linkManager.once('ports', function (portlist) {
+                $(this.el).html(template(_.extend(this.model.toJSON(), {
+                    instypes: instrumentManager.supportedInstruments,
+                    ports: portlist
+                })));
+
                 if (vizapp.type == "chrome") {
                     $('.hide-chrome', this.el).hide();
                 }
-                
-                var insType = this.model.get('type');
+
 
                 // If the instrument type has got its own extra settings, then render those here:
                 var insSettingsView = instrumentManager.supportedInstruments[insType].settings;
-                if ( insSettingsView != null) {
-                    var settingsView = new insSettingsView({model: this.model});
-                    $('#metadata',this.el).html(settingsView.el);
+                if (insSettingsView != null) {
+                    var settingsView = new insSettingsView({
+                        model: this.model
+                    });
+                    $('#metadata', this.el).html(settingsView.el);
                     settingsView.render();
                 }
-                
+
                 // Last, load the port settings view: Wizkers now supports various kinds of connections, now
                 // only serial ports. This means that instruments plugins are in charge of telling Wizkers
                 // what sort of connection selector they want to use.
-                instrumentManager.getConnectionSettingsFor(insType, {model: this.model, ports: portlist}, function(view) {
-                    $('#portsettings',self.el).html(view.el);
+                instrumentManager.getConnectionSettingsFor(insType, {
+                    model: this.model,
+                    ports: portlist
+                }, function (view) {
+                    $('#portsettings', self.el).html(view.el);
                     view.render();
                 });
-                
+
             }, this);
-            linkManager.getPorts();
+            linkManager.getPorts(insType);
             return this;
         },
 
         events: {
-            "change"                    : "change",
-            "change #otherports"        : "selectPort",
-            "click .save"               : "beforeSave",
-            "click .delete"             : "deleteInstrument",
-            "click .export"             : "exportSettings",
-            "click #do-delete"          : "doDeleteInstrument",
-            "dragover #icon"            : "dragOver",
-            "dragleave #icon"           : "dragLeave",
-            "drop #icon"                : "dropHandler",
-            "dragover #restore-area"    : "dragOver",
-            "dragleave #restore-area"   : "dragLeave",
-            "drop #restore-area"        : "importSettings"
+            "change": "change",
+            "change #otherports": "selectPort",
+            "click .save": "beforeSave",
+            "click .delete": "deleteInstrument",
+            "click .export": "exportSettings",
+            "click #do-delete": "doDeleteInstrument",
+            "dragover #icon": "dragOver",
+            "dragleave #icon": "dragLeave",
+            "drop #icon": "dropHandler",
+            "dragover #restore-area": "dragOver",
+            "dragleave #restore-area": "dragLeave",
+            "drop #restore-area": "importSettings"
 
         },
 
-        selectPort: function(event) {
+        selectPort: function (event) {
             $('#port').val($('select#otherports').val());
-            this.model.set({port: event.target.value});
+            this.model.set({
+                port: event.target.value
+            });
         },
-        
-        exportSettings: function() {
-             var header = 'data:application/json; charset=utf-8,';
+
+        exportSettings: function () {
+            var header = 'data:application/json; charset=utf-8,';
             // Now encapsulate our metadata into a structure that
             // tells up what instrument type this is. In the future,
             // we might do version checking too, but it is not necessary at this stage
@@ -106,7 +115,7 @@ define(function(require) {
                 magic: 'Wizkers.io - backup version 1',
                 type: this.model.get('type'),
                 comment: this.model.get('comment'),
-                metadata: this.model.get('metadata')                
+                metadata: this.model.get('metadata')
             };
             var uri = encodeURI(header + JSON.stringify(xports));
             window.open(uri, this.model.get('type') + ".json");
@@ -120,7 +129,7 @@ define(function(require) {
             // Apply the change to the model
             var target = event.target;
             var change = {};
-                        
+
             // Another refinement since I was not able to find another way:
             // sometimes in templates we are coding objects with object.key. The
             // target.name will then by a string called "object.key": catch this
@@ -137,7 +146,7 @@ define(function(require) {
             } else {
                 change[target.name] = target.value;
             }
-            
+
             this.model.set(change);
 
             // Run validation rule (if any) on changed item
@@ -148,7 +157,7 @@ define(function(require) {
                 utils.removeValidationError(target.id);
             }
 
-                // If we changed the plugin type, we need to reset the view:
+            // If we changed the plugin type, we need to reset the view:
             if (target.name == "type") {
                 this.render();
             }
@@ -195,7 +204,9 @@ define(function(require) {
                     // Trick: if we notice no instrument is selected, then select this one.
                     var ins = instrumentManager.getInstrument();
                     if (ins == null) {
-                        settings.set({currentInstrument:model.id});
+                        settings.set({
+                            currentInstrument: model.id
+                        });
                         settings.save(); // will trigger an instrument change from the router
                     } else if (ins.id == model.id) {
                         // Force an instrument reload if we changed the settings
@@ -208,29 +219,31 @@ define(function(require) {
                 }
             });
         },
-        
-        deleteInstrument: function(event) {
+
+        deleteInstrument: function (event) {
             var self = this;
             if (this.model.id == undefined) {
                 // Will happen if we are on a new instrument that was not saved yet
                 // but where the user pressed delete
                 console.log("User wants to delete an instrument that was not created yet");
-                router.navigate('instruments', {trigger: true});
+                router.navigate('instruments', {
+                    trigger: true
+                });
                 return;
             }
 
             // We refuse to delete an instrument that contains logs
             var logs = this.model.logs;
-            
+
             logs.fetch({
-                success:function(res) {
+                success: function (res) {
                     if (res.length == 0) {
-                        $('#deleteConfirm',self.el).modal('show');
+                        $('#deleteConfirm', self.el).modal('show');
                     } else {
-                      utils.showAlert('Error', 'This instrument has logs associated to it. Delete them before deleting the instrument.'
-                                      , 'alert-danger');  
+                        utils.showAlert('Error', 'This instrument has logs associated to it. Delete them before deleting the instrument.', 'alert-danger');
                     }
-                }});
+                }
+            });
 
         },
 
@@ -244,21 +257,23 @@ define(function(require) {
             }
             this.model.destroy({
                 success: function () {
-                    $('#deleteConfirm',self.el).modal('hide');
-                    router.navigate('instruments', {trigger: true});
+                    $('#deleteConfirm', self.el).modal('hide');
+                    router.navigate('instruments', {
+                        trigger: true
+                    });
                 }
             });
             return false;
         },
 
 
-        dragOver: function(event) {
+        dragOver: function (event) {
             //console.log('Something gettting dragged in here');
-            $("#"+event.target.id).parent().parent().parent().addClass("hover");
+            $("#" + event.target.id).parent().parent().parent().addClass("hover");
             return false;
         },
 
-        dragLeave: function(event) {
+        dragLeave: function (event) {
             $("#" + event.target.id).parent().parent().parent().removeClass("hover");
             return false;
         },
@@ -277,10 +292,10 @@ define(function(require) {
                 try {
                     var settings = JSON.parse(reader.result);
                     if (settings.magic != "Wizkers.io - backup version 1")
-                        throw"Invalid backup version";
+                        throw "Invalid backup version";
                     self.model.set('metadata', settings.metadata);
                     self.model.set('comment', settings.comment);
-                    self.model.set('type',settings.type);
+                    self.model.set('type', settings.type);
                     self.render();
                 } catch (err) {
                     utils.showAlert('Error', 'Invalid settings file', 'alert-danger');
@@ -289,7 +304,7 @@ define(function(require) {
             reader.readAsText(this.settingsFile);
         },
 
-        
+
         dropHandler: function (event) {
             event.stopPropagation();
             event.preventDefault();

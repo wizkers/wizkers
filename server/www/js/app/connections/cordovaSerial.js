@@ -45,8 +45,6 @@ define(function (require) {
 
         var parser = mySettings.parser;
 
-        openPort();
-
         ///////////
         // Public methods
         ///////////
@@ -106,20 +104,8 @@ define(function (require) {
         this.getPorts = function () {
             self.trigger('ports', ["OTG Serial"]);
         }
-
-        ///////////
-        // Private methods and variables
-        ///////////
-
-        // We are implementing the same sort of command queue as on the
-        // Chrome implementation, just in case:
-        var cmd_queue = [],
-            queue_busy = false;
-
-        this.connectionId = -1;
-
-
-        function openPort() {
+        
+        this.open = function() {
             console.log("cordovaSerial: openPort");
             serial.requestPermission(
                 function (success) {
@@ -134,16 +120,32 @@ define(function (require) {
                             self.trigger('status', {
                                 openerror: true,
                                 reason: 'Port not found',
-                                description: 'Please check your instrument settings, we were not able to find the serial port you specified there.'
+                                description: 'Not able to find an OTG port on this phone/tablet.'
                             });
                         }
                     );
                 },
                 function (error) {
-                    alert("cordovaSerialLib: requestPermission error: " + error);
+                            self.trigger('status', {
+                                openerror: true,
+                                reason: 'Port not found or permission error',
+                                description: 'Not able to find an OTG port on this device - or you didn\'t accept to connect.'
+                            });
                 }
             );
         }
+
+
+        ///////////
+        // Private methods and variables
+        ///////////
+
+        // We are implementing the same sort of command queue as on the
+        // Chrome implementation, just in case:
+        var cmd_queue = [],
+            queue_busy = false;
+
+        this.connectionId = -1;
 
         function processCmdQueue() {
             if (queue_busy)

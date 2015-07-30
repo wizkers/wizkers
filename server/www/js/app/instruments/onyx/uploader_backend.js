@@ -118,6 +118,7 @@ define(function (require) {
             portPath = ins.get('port');
             // Send a command to reboot in bootloader mode and continue
             port = new serialConnection(portPath, portSettings());
+            port.open();
             port.on('data', format);
             port.on('status', status);
         };

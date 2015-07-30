@@ -149,6 +149,7 @@ define(function (require) {
                     // The right way would be to detect the port properly
                     setTimeout(function () {
                         port = new serialConnection(portPath, portSettings());
+                        port.open();
                         port.on('data', format);
                         port.on('status', status);
                     }, 800);

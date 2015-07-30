@@ -25,6 +25,7 @@
 define(function (require) {
 
     "use strict";
+    var Backbone = require('backbone');
 
     var ConnectionManager = function (s) {
 
@@ -37,7 +38,7 @@ define(function (require) {
         /////
         // Public methods
         /////
-
+        
         /**
          * Opens an instrument and sets up the instrument driver.
          * @param {String}   instrumentid The Instrument ID
@@ -109,7 +110,10 @@ define(function (require) {
         }
 
     }
-
+    
+    
+    // Add event management to our serial lib, from the Backbone.Events class:
+    _.extend(ConnectionManager.prototype, Backbone.Events);
     return ConnectionManager;
 
 });
