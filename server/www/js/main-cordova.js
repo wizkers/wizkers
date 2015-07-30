@@ -58,7 +58,9 @@ require.config({
      */
     map: {
         '*': {
-            'socketio': 'app/cordovaSerialLib',
+            'socketio': 'app/chromeSocket',
+            'connections_serial': 'app/connections/cordovaSerial',
+            'connections_hid': 'app/connections/usbhid',
             'serialport': 'app/lib/serialport',
         }
     },

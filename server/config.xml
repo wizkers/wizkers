@@ -1,5 +1,5 @@
-<?xml version='1.0' encoding='utf-8'?>
-<widget id="org.aerodynes.vizapp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<?xml version="1.0" encoding="UTF-8" ?>
+<widget id="org.aerodynes.vizapp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:gap= "http://phonegap.com/ns/1.0" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>VizApp</name>
     <description>
         A utility to interface with measurement devices and more.
@@ -9,4 +9,5 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <gap:plugin name="fr.drangies.cordova.serial" version="0.0.2" />
 </widget>
