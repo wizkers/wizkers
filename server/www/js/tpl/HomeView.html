@@ -1,15 +1,13 @@
 <!-- We are starting inside a "row" div -->
 <div class="col-md-9">
   <div class="row">
-      <div class="col-md-9" id="control-area">
-        <p>
-          <button role="button" disabled class="ctrl-connect btn btn-responsive  btn-warning"><span class="glyphicon glyphicon-off"></span>&nbsp;Connect to Instrument</button>
-          <button disabled role="button" class="ctrl-diag btn btn-responsive btn-enable-connected btn-info">Device setup</button>
-          <button  role="button" disabled class="ctrl-record btn btn-responsive btn-enable-connected btn-danger"><span class="glyphicon glyphicon-download"></span>&nbsp;Record session</button>
-         </p>
-      </div>
-      <div class="col-md-3">
+      <div class="col-xs-12" id="control-area">
+      <div class="pull-right">
         <button disabled role="button" id="outputstatus" class="btn btn-responsive btn-info">Output status</button>
+      </div>
+      <button role="button" disabled class="ctrl-connect btn btn-responsive  btn-warning"><span class="glyphicon glyphicon-off"></span>&nbsp;Connect to Instrument</button>
+      <button disabled role="button" class="ctrl-diag btn btn-responsive btn-enable-connected btn-info">Device setup</button>
+      <button  role="button" disabled class="ctrl-record btn btn-responsive btn-enable-connected btn-danger"><span class="glyphicon glyphicon-download"></span>&nbsp;Record session</button>
       </div>
   </div> <!-- row-fluid -->
 <div id="liveview" class="row">

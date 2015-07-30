@@ -101,6 +101,9 @@ a.plain:hover {
 /**
  * Responsive buttons: make buttons smaller on narrow screens
  */
+.btn-responsive {
+      margin-bottom: 4px;
+}
   
 /* Same as btn-sm */
 @media (min-width: 769px) and (max-width: 992px) {

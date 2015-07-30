@@ -52,9 +52,11 @@ define(function (require) {
                     ports: portlist
                 })));
 
-                if (vizapp.type == "chrome") {
+                if (vizapp.type == "chrome")
                     $('.hide-chrome', this.el).hide();
-                }
+                
+                if (vizapp.type == "cordova")
+                    $('.hide-cordova', this.el).hide();
 
 
                 // If the instrument type has got its own extra settings, then render those here:
