@@ -7,7 +7,8 @@
     <author email="ed@aerodynes.org" href="http://aerodynes.og">
         Edouard Lafargue
     </author>
-    <content src="index.html" />
+    <content src="cordova.html" />
     <access origin="*" />
     <gap:plugin name="fr.drangies.cordova.serial" version="0.0.2" />
+    <gap:plugin name="cordova-plugin-whitelist" version="1.0.0" source="npm" />
 </widget>
