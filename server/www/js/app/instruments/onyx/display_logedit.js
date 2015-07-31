@@ -30,15 +30,7 @@ define(function(require) {
         _        = require('underscore'),
         Backbone = require('backbone'),
         bootbox  = require('bootbox'),
-        tpl      = require('text!tpl/instruments/OnyxLogEditView.html'),
-        template = null;
-        
-        try {
-            template = _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/OnyxLogEditView.js');
-        }
+        template = require('js/tpl/instruments/OnyxLogEditView.js');
 
     return Backbone.View.extend({
 

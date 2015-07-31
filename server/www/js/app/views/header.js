@@ -23,7 +23,6 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        tpl     = require('text!tpl/HeaderView.html'),
         template = require('js/tpl/HeaderView.js');
 
     return Backbone.View.extend({

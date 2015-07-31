@@ -31,18 +31,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        tpl     = require('text!tpl/instruments/W433SettingsView.html'),
-        template = null;
-    
-        try {
-            template =  _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            console.log('W433Settings View: using compiled version (chrome app)');
-            template = require(['js/tpl/instruments/W433SettingsView.js'], function(){} , function(err) {
-                            console.log("Compiled JS preloading error callback.");
-                            });
-        }
+        template = require('js/tpl/instruments/W433SettingsView.js');
     
     return Backbone.View.extend({
             initialize:function () {

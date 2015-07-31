@@ -29,18 +29,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        tpl     = require('text!tpl/instruments/Fluke289DiagView.html'),
-        template = null;
-                
-        try {
-            template =  _.template(tpl);
-            console.log("Loaded direct template");
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            console.log("Trying compiled template");
-            template = require('js/tpl/instruments/Fluke289DiagView.js');
-        }
-
+        template = require('js/tpl/instruments/Fluke289DiagView.js');
 
     return Backbone.View.extend({
 

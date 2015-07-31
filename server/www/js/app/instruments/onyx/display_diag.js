@@ -30,15 +30,7 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        tpl = require('text!tpl/instruments/OnyxDiagView.html'),
-        template = null;
-
-    try {
-        template = _.template(tpl);
-    } catch (e) {
-        // Will happen if we are packaged in a Chrome app
         template = require('js/tpl/instruments/OnyxDiagView.js');
-    }
 
     return Backbone.View.extend({
 
@@ -98,8 +90,8 @@ define(function (require) {
                 break;
             }
         },
-        
-        saveqr: function() {
+
+        saveqr: function () {
             var tmpl = $('#qr_template').val();
             linkManager.driver.saveqr(tmpl);
         },
@@ -119,8 +111,8 @@ define(function (require) {
                 this.calchanged();
             }
         },
-        
-        savecal: function() {
+
+        savecal: function () {
             var cal = parseFloat($('#calfactor', this.el).val());
             linkManager.driver.setcalibration(cal);
             $('#cmdsavecal', this.el).removeClass('btn-danger').addClass('btn-success');

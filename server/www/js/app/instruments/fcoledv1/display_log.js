@@ -31,21 +31,7 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        tpl = require('text!tpl/instruments/FCOledLogView.html'),
-        template = null;
-
-    try {
-        template = _.template(tpl);
-        console.log("Loaded direct template");
-    } catch (e) {
-        // Will happen if we are packaged in a Chrome app
-        try {
-            console.log("Trying compiled template");
-            template = require('js/tpl/instruments/FCOledLogView.js');
-        } catch (e) {
-            console.log(e);
-        }
-    }
+        template = require('js/tpl/instruments/FCOledLogView.js');
 
     // Load the flot library & flot time plugin:
     require('flot');

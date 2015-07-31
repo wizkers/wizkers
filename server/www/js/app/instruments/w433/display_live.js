@@ -31,18 +31,9 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        tpl     = require('text!tpl/instruments/W433LiveView.html'),
         simpleplot = require('app/lib/flotplot'),
         roseplot = require('app/lib/flotwindrose'),
-        template = null;
-    
-        try {
-            template =  _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            console.log('W433Settings View: using compiled version (chrome app)');
-            template = require('js/tpl/instruments/W433LiveView.js');
-      }
+        template = require('js/tpl/instruments/W433LiveView.js');
 
     // Load the flot library & flot time plugin:
     require('flot');

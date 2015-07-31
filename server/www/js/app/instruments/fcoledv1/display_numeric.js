@@ -32,21 +32,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         utils    = require('app/utils'),
-        tpl     = require('text!tpl/instruments/FCOledNumView.html'),
-        template = null;
-                
-        try {
-            template =  _.template(tpl);
-            console.log("Loaded direct template");
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            try {
-                console.log("Trying compiled template");
-                template = require('js/tpl/instruments/FCOledNumView.js');
-            } catch (e) {
-            console.log(e);
-            }
-        }
+        template = require('js/tpl/instruments/FCOledNumView.js');
     
     return Backbone.View.extend({
 

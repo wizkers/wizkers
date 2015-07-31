@@ -29,15 +29,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        tpl     = require('text!tpl/instruments/W433NumView.html'),
-                template = null;
-    
-        try {
-            template =  _.template(tpl);
-        } catch (e) {
-            // Will happen if we are packaged in a Chrome app
-            template = require('js/tpl/instruments/W433NumView.js');
-        }
+        template = require('js/tpl/instruments/W433NumView.js');
 
     return Backbone.View.extend({
 
