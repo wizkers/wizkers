@@ -25,7 +25,7 @@
  */
 
 ({
-    
+
     optimize: 'uglify2',
 
     //If using UglifyJS2 for script optimization, these config options can be
@@ -42,8 +42,16 @@
             beautify: false
         },
         compress: {
-            drop_console: true,   // Remove all console.log calls from the build
-            sequences: false,
+            sequences: true,
+            dead_code: true,
+            conditionals: true,
+            booleans: true,
+            unused: true,
+            evaluate: true,
+            if_return: true,
+            join_vars: true,
+            drop_console: true, // Remove all console.log calls from the build
+            //sequences: false,
             global_defs: {
                 DEBUG: false
             }
@@ -52,18 +60,19 @@
         mangle: true
     },
 
-    mainConfigFile : "main-chrome.js",
+    preserveLicenseComments: false,
+    mainConfigFile: "main-chrome.js",
     appDir: '..',
     baseUrl: 'js',
-    dir: '../../chrome_build/',
-    
+    dir: '../../../chrome/www/',
+
     // Combine everytyhing into one single file
     removeCombined: true,
-    findNestedDependencies: true,    
-    
+    findNestedDependencies: true,
+
     modules: [
         {
             name: 'main-chrome'
         }
-    ]    
+    ]
 })

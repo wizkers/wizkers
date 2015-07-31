@@ -2,7 +2,9 @@ var gulp = require('gulp');
 var debug = require('gulp-debug');
 var tap = require('gulp-tap');
 var change = require('gulp-change');
-var rename = require("gulp-rename");
+var rename = require('gulp-rename');
+var amdOptimize = require('amd-optimize');
+var concat = require('gulp-concat');
 
 
 var fs = require('fs');
@@ -22,15 +24,17 @@ var paths = {
     build: 'build', // Where we compile the templates and build the javascript distribution
     chrome_dist: 'dist/chrome/', // Where we distribute the Chrome app (ready for packaging for Chrome app store)
     // All javascript is minified there.
-    chrome_debug: 'dist/chrome_debug/', // Debug build (not minified)
+    chrome_debug: 'dist/chrome-debug/', // Debug build (not minified)
     cordova_dist: 'dist/cordova/',
     server_dist: 'dist/server/',
 
     // Application paths: (needs to be in arrays)
     templates: ['www/js/tpl/*.html', 'www/js/tpl/**/*.html', 'www/js/tpl/**/**/**.html'],
-    css: ['www/css/*', 'www/fonts/*', 'www/img/*'],
+    css: ['www/css/*', 'www/fonts/*', 'www/img/*', 'www/img/**/*'],
     libs: ['www/js/lib/*.js', 'www/js/lib/**/*.js'],
-    jsapp: ['www/js/app/*.js', 'www/js/app/instruments/**/*.png', 'www/js/app/**/*.js', 'www/js/app/**/**/ *.js'],
+    jsapp: ['www/js/app/*.js', 'www/js/app/instruments/**/*.png', 
+            'www/js/app/outputs/**/*.png',
+            'www/js/app/**/*.js', 'www/js/app/**/**/ *.js'],
 
     // Files specific to each kind of run mode (chrome, cordova, server)
     server_files: ['server'],
@@ -115,14 +119,14 @@ gulp.task('build', ['templates', 'css', 'libs', 'jsapp']);
  */
 gulp.task('templates', function () {
     return gulp.src(paths.templates, {
-            base: 'www'
+            base: '.'
         })
         .pipe(change(compileTemplate))
         // .pipe(debug())
         .pipe(rename(function (path) {
             path.extname = '.js';
         }))
-        .pipe(gulp.dest(path.join(paths.build, 'www')))
+        .pipe(gulp.dest(path.join(paths.build)))
 });
 
 /**
@@ -130,9 +134,9 @@ gulp.task('templates', function () {
  */
 gulp.task('css', function () {
     return gulp.src(paths.css, {
-            base: 'www'
+            base: '.'
         })
-        .pipe(gulp.dest(path.join(paths.build, 'www')))
+        .pipe(gulp.dest(paths.build))
 });
 
 /**
@@ -140,15 +144,29 @@ gulp.task('css', function () {
  */
 gulp.task('libs', function () {
     return gulp.src(paths.libs, {
-            base: 'www'
+            base: '.'
         })
-        .pipe(gulp.dest(path.join(paths.build, 'www')))
+        .pipe(gulp.dest(paths.build))
 });
 
 gulp.task('jsapp', function () {
-    return gulp.src(paths.jsapp, { base: 'www'} )
-        .pipe(gulp.dest(path.join(paths.build, 'www')))
+    return gulp.src(paths.jsapp, {
+            base: '.'
+        })
+        .pipe(gulp.dest(paths.build))
 
+});
+
+gulp.task('jsopt', function () {
+    return gulp.src(paths.jsapp.map(function (arg) {
+            return paths.chrome_dist + arg;
+        }))
+        .pipe(amdOptimize('main-chrome', {
+                configFile: 'dist/chrome/www/js/main-chrome.js',
+                baseUrl: './dist/chrome/www/js'
+            }))
+        .pipe(concat('index.js'))
+        .pipe(gulp.dest(paths.build));
 });
 
 /**
@@ -160,7 +178,7 @@ gulp.task('chrome', ['build'], function () {
     // Add all the javascript files built in the previous step
     folders = folders.concat(getFolders([paths.build]));
 
-    return mapFolders(folders, paths.chrome_dist, '/*', 1);
+    return mapFolders(folders, paths.chrome_debug, '/*', 1);
 });
 
 
@@ -191,4 +209,3 @@ gulp.task('server', ['build'], function () {
     // the juggling in the dest, which basically removes the base directory from 'folder'
     return mapFolders(folders, paths.server_dist, '/*', 1);
 });
-

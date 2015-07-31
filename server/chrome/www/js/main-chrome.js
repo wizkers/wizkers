@@ -20,7 +20,7 @@
  * We now use require.js: these are the mappings of our application.
  *
  * This is the version of the require mappings that is used when compiling
- * for Cordova
+ * for Chrome
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -74,13 +74,6 @@ require.config({
     },
 
     shim: {
-        'backbone': {
-            deps: ['underscore', 'jquery'],
-            exports: 'Backbone'
-        },
-        'underscore': {
-            exports: '_'
-        },
         // Define Bootstrap's main JS, then all plugins which depend on it:
         'bootstrap': {
             deps: ['jquery']
