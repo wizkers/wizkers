@@ -17,13 +17,28 @@ gulp.task('default', function () {
 });
 
 
-var templatesPath = ['www/js/tpl'];
-
 var paths = {
-    templates: ['www/js/tpl/**/*.html'],
-    chrome_dist: 'dist/chrome/',
+    // Destination directories
+    build: 'build', // Where we compile the templates and build the javascript distribution
+    chrome_dist: 'dist/chrome/', // Where we distribute the Chrome app (ready for packaging for Chrome app store)
+    // All javascript is minified there.
+    chrome_debug: 'dist/chrome_debug/', // Debug build (not minified)
+    cordova_dist: 'dist/cordova/',
+    server_dist: 'dist/server/',
+
+    // Application paths: (needs to be in arrays)
+    templates: ['www/js/tpl/*.html', 'www/js/tpl/**/*.html', 'www/js/tpl/**/**/**.html'],
+    css: ['www/css/*', 'www/fonts/*', 'www/img/*'],
+    libs: ['www/js/lib/*.js', 'www/js/lib/**/*.js'],
+    jsapp: ['www/js/app/*.js', 'www/js/app/instruments/**/*.png', 'www/js/app/**/*.js', 'www/js/app/**/**/ *.js'],
+
+    // Files specific to each kind of run mode (chrome, cordova, server)
+    server_files: ['server'],
+    chrome_files: ['chrome'],
+    cordova_files: ['cordova']
 }
 
+console.log(paths.templates);
 /***************
  * Utilities
  */
@@ -38,6 +53,20 @@ var compileTemplate = function (contents) {
     } catch (e) {
         console.error('Could not compile a template for: ' + templates[templ] + " -- " + e.message);
     }
+}
+
+/**
+ * Returns an array of all the directories below dir (can be an array
+ * of muliple directories) with the 'glob' pattern added
+ * @param   {Array}  dir  List of directories
+ * @param   {String} glob Glob pattern like '/*.js'
+ * @returns {Array}  List of all subdirectories with glob pattern
+ */
+function makeSrc(dir, glob) {
+    var dirlist = getFolders(dir);
+    return dirlist.map(function (arg) {
+        return arg + glob;
+    });
 }
 
 /**
@@ -60,22 +89,93 @@ function getFolders(dir) {
     return resp.concat(dir);
 }
 
+/**
+ * Copy folder contents for an array of folders (omits 1st level of source file path)
+ * @param   {Array}    folders Folders to copy
+ * @param   {String}   dest    Destination location
+ * @param   {Number}   base    Where to truncate the destination path
+ */
+function mapFolders(folders, dest, pattern, base) {
+    return folders.map(function (folder) {
+        return gulp.src(path.join(folder, pattern))
+            .pipe(gulp.dest(path.join(dest, folder.split(path.sep).slice(base).join(path.sep))));
+    });
+}
+
+/*******************
+ *  Tasks
+ */
+
+
+gulp.task('build', ['templates', 'css', 'libs', 'jsapp']);
+
+
+/**
+ * Compile all templates and copy them to the various dist directories
+ */
 gulp.task('templates', function () {
-    gulp.src(paths.templates)
-        .pipe(debug());
+    return gulp.src(paths.templates, {
+            base: 'www'
+        })
+        .pipe(change(compileTemplate))
+        // .pipe(debug())
+        .pipe(rename(function (path) {
+            path.extname = '.js';
+        }))
+        .pipe(gulp.dest(path.join(paths.build, 'www')))
 });
 
-gulp.task('t', function () {
-    var folders = getFolders(templatesPath);
-    console.log(folders);
+/**
+ * Copy all CSS files - to all correct locations
+ */
+gulp.task('css', function () {
+    return gulp.src(paths.css, {
+            base: 'www'
+        })
+        .pipe(gulp.dest(path.join(paths.build, 'www')))
+});
 
-    var tasks = folders.map(function (folder) {
-        return gulp.src(path.join(folder, '/*.html'))
-            .pipe(change(compileTemplate))
-            .pipe(debug())
-            .pipe(rename(function(path) { path.extname = '.js'; }))
-            .pipe(gulp.dest(path.join(paths.chrome_dist, folder)));
-    });
+/**
+ * Same for the libraries
+ */
+gulp.task('libs', function () {
+    return gulp.src(paths.libs, {
+            base: 'www'
+        })
+        .pipe(gulp.dest(path.join(paths.build, 'www')))
+});
+
+gulp.task('jsapp', function () {
+    return gulp.src(paths.jsapp, { base: 'www'} )
+        .pipe(gulp.dest(path.join(paths.build, 'www')))
+
+});
+
+/**
+ * Build the Chrome app (debug, not minified)
+ */
+gulp.task('chrome', ['build'], function () {
+    var folders = getFolders(paths.chrome_files);
+
+    // Add all the javascript files built in the previous step
+    folders = folders.concat(getFolders([paths.build]));
+
+    // Note: we want to copy those to the base of the distribution directory, hence
+    // the juggling in the dest, which basically removes the base directory from 'folder'
+    var tasks = mapFolders(folders, paths.chrome_dist, '/*', 1);
+});
 
 
+/**
+ * Build the Cordova app
+ */
+gulp.task('cordova', ['build'], function () {
+    var folders = getFolders(paths.cordova_files);
+
+    // Add all the javascript files built in the previous step
+    folders = folders.concat(getFolders([paths.build]));
+
+    // Note: we want to copy those to the base of the distribution directory, hence
+    // the juggling in the dest, which basically removes the base directory from 'folder'
+    var tasks = mapFolders(folders, paths.cordova_dist, '/*', 1);
 });
