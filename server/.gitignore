@@ -1,4 +1,7 @@
 .DS_Store
 node_modules
 screenshot.*
-chrome_build
+dist
+build
+cordova/platforms
+cordova/plugins

@@ -15,7 +15,9 @@ var _s = require('underscore.string');
 
 
 gulp.task('default', function () {
-    // Do nothing
+    console.log("*******************");
+    console.log("Targets: build chrome cordova server");
+    console.log("*******************");
 });
 
 
@@ -28,7 +30,7 @@ var paths = {
     cordova_dist: 'dist/cordova/',
     server_dist: 'dist/server/',
 
-    // Application paths: (needs to be in arrays)
+    // Application paths: (need to be in arrays)
     templates: ['www/js/tpl/*.html', 'www/js/tpl/**/*.html', 'www/js/tpl/**/**/**.html'],
     css: ['www/css/*', 'www/fonts/*', 'www/img/*', 'www/img/**/*'],
     libs: ['www/js/lib/*.js', 'www/js/lib/**/*.js'],
@@ -126,17 +128,18 @@ gulp.task('templates', function () {
         .pipe(rename(function (path) {
             path.extname = '.js';
         }))
-        .pipe(gulp.dest(path.join(paths.build)))
+        .pipe(gulp.dest(path.join(paths.build)));
 });
 
 /**
- * Copy all CSS files - to all correct locations
+ * Copy all CSS files
+ * TODO: Minimize for distribution
  */
 gulp.task('css', function () {
     return gulp.src(paths.css, {
             base: '.'
         })
-        .pipe(gulp.dest(paths.build))
+        .pipe(gulp.dest(paths.build));
 });
 
 /**
@@ -146,26 +149,13 @@ gulp.task('libs', function () {
     return gulp.src(paths.libs, {
             base: '.'
         })
-        .pipe(gulp.dest(paths.build))
+        .pipe(gulp.dest(paths.build));
 });
 
 gulp.task('jsapp', function () {
     return gulp.src(paths.jsapp, {
             base: '.'
         })
-        .pipe(gulp.dest(paths.build))
-
-});
-
-gulp.task('jsopt', function () {
-    return gulp.src(paths.jsapp.map(function (arg) {
-            return paths.chrome_dist + arg;
-        }))
-        .pipe(amdOptimize('main-chrome', {
-                configFile: 'dist/chrome/www/js/main-chrome.js',
-                baseUrl: './dist/chrome/www/js'
-            }))
-        .pipe(concat('index.js'))
         .pipe(gulp.dest(paths.build));
 });
 
@@ -174,6 +164,10 @@ gulp.task('jsopt', function () {
  */
 gulp.task('chrome', ['build'], function () {
     var folders = getFolders(paths.chrome_files);
+
+    // First put all those files in the (minified) build
+    // directory
+    mapFolders(folders, paths.chrome_dist, '/*', 1);
 
     // Add all the javascript files built in the previous step
     folders = folders.concat(getFolders([paths.build]));
