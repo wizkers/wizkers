@@ -160,9 +160,7 @@ gulp.task('chrome', ['build'], function () {
     // Add all the javascript files built in the previous step
     folders = folders.concat(getFolders([paths.build]));
 
-    // Note: we want to copy those to the base of the distribution directory, hence
-    // the juggling in the dest, which basically removes the base directory from 'folder'
-    var tasks = mapFolders(folders, paths.chrome_dist, '/*', 1);
+    return mapFolders(folders, paths.chrome_dist, '/*', 1);
 });
 
 
@@ -177,5 +175,20 @@ gulp.task('cordova', ['build'], function () {
 
     // Note: we want to copy those to the base of the distribution directory, hence
     // the juggling in the dest, which basically removes the base directory from 'folder'
-    var tasks = mapFolders(folders, paths.cordova_dist, '/*', 1);
+    return mapFolders(folders, paths.cordova_dist, '/*', 1);
 });
+
+/**
+ * Build the Server app
+ */
+gulp.task('server', ['build'], function () {
+    var folders = getFolders(paths.server_files);
+
+    // Add all the javascript files built in the previous step
+    folders = folders.concat(getFolders([paths.build]));
+
+    // Note: we want to copy those to the base of the distribution directory, hence
+    // the juggling in the dest, which basically removes the base directory from 'folder'
+    return mapFolders(folders, paths.server_dist, '/*', 1);
+});
+
