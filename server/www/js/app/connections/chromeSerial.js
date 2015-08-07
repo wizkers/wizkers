@@ -228,24 +228,30 @@ define(function (require) {
         }
 
         // onError is called on Windows in some situations, when the serial device
-        // generates a "Break" signal. In that case, we wait for 200ms and we try
+        // generates a "Break" signal. In that case, we wait for 1 second and we try
         // to reconnect.
         // Note: we do a clean close/open, so the close/open propagates all the
         // way to the front-end.
         function onError(info) {
             console.log("[chromeSerial] We got an error from the driver: " + info.error);
+            self.trigger('status', {
+                    openerror: true,
+                    reason: 'Port error - driver triggered an error, trying to recover.',
+                    description: info.error
+            });
             switch (info.error) {
             case "system_error":
                 if (!self.portOpen)
                     break;
                 self.close();
-                setTimeout(openPort, 500);
+                setTimeout(self.open, 1000);
                 break;
             case "device_lost":
                 self.close();
                 break;
             }
         };
+        
 
         function onOpen(openInfo) {
             if (!openInfo) {

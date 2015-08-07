@@ -51,8 +51,8 @@ define(function (require) {
             port = null,
             port_close_requested = false,
             port_open_requested = false,
-            first_open_done = false,    // Windows generates a system error when we get
-                                        // into bootloader mode, so we need to detect it.
+            first_open_done = false, // Windows generates a system error when we get
+            // into bootloader mode, so we need to detect it.
             isopen = false;
 
 
@@ -136,8 +136,8 @@ define(function (require) {
         this.isOpen = function () {
             return isopen;
         }
-        
-        this.isOpenPending = function() {
+
+        this.isOpenPending = function () {
             return port_open_requested;
         }
 
@@ -269,7 +269,7 @@ define(function (require) {
                     break;
                 var s = inputBuffer[1];
                 bytesExpected = s + 4; // +4 because of ACK + final ACK + Length byte
-                                       // and length byte is 'number of payload bytes - 1'
+                // and length byte is 'number of payload bytes - 1'
                 current_state = States.RECEIVING;
                 //console.log('WAIT_SIZE', bytesExpected);
                 // break;  // Don't break, the byte may already be waiting for us
@@ -314,6 +314,17 @@ define(function (require) {
         var status = function (stat) {
             port_open_requested = false;
             console.log('Port status change', stat);
+            if (stat.openerror) {
+                // We issue with the port: warn through
+                // a 'data' messages
+                var resp = {
+                    status: 'ok'
+                };
+                if (stat.description == "system_error")
+                    resp.msg = "Windows specific - waiting for port recovery";
+                self.trigger('data', resp);
+                return;
+            }
             isopen = stat.portopen;
 
             if (isopen) {
@@ -336,14 +347,19 @@ define(function (require) {
             console.log('resetToBootloader');
             port.write('{"set":{"reset":"bootloader"}}\n');
             console.log('bootloader reset done');
-            // Wait 500ms then get into Bootloader mode and detect
+            self.trigger('data', {
+                status: 'ok',
+                msg: 'Waiting 3 seconds for device reboot to bootloader'
+            });
+
+            // Wait 3s then get into Bootloader mode and detect
             // the protocol
             var nxt = function () {
-                initBootloader(getBLVersion);
-            }
-            // Wait 2 seconds, because on Windows, the command above triggers
-            // a driver error, so we need time to close/reopen the port.
-            setTimeout(nxt, 2000);
+                    initBootloader(getBLVersion);
+                }
+                // Wait 3 seconds, because on Windows, the command above triggers
+                // a driver error, so we need time to close/reopen the port.
+            setTimeout(nxt, 5000);
         }
 
         /**
@@ -352,9 +368,9 @@ define(function (require) {
         var onOpen = function (success) {
             console.log("We have the board in uploader mode now");
             if (first_open_done)
-                return;  // We end up here on Windows, where the FTDI driver generates an error
-                         // after the Onyx reboots into bootloader, and requires closing/opending the
-                         // driver again. Pretty dumb, but hey, that's Windows for you.
+                return; // We end up here on Windows, where the FTDI driver generates an error
+            // after the Onyx reboots into bootloader, and requires closing/opending the
+            // driver again. Pretty dumb, but hey, that's Windows for you.
             first_open_done = true;
             resetToBootloader();
         };
