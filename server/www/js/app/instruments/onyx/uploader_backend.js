@@ -59,6 +59,7 @@ define(function (require) {
         var inputBuffer = new Uint8Array(1024); // Receive buffer
         var ibIdx = 0;
         var watchdog = null;
+        var blConnectionRetries = 0;
 
         // Since serial read/write is async, we keep track of our state globally.
         //
@@ -355,6 +356,7 @@ define(function (require) {
             // Wait 3s then get into Bootloader mode and detect
             // the protocol
             var nxt = function () {
+                    blConnectionRetries = 0;
                     initBootloader(getBLVersion);
                 }
                 // Wait 3 seconds, because on Windows, the command above triggers
@@ -435,9 +437,16 @@ define(function (require) {
             console.log('initBootloader');
             var d = new Uint8Array([STM32.INIT_BL]);
             write(d, States.WAIT_ACK, 500, function (res) {
-                if (res.data != STM32.ACK)
+                if (res.data != STM32.ACK) {
+                    self.trigger('data', {
+                        status: 'error',
+                        msg: 'Retrying bootloader connection'
+                    });
+                    if (blConnectionRetries++ < 5)
+                        initBootloader(cb);
                     return;
-                // the bootloader and move on to the next step:
+                }
+                // move on to the next step:
                 self.trigger('data', {
                     status: 'ok',
                     msg: 'established communication with the bootloader'
