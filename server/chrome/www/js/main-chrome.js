@@ -47,6 +47,10 @@ require.config({
         dsp: 'lib/dsp',
         chroma: 'lib/chroma',
         resampler: 'lib/resampler',
+        
+        // WebRTC adapter shim to abstract from
+        // navigator implementations
+        webrtc: 'lib/webrtc_adapter',
 
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',

@@ -1,0 +1,30 @@
+<p><strong>BAUD RATE:</strong>this plugin requires your KX3 to be set to a baud rate of 38400.
+</p>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 control-label">Audio input:</label>
+    <div class="col-md-9">
+        <select id="audio_input" name="audio_input" class="form-control">
+            <% for(var i=0; i < inputs.length; i++) { %>
+            <option
+                <%= audio_input == inputs[i].value ? 'selected':'' %>
+                value="<%= inputs[i].value %>"><%= inputs[i].label %></option>
+            <% } %>
+        </select>
+        <span class="help-inline"></span>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 control-label">Audio output:</label>
+    <div class="col-md-9">
+        <select id="audio_output" name="audio_output" class="form-control">
+            <% for(var i=0; i < outputs.length; i++) { %>
+            <option
+                <%= audio_output == outputs[i].value ? 'selected':'' %>
+                value="<%= outputs[i].value %>"><%= outputs[i].label %></option>
+            <% } %>
+        </select>
+        <span class="help-inline"></span>
+    </div>
+</div>

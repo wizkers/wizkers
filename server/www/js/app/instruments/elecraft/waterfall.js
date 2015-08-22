@@ -100,6 +100,8 @@ define(function(require) {
         
         
         initialize: function() {
+            
+            this.audioDevice = this.model.get('audio_input');
 
         },
 
@@ -257,7 +259,9 @@ define(function(require) {
                 // is totally distorted as Chrome now uses webaudio and webrtc in a more consistant
                 // manner, see https://code.google.com/p/chromium/issues/detail?id=397959
                 var audioConstraints = {
-                    audio: { optional: [{ echoCancellation: false }] }
+                    audio: { echoCancellation: false,
+                             deviceId: this.audioDevice
+                           }
                 };
                 
                 if (sourceNode == null) {
