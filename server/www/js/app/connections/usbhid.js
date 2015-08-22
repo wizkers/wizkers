@@ -29,7 +29,6 @@ define(function (require) {
     "use strict";
 
     var Backbone = require('backbone'),
-        Serialport = require('serialport'),
         abu = require('app/lib/abutils');
 
     /**

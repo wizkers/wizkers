@@ -65,6 +65,10 @@ define(function(require) {
     var Sigma25Instrument = require('app/instruments/sigma25/sigma25'),
         Sigma25SettingsView = require('app/instruments/sigma25/settings');
 
+    var BlueOnyxInstrument = require('app/instruments/blue_onyx/blue_onyx'),
+        BlueOnyxSettingsView = require('app/instruments/blue_onyx/settings');
+
+    
     var InstrumentManager = function() {
     
         // current_instrument is a Backbone Model instance
@@ -106,6 +110,9 @@ define(function(require) {
             this.supportedInstruments["sark110"] =
                 { name: "Sark110 Antenna Analyzer", type: Sark110Instrument, settings: Sark110SettingsView,
                           connectionsettings: 'app/views/instrument/usbhid' };
+            this.supportedInstruments["blue_onyx"] = 
+                { name: "Medcom Blue Onyx", type: BlueOnyxInstrument, settings: BlueOnyxSettingsView,
+                          connectionsettings: 'app/views/instrument/bluetooth' };
         }
         
         /**

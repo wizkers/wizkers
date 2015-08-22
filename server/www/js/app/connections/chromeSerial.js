@@ -156,6 +156,12 @@ define(function (require) {
                 }
             });
         }
+        
+        this.flush = function(cb) {
+            if (!self.portOpen)
+                return;
+            chrome.serial.flush(self.connectionId, cb);
+        }
 
         ///////////
         // Private methods and variables

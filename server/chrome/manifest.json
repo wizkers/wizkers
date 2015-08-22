@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Wizkers",
     "description": "A framework for Measurement instruments",
-    "version": "0.9.16.2",
+    "version": "0.9.17",
     "offline_enabled": true,
     "app": {
         "background": {
@@ -29,10 +29,12 @@
                     "vendorId": 1155,
                     "productId": 22352
                 }
-    ]
-  }
-
-  ],
+            ]
+        }
+    ],
+    "bluetooth": {
+        "low_energy": true
+    },
     "sockets": {
         "tcpServer": {
             "listen": ":4532"

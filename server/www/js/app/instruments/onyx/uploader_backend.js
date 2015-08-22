@@ -443,7 +443,9 @@ define(function (require) {
                         msg: 'Retrying bootloader connection'
                     });
                     if (blConnectionRetries++ < 5)
-                        initBootloader(cb);
+                        port.flush( function() {
+                            initBootloader(cb);
+                        });
                     return;
                 }
                 // move on to the next step:

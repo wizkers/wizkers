@@ -43,7 +43,7 @@ define(function (require) {
             driver = null,
             currentInstrumentid = null,
             currentLog = null,
-            openPending =false,
+            openPending = false,
             recording = false,
             uploader_mode = false; // Will be true when we have loaded the special uploader driver.
 
@@ -227,17 +227,58 @@ define(function (require) {
             var ct = instrumentManager.getConnectionTypeFor(insType);
             if (ct == 'app/views/instrument/serialport') {
                 switch (vizapp.type) {
-                        case 'chrome':
-                            chrome.serial.getDevices(onGetDevices);
-                            break;
-                        case 'cordova':
-                            self.trigger('ports', ["OTG Serial"]);
-                            break;
+                case 'chrome':
+                    chrome.serial.getDevices(onGetDevices);
+                    break;
+                case 'cordova':
+                    self.trigger('ports', ["OTG Serial"]);
+                    break;
+                }
+            } else if (ct == 'app/views/instrument/bluetooth') {
+                switch (vizapp.type) {
+                case 'chrome':
+                    discoverBluetooth();
+                    break;
                 }
             } else {
-                self.trigger('ports', [ "Not available"]);
+                self.trigger('ports', ["Not available"]);
             }
-                
+        }
+
+        var discoverBluetooth = function () {
+            var device_names = {};
+
+            var updateDeviceName = function (device) {
+                device_names[device.address] = device.name;
+                console.log('New BT Device', device);
+                self.trigger('ports', device_names);
+            };
+            var removeDeviceName = function (device) {
+                    delete device_names[device.address];
+                    self.trigger('ports', device_names);
+                }
+                // Add listeners to receive newly found devices and updates
+                // to the previously known devices.
+            chrome.bluetooth.onDeviceAdded.addListener(updateDeviceName);
+            chrome.bluetooth.onDeviceChanged.addListener(updateDeviceName);
+            chrome.bluetooth.onDeviceRemoved.addListener(removeDeviceName);
+
+            // With the listeners in place, get the list of devices found in
+            // previous discovery sessions, or any currently active ones,
+            // along with paired devices.
+            chrome.bluetooth.getDevices(function (devices) {
+                for (var i = 0; i < devices.length; i++) {
+                    updateDeviceName(devices[i]);
+                }
+            });
+
+            // Now begin the discovery process.
+            chrome.bluetooth.startDiscovery(function () {
+                // Stop discovery after 30 seconds.
+                setTimeout(function () {
+                    chrome.bluetooth.stopDiscovery(function () {});
+                }, 30000);
+            });
         }
 
         var setOutputs = function (insid) {

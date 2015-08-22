@@ -44,6 +44,8 @@ define(function (require) {
 
         render: function () {
             var self = this;
+            
+            this.connectionView = null;
             console.log("Render instrument details");
             var insType = this.model.get('type');
             linkManager.once('ports', function (portlist) {
@@ -78,6 +80,9 @@ define(function (require) {
                 }, function (view) {
                     $('#portsettings', self.el).html(view.el);
                     view.render();
+                    // Keep a reference to tell the view to close
+                    // when we close this view
+                    self.connectionView = view;
                 });
 
             }, this);
@@ -99,6 +104,13 @@ define(function (require) {
             "dragleave #restore-area": "dragLeave",
             "drop #restore-area": "importSettings"
 
+        },
+        
+        onClose: function() {
+            console.log("Instrument details view closing");
+            // Tell the port settings view we are closing
+            if (this.connectionView != null && this.connectionView.onClose != undefined)
+                this.connectionView.onClose();
         },
 
         selectPort: function (event) {
