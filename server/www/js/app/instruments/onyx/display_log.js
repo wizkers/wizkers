@@ -200,12 +200,17 @@ define(function (require) {
             var header = 'data:text/csv; charset=utf-8,';
             var csv = header + "Timestamp (UTC), ";
             for (var i = 0; i < this.deviceLogs.length; i++) {
-                var entries = this.deviceLogs.at(i).entries;
-                var type = this.deviceLogs.at(i).get('logtype');
+                var currentLog = this.deviceLogs.at(i); 
+                var entries = currentLog.entries;
+                var type = currentLog.get('logtype');
                 if (type == 'live') {
                     csv += "CPM, CPM30, USV, COUNT, Valid\n";
+                } else if (entries.at(0) && entries.at(0).get('data').min != undefined) {
+                    // We have new generation log type with min/max values
+                    csv += "cpm, cpm_min, cpm_max, counts, duration (s), is_cpm_30, time on device (ISO String)\n";
+                    type = "min_max";
                 } else {
-                    csv += "accel_x_start, accel_x_end, accel_y_start, accel_y_end, accel_z_start, accel_z_end, cpm, duration (min), time on device (ISO String)\n";
+                    csv += "accel_x_start, accel_x_end, accel_y_start, accel_y_end, accel_z_start, accel_z_end, cpm, duration (s), time on device (ISO String)\n";
                 }
                 for (var j = 0; j < entries.length; j++) {
                     var entry = entries.at(j);
@@ -231,6 +236,14 @@ define(function (require) {
                                 ',' + data.cpm.usv +
                                 ',' + data.cpm.count +
                                 ',' + data.cpm.valid;
+                        } else if (type == 'min_max') {
+                            csv += ',' + data.cpm +
+                                ',' + data.min +
+                                ',' + data.max +
+                                ',' + data.counts +
+                                ',' + data.duration +
+                                ',' + (data.type == 1) +
+                                ',' + data.time;
                         } else {
                             csv += ',' + data.accel_x_start +
                                 ',' + data.accel_x_end +
@@ -250,9 +263,6 @@ define(function (require) {
             window.open(uri);
         },
 
-
-        // We can only add the plot once the view has finished rendering and its el is
-        // attached to the DOM, so this function has to be called from the home view.
         addPlot: function () {
             var self = this;
 

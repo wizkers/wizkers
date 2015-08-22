@@ -97,6 +97,14 @@ define(function(require) {
             lm.sendCommand('{"set":{"qr":"' + tmpl + '"}}');
         }
         
+        this.get_screen_dim_delay = function() {
+            lm.sendCommand('{"get":"dim"}');
+        }
+        
+        this.save_screen_dim_delay = function(del) {
+            lm.sendCommand('{"set":{"dim":' + del + '}}');
+        }
+        
         this.setcalibration = function(cal) {
             lm.sendCommand('{"set":{"cal":' + cal + '}}');
         }
