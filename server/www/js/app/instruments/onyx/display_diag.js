@@ -49,6 +49,7 @@ define(function (require) {
             "click #calccal": "calccal",
             "click #cmdsavecal": "savecal",
             "click #qrsave": "saveqr",
+            "click #screen_dim_delay_save": "save_screen_dim_delay",
             "keypress input#manualcmd": "sendcmd",
             "click #nameset": "setdevtag",
             "keypress input#devname": "setdevtag",
@@ -94,6 +95,11 @@ define(function (require) {
         saveqr: function () {
             var tmpl = $('#qr_template').val();
             linkManager.driver.saveqr(tmpl);
+        },
+        
+        save_screen_dim_delay: function() {
+            var delay = $('#screen_dim_delay').val();
+            linkManager.driver.save_screen_dim_delay(delay);
         },
 
         calchanged: function () {
@@ -167,13 +173,6 @@ define(function (require) {
                 $('#version', this.el).html(data.version);
                 linkManager.driver.guid();
             }
-
-            if (data.cal != undefined) {
-                $('#calfactor', this.el).val(data.cal);
-                // Restart live streaming after we got all the readings (the Onyx serial
-                // port cannot take a lot of commands in its buffer...)
-                linkManager.startLiveStream();
-            }
             if (data.guid != undefined) {
                 $('#guid', this.el).html(data.guid);
                 linkManager.driver.devicetag();
@@ -190,6 +189,17 @@ define(function (require) {
                 $('#qr_template', this.el).val(data.qr);
                 linkManager.driver.getcalibration();
             }
+            if (data.cal != undefined) {
+                $('#calfactor', this.el).val(data.cal);
+                linkManager.driver.get_screen_dim_delay();
+            }
+            if (data.dim != undefined) {
+                $('#screen_dim_delay', this.el).val(data.dim);
+                // Restart live streaming after we got all the readings (the Onyx serial
+                // port cannot take a lot of commands in its buffer...)
+                linkManager.startLiveStream();
+            }
+
         }
     });
 });
