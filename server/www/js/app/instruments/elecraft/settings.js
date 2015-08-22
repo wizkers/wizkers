@@ -36,8 +36,7 @@ define(function (require) {
 
         initialize: function (options) {
             this.gotdevices = false;
-            console.log(options);
-            // To be checked:
+
             if (this.model.get('audio_input') == undefined) {
                 this.model.set('audio_input','n.a.');
             }
