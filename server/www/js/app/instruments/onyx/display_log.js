@@ -200,7 +200,7 @@ define(function (require) {
             var header = 'data:text/csv; charset=utf-8,';
             var csv = header + "Timestamp (UTC), ";
             for (var i = 0; i < this.deviceLogs.length; i++) {
-                var currentLog = this.deviceLogs.at(i); 
+                var currentLog = this.deviceLogs.at(i);
                 var entries = currentLog.entries;
                 var type = currentLog.get('logtype');
                 if (type == 'live') {
@@ -242,7 +242,7 @@ define(function (require) {
                                 ',' + data.max +
                                 ',' + data.counts +
                                 ',' + data.duration +
-                                ',' + (data.type == 1) +
+                                ',' + data.type +
                                 ',' + data.time;
                         } else {
                             csv += ',' + data.accel_x_start +
@@ -250,7 +250,7 @@ define(function (require) {
                                 ',' + data.accel_y_start +
                                 ',' + data.accel_y_end +
                                 ',' + data.accel_z_start +
-                                ',' + data.accel_z_end + 
+                                ',' + data.accel_z_end +
                                 ',' + data.cpm +
                                 ',' + data.duration +
                                 ',' + data.time;
@@ -336,6 +336,31 @@ define(function (require) {
                             value: cpm,
                             timestamp: stamp
                         });
+
+                        // If we have min/max values in the recording and we have a proper CPM reading
+                        // (not CPM30) then record those as well:
+                        if (entry.get('data').type == 'CPM') {
+                            this.plot.fastAppendPoint({
+                                value: entry.get('data').min,
+                                name: 'Minimum',
+                                timestamp: stamp,
+                                options: {
+                                    id: "min"
+                                }
+                            });
+                            this.plot.fastAppendPoint({
+                                value: entry.get('data').max,
+                                name: "Maximum",
+                                timestamp: stamp,
+                                options: {lines: {
+                                    show: true,
+                                    fill: true
+                                },
+                                fillBetween: "min"},
+                            });
+                        }
+
+
                     }
                     if (entry.get('data').cpm2 != undefined) {
                         var cpm2 = parseFloat(entry.get('data').cpm2.value);
