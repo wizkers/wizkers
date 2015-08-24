@@ -7,8 +7,8 @@
             <option>Refresh...</option>
             <% for (var port in ports) { %>
             <option
-                <%= port == ports[port] ? 'selected':'' %>
-                value="<%= ports[port] %>"><%= ports[port] %></option>
+                <%= port == ports[port].address ? 'selected':'' %>
+                value="<%= ports[port].address %>"><%= ports[port].name %></option>
             <% } %>
         </select>
 </div>

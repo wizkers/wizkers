@@ -17,7 +17,9 @@
  */
 
 /**
- * Bluetooth Low Energy connection. 
+ * Bluetooth Low Energy connection.
+ * 
+ * Note: only notifications are implemented for now.
  */
 define(function (require) {
 
@@ -28,8 +30,10 @@ define(function (require) {
 
     /**
      * Instanciates a BTLE connection
-     * @param {Object} path     Contain the UUID of the BTLE Device we want to hear about
-     * @param {Object} settings TbD
+     * @param {Object} path  Contains the address of the BTLE device we want to connect to.
+     * @param {Object} settings contains two values: service_uuid and characteristic_uuid
+     *                          Todo: also add a flag to return all services for discovery by
+     *                          front-end.
      */
     var chromeBTLE = function (path, settings) {
 
@@ -37,20 +41,21 @@ define(function (require) {
         // Initialization
         /////////
         var portOpen = false,
-            currentDevice = null,
+            currentService = null,
+            currentCharacteristics = null,
             self = this,
+            devAddress = path,
+            service_uuid = settings.service_uuid,
+            characteristic_uuid = settings.characteristic_uuid,
             connectionId = -1;
 
-        // Right now, we are just going to open the first available device that matches
-        // the VID/PID.
-        chrome.hid.getDevices(path, onDevicesEnumerated);
 
         ///////////
         // Public methods
         ///////////
 
         /**
-         * Send data to the serial port.
+         * Send data
          * cmd has to be either a String or an ArrayBuffer
          * @param {integer} reportId the reportId to use, or 0 if none
          * @param {ArrayBuffer} data The command, already formatted for sending.
@@ -58,58 +63,193 @@ define(function (require) {
         this.write = function (reportId, data, callback) {
             if (!portOpen)
                 return;
-            chrome.hid.send(connectionId, reportId, data, (callback) ? callback : function () {});
         };
 
         /**
-         * Receive data from the HID device
+         * Read data from the BTLE device
          */
         this.read = function () {
-            chrome.hid.receive(connectionId, function (reportId, data) {
-                self.trigger('data', data);
-            });
+            // self.trigger('data', data);
         }
 
-        this.close = function (port) {
-            console.log("[chromeHID] Close USB Peripheral");
+        this.subscribe = function (characteristic) {}
+
+        this.close = function () {
+            console.log("[chromeBTLE] Close BTLE connection");
             if (!portOpen)
                 return;
-            chrome.hid.disconnect(connectionId, function () {
-                portOpen = false;
+
+            // Disconnect and remove the various callbacks so that they can be garbage
+            // collected
+            chrome.bluetoothLowEnergy.disconnect(devAddress);
+            chrome.bluetoothLowEnergy.onServiceAdded.removeListener(onServiceAdded);
+            chrome.bluetoothLowEnergy.onCharacteristicValueChanged.removeListener(onCharacteristicValueChanged);
+
+            // Disable notifications from the currently selected characteristics
+            if (currentCharacteristics) {
+                chrome.bluetoothLowEnergy.stopCharacteristicNotifications(
+                    currentCharacteristics.instanceId);
+            }
+
+            portOpen = false;
+            this.trigger('status', {
+                portopen: portOpen
+            });
+        };
+
+        // Has to be called by the backend_driver to actually open the port.
+        // This just connects to the device
+        this.open = function () {
+            chrome.bluetoothLowEnergy.connect(devAddress, function () {
+                if (chrome.runtime.lastError) {
+                    self.trigger('status', {
+                        openerror: true,
+                        reason: 'Device connection error',
+                        description: chrome.runtime.lastError.message
+                    });
+                    // Do a disconnect to make sure we end up in a sane state:
+                    chrome.bluetoothLowEnergy.disconnect(devAddress);
+                    return;
+                }
+                portOpen = true;
                 self.trigger('status', {
                     portopen: portOpen
                 });
+
+                // Track GATT characteristic value changes. This event will be triggered
+                // after successful characteristic value reads and received notifications
+                // and indications.
+                chrome.bluetoothLowEnergy.onCharacteristicValueChanged.addListener(onCharacteristicValueChanged);
+
+                // Track services as they are added - sometimes the initial GetServices call
+                // does not immediately return the services, we we go on listening in the background
+                chrome.bluetoothLowEnergy.onServiceAdded.addListener(onServiceAdded);
+
+                // Track devices as they are removed.
+                chrome.bluetooth.onDeviceRemoved.addListener(onDeviceRemoved);
+
+                getServices();
+
             });
-        };
+        }
+
+        /////////////
+        // Private methods
+        /////////////
+
+        // Get all get services on the BTLE device and select the service
+        // matching the service_uuid we want:
+        var getServices = function () {
+            chrome.bluetoothLowEnergy.getServices(devAddress, function (services) {
+                if (chrome.runtime.lastError) {
+                    console.log(chrome.runtime.lastError.message);
+                    selectService(undefined);
+                    return;
+                }
+
+                var foundService = undefined;
+                services.forEach(function (service) {
+                    if (service.uuid == service_uuid) {
+                        foundService = service;
+                    }
+                });
+
+                selectService(foundService);
+            });
+        }
+
+        // Inspired by Google Bluetooth samples on Github
+        var selectService = function (service) {
+            if (currentService && (!service || currentService.deviceAddress !== service.deviceAddress)) {
+                chrome.bluetoothLowEnergy.disconnect(currentSerivce.deviceAddress);
+            }
+
+            currentService = service;
+            currentCharacteristics = null;
+
+            if (!service) {
+                console.log('No service selected.');
+                return;
+            }
+
+            console.log('GATT service selected: ' + service.instanceId);
+
+            // Get the characteristics of the selected service.
+            chrome.bluetoothLowEnergy.getCharacteristics(service.instanceId,
+                function (chrcs) {
+                    if (chrome.runtime.lastError) {
+                        console.log(chrome.runtime.lastError.message);
+                        return;
+                    }
+
+                    // Make sure that the same service is still selected.
+                    if (service.instanceId != currentService.instanceId) {
+                        return;
+                    }
+
+                    if (chrcs.length == 0) {
+                        console.log('Service has no characteristics: ' + service.instanceId);
+                        return;
+                    }
+
+                    chrcs.forEach(function (chrc) {
+                        if (chrc.uuid == characteristic_uuid) {
+                            console.log('Setting Characteristic: ' +
+                                chrc.instanceId);
+                            currentCharacteristics = chrc;
+                            //self.updateHeartRateMeasurementValue();
+                            // Enable notifications from the characteristic.
+                            chrome.bluetoothLowEnergy.startCharacteristicNotifications(
+                                chrc.instanceId,
+                                function () {
+                                    if (chrome.runtime.lastError) {
+                                        console.log(
+                                            'Failed to enable Heart Rate Measurement notifications: ' +
+                                            chrome.runtime.lastError.message);
+                                        return;
+                                    }
+
+                                    console.log('Characteristics notifications enabled!');
+                                });
+                            return;
+                        }
+                    });
+                });
+        }
 
         /////////////
         //   Callbacks
         /////////////
 
-        function onDevicesEnumerated(devices) {
-            if (devices.length != 1) {
-                // Tell our front-end what's happening
-                    self.trigger('status', {
-                        openerror: true,
-                        reason: 'Device not found',
-                        description: 'Please check that your device is connected to the USB port. This driver only supports one device at a time, so make sure you are not connecting several identical devices at the same time.'
-                    });
-                return;
+        // Auto close if the device disappears
+        function onDeviceRemoved(device) {
+            console.log('[ChromeBTLE] Bluetooth device removed: ' + device.address);
+            if (currentService && currentService.deviceAddress == device.address) {
+                self.close();
             }
-            currentDevice = devices[0];
-            chrome.hid.connect(currentDevice.deviceId, function (connectInfo) {
-                if (!connectInfo) {
-                    console.warn("Unable to connect to device.");
-                }
-                connectionId = connectInfo.connectionId;
-                portOpen = true;
-                self.trigger('status', {
-                    portopen: portOpen
-                });
-            });
         }
 
-        console.log("[chromeHID] Chrome HID Library loaded");
+        function onServiceAdded(service) {
+            // Ignore, if the service is not the one we want
+            if (service.uuid != service_uuid) {
+                return;
+            }
+
+            // If this came from the currently selected device and no service is
+            // currently selected, select this service.
+            if (service.deviceAddress == devAddress && !currentService) {
+                selectService(service);
+            }
+        }
+
+        // This is where we get notifications
+        function onCharacteristicValueChanged(chrc) {
+            console.log(chrc);
+            // Pass it on to the driver
+            self.trigger('data', chrc);
+        }
+
+        console.log("[chromeBTLE] Chrome BTLE Library loaded");
 
     };
 

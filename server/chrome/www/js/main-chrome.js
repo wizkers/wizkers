@@ -73,6 +73,7 @@ require.config({
             'socketio': 'app/chromeSocket',
             'connections_serial': 'app/connections/chromeSerial',
             'connections_hid': 'app/connections/usbhid',
+            'connections_btle': 'app/connections/btle',
             'serialport': 'app/lib/serialport',
         }
     },

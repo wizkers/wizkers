@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Wizkers",
     "description": "A framework for Measurement instruments",
-    "version": "0.9.17",
+    "version": "0.9.18",
     "offline_enabled": true,
     "app": {
         "background": {
@@ -33,6 +33,7 @@
         }
     ],
     "bluetooth": {
+        "uuids": ["180d"], 
         "low_energy": true
     },
     "sockets": {

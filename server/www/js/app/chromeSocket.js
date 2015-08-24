@@ -249,7 +249,10 @@ define(function (require) {
             var device_names = {};
 
             var updateDeviceName = function (device) {
-                device_names[device.address] = device.name;
+                device_names[device.address] = {
+                    name: device.name,
+                    address: device.address
+                };
                 console.log('New BT Device', device);
                 self.trigger('ports', device_names);
             };

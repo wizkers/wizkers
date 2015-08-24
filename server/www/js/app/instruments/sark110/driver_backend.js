@@ -28,7 +28,6 @@ define(function (require) {
     "use strict";
 
     var Backbone = require('backbone'),
-        Serialport = require('serialport'),
         abutils = require('app/lib/abutils'),
         hidConnection = require('connections_hid');
 
