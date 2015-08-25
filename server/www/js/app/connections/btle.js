@@ -18,7 +18,7 @@
 
 /**
  * Bluetooth Low Energy connection.
- * 
+ *
  * Note: only notifications are implemented for now.
  */
 define(function (require) {
@@ -41,6 +41,8 @@ define(function (require) {
         // Initialization
         /////////
         var portOpen = false,
+            deviceDisappeared = false, // becomes true if the device disappeared (we will try to
+            // reconnect if it comes back
             currentService = null,
             currentCharacteristics = null,
             self = this,
@@ -85,6 +87,10 @@ define(function (require) {
             chrome.bluetoothLowEnergy.onServiceAdded.removeListener(onServiceAdded);
             chrome.bluetoothLowEnergy.onCharacteristicValueChanged.removeListener(onCharacteristicValueChanged);
 
+            chrome.bluetooth.onDeviceAdded.removeListener(onDeviceAdded);
+            chrome.bluetooth.onDeviceRemoved.removeListener(onDeviceRemoved);
+
+
             // Disable notifications from the currently selected characteristics
             if (currentCharacteristics) {
                 chrome.bluetoothLowEnergy.stopCharacteristicNotifications(
@@ -125,9 +131,9 @@ define(function (require) {
                 // does not immediately return the services, we we go on listening in the background
                 chrome.bluetoothLowEnergy.onServiceAdded.addListener(onServiceAdded);
 
-                // Track devices as they are removed.
+                // Track devices as they are removed and added
                 chrome.bluetooth.onDeviceRemoved.addListener(onDeviceRemoved);
-
+                chrome.bluetooth.onDeviceAdded.addListener(onDeviceAdded);
                 getServices();
 
             });
@@ -225,7 +231,21 @@ define(function (require) {
         function onDeviceRemoved(device) {
             console.log('[ChromeBTLE] Bluetooth device removed: ' + device.address);
             if (currentService && currentService.deviceAddress == device.address) {
+                deviceDisappeared = true;
                 self.close();
+                // Re-add the listener for device added, otherwise we'll miss it coming
+                // back
+                chrome.bluetooth.onDeviceAdded.addListener(onDeviceAdded);
+
+            }
+        }
+
+        // Auto reopen if the device reappears
+        function onDeviceAdded(device) {
+            console.log('[ChromeBTLE] Bluetooth device removed: ' + device.address);
+            if (!currentService && devAddress == device.address) {
+                deviceDisappeared = false;
+                self.open();
             }
         }
 
