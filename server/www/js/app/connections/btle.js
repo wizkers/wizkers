@@ -85,6 +85,8 @@ define(function (require) {
             // collected
             chrome.bluetoothLowEnergy.disconnect(devAddress);
             chrome.bluetoothLowEnergy.onServiceAdded.removeListener(onServiceAdded);
+            chrome.bluetoothLowEnergy.onServiceRemoved.removeListener(onServiceRemoved);
+
             chrome.bluetoothLowEnergy.onCharacteristicValueChanged.removeListener(onCharacteristicValueChanged);
 
             chrome.bluetooth.onDeviceAdded.removeListener(onDeviceAdded);
@@ -134,6 +136,17 @@ define(function (require) {
                 // Track devices as they are removed and added
                 chrome.bluetooth.onDeviceRemoved.addListener(onDeviceRemoved);
                 chrome.bluetooth.onDeviceAdded.addListener(onDeviceAdded);
+
+                // This can happen either if the device is turned off, or it gets out
+                // of range.
+                chrome.bluetoothLowEnergy.onServiceRemoved.addListener(onServiceRemoved);
+
+                // Track GATT services as they change.
+                chrome.bluetoothLowEnergy.onServiceChanged.addListener(function (service) {
+                    console.log('[ChromeBTLE] Service changed', service);
+                });
+
+
                 getServices();
 
             });
@@ -166,9 +179,10 @@ define(function (require) {
 
         // Inspired by Google Bluetooth samples on Github
         var selectService = function (service) {
-            if (currentService && (!service || currentService.deviceAddress !== service.deviceAddress)) {
-                chrome.bluetoothLowEnergy.disconnect(currentSerivce.deviceAddress);
-            }
+            
+            //if (currentService && (!service || currentService.deviceAddress !== service.deviceAddress)) {
+            //    chrome.bluetoothLowEnergy.disconnect(currentService.deviceAddress);
+            //}
 
             currentService = service;
             currentCharacteristics = null;
@@ -248,8 +262,23 @@ define(function (require) {
                 self.open();
             }
         }
+        
+        // Follow up when service removed - this can happen when the device actually
+        // removes the service, or it gets out of range for a short while
+        function onServiceRemoved(service) {
+            console.log('[ChromeBTLE] Service removed', service);
+            if (service.uuid != service_uuid) {
+                return;
+            }
+            
+            // If this came from the currently selected service, then disconnect it.
+            if (service.deviceAddress == devAddress && currentService) {
+                selectService(undefined);
+            }
+        }
 
         function onServiceAdded(service) {
+            console.log('[ChromeBTLT] Service added', service);
             // Ignore, if the service is not the one we want
             if (service.uuid != service_uuid) {
                 return;

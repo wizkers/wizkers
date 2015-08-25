@@ -18,45 +18,40 @@
  */
 
 /**
- * A Safecast Blue Onyx instrument. Only works on Chrome apps on
- * Chromebooks, and eventually on Cordova too...
- *
+ * A FriedCirctuits OLED Backpack instrument
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
 define(function (require) {
     "use strict";
 
-    var driver_frontend = require('app/instruments/onyx/driver_frontend');
-    var uploader_frontend = require('app/instruments/onyx/uploader_frontend');
+    var driver_frontend = require('app/instruments/fcbtusbv1/driver_frontend');
 
     return function () {
 
-        // Helper function: get driver capabilites for display.
+        // Helper function: get driver capabilites.
         // returns a simple array of capabilities    
         this.getCaps = function () {
-            return ["LiveDisplay", "NumDisplay", "LogView",
-                    "LogManagementView"
-                   ];
+            return ["LiveDisplay", "NumDisplay", "LogView"];
         };
 
         // Return the type of data reading that this instrument generates. Can be used
         // by output plugins to accept data from this instrument or not.
         this.getDataType = function () {
-            return ["radioactivity"];
+            return ["voltage", "current", "power", "energy"];
         }
 
         // This has to be a backbone view
         this.getSettings = function (arg, callback) {
-            require(['app/instruments/onyx/settings'], function (view) {
+            require(['app/instruments/fcbtusbv1/settings'], function (view) {
                 callback(new view(arg));
             });
         };
 
         // This has to be a Backbone view
-        // This is the full screen live view graph (not a small widget)
+        // This is the full screen live view (not a small widget)
         this.getLiveDisplay = function (arg, callback) {
-            require(['app/instruments/onyx/display_live'], function (view) {
+            require(['app/instruments/fcoledv1/display_live'], function (view) {
                 callback(new view(arg));
             });
         };
@@ -64,9 +59,14 @@ define(function (require) {
         // This is a Backbone view
         // This is a numeric display
         this.getNumDisplay = function (arg, callback) {
-            require(['app/instruments/onyx/display_numeric'], function (view) {
+            require(['app/instruments/fcoledv1/display_numeric'], function (view) {
                 callback(new view(arg));
             });
+        };
+
+        // A diagnostics/device setup screen
+        this.getDiagDisplay = function (arg, callback) {
+            return null;
         };
 
         // A smaller widget (just a graph)
@@ -74,50 +74,35 @@ define(function (require) {
             return null;
         };
 
-        // A diagnostics/device setup screen
-        this.getDiagDisplay = function (arg, callback) {
-            require(['app/instruments/onyx/display_diag'], function (view) {
-                callback(new view(arg));
-            });
-        };
-
-        // This has to be a link manager
+        // The instrument driver (browser-side)
         this.getDriver = function () {
             return new driver_frontend();
         };
 
         // This is a browser implementation of the backend driver, when we
-        // run the app fully in-browser or as a Cordova native app.
+        // run the app fully in-browser on as a Cordova native app.
         this.getBackendDriver = function (arg, callback) {
-            require(['app/instruments/blue_onyx/driver_backend'], function (driver) {
+            require(['app/instruments/fcbtusbv1/driver_backend'], function (driver) {
                 callback(new driver(arg));
             });
         };
 
         // Return a Backbone view which is a mini graph
-        this.getMiniLogview = function (arg, callback) {
+        this.getMiniLogview = function (arg) {
             return null;
         };
 
         // Return a device log management view
-        this.getLogManagementView = function (arg, callback) {
-            require(['app/instruments/onyx/display_logmanager'], function (view) {
-                callback(new view(arg));
-            });
+        this.getLogManagementView = function (arg) {
+            return null;
         }
 
         // Render a log (or list of logs) for the device.
         this.getLogView = function (arg, callback) {
-            require(['app/instruments/onyx/display_log'], function (view) {
+            require(['app/instruments/fcoledv1/display_log'], function (view) {
                 callback(new view(arg));
             });
         }
 
-        // Render a log edit table for a log collection for the device
-        this.getLogEditView = function (arg, callback) {
-            require(['app/instruments/onyx/display_logedit'], function (view) {
-                callback(new view(arg));
-            });
-        }
     };
 });

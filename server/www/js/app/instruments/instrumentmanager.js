@@ -68,6 +68,9 @@ define(function(require) {
     var BlueOnyxInstrument = require('app/instruments/blue_onyx/blue_onyx'),
         BlueOnyxSettingsView = require('app/instruments/blue_onyx/settings');
 
+    var FCBTInstrument = require('app/instruments/fcbtusbv1/fcbtusbv1'),
+        FCBTSettingsView = require('app/instruments/fcbtusbv1/settings');
+
     
     var InstrumentManager = function() {
     
@@ -112,6 +115,9 @@ define(function(require) {
                           connectionsettings: 'app/views/instrument/usbhid' };
             this.supportedInstruments["blue_onyx"] = 
                 { name: "Medcom Blue Onyx", type: BlueOnyxInstrument, settings: BlueOnyxSettingsView,
+                          connectionsettings: 'app/views/instrument/bluetooth' };
+            this.supportedInstruments["fcbtusbv1"] = 
+                { name: "Fried Circuits Bluetooth backpack", type: FCBTInstrument, settings: FCBTSettingsView,
                           connectionsettings: 'app/views/instrument/bluetooth' };
         }
         

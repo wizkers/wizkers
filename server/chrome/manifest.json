@@ -33,7 +33,7 @@
         }
     ],
     "bluetooth": {
-        "uuids": ["180d"], 
+        "uuids": ["180d", "ffe0"], 
         "low_energy": true
     },
     "sockets": {
