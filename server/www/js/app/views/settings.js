@@ -60,6 +60,7 @@ define(function (require) {
         initialize: function () {},
 
         render: function () {
+            
             $(this.el).html(template(this.model.toJSON()));
 
             // Depending on the runmode, we can display additional info
@@ -73,6 +74,9 @@ define(function (require) {
                 if (instrumentManager.getCaps().indexOf("Upgrader") > -1) {
                     $('#device_upgrade', this.el).show();
                 }
+                
+                $('#statistics_enable',this.el).show();
+                                
             }
 
             return this;
@@ -96,6 +100,9 @@ define(function (require) {
             this.model.set(change);
             this.model.save();
             this.render();
+            
+            if (target.name == 'enablestats')
+                stats.setTrackingEnabled(target.checked);
 
         },
 
