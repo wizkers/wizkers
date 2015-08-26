@@ -44,6 +44,7 @@ define(function (require) {
         var tracking_id = 'UA-XXXXX-XX',
             service = undefined,
             config = undefined,
+            instrumenttype = '',
             tracker = undefined;
 
         // Define a wrapper for most GA functions, so that we
@@ -79,6 +80,17 @@ define(function (require) {
         this.getService = function() {
             return service;
         }
+        
+        // Custom events related to actions on instruments (not
+        // app-level actions)
+        this.instrumentEvent = function(action, label) {
+            if (!tracker)
+                return;
+            // category / action / label
+            tracker.sendEvent('Instrument', action, label);
+        }
+        
+        
         
         this.setInstrumentType = function (instype) {
             if (tracker) {

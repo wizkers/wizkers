@@ -99,10 +99,12 @@ define(function (require) {
             }
 
             this.openInstrument = function (id) {
+                stats.instrumentEvent('openinstrument', '');
                 socket.emit('openinstrument', id);
             }
 
             this.openBootloader = function (id) {
+                stats.instrumentEvent('openbootloader', '');
                 socket.emit('openbootloader', id);
             }
             
@@ -120,6 +122,7 @@ define(function (require) {
                     id = instrumentManager.getInstrument().id;
                 // Note: this will also close recording and streaming
                 // on the backend.
+                stats.instrumentEvent('closeinstrument', '');
                 socket.emit('closeinstrument', id);
             }
 
@@ -147,10 +150,12 @@ define(function (require) {
 
             // id is the Log session ID we are recording into.
             this.startRecording = function (id) {
+                stats.instrumentEvent('startrecording','');
                 socket.emit('startrecording', id);
             }
 
             this.stopRecording = function () {
+                stats.instrumentEvent('stoprecording','');
                 socket.emit('stoprecording');
             }
 
