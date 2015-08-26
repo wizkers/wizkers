@@ -52,6 +52,7 @@ define(function(require) {
             currentInstrument: null,
             token: null,
             showstream: false,
+            enablestats: true,
         }
     });    
     

@@ -48,6 +48,10 @@ require.config({
         chroma: 'lib/chroma',
         resampler: 'lib/resampler',
         
+        // Analytics wrapper:
+        ga_bundle: 'lib/google-analytics-bundle',
+        stats: 'app/analytics',
+        
         // WebRTC adapter shim to abstract from
         // navigator implementations
         webrtc: 'lib/webrtc_adapter',
@@ -134,8 +138,13 @@ var vizapp = {
 var router;
 
 require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager',
-         'app/outputs/outputmanager', 'app/models/instrument', 'chromestorage'], function ($, Backbone, Router, Settings, InstrumentManager,
-    LinkManager, OutputManager, Instrument) {
+         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'chromestorage'], function ($, Backbone, Router, Settings, InstrumentManager,
+    LinkManager, OutputManager, Instrument, Analytics) {
+    
+    // Initialize our Analytics object to get stats on app usage
+    stats = new Analytics();
+    stats.init('UA-66729721-1');
+    
     // Get our settings here, and
     // share them afterwards, rather than requesting it
     // everytime...
