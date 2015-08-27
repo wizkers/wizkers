@@ -36,19 +36,32 @@ define(function (require) {
 
         },
 
+        events: {
+            "click #refresh": "refresh"
+        },
+
         onClose: function () {
             console.log("Bluetooth connexion settings closing");
             linkManager.off('ports', this.refreshDevices);
         },
 
         render: function () {
-            $(this.el).html(template(_.extend(this.model.toJSON(), {ports: this.ports})));
+            $(this.el).html(template(_.extend(this.model.toJSON(), {
+                ports: this.ports
+            })));
             return this;
         },
 
         refreshDevices: function (devices) {
-            console.log('BT Connection', devices);
+            this.ports = devices;
+            this.render;
+        },
 
+        refresh: function () {
+            // Catch a "Refresh" value here which indicates we should
+            // just ask for a list of ports again:
+            var insType = this.model.get('type');
+            linkManager.getPorts(insType);
         }
 
     });

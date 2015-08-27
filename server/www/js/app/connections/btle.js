@@ -27,6 +27,10 @@ define(function (require) {
 
     var Backbone = require('backbone'),
         abu = require('app/lib/abutils');
+    
+    
+    // TODO: accept a list of service UUIDs and a list of Characteristic UUIDs
+    //       rather than a single value.
 
     /**
      * Instanciates a BTLE connection

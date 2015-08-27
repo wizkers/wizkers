@@ -21,25 +21,52 @@
  * @author Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
  */
-define(function(require) {
+define(function (require) {
     "use strict";
-    
-    var $        = require('jquery'),
-        _       = require('underscore'),
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
         Backbone = require('backbone'),
         template = require('tpl/connections/serialport');
 
     return Backbone.View.extend({
-        
-        initialize: function(options) {
+
+        initialize: function (options) {
             console.log(options);
             this.ports = options.ports;
+            linkManager.on('ports', this.refreshDevices);
+
         },
 
-        render:function () {
-            $(this.el).html(template(_.extend(this.model.toJSON(), {ports: this.ports})));
+        events: {
+            "click #refresh": "refresh"
+        },
+
+        onClose: function () {
+            console.log("Serial connexion settings closing");
+            linkManager.off('ports', this.refreshDevices);
+        },
+
+
+        render: function () {
+            $(this.el).html(template(_.extend(this.model.toJSON(), {
+                ports: this.ports
+            })));
             return this;
+        },
+
+        refreshDevices: function (devices) {
+            this.ports = devices;
+            this.render;
+        },
+
+        refresh: function () {
+            // Catch a "Refresh" value here which indicates we should
+            // just ask for a list of ports again:
+            var insType = this.model.get('type');
+            linkManager.getPorts(insType);
         }
+
 
     });
 });
