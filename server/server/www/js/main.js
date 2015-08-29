@@ -23,12 +23,12 @@
  */
 
 require.config({
-    
+
     baseUrl: 'js',
 
     // On the Beaglebone, some calls take forever
     waitSeconds: 0,
-    
+
     paths: {
         app: 'app',
         tpl: 'tpl',
@@ -41,13 +41,21 @@ require.config({
 
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',
-	    text: 'lib/text',
-        
+        text: 'lib/text',
+
         // Signal processing libs
         dsp: 'lib/dsp',
         chroma: 'lib/chroma',
         resampler: 'lib/resampler',
-        
+
+        // Analytics wrapper:
+        ga_bundle: 'lib/google-analytics-bundle',
+        stats: 'app/analytics',
+
+        // WebRTC adapter shim to abstract from
+        // navigator implementations
+        webrtc: 'lib/webrtc_adapter',
+
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
         bootstrapeditable: 'lib/bootstrap-editable',
@@ -60,7 +68,7 @@ require.config({
         flot_windrose: 'lib/jquery.flot.windrose',
         flot_jumlib: 'lib/jquery.flot.JUMlib',
     },
-    
+
     /*
      * Mappings to be able to switch our models (in-mem, browser, backend, etc)
      */
@@ -69,15 +77,15 @@ require.config({
             'socketio': '/socket.io/socket.io.js'
         }
     },
-    
+
     shim: {
         'backbone': {
-            deps: ['underscore', 'jquery' ],
+            deps: ['underscore', 'jquery'],
             exports: 'Backbone'
         },
         'underscore': {
             exports: '_'
-        },        
+        },
         // Define Bootstrap's main JS, then all plugins which depend on it:
         'bootstrap': {
             deps: ['jquery']
@@ -91,10 +99,10 @@ require.config({
         'utils': {
             exports: 'utils'
         },
-        
+
         // The Flot library, along with our dependencies:
         'flot': {
-            deps: ['jquery' ],
+            deps: ['jquery'],
             exports: '$.plot'
         },
         'flot_time': {
@@ -112,7 +120,7 @@ require.config({
         'flot_jumlib': {
             deps: ['jquery', 'flot'],
             exports: '$.plot.JUMlib'
-        },        
+        },
         'flot_windrose': {
             deps: ['flot', 'flot_jumlib']
         }
@@ -122,7 +130,7 @@ require.config({
 // We are going to manage a single global variable for VizApp that contains the few things that have to
 // be defined application-wise:
 var vizapp = {
-    
+
     // type is a helper to avoid code duplication depending on the
     // run mode of the application. Can be:
     //   - server : use a remote server for device connection & database
@@ -133,46 +141,52 @@ var vizapp = {
 
 var router;
 
-require(['jquery', 'backbone', 'app/router', 'app/models/settings','app/instruments/instrumentmanager', 'app/linkmanager',
-         'app/outputs/outputmanager', 'app/models/instrument'], function($, Backbone, Router, Settings, InstrumentManager, LinkManager,
-                                                                  OutputManager, Instrument) {
-        // Get our settings here, and
-        // share them afterwards, rather than requesting them
-        // everytime...
-        settings = new Settings({id: 1 });
+require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager',
+         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
 
-        // Create our instrument manager: in charge of creating/deleting
-        // instruments as necessary, as well as providing a list of
-        // instruments to other parts who need those
-        instrumentManager = new InstrumentManager();
-             
-        // Create our output manager: in charge of connecting instrument outputs
-        // to third party data consumers.
-        outputManager = new OutputManager();
 
-        settings.fetch({success: function() {
-            
+    // Initialize our Analytics object to get stats on app usage
+    stats = new Analytics();
+    //stats.init('');
+
+    // Get our settings here, and
+    // share them afterwards, rather than requesting them
+    // everytime...
+    settings = new Settings({
+        id: 1
+    });
+
+    // Create our instrument manager: in charge of creating/deleting
+    // instruments as necessary, as well as providing a list of
+    // instruments to other parts who need those
+    instrumentManager = new InstrumentManager();
+
+    // Create our output manager: in charge of connecting instrument outputs
+    // to third party data consumers.
+    outputManager = new OutputManager();
+
+    settings.fetch({
+        success: function () {
+
             // Create our link manager: it is in charge of talking
             // to the server-side controller interface through a socket.io
             // web socket. It is passed to all views that need it.
-            linkManager =  new LinkManager();
+            linkManager = new LinkManager();
 
             var insId = settings.get('currentInstrument');
             if (insId != null) {
-                    router = new Router();
-                    router.switchinstrument(insId, false); // second argument prevents router from closing instrument
-                    Backbone.history.start();
+                router = new Router();
+                router.switchinstrument(insId, false); // second argument prevents router from closing instrument
+                Backbone.history.start();
             } else {
-           router = new Router();
-           Backbone.history.start();
-	       }
+                router = new Router();
+                Backbone.history.start();
+            }
         },
-		error: function() {
-		// Probably first run: settings don't exist on the backend
-		router = new Router();
-		Backbone.history.start();
-	}
-                       });
+        error: function () {
+            // Probably first run: settings don't exist on the backend
+            router = new Router();
+            Backbone.history.start();
+        }
+    });
 });
-
-
