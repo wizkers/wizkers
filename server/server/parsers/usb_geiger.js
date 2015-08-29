@@ -132,10 +132,8 @@ var USBGeiger = function () {
                 jsresp.RAM = resp[5];
                 jsresp.WIN1 = resp[7];
                 jsresp.WIN2 = resp[9];
-            } else if (resp.length > 1) {
-                jsresp[resp[0]] = resp.slice(1);
             } else {
-                jsresp.raw = data;
+                return; // We didn't understand the data coming in...
             }
             // Send the response to the front-end
             // Why 'self' below ?
