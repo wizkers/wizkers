@@ -234,17 +234,9 @@ define(function (require) {
                 filterNode.connect(context.destination);
                 $("#wf-audiomonitor").removeClass('btn-default').addClass('btn-success');
             } else {
-                if (this.audioDevice == 'webrtc') {
-                    // Hang up
-                    if (this.webRTCPeer) {
-                        this.webRTCPeer.destroy();
-                    }
-                } else {
-                    filterNode.disconnect();
-                    filterNode.connect(resamplerNode);
-                }
+                filterNode.disconnect();
+                filterNode.connect(resamplerNode);
                 $("#wf-audiomonitor").removeClass('btn-success').addClass('btn-default');
-
             }
             monitoring = !monitoring;
         },
@@ -253,7 +245,7 @@ define(function (require) {
             var self = this;
 
             if (running) {
-                // Stop:   
+                // Stop:
                 sourceNode.disconnect();
                 filterNode.disconnect();
                 resamplerNode.disconnect();
@@ -262,8 +254,13 @@ define(function (require) {
                 monitoring = false;
                 $("#wf-start").removeClass('btn-success').addClass('btn-default');
                 $("#wf-audiomonitor").removeClass('btn-success').addClass('btn-default');
+                if (this.audioDevice == 'webrtc') {
+                    // Hang up
+                    if (this.webRTCPeer) {
+                        this.webRTCPeer.destroy();
+                    }
+                }
             } else {
-
                 if (this.audioDevice == 'webrtc') {
                     // Our audio is coming in from a WebRTC stream: we have all the
                     // peer info in our settings, we just need to initiate the call
@@ -284,7 +281,6 @@ define(function (require) {
                             deviceId: this.model.get('op_audio_input')
                         }
                     };
-                    context = new AudioContext();
 
                     navigator.getUserMedia(audioConstraints,
                         function success(audioStream) {
@@ -301,8 +297,19 @@ define(function (require) {
                                 var audio = $('<audio id="aud" controls autoplay></audio>').appendTo('#wf-display');
                                 audio[0].src = (URL || webkitURL || mozURL).createObjectURL(stream);
                                 // Let's see if this starts working one day:
-                                sourceNode = context.createMediaStreamSource(stream);
-                                self.initResampler();
+                                if (context) {
+                                    context.close().then(function () {
+                                        context = new AudioContext();
+                                        sourceNode = context.createMediaStreamSource(stream);
+                                        self.initResampler();
+                                    }).catch(function (err) {
+                                        console.log(err);
+                                    });
+                                } else {
+                                    context = new AudioContext();
+                                    sourceNode = context.createMediaStreamSource(stream);
+                                    self.initResampler();
+                                }
                             });
                         },
                         function error(err) {
@@ -321,15 +328,24 @@ define(function (require) {
 
                     if (sourceNode == null) {
                         try {
-                            context = new AudioContext();
-                            navigator.getUserMedia(audioConstraints, function (stream) {
-                                fft = new FFT(2048, sampleRate);
-                                // Create an AudioNode from the stream (live input)
-                                sourceNode = context.createMediaStreamSource(stream);
-                                self.initResampler();
-                            }, function (err) {
-                                console.log('Get User Media Failure: ' + err);
-                            });
+                            var i = function () {
+                                context = new AudioContext();
+                                navigator.getUserMedia(audioConstraints, function (stream) {
+                                    fft = new FFT(2048, sampleRate);
+                                    // Create an AudioNode from the stream (live input)
+                                    sourceNode = context.createMediaStreamSource(stream);
+                                    self.initResampler();
+                                }, function (err) {
+                                    console.log('Get User Media Failure: ' + err);
+                                });
+                            }
+                            if (context) {
+                                context.close().then(i).catch(function (err) {
+                                    console.log(err)
+                                });
+                            } else {
+                                i();
+                            }
                         } catch (e) {
                             console.log('webkitGetUserMedia threw exception :' + e);
                         }
