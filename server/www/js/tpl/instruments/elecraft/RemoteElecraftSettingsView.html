@@ -1,0 +1,35 @@
+<div class="form-group">
+    <label for="name" class="col-md-3 control-label">Audio to/from radio:</label>
+    <div class="col-md-9">
+        Audio to/from radio comes in through the WebRTC connection. Todo: select
+        audio codec to use here ?
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 control-label">Audio from operator:</label>
+    <div class="col-md-9">
+        <select id="op_audio_input" name="op_audio_input" class="form-control">
+            <% for(var i=0; i < inputs.length; i++) { %>
+            <option
+                <%= op_audio_input == inputs[i].value ? 'selected':'' %>
+                value="<%= inputs[i].value %>"><%= inputs[i].label %></option>
+            <% } %>
+        </select>
+        <span class="help-inline">Where you connect your microphone.</span>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 control-label">Audio to operator:</label>
+    <div class="col-md-9">
+        <select id="op_audio_output" name="op_audio_output" class="form-control">
+            <% for(var i=0; i < outputs.length; i++) { %>
+            <option
+                <%= op_audio_output == outputs[i].value ? 'selected':'' %>
+                value="<%= outputs[i].value %>"><%= outputs[i].label %></option>
+            <% } %>
+        </select>
+        <span class="help-inline">Computer speakers for instance.</span>
+    </div>
+</div>

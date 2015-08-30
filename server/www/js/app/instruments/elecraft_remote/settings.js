@@ -27,7 +27,7 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        template = require('js/tpl/instruments/elecraft/ElecraftSettingsView.js');
+        template = require('js/tpl/instruments/elecraft/RemoteElecraftSettingsView.js');
 
     require('webrtc_adapter'); // Load WebRTC adapter shim.
 
@@ -37,22 +37,20 @@ define(function (require) {
         initialize: function (options) {
             this.gotdevices = false;
 
-            // We support two sound card sets:
-            // - One to connect the radio to the computer
+            // We support only one sound card here, because the radio
+            // comes in through WebRTC audio
             // - One for local audio output (computer speakers for instance), and
             //     local audio input (microphone input for instance)
-            if (this.model.get('audio_input') == undefined) {
-                this.model.set('audio_input','n.a.');
-            }
-            if (this.model.get('audio_output') == undefined) {
-                this.model.set('audio_output','n.a.');
-            }
             if (this.model.get('op_audio_input') == undefined) {
-                this.model.set('op_audio_input','n.a.');
+                this.model.set('op_audio_input', 'n.a.');
             }
             if (this.model.get('op_audio_output') == undefined) {
-                this.model.set('op_audio_output','n.a.');
+                this.model.set('op_audio_output', 'n.a.');
             }
+
+            this.model.set('audio_input', 'webrtc');
+            this.model.set('audio_output', 'webrtc');
+
             this.outputs = [];
             this.inputs = [];
 
@@ -88,13 +86,15 @@ define(function (require) {
                 var deviceInfo = deviceInfos[i];
 
                 if (deviceInfo.kind === 'audioinput') {
-                    this.inputs.push({ label: deviceInfo.label || 'microphone ' + (audioInputSelect.length + 1),
-                                       value: deviceInfo.deviceId
-                                     });
+                    this.inputs.push({
+                        label: deviceInfo.label || 'microphone ' + (audioInputSelect.length + 1),
+                        value: deviceInfo.deviceId
+                    });
                 } else if (deviceInfo.kind === 'audiooutput') {
-                    this.outputs.push({ label: deviceInfo.label || 'speaker ' + (audioOutputSelect.length + 1),
-                                        value: deviceInfo.deviceId
-                                      });
+                    this.outputs.push({
+                        label: deviceInfo.label || 'speaker ' + (audioOutputSelect.length + 1),
+                        value: deviceInfo.deviceId
+                    });
                 } else {
                     console.log('Some other kind of source/device: ', deviceInfo);
                 }

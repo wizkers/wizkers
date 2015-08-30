@@ -44,7 +44,8 @@ define(function (require) {
     var ElecraftInstrument = require('app/instruments/elecraft/elecraft'),
         ElecraftSettingsView = require('app/instruments/elecraft/settings');
 
-    var RemoteElecraftInstrument = require('app/instruments/elecraft_remote/elecraft_remote');
+    var RemoteElecraftInstrument = require('app/instruments/elecraft_remote/elecraft_remote'),
+        RemoteElecraftSettingsView = require('app/instruments/elecraft_remote/settings');
 
     var Fluke289Instrument = require('app/instruments/fluke28x/fluke'),
         Fluke289SettingsView = require('app/instruments/fluke28x/settings');
@@ -170,7 +171,7 @@ define(function (require) {
             this.supportedInstruments["elecraft_remote"] = {
                 name: "Remote Elecraft KX3",
                 type: RemoteElecraftInstrument,
-                settings: ElecraftSettingsView,
+                settings: RemoteElecraftSettingsView,
                 connectionsettings: 'app/views/instrument/webrtc'
             };
         }

@@ -17,37 +17,34 @@
 </div>
 <div class="row">
     <div class="form-group">
-    <label for="name" class="col-md-3 control-label">Audio input:</label>
-    <div class="col-md-9">
-        <select id="audio_input" name="audio_input" class="form-control">
-            <option value="disable">Disable audio input</option>
-            <% for(var i=0; i < inputs.length; i++) { %>
-            <option
-                <%= metadata['audio_input'] == inputs[i].value ? 'selected':'' %>
-                value="<%= inputs[i].value %>"><%= inputs[i].label %></option>
-            <% } %>
-        </select>
-        <span class="help-inline"></span>
+        <label for="name" class="col-md-5 control-label">Local audio to send to remote:</label>
+        <div class="col-md-7">
+            <select id="audio_input" name="audio_input" class="form-control">
+                <option value="disable">Disable audio input</option>
+                <% for(var i=0; i < inputs.length; i++) { %>
+                <option
+                    <%= metadata['audio_input'] == inputs[i].value ? 'selected':'' %>
+                    value="<%= inputs[i].value %>"><%= inputs[i].label %></option>
+                <% } %>
+            </select>
+            <span class="help-inline"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="name" class="col-md-5 control-label">Output incoming remote audio to:</label>
+        <div class="col-md-7">
+            <select id="audio_output" name="audio_output" class="form-control">
+                <option value="disable">Disable audio output</option>
+                <% for(var i=0; i < outputs.length; i++) { %>
+                <option
+                    <%= metadata['audio_output'] == outputs[i].value ? 'selected':'' %>
+                    value="<%= outputs[i].value %>"><%= outputs[i].label %></option>
+                <% } %>
+            </select>
+            <span class="help-inline"></span>
+        </div>
     </div>
 </div>
-
-<div class="form-group">
-    <label for="name" class="col-md-3 control-label">Audio output:</label>
-    <div class="col-md-9">
-        <select id="audio_output" name="audio_output" class="form-control">
-            <option value="disable">Disable audio output</option>
-            <% for(var i=0; i < outputs.length; i++) { %>
-            <option
-                <%= metadata['audio_output'] == outputs[i].value ? 'selected':'' %>
-                value="<%= outputs[i].value %>"><%= outputs[i].label %></option>
-            <% } %>
-        </select>
-        <span class="help-inline"></span>
-    </div>
-</div>
-</div>
-
-
 <div class="row">
     <div class="col-md-12">
         <h4>For self-hosted only:</h4>
@@ -61,5 +58,3 @@
             </div>
     </div>
 </div>
-
-

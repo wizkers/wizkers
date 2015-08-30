@@ -130,18 +130,49 @@ define(function (require) {
             console.log('[WebRTC Output] Incoming Audio call', call);
 
             // Time to create our media stream to connect to the incoming call:
-
             var audioConstraints = {
                 audio: {
-                    echoCancellation: false,
-                    deviceId: settings.audio_input
+                    googEchoCancellation: false,
+                    googAutoGainControl: false,
+                    sourceId: settings.audio_input
                 }
             };
 
             navigator.getUserMedia(audioConstraints,
                 function success(audioStream) {
-                call.answer(audioStream);
-            },
+                    call.answer(audioStream);
+
+                    // Then hook up our any incoming audio stream to
+                    // our local audio output:
+                    call.on('stream', function (stream) {
+                        // We need to hook up this incoming stream to an audio element,
+                        var audio = $('<audio id="audioSinkElement" autoplay />').appendTo('body');
+                        audio[0].src = (URL || webkitURL || mozURL).createObjectURL(stream);
+
+                        // And we need to connect the output of this audio element to the right sink:
+                        // (note: right now Chrome does not let us connect a remote WebRTC stream to a
+                        // WebAudio node for processing, unfortunately
+
+                        // The media object takes some time to initialize, and apparently there is no good
+                        // way to get a signal once it's ready, so we just wait for 1 second before
+                        // setting the sink:
+                        setTimeout(function () {
+                            audio[0].setSinkId(settings.audio_output).then(function () {
+                                    console.log('[WebRTC Output] Success, audio output device attached: ', settings.audio_output);
+                                })
+                                .catch(function (error) {
+                                    var errorMessage = error;
+                                    if (error.name === 'SecurityError') {
+                                        errorMessage = 'You need to use HTTPS for selecting audio output ' +
+                                            'device: ' + error;
+                                    }
+                                    console.log('[WebRTC Output] Error setting audio output', errorMessage);
+                                });
+                        }, 1000);
+                    });
+
+
+                },
                 function error(err) {
                     console.log(err);
                 });
