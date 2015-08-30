@@ -54,7 +54,8 @@ require.config({
         
         // WebRTC adapter shim to abstract from
         // navigator implementations
-        webrtc: 'lib/webrtc_adapter',
+        peerjs: 'lib/peer-0.3.14',
+        webrtc_adapter: 'lib/webrtc_adapter',
 
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
@@ -78,6 +79,7 @@ require.config({
             'connections_serial': 'app/connections/chromeSerial',
             'connections_hid': 'app/connections/usbhid',
             'connections_btle': 'app/connections/btle',
+            'connections_webrtc': 'app/connections/webrtc',
             'serialport': 'app/lib/serialport',
         }
     },

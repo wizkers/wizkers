@@ -29,7 +29,7 @@ define(function (require) {
         Backbone = require('backbone'),
         template = require('js/tpl/instruments/elecraft/ElecraftSettingsView.js');
 
-    require('webrtc'); // Load WebRTC adapter shim.
+    require('webrtc_adapter'); // Load WebRTC adapter shim.
 
 
     return Backbone.View.extend({

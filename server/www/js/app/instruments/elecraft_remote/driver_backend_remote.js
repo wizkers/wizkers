@@ -17,100 +17,68 @@
  * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * Browser-side Parser for Elecraft radios.
+ *
+ * This parser implements elecraft serial commands for:
+ *    - KXPA100
+ *    - KX3
+ *
+ * The Browser-side parser is used when running as a Chrome or Cordova app.
+ *
+ * Differences with server-side parser:
+ *
+ *   - 'socket' uses "trigger" to emit events, not "emit"
+ *
+ *  @author Edouard Lafargue, ed@lafargue.name
+ */
+
 define(function (require) {
     "use strict";
 
-    var Backbone = require('backbone'),
-        abutils = require('app/lib/abutils'),
-        btleConnection = require('connections_btle');
+    var webrtcConnection = require('connections_webrtc'),
+        Bitmap = require('app/lib/bitmap');
 
 
     var parser = function (socket) {
 
-        var self = this,
-            socket = socket,
-            streaming = true,
+        var socket = socket,
+            self = this;
+        var serialport = null;
+        var livePoller = null; // Reference to the live streaming poller
+        var streaming = false,
             port = null,
             port_close_requested = false,
-            port_open_requested = false,
-            isopen = false,
-            lastUpdate = new Date().getTime();
-
-        var HEART_RATE_SERVICE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
-        var HEART_RATE_MEASUREMENT_UUID = '00002a37-0000-1000-8000-00805f9b34fb';
+            port_open_requested = true,
+            isopen = false;
 
         /////////////
         // Private methods
         /////////////
 
-        var portSettings = function () {
-            return {
-                service_uuid: HEART_RATE_SERVICE_UUID,
-                characteristic_uuid: HEART_RATE_MEASUREMENT_UUID
-            }
+        // Send the bitmap back to the front-end
+        function sendBitmap() {
+            var bm = new Bitmap(bitmap);
+            bm.init();
+            var data = bm.getData();
+            socket.trigger('serialEvent', {
+                screenshot: data,
+                width: bm.getWidth(),
+                height: bm.getHeight()
+            });
         };
 
-        // Format can act on incoming data from the counter, and then
-        // forwards the data to the app through a 'data' event.
 
-        // Using https://github.com/GoogleChrome/chrome-app-samples/blob/master/samples/bluetooth-samples/heart-rate-sensor/main.js
-        // as the source for BTLE Heartrate measurement
-        //        (Apache License)
-        var format = function (data) {
-            var response = '';
-            var updt = new Date.getTime();
-
-            // The Blue Onyx simulates a Heart Rate monitor, hence the references
-            // to Heart Rate below.
-
-            // TODO: move this into its own library/class so that we can use the code
-            //       for various other uses (actual Heart Rate monitors, etc)
-
-            // The Heart Rate Measurement Characteristic does not allow 'read'
-            // operations and its value can only be obtained via notifications, so the
-            // |value| field might be undefined here.
-            if (!data.value) {
-                console.log('No Heart Rate Measurement value received yet');
-                return;
-            }
-
-            var valueBytes = new Uint8Array(data.value);
-            if (valueBytes.length < 2) {
-                console.log('Invalid Heart Rate Measurement value');
-                return;
-            }
-            
-            // Keep track of the time since we last got a packet - if this is more than
-            // 6 seconds, then we missed one (or more) and the CPM count cannot be trusted
-            var valid = false;
-            if ((updt - lastUpdate) < 6000)
-                valid = true;
-
-            // The first byte is the counts in the last 5 seconds
-            var count = valueBytes[0];
-            
-            var cpm = updateCPM(count);
-
-            var response = {
-                cpm: {
-                    cpm: cpm,
-                    valid: true
-                }
-            };
-            self.trigger('data', response);
-        };
-        
-        
         /**
-         * Update the current CPM
-         * @param {Number} count Count in the last 5 seconds
+         * We have an easy life here: we are getting pre-parsed data
+         * from the remote driver through the WebRTC channel, so we can simply
+         * forward it to the front-end
+         * @param {[[Type]]} data [[Description]]
          */
-        var updateCPM = function(count) {
-            
+        var format = function (data) {
+            self.trigger('data', data);
         };
 
-        // Status returns an object that is concatenated with the
-        // global server status
         var status = function (stat) {
             port_open_requested = false;
             console.log('Port status change', stat);
@@ -127,7 +95,9 @@ define(function (require) {
                 self.trigger('data', resp);
                 return;
             }
+
             isopen = stat.portopen;
+
             if (isopen) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
@@ -140,7 +110,6 @@ define(function (require) {
             }
         };
 
-
         /////////////
         // Public methods
         /////////////
@@ -148,10 +117,11 @@ define(function (require) {
         this.openPort = function (insid) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
-            port = new btleConnection(ins.get('port'), portSettings());
-            port.open();
+            var settings = ins.get('webrtc');
+            port = new webrtcConnection('webrtc-wizkers', { host: settings.host, port: settings.port});
             port.on('data', format);
             port.on('status', status);
+            port.open();
 
         };
 
@@ -174,29 +144,43 @@ define(function (require) {
         this.getInstrumentId = function (arg) {};
 
         this.isStreaming = function () {
-            return streaming;
-        };
+            return true;
+        }
 
         // Called when the app needs a unique identifier.
         // this is a standardized call across all drivers.
         //
-        // TODO: Returns the instrument GUID.
-        this.sendUniqueID = function () {};
+        // Returns the Radio serial number.
+        this.sendUniqueID = function () {
+            this.uidrequested = true;
+            try {
+                port.write("MN026;ds;MN255;");
+            } catch (err) {
+                console.log("Error on serial port while requesting Elecraft UID : " + err);
+            }
+        };
 
         // period in seconds
-        this.startLiveStream = function (period) {};
+        this.startLiveStream = function (period) {
+            // The remote driver does the streaming, not us
+            streaming = true;
+            return;
+        };
 
-        this.stopLiveStream = function (args) {};
+        this.stopLiveStream = function (args) {
+
+        };
 
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
         // HTML interface.
         this.output = function (data) {
-            //console.log('TX', data);
             port.write(data);
         };
     }
 
+    // Add event management to our parser, from the Backbone.Events class:
     _.extend(parser.prototype, Backbone.Events);
+
     return parser;
 });

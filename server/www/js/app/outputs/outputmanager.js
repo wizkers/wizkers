@@ -38,6 +38,8 @@ define(function(require) {
     var RestSettings = require('app/outputs/rest/settings');
     var Rigctld = require('app/outputs/rigctld/rigctld');
     var RigctldSettings = require('app/outputs/rigctld/settings');
+    var WebRTCOutput = require('app/outputs/webrtc/webrtc');
+    var WebRTCOutputSettings = require('app/outputs/webrtc/settings');
 
     var OutputManager = function() {
         
@@ -134,8 +136,17 @@ define(function(require) {
             "rest":      { name: "http REST calls", plugin: Rest, backend: 'app/outputs/rest/driver_backend',
                               settings: RestSettings },
             "rigctld":  { name: "Rigctld emulation", plugin: Rigctld, backend: 'app/outputs/rigctld/driver_backend',
-                            settings: RigctldSettings }
+                            settings: RigctldSettings },
+            "webrtc":  { name: "WebRTC", plugin: WebRTCOutput, backend: 'app/outputs/webrtc/driver_backend',
+                            settings: WebRTCOutputSettings }
         };
+        
+        // Called in Chrome/Cordova mode - not properly implemented
+        this.reconnectOutputs = function(a,b,c) {
+            console.log('a', a);
+            console.log('b', b);
+            console.log('c', c);
+        }
         
         // Used by Chrome/Cordova: implements the same API as on the server
         // (outputs/outputmanager.js)
@@ -185,6 +196,7 @@ define(function(require) {
         // Main feature of our manager: send the data
         // to all active output plugins according to their
         // schedule.
+        // Called by chromeSocket when it gets data
         this.output = function(data) {
             for (var idx in this.activeOutputs) {
                 var output = this.activeOutputs[idx];

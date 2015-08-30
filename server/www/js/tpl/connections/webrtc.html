@@ -1,0 +1,13 @@
+<label for="port" class="col-md-3 control-label">WebRTC Peer:</label>
+<div class="col-md-3">
+    <input type="text" class="form-control" id="webrtc.host" name="webrtc.host" value="<%= webrtc.host %>"/>
+</div>
+<div class="col-md-3">
+    <input type="text" class="form-control" id="webrtc.port" name="webrtc.port" value="<%= webrtc.port %>"/>
+</div>
+    <div class="input-group col-md-3">
+        <select name="instance" class="form-control">
+            <option value="peerjs" <%= webrtc.provider == 'peerjs' ?'selected':'' %>>PeerJS CDN</option>
+            <option value="custom" <%= webrtc.provider == 'custom' ?'selected':'' %>>Self-hosted</option>
+        </select>
+    </div>

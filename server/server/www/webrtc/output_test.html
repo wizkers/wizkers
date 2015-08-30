@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <title>PeerJS Hello World Code Example</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Language" content="en-us">
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/lib/peer-0.3.14.js"></script>
+    <script type="text/javascript" src="../js/lib/webrtc_adapter.js"></script>
+    <script>
+        // Quick and dirty test of the WebRTC Output - but as you can see, tons of potential!
+
+        var call = null;
+
+        $(document).ready(function () {
+
+            // handle browser prefixes
+            navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+
+            // Create a new Peer with our demo API key, with debug set to true so we can
+            // see what's going on.
+            peer1 = new Peer({
+                host: '127.0.0.1',
+                port: 9000,
+                debug: 3
+            });
+
+
+            // 1. Initiate a data connection through the 'connect' method
+            var c = peer1.connect('webrtc-wizkers');
+            c.on('open', function () {
+                c.on('data', function (data) {
+                    // When we receive 'Hello', send ' world'.
+                    $('#data_channel').append(data);
+                    $('#data_channel').append('<br>');
+                });
+
+                // Now that the data connection is fine, initiate an audio
+                // connection
+
+                navigator.getUserMedia({
+                        video: false,
+                        audio: true
+                    },
+
+                    function success(audioStream) {
+                        call = peer1.call('webrtc-wizkers', audioStream);
+                        console.log('Calling remote end');
+
+                        call.on('stream', function (stream) {
+                            console.log('Incoming media stream');
+                            // Add a HTML element to display the stream:
+                            var audio = $('<audio autoplay />').appendTo('body');
+                            audio[0].src = (URL || webkitURL || mozURL).createObjectURL(stream);
+                        });
+                    },
+
+                    function error(err) {
+                        console.log(err);
+                    }
+                );
+
+
+
+            });
+
+
+            // Show browser version
+            $('#browsers').text(navigator.userAgent);
+        });
+    </script>
+    <style>
+        #data_channel {
+            padding: 20px;
+            background-color: #4dace2;
+            border: 1px solid #0C6BA1;
+            max-width: 600px;
+        }
+        
+        #browsers {
+            font-weight: 600;
+        }
+        
+        .warning {
+            max-width: 600px;
+            padding: 20px;
+            background-color: #eee;
+            border: 1px solid #ccc;
+            font-size: 18px;
+        }
+        
+        .browserinfo {
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f8f8f8;
+        }
+        
+        a {
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <textarea id="data_channel"></textarea>
+    <div class="log" style="color:#FF7500;text-shadow:none;padding:15px;"><strong>Connection status</strong>:
+        <br>
+    </div>
+</body>
+
+</html>
