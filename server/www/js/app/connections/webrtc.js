@@ -68,7 +68,7 @@ define(function (require) {
          */
         this.write = function (cmd) {
 
-            if (!self.portOpen ||  cmd == '')
+            if (!self.portOpen ||  cmd == '' || !connection)
                 return;
 
             // We try to be a bit accomodating: detect strings, and
@@ -83,7 +83,8 @@ define(function (require) {
                 break;
             }
 
-            // TODO: do the write
+            // Do the write
+            connection.send(cmd);
 
         };
 
@@ -109,7 +110,7 @@ define(function (require) {
                 debug: 3
             });
 
-            var connection = peer.connect('webrtc-wizkers');
+            connection = peer.connect('webrtc-wizkers');
             connection.on('data', onRead);
             self.portOpen = true;
             self.trigger('status', {

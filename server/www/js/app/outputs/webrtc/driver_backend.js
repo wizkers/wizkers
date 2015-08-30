@@ -37,6 +37,7 @@ define(function (require) {
 
     var _ = require('underscore'),
         Backbone = require('backbone'),
+        abu = require('app/lib/abutils'),
         utils = require('app/utils');
 
 
@@ -107,11 +108,10 @@ define(function (require) {
             return null;
         };
 
-
         // In this plugin, we just forward all the data coming from
         // the driver to the other end, as long as we are connected
         this.sendData = function (data) {
-            // Sending the data here (TODO)
+            // Sending the data here
             if (activeConnection)
                 activeConnection.send(data);
         };
@@ -123,6 +123,15 @@ define(function (require) {
         var onPeerConnection = function (conn) {
             console.log('[WebRTC Output] Incoming Peer data connection', conn);
             activeConnection = conn;
+            
+            activeConnection.on('data', onIncomingData);
+        }
+        
+        var onIncomingData = function(data) {
+            // data is an ArrayBuffer, forward it to the driver,
+            // but convert it to a string first
+            console.log('[WebRTC Output] Incoming data:', abu.ab2str(data));
+            linkManager.sendCommand(abu.ab2str(data));
         }
 
 

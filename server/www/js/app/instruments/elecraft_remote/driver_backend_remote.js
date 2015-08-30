@@ -76,6 +76,15 @@ define(function (require) {
          * @param {[[Type]]} data [[Description]]
          */
         var format = function (data) {
+            if (self.uidrequested && data.substr(0, 5) == "DS@@@") {
+                // We have a Unique ID
+                console.log("Sending uniqueID message");
+                self.trigger('data', {
+                    uniqueID: '' + data.substr(5, 5)
+                });
+                self.uidrequested = false;
+                return;
+            }
             self.trigger('data', data);
         };
 
@@ -118,7 +127,10 @@ define(function (require) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
             var settings = ins.get('webrtc');
-            port = new webrtcConnection('webrtc-wizkers', { host: settings.host, port: settings.port});
+            port = new webrtcConnection('webrtc-wizkers', {
+                host: settings.host,
+                port: settings.port
+            });
             port.on('data', format);
             port.on('status', status);
             port.open();
