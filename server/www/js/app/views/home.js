@@ -203,11 +203,11 @@ define(function (require) {
             // If we are just a 'viewer' in server mode, then disable all buttons.
             if (vizapp.type == 'server' && (settings.get('currentUserRole') == 'viewer')) {
                 if (linkManager.isConnected()) {
-                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;' +
+                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-stop"></span>&nbsp;' +
                             this.instrument.get('name') + ' connected')
                         .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning');
                 } else {
-                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>' +
+                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-play"></span>' +
                             this.instrument.get('name') + ' not connected')
                         .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning');
                 }
@@ -217,7 +217,7 @@ define(function (require) {
             // Depending on port status, update our controller
             // connect button:
             if (linkManager.isConnected()) {
-                $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Disconnect ' + this.instrument.get('name'))
+                $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-stop"></span>&nbsp;Disconnect ' + this.instrument.get('name'))
                     .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 $('.btn-enable-connected', this.el).removeAttr('disabled');
 
@@ -229,7 +229,7 @@ define(function (require) {
                     $('.ctrl-diag', self.el).attr('disabled', true);
                 }
             } else {
-                $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Connect to ' + this.instrument.get('name'))
+                $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-play"></span>&nbsp;Connect to ' + this.instrument.get('name'))
                     .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 $('.btn-enable-connected', this.el).attr('disabled', true);
 
@@ -255,11 +255,11 @@ define(function (require) {
             var id = instrumentManager.getInstrument().id;
             if (id != null) {
                 if (!linkManager.isConnected()) {
-                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Opening...')
+                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-play"></span>&nbsp;Opening...')
                     self.instrumentUniqueID = null; // Just in case we change the instrument
                     linkManager.openInstrument(id);
                 } else {
-                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-off"></span>&nbsp;Closing...')
+                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-play"></span>&nbsp;Closing...')
                     if (linkManager.isStreaming())
                         linkManager.stopLiveStream();
                     linkManager.closeInstrument(id);

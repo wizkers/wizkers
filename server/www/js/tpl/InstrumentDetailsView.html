@@ -9,14 +9,14 @@
         <div class="row">
             <div class="col-md-5">
                 <div class="form-group">
-                    <label for="name" class="col-md-3 control-label">Name:</label>
+                    <label for="name" class="col-md-3 control-label">Name</label>
                     <div class="col-md-9">
                         <input type="text" class="form-control" name="name" value="<%= name %>"/>
                         <span class="help-inline"></span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="name" class="col-md-3 control-label">Type:</label>
+                    <label for="name" class="col-md-3 control-label">Type</label>
                         <div class="col-md-9">
                             <select name="type" class="form-control">
                                 <% for(var ins in instypes) { %>
@@ -33,18 +33,22 @@
                     <!-- End Connection DIV -->
                 </div>      
                 <div class="form-group">
-                    <label for="liveviewspan" class="col-md-3 control-label">Live view length:</label>
-                    <div class="col-md-9 input-group">
-                        <input type="text" class="form-control" name="liveviewspan" value="<%= liveviewspan %>">
-                        <span class="input-group-addon">seconds</span>
+                    <label for="liveviewspan" class="col-md-3 control-label">Live view length</label>
+                    <div class="col-md-9">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="liveviewspan" value="<%= liveviewspan %>">
+                            <span class="input-group-addon">seconds</span>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="liveviewperiod" class="col-md-3 control-label">Polling period:</label>
-                    <div class="col-md-9 input-group">
-                        <span class="input-group-addon">Poll Every</span>
-                        <input type="text" class="form-control" name="liveviewperiod" value="<%= liveviewperiod %>">
-                        <span class="input-group-addon">seconds</span>
+                    <label for="liveviewperiod" class="col-md-3 control-label">Polling period</label>
+                    <div class="col-md-9">
+                        <div class="input-group">
+                            <span class="input-group-addon">Poll Every</span>
+                            <input type="text" class="form-control" name="liveviewperiod" value="<%= liveviewperiod %>">
+                            <span class="input-group-addon">seconds</span>
+                        </div>
                     </div>
                 </div>
                 <div class="hide-chrome hide-cordova">
@@ -71,13 +75,13 @@
             </div>
             <div class="col-md-4">
                 <div class="control-group">
-                    <label for="description" class="control-label">Notes:</label>
+                    <label for="description" class="control-label">Notes</label>
                     <div class="controls">
                             <textarea id="comment" class="form-control" name="comment" style="width: 90%;" rows="6"><%= comment %></textarea>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label for="metadata" class="control-label">Extra settings:</label>
+                    <label for="metadata" class="control-label">Extra settings</label>
                     <div class="controls">
                             <div id="metadata">This device types does not require extra settings.</div>
                     </div>
@@ -96,14 +100,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                        <br />
-                        <div class="alert alert-success" style="display: none">
-                            <b>Success!</b> Instrument saved successfully
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
+                       <br />
                         <div class="well hide-cordova">
                             <p>Drop a backup file on the box below to import instrument settings from a backup:</p>
                             <div style="width:120px; height:107px; position:relative;margin: 0px auto;">
@@ -121,6 +118,11 @@
                 <button type="button" class="btn btn-primary save">Save</button>
                 <button type="button" class="btn btn-default delete">Delete</button>
                 <button type="button" class="btn btn-default export hide-cordova">Export Settings</button>
+            </div>
+            <div class="col-md-3">
+                <div class="alert alert-success" style="display: none">
+                        <b>Success!</b> Instrument saved successfully
+                </div>
             </div>
         </div>
     </form>

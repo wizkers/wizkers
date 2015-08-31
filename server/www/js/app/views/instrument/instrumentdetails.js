@@ -214,7 +214,7 @@ define(function (require) {
 
             this.model.save(null, {
                 success: function (model) {
-                    utils.showAlert('Success', 'Configuration saved', 'alert-success');
+                    utils.showAlert('Success:', 'Configuration saved', 'alert-success');
                     // Trick: if we notice no instrument is selected, then select this one.
                     var ins = instrumentManager.getInstrument();
                     if (ins == null) {
@@ -229,7 +229,7 @@ define(function (require) {
                 },
                 error: function () {
                     console.log('Instrument: error saving');
-                    utils.showAlert('Error', 'An error occurred while trying to save intrument config', 'alert-danger');
+                    utils.showAlert('Error:', 'An error occurred while trying to save intrument config', 'alert-danger');
                 }
             });
         },
