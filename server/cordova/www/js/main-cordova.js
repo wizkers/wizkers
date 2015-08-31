@@ -50,7 +50,17 @@ require.config({
         flot_time: 'lib/flot-0.8.3/jquery.flot.time',
         flot_resize: 'lib/flot-0.8.3/jquery.flot.resize',
         flot_selection: 'lib/flot-0.8.3/jquery.flot.selection',
-        flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween'
+        flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
+
+        // Analytics wrapper:
+        ga_bundle: 'lib/google-analytics-bundle',
+        stats: 'app/analytics',
+
+        // WebRTC adapter shim to abstract from
+        // navigator implementations
+        peerjs: 'lib/peer-0.3.14',
+        webrtc_adapter: 'lib/webrtc_adapter',
+
     },
 
     /*
@@ -61,7 +71,9 @@ require.config({
             'socketio': 'app/chromeSocket',
             'connections_serial': 'app/connections/cordovaSerial',
             'connections_hid': 'app/connections/usbhid',
+            'connections_webrtc': 'app/connections/webrtc',
             'serialport': 'app/lib/serialport',
+
         }
     },
 
@@ -121,7 +133,13 @@ var vizapp = {
 
 var router;
 
-require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'localstorage'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument) {
+require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'localstorage'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
+    
+    
+    // Initialize our Analytics object to get stats on app usage
+    stats = new Analytics();
+    //stats.init('');
+
     // Get our settings here, and
     // share them afterwards, rather than requesting it
     // everytime...
