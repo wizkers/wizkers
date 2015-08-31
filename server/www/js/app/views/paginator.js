@@ -42,7 +42,7 @@ define(function(require) {
         render:function () {
 
             var items = this.model.models;
-            var len = items.length;
+            var len = items.length +1; // +1 for the "Add" card at the end.
             var pageCount = Math.ceil(len / this.options.items);
 
             $(this.el).html('<ul class="pagination" />');

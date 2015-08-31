@@ -56,7 +56,7 @@ define(function (require) {
         },
 
         onClose: function () {
-            console.log('[insdetail]',this.model.id,'close');
+            console.log('[insdetail]', this.model.id, 'close');
             linkManager.off('instrumentStatus', this.updateStatus);
         },
 
@@ -126,16 +126,10 @@ define(function (require) {
         render: function () {
             var instruments = this.model.models;
             var len = instruments.length;
-            console.log("Instrument list: " + len + " instruments");
-
-            if (len == 0) {
-                $(this.el).html('<div class="col-md-12"><div class="row thumbnails"><div class="col-md-3 col-sm-2"><div class="thumbnail glowthumbnail select" style="text-align:center;"><a href="#" class="plain"><h5>No instrument</h5><p>There are no instruments setup in the application yet. Click on "Add Instrument" in the menu above to add one.</p></a></div></div></div></div>');
-                return this;
-            }
 
             var items = 4;
             var startPos = (this.options.page - 1) * items;
-            var endPos = Math.min(startPos + items, len);
+            var endPos = Math.min(startPos + items, len+1);
 
             $(this.el).html('<div class="col-md-12"><div class="row thumbnails"></div></div>');
             var editok = true;
@@ -147,11 +141,16 @@ define(function (require) {
             }
 
             for (var i = startPos; i < endPos; i++) {
-                this.inslist.push(new InstrumentListItemView({
-                    model: instruments[i],
-                    edit: editok
-                }));
-                $('.thumbnails', this.el).append(this.inslist[this.inslist.length - 1].render().el);
+                if (i < len) {
+                    this.inslist.push(new InstrumentListItemView({
+                        model: instruments[i],
+                        edit: editok
+                    }));
+                    $('.thumbnails', this.el).append(this.inslist[this.inslist.length - 1].render().el);
+                } else {
+                    // Add a "Add Instrument" card at the end:
+                    $('.thumbnails', this.el).append('<div class="col-md-3 col-sm-2"><div class="thumbnail glowthumbnail select" style="text-align:center;"><a href="#instruments/add" class="plain"><h5>Add instrument</h5><p style="font-size:6em;"><span class="glyphicon glyphicon-plus-sign"></span></p><p>Create a new instrument</p></a></div></div>');
+                }
             }
 
             $(this.el).append(new Paginator({
@@ -160,6 +159,9 @@ define(function (require) {
                 viewname: 'instruments',
                 items: items
             }).render().el);
+
+
+
 
             return this;
         }
