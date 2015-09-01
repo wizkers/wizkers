@@ -1,1 +1,0 @@
-# Elecraft KX3
