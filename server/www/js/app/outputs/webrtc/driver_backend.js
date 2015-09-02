@@ -69,11 +69,14 @@ define(function (require) {
 
             if (settings.instance == 'custom') {
                 var sp = settings.ipaddress.split(':');
-                peer = new Peer('webrtc-wizkers', {
+                var connection_info = {
                     host: sp[0],
                     port: sp[1],
                     debug: true
-                });
+                };
+                if (settings.apikey)
+                    connection_info['key'] = settings.apikey;
+                peer = new Peer('webrtc-wizkers', connection_info);
             } else {
                 // Create a PeerJS connection:
                 peer = new Peer('1829384858', {

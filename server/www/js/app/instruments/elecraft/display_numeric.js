@@ -184,7 +184,7 @@ define(function (require) {
                 var cmd = data.substr(0, 2);
                 if (cmd == "PO") {
                     // Actual Power Outout
-                    var w = parseInt(data.substr(2)) / 10;
+                    var val = parseInt(data.substr(2)) / 10;
                     this.amppowerplot.appendPoint({
                         'name': "KX3",
                         'value': val

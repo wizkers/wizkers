@@ -34,8 +34,7 @@ define(function (require) {
         initialize: function (options) {
             console.log(options);
             this.ports = options.ports;
-            linkManager.on('ports', this.refreshDevices);
-
+            linkManager.once('ports', this.refreshDevices, this);
         },
 
         events: {
@@ -44,7 +43,6 @@ define(function (require) {
 
         onClose: function () {
             console.log("Serial connexion settings closing");
-            linkManager.off('ports', this.refreshDevices);
         },
 
 
@@ -57,13 +55,14 @@ define(function (require) {
 
         refreshDevices: function (devices) {
             this.ports = devices;
-            this.render;
+            this.render();
         },
 
         refresh: function () {
             // Catch a "Refresh" value here which indicates we should
             // just ask for a list of ports again:
             var insType = this.model.get('type');
+            linkManager.once('ports', this.refreshDevices, this);
             linkManager.getPorts(insType);
         }
 

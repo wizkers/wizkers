@@ -1,6 +1,6 @@
 <div class="row">
     <div class="form-group col-md-6">
-    <label for="type" class="col-md-6 control-label">Connection method:</label>
+    <label for="type" class="col-md-6 control-label">Connection method</label>
     <div class="input-group col-md-6">
         <select name="instance" class="form-control">
             <option value="peerjs" <%= metadata['instance'] == 'peerjs' ?'selected':'' %>>PeerJS CDN</option>
@@ -9,7 +9,7 @@
     </div>
     </div>
     <div class="form-group col-md-6">
-        <label for="type" class="col-md-6 control-label">PeerJS API key:</label>
+        <label for="type" class="col-md-6 control-label">API key</label>
         <div class="input-group col-md-6">
             <input type="text" class="form-control" name="apikey" value="<%= metadata['apikey'] %>"/>
         </div>
@@ -17,7 +17,7 @@
 </div>
 <div class="row">
     <div class="form-group">
-        <label for="name" class="col-md-5 control-label">Local audio to send to remote:</label>
+        <label for="name" class="col-md-5 control-label">Local audio to send to remote</label>
         <div class="col-md-7">
             <select id="audio_input" name="audio_input" class="form-control">
                 <option value="disable">Disable audio input</option>
@@ -31,7 +31,7 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="name" class="col-md-5 control-label">Output incoming remote audio to:</label>
+        <label for="name" class="col-md-5 control-label">Output incoming remote audio to</label>
         <div class="col-md-7">
             <select id="audio_output" name="audio_output" class="form-control">
                 <option value="disable">Disable audio output</option>
