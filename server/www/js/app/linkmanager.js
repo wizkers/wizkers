@@ -44,8 +44,7 @@ define(function (require) {
             var streaming = false;
             var recording = false;
 
-
-            // Public variables and methodfs:
+            // Public variables and methods:
 
             // Driver is public because our views want to talk to it directly
             // to use all the non-standard APIs
@@ -84,6 +83,10 @@ define(function (require) {
             this.isConnected = function () {
                 return connected;
             }
+            
+            this.requestReplay = function() {
+                socket.emit('replaydata', 0);
+            }
 
             this.controllerCommandResponse = function () {}
 
@@ -107,13 +110,13 @@ define(function (require) {
                 stats.instrumentEvent('openbootloader', '');
                 socket.emit('openbootloader', id);
             }
-            
+
             /**
              * Returns the open/closed state of a given instrument. Mostly makes sense
              * in server mode where we can have multiple open instruments.
              * @param {String} id Instrument ID
              */
-            this.isInstrumentOpen = function(id) {
+            this.isInstrumentOpen = function (id) {
                 socket.emit('isinstrumentopen', id);
             }
 
@@ -150,12 +153,12 @@ define(function (require) {
 
             // id is the Log session ID we are recording into.
             this.startRecording = function (id) {
-                stats.instrumentEvent('startrecording','');
+                stats.instrumentEvent('startrecording', '');
                 socket.emit('startrecording', id);
             }
 
             this.stopRecording = function () {
-                stats.instrumentEvent('stoprecording','');
+                stats.instrumentEvent('stoprecording', '');
                 socket.emit('stoprecording');
             }
 
@@ -192,6 +195,13 @@ define(function (require) {
                 self.trigger('status', data);
             }
 
+            /**
+             * This is there the instrument data arrives into the front-end.
+             * We are going to keep a ring buffer of the last 500 events in the
+             * link manager, so that this ring buffer can be replayed on demand to
+             * catch up on live instrument data after switching screens
+              * @param {Object} data data is normally a string, can be an 
+             */
             function processInput(data) {
                 self.trigger('input', data);
             };
@@ -211,7 +221,7 @@ define(function (require) {
             function sendUniqueID(uid) {
                 self.trigger('uniqueID', uid);
             }
-            
+
             function processInstrumentStatus(status) {
                 self.trigger('instrumentStatus', status);
             }

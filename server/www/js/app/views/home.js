@@ -125,6 +125,17 @@ define(function (require) {
                     if (view != null) {
                         $('#liveview').html(view.el);
                         view.render();
+                        if (linkManager.isConnected()) {
+                            if (instrumentManager.getCaps().indexOf("WantReplay") > -1) {
+                                console.log('[Home view] Replaying previous datapoints');
+                                // Our instrument supports live view replay, so we ask for it:
+                                setTimeout( function() {
+                                    view.clear();
+                                    linkManager.requestReplay();
+                                }
+                                           , 500);
+                            }
+                        }
                     }
                 });
 
@@ -182,19 +193,20 @@ define(function (require) {
         ctrlDiag: function () {
             router.navigate('diagnostics/' + this.instrument.id, true);
         },
-        
-        parseInput: function(data) {
+
+        parseInput: function (data) {
             if (data.openerror) {
                 // Give feedback to the user on why we could not open the device
                 if (data.reason)
                     $('#errorreason', this.el).html(data.reason);
                 if (data.description)
                     $('#errordetail', this.el).html(data.description);
-                
+
                 $('#ErrorModal').modal();
             }
         },
 
+        // Callback every 2/3 seconds from the instrument:
         updatestatus: function (data) {
             // First of all, if we don't have an instrument, no need to update our status:
             if (this.instrument == null)

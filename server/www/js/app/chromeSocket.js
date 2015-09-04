@@ -47,6 +47,11 @@ define(function (require) {
             recording = false,
             uploader_mode = false; // Will be true when we have loaded the special uploader driver.
 
+        // We keep a buffer of the last 500 events
+        var data_buffer = [];
+        var data_buffer_max = 500;
+        var suspend_data = false;
+
         ////////////////////
         // Public methods
         // Same API as for the socket object on server.js (Node application)
@@ -94,6 +99,9 @@ define(function (require) {
                 break;
             case 'stoplivestream':
                 stopLiveStream(args);
+                break;
+            case 'replaydata':
+                replayData(args);
                 break;
             case 'isinstrumentopen':
                 console.log('Call to isintrumentopen in Chrome/Cordova mode, ignoring');
@@ -303,6 +311,20 @@ define(function (require) {
             }, true);
         }
 
+        /**
+         * Resend the contents of the data buffer all at once.
+         * Note: we send the data points as an object with the
+         *       time stamp embedded for accurate replay.
+         * @param {Number} l Number of points to resend (not used)
+         */
+        var replayData = function (l) {
+            suspend_data = true;
+            for (var i = 0; i < data_buffer.length; i++) {
+                self.trigger('serialEvent', data_buffer[i]);
+            }
+            suspend_data = false;
+        }
+
         ///////////
         // Callbacks
         ///////////
@@ -321,7 +343,17 @@ define(function (require) {
             if (recording)
                 record(data);
             outputManager.output(data);
-            self.trigger('serialEvent', data);
+
+            // Now also keep the data in our data buffer:
+            var stamp = (data.timestamp) ? new Date(data.timestamp).getTime() : new Date().getTime();
+            data_buffer.push({
+                replay_ts: stamp,
+                data: data
+            });
+            if (data_buffer.length > data_buffer_max)
+                data_buffer = data_buffer.slice(1);
+            if (!suspend_data)
+                self.trigger('serialEvent', data);
         }
 
         function onGetDevices(ports) {

@@ -403,6 +403,8 @@ define(function(require) {
             },
 
             showInput: function(data) {
+                if (typeof data != "string")
+                    return; // data is sometimes an object when we get a serial port error
                 // Now update our display depending on the data we received:
                 var cmd = data.substr(0,2);
                 var val = data.substr(2);

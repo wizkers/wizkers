@@ -35,7 +35,7 @@ define(function (require) {
         // returns a simple array of capabilities    
         this.getCaps = function () {
             return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView",
-                    "LogManagementView", "Upgrader"
+                    "LogManagementView", "Upgrader", "WantReplay"
                    ];
         };
 

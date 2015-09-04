@@ -476,6 +476,17 @@ io.sockets.on('connection', function (socket) {
     // instruments
     var currentInstrumentid = null;
 
+    // We keep a buffer of the last 500 events to repopulate
+    // the live view of instruments which support it.
+    //
+    // TODO: move this next to the recorder, so that
+    // we keep the data even when no one is connected, which
+    // makes better sense.
+    // 
+    var data_buffer = [];
+    var data_buffer_max = 500;
+    var suspend_data = false;
+
     socket_debug(socket.decoded_token.role, 'connected');
     var userinfo = socket.decoded_token;
     // For security purposes, load the role of the user from our server-side
@@ -498,7 +509,31 @@ io.sockets.on('connection', function (socket) {
             socket.emit('uniqueID', data.uniqueID);
             return;
         }
-        socket.emit('serialEvent', data);
+        // Now also keep the data in our data buffer:
+        var stamp = (data.timestamp) ? new Date(data.timestamp).getTime() : new Date().getTime();
+        data_buffer.push({
+            replay_ts: stamp,
+            data: data
+        });
+        if (data_buffer.length > data_buffer_max)
+            data_buffer = data_buffer.slice(1);
+
+        if (!suspend_data)
+            socket.emit('serialEvent', data);
+    }
+
+    /**
+     * Resend the contents of the data buffer all at once.
+     * Note: we send the data points as an object with the
+     *       time stamp embedded for accurate replay.
+     * @param {Number} l Number of points to resend (not used)
+     */
+    var replayData = function (l) {
+        suspend_data = true;
+        for (var i = 0; i < data_buffer.length; i++) {
+            socket.emit('serialEvent', data_buffer[i]);
+        }
+        suspend_data = false;
     }
 
     var openInstrument = function (insid) {
@@ -508,6 +543,9 @@ io.sockets.on('connection', function (socket) {
         var isopen = connectionmanager.isOpen(insid);
         if (userinfo.role == 'operator' || userinfo.role == 'admin' ||
             isopen) {
+            // Flush the data buffer if the instrument is not open already
+            if( !isopen)
+                data_buffer = [];
             connectionmanager.openInstrument(insid, function (d) {
                 driver = d;
                 currentInstrumentid = insid;
@@ -619,6 +657,10 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('stoprecording', function () {
         recorder.stopRecording(currentInstrumentid);
+    });
+    
+    socket.on('replaydata', function() {
+        replayData();
     });
 
     socket.on('startlivestream', function (data) {

@@ -98,6 +98,8 @@ define(function (require) {
         // In this plugin, we just keep track of the incoming data and
         // only send data upon request on the TCP server interface
         this.sendData = function (data) {
+            if (typeof data != "string")
+                return;
             var cmd = data.substr(0, 2);
             switch (cmd) {
             case "FA":

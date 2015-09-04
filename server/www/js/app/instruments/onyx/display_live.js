@@ -19,20 +19,20 @@
 
 /*
  * Live view display of the output of the Onyx
- * 
+ *
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
-define(function(require) {
+define(function (require) {
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
         Backbone = require('backbone'),
-        utils    = require('app/utils'),
+        utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/OnyxLiveView.js');
-        
+
     // Load the flot library & flot time plugin:
     require('flot');
     require('flot_time');
@@ -41,7 +41,7 @@ define(function(require) {
 
     return Backbone.View.extend({
 
-        initialize:function (options) {
+        initialize: function (options) {
 
             this.currentDevice = null;
             this.showstream = settings.get('showstream');
@@ -50,14 +50,14 @@ define(function(require) {
             this.plotavg = false;
 
             // Get frequency and span if specified:
-            var span = this.model.get('liveviewspan');     // In seconds
+            var span = this.model.get('liveviewspan'); // In seconds
             var period = this.model.get('liveviewperiod'); // Polling frequency
-            
+
             var livepoints = 300; // 5 minutes @ 1 Hz
             if (span && period) {
-                livepoints = span/period;
+                livepoints = span / period;
             }
-            
+
             // We will pass this when we create plots, this is the global
             // config for the look and feel of the plot
             this.plotoptions = {
@@ -69,8 +69,8 @@ define(function(require) {
             // In Live view, we fix this at 1 minute. In log management, we will
             // make this configurable
             this.movingAvgPoints = 60;
-            this.movingAvgData =  [];  // Note: used for the graph, this stores the result of the moving average
-            this.movingAvgData2 = [];  // Note: used for the graph, this stores the result of the moving average
+            this.movingAvgData = []; // Note: used for the graph, this stores the result of the moving average
+            this.movingAvgData2 = []; // Note: used for the graph, this stores the result of the moving average
 
             this.prevStamp = 0;
 
@@ -84,41 +84,50 @@ define(function(require) {
             "click #setdevicetag": "setdevicetag",
         },
 
-        render:function () {
+        render: function () {
             var self = this;
             console.log('Main render of Onyx live view');
             $(this.el).html(template());
-            
+
             // Hide the raw data stream if we don't want it
             if (!this.showstream) {
-                $('#showstream',this.el).css('visibility', 'hidden');
+                $('#showstream', this.el).css('visibility', 'hidden');
             }
-            
+
             linkManager.requestStatus();
             this.addPlot();
             return this;
         },
 
-        addPlot: function() {
+        addPlot: function () {
             var self = this;
-            this.plot = new simpleplot({model: this.model, settings:this.plotoptions});
+            this.plot = new simpleplot({
+                model: this.model,
+                settings: this.plotoptions
+            });
             if (this.plot != null) {
-                  $('.geigerchart', this.el).append(this.plot.el);
-                  this.plot.render();
-              }
+                $('.geigerchart', this.el).append(this.plot.el);
+                this.plot.render();
+            }
+        },
+        
+        clear: function() {
+            $('.geigerchart', this.el).empty();
+            this.addPlot();
+            this.suspendGraph = true;
         },
 
-        onClose: function() {
+        onClose: function () {
             console.log("Onyx live view closing...");
 
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
             this.plot.onClose();
-            
+
         },
 
-        movingAverager: function(newpoint, buffer) {
-            
+        movingAverager: function (newpoint, buffer) {
+
             buffer.push(newpoint);
 
             // Keep our data to the length we want
@@ -127,25 +136,25 @@ define(function(require) {
 
             // Now compute the average
             var avg = 0;
-            for (var i= 0; i < buffer.length; i++) {
+            for (var i = 0; i < buffer.length; i++) {
                 avg += buffer[i];
             }
-            return avg/buffer.length;
-            
+            return avg / buffer.length;
+
         },
 
-        setdevicetag: function() {
-            var tag = $('#devicetagfield',this.el).val();
+        setdevicetag: function () {
+            var tag = $('#devicetagfield', this.el).val();
             linkManager.driver.setdevicetag(tag);
-            $('#dtModal',this.el).modal('hide');
+            $('#dtModal', this.el).modal('hide');
             // Need a small delay to let the Onyx store the tag
-            setTimeout( linkManager.driver.devicetag, 300);
+            setTimeout(linkManager.driver.devicetag, 300);
         },
 
 
-        updatestatus: function(data) {
+        updatestatus: function (data) {
             console.log("Onyx live display: serial status update");
-            
+
             // Either the port is open and we have not done our device init,
             // or the port is closed and we have to reset the device init status
             if (data.portopen && !this.deviceinitdone) {
@@ -155,18 +164,66 @@ define(function(require) {
             }
         },
 
+        disp_cpm: function (data, ts) {
+            if (data.cpm != undefined) {
+                var cpm = parseFloat(data.cpm.value);
+
+                var dp = {
+                    'name': "CPM",
+                    'value': cpm
+                };
+                if (ts != undefined)
+                    dp['timestamp'] = ts;
+
+                this.plot.appendPoint(dp);
+                dp = {
+                    'name': "AVG",
+                    'value': this.movingAverager(cpm, this.movingAvgData)
+                }
+                if (ts != undefined)
+                    dp['timestamp'] = ts;
+                this.plot.appendPoint(dp);
+            }
+            if (data.cpm2 != undefined) {
+                var cpm2 = parseFloat(data.cpm2.value);
+                var dp = {
+                    'name': "CPM2",
+                    'value': cpm2
+                };
+                if (ts != undefined)
+                    dp['timestamp'] = ts;
+                this.plot.appendPoint(dp);
+                dp = {
+                    'name': "AVG2",
+                    'value': this.movingAverager(cpm2, this.movingAvgData2)
+                };
+                if (ts != undefined)
+                    dp['timestamp'] = ts;                
+                this.plot.appendPoint(dp);
+            }
+        },
 
         // We get there whenever we receive something from the serial port
-        showInput: function(data) {
+        showInput: function (data) {
             var self = this;
+
+            if (data.replay_ts != undefined) {
+                this.suspend_graph = false;
+                this.disp_cpm(data.data, data.replay_ts);
+                return;
+            }
+            
+            // We're waiting for a data replay
+            if (this.suspend_graph)
+                return;
 
             if (this.showstream) {
                 // Update our raw data monitor
-                var i = $('#input',this.el);
+                var i = $('#input', this.el);
                 var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
                 // Keep max 50 lines:
                 if (scroll.length > 50) {
-                    scroll = scroll.slice(scroll.length-50);
+                    scroll = scroll.slice(scroll.length - 50);
                 }
                 i.val(scroll.join('\n'));
                 // Autoscroll:
@@ -177,42 +234,28 @@ define(function(require) {
             if (!this.deviceinitdone) {
                 linkManager.driver.devicetag();
             }
-            
+
             if (data.rtc != undefined) {
-                var date = new Date(parseInt(data.rtc)*1000);
+                var date = new Date(parseInt(data.rtc) * 1000);
                 if (date.getFullYear() < new Date().getFullYear()) {
                     // We have a RTC that is wrong, need to sync it.
                     linkManager.driver.settime();
                     $('#stModal', this.el).modal('show');
                 }
             }
-            
+
             if (data.devicetag != undefined) {
                 this.deviceinitdone = true;
                 if (data.devicetag == "No device tag set") {
                     // Show the device tag set dialog
-                    $('#dtModal',this.el).modal('show');
+                    $('#dtModal', this.el).modal('show');
                 } else {
                     linkManager.driver.getRTC();
                     linkManager.startLiveStream(this.model.get('liveviewperiod'));
                 }
             } else {
-                if (data.cpm != undefined) {
-                    var cpm = parseFloat(data.cpm.value);
-                    
-                    this.plot.appendPoint({'name': "CPM", 'value': cpm});
-                    this.plot.appendPoint({'name': "AVG", 'value': this.movingAverager(cpm, this.movingAvgData) });
-
-                }
-                if (data.cpm2 != undefined) {
-                    var cpm2 = parseFloat(data.cpm2.value);
-                    
-                    this.plot.appendPoint({'name': "CPM2", 'value': cpm2});
-                    this.plot.appendPoint({'name': "AVG2", 'value': this.movingAverager(cpm2, this.movingAvgData2) });
-
-                }
+                this.disp_cpm(data);
             }
         },
     });
-    
 });
