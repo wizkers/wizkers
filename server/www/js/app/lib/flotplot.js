@@ -53,7 +53,7 @@ define(function (require) {
                 // points: 150,
                 // preload: 4096,  // Use this when creating a plot with a fixed number of data points
                                    // (used for the Sigma-25)
-                log: false,
+                // log: false,     // Override log display
                 showtips: true,
                 selectable: false,
                 vertical_stretch: false, // Stretch relative to window height
@@ -88,7 +88,16 @@ define(function (require) {
             // passed - if any
             if (options && options.settings) {
                 for (var prop in options.settings) {
-                    this.flotplot_settings[prop] = options.settings[prop];
+                    if (prop != 'plot_options')
+                        this.flotplot_settings[prop] = options.settings[prop];
+                }
+                // Also copy the plot options (don't just upate the reference, otherwise
+                // this causes random issues when using the same options objects for initializing
+                // several plots
+                if ('plot_options' in options.settings) {
+                    for (var prop in options.settings.plot_options) {
+                        this.flotplot_settings.plot_options[prop] = options.settings.plot_options[prop];
+                    }
                 }
             }
 
@@ -139,7 +148,8 @@ define(function (require) {
             }], this.plotOptions);
 
             // Adjust whether we want a log display, or linear (setup in global settings)
-            if (settings.get('cpmscale') == "log") {
+            var log_disabled = (this.flotplot_settings.log) && (this.flotplot_settings.log == false);
+            if (settings.get('cpmscale') == "log" ) {
                 this.plotOptions.yaxis = {
                     min: 1,
                     //ticks: [1,10,30,50,100,500,1000,1500],
@@ -150,7 +160,8 @@ define(function (require) {
                         return Math.exp(v) - 10;
                     }
                 };
-            } else if ('yaxis' in this.plotOptions) {
+            }
+            if (('yaxis' in this.plotOptions) || log_disabled) {
                 delete this.plotOptions.yaxis.min;
                 delete this.plotOptions.yaxis.transform;
                 delete this.plotOptions.yaxis.inverseTransform;

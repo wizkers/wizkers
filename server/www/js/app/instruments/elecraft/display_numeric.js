@@ -41,32 +41,35 @@ define(function (require) {
 
         initialize: function () {
 
-            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
+            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"];
 
-                // We will pass this when we create plots, this is the global
-                // config for the look and feel of the plot
-                this.plotoptions = {
-                    points: 150, // 2.5 minutes @ 1 Hz
-                    plot_options: {
-                        xaxes: [{
-                                mode: "time",
-                                show: true,
-                                timezone: settings.get("timezone")
+            // We will pass this when we create plots, this is the global
+            // config for the look and feel of the plot
+            this.plotoptions = {
+                points: 150, // 2.5 minutes @ 1 Hz
+                log: false,
+                plot_options: {
+                    xaxes: [{
+                            mode: "time",
+                            show: true,
+                            timeformat: "%H:%M",
+                            ticks: 5,
+                            timezone: settings.get("timezone")
                         },
                        ],
-                        yaxis: {
-                            min: 0
-                        },
-                        grid: {
-                            hoverable: true,
-                            clickable: true
-                        },
-                        legend: {
-                            position: "ne"
-                        },
-                        colors: this.palette,
-                    }
-                };
+                    yaxis: {
+                        min: 0
+                    },
+                    grid: {
+                        hoverable: true,
+                        clickable: true
+                    },
+                    legend: {
+                        position: "ne"
+                    },
+                    colors: this.palette,
+                }
+            };
 
             linkManager.on('input', this.showInput, this);
             linkManager.on('status', this.updateStatus, this);

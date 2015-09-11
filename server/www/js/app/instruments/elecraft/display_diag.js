@@ -59,31 +59,33 @@ define(function (require) {
 
             this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
 
-            // We will pass this when we create plots, this is the global
-            // config for the look and feel of the plot
-            this.plotoptions = {
-                points: 150, // 2.5 minutes @ 1 Hz
-                plot_options: {
-                    xaxes: [{
-                            mode: "time",
-                            show: true,
-                            timeformat: "%M:%S",
-                            timezone: settings.get("timezone")
+                // We will pass this when we create plots, this is the global
+                // config for the look and feel of the plot
+                this.plotoptions = {
+                    points: 150, // 2.5 minutes @ 1 Hz
+                    log: false,
+                    plot_options: {
+                        xaxes: [{
+                                mode: "time",
+                                show: true,
+                                timeformat: "%M:%S",
+                                ticks: 5,
+                                timezone: settings.get("timezone")
                         },
                        ],
-                    yaxis: {
-                        min: 0
-                    },
-                    grid: {
-                        hoverable: true,
-                        clickable: true
-                    },
-                    legend: {
-                        position: "ne"
-                    },
-                    colors: this.palette,
-                }
-            };
+                        yaxis: {
+                            min: 0
+                        },
+                        grid: {
+                            hoverable: true,
+                            clickable: true
+                        },
+                        legend: {
+                            position: "ne"
+                        },
+                        colors: this.palette,
+                    }
+                };
 
         },
 
@@ -193,76 +195,92 @@ define(function (require) {
                 clearInterval(this.KXPAPoller);
             }
         },
-        
-        cap_click: function(e) {
-            var val = parseInt(e.target.id.substr(e.target.id.lastIndexOf('-')+1));
-            var caps = [ 10, 22, 40, 82, 150, 300, 660, 1360 ];
+
+        cap_click: function (e) {
+            var val = parseInt(e.target.id.substr(e.target.id.lastIndexOf('-') + 1));
+            var caps = [10, 22, 40, 82, 150, 300, 660, 1360];
             var cr = this.currentCR;
             if (e.target.checked) {
                 cr = cr | 1 << (caps.indexOf(val));
             } else {
-                cr = cr & ~(1<< caps.indexOf(val));
+                cr = cr & ~(1 << caps.indexOf(val));
             }
             this.currentCR = cr;
             cr = cr.toString(16);
-            if (cr.length<2) { cr = '0' + cr; }
+            if (cr.length < 2) {
+                cr = '0' + cr;
+            }
             linkManager.sendCommand('^CR' + cr + ';');
-            setTimeout(function(){linkManager.sendCommand('^CR;')},50);
+            setTimeout(function () {
+                linkManager.sendCommand('^CR;')
+            }, 50);
         },
-        
-        ind_click: function(e) {
-            var val = parseInt(e.target.id.substr(e.target.id.lastIndexOf('-')+1));
-            var inds = [ 50, 110, 230, 480, 1000, 2100, 4400, 9000 ];
+
+        ind_click: function (e) {
+            var val = parseInt(e.target.id.substr(e.target.id.lastIndexOf('-') + 1));
+            var inds = [50, 110, 230, 480, 1000, 2100, 4400, 9000];
             var lr = this.currentLR;
             if (e.target.checked) {
                 lr = lr | 1 << (inds.indexOf(val));
             } else {
-                lr = lr & ~(1<< inds.indexOf(val));
+                lr = lr & ~(1 << inds.indexOf(val));
             }
             this.currentLR = lr;
             lr = lr.toString(16);
-            if (lr.length<2) { lr = '0' + lr; }
+            if (lr.length < 2) {
+                lr = '0' + lr;
+            }
             linkManager.sendCommand('^LR' + lr + ';');
-            setTimeout(function(){linkManager.sendCommand('^LR;')},50);
+            setTimeout(function () {
+                linkManager.sendCommand('^LR;')
+            }, 50);
         },
-        
-        at_click: function(e) {
+
+        at_click: function (e) {
             if (e.target.checked) {
                 linkManager.sendCommand('^AT1;');
             } else {
                 linkManager.sendCommand('^AT0;');
             }
-            setTimeout(function(){linkManager.sendCommand('^AT;')},50);
+            setTimeout(function () {
+                linkManager.sendCommand('^AT;')
+            }, 50);
         },
-        
-        capstx_click: function(e) {
+
+        capstx_click: function (e) {
             if (e.target.checked) {
                 linkManager.sendCommand('^SIT;');
             } else {
                 linkManager.sendCommand('^SIA;');
             }
-            setTimeout(function(){linkManager.sendCommand('^SI;')},50);
+            setTimeout(function () {
+                linkManager.sendCommand('^SI;')
+            }, 50);
         },
 
-        change_ant: function(e) {
-            if ( $(e.target).val() == "ant2") {
+        change_ant: function (e) {
+            if ($(e.target).val() == "ant2") {
                 linkManager.sendCommand('^AN2;');
             } else {
                 linkManager.sendCommand('^AN1;');
             }
-            setTimeout(function(){linkManager.sendCommand('^AN;')},50);
+            setTimeout(function () {
+                linkManager.sendCommand('^AN;')
+            }, 50);
         },
-        
-        atub_click: function(e) {
+
+        atub_click: function (e) {
             if (e.target.checked) {
                 linkManager.sendCommand('^BYB;');
             } else {
                 linkManager.sendCommand('^BYN;');
             }
-            setTimeout(function(){linkManager.sendCommand('^BY;^CR;^LR;')},50);
+            setTimeout(function () {
+                linkManager.sendCommand('^BY;^CR;^LR;')
+            }, 50);
         },
 
-        pabypass_click: function(e) {
+        pabypass_click: function (e) {
             if (e.target.checked) {
                 linkManager.sendCommand('^OP0;');
             } else {
@@ -271,10 +289,12 @@ define(function (require) {
             // We query OP status in the regular calls
         },
 
-        change_mode: function(e) {
+        change_mode: function (e) {
             var md = $(e.target).val().substr(-1);
             linkManager.sendCommand('^MD' + md + ';');
-            setTimeout(function(){linkManager.sendCommand('^MD;^BY;^CR;^LR;')},50);
+            setTimeout(function () {
+                linkManager.sendCommand('^MD;^BY;^CR;^LR;')
+            }, 50);
         },
 
         makeTXEQ: function () {
@@ -385,45 +405,45 @@ define(function (require) {
             } else if (data.charAt(1) == 'F') {
                 $("#kxpa-frequency", this.el).html(data.substr(2));
             } else if (cmd == 'CR') {
-                var val = parseInt(data.substr(3),16);
+                var val = parseInt(data.substr(3), 16);
                 this.currentCR = val;
                 var sum = 0;
-                var caps = [ 10, 22, 40, 82, 150, 300, 660, 1360 ];
-                for (var i=0; i < 8; i++) {
-                    if ( val & (1<<i) ) {
-                        $('#kxpa-cap-' + caps[i], this.el).prop('checked',true);
+                var caps = [10, 22, 40, 82, 150, 300, 660, 1360];
+                for (var i = 0; i < 8; i++) {
+                    if (val & (1 << i)) {
+                        $('#kxpa-cap-' + caps[i], this.el).prop('checked', true);
                         sum += caps[i];
                     } else {
-                        $('#kxpa-cap-' + caps[i], this.el).prop('checked',false);
+                        $('#kxpa-cap-' + caps[i], this.el).prop('checked', false);
                     }
                 }
-                $('#kxpa-cap',this.el).html(sum);
+                $('#kxpa-cap', this.el).html(sum);
             } else if (cmd == 'LR') {
-                var val = parseInt(data.substr(3),16);
+                var val = parseInt(data.substr(3), 16);
                 this.currentLR = val;
                 var sum = 0;
-                var inds = [ 50, 110, 230, 480, 1000, 2100, 4400, 9000 ];
-                for (var i=0; i < 8; i++) {
-                    if ( val & (1<<i) ) {
-                        $('#kxpa-ind-' + inds[i], this.el).prop('checked',true);
+                var inds = [50, 110, 230, 480, 1000, 2100, 4400, 9000];
+                for (var i = 0; i < 8; i++) {
+                    if (val & (1 << i)) {
+                        $('#kxpa-ind-' + inds[i], this.el).prop('checked', true);
                         sum += inds[i];
                     } else {
-                        $('#kxpa-ind-' + inds[i], this.el).prop('checked',false);
+                        $('#kxpa-ind-' + inds[i], this.el).prop('checked', false);
                     }
                 }
-                $('#kxpa-ind',this.el).html(sum);
+                $('#kxpa-ind', this.el).html(sum);
             } else if (cmd == 'AT') {
-                $('#kxpa-pa-attenuator',this.el).prop('checked', (data.substr(-1,1) == "1"));
+                $('#kxpa-pa-attenuator', this.el).prop('checked', (data.substr(-1, 1) == "1"));
             } else if (cmd == 'AN') {
-                $('#kxpa-antenna',this.el).val('ant' + data.substr(-1,1));
+                $('#kxpa-antenna', this.el).val('ant' + data.substr(-1, 1));
             } else if (cmd == 'BY') {
-                $('#kxpa-atu-bypass',this.el).prop('checked', (data.substr(-1,1) == "B"));
+                $('#kxpa-atu-bypass', this.el).prop('checked', (data.substr(-1, 1) == "B"));
             } else if (cmd == 'MD') {
-                $('#kxpa-mode',this.el).val('kxpa-mode-' + data.substr(-1,1));
+                $('#kxpa-mode', this.el).val('kxpa-mode-' + data.substr(-1, 1));
             } else if (cmd == 'SI') {
-                $('#kxpa-caps-tx',this.el).prop('checked', (data.substr(-1,1) == "T"));
+                $('#kxpa-caps-tx', this.el).prop('checked', (data.substr(-1, 1) == "T"));
             } else if (cmd == 'OP') {
-                $('#kxpa-pa-bypass',this.el).prop('checked', (data.substr(-1,1) == "0"));
+                $('#kxpa-pa-bypass', this.el).prop('checked', (data.substr(-1, 1) == "0"));
             }
 
         },
