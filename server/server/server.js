@@ -113,7 +113,7 @@ dbs.settings.get('coresettings', function (err, item) {
         debug('Issue finding my own settings ' + err);
     }
     if (item == null) {
-        item = dbs.defaults.settings;
+        item = dbs.defaults('settings');
     }
 
     item.token = "_invalid_";
@@ -171,7 +171,7 @@ app.get('/login', function (req, res) {
     // Before logging in, we need to make sure there are users defined on our system.
     dbs.users.info(function (err, info) {
         if (info.doc_count == 0) {
-            var adm = dbs.defaults.user;
+            var adm = dbs.defaults('user');
             adm.local.email = "admin";
             adm.local.password = dbs.utils.users.generateHash('admin');
             adm.role = 'admin';
@@ -180,8 +180,17 @@ app.get('/login', function (req, res) {
                 if (err)
                     debug("Error during first user creation " + err);
                 debug(response);
-                res.render('login.ejs', {
-                    message: 'Welcome! Your default login/password is admin/admin'
+
+                // Now create de admin user's settings too:
+                var settings = dbs.defaults('settings');
+                settings.currentUserRole = 'admin';
+                settings._id = 'admin';
+                dbs.settings.put(settings, function (err, response) {
+                    if (err)
+                        debug('Error during first user settings creation', err);
+                    res.render('login.ejs', {
+                        message: 'Welcome! Your default login/password is admin/admin'
+                    });
                 });
             });
         } else {
@@ -240,7 +249,7 @@ app.post('/login', passport.authenticate('local-login', {
             res.redirect('/login');
         }
         if (item == null) {
-            item = dbs.defaults.settings;
+            item = dbs.defaults('settings');
         }
         item.token = token;
         dbs.settings.put(item, req.user.local.email, function (err) {
@@ -544,7 +553,7 @@ io.sockets.on('connection', function (socket) {
         if (userinfo.role == 'operator' || userinfo.role == 'admin' ||
             isopen) {
             // Flush the data buffer if the instrument is not open already
-            if( !isopen)
+            if (!isopen)
                 data_buffer = [];
             connectionmanager.openInstrument(insid, function (d) {
                 driver = d;
@@ -658,8 +667,8 @@ io.sockets.on('connection', function (socket) {
     socket.on('stoprecording', function () {
         recorder.stopRecording(currentInstrumentid);
     });
-    
-    socket.on('replaydata', function() {
+
+    socket.on('replaydata', function () {
         replayData();
     });
 

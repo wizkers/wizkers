@@ -27,11 +27,27 @@
 var dbs = require('../pouch-config');
 var debug = require('debug')('wizkers:routes:settings');
 
-
+/**
+ * Get the settings for a given user
+ * @param {Object}   req Request object containing a 'user' property
+ * @param {Function} res result handle
+ */
 exports.getSettings = function(req, res) {
     // Note: 'coresettings' always exists since it is created/
     // refreshed at application startup.
+    debug('getSettings', req.user);
     dbs.settings.get(req.user.local.email, function(err, item) {
+        if (err) {
+            debug('getSettings - requested settings for an unknown user');
+            item = dbs.defaults.settings;
+            res.send("500: bad request");
+            return;
+        }
+        // Note: currentUserRole is purely used by the front-end to
+        // determine what options should be available. It is not used to
+        // enforce any server-side security role, which would be terribly insecure.
+        // In case a user tries to hack the value, they will simply end up with
+        // user interface options which do not work when they try to use them.
         item.currentUserRole = req.user.role;
         res.send(item);
     });

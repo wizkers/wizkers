@@ -40,11 +40,21 @@ debug("Requiring pouch-config.js");
 // auto_compaction is important because we update the documents often,
 // and P/CouchDB keeps previous revisions otherwise. This option is only
 // effective for local DBs, not remote (CouchDB manages that on its own).
-var instruments = new PouchDB('./ldb/instruments', {auto_compaction: true});
-var outputs = new PouchDB('./ldb/outputs', {auto_compaction: true});
-var settings = new PouchDB('./ldb/settings', {auto_compaction: true});
-var users = new PouchDB('./ldb/users', {auto_compaction: true});
-var logs = new PouchDB('./ldb/logs', {auto_compaction: true});
+var instruments = new PouchDB('./ldb/instruments', {
+    auto_compaction: true
+});
+var outputs = new PouchDB('./ldb/outputs', {
+    auto_compaction: true
+});
+var settings = new PouchDB('./ldb/settings', {
+    auto_compaction: true
+});
+var users = new PouchDB('./ldb/users', {
+    auto_compaction: true
+});
+var logs = new PouchDB('./ldb/logs', {
+    auto_compaction: true
+});
 
 // Create the design docs we need for our various databases in order to get
 // decent performance on large datasets:
@@ -53,16 +63,18 @@ var logs = new PouchDB('./ldb/logs', {auto_compaction: true});
  * View of logs by instrument ID
  */
 var logByInstrument = {
-  _id: '_design/by_instrument',
-  views: {
-    'by_instrument': {
-      map: function (doc) { emit(doc.instrumentid); }.toString()
+    _id: '_design/by_instrument',
+    views: {
+        'by_instrument': {
+            map: function (doc) {
+                emit(doc.instrumentid);
+            }.toString()
+        }
     }
-  }
 };
 // save it
 logs.put(logByInstrument).then(function () {
-  // success!
+    // success!
     debug("Created Instruments DB 'by instrument' view");
 }).catch(function (err) {
     debug("Error creating design doc: " + err);
@@ -77,53 +89,60 @@ logs.put(logByInstrument).then(function () {
  * Defaults: we use this to initialize new documents in our Pouch
  * databases.
  */
-var defaults = {
-    settings: {
-        serialPort: '',
-        timezone: '',
-        cpmcolor: 0,
-        cpmscale: 'linear',
-        itemsperpage: 4,
-        currentInstrument: null,
-        currentUserRole: 'pending',
-        token: '', // The current authorization token for socket.io
-        showstream: false, // Show debug output
-    },
-    
-    user: {
-        local: {
-            email: '',
-            password: ''
-        },
-        google     : {
-            id     : '',
-            token  : '',
-            email  : '',
-            name   : ''
-        },
-        facebook   : {
-            id     : '',
-            token  : '',
-            email  : '',
-            name   : ''
-        },
-
-        role: 'pending'  // Should be "pending", "viewer", "operator" or "admin"
-    },
-    
-    instrument: {
-        name: '',           // Used for display
-        type: '',           // Will correspond to parsers known on the server side
-        tag: '',            // Asset tag for the instrument (if supported)
-        uuid: '',           // Serial number or unique ID (if supported)
-        port: '',           // Name of the port on server side
-        comment: '',        // Simple comments
-        icon: '',           // TbD: either user-selectable, or served by server-side (linked to type)
-        liveviewspan: '',                 // Width of live view in seconds
-        liveviewperiod: '',                 // Period of polling if supported
-        liveviewlogscale: false,                // Should live view display as a log scale by default ?
-        autoconnect: false,
-        metadata: null, // Depending on instrument type, this metadata can include additional settings
+var defaults = function (role) {
+    switch (role) {
+    case 'settings':
+        return {
+            serialPort: '',
+            timezone: '',
+            cpmcolor: 0,
+            cpmscale: 'linear',
+            itemsperpage: 4,
+            currentInstrument: null,
+            currentUserRole: 'pending',
+            token: '', // The current authorization token for socket.io
+            showstream: false, // Show debug output
+        }
+        break;
+    case 'user':
+        return {
+            local: {
+                email: '',
+                password: ''
+            },
+            google: {
+                id: '',
+                token: '',
+                email: '',
+                name: ''
+            },
+            facebook: {
+                id: '',
+                token: '',
+                email: '',
+                name: ''
+            },
+            role: 'pending' // Should be "pending", "viewer", "operator" or "admin"
+        };
+        break;
+    case instrument:
+        return {
+            name: '', // Used for display
+            type: '', // Will correspond to parsers known on the server side
+            tag: '', // Asset tag for the instrument (if supported)
+            uuid: '', // Serial number or unique ID (if supported)
+            port: '', // Name of the port on server side
+            comment: '', // Simple comments
+            icon: '', // TbD: either user-selectable, or served by server-side (linked to type)
+            liveviewspan: '', // Width of live view in seconds
+            liveviewperiod: '', // Period of polling if supported
+            liveviewlogscale: false, // Should live view display as a log scale by default ?
+            autoconnect: false,
+            metadata: null, // Depending on instrument type, this metadata can include additional settings
+        };
+        break;
+    default:
+        return {};
     }
 };
 
@@ -134,10 +153,10 @@ var defaults = {
 
 var utils = {
     users: {
-        generateHash: function(password) {
-                return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+        generateHash: function (password) {
+            return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
         },
-        validPassword: function(pw1, pw2) {
+        validPassword: function (pw1, pw2) {
             return bcrypt.compareSync(pw1, pw2);
         }
     }
@@ -151,7 +170,7 @@ module.exports = {
     settings: settings,
     users: users,
     logs: logs,
-    
+
     defaults: defaults,
     utils: utils
 }

@@ -81,12 +81,13 @@ module.exports = function(passport) {
 
 				// if there is no user with that email
                 // create the user
-                var newUser = dbs.defaults.user;
+                var newUser = dbs.defaults('user');
 
                 // set the user's local credentials
                 newUser._id = email;
                 newUser.local.email    = email;
                 newUser.local.password = dbs.utils.users.generateHash(password);
+                debug('New user credentials', newUser);
 
 				// save the user
                 dbs.users.put(newUser,function(err, result) {
