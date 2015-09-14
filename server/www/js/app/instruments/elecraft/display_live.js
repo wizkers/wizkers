@@ -32,7 +32,7 @@ define(function(require) {
         Backbone = require('backbone'),
         Snap    = require('snap'),
         utils   = require('app/utils'),
-        template =  require('js/tpl/instruments/ElecraftLiveView.js');
+        template =  require('js/tpl/instruments/elecraft/ElecraftLiveView.js');
         
     
         // Need to load these, but no related variables.

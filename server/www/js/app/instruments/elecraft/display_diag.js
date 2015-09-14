@@ -28,7 +28,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         simpleplot = require('app/lib/flotplot'),
-        template = require('js/tpl/instruments/ElecraftDiagView.js');
+        template = require('js/tpl/instruments/elecraft/ElecraftDiagView.js');
 
     // Need to load these, but no related variables.
     require('bootstrap');
@@ -115,6 +115,8 @@ define(function (require) {
             // very well until I click, otherwise
             $("#settingsTabs a:first", this.el).tab('show');
 
+            $("#cmp-control", this.el).slider();
+
             this.addPlot();
             return this;
         },
@@ -146,6 +148,7 @@ define(function (require) {
             'click input[id="kxpa-pa-bypass"]': 'pabypass_click',
             'change #kxpa-antenna': 'change_ant',
             'change #kxpa-mode': 'change_mode',
+            'slideStop #cmp-control': 'setCP'
         },
 
         addPlot: function () {
@@ -312,6 +315,11 @@ define(function (require) {
 
         },
 
+        setCP: function (e) {
+            linkManager.driver.setCP(e.value);
+        },
+
+
         take_screenshot: function () {
             // It looks like screenshots are not reliable when the KX3 and the KXPA100 are talking, so set
             // KXPA100 mode off during transfer
@@ -329,7 +337,7 @@ define(function (require) {
 
         queryKX3: function () {
             $("#kx3-sn", this.el).html(instrumentManager.getInstrument().get('uuid'));
-            linkManager.sendCommand("RVM;RVD;OM;");
+            linkManager.sendCommand("RVM;RVD;OM;CP;");
         },
 
         // Called every second when the KXPA100 tab is shown
@@ -505,6 +513,9 @@ define(function (require) {
                 var da3 = data.substr(0, 3);
                 if (da3 == 'RVM') {
                     $("#kx3-fw-mcu", this.el).html(data.substr(3));
+                } else if (da2 == 'CP') {
+                    // Speech compression
+                    $('#cmp-control', this.el).slider('setValue', parseInt(data.substr(2)));
                 } else if (da3 == 'RVD') {
                     $("#kx3-fw-dsp", this.el).html(data.substr(3));
                 } else if (da2 == 'OM') {

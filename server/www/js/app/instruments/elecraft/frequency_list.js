@@ -30,7 +30,7 @@ define(function (require) {
         Backbone = require('backbone'),
         Snap = require('snap'),
         bootbox = require('bootbox'),
-        template = require('js/tpl/instruments/ElecraftFrequencyItemView.js');
+        template = require('js/tpl/instruments/elecraft/ElecraftFrequencyItemView.js');
 
 
     // Need to load these, but no related variables.

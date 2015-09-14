@@ -27,7 +27,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        template = require('js/tpl/instruments/ElecraftEqualizer.js');
+        template = require('js/tpl/instruments/elecraft/ElecraftEqualizer.js');
     
         // Need to load these, but no related variables.
         require('bootstrap');

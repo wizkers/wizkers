@@ -1,0 +1,385 @@
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                <li class="active" role="presentation"><a href="#general" data-toggle="tab">Diagnostics</a>
+                </li>
+                </li>
+                <li role="presentation"><a href="#kx3" data-toggle="tab">KX3</a>
+                </li>
+                <li role="presentation"><a href="#kxpa100" data-toggle="tab">KXPA100</a>
+                </li>
+                <li role="presentation"><a href="#px3" data-toggle="tab">PX3</a>
+                </li>
+            </ul>
+            <br>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div class="tab-pane active" id="general">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p>Radio Serial number: <span id="kx3-sn"></span>
+                            </p>
+                            <p>Firmware versions: MCU v<span id="kx3-fw-mcu"></span>, DSP v<span id="kx3-fw-dsp"></span>
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p>Options installed/enabled:</p>
+                            <p>
+                                <span class="label label-default" id="opt-kxat3">KXAT3</span>
+                                <span class="label label-default" id="opt-kxpa100">KXPA100</span>
+                                <span class="label label-default" id="opt-kxfl3">KXLF3</span>
+                                <span class="label label-default" id="opt-kxat100">KXAT100</span>
+                                <span class="label label-default" id="opt-kxbc3">KXBC3</span>
+                                <span class="label label-default" id="opt-kx3-2m">KX3-2M</span>
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p>KXPA100 Serial number: <span id="kxpa-sn">not enabled</span>
+                            </p>
+                            <p>Firmware revision: <span id="kxpa-fwrv">not available</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row showstream">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">Manual Command</span>
+                                <input id="manualcmd" class="form-control" value="" type="text" maxlength="32">
+                                <span class="input-group-btn"><button type="button" class="btn" id="cmdsend"><span class="glyphicon glyphicon-check"></span>
+                                </button>
+                                </span>
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                    <div class="row showstream">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <h6>Raw data stream</h6>
+                                <textarea id="input" style="height:100px; width:98%;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="kx3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <legend>Audio</legend>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h4>RX Equalizer</h4>
+                            <div id="kx3-rxeq"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>TX Equalizer</h4>
+                            <div id="kx3-txeq"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>Speech Compression</h4>
+                            <div class="form-control slider-bg-info">
+                                <input type="text" id="cmp-control" data-slider-value="0" data-slider-min="0" data-slider-max="40" data-slider-step="1">
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <p>&nbsp;</p>
+                    </div>
+                    <!--
+                    <div class="row">
+                        <div class="col-md-12">
+                            <legend>Calibration</legend>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            RX Calibration freq: <span id="kx3-refcal"></span>
+                        </div>
+                    </div>
+                    -->
+                </div>
+                <div class="tab-pane" id="kxpa100">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h4>Amplifier</h4>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="col-md-4">
+                                                Input Power: <span id="kxpa-inputpower">0.0</span>
+                                                <br> Drain Current: <span id="kxpa-inputcurrent">0.0</span>
+                                                <br> Supply Voltage: <span id="kxpa-inputvoltage">.0</span>
+                                                <br> Dissipated Power: <span id="kxpa-dissipatedpower">0.0</span>
+                                                <br> Temperature: <span id="kxpa-temperature">0.0</span>
+                                                <br>
+                                            </div>
+                                            <div class="col-md-4">
+                                                Forward Power: <span id="kxpa-forwardpower">0.0</span>
+                                                <br> Reflected Power: <span id="kxpa-reflectedpower">0.0</span>
+                                                <br> Last SWR: <span id="kxpa-lastswr">0.0</span>
+                                                <br> Frequency: <span id="kxpa-frequency"></span>
+                                                <br> Band: <span id="kxpa-band"></span>
+                                                <br>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <p>Fault: <span id="kxpa-fault">NO FAULT</span>
+                                                </p>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" id="kxpa-pa-bypass">PA Bypass
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" id="kxpa-pa-attenuator">Attenuator
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h4>Antenna Tuner</h4>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <p>Mode:
+                                                        <select id="kxpa-mode">
+                                                            <option value="kxpa-mode-A">Auto</option>
+                                                            <option value="kxpa-mode-M">Manual</option>
+                                                            <option value="kxpa-mode-B">Bypass</option>
+                                                        </select>
+                                                    </p>
+                                                    <p>Antenna:
+                                                        <select id="kxpa-antenna">
+                                                            <option value="ant1">1</option>
+                                                            <option value="ant2">2</option>
+                                                        </select>
+                                                    </p>
+                                                    <p>Tune</p>
+
+                                                    <div class="checkbox">
+                                                        <label>
+                                                            <input type="checkbox" id="kxpa-atu-bypass">ATU Bypassed
+                                                        </label>
+                                                    </div>
+                                                    <div class="checkbox">
+                                                        <label>
+                                                            <input type="checkbox" id="kxpa-caps-tx">Caps on Tx side
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <p>Capacitance (pF)</p>
+                                                                    <p>Total: <span id="kxpa-cap">n.a.</span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-cap-1360">1360
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-cap-660">660
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-cap-300">300
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-cap-150">150
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-cap-82">82
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-cap-40">40
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-cap-22">22
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-cap-10">10
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <p>Inductance (nH)</p>
+                                                                    <p>Total: <span id="kxpa-ind">n.a.</span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-ind-9000">9000
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-ind-4400">4400
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-ind-2100">2100
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-ind-1000">1000
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-ind-480">480
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-ind-230">230
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-ind-110">110
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="checkbox">
+                                                                        <label>
+                                                                            <input type="checkbox" id="kxpa-ind-50">50
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h4>Power</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>Temperature</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>Supply</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>SWR</h4>
+                        </div>
+                    </div>
+                    <!-- Add here Amplifier graphs -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="thumbnail">
+                                <div class="amppowerchart chart" style="position: relative; height:200px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="thumbnail">
+                                <div class="amptempchart chart" style="position: relative; height:200px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="thumbnail">
+                                <div class="ampvoltagechart chart" style="position: relative; height:200px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="thumbnail">
+                                <div class="ampswrchart chart" style="position: relative; height:200px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="tab-pane" id="px3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <button class="btn btn-info" id="px3-screenshot" title="Screenshot" type="button">
+                                        Take Screenshot
+                                    </button>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="progress">
+                                        <div class="progress-bar" id="bmdownload" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class=" thumbnail">
+                                        <canvas id="screenshot" style="width:480px; height:272px;" class="takeshot"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>

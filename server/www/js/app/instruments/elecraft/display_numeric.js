@@ -30,7 +30,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         simpleplot = require('app/lib/flotplot'),
-        template = require('js/tpl/instruments/ElecraftNumView.js');
+        template = require('js/tpl/instruments/elecraft/ElecraftNumView.js');
 
     //require('bootstrap');
     require('flot');
