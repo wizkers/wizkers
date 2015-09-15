@@ -45,7 +45,7 @@ var HawkNest = function () {
     var self = this;
     var instrumentid;
     var pinoccio_info;
-
+    
     /////////
     // Private methods
     /////////
@@ -79,41 +79,47 @@ var HawkNest = function () {
         debug(data);
 
         // Now extract what we really are interested into:
-        if (data.report && data.report.type == 'Hawk') {
+        if (data.report) {
             var val = data.report;
-            jsresp = {
-                cpm: {
-                    value: val.ch1,
-                    valid: true
-                },
-                cpm2: {
-                    value: val.ch2,
-                    valid: true
-                },
-                probeid: val.hwser,
-                timestamp: val.at
-            }
-            // Extract a proper date from the data:
-            var date = val.year + 2000 + '/' + val.month + '/' + val.day;
-            var time = val.hour + ':' + val.min + ':' + val.sec + ' UTC';
-            jsresp.devicestamp = Date.parse(date + ' ' + time);  // Javascript timestamp (microseconds since Jan 1 1970 UTC)
+            if (val.type == 'Hawk') {
+                jsresp = {
+                        cpm: {
+                            value: val.ch1,
+                            valid: true
+                        },
+                        cpm2: {
+                            value: val.ch2,
+                            valid: true
+                        },
+                        probeid: val.hwser,
+                        timestamp: val.at
+                    }
+                    // Extract a proper date from the data:
+                var date = val.year + 2000 + '/' + val.month + '/' + val.day;
+                var time = val.hour + ':' + val.min + ':' + val.sec + ' UTC';
+                jsresp.devicestamp = Date.parse(date + ' ' + time); // Javascript timestamp (microseconds since Jan 1 1970 UTC)
 
-            // Whenever we get data, attempt to resync the unit time to avoid any drift
-            var d = new Date();
-            // Warning: this code will break after 2100:
-            var cmd = 'nest.settimedate(\\"' + (d.getUTCFullYear()-2000) +
-                ((d.getUTCMonth() < 9) ? '0' : '') + (d.getUTCMonth()+1) +
-                ((d.getUTCDate() < 10) ? '0' : '') + d.getUTCDate() +
-                ((d.getUTCHours() < 10) ? '0' : '') + d.getUTCHours() +
-                ((d.getUTCMinutes() < 10) ? '0' : '') + d.getUTCMinutes() +
-                ((d.getUTCSeconds() < 10) ? '0' : '') + d.getUTCSeconds() +
-                '\\")';
-            debug(cmd);
-            self.output({ id: data.id, command: cmd});
-        } 
+                // Whenever we get data, attempt to resync the unit time to avoid any drift
+                var d = new Date();
+                // Warning: this code will break after 2100:
+                var cmd = 'nest.settimedate(\\"' + (d.getUTCFullYear() - 2000) +
+                    ((d.getUTCMonth() < 9) ? '0' : '') + (d.getUTCMonth() + 1) +
+                    ((d.getUTCDate() < 10) ? '0' : '') + d.getUTCDate() +
+                    ((d.getUTCHours() < 10) ? '0' : '') + d.getUTCHours() +
+                    ((d.getUTCMinutes() < 10) ? '0' : '') + d.getUTCMinutes() +
+                    ((d.getUTCSeconds() < 10) ? '0' : '') + d.getUTCSeconds() +
+                    '\\")';
+                debug(cmd);
+                self.output({
+                    token: data.token,
+                    command: cmd
+                });
+            } else if (val.type == 'power' || val.type == 'temp') {
+                jsresp = val;
+            }
+        }
         if (jsresp !== undefined)
             self.emit('data', jsresp);
-        
     };
 
     /////////

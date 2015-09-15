@@ -43,12 +43,14 @@ var Scout = function (sock) {
 
     EventEmitter.call(this);
 
-    debug("Creating Pinocc.io scout with the following info:");
+    debug("Creating Pinocc.io scout gwith the following info:");
     debug(sock);
     
     var self = this,
         token = undefined,
-        lead_scout_id = undefined;
+        lead_scout_id = undefined,
+        cmd_id = 1,
+        maxId = 255;
         
     
     sock.on('data', function(data) {
@@ -70,7 +72,7 @@ var Scout = function (sock) {
                 token = jsdata.token;
                 self.emit('ready', token);
             } else if (token != 0) {
-                jsdata.id = token;
+                jsdata.token = token;
             }                
             
             self.emit('data', jsdata);
@@ -102,7 +104,9 @@ var Scout = function (sock) {
      */
     this.sendCommand = function(cmd) {
         if (lead_scout_id != undefined && token != undefined) {
-            sock.write('{"type":"command", "to":' + lead_scout_id + ', "id":"' + token + '",  "command":"' + cmd + '"}\n');
+            sock.write('{"type":"command", "to":' + lead_scout_id + ', "id":"' + cmd_id++ + '",  "command":"' + cmd + '"}\n');
+            if (cmd_id > maxId)
+                cmd_id = 1;
         }
     };
     

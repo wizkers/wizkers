@@ -113,9 +113,9 @@ var PinoConnection = function (path) {
      *                      "command" key which contains the command.
      */
     this.write = function (data) {
-        var id = data.id;
-        if ( id != undefined) {
-            troop[id].sendCommand(data.command);
+        var token = data.token;
+        if ( token != undefined) {
+            troop[token].sendCommand(data.command);
         }
     }
 
