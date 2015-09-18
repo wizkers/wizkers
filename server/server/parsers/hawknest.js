@@ -45,11 +45,14 @@ var HawkNest = function () {
     var self = this;
     var instrumentid;
     var pinoccio_info;
-    
+
     // Keep track of last call time for throttling commands
     // to the probes (don't send too many)
     var last_cmd_time = {};
-    
+
+    // Keep track of the probes we know about, by token
+    var probes = {};
+
     /////////
     // Private methods
     /////////
@@ -82,27 +85,40 @@ var HawkNest = function () {
         var jsresp;
         debug(data);
 
+        if (data.token == undefined)
+            return;
+
+        if (probes[data.token] == undefined)
+            probes[data.token] = {
+                probeid: -1
+            };
+
         // Now extract what we really are interested into:
         if (data.report) {
             var val = data.report;
             if (val.type == 'Hawk') {
                 jsresp = {
-                        cpm: {
-                            value: val.ch1,
-                            valid: true
-                        },
-                        cpm2: {
-                            value: val.ch2,
-                            valid: true
-                        },
-                        probeid: val.hwser,
-                        timestamp: val.at
-                    }
-                    // Extract a proper date from the data:
+                    cpm: {
+                        value: val.ch1,
+                        valid: true
+                    },
+                    cpm2: {
+                        value: val.ch2,
+                        valid: true
+                    },
+                    probeid: val.hwser,
+                    timestamp: val.at
+                };
+
+                // Map the hwser to the token, since the front-end uses the (unique) hwser
+                // to track the probes
+                probes[data.token].probeid = val.hwser;
+
+                // Extract a proper date from the data:
                 var date = val.year + 2000 + '/' + val.month + '/' + val.day;
                 var time = val.hour + ':' + val.min + ':' + val.sec + ' UTC';
                 jsresp.devicestamp = Date.parse(date + ' ' + time); // Javascript timestamp (microseconds since Jan 1 1970 UTC)
-                
+
                 var ts = new Date().getTime();
                 if (last_cmd_time[data.token] == undefined)
                     last_cmd_time[data.token] = ts;
@@ -132,8 +148,11 @@ var HawkNest = function () {
                         command: cmd
                     });
                 }
-                
+
             } else if (val.type == 'power' || val.type == 'temp') {
+                // We need to add the probeID otherwise the front-end won't be able
+                // to tell what probe this reading is for!
+                val.probeid = probes[data.token].probeid;
                 jsresp = val;
             }
         }
