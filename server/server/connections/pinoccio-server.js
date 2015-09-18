@@ -91,6 +91,9 @@ var PinoConnection = function (path) {
             scout.on('data', forwardData);
             scout.on('error', handleError);
             scout.on('ready', addScout);
+            
+            // TODO: there might be a memory leak here, with scout objects not garbage
+            // collected properly upon socket closing.
 
         });
 

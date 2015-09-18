@@ -46,6 +46,10 @@ var HawkNest = function () {
     var instrumentid;
     var pinoccio_info;
     
+    // Keep track of last call time for throttling commands
+    // to the probes (don't send too many)
+    var last_cmd_time = {};
+    
     /////////
     // Private methods
     /////////
@@ -98,22 +102,37 @@ var HawkNest = function () {
                 var date = val.year + 2000 + '/' + val.month + '/' + val.day;
                 var time = val.hour + ':' + val.min + ':' + val.sec + ' UTC';
                 jsresp.devicestamp = Date.parse(date + ' ' + time); // Javascript timestamp (microseconds since Jan 1 1970 UTC)
+                
+                var ts = new Date().getTime();
+                if (last_cmd_time[data.token] == undefined)
+                    last_cmd_time[data.token] = ts;
 
-                // Whenever we get data, attempt to resync the unit time to avoid any drift
-                var d = new Date();
-                // Warning: this code will break after 2100:
-                var cmd = 'nest.settimedate(\\"' + (d.getUTCFullYear() - 2000) +
-                    ((d.getUTCMonth() < 9) ? '0' : '') + (d.getUTCMonth() + 1) +
-                    ((d.getUTCDate() < 10) ? '0' : '') + d.getUTCDate() +
-                    ((d.getUTCHours() < 10) ? '0' : '') + d.getUTCHours() +
-                    ((d.getUTCMinutes() < 10) ? '0' : '') + d.getUTCMinutes() +
-                    ((d.getUTCSeconds() < 10) ? '0' : '') + d.getUTCSeconds() +
-                    '\\")';
-                debug(cmd);
-                self.output({
-                    token: data.token,
-                    command: cmd
-                });
+                if (ts - last_cmd_time[data.token] > 5000) {
+                    last_cmd_time[data.token] = ts;
+                    // Whenever we get data, attempt to resync the unit time to avoid any drift
+                    var d = new Date();
+                    // Warning: this code will break after 2100:
+                    var cmd = 'nest.settimedate(\\"' + (d.getUTCFullYear() - 2000) +
+                        ((d.getUTCMonth() < 9) ? '0' : '') + (d.getUTCMonth() + 1) +
+                        ((d.getUTCDate() < 10) ? '0' : '') + d.getUTCDate() +
+                        ((d.getUTCHours() < 10) ? '0' : '') + d.getUTCHours() +
+                        ((d.getUTCMinutes() < 10) ? '0' : '') + d.getUTCMinutes() +
+                        ((d.getUTCSeconds() < 10) ? '0' : '') + d.getUTCSeconds() +
+                        '\\")';
+                    debug(cmd);
+                    self.output({
+                        token: data.token,
+                        command: cmd
+                    });
+
+                    // Then ask for power as well, while we can
+                    cmd = 'power.report';
+                    self.output({
+                        token: data.token,
+                        command: cmd
+                    });
+                }
+                
             } else if (val.type == 'power' || val.type == 'temp') {
                 jsresp = val;
             }

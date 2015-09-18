@@ -43,8 +43,8 @@ var Scout = function (sock) {
 
     EventEmitter.call(this);
 
-    debug("Creating Pinocc.io scout gwith the following info:");
-    debug(sock);
+    debug("Creating Pinocc.io scout");
+    // debug(sock);
     
     var self = this,
         token = undefined,
