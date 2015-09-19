@@ -43,8 +43,8 @@ var HawkNest = function () {
     var isopen = false;
     var port_close_requested = false;
     var self = this;
+    var instrument;
     var instrumentid;
-    var pinoccio_info;
 
     // Keep track of last call time for throttling commands
     // to the probes (don't send too many)
@@ -114,6 +114,32 @@ var HawkNest = function () {
                 // to track the probes
                 probes[data.token].probeid = val.hwser;
 
+                // Memorize the Probe ID in the Pinoccio instrument, so that we can
+                // name the probes on the front-end
+                var known_probes = instrument.metadata.probes || {};
+                if (known_probes[val.hwser] == undefined) {
+                    debug('Adding new discovered probe:' + val.hwser);
+                    dbs.instruments.get(instrument._id, function (err, result) {
+                        if (err) {
+                            debug("Error updating probe name: " + err);
+                            return;
+                        }
+                        if (result.metadata.probes == undefined)
+                            result.metadata.probes = {};
+                        result.metadata.probes[val.hwser] = {
+                            name: '' + val.hwser
+                        };
+                        debug('New instrument state', result);
+                        instrument = result; // Otherwise we'll keep on adding the probes!
+                        dbs.instruments.put(result, function (err, result) {
+                            if (err) {
+                                debug(err);
+                                return;
+                            }
+                        });
+                    });
+                }
+
                 // Extract a proper date from the data:
                 var date = val.year + 2000 + '/' + val.month + '/' + val.day;
                 var time = val.hour + ':' + val.min + ':' + val.sec + ' UTC';
@@ -175,8 +201,9 @@ var HawkNest = function () {
     this.openPort = function (id) {
         instrumentid = id;
         dbs.instruments.get(id, function (err, item) {
-            pinoccio_info = item.pinoccio; // Save for later use (close esp.)
-            port = new pinoconnection(item.pinoccio);
+            instrument = item; // We will use this later
+            debug(instrument);
+            port = new pinoconnection(instrument.pinoccio);
             port.on('data', format);
             port.on('status', status);
             port.open();

@@ -16,3 +16,77 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * Diag and settings screen for the instrument
+ *
+ * @author Edouard Lafargue, ed@lafargue.name
+ *
+ */
+
+define(function (require) {
+    "use strict";
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        template = require('js/tpl/instruments/hawknest/HawkNestDiagView.js');
+
+    return Backbone.View.extend({
+
+        initialize: function () {
+            this.ins = undefined;
+
+            linkManager.on('input', this.showInput, this);
+
+            if (!linkManager.isRecording())
+                linkManager.stopLiveStream();
+        },
+
+        events: {
+            'click .probeline': 'selectProbe',
+            'click #setprobename': 'updateProbeName'
+        },
+
+        onClose: function () {
+            console.log('[Hawk Nest] Diag view closing...');
+            linkManager.off('input', this.showInput);
+        },
+
+        render: function () {
+            var self = this;
+
+            // This view touches the instrument object, which can also be modified on the backend, when
+            // a new probe is detected - then backend then adds the Probe ID to the metadata.
+            // For this reason, we need to refresh our instrument from the backend whenever we display this
+            // screen.
+            // Worst case, a new probe will be detected while we are on the screen, and its ID will be
+            // deleted when we save any changes here. The ID will be added again next time the probe sends
+            // data.
+            instrumentManager.getInstrument().fetch({
+                success: function () {
+                    self.ins = instrumentManager.getInstrument();
+                    self.$el.html(template(_.extend(self.model.toJSON(), {
+                        metadata: self.ins.get('metadata')
+                    })));
+                }
+            });
+
+            return this;
+        },
+
+        selectProbe: function (e) {
+            var probeid = $(e.target).data('probeid');
+            $("#probetitle", this.el).html(probeid);
+
+            // Populate the name of the probe:
+            var pname = this.ins.get('metadata').probes[probeid].name;
+            $('#probename', this.el).val(pname);
+
+        },
+        
+        updateProbeName: function(e) {
+        },
+
+        showInput: function (data) {}
+    });
+});

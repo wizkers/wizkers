@@ -45,7 +45,7 @@ define(function(require) {
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities    
         this.getCaps = function() {
-            return ["LiveDisplay", "NumDisplay", "LogView"
+            return ["LiveDisplay", "NumDisplay", "LogView", "DiagDisplay"
                    ];
         };
         
@@ -87,7 +87,7 @@ define(function(require) {
 
         // A diagnostics/device setup screen
         this.getDiagDisplay = function(arg, callback) {
-            require(['app/instruments/heliumgeiger/display_diag'], function(view) {
+            require(['app/instruments/hawknest/display_diag'], function(view) {
                 callback(new view(arg));
             });
         };
