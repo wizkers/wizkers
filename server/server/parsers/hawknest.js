@@ -180,6 +180,35 @@ var HawkNest = function () {
                 // to tell what probe this reading is for!
                 val.probeid = probes[data.token].probeid;
                 jsresp = val;
+
+                // Store the results into the instrument info, so that it can be
+                // monitored by the front-end
+                var known_probes = instrument.metadata.probes || {};
+                if (known_probes[val.probeid] != undefined) {
+                    dbs.instruments.get(instrument._id, function (err, result) {
+                        if (err) {
+                            debug("Error updating probe name: " + err);
+                            return;
+                        }
+                        result.metadata.probes[val.probeid].ts = new Date().getTime();
+                        if (val.voltage != undefined)
+                            result.metadata.probes[val.probeid].voltage = val.voltage;
+                        if (val.battery != undefined)
+                            result.metadata.probes[val.probeid].battery = val.battery;
+                        if (val.charging != undefined)
+                            result.metadata.probes[val.probeid].charging = val.charging;
+                        if (val.temp != undefined)
+                            result.metadata.probes[val.probeid].temp = val.temp;
+                        instrument = result; // Otherwise we'll keep on adding the probes!
+                        debug(result.metadata.probes[val.probeid]);
+                        dbs.instruments.put(result, function (err, result) {
+                            if (err) {
+                                debug(err);
+                                return;
+                            }
+                        });
+                    });
+                }
             }
         }
         if (jsresp !== undefined)

@@ -79,12 +79,16 @@ define(function (require) {
             $("#probetitle", this.el).html(probeid);
 
             // Populate the name of the probe:
-            var pname = this.ins.get('metadata').probes[probeid].name;
-            $('#probename', this.el).val(pname);
-
+            var pid = this.ins.get('metadata').probes[probeid]
+            $('#probename', this.el).val(pid.name);
+            var ls = ((new Date().getTime()-pid.ts)/60000).toFixed(0);
+            $('#lastseen',this.el).html(ls + ' minute' + ((ls == '1') ? '':'s') +' ago');
+            $('#lastseenfull', this.el).html(new Date(pid.ts).toISOString());
+            $('#voltage', this.el).html(pid.voltage/100 + 'V');
         },
         
         updateProbeName: function(e) {
+            
         },
 
         showInput: function (data) {}
