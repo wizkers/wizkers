@@ -44,7 +44,8 @@ define(function (require) {
 
         events: {
             'click .probeline': 'selectProbe',
-            'click #setprobename': 'updateProbeName'
+            'click #setprobename': 'updateProbeName',
+            'click .refresh': 'render'
         },
 
         onClose: function () {
@@ -88,7 +89,14 @@ define(function (require) {
         },
         
         updateProbeName: function(e) {
-            
+            var pname = $('#probename', this.el).val();
+            var probeid = parseInt($('#probetitle',this.el).html());
+            if (isNaN(probeid))
+                return;
+            var pid = this.ins.get('metadata');
+            pid.probes[probeid].name = pname;
+            this.ins.set('metadata', pid);
+            this.ins.save(null,function() {});
         },
 
         showInput: function (data) {}

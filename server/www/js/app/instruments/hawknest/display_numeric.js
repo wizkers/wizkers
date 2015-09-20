@@ -55,7 +55,8 @@ define(function(require) {
             var self = this;
             $(this.el).html(template());
             if (probeid != '-') {
-                $("#probeid",this.el).html(probeid);
+                var pname = instrumentManager.getInstrument().get('metadata').probes[probeid].name || probeid;
+                $("#probeid",this.el).html(pname);
                 if (readings[probeid] != undefined) {
                     $('#livecpm', this.el).html(readings[probeid].cpm);
                     $('#livecpm2', this.el).html(readings[probeid].cpm2);

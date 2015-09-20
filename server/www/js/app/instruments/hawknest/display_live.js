@@ -130,7 +130,7 @@ define(function (require) {
         },
 
         selectProbe: function (evt) {
-            var pid = evt.target.firstChild.nodeValue;
+            var pid = $(evt.target).data('probe');
             // We need to tell the num view we got a new probe ID:
             instrumentManager.numViewRef().selectProbe(pid);
         },
@@ -175,7 +175,12 @@ define(function (require) {
                     model: this.model,
                     settings: this.plotoptions
                 });
-                $('#probes-select', this.el).append('<li role="presentation" class="probe-tab" ><a data-toggle="tab" href="#probes-' + data.probeid + '">' + data.probeid + '</a></li>');
+                var pname = data.probeid;
+                try {
+                    var pname = instrumentManager.getInstrument().get('metadata').probes[data.probeid].name;
+                } catch (e) {                    
+                }
+                $('#probes-select', this.el).append('<li role="presentation" class="probe-tab" ><a data-toggle="tab" href="#probes-' + data.probeid + '" data-probe="' + data.probeid + '">' + pname + '</a></li>');
                 $('#probes-content', this.el).append('<div class="tab-pane" id="probes-' + data.probeid + '"><div class="thumbnail">' +
                     '<div class="chart" id="chart-' + data.probeid + '"></div></div></div>');
                 // Need to activate the tab before adding the plot, otherwise we get a "invalid plot dimensions" error
