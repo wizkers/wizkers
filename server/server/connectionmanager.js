@@ -42,7 +42,7 @@ var FCOled = require('./parsers/fried_usb_tester.js');
 var W433 = require('./parsers/w433.js');
 var Elecraft = require('./parsers/elecraft.js');
 var USBGeiger = require('./parsers/usb_geiger.js');
-var HeliumGeiger = require('./parsers/helium_geiger.js');
+//var HeliumGeiger = require('./parsers/helium_geiger.js');
 var HawkNest = require('./parsers/hawknest.js');
 var SimpleSerial = require('./parsers/simple_serial.js');
 
@@ -65,8 +65,8 @@ var ConnectionManager = function () {
             driver = new Elecraft();
         } else if (type == 'usbgeiger') {
             driver = new USBGeiger();
-        } else if (type == 'heliumgeiger') {
-            driver = new HeliumGeiger();
+//        } else if (type == 'heliumgeiger') {
+//            driver = new HeliumGeiger();
         } else if (type == 'hawknest') {
             driver = new HawkNest();
         } else if (type == 'simple_serial') {

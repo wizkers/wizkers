@@ -73,36 +73,36 @@ var socketioJwt = require('socketio-jwt');
  * Setup the HTTP server and routes
  */
 var express = require('express'),
+    cookieParser = require('cookie-parser'),
+    favicon = require('serve-favicon'),
+    bodyParser = require('body-parser'),
+    session = require('express-session'),
     instruments = require('./routes/instruments.js'),
     outputs = require('./routes/outputs.js'),
     deviceLogs = require('./routes/logs.js'),
     settings = require('./routes/settings.js'),
     backup = require('./routes/backup.js');
 
-var app = express(),
-    server = require('http').createServer(app),
-    io = require('socket.io').listen(server, {
-        log: false
-    });
+var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
-app.configure(function () {
-    //app.use(express.logger('dev'));     // 'default', 'short', 'tiny', 'dev'
-    app.use(express.cookieParser()); // passport authentication needs to read cookies
-    app.use(express.favicon());
-    app.use(express.bodyParser({
-        keepExtensions: true
-    }));
+app.use(cookieParser()); // passport authentication needs to read cookies
+app.use(favicon(__dirname + '/www/img/ico/favicon.png'));
+app.use(bodyParser({
+    keepExtensions: true
+}));
 
-    app.set('view engine', 'ejs'); // Setup templating for login forms
+app.set('view engine', 'ejs'); // Setup templating for login forms
 
-    // Configure Passport
-    app.use(express.session({
-        secret: 'LKJQDHFGLKJHpiusdhfgpsidf!à§98769876654è§!ç'
-    }));
-    app.use(passport.initialize());
-    app.use(passport.session()); // Persistent login sessions, makes user life easier
-    app.use(flash()); // Flash messages upon login, stored in session
-});
+// Configure Passport
+app.use(session({
+    secret: 'LKJQDHFGLKJHpiusdhfgpsidf!à§98769876654è§!ç'
+}));
+app.use(passport.initialize());
+app.use(passport.session()); // Persistent login sessions, makes user life easier
+app.use(flash()); // Flash messages upon login, stored in session
+
 
 
 
