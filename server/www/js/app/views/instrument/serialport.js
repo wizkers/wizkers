@@ -34,7 +34,7 @@ define(function (require) {
         initialize: function (options) {
             console.log(options);
             this.ports = options.ports;
-            linkManager.once('ports', this.refreshDevices, this);
+            this.refresh();
         },
 
         events: {
