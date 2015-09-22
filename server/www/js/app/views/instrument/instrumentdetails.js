@@ -44,7 +44,7 @@ define(function (require) {
 
         render: function () {
             var self = this;
-            
+
             this.connectionView = null;
             console.log("Render instrument details");
             var insType = this.model.get('type');
@@ -56,7 +56,7 @@ define(function (require) {
 
                 if (vizapp.type == "chrome")
                     $('.hide-chrome', this.el).hide();
-                
+
                 if (vizapp.type == "cordova")
                     $('.hide-cordova', this.el).hide();
 
@@ -74,6 +74,9 @@ define(function (require) {
                 // Last, load the port settings view: Wizkers now supports various kinds of connections, now
                 // only serial ports. This means that instruments plugins are in charge of telling Wizkers
                 // what sort of connection selector they want to use.
+                if (this.connectionView != null && this.connectionView.onClose != undefined)
+                    this.connectionView.onClose();
+
                 instrumentManager.getConnectionSettingsFor(insType, {
                     model: this.model,
                     ports: portlist
@@ -105,8 +108,8 @@ define(function (require) {
             "drop #restore-area": "importSettings"
 
         },
-        
-        onClose: function() {
+
+        onClose: function () {
             console.log("Instrument details view closing");
             // Tell the port settings view we are closing
             if (this.connectionView != null && this.connectionView.onClose != undefined)
