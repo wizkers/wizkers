@@ -164,7 +164,7 @@ function isLoggedIn(req, res, next) {
 app.get('/',
     isLoggedIn,
     function (req, res) {
-        res.sendfile('www/index.html');
+        res.sendFile(__dirname, 'www/index.html');
     });
 
 app.get('/login', function (req, res) {
