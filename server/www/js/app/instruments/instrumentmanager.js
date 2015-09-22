@@ -95,7 +95,7 @@ define(function (require) {
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "elecraft": {
-                name: "Elecraft radios",
+                name: "Elecraft KX3",
                 type: ElecraftInstrument,
                 settings: ElecraftSettingsView,
                 connectionsettings: 'app/views/instrument/serialport'
