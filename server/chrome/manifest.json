@@ -39,6 +39,9 @@
     "sockets": {
         "tcpServer": {
             "listen": ":4532"
+        },
+        "tcp": {
+            "connect": ""
         }
     },
     "sandbox": {

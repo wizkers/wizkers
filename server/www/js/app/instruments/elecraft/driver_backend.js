@@ -38,6 +38,7 @@ define(function (require) {
 
     var Serialport = require('serialport'),
         serialConnection = require('connections_serial'),
+        tcpConnection = require('connections_tcp'),
         Bitmap = require('app/lib/bitmap');
 
 
@@ -188,7 +189,16 @@ define(function (require) {
         this.openPort = function (insid) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
-            port = new serialConnection(ins.get('port'), portSettings());
+            // We now support serial over TCP/IP sockets: if we detect
+            // that the port is "TCP/IP", then create the right type of
+            // tcp port:
+            var p = ins.get('port');
+            if (p == 'TCP/IP') {
+                // Note: we just use the parser info from portSettings()
+                port = new tcpConnection(ins.get('tcpip'), portSettings().parser);
+            } else {
+                port = new serialConnection(ins.get('port'), portSettings());
+            }
             port.open();
             port.on('data', format);
             port.on('status', status);

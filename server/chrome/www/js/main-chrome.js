@@ -77,6 +77,7 @@ require.config({
         '*': {
             'socketio': 'app/chromeSocket',
             'connections_serial': 'app/connections/chromeSerial',
+            'connections_tcp': 'app/connections/chromeTcpSerial',
             'connections_hid': 'app/connections/usbhid',
             'connections_btle': 'app/connections/btle',
             'connections_webrtc': 'app/connections/webrtc',

@@ -231,7 +231,7 @@ define(function (require) {
         var getPorts = function (insType) {
             console.log('ports');
             // I'm sure this could be a lot more elegant, but at least it avoids
-            // complicated patterns and it can in theory support various port types:
+            // complicated patterns and it can support various port types:
             var ct = instrumentManager.getConnectionTypeFor(insType);
             if (ct == 'app/views/instrument/serialport') {
                 switch (vizapp.type) {
@@ -361,6 +361,7 @@ define(function (require) {
             for (var i = 0; i < ports.length; i++) {
                 portlist.push(ports[i].path);
             }
+            portlist.push('TCP/IP');
             self.trigger('ports', portlist);
         }
 

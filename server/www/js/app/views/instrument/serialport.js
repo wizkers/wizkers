@@ -34,15 +34,24 @@ define(function (require) {
         initialize: function (options) {
             console.log(options);
             this.ports = options.ports;
+            if (this.model.get('tcpip') == undefined) {
+                this.model.set('tcpip', {
+                    host: '127.0.0.1',
+                    port: 7373,
+                    proto: 'tcp'
+                });
+            }
+
             this.refresh();
         },
 
         events: {
-            "click #refresh": "refresh"
+            "click #refresh": "refresh",
+            "change #port": "toggleTcp"
         },
 
         onClose: function () {
-            console.log("Serial connexion settings closing");
+            console.log("Serial connection settings closing");
         },
 
 
@@ -50,7 +59,17 @@ define(function (require) {
             $(this.el).html(template(_.extend(this.model.toJSON(), {
                 ports: this.ports
             })));
+            if (this.model.get('port') != 'TCP/IP')
+                $('.hide-tcp', this.el).hide();
+
             return this;
+        },
+
+        toggleTcp: function (e) {
+            if (e.target.value == 'TCP/IP')
+                $('.hide-tcp', this.el).show();
+            else
+                $('.hide-tcp', this.el).hide();
         },
 
         refreshDevices: function (devices) {
