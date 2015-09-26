@@ -244,7 +244,7 @@ define(function (require) {
         initaudio: function () {
             var self = this;
 
-            if (running) {
+            if (running && sourceNode) {
                 // Stop:
                 sourceNode.disconnect();
                 filterNode.disconnect();

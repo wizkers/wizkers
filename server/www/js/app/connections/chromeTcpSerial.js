@@ -225,10 +225,28 @@ define(function (require) {
             if (info.socketId != socketId)
                 return;
             console.log("[chromeTcpSerial] We got an error from the driver: " + info.resultCode);
+            // Create meaningful error codes.
+            // The result codes are hardcoded in
+            // https://code.google.com/p/chromium/codesearch#chromium/src/net/base/net_error_list.h&sq=package:chromium&l=111
+            var friendlyCode = info.resultCode;
+            switch (info.resultCode) {
+            case -7: // timeout
+                friendlyCode = '-7: Socket timeout - lost connection';
+                break;
+            case -102: // Connectionion refused
+                friendlyCode = '-102: connection refused';
+                break;
+            case -101: // Connection reset
+                friendlyCode = '-101: connection reset';
+                break;
+            case -109: // Address unreachable
+                friendlyCode = '-109: address unreachable';
+                break;
+            }
             self.trigger('status', {
                 openerror: true,
                 reason: 'Port error - driver triggered an error.',
-                description: 'Result code: ' + info.resultCode
+                description: 'Result code: ' + friendlyCode
             });
         };
 

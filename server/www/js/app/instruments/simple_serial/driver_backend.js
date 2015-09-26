@@ -34,6 +34,7 @@ define(function (require) {
     var Backbone = require('backbone'),
         Serialport = require('serialport'),
         serialConnection = require('connections_serial'),
+        tcpConnection = require('connections_tcp'),
         abutils = require('app/lib/abutils');
 
     var parser = function (socket) {
@@ -119,7 +120,16 @@ define(function (require) {
         this.openPort = function (insid) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
-            port = new serialConnection(ins.get('port'), portSettings());
+            // We now support serial over TCP/IP sockets: if we detect
+            // that the port is "TCP/IP", then create the right type of
+            // tcp port:
+            var p = ins.get('port');
+            if (p == 'TCP/IP') {
+                // Note: we just use the parser info from portSettings()
+                port = new tcpConnection(ins.get('tcpip'), portSettings().parser);
+            } else {
+                port = new serialConnection(ins.get('port'), portSettings());
+            }
             port.open();
             port.on('data', format);
             port.on('status', status);
@@ -138,7 +148,7 @@ define(function (require) {
             return isopen;
         }
 
-        this.isOpenPending = function() {
+        this.isOpenPending = function () {
             return port_open_requested;
         }
 
@@ -157,13 +167,11 @@ define(function (require) {
         this.isStreaming = function () {
             return true;
         };
-        
-        // period in seconds
-        this.startLiveStream = function (period) {
-        };
 
-        this.stopLiveStream = function (args) {
-        };
+        // period in seconds
+        this.startLiveStream = function (period) {};
+
+        this.stopLiveStream = function (args) {};
 
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
