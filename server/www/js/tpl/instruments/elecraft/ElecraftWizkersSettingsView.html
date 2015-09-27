@@ -1,0 +1,66 @@
+<!-- this is inside a row div -->
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-12">
+            <h4>Data mode macros</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-group input-group-sm input-margin">
+                <span class="input-group-addon">CQ</span>
+                <input name="radio_data_macros.cq" type="text" class="form-control" placeholder="CQ CQ DE <MYCALL> <MYCALL>" value="<%= radio_data_macros.cq %>">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group input-group-sm input-margin">
+                <span class="input-group-addon">ANS</span>
+                <input name="radio_data_macros.ans" type="text" class="form-control" placeholder="<YOURCALL> <YOURCALL> DE <MYCALL> pse kn" value="<%= radio_data_macros.ans %>">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-group input-group-sm input-margin">
+                <span class="input-group-addon">QSO</span>
+                <input name="radio_data_macros.qso" type="text" class="form-control" placeholder="<YOURCALL> DE <MYCALL> " value="<%= radio_data_macros.qso %>">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group input-group-sm input-margin">
+                <span class="input-group-addon">KN</span>
+                <input name="radio_data_macros.kn" type="text" class="form-control" placeholder="btu <YOURCALL> DE <MYCALL> kn" value="<%= radio_data_macros.kn %>">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="input-group input-group-sm input-margin">
+                <span class="input-group-addon">SK</span>
+                <input name="radio_data_macros.sk" type="text" class="form-control" placeholder="Thank you for this QSO, 73 and all the best! <YOURCALL> de <MYCALL> sk" value="<%= radio_data_macros.sk %>">
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 input-margin">
+            <b>Me</b>
+            <textarea name="radio_data_macros.me" class="form-control" rows="3" placeholder="Operator: John, QTH: Palo Alto, CA. Grid: CM87wk"><%= radio_data_macros.me %></textarea>
+        </div>
+        <div class="col-md-6">
+            <b>My rig</b>
+            <textarea name="radio_data_macros.brag" rows="3" class="form-control" placeholder="Rig: Elecraft KX3. Controller: Wizkers.io"><%= radio_data_macros.brag %></textarea>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10">
+            <div class="alert alert-success" style="display: none">
+                <b>Success!</b> Instrument saved successfully
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-info" id="save-macros">Save macros</button>
+        </div>
+    </div>
+
+</div>

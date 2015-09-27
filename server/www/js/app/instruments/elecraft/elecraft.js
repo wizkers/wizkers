@@ -27,7 +27,7 @@
 
 
 define(function(require) {
-    "use strict";
+    'use strict';
     
     var frontend_driver = require('app/instruments/elecraft/driver_frontend');
     
@@ -35,13 +35,13 @@ define(function(require) {
         // Helper function: get driver capabilites.
         // returns a simple array of capabilities    
         this.getCaps = function() {
-            return ["LiveDisplay", "NumDisplay", "DiagDisplay"];
+            return ['LiveDisplay', 'NumDisplay', 'DiagDisplay', 'WizkersSettings'];
         };
         
         // Return the type of data reading that this instrument generates. Can be used
         // by output plugins to accept data from this instrument or not.
         this.getDataType = function() {
-                    return [ "transceiver" ];
+                    return [ 'transceiver' ];
         }
 
 
@@ -76,6 +76,15 @@ define(function(require) {
         this.getBackendDriver = function(arg, callback) {
             require(['app/instruments/elecraft/driver_backend'], function(driver) {
                 callback(new driver(arg));
+            });
+        };
+        
+        // The screen for the "Settings" top level menu. This covers settings
+        // for the Wizkers app, not the instrument itself (those are done on the DiagDisplay
+        // screen).
+        this.getWizkersSettings = function(arg, callback) {
+            require(['app/instruments/elecraft/settings_wizkers'], function(view) {
+                callback(new view(arg));
             });
         };
 

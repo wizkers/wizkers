@@ -60,7 +60,8 @@ define(function (require) {
         initialize: function () {},
 
         render: function () {
-            
+            var self = this;
+
             $(this.el).html(template(this.model.toJSON()));
 
             // Depending on the runmode, we can display additional info
@@ -70,16 +71,37 @@ define(function (require) {
                     $("#chromesettings", this.el).append("<p>" + used + " bytes used out of a " +
                         chrome.storage.local.QUOTA_BYTES + " bytes quota.</p>");
                 });
-                
+
                 if (instrumentManager.getCaps().indexOf("Upgrader") > -1) {
                     $('#device_upgrade', this.el).show();
                 }
-                
-                $('#statistics_enable',this.el).show();
-                                
+
+                $('#statistics_enable', this.el).show();
+
             }
 
+            if (instrumentManager.getCaps().indexOf('WizkersSettings') > -1) {
+                $('#no-settings', this.el).hide();
+                
+                // OK, we have additional settings for this instrument, add them here
+                instrumentManager.getWizkersSettings({
+                    model: instrumentManager.getInstrument()
+                }, function (view) {
+                    self.instrumentSettingsView = view;
+                    if (view != null) {
+                        $('#instrument-settings').html(view.el);
+                        view.render();
+                    }
+                });
+            }
+
+
             return this;
+        },
+
+        onClose: function () {
+            if (this.instrumentSettingsView && this.instrumentSettingsView.onClose)
+                this.instrumentSettingsView.onClose();
         },
 
         events: {
@@ -100,7 +122,7 @@ define(function (require) {
             this.model.set(change);
             this.model.save();
             this.render();
-            
+
             if (target.name == 'enablestats')
                 stats.setTrackingEnabled(target.checked);
 
