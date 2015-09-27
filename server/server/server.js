@@ -555,17 +555,13 @@ io.sockets.on('connection', function (socket) {
             // Flush the data buffer if the instrument is not open already
             if (!isopen)
                 data_buffer = [];
+            // If the instrument is already open, openInstrument just
+            // returns the reference to the already-created driver
             connectionmanager.openInstrument(insid, function (d) {
                 driver = d;
                 currentInstrumentid = insid;
                 // Listen for data coming in from our driver
                 driver.on('data', sendDataToFrontEnd);
-                // Reconnect the outputs for the instrument
-                // only if we are operator or admin, viewer should
-                // not touch the outputs. If the instrument was already open,
-                // do not ask to enable the outputs again either...
-                if ((userinfo.role == 'operator' || userinfo.role == 'admin') && !isopen)
-                    outputmanager.enableOutputs(insid, driver);
             });
         } else
             socket_debug("Unauthorized attempt to open instrument");

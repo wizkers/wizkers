@@ -65,8 +65,8 @@ var ConnectionManager = function () {
             driver = new Elecraft();
         } else if (type == 'usbgeiger') {
             driver = new USBGeiger();
-//        } else if (type == 'heliumgeiger') {
-//            driver = new HeliumGeiger();
+            //        } else if (type == 'heliumgeiger') {
+            //            driver = new HeliumGeiger();
         } else if (type == 'hawknest') {
             driver = new HawkNest();
         } else if (type == 'simple_serial') {
@@ -94,7 +94,7 @@ var ConnectionManager = function () {
                 var doc = items.rows[item].doc;
                 if (doc.autoconnect) {
                     self.openInstrument(doc._id, function (driver, id) {
-                            self.autoRecord(id , driver);
+                        self.autoRecord(id, driver);
                     });
                 }
             }
@@ -107,7 +107,7 @@ var ConnectionManager = function () {
      * @param {String} instrumentid The InstrumentID
      */
     this.autoRecord = function (instrumentid, driver) {
-        dbs.instruments.get(instrumentid, function(err,item) {
+        dbs.instruments.get(instrumentid, function (err, item) {
             if (err) {
                 debug('Autorecord error - ' + err);
                 return;
@@ -149,8 +149,6 @@ var ConnectionManager = function () {
      * If the instrument was already open, returns the reference to the
      * existing driver, otherwise create it.
      *
-     *
-     *
      * Note: connection manager does not handle authorization, the caller is
      * in charge of making sure it is authorized.
      */
@@ -180,6 +178,14 @@ var ConnectionManager = function () {
                 // Now ask the instrument to open its port
                 driver.openPort(instrumentid);
                 debug('Instrument is opening');
+
+                // Then also tell the output manager the instrument is open,
+                // so that it reconnects its outputs. Again, no authorization handling,
+                // we assume that the caller of openInstrument checked we had the right
+                // to open - and thus to also reconnect the outputs.
+                outputmanager.enableOutputs(instrumentid, driver);
+
+                // Last, let our caller know the driver is ready:
                 callback(driver, instrumentid);
             });
         }
