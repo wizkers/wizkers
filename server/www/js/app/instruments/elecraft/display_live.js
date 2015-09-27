@@ -144,6 +144,8 @@ define(function (require) {
         onClose: function () {
             linkManager.off('status', this.updatestatus, this);
             linkManager.off('input', this.showInput, this);
+            
+            linkManager.driver.stopTextStream();
 
             if (this.ElecraftFrequencyListView != null)
                 this.ElecraftFrequencyListView.onClose();
