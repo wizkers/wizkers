@@ -63,7 +63,7 @@ define(function (require) {
                 log: false,
                 showtips: true,
                 selectable: false,
-                                plot_options: {
+                plot_options: {
                     xaxis: {
                         mode: "time",
                         show: true,
@@ -128,7 +128,7 @@ define(function (require) {
 
             var self = this;
             var rsc = function () {
-                var chartheight = window.innerHeight /2 - $(self.el).offset().top+10;
+                var chartheight = window.innerHeight / 2 - $(self.el).offset().top + 10;
                 $('.datachart', self.el).css('height', chartheight + 'px');
                 $('.datachart2', self.el).css('height', chartheight + 'px');
             }
@@ -147,9 +147,6 @@ define(function (require) {
             this.voltplot.onClose();
             this.ampplot.onClose();
 
-            // Stop the live stream before leaving
-            linkManager.stopLiveStream();
-
         },
 
 
@@ -157,11 +154,14 @@ define(function (require) {
             console.log("OLED live display: serial status update");
         },
 
+        clear: function () {
+            $('.datachart', this.el).empty();
+            $('.datachart2', this.el).empty();
+            this.addPlot();
+            this.suspendGraph = true;
+        },
 
-        // We get there whenever we receive something from the serial port
-        showInput: function (data) {
-            var self = this;
-
+        disp_va: function (data, ts) {
             if (data.v != undefined && data.a != undefined) {
                 var v = parseFloat(data.v.avg);
                 var v_min = parseFloat(data.v.min);
@@ -170,12 +170,13 @@ define(function (require) {
                 var a_min = parseFloat(data.a.min);
                 var a_max = parseFloat(data.a.max);
 
-
                 this.voltplot.fastAppendPoint({
                     name: "V",
-                    value: v
+                    value: v,
+                    timestamp: ts
                 }).fastAppendPoint({
                     name: "Vmin",
+                    timestamp: ts,
                     value: v_min,
                     options: {
                         id: "vmin"
@@ -183,6 +184,7 @@ define(function (require) {
                 }).appendPoint({
                     name: "Vmax",
                     value: v_max,
+                    timestamp: ts,
                     options: {
                         lines: {
                             show: true,
@@ -194,10 +196,12 @@ define(function (require) {
 
                 this.ampplot.fastAppendPoint({
                     name: "mA",
-                    value: a
+                    value: a,
+                    timestamp: ts
                 }).fastAppendPoint({
                     name: "Amin",
                     value: a_min,
+                    timestamp: ts,
                     options: {
                         id: "amin"
                     }
@@ -205,6 +209,7 @@ define(function (require) {
                 }).appendPoint({
                     name: "Amax",
                     value: a_max,
+                    timestamp: ts,
                     options: {
                         lines: {
                             show: true,
@@ -214,6 +219,25 @@ define(function (require) {
                     }
                 });
             }
+        },
+
+
+        // We get there whenever we receive something from the serial port
+        showInput: function (data) {
+            var self = this;
+
+            if (data.replay_ts != undefined) {
+                this.suspend_graph = false;
+                this.disp_va(data.data, data.replay_ts);
+                return;
+            }
+
+            // We're waiting for a data replay
+            if (this.suspend_graph)
+                return;
+
+            this.disp_va(data);
+
         },
     });
 

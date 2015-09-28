@@ -300,7 +300,7 @@ define(function (require) {
             if (data.index != undefined) {
                 this.livedata[idx][data.index] = [data.index, data.value];
             } else {
-                var stamp = (data.timestamp) ? new Date(data.timestamp).getTime() : new Date().getTime();
+                var stamp = (data.timestamp != undefined) ? new Date(data.timestamp).getTime() : new Date().getTime();
                 this.livedata[idx].push([stamp, data.value]);
             }
             return this; // This lets us chain multiple operations
