@@ -90,6 +90,13 @@ define(function (require) {
             tracker.sendEvent('Instrument', action, label);
         }
         
+        this.fullEvent = function(category, action, label) {
+            if (!tracker)
+                return;
+            // category / action / label
+            tracker.sendEvent(category, action, label);
+        }
+        
         
         
         this.setInstrumentType = function (instype) {

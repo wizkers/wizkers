@@ -428,7 +428,7 @@ define(function (require) {
             var you = $("#data-theircall").val();
             var templ = this.model.get('radio_data_macros').qso;
             var fields = { MYCALL: me, YOURCALL:you };
-            var key = matchTempl(templ, fields) + "\x04";
+            var key = matchTempl(templ, fields) + " - ";
             this.queueText(key);
         },
 
@@ -441,7 +441,7 @@ define(function (require) {
             var you = $("#data-theircall").val();
             var templ = this.model.get('radio_data_macros').me;
             var fields = { MYCALL: me, YOURCALL:you };
-            var key = matchTempl(templ, fields) + " ";
+            var key = matchTempl(templ, fields) + " - ";
             this.queueText(key);
             this.sendKN();
         },
@@ -455,7 +455,7 @@ define(function (require) {
             var you = $("#data-theircall").val();
             var templ = this.model.get('radio_data_macros').brag;
             var fields = { MYCALL: me, YOURCALL:you };
-            var key = matchTempl(templ, fields);
+            var key = matchTempl(templ, fields) + " - ";
             this.queueText(key);
             this.sendKN();
         },

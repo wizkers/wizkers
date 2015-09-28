@@ -135,6 +135,7 @@ define(function (require) {
                 utils.showAlert('Error', 'No file selected', 'bg-danger');
                 return;
             }
+            stats.instrumentEvent('fw_upgrade_start', 'onyx');
             $("#device_upgrade", this.el).attr('disabled', true);
             utils.hideAlert();
             utils.showAlert('Info', "Starting upgrade, please wait", 'bg-info');
@@ -172,6 +173,7 @@ define(function (require) {
             // The first thing we do is ask for the current FW version - we
             // can't upgrade the firmware if the Onyx is not version 12.26-b at least
             if (data.version && data.status == undefined) {
+                stats.fullEvent('Firmware', 'version_before', 'onyx ' + data.version);
                 if (parseFloat(data.version) >= 12.26) {
                     $('#file_sel', this.el).attr('disabled', false);
                     $('#fw_dl', this.el).attr('disabled', false);
@@ -193,6 +195,7 @@ define(function (require) {
                     $('#chipversion', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-remove');
                     $('#chipid', this.el).html(' --- Chip ID unsupported, please contact Medcom.');
                 } else {
+                    stats.fullEvent('Firmware', 'upgrade_start', 'onyx');
                     $('#chipversion', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
                     $('#chipid', this.el).html('(chipID 420, STM32F1)');
                     linkManager.sendCommand({
@@ -204,8 +207,10 @@ define(function (require) {
             } else if (data.verifying) {
                 $("#prog-flash", this.el).width(data.verifying + "%");
             } else if (data.run_mode) {
-                if (data.run_mode == 'firmware')
+                if (data.run_mode == 'firmware') {
+                    stats.fullEvent('Firmware', 'upgrade_success', 'onyx');
                     utils.showAlert('Success', 'Firmware Upgrade was successful, device is restarting', 'bg-success');
+                }
             } else if (data.version) {
                 $('#bootloader', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
                 $('#blversion', this.el).html('( version ' + parseFloat(data.version) / 10 + ')');
