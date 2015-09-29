@@ -45,6 +45,7 @@ var USBGeiger = require('./parsers/usb_geiger.js');
 //var HeliumGeiger = require('./parsers/helium_geiger.js');
 var HawkNest = require('./parsers/hawknest.js');
 var SimpleSerial = require('./parsers/simple_serial.js');
+var Powerlog = require('./parsers/powerlog_1.js');
 
 var ConnectionManager = function () {
 
@@ -71,6 +72,8 @@ var ConnectionManager = function () {
             driver = new HawkNest();
         } else if (type == 'simple_serial') {
             driver = new SimpleSerial();
+        } else if (type == 'powerlog_1') {
+            driver = new Powerlog();
         }
         return driver;
     }

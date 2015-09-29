@@ -74,6 +74,9 @@ define(function (require) {
     var FCBTInstrument = require('app/instruments/fcbtusbv1/fcbtusbv1'),
         FCBTSettingsView = require('app/instruments/fcbtusbv1/settings');
 
+    var PowerLogInstrument = require('app/instruments/powerlog_1/powerlog_1'),
+        PowerLogSettingsView = require('app/instruments/powerlog_1/settings');
+
 
     var InstrumentManager = function () {
 
@@ -124,6 +127,12 @@ define(function (require) {
                 settings: Sigma25SettingsView,
                 connectionsettings: 'app/views/instrument/serialport'
             },
+            "powerlog_1": {
+                name: "PowerCost Monitor",
+                type: PowerLogInstrument,
+                settings: PowerLogSettingsView,
+                connectionsettings: 'app/views/instrument/serialport'
+            }
         };
 
         // The instruments below are only supported in Server runmode:
