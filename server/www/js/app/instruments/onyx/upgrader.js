@@ -135,7 +135,7 @@ define(function (require) {
                 utils.showAlert('Error', 'No file selected', 'bg-danger');
                 return;
             }
-            stats.instrumentEvent('fw_upgrade_start', 'onyx');
+            stats.fullEvent('Firmare','fw_upgrade_start', 'onyx');
             $("#device_upgrade", this.el).attr('disabled', true);
             utils.hideAlert();
             utils.showAlert('Info', "Starting upgrade, please wait", 'bg-info');
@@ -195,7 +195,7 @@ define(function (require) {
                     $('#chipversion', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-remove');
                     $('#chipid', this.el).html(' --- Chip ID unsupported, please contact Medcom.');
                 } else {
-                    stats.fullEvent('Firmware', 'upgrade_start', 'onyx');
+                    stats.fullEvent('Firmware', 'fw_upload_start', 'onyx');
                     $('#chipversion', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
                     $('#chipid', this.el).html('(chipID 420, STM32F1)');
                     linkManager.sendCommand({
