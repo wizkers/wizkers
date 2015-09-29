@@ -54,10 +54,13 @@ define(function(require) {
                      "latitude" : { "name": "Latitude", "required": true },
                      "longitude": { "name": "Longitude", "required": true },
                      "height"   : { "name": "Height", "required": false},
-                     "device_id"   : { "name": "Device Id", "required": false }
+                     "device_id": { "name": "Device Id", "required": false },
+                    // Those Xtra fields can be used by the output system to create alarms,
+                    // but they are not forwarded to Safecast
+                     "xtra_1"   : { "name": "Extra field 1", "required": false },
+                     "xtra_2"   : { "name": "Extra field 2", "required": false }
                    }
         }
-        
     };
 
     _.extend(Safecast.prototype, Backbone.Events);

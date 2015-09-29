@@ -122,6 +122,10 @@ module.exports = function safecast() {
                 debug(data);
                 output_ref.lastmessage = data;
                 dbs.outputs.get(output_ref._id, function(err,result) {
+                    if (err) {
+                        debug('Safecast output API request result storage error ' + err);
+                        return;
+                    }
                     output_ref._rev = result._rev;
                     dbs.outputs.put(output_ref, function(err,result) {
                 });

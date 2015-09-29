@@ -102,7 +102,7 @@ define(function(require) {
                 return false;
             
             var freq = output.config.get('alrmfrequency');
-            if (freq = 0)
+            if (freq == 0)
                 return false;
             if ( (output.last_alarm == undefined) ||
                  (new Date().getTime() - output.last_alarm > freq*1000)

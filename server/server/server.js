@@ -595,13 +595,16 @@ io.sockets.on('connection', function (socket) {
         }
         if (userinfo.role == 'operator' || userinfo.role == 'admin') {
             socket_debug('Instrument close request for instrument ID ' + insid);
+            // Don't close a closed instrument...
+            if (!connectionmanager.isOpen(insid))
+                return;
             driver.removeListener('data', sendDataToFrontEnd);
             recorder.stopRecording(insid);
             outputmanager.disconnectOutputs(insid);
             connectionmanager.closeInstrument(insid);
             currentInstrumentid = null;
         } else
-            socket_debug("Unauthorized attempt to open instrument");
+            socket_debug("Unauthorized attempt to close instrument");
     });
 
     /**
