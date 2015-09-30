@@ -129,7 +129,6 @@ define(function (require) {
 
         // We get there whenever we receive something from the serial port
         showInput: function (data) {
-            var self = this;
 
             if (data.replay_ts != undefined) {
                 this.suspend_graph = false;
@@ -137,7 +136,7 @@ define(function (require) {
                 return;
             }
 
-            // We're waiting for a data replay
+            // We're waiting for a data replay.
             if (this.suspend_graph)
                 return;
 

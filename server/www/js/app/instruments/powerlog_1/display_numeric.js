@@ -72,11 +72,11 @@ define(function (require) {
             var sessionDuration = (new Date().getTime() - this.sessionStartStamp) / 1000;
             $('#sessionlength', this.el).html(utils.hms(sessionDuration));
 
-            if (cpm > this.maxreading) {
+            if (pwr > this.maxreading) {
                 this.maxreading = pwr;
                 $('#maxreading', this.el).html(pwr);
             }
-            if (cpm < this.minreading || this.minreading == -1) {
+            if (pwr < this.minreading || this.minreading == -1) {
                 this.minreading = pwr;
                 $('#minreading', this.el).html(pwr);
             }
