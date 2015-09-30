@@ -91,7 +91,7 @@ var SerialConnection = function(path, settings) {
     myPort.on('error', function(err) {
         debug("Serial port error: "  + err);
         portOpen = false;
-        self.emit('status', {portopen: portOpen});
+        self.emit('status', {portopen: portOpen, error: true});
     });
         
     myPort.on('close', function() {

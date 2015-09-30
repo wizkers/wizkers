@@ -65,6 +65,12 @@ var USBGeiger = function () {
                 port.removeListener('status', status);
                 port_close_requested = false;
             }
+            if (stat.error) {
+                // The port closed by itself, we need to unregister
+                // all our callbacks
+                port.off('status', status);
+                port.off('data', format);
+            }
         }
     };
 

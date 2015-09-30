@@ -103,8 +103,14 @@ var Powerlog = function () {
         } else {
             // We remove the listener so that the serial port can be GC'ed
             if (port_close_requested) {
-                port.off('status', stat);
+                port.off('status', status);
                 port_close_requested = false;
+            }
+            if (stat.error) {
+                // The port closed by itself, we need to unregister
+                // all our callbacks
+                port.off('status', status);
+                port.off('data', format);
             }
         }
     };
