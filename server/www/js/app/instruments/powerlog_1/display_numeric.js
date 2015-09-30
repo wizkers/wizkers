@@ -39,8 +39,6 @@ define(function (require) {
             this.sessionStartStamp = new Date().getTime();
             this.maxreading = 0;
             this.minreading = -1;
-            this.valid = false;
-            this.validinit = false;
             linkManager.on('input', this.showInput, this);
         },
 
@@ -60,39 +58,27 @@ define(function (require) {
 
         showInput: function (data) {
 
-            if (typeof (data.devicetag) != 'undefined')
-                $('#devicetag', this.el).html(data.devicetag);
-
-            if (typeof (data.cpm) == 'undefined')
+            // We don't want to do anything on replays, it just
+            // eats CPU cycles.
+            if (data.replay_ts != undefined)
                 return;
-            var cpm = parseFloat(data.cpm.value);
-            var usv = parseFloat(data.cpm.usv);
-            var count = parseInt(data.cpm.count);
-            $('#livecpm', this.el).html(cpm.toFixed(0));
-            if (usv) {
-                $('#liveusvh', this.el).html(usv.toFixed(3) + "&nbsp;&mu;Sv/h");
-            }
 
-            if (data.cpm.valid)
-                $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('VALID');
-            else
-                $('#readingvalid', this.el).removeClass('label-success').addClass('label-danger').html('INVALID');
-
-            if (count) {
-                $('#count', this.el).html(count);
-            }
+            if (typeof (data.power) == 'undefined')
+                return;
+            var pwr = parseFloat(data.power);
+            $('#livepower', this.el).html(pwr.toFixed(0));
 
             // Update statistics:
             var sessionDuration = (new Date().getTime() - this.sessionStartStamp) / 1000;
             $('#sessionlength', this.el).html(utils.hms(sessionDuration));
 
             if (cpm > this.maxreading) {
-                this.maxreading = cpm;
-                $('#maxreading', this.el).html(cpm);
+                this.maxreading = pwr;
+                $('#maxreading', this.el).html(pwr);
             }
             if (cpm < this.minreading || this.minreading == -1) {
-                this.minreading = cpm;
-                $('#minreading', this.el).html(cpm);
+                this.minreading = pwr;
+                $('#minreading', this.el).html(pwr);
             }
 
         },
