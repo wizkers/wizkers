@@ -43,6 +43,7 @@ var Powerlog = function () {
         livePoller = null, // Reference to the live streaming poller
         streaming = true,
         port = null,
+        instrumentid = null,
         port_close_requested = false,
         port_open_requested = false,
         isopen = false;
@@ -59,7 +60,7 @@ var Powerlog = function () {
             stopBits: 1,
             dtr: true,
             flowControl: false,
-            parser: Serialport.parsers.readline(),
+            parser: serialport.parsers.readline(),
         }
     };
 
@@ -113,16 +114,15 @@ var Powerlog = function () {
     // Public methods
     /////////////
 
-
-    this.openPort = function (insid) {
+    this.openPort = function (id) {
         port_open_requested = true;
-        var ins = instrumentManager.getInstrument();
-        port = new serialConnection(ins.get('port'), portSettings());
-        port.open();
-        port.on('data', format);
-        port.on('status', status);
-
-    };
+        instrumentid = id;
+        dbs.instruments.get(id, function (err, item) {
+            port = new serialconnection(item.port, portSettings());
+            port.on('data', format);
+            port.on('status', status);
+        });
+    }
 
     this.closePort = function (data) {
         // We need to remove all listeners otherwise the serial port
@@ -140,7 +140,9 @@ var Powerlog = function () {
         return port_open_requested;
     }
 
-    this.getInstrumentId = function (arg) {};
+    this.getInstrumentId = function (arg) {
+        return instrumentid;
+    };
 
     this.isStreaming = function () {
         return streaming;
