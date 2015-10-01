@@ -62,7 +62,7 @@ exports.findByInstrumentId = function (req, res) {
             // at log creation where no keys were stored in the log, we can have an
             // empty entry (seen this in production).
             if (item.doc) {
-                var db = new PouchDB('./ldb/datapoints/' + item.doc._id);
+                var db = dbs.createDataPointDB(item.doc._id);
                 db.info(function (err, info) {
                     if (err) {
                         debug('Error retrieving datapoints', err);
@@ -116,7 +116,7 @@ exports.getLogEntries = function (req, res) {
     var id = req.params.id;
     var count = 0;
     debug("Retrieving entries of log ID: " + id);
-    var db = new PouchDB('./ldb/datapoints/' + id);
+    var db = dbs.createDataPointDB(id);
     res.writeHead(200, {
         "Content-Type": "application/json"
     });
@@ -155,7 +155,7 @@ exports.getLive = function (req, res) {
 
     var minstamp = new Date().getTime() - req.params.period * 60000;
     debug(" Min Stamp: " + minstamp);
-    var db = new PouchDB('./ldb/datapoints/' + rid);
+    var db = dbs.createDataPointDB(rid);
     res.writeHead(200, {
         "Content-Type": "application/json"
     });
@@ -198,7 +198,7 @@ exports.addLogEntry = function (req, res) {
     var entry = req.body;
     delete entry._id;
     // Note: will create it if it does not exist
-    var db = new PouchDB('./ldb/datapoints/' + logID);
+    var db = dbs.createDataPointDB(logID);
     debug(entry);
     db.put(entry, '' + entry.timestamp, function (err, entry) {
         if (err) {

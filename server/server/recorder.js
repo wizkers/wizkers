@@ -128,7 +128,7 @@ exports.startRecording = function (logid, driver) {
             var cb = function (data) {
                 record(data, logid);
             }
-            var db = new PouchDB('./ldb/datapoints/' + logid);
+            var db = dbs.createDataPointDB(logid);
             register(driver, logid, cb, db); // Keep track for later use when we stop recording
             driver.on('data', cb);
         }

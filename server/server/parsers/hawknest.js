@@ -30,8 +30,38 @@ var events = require('events'),
     dbs = require('../pouch-config'),
     debug = require('debug')('wizkers:parsers:hawknest');
 
-
 var HawkNest = function () {
+
+    // Debug function for revision control (check that we don't
+    // keep infinite revisions in the database, thus exploding our
+    // storage capacity.
+    function printRevisions(result) {
+        return dbs.instruments.get(result._id, {
+            revs: true
+        }).then(function (doc) {
+            debug('**********************************************');
+            // convert revision IDs into full _rev hashes
+            var start = doc._revisions.start;
+            return PouchDB.utils.Promise.all(doc._revisions.ids.map(function (id, i) {
+                var rev = (start - i) + '-' + id;
+                return dbs.instruments.get(id, {
+                    rev: rev
+                }).then(function (doc) {
+                    return [rev, doc];
+                }).catch(function (err) {
+                    if (err.status !== 404) {
+                        throw err;
+                    }
+                    return [rev, err];
+                });
+            })).then(function (revsAndDocs) {
+                revsAndDocs.forEach(function (revAndDoc) {
+                    debug('Fetched revision "' + revAndDoc[0] + '": ' + JSON.stringify(revAndDoc[1]));
+                });
+            });
+        });
+    }
+
 
     // Driver initialization
     events.EventEmitter.call(this);
@@ -185,29 +215,23 @@ var HawkNest = function () {
                 // monitored by the front-end
                 var known_probes = instrument.metadata.probes || {};
                 if (known_probes[val.probeid] != undefined) {
-                    dbs.instruments.get(instrument._id, function (err, result) {
-                        if (err) {
+                    dbs.instruments.get(instrument._id).then(function (result) {
+                            result.metadata.probes[val.probeid].ts = new Date().getTime();
+                            if (val.voltage != undefined)
+                                result.metadata.probes[val.probeid].voltage = val.voltage;
+                            if (val.battery != undefined)
+                                result.metadata.probes[val.probeid].battery = val.battery;
+                            if (val.charging != undefined)
+                                result.metadata.probes[val.probeid].charging = val.charging;
+                            if (val.temp != undefined)
+                                result.metadata.probes[val.probeid].temp = val.temp;
+                            instrument = result; // Otherwise we'll keep on adding the probes!
+                            debug(result.metadata.probes[val.probeid]);
+                            return dbs.instruments.put(result);
+                        }).catch(function (err) {
                             debug("Error updating probe name: " + err);
                             return;
-                        }
-                        result.metadata.probes[val.probeid].ts = new Date().getTime();
-                        if (val.voltage != undefined)
-                            result.metadata.probes[val.probeid].voltage = val.voltage;
-                        if (val.battery != undefined)
-                            result.metadata.probes[val.probeid].battery = val.battery;
-                        if (val.charging != undefined)
-                            result.metadata.probes[val.probeid].charging = val.charging;
-                        if (val.temp != undefined)
-                            result.metadata.probes[val.probeid].temp = val.temp;
-                        instrument = result; // Otherwise we'll keep on adding the probes!
-                        debug(result.metadata.probes[val.probeid]);
-                        dbs.instruments.put(result, function (err, result) {
-                            if (err) {
-                                debug(err);
-                                return;
-                            }
                         });
-                    });
                 }
             }
         }

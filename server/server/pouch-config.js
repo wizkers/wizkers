@@ -18,13 +18,40 @@
  */
 
 /**
- * Where we are storing our database configuration and schemas.
+ * Where we are storing our database configuration and schemas. All DB operations
+ * should go through this.
  */
 
 
 var PouchDB = require('pouchdb');
 var bcrypt = require('bcrypt-nodejs');
 var debug = require('debug')('pouchdb');
+
+
+/**
+ * Top level configuration: we can decide to either use local PouchDB
+ * over LevelDB databases - good for small or embedded instances
+ * or use a real CouchDB backend which will scale up to lots of data/sensors
+ */
+
+var backend = 'PouchDB';
+
+var instrumentsDB = './ldb/instruments',
+    outputsDB = './ldb/outputs',
+    settingsDB = './ldb/settings',
+    usersDB = './ldb/users',
+    logsDB = './ldb/logs',
+    datapointsDB = './ldb/datapoints/';
+    
+if (backend == 'CouchDB') {
+    
+    instrumentsDB = 'http://localhost:5984/wiz_instruments';
+    outputsDB = 'http://localhost:5984/wiz_outputs';
+    settingsDB = 'http://localhost:5984/wiz_settings';
+    usersDB = 'http://localhost:5984/wiz_users';
+    logsDB = 'http://localhost:5984/wiz_logs';
+    datapointsDB = 'http://localhost:5984/wiz_datapoints_';
+}
 
 
 debug("Requiring pouch-config.js");
@@ -40,19 +67,19 @@ debug("Requiring pouch-config.js");
 // auto_compaction is important because we update the documents often,
 // and P/CouchDB keeps previous revisions otherwise. This option is only
 // effective for local DBs, not remote (CouchDB manages that on its own).
-var instruments = new PouchDB('./ldb/instruments', {
+var instruments = new PouchDB(instrumentsDB, {
+    // auto_compaction: true
+});
+var outputs = new PouchDB(outputsDB, {
     auto_compaction: true
 });
-var outputs = new PouchDB('./ldb/outputs', {
+var settings = new PouchDB(settingsDB, {
     auto_compaction: true
 });
-var settings = new PouchDB('./ldb/settings', {
+var users = new PouchDB(usersDB, {
     auto_compaction: true
 });
-var users = new PouchDB('./ldb/users', {
-    auto_compaction: true
-});
-var logs = new PouchDB('./ldb/logs', {
+var logs = new PouchDB(logsDB, {
     auto_compaction: true
 });
 
@@ -83,6 +110,14 @@ logs.put(logByInstrument).then(function () {
 });
 
 
+/**
+ * Create recording datapoint databases
+ */
+var createDataPointDB = function(logid) {
+    // Note: CouchDB only wants lowercase in their databases, so we need to make sure the
+    // logid is in lowercase.
+    return new PouchDB(datapointsDB + logid.toLowerCase());
+}
 
 
 /**
@@ -172,5 +207,6 @@ module.exports = {
     logs: logs,
 
     defaults: defaults,
-    utils: utils
+    utils: utils,
+    createDataPointDB: createDataPointDB
 }
