@@ -299,8 +299,12 @@ exports.deleteLog = function (req, res) {
                 } else {
                     debug('' + result + ' document(s) deleted');
                     // Now delete the database of log points
-                    PouchDB.destroy('./ldb/datapoints/' + id, function (err, res2) {
+                    var db = dbs.createDataPointDB(id);
+                    db.destroy().then(function () {
                         debug("Destroyed datapoints");
+                        res.send(req.body);
+                    }).catch(function (err) {
+                        debug("Datapoint DB destruction error");
                         res.send(req.body);
                     });
                 }
