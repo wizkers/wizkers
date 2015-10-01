@@ -48,8 +48,8 @@ define(function(require) {
         // Returns 'true' if alarm is triggered
         var check_alarm = function(output, alarm, data) {
             if (alarm.field != "_unused" && alarm.field != "") {
-                var value = output.plugin.resolveMapping(alarm.field, data);
-                if (value != undefined) {
+                var field = output.plugin.resolveMapping(alarm.field, data);
+                if (field != undefined) {
                     // If both field and alarm.level can be parsed as
                     // numbers, do it (we might have numbers as strings on both sides
                     // which will lead to a wrong comparison)
@@ -61,13 +61,13 @@ define(function(require) {
                         alarm.level = numval;
                     switch (alarm.comparator) {
                         case "less":
-                            return (value < alarm.level);
+                            return (field < alarm.level);
                             break;
                         case "moreeq":
-                            return (value >= alarm.level);
+                            return (field >= alarm.level);
                             break;
                         case "eq":
-                            return (value == alarm.level);
+                            return (field == alarm.level);
                             break;
                         default:
                             return false;
@@ -77,7 +77,7 @@ define(function(require) {
             return false;
         }
         
-                // Used in Chrome/Cordova mode
+        // Used in Chrome/Cordova mode
         // Do we have an alarm on this output ?
         var alarm = function(output, data) {
             var alarm1 = output.config.get('alarm1'),

@@ -68,7 +68,7 @@ define(function (require) {
             }, {
                 success: function () {
                     self.updateButtonStatus(en);
-                    outputManager.reconnectOutputs();
+                    linkManager.setOutputs(instrumentManager.getInstrument().id);
                 }
             });
 

@@ -40,7 +40,8 @@ module.exports = function rest() {
 
     var matchTempl = function(str, args) {
         return str.replace(/<%=(.*?)%>/g, function(match, field) {
-            return args[field] || match;
+            // the != undefined test is necessary since args[field] can be == 0
+            return (args[field] != undefined) ? args[field] : match;
         });
     }
 
@@ -110,6 +111,8 @@ module.exports = function rest() {
         for (var mapping in mappings) {
             fields[mapping] = self.resolveMapping(mapping, data);
         };
+        
+        debug('Fields', fields);
 
         post_options.path = matchTempl(regexpath, fields);
         if (regexargs != undefined)
@@ -119,6 +122,8 @@ module.exports = function rest() {
         if (post_options.method == "GET") {
             post_options.path = post_options.path + '?' + post_data;
         }
+        
+        debug('Post options', post_options);
 
         output_ref.last = new Date().getTime();
         var post_request = http.request(post_options, function(res) {

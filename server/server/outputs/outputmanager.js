@@ -120,6 +120,7 @@ var alarm = function (output, data) {
     default:
         break;
     }
+
     if (!alarm)
         return false;
 
@@ -179,7 +180,7 @@ module.exports = {
 
         // Destroy the previous list of active outputs,
         activeOutputs[insid] = [];
-
+        
         // TODO: use persistent queries before going to prod
         dbs.outputs.query(function (doc) {
                 if (doc.enabled == true)
@@ -227,7 +228,6 @@ module.exports = {
                         drivers[insid].driver.removeListener('data', drivers[insid].cb);
                     }
                 }
-
             });
     },
 

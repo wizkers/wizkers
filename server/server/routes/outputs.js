@@ -82,7 +82,6 @@ exports.updateOutput = function(req, res) {
     var id = req.params.id;
     var output = req.body;
     debug('Updating output: ' + id);
-//    debug(JSON.stringify(output));    
     dbs.outputs.put(req.body, function(err, result) {
             if (err) {
                 debug('Error updating output: ' + err);
