@@ -26,7 +26,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                <% var selectedType = "";
+                <% var tz = settings.get("timezone");
+                   var selectedType = "";
                    _.each(deviceLogs,function(log) {
                         /* Make sure we can only select identical log types */
                         if (selected.indexOf(log._id) > -1 || selected.length==0) selectedType = log.logtype;
@@ -35,8 +36,12 @@
                         <td><input class="logcheckbox" type="checkbox" <%= selected.indexOf(log._id) > -1  ? 'checked':''%>
                             <%= (log.logtype != selectedType && selectedType != "") ? 'disabled':'' %>
                             value="<%=log._id%>" ></td>
-                        <td><%= new Date(log.startstamp).toUTCString() %></td>
-                        <td><%= new Date(log.endstamp).toUTCString() %></td>
+                        <td><%= (tz == 'UTC') ? new Date(log.startstamp).toUTCString() :
+                               new Date(log.startstamp).toString()
+                               %></td>
+                        <td><%= (tz == 'UTC') ? new Date(log.endstamp).toUTCString() :
+                               new Date(log.endstamp).toString()
+                               %></td>
                         <td><%= log.name %></td>
                         <td><%= log.datapoints %></td>
                         <td><%= log.logtype %></td>
