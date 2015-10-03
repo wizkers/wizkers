@@ -247,10 +247,62 @@ define(function (require) {
                 case 'chrome':
                     discoverBluetooth();
                     break;
+                case 'cordova':
+                    cordovaDiscoverBluetooth();
+                    break;
                 }
             } else {
                 self.trigger('ports', ["Not available"]);
             }
+        }
+
+        /**
+         * Only in Cordova mode, that's pretty obvious
+         */
+        var cordovaDiscoverBluetooth = function () {
+            function success(status) {
+                if (status.status == 'enabled') {
+                    var device_names = {};
+
+                    // OK, we have Bluetooth, let's do the discovery now
+                    function startScanSuccess(status) {
+                        // Stop discovery after 30 seconds.
+                        if (status.status == 'scanStarted') {
+                            setTimeout(function () {
+                                bluetoothle.stopScan(function () {
+                                    console.log('Stopped scan');
+                                }, function () {});
+                            }, 30000);
+                        }
+                        if (status.address) {
+                            device_names[status.address] = {
+                                name: status.name || status.address,
+                                address: status.address
+                            };
+                            console.log('New BT Device', status);
+                            self.trigger('ports', device_names);
+                        }
+                    }
+
+                    function startScanError(status) {
+                        console.log(status);
+                    }
+
+                    bluetoothle.startScan(startScanSuccess, startScanError, {
+                        "serviceUuids": [],
+                        allowDuplicates: true
+                    });
+                } else {
+                    // The user didn't enable BT... error ?
+                }
+            };
+
+            function error(err) {};
+
+            bluetoothle.initialize(success, error, {
+                request: true,
+                statusReceiver: false
+            });
         }
 
         var discoverBluetooth = function () {
@@ -265,11 +317,11 @@ define(function (require) {
                 self.trigger('ports', device_names);
             };
             var removeDeviceName = function (device) {
-                    delete device_names[device.address];
-                    self.trigger('ports', device_names);
-                }
-                // Add listeners to receive newly found devices and updates
-                // to the previously known devices.
+                delete device_names[device.address];
+                self.trigger('ports', device_names);
+            };
+            // Add listeners to receive newly found devices and updates
+            // to the previously known devices.
             chrome.bluetooth.onDeviceAdded.addListener(updateDeviceName);
             chrome.bluetooth.onDeviceChanged.addListener(updateDeviceName);
             chrome.bluetooth.onDeviceRemoved.addListener(removeDeviceName);

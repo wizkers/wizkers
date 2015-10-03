@@ -71,6 +71,7 @@ require.config({
             'socketio': 'app/chromeSocket',
             'connections_serial': 'app/connections/cordovaSerial',
             'connections_hid': 'app/connections/usbhid',
+            'connections_btle': 'app/connections/cordovaBTLE',
             'connections_webrtc': 'app/connections/webrtc',
             'serialport': 'app/lib/serialport',
 
@@ -134,8 +135,8 @@ var vizapp = {
 var router;
 
 require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'localstorage'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
-    
-    
+
+
     // Initialize our Analytics object to get stats on app usage
     stats = new Analytics();
     //stats.init('');

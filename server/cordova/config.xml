@@ -11,4 +11,5 @@
     <access origin="*" />
     <gap:plugin name="fr.drangies.cordova.serial" version="0.0.2" />
     <gap:plugin name="cordova-plugin-whitelist" version="1.0.0" source="npm" />
+    <gap:plugin name="cordova-plugin-bluetoothle" source="npm" />
 </widget>
