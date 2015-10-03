@@ -110,7 +110,7 @@ define(function (require) {
 
         var count_buffer = [];
         var buffer_max = 80;
-        var time_interval = 3; // seconds
+        var time_interval = 5; // seconds
         var buffer_idx = 0;
 
         /**
@@ -131,7 +131,7 @@ define(function (require) {
             }
 
             //	 deadtime compensation
-            var rcpm = count / ((i+1) * time_interval);
+            var rcpm = count*60/((i+1) * time_interval);
             return rcpm / (1 - rcpm * 1.8833e-6);
         };
 
