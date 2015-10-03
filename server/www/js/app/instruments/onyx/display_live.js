@@ -153,8 +153,6 @@ define(function (require) {
 
 
         updatestatus: function (data) {
-            console.log("Onyx live display: serial status update");
-
             // Either the port is open and we have not done our device init,
             // or the port is closed and we have to reset the device init status
             if (data.portopen && !this.deviceinitdone) {

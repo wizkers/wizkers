@@ -135,7 +135,7 @@ define(function (require) {
                 utils.showAlert('Error', 'No file selected', 'bg-danger');
                 return;
             }
-            stats.fullEvent('Firmare','fw_upgrade_start', 'onyx');
+            stats.fullEvent('Firmare', 'fw_upgrade_start', 'onyx');
             $("#device_upgrade", this.el).attr('disabled', true);
             utils.hideAlert();
             utils.showAlert('Info', "Starting upgrade, please wait", 'bg-info');
@@ -208,7 +208,6 @@ define(function (require) {
                 $("#prog-flash", this.el).width(data.verifying + "%");
             } else if (data.run_mode) {
                 if (data.run_mode == 'firmware') {
-                    stats.fullEvent('Firmware', 'upgrade_success', 'onyx');
                     utils.showAlert('Success', 'Firmware Upgrade was successful, device is restarting', 'bg-success');
                 }
             } else if (data.version) {
@@ -235,6 +234,7 @@ define(function (require) {
                         $('#flasherased', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
                     }
                     if (data.msg == 'firmware flashed') {
+                        stats.fullEvent('Firmware', 'upgrade_success', 'onyx');
                         $('#flashprogrammed', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
                     }
                 }
