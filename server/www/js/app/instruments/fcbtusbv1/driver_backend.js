@@ -58,9 +58,9 @@ define(function (require) {
                 console.log('No value received');
                 return;
             }
-            parser(self,data.value);            
+            parser(self, data.value);
         };
-        
+
         // Status returns an object that is concatenated with the
         // global server status
         var status = function (stat) {
@@ -83,6 +83,11 @@ define(function (require) {
             if (isopen) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
+                port.subscribe({
+                    service_uuid: CUSTOM_SERVICE_UUID,
+                    characteristic_uuid: SERIAL_PORT_UUID
+                });
+
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
@@ -147,10 +152,10 @@ define(function (require) {
             //console.log('TX', data);
             port.write(data);
         };
-        
+
         // This is called by the serial parser (see 'format' above)
-        this.onDataReady = function(data) {
-        // Remove any carriage return
+        this.onDataReady = function (data) {
+            // Remove any carriage return
             data = data.replace('\n', '');
             var fields = {};
             try {
@@ -161,8 +166,8 @@ define(function (require) {
             self.trigger('data', fields);
         };
 
-        
-        
+
+
     }
 
     _.extend(parser.prototype, Backbone.Events);

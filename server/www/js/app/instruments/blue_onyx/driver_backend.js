@@ -34,10 +34,16 @@ define(function (require) {
             port_close_requested = false,
             port_open_requested = false,
             isopen = false,
+            isInitialized = 0,
             lastUpdate = new Date().getTime();
 
         var HEART_RATE_SERVICE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
         var HEART_RATE_MEASUREMENT_UUID = '00002a37-0000-1000-8000-00805f9b34fb';
+
+        // We need to write a "0" (string) to this characteristic to get the BlueOnyx
+        // to start sending measurements, because it boots in Bootloader mode and remains there
+        // until we tell it otherwise.
+        var BLEONYX_MEASURING_MODE = 'e7add780-b042-4876-aae1-112855353cc1';
 
         /////////////
         // Private methods
@@ -58,7 +64,7 @@ define(function (require) {
         //        (Apache License)
         var format = function (data) {
             var response = '';
-            var updt = new Date.getTime();
+            var updt = new Date().getTime();
 
             // The Blue Onyx simulates a Heart Rate monitor, hence the references
             // to Heart Rate below.
@@ -79,7 +85,7 @@ define(function (require) {
                 console.log('Invalid Heart Rate Measurement value');
                 return;
             }
-            
+
             // Keep track of the time since we last got a packet - if this is more than
             // 6 seconds, then we missed one (or more) and the CPM count cannot be trusted
             var valid = false;
@@ -88,7 +94,7 @@ define(function (require) {
 
             // The first byte is the counts in the last 5 seconds
             var count = valueBytes[0];
-            
+
             var cpm = updateCPM(count);
 
             var response = {
@@ -99,14 +105,14 @@ define(function (require) {
             };
             self.trigger('data', response);
         };
-        
-        
+
+
         /**
          * Update the current CPM
          * @param {Number} count Count in the last 5 seconds
          */
-        var updateCPM = function(count) {
-            
+        var updateCPM = function (count) {
+
         };
 
         // Status returns an object that is concatenated with the
@@ -127,10 +133,39 @@ define(function (require) {
                 self.trigger('data', resp);
                 return;
             }
+
+            if ((isInitialized == 1) && !stat.portopen) {
+                // We now have to reopen the port
+                port.open();
+                return;
+            }
+
             isopen = stat.portopen;
             if (isopen) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
+                console.log("Our port is now open");
+
+                if (isInitialized == 0) {
+                    console.log("Do a Onyx bootloader mode cancel");
+                    port.write(abutils.str2ab("0"), {
+                        service_uuid: HEART_RATE_SERVICE_UUID,
+                        characteristic_uuid: BLEONYX_MEASURING_MODE
+                    }, function (info) {
+                        console.log('callback from write', info);
+                    });
+                    setTimeout(function () {
+                        // We have to close the port after writing "0" :(
+                        isInitialized = 1;
+                        port.close();
+                    }, 2000);
+                } else {
+                    port.subscribe({
+                        service_uuid: HEART_RATE_SERVICE_UUID,
+                        characteristic_uuid: HEART_RATE_MEASUREMENT_UUID
+                    });
+                    isInitialized = 2;
+                }
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
@@ -148,11 +183,12 @@ define(function (require) {
         this.openPort = function (insid) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
-            port = new btleConnection(ins.get('port'), portSettings());
+            if (port == null) {
+                port = new btleConnection(ins.get('port'), portSettings());
+                port.on('data', format);
+                port.on('status', status);
+            }
             port.open();
-            port.on('data', format);
-            port.on('status', status);
-
         };
 
         this.closePort = function (data) {

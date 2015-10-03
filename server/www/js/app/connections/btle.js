@@ -27,8 +27,8 @@ define(function (require) {
 
     var Backbone = require('backbone'),
         abu = require('app/lib/abutils');
-    
-    
+
+
     // TODO: accept a list of service UUIDs and a list of Characteristic UUIDs
     //       rather than a single value.
 
@@ -78,7 +78,15 @@ define(function (require) {
             // self.trigger('data', data);
         }
 
-        this.subscribe = function (characteristic) {}
+        /**
+         * Subscribe to a service/characteristic
+         * @param {[[Type]]} subscribeInfo [[Description]]
+         */
+
+        this.subscribe = function (subscribeInfo) {
+                getServices();
+
+        }
 
         this.close = function () {
             console.log("[chromeBTLE] Close BTLE connection");
@@ -150,9 +158,6 @@ define(function (require) {
                     console.log('[ChromeBTLE] Service changed', service);
                 });
 
-
-                getServices();
-
             });
         }
 
@@ -183,7 +188,7 @@ define(function (require) {
 
         // Inspired by Google Bluetooth samples on Github
         var selectService = function (service) {
-            
+
             //if (currentService && (!service || currentService.deviceAddress !== service.deviceAddress)) {
             //    chrome.bluetoothLowEnergy.disconnect(currentService.deviceAddress);
             //}
@@ -260,13 +265,13 @@ define(function (require) {
 
         // Auto reopen if the device reappears
         function onDeviceAdded(device) {
-            console.log('[ChromeBTLE] Bluetooth device removed: ' + device.address);
+            console.log('[ChromeBTLE] Bluetooth device added: ' + device.address);
             if (!currentService && devAddress == device.address) {
                 deviceDisappeared = false;
                 self.open();
             }
         }
-        
+
         // Follow up when service removed - this can happen when the device actually
         // removes the service, or it gets out of range for a short while
         function onServiceRemoved(service) {
@@ -274,7 +279,7 @@ define(function (require) {
             if (service.uuid != service_uuid) {
                 return;
             }
-            
+
             // If this came from the currently selected service, then disconnect it.
             if (service.deviceAddress == devAddress && currentService) {
                 selectService(undefined);

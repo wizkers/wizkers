@@ -157,28 +157,32 @@ define(function (require) {
             };
         }
 
-        // The instruments below are only supported in Chrome runmode:
-        if (vizapp.type == "chrome") {
-            this.supportedInstruments["sark110"] = {
-                name: "Sark110 Antenna Analyzer",
-                type: Sark110Instrument,
-                settings: Sark110SettingsView,
-                connectionsettings: 'app/views/instrument/usbhid'
-            };
-            this.supportedInstruments["blue_onyx"] = {
-                name: "Medcom Blue Onyx",
+        // The instruments below are supported in both Chrome and Cordova mode
+        if (vizapp.type == 'chrome' || vizapp.type == 'cordova') {
+            this.supportedInstruments['blue_onyx'] = {
+                name: 'Medcom Blue Onyx',
                 type: BlueOnyxInstrument,
                 settings: BlueOnyxSettingsView,
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
-            this.supportedInstruments["fcbtusbv1"] = {
-                name: "Fried Circuits Bluetooth backpack",
+            this.supportedInstruments['fcbtusbv1'] = {
+                name: 'Fried Circuits Bluetooth backpack',
                 type: FCBTInstrument,
                 settings: FCBTSettingsView,
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
-            this.supportedInstruments["elecraft_remote"] = {
-                name: "Remote Elecraft KX3",
+        }
+
+        // The instruments below are only supported in Chrome runmode:
+        if (vizapp.type == 'chrome') {
+            this.supportedInstruments['sark110'] = {
+                name: 'Sark110 Antenna Analyzer',
+                type: Sark110Instrument,
+                settings: Sark110SettingsView,
+                connectionsettings: 'app/views/instrument/usbhid'
+            };
+            this.supportedInstruments['elecraft_remote'] = {
+                name: 'Remote Elecraft KX3',
                 type: RemoteElecraftInstrument,
                 settings: RemoteElecraftSettingsView,
                 connectionsettings: 'app/views/instrument/webrtc'
