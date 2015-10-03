@@ -108,9 +108,6 @@ define(function (require) {
 
         this.close = function () {
             console.log("[cordovaBTLE] Close BTLE connection");
-//            if (!portOpen)
-//                return;
-
             // We need to disconnect before closing, as per the doc
             bluetoothle.disconnect(function (result) {
                 // OK, we can now close the device:
@@ -128,7 +125,6 @@ define(function (require) {
             }, {
                 address: devAddress
             });
-
         };
 
         // Has to be called by the backend_driver to actually open the port.

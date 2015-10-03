@@ -34,7 +34,6 @@ define(function (require) {
             port_close_requested = false,
             port_open_requested = false,
             isopen = false,
-            isInitialized = 0,
             lastUpdate = new Date().getTime();
 
         var HEART_RATE_SERVICE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -91,15 +90,17 @@ define(function (require) {
             var valid = false;
             if ((updt - lastUpdate) < 6000)
                 valid = true;
+            
+            lastUpdate = updt;
 
             // The first byte is the counts in the last 5 seconds
-            var count = valueBytes[0];
+            var count = valueBytes[0] + (valueBytes[1] << 8);
 
             var cpm = updateCPM(count);
 
             var response = {
                 cpm: {
-                    cpm: cpm,
+                    value: cpm,
                     valid: true
                 }
             };
@@ -107,12 +108,31 @@ define(function (require) {
         };
 
 
+        var count_buffer = [];
+        var buffer_max = 80;
+        var time_interval = 3; // seconds
+        var buffer_idx = 0;
+
         /**
          * Update the current CPM
          * @param {Number} count Count in the last 5 seconds
          */
         var updateCPM = function (count) {
 
+            count_buffer[buffer_idx] = count;
+            buffer_idx = (buffer_idx + 1) % buffer_max;
+
+            var count = 0;
+            var i = 0;
+            for (i = 0; i < buffer_max; i++) {
+                if (isNaN(count_buffer[i]))
+                    break;
+                count += count_buffer[i];
+            }
+
+            //	 deadtime compensation
+            var rcpm = count / ((i+1) * time_interval);
+            return rcpm / (1 - rcpm * 1.8833e-6);
         };
 
         // Status returns an object that is concatenated with the
@@ -134,38 +154,35 @@ define(function (require) {
                 return;
             }
 
-            if ((isInitialized == 1) && !stat.portopen) {
-                // We now have to reopen the port
-                port.open();
-                return;
-            }
-
             isopen = stat.portopen;
             if (isopen) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
                 console.log("Our port is now open");
 
-                if (isInitialized == 0) {
-                    console.log("Do a Onyx bootloader mode cancel");
-                    port.write(abutils.str2ab("0"), {
-                        service_uuid: HEART_RATE_SERVICE_UUID,
-                        characteristic_uuid: BLEONYX_MEASURING_MODE
-                    }, function (info) {
-                        console.log('callback from write', info);
-                    });
-                    setTimeout(function () {
-                        // We have to close the port after writing "0" :(
-                        isInitialized = 1;
-                        port.close();
-                    }, 2000);
-                } else {
-                    port.subscribe({
-                        service_uuid: HEART_RATE_SERVICE_UUID,
-                        characteristic_uuid: HEART_RATE_MEASUREMENT_UUID
-                    });
-                    isInitialized = 2;
-                }
+                port.subscribe({
+                    service_uuid: HEART_RATE_SERVICE_UUID,
+                    characteristic_uuid: HEART_RATE_MEASUREMENT_UUID
+                });
+
+                lastUpdate = new Date().getTime();
+
+                // If we don't receive data within 5 seconds, then take action
+                setTimeout(function () {
+                    if ((new Date().getTime() - lastUpdate) > 4000) {
+                        console.log("Do a Onyx bootloader mode cancel");
+                        port.write(abutils.str2ab("0"), {
+                            service_uuid: HEART_RATE_SERVICE_UUID,
+                            characteristic_uuid: BLEONYX_MEASURING_MODE
+                        }, function (info) {
+                            console.log('callback from write', info);
+                        });
+                        setTimeout(function () {
+                            // We have to close the port after writing "0" :(
+                            port.close();
+                        }, 1000);
+                    }
+                }, 8000);
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
