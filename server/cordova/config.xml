@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<widget id="org.aerodynes.vizapp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:gap= "http://phonegap.com/ns/1.0" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>VizApp</name>
+<widget id="io.wizkers.wizkersapp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:gap= "http://phonegap.com/ns/1.0" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Wizkers</name>
     <description>
         A utility to interface with measurement devices and more.
     </description>
-    <author email="ed@aerodynes.org" href="http://aerodynes.og">
+    <author email="ed@wizkers.io" href="http://wizkers.io">
         Edouard Lafargue
     </author>
+    <icon src="icon.png" />
     <content src="cordova.html" />
     <access origin="*" />
     <gap:plugin name="fr.drangies.cordova.serial" version="0.0.2" />

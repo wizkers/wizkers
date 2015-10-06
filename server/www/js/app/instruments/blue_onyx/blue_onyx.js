@@ -56,7 +56,7 @@ define(function (require) {
         // This has to be a Backbone view
         // This is the full screen live view graph (not a small widget)
         this.getLiveDisplay = function (arg, callback) {
-            require(['app/instruments/onyx/display_live'], function (view) {
+            require(['app/instruments/blue_onyx/display_live'], function (view) {
                 callback(new view(arg));
             });
         };
@@ -64,7 +64,7 @@ define(function (require) {
         // This is a Backbone view
         // This is a numeric display
         this.getNumDisplay = function (arg, callback) {
-            require(['app/instruments/onyx/display_numeric'], function (view) {
+            require(['app/instruments/blue_onyx/display_numeric'], function (view) {
                 callback(new view(arg));
             });
         };

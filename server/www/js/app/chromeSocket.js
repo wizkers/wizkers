@@ -260,34 +260,34 @@ define(function (require) {
          * Only in Cordova mode, that's pretty obvious
          */
         var cordovaDiscoverBluetooth = function () {
+
+            var device_names = {};
+            // OK, we have Bluetooth, let's do the discovery now
+            function startScanSuccess(status) {
+                // Stop discovery after 30 seconds.
+                if (status.status == 'scanStarted') {
+                    setTimeout(function () {
+                        bluetoothle.stopScan(function () {
+                            console.log('Stopped scan');
+                        }, function () {});
+                    }, 30000);
+                }
+                if (status.address) {
+                    device_names[status.address] = {
+                        name: status.name || status.address,
+                        address: status.address
+                    };
+                    console.log('New BT Device', status);
+                    self.trigger('ports', device_names);
+                }
+            }
+
+            function startScanError(status) {
+                console.log(status);
+            }
+
             function success(status) {
                 if (status.status == 'enabled') {
-                    var device_names = {};
-
-                    // OK, we have Bluetooth, let's do the discovery now
-                    function startScanSuccess(status) {
-                        // Stop discovery after 30 seconds.
-                        if (status.status == 'scanStarted') {
-                            setTimeout(function () {
-                                bluetoothle.stopScan(function () {
-                                    console.log('Stopped scan');
-                                }, function () {});
-                            }, 30000);
-                        }
-                        if (status.address) {
-                            device_names[status.address] = {
-                                name: status.name || status.address,
-                                address: status.address
-                            };
-                            console.log('New BT Device', status);
-                            self.trigger('ports', device_names);
-                        }
-                    }
-
-                    function startScanError(status) {
-                        console.log(status);
-                    }
-
                     bluetoothle.startScan(startScanSuccess, startScanError, {
                         "serviceUuids": [],
                         allowDuplicates: true

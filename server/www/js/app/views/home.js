@@ -247,10 +247,10 @@ define(function (require) {
 
             }
             if (data.recording) {
-                $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording...').addClass('btn-success')
+                $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording').addClass('btn-success')
                     .removeClass('btn-danger').attr('disabled', false);
             } else {
-                $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-download"></span>&nbsp;Record session').addClass('btn-danger')
+                $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-download"></span>&nbsp;Record').addClass('btn-danger')
                     .removeClass('btn-success');
             }
 

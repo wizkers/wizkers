@@ -44,6 +44,14 @@ define(function (require) {
         // until we tell it otherwise.
         var BLEONYX_MEASURING_MODE = 'e7add780-b042-4876-aae1-112855353cc1';
 
+
+        // Those variables are used to do our CPM calculations.
+        // We use a one-window mechanism.
+        var count_buffer = [];
+        var time_interval = 5; // seconds
+        var buffer_max = 90 / time_interval; // Number of samples in the buffer (seconds/time_interval)
+        var buffer_idx = 0;
+
         /////////////
         // Private methods
         /////////////
@@ -90,28 +98,32 @@ define(function (require) {
             var valid = false;
             if ((updt - lastUpdate) < 6000)
                 valid = true;
-            
+
             lastUpdate = updt;
 
             // The first byte is the counts in the last 5 seconds
             var count = valueBytes[0] + (valueBytes[1] << 8);
+            var battery_ok = (valueBytes[2] == 0x01);
 
             var cpm = updateCPM(count);
 
+            // This is the CPM to µSv/h conversion coefficient for the tube
+            // in the Blue Onyx. A proper µSv/h output should also take a conversion
+            // coefficient into account for calibration.
+            var conversionCoefficient = 0.00294;
+
             var response = {
                 cpm: {
-                    value: cpm,
-                    valid: true
+                    value: cpm.cpm,
+                    usv: cpm.cpm * conversionCoefficient,
+                    batt_ok: battery_ok,
+                    valid: valid && cpm.valid
                 }
             };
             self.trigger('data', response);
         };
 
 
-        var count_buffer = [];
-        var buffer_max = 80;
-        var time_interval = 5; // seconds
-        var buffer_idx = 0;
 
         /**
          * Update the current CPM
@@ -124,15 +136,21 @@ define(function (require) {
 
             var count = 0;
             var i = 0;
+            var buffer_filled = true;
             for (i = 0; i < buffer_max; i++) {
-                if (isNaN(count_buffer[i]))
+                if (isNaN(count_buffer[i])) {
+                    buffer_filled = false;
                     break;
+                }
                 count += count_buffer[i];
             }
 
             //	 deadtime compensation
-            var rcpm = count*60/((i+1) * time_interval);
-            return rcpm / (1 - rcpm * 1.8833e-6);
+            var rcpm = count * 60 / ((i + 1) * time_interval);
+            return {
+                cpm: rcpm / (1 - rcpm * 1.8833e-6),
+                valid: buffer_filled
+            };
         };
 
         // Status returns an object that is concatenated with the
