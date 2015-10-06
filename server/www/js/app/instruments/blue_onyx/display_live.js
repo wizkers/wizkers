@@ -126,13 +126,21 @@ define(function (require) {
                 };
                 var map = new google.maps.Map($('.map_container', this.el)[0], mapOptions);
             }
-            // Now we want the map element to autostretch
+            // Now we want the map element to autostretch. A bit of queries and trickery here,
+            // so that we resize exactly to the correct height:
+            // - We know our offset (below the home view buttons) within the window ($(self.el).offset().top)
+            // - We know the size of the chart: $('.geigerchart',self.el).parent().height()
+            //     Note: .parent() is the enclosing .thumbnail
+            // - Then, we know the size of the numview: $('#numview').height();
+            // - Last, remove 60 pixels to account for all the margins around the map/divs/thumbnails
+            // ... now do the equation
             $('.map_container', this.el).css('height', $(this.el).parent().css('height'));
             var self = this;
             var rsc = function () {
-                var chartheight;
-                chartheight = window.innerHeight*0.5 - $(self.el).offset().top - 20;
-                $('.map_container', self.el).css('height', chartheight + 'px');
+                var chartheight = $('#geigerchart_row',self.el).outerHeight();
+                var numviewheight = $('#numview').outerHeight();
+                var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 60;
+                $('.map_container', self.el).css('height', mapheight + 'px');
             }
             this.rsc = rsc;
             $(window).on('resize', this.rsc);

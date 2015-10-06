@@ -74,7 +74,7 @@ define(function (require) {
             }
 
             // Create a blinking effect to indicate that we received data:
-            $('#readingvalid', this.el).addClass('label-info');
+            $('#readingvalid', this.el).addClass('label-info').removeClass('label-danger').removeClass('label-success');
             setTimeout(function () {
                 $('#readingvalid',this.el).removeClass('label-info');
                 if (data.cpm.valid)
