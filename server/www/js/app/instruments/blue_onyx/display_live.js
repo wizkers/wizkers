@@ -49,6 +49,8 @@ define(function (require) {
             this.deviceinitdone = false;
             this.plotavg = false;
 
+            // TODO: this breaks on Chrome apps due to their inflexible content security
+            // policy (we can't inject Javascript in the DOM).
             // We want to dynamically load the Google Maps API at this point:
             $.getScript('https://maps.googleapis.com/maps/api/js?sensor=true&callback=onGMapReady');
 
@@ -110,21 +112,22 @@ define(function (require) {
             // (hiding it is not enough to make it disappear from the layout (it will take
             // room and show as empty space, very noticeable on phones/tablets).
             if (!this.showstream) {
-                $("#showstream",this.el).empty();
+                $("#showstream", this.el).empty();
             }
 
             this.addPlot();
 
-            if (typeof(google) == 'undefined') {
+            if (typeof (google) == 'undefined') {
                 console.log('Error: Google maps API did not load');
                 $('.map_container', this.el).html('<h4>Maps are unavailable</h4>');
             } else {
                 var mapOptions = {
                     zoom: 4,
-                    center: new google.maps.LatLng(-33, 151),
+                    center: new google.maps.LatLng(32, -60),
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
                 var map = new google.maps.Map($('.map_container', this.el)[0], mapOptions);
+
             }
             // Now we want the map element to autostretch. A bit of queries and trickery here,
             // so that we resize exactly to the correct height:
@@ -137,7 +140,7 @@ define(function (require) {
             $('.map_container', this.el).css('height', $(this.el).parent().css('height'));
             var self = this;
             var rsc = function () {
-                var chartheight = $('#geigerchart_row',self.el).outerHeight();
+                var chartheight = $('#geigerchart_row', self.el).outerHeight();
                 var numviewheight = $('#numview').outerHeight();
                 var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 60;
                 $('.map_container', self.el).css('height', mapheight + 'px');

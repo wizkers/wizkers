@@ -44,6 +44,11 @@ define(function (require) {
         // until we tell it otherwise.
         var BLEONYX_MEASURING_MODE = 'e7add780-b042-4876-aae1-112855353cc1';
 
+        // If possible, we want to keep track of the location of the measurement.
+        var current_loc = null,
+            location_status = '',
+            watchid = null;
+
 
         // Those variables are used to do our CPM calculations.
         // We use a one-window mechanism.
@@ -65,19 +70,12 @@ define(function (require) {
 
         // Format can act on incoming data from the counter, and then
         // forwards the data to the app through a 'data' event.
-
-        // Using https://github.com/GoogleChrome/chrome-app-samples/blob/master/samples/bluetooth-samples/heart-rate-sensor/main.js
-        // as the source for BTLE Heartrate measurement
-        //        (Apache License)
         var format = function (data) {
             var response = '';
             var updt = new Date().getTime();
 
             // The Blue Onyx simulates a Heart Rate monitor, hence the references
             // to Heart Rate below.
-
-            // TODO: move this into its own library/class so that we can use the code
-            //       for various other uses (actual Heart Rate monitors, etc)
 
             // The Heart Rate Measurement Characteristic does not allow 'read'
             // operations and its value can only be obtained via notifications, so the
@@ -116,17 +114,23 @@ define(function (require) {
                 cpm: {
                     value: cpm.cpm,
                     usv: cpm.cpm * conversionCoefficient,
-                    batt_ok: battery_ok,
+
                     valid: valid && cpm.valid
-                }
+                },
+                batt_ok: battery_ok,
+                loc: current_loc,
+                loc_status: location_status
             };
+            
             self.trigger('data', response);
         };
 
-
-
         /**
-         * Update the current CPM
+         * Update the current CPM. This is a very simple CPM calculation
+         * algorithm, which uses a fixed averaging window length, and tube
+         * dead time error correction. It sets a "valid" flag that becomes true
+         * once we have enough sample to do the averaging we want.
+         * 
          * @param {Number} count Count in the last 5 seconds
          */
         var updateCPM = function (count) {
@@ -174,8 +178,7 @@ define(function (require) {
 
             isopen = stat.portopen;
             if (isopen) {
-                // Should run any "onOpen" initialization routine here if
-                // necessary.
+                // Runs our "onOpen" initialization routine here
                 console.log("Our port is now open");
 
                 port.subscribe({
@@ -186,6 +189,9 @@ define(function (require) {
                 lastUpdate = new Date().getTime();
 
                 // If we don't receive data within 5 seconds, then take action
+                // and attempt to put the Blue Onyx into streaming mode (it might
+                // be in bootloader mode, and this requires writing "0" to the
+                // relevant service/characteristic
                 setTimeout(function () {
                     if ((new Date().getTime() - lastUpdate) > 4000) {
                         console.log("Do a Onyx bootloader mode cancel");
@@ -196,19 +202,47 @@ define(function (require) {
                             console.log('callback from write', info);
                         });
                         setTimeout(function () {
-                            // We have to close the port after writing "0" :(
+                            // We have to close the port after writing "0", this
+                            // is the case for both Android and MacOS. Otherwise we
+                            // will eventually just get a connection error and port force
+                            // close.
                             port.close();
                         }, 1000);
                     }
                 }, 8000);
+
+                // Now regularly ask the navigator for current position and refresh map
+                if (watchid == null) {
+                    watchid = navigator.geolocation.watchPosition(newLocation, geolocationError, {
+                        maximumAge: 10000,
+                        timeout: 20000,
+                        enableHighAccuracy: true
+                    });
+                }
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
                     port.off('status', stat);
                     port_close_requested = false;
+                    if (watchid != null)
+                        navigator.geolocation.clearWatch(watchid);
                 }
             }
         };
+
+        var newLocation = function (loc) {
+            console.log('Got a new location');
+            location_status = 'OK';
+            current_loc = loc;
+        }
+
+        var geolocationError = function (err) {
+            console.log('Location error', err);
+            if (err.code == 3) {
+                location_status = 'no fix (timeout)';
+            } else
+            location_status = err.message;
+        }
 
 
         /////////////

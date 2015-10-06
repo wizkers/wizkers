@@ -72,6 +72,14 @@ define(function (require) {
             if (usv) {
                 $('#liveusvh', this.el).html(usv.toFixed(3) + "&nbsp;&mu;Sv/h");
             }
+            
+            if (data.loc_status && data.loc_status == 'OK') {
+                $('#lat',this.el).html(data.loc.latitude);
+                $('#lon',this.el).html(data.loc.longitude);
+            } else if (data.loc_status) {
+                $('#lat',this.el).html('GPS: ' + data.loc_status);
+                $('#lon',this.el).html('');
+            }
 
             // Create a blinking effect to indicate that we received data:
             $('#readingvalid', this.el).addClass('label-info').removeClass('label-danger').removeClass('label-success');
