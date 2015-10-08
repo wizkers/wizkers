@@ -43,16 +43,17 @@ define(function (require) {
 
         initialize: function (options) {
 
+            var self = this;
+
+            this.map = null;
+            this.markers = [];
+            this.lastMarker = null;
+
             this.currentDevice = null;
             this.showstream = settings.get('showstream');
 
             this.deviceinitdone = false;
             this.plotavg = false;
-
-            // TODO: this breaks on Chrome apps due to their inflexible content security
-            // policy (we can't inject Javascript in the DOM).
-            // We want to dynamically load the Google Maps API at this point:
-            $.getScript('https://maps.googleapis.com/maps/api/js?sensor=true&callback=onGMapReady');
 
             // Get frequency and span if specified:
             var span = this.model.get('liveviewspan'); // In seconds
@@ -119,15 +120,24 @@ define(function (require) {
 
             if (typeof (google) == 'undefined') {
                 console.log('Error: Google maps API did not load');
-                $('.map_container', this.el).html('<h4>Maps are unavailable</h4>');
+                $('.map_container', this.el).html('<h4>Maps are not available yet</h4>');
+                // TODO: this breaks on Chrome apps due to their inflexible content security
+                // policy (we can't inject Javascript in the DOM).
+                // We want to dynamically load the Google Maps API at this point:
+
+                window.GMAPLoaded = function () {
+                    self.render();
+                };
+
+                $.getScript('https://maps.googleapis.com/maps/api/js?sensor=true&callback=GMAPLoaded');
+
             } else {
                 var mapOptions = {
-                    zoom: 4,
-                    center: new google.maps.LatLng(32, -60),
+                    zoom: 11,
+                    center: new google.maps.LatLng(0, 0),
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
-                var map = new google.maps.Map($('.map_container', this.el)[0], mapOptions);
-
+                this.map = new google.maps.Map($('.map_container', this.el)[0], mapOptions);
             }
             // Now we want the map element to autostretch. A bit of queries and trickery here,
             // so that we resize exactly to the correct height:
@@ -135,14 +145,14 @@ define(function (require) {
             // - We know the size of the chart: $('.geigerchart',self.el).parent().height()
             //     Note: .parent() is the enclosing .thumbnail
             // - Then, we know the size of the numview: $('#numview').height();
-            // - Last, remove 60 pixels to account for all the margins around the map/divs/thumbnails
+            // - Last, remove 50 pixels to account for all the margins around the map/divs/thumbnails
             // ... now do the equation
             $('.map_container', this.el).css('height', $(this.el).parent().css('height'));
             var self = this;
             var rsc = function () {
                 var chartheight = $('#geigerchart_row', self.el).outerHeight();
                 var numviewheight = $('#numview').outerHeight();
-                var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 60;
+                var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 50;
                 $('.map_container', self.el).css('height', mapheight + 'px');
             }
             this.rsc = rsc;
@@ -174,6 +184,7 @@ define(function (require) {
 
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
+            $(window).off('resize', this.rsc);
             this.plot.onClose();
 
         },
@@ -252,6 +263,37 @@ define(function (require) {
                 i.scrollTop(i[0].scrollHeight - i.height());
             }
 
+            // Now update the map (if it exists) to show the current location/measurement
+            if (this.map && data.loc_status && data.loc_status == 'OK') {
+                this.map.setCenter(new google.maps.LatLng(data.loc.coords.latitude, data.loc.coords.longitude));
+                if (this.lastMarker == null) {
+                    this.lastMarker = {
+                        lat: data.loc.coords.latitude,
+                        lng: data.loc.coords.longitude
+                    };
+                    this.markers.push(new google.maps.Marker({
+                        position: this.lastMarker,
+                        map: this.map,
+                    }));
+                }
+
+                // We want to add points/markers to the line of logging at points every X meters ?
+                var d = utils.CoordDistance({
+                        lat: data.loc.coords.latitude,
+                        lng: data.loc.coords.longitude
+                    },
+                    this.lastMarker);
+                if (d > 50) {
+                    this.lastMarker = {
+                        lat: data.loc.coords.latitude,
+                        lng: data.loc.coords.longitude
+                    };
+                    this.markers.push(new google.maps.Marker({
+                        position: this.lastMarker,
+                        map: this.map,
+                    }));
+                }
+            }
             this.disp_cpm(data);
         },
     });

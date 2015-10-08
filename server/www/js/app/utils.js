@@ -111,6 +111,25 @@ define(function (require) {
                 );
         },
 
+        /**
+         * Distance between two points.
+         * @param {Object} loc1 Location 1 {lat: XXX, lon:YYY}
+         * @param {Object} loc2 Location 2 {lat: XXX, lon:YYY}
+         */
+        CoordDistance: function (loc1, loc2) {
+            var rad = function (x) {
+                return x * Math.PI / 180;
+            }
+
+            var R = 6371; //Earth Radius in km
+            var dLat = rad(loc2.lat - loc1.lat);
+            var dLong = rad(loc2.lng - loc1.lng);
+
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(rad(loc1.lat)) * Math.cos(rad(loc2.lat)) * Math.sin(dLong / 2) * Math.sin(dLong / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        },
+
 
         // See http://stackoverflow.com/questions/19098797/fastest-way-to-flatten-un-flatten-nested-json-objects
         JSONflatten: function (data) {
@@ -158,7 +177,7 @@ define(function (require) {
         },
 
         // Concatenate two objects
-        collate: function(ob1, ob2) {
+        collate: function (ob1, ob2) {
             var ret = {},
                 len = arguments.length,
                 arg, i = 0,

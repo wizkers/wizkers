@@ -50,6 +50,11 @@ define(function (require) {
             var self = this;
             console.log('Main render of Onyx numeric view');
             $(this.el).html(template());
+            // We need to force the Live view to resize the map at this
+            // stage, becaure we just changed the size of the numview
+            if (instrumentManager.liveViewRef().rsc) {
+                instrumentManager.liveViewRef().rsc();
+            };
             return this;
         },
 
@@ -74,8 +79,8 @@ define(function (require) {
             }
             
             if (data.loc_status && data.loc_status == 'OK') {
-                $('#lat',this.el).html(data.loc.latitude);
-                $('#lon',this.el).html(data.loc.longitude);
+                $('#lat',this.el).html(data.loc.coords.latitude);
+                $('#lon',this.el).html(data.loc.coords.longitude);
             } else if (data.loc_status) {
                 $('#lat',this.el).html('GPS: ' + data.loc_status);
                 $('#lon',this.el).html('');

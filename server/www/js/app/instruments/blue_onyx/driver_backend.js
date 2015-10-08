@@ -231,7 +231,6 @@ define(function (require) {
         };
 
         var newLocation = function (loc) {
-            console.log('Got a new location');
             location_status = 'OK';
             current_loc = loc;
         }
