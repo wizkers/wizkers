@@ -43,8 +43,5 @@
         "tcp": {
             "connect": ""
         }
-    },
-    "sandbox": {
-        "pages": ["public/tpl/HomeView.html"]
     }
 }

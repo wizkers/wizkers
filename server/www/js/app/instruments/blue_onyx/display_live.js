@@ -64,11 +64,21 @@ define(function (require) {
                 livepoints = span / period;
             }
 
+            this.display_map = false;
+            var wz_settings = settings.get('wizkers_settings');
+            if (wz_settings == undefined)
+                this.display_map = true;
+            else if (wz.settings.display_map == true)
+                this.display_map = true;
+            
+            if (vizapp.type == 'chrome')
+                this.display_map = false;
+
             // We will pass this when we create plots, this is the global
             // config for the look and feel of the plot
             this.plotoptions = {
                 points: livepoints,
-                vertical_stretch: false,
+                vertical_stretch: !this.display_map,
                 plot_options: {
                     xaxis: {
                         mode: "time",
@@ -116,48 +126,57 @@ define(function (require) {
                 $("#showstream", this.el).empty();
             }
 
+            // If we dont' want the maps, then modify the style of the graph to make sure
+            // it occupies the whole space:
+            if (!this.display_map) {
+                $('.geigerchart', this.el).removeAttr('style');
+                $('.map_row', this.el).empty();
+            }
+
             this.addPlot();
 
-            if (typeof (google) == 'undefined') {
-                console.log('Error: Google maps API did not load');
-                $('.map_container', this.el).html('<h4>Maps are not available yet</h4>');
-                // TODO: this breaks on Chrome apps due to their inflexible content security
-                // policy (we can't inject Javascript in the DOM).
-                // We want to dynamically load the Google Maps API at this point:
+            if (this.display_map) {
+                if (typeof (google) == 'undefined') {
+                    console.log('Error: Google maps API did not load');
+                    $('.map_container', this.el).html('<h4>Maps are not available yet</h4>');
+                    // TODO: this breaks on Chrome apps due to their inflexible content security
+                    // policy (we can't inject Javascript in the DOM).
+                    // We want to dynamically load the Google Maps API at this point:
 
-                window.GMAPLoaded = function () {
-                    self.render();
-                };
+                    window.GMAPLoaded = function () {
+                        self.render();
+                    };
 
-                $.getScript('https://maps.googleapis.com/maps/api/js?sensor=true&callback=GMAPLoaded');
+                    $.getScript('https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&callback=GMAPLoaded');
 
-            } else {
-                var mapOptions = {
-                    zoom: 11,
-                    center: new google.maps.LatLng(0, 0),
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
-                };
-                this.map = new google.maps.Map($('.map_container', this.el)[0], mapOptions);
+                } else {
+                    var mapOptions = {
+                        zoom: 11,
+                        center: new google.maps.LatLng(0, 0),
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+                    this.map = new google.maps.Map($('.map_container', this.el)[0], mapOptions);
+                }
+                // Now we want the map element to autostretch. A bit of queries and trickery here,
+                // so that we resize exactly to the correct height:
+                // - We know our offset (below the home view buttons) within the window ($(self.el).offset().top)
+                // - We know the size of the chart: $('.geigerchart',self.el).parent().height()
+                //     Note: .parent() is the enclosing .thumbnail
+                // - Then, we know the size of the numview: $('#numview').height();
+                // - Last, remove 50 pixels to account for all the margins around the map/divs/thumbnails
+                // ... now do the equation
+                $('.map_container', this.el).css('height', $(this.el).parent().css('height'));
+                var self = this;
+                var rsc = function () {
+                    var chartheight = $('#geigerchart_row', self.el).outerHeight();
+                    var numviewheight = $('#numview').outerHeight();
+                    var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 50;
+                    $('.map_container', self.el).css('height', mapheight + 'px');
+                }
+                this.rsc = rsc;
+                $(window).on('resize', this.rsc);
+                rsc();
             }
-            // Now we want the map element to autostretch. A bit of queries and trickery here,
-            // so that we resize exactly to the correct height:
-            // - We know our offset (below the home view buttons) within the window ($(self.el).offset().top)
-            // - We know the size of the chart: $('.geigerchart',self.el).parent().height()
-            //     Note: .parent() is the enclosing .thumbnail
-            // - Then, we know the size of the numview: $('#numview').height();
-            // - Last, remove 50 pixels to account for all the margins around the map/divs/thumbnails
-            // ... now do the equation
-            $('.map_container', this.el).css('height', $(this.el).parent().css('height'));
-            var self = this;
-            var rsc = function () {
-                var chartheight = $('#geigerchart_row', self.el).outerHeight();
-                var numviewheight = $('#numview').outerHeight();
-                var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 50;
-                $('.map_container', self.el).css('height', mapheight + 'px');
-            }
-            this.rsc = rsc;
-            $(window).on('resize', this.rsc);
-            rsc();
             return this;
         },
 
