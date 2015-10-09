@@ -30,7 +30,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
-        template = require('js/tpl/instruments/OnyxNumView.js');
+        template = require('js/tpl/instruments/onyx/OnyxNumView.js');
 
 
     return Backbone.View.extend({
@@ -50,6 +50,12 @@ define(function (require) {
             var self = this;
             console.log('Main render of Onyx numeric view');
             $(this.el).html(template());
+            // We need to force the Live view to resize the map at this
+            // stage, becaure we just changed the size of the numview
+            if (instrumentManager.liveViewRef() && instrumentManager.liveViewRef().rsc) {
+                instrumentManager.liveViewRef().rsc();
+            };
+
             return this;
         },
 
@@ -73,6 +79,18 @@ define(function (require) {
                 $('#liveusvh', this.el).html(usv.toFixed(3) + "&nbsp;&mu;Sv/h");
             }
 
+            if (data.loc_status && data.loc_status == 'OK') {
+                var coord = utils.coordToString({
+                    lat: data.loc.coords.latitude,
+                    lng: data.loc.coords.longitude
+                });
+                $('#lat', this.el).html(coord.lat);
+                $('#lon', this.el).html(coord.lng);
+            } else if (data.loc_status) {
+                $('#lat', this.el).html('GPS: ' + data.loc_status);
+                $('#lon', this.el).html('');
+            }
+
             if (data.cpm.valid)
                 $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('VALID');
             else
@@ -83,6 +101,9 @@ define(function (require) {
             }
 
             // Update statistics:
+
+            // Removed for now, not very interesting
+            /**
             var sessionDuration = (new Date().getTime() - this.sessionStartStamp) / 1000;
             $('#sessionlength', this.el).html(utils.hms(sessionDuration));
 
@@ -94,6 +115,7 @@ define(function (require) {
                 this.minreading = cpm;
                 $('#minreading', this.el).html(cpm);
             }
+            **/
 
         },
 

@@ -131,6 +131,29 @@ define(function (require) {
         },
 
         /**
+         * Formats a decimal coordinate to a text string
+         * @param {Number} coord the {lat:XXX, lng: YYY}
+         */
+        coordToString: function (coord) {
+            var ret = {
+                lat: '',
+                lng: ''
+            };
+
+            var deg = Math.floor(coord.lat);
+            var min = (Math.abs(coord.lat - deg) * 60);
+            var sec = (min - Math.floor(min));
+            ret.lat = deg + '&deg;&nbsp;' + Math.floor(min) + '\'&nbsp;' + (sec * 60).toFixed(3) + '"&nbsp;' + ((deg >= 0) ? 'N' : 'S');
+
+            deg = Math.floor(coord.lng);
+            min = (Math.abs(coord.lng - deg) * 60);
+            sec = (min - Math.floor(min));
+            ret.lng = ((deg < 100) ? '&nbsp;' : '') + deg + '&deg;&nbsp;' + Math.floor(min) + '\'&nbsp;' + (sec * 60).toFixed(3) + '"&nbsp;' + ((deg >= 0) ? 'E' : 'W');
+
+            return ret;
+        },
+
+        /**
          * Checks what's visible and what's not on a Bootstrap layout.
          * relies on a couple of (empty) divs on the page
          * @param   {String}  bp Breakpoint we're looking for (xs, md, sm etc)

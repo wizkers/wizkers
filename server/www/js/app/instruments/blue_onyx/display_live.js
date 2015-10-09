@@ -125,7 +125,6 @@ define(function (require) {
             // If we dont' want the maps, then modify the style of the graph to make sure
             // it occupies the whole space:
             if (!this.display_map) {
-                // $('.geigerchart', this.el).removeAttr('style');
                 $('#map_row', this.el).empty();
             }
 
@@ -150,8 +149,8 @@ define(function (require) {
                     var rsc = function () {
                         var chartheight = $('#geigerchart_row', self.el).outerHeight();
                         var numviewheight = 0;
-                        // We want to take the numview height into account if screen is xs
-                        if (utils.checkBreakpoint('xs'))
+                        // We want to take the numview height into account if screen is xs or sm
+                        if (utils.checkBreakpoint('xs') || utils.checkBreakpoint('sm'))
                             numviewheight = $('#numview').outerHeight();
                         var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 55;
                         $('.map_container > .map', self.el).css('height', mapheight + 'px');
@@ -168,8 +167,8 @@ define(function (require) {
                 var self = this;
                 var rsc = function () {
                     var numviewheight = 0;
-                    // We want to take the numview height into account if screen is xs
-                    if (utils.checkBreakpoint('xs'))
+                    // We want to take the numview height into account if screen is xs or sm
+                    if (utils.checkBreakpoint('xs') || utils.checkBreakpoint('sm'))
                         numviewheight = $('#numview').outerHeight();
                     var chartheight = window.innerHeight - $(self.el).offset().top - numviewheight - 55;
                     $('.geigerchart', self.el).css('height', chartheight + 'px');

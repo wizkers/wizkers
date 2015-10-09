@@ -142,11 +142,20 @@ define(function (require) {
             var self = this;
             // Now initialize the plot area:
             // this.plotOptions.legend = { container: $('#legend',this.el) };
-            this.plot = $.plot($(".chart", this.el), [{
-                data: [],
-                label: "??",
-                color: this.color
+
+            // In some instances, we get an error here, depending on how/when we
+            // called the initialization. if that's the case, then just retry automatically
+            // after 250ms
+            try {
+                this.plot = $.plot($(".chart", this.el), [{
+                    data: [],
+                    label: "??",
+                    color: this.color
             }], this.plotOptions);
+            } catch (e) {
+                setTimeout(this.addPlot, 250);
+                return;
+            }
 
             // Adjust whether we want a log display, or linear (setup in global settings)
             var log_disabled = (this.flotplot_settings.log) && (this.flotplot_settings.log == false);

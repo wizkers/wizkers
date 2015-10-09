@@ -1,14 +1,20 @@
-<span class="label label-danger" id="readingvalid" style="float:right;">INVALID</span>
-<h4>Live reading</h4>
-<br>
+<div class="row">
+    <div class="col-md-12 col-xs-6">
+        <span class="label label-danger" id="readingvalid" style="position:absolute; right:10px;">INVALID</span>
+        <span class="bigreading" id="livecpm">00</span> CPM
+    </div>
+    <div class="col-md-12 col-xs-6">
+        <span class="smallreading" id="liveusvh">0.000 &mu;Sv/h</span><br>
+        <small id="lat"></small></br>
+        <small id="lon"></small>
+    </div>
+</div>
 
-<span class="bigreading" id="livecpm">00</span> CPM
-<br>
-<span class="smallreading" id="liveusvh">0.000 &mu;Sv/h</span>
-<br>
-<br>
 <p>Total count: <span id="count"></span>
 </p>
+
+
+<!--
 <h4>Sessions stats</h4>
 
 <p>Duration: <span id="sessionlength">00:00:00</span>
@@ -20,9 +26,8 @@
     </li>
     <li>Min:&nbsp;<span id="minreading">00</span>
     </li>
-    <!-- <li>Accumulated:<span id="accreading">00</span></li> -->
 </ul>
-
 
 <p>Device tag:&nbsp;<span id="devicetag"></span>
 </p>
+-->

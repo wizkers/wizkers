@@ -31,7 +31,8 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
-        template = require('js/tpl/instruments/OnyxLiveView.js');
+        mapWidget = require('app/lib/mapwidget'),
+        template = require('js/tpl/instruments/onyx/OnyxLiveView.js');
 
     // Load the flot library & flot time plugin:
     require('flot');
@@ -58,11 +59,22 @@ define(function (require) {
                 livepoints = span / period;
             }
 
+            this.display_map = false;
+            var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
+            if (wz_settings == undefined)
+                this.display_map = true;
+            else if (wz_settings.display_gmaps == 'true')
+                this.display_map = true;
+
+            if (vizapp.type == 'chrome')
+                this.display_map = false;
+
+
             // We will pass this when we create plots, this is the global
             // config for the look and feel of the plot
             this.plotoptions = {
                 points: livepoints,
-                vertical_stretch: true
+                vertical_stretch_parent: true
             };
 
             // Keep an array for moving average over the last X samples
@@ -71,8 +83,6 @@ define(function (require) {
             this.movingAvgPoints = 60;
             this.movingAvgData = []; // Note: used for the graph, this stores the result of the moving average
             this.movingAvgData2 = []; // Note: used for the graph, this stores the result of the moving average
-
-            this.prevStamp = 0;
 
             linkManager.on('status', this.updatestatus, this);
             linkManager.on('input', this.showInput, this);
@@ -91,11 +101,72 @@ define(function (require) {
 
             // Hide the raw data stream if we don't want it
             if (!this.showstream) {
-                $('#showstream', this.el).css('visibility', 'hidden');
+                $("#showstream", this.el).empty();
+            }
+
+            // If we dont' want the maps, then modify the style of the graph to make sure
+            // it occupies the whole space:
+            if (!this.display_map) {
+                $('#map_row', this.el).empty();
             }
 
             linkManager.requestStatus();
             this.addPlot();
+
+            if (this.display_map) {
+                this.map = new mapWidget();
+                if (this.map != null) {
+                    $('.map_container', this.el).append(this.map.el);
+                    this.map.render();
+                    // Now we want the map element to autostretch. A bit of queries and trickery here,
+                    // so that we resize exactly to the correct height:
+                    // - We know our offset (below the home view buttons) within the window ($(self.el).offset().top)
+                    // - We know the size of the chart: $('.geigerchart',self.el).parent().height()
+                    //     Note: .parent() is the enclosing .thumbnail
+                    // - Then, we know the size of the numview: $('#numview').height();
+                    // - Last, remove 55 pixels to account for all the margins around the map/divs/thumbnails
+                    // ... now do the equation
+                    //$('.map_container', this.el).css('height', $(this.el).parent().css('height'));
+
+                    var self = this;
+                    var rsc = function () {
+                        var chartheight = $('#geigerchart_row', self.el).outerHeight();
+                        var numviewheight = 0;
+                        // We want to take the numview height into account if screen is xs or sm
+                        if (utils.checkBreakpoint('xs') || utils.checkBreakpoint('sm'))
+                            numviewheight = $('#numview').outerHeight();
+                        var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 55;
+                        $('.map_container > .map', self.el).css('height', mapheight + 'px');
+                        self.map.resize();
+                    }
+                    if (this.rsc)
+                        $(window).off('resize', this.rsc);
+                    this.rsc = rsc;
+                    $(window).on('resize', this.rsc);
+                    rsc();
+                }
+            } else {
+                // Implement a resizer for the Geiger chart only
+                var self = this;
+                var rsc = function () {
+                    var numviewheight = 0;
+                    // We want to take the numview height into account if screen is xs or sm
+                    if (utils.checkBreakpoint('xs') || utils.checkBreakpoint('sm'))
+                        numviewheight = $('#numview').outerHeight();
+                    var chartheight = window.innerHeight - $(self.el).offset().top - numviewheight - 55;
+                    $('.geigerchart', self.el).css('height', chartheight + 'px');
+                    // Then tell the chart to resize itself
+                    if (self.plot)
+                        self.plot.rsc();
+                }
+                if (this.rsc)
+                    $(window).off('resize', this.rsc);
+                this.rsc = rsc;
+                $(window).on('resize', this.rsc);
+                rsc();
+            }
+
+
             return this;
         },
 
@@ -110,8 +181,8 @@ define(function (require) {
                 this.plot.render();
             }
         },
-        
-        clear: function() {
+
+        clear: function () {
             $('.geigerchart', this.el).empty();
             this.addPlot();
             this.suspendGraph = true;
@@ -168,35 +239,31 @@ define(function (require) {
 
                 var dp = {
                     'name': "CPM",
-                    'value': cpm
+                    'value': cpm,
+                    'timestamp': ts
                 };
-                if (ts != undefined)
-                    dp['timestamp'] = ts;
 
                 this.plot.appendPoint(dp);
                 dp = {
                     'name': "AVG",
-                    'value': this.movingAverager(cpm, this.movingAvgData)
+                    'value': this.movingAverager(cpm, this.movingAvgData),
+                    'timestamp': ts
                 }
-                if (ts != undefined)
-                    dp['timestamp'] = ts;
                 this.plot.appendPoint(dp);
             }
             if (data.cpm2 != undefined) {
                 var cpm2 = parseFloat(data.cpm2.value);
                 var dp = {
                     'name': "CPM2",
-                    'value': cpm2
+                    'value': cpm2,
+                    'timestamp': ts
                 };
-                if (ts != undefined)
-                    dp['timestamp'] = ts;
                 this.plot.appendPoint(dp);
                 dp = {
                     'name': "AVG2",
-                    'value': this.movingAverager(cpm2, this.movingAvgData2)
+                    'value': this.movingAverager(cpm2, this.movingAvgData2),
+                    'timestamp': ts
                 };
-                if (ts != undefined)
-                    dp['timestamp'] = ts;                
                 this.plot.appendPoint(dp);
             }
         },
@@ -210,7 +277,7 @@ define(function (require) {
                 this.disp_cpm(data.data, data.replay_ts);
                 return;
             }
-            
+
             // We're waiting for a data replay
             if (this.suspend_graph)
                 return;
@@ -252,6 +319,35 @@ define(function (require) {
                     linkManager.startLiveStream(this.model.get('liveviewperiod'));
                 }
             } else {
+
+                if (this.map && data.loc_status && data.loc_status == 'OK') {
+                    this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
+                    if (this.lastMarker == null) {
+                        this.lastMarker = {
+                            lat: data.loc.coords.latitude,
+                            lng: data.loc.coords.longitude
+                        };
+
+                        this.map.addMarker(this.lastMarker);
+                    }
+
+                    // We want to add points/markers to the line of logging at points every X meters ?
+                    var d = utils.CoordDistance({
+                            lat: data.loc.coords.latitude,
+                            lng: data.loc.coords.longitude
+                        },
+                        this.lastMarker);
+                    if (d > 50) {
+                        this.lastMarker = {
+                            lat: data.loc.coords.latitude,
+                            lng: data.loc.coords.longitude
+                        };
+                        this.map.addMarker(this.lastMarker);
+                    }
+                }
+
+
+
                 this.disp_cpm(data);
             }
         },

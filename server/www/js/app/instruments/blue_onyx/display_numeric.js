@@ -79,8 +79,9 @@ define(function (require) {
             }
             
             if (data.loc_status && data.loc_status == 'OK') {
-                $('#lat',this.el).html(data.loc.coords.latitude);
-                $('#lon',this.el).html(data.loc.coords.longitude);
+                var coord = utils.coordToString({ lat: data.loc.coords.latitude, lng: data.loc.coords.longitude});
+                $('#lat', this.el).html(coord.lat);
+                $('#lon', this.el).html(coord.lng);
             } else if (data.loc_status) {
                 $('#lat',this.el).html('GPS: ' + data.loc_status);
                 $('#lon',this.el).html('');

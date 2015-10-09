@@ -44,7 +44,10 @@ define(function (require) {
             port = null,
             port_close_requested = false,
             port_open_requested = false,
-            isopen = false;
+            isopen = false,
+            current_loc = null,
+            location_status = '',
+            watchid = null;
 
         /////////////
         // Private methods
@@ -80,6 +83,9 @@ define(function (require) {
                     });
                     uidrequested = false;
                 } else {
+                    // Add geolocation information to the response
+                    response['loc'] = current_loc;
+                    response['loc_status'] = location_status;
                     self.trigger('data', response);
                 }
             } catch (err) {
@@ -109,14 +115,39 @@ define(function (require) {
             if (isopen) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
+                // Now regularly ask the navigator for current position and refresh map
+                if (watchid == null) {
+                    watchid = navigator.geolocation.watchPosition(newLocation, geolocationError, {
+                        maximumAge: 10000,
+                        timeout: 20000,
+                        enableHighAccuracy: true
+                    });
+                }
+
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
                     port.off('status', stat);
                     port_close_requested = false;
+                    if (watchid != null)
+                        navigator.geolocation.clearWatch(watchid);
                 }
             }
         };
+        
+        var newLocation = function (loc) {
+            location_status = 'OK';
+            current_loc = loc;
+        }
+
+        var geolocationError = function (err) {
+            console.log('Location error', err);
+            if (err.code == 3) {
+                location_status = 'no fix (timeout)';
+            } else
+            location_status = err.message;
+        }
+
 
 
         /////////////
@@ -145,8 +176,8 @@ define(function (require) {
         this.isOpen = function () {
             return isopen;
         }
-        
-        this.isOpenPending = function() {
+
+        this.isOpenPending = function () {
             return port_open_requested;
         }
 
