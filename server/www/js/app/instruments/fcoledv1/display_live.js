@@ -131,6 +131,12 @@ define(function (require) {
                 var chartheight = window.innerHeight / 2 - $(self.el).offset().top + 10;
                 $('.datachart', self.el).css('height', chartheight + 'px');
                 $('.datachart2', self.el).css('height', chartheight + 'px');
+                // Then tell the charts to resize themselves since we changed
+                // their parent's size
+                if (self.voltplot)
+                    self.voltplot.rsc();
+                if (self.ampplot)
+                    self.ampplot.rsc();
             }
             this.rsc = rsc;
             $(window).on('resize', this.rsc);
