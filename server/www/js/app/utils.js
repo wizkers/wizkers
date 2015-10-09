@@ -130,6 +130,17 @@ define(function (require) {
             return R * c;
         },
 
+        /**
+         * Checks what's visible and what's not on a Bootstrap layout.
+         * relies on a couple of (empty) divs on the page
+         * @param   {String}  bp Breakpoint we're looking for (xs, md, sm etc)
+         * @returns {Boolean} Is it visible?
+         */
+        checkBreakpoint: function (bp) {
+            return $('.screen-' + bp).is(':visible');
+        },
+
+
 
         // See http://stackoverflow.com/questions/19098797/fastest-way-to-flatten-un-flatten-nested-json-objects
         JSONflatten: function (data) {
