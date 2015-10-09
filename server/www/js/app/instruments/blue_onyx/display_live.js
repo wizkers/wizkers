@@ -31,6 +31,7 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
+        mapWidget = require('app/lib/mapwidget'),
         template = require('js/tpl/instruments/blueonyx/LiveView.js');
 
     // Load the flot library & flot time plugin:
@@ -45,7 +46,6 @@ define(function (require) {
             var self = this;
 
             this.map = null;
-            this.markers = [];
             this.lastMarker = null;
 
             this.currentDevice = null;
@@ -132,52 +132,37 @@ define(function (require) {
             this.addPlot();
 
             if (this.display_map) {
-                if (typeof (google) == 'undefined') {
-                    console.log('Error: Google maps API did not load');
-                    $('.map_container', this.el).html('<h4>Maps are not available yet</h4>');
-                    // TODO: this breaks on Chrome apps due to their inflexible content security
-                    // policy (we can't inject Javascript in the DOM).
-                    // We want to dynamically load the Google Maps API at this point:
+                this.map = new mapWidget();
+                if (this.map != null) {
+                    $('.map_container', this.el).append(this.map.el);
+                    this.map.render();
+                    // Now we want the map element to autostretch. A bit of queries and trickery here,
+                    // so that we resize exactly to the correct height:
+                    // - We know our offset (below the home view buttons) within the window ($(self.el).offset().top)
+                    // - We know the size of the chart: $('.geigerchart',self.el).parent().height()
+                    //     Note: .parent() is the enclosing .thumbnail
+                    // - Then, we know the size of the numview: $('#numview').height();
+                    // - Last, remove 55 pixels to account for all the margins around the map/divs/thumbnails
+                    // ... now do the equation
+                    //$('.map_container', this.el).css('height', $(this.el).parent().css('height'));
 
-                    window.GMAPLoaded = function () {
-                        self.render();
-                    };
-
-                    $.getScript('https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&callback=GMAPLoaded');
-
-                } else {
-                    var mapOptions = {
-                        zoom: 11,
-                        center: new google.maps.LatLng(0, 0),
-                        mapTypeId: google.maps.MapTypeId.ROADMAP
-                    };
-                    this.map = new google.maps.Map($('.map_container', this.el)[0], mapOptions);
+                    var self = this;
+                    var rsc = function () {
+                        var chartheight = $('#geigerchart_row', self.el).outerHeight();
+                        var numviewheight = 0;
+                        // We want to take the numview height into account if screen is xs
+                        if (utils.checkBreakpoint('xs'))
+                            numviewheight = $('#numview').outerHeight();
+                        var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 55;
+                        $('.map_container > .map', self.el).css('height', mapheight + 'px');
+                        self.map.resize();
+                    }
+                    if (this.rsc)
+                        $(window).off('resize', this.rsc);
+                    this.rsc = rsc;
+                    $(window).on('resize', this.rsc);
+                    rsc();
                 }
-                // Now we want the map element to autostretch. A bit of queries and trickery here,
-                // so that we resize exactly to the correct height:
-                // - We know our offset (below the home view buttons) within the window ($(self.el).offset().top)
-                // - We know the size of the chart: $('.geigerchart',self.el).parent().height()
-                //     Note: .parent() is the enclosing .thumbnail
-                // - Then, we know the size of the numview: $('#numview').height();
-                // - Last, remove 55 pixels to account for all the margins around the map/divs/thumbnails
-                // ... now do the equation
-                $('.map_container', this.el).css('height', $(this.el).parent().css('height'));
-
-                var self = this;
-                var rsc = function () {
-                    var chartheight = $('#geigerchart_row', self.el).outerHeight();
-                    var numviewheight = 0;
-                    // We want to take the numview height into account if screen is xs
-                    if (utils.checkBreakpoint('xs'))
-                        numviewheight = $('#numview').outerHeight();
-                    var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 55;
-                    $('.map_container', self.el).css('height', mapheight + 'px');
-                }
-                if (this.rsc)
-                    $(window).off('resize', this.rsc);
-                this.rsc = rsc;
-                $(window).on('resize', this.rsc);
-                rsc();
             } else {
                 // Implement a resizer for the Geiger chart only
                 var self = this;
@@ -307,16 +292,14 @@ define(function (require) {
 
             // Now update the map (if it exists) to show the current location/measurement
             if (this.map && data.loc_status && data.loc_status == 'OK') {
-                this.map.setCenter(new google.maps.LatLng(data.loc.coords.latitude, data.loc.coords.longitude));
+                this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                 if (this.lastMarker == null) {
                     this.lastMarker = {
                         lat: data.loc.coords.latitude,
                         lng: data.loc.coords.longitude
                     };
-                    this.markers.push(new google.maps.Marker({
-                        position: this.lastMarker,
-                        map: this.map,
-                    }));
+
+                    this.map.addMarker(this.lastMarker);
                 }
 
                 // We want to add points/markers to the line of logging at points every X meters ?
@@ -330,10 +313,7 @@ define(function (require) {
                         lat: data.loc.coords.latitude,
                         lng: data.loc.coords.longitude
                     };
-                    this.markers.push(new google.maps.Marker({
-                        position: this.lastMarker,
-                        map: this.map,
-                    }));
+                    this.map.addMarker(this.lastMarker);
                 }
             }
             this.disp_cpm(data);
