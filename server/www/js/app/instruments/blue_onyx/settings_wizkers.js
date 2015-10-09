@@ -50,23 +50,6 @@ define(function (require) {
 
         events: {
             "change": "change",
-            "click #save-macros": "saveMacros"
-        },
-
-        saveMacros: function () {
-            console.log("Save macros");
-            var self = this;
-
-            this.model.save(null, {
-                success: function (model) {
-                    utils.showAlert('Success:', 'Configuration saved', 'alert-success');
-                },
-                error: function () {
-                    console.log('Instrument: error saving');
-                    utils.showAlert('Error:', 'An error occurred while trying to save intrument config', 'alert-danger');
-                }
-            });
-
         },
 
         change: function (event) {
@@ -97,6 +80,15 @@ define(function (require) {
             // are going to bubble up to the upper view and change attributes
             // with the same name, so we stop event propagation here:
             event.stopPropagation();
+
+            this.model.save(null, {
+                success: function (model) {
+                },
+                error: function () {
+                    console.log('Instrument: error saving');
+                    utils.showAlert('Error:', 'An error occurred while trying to save intrument config', 'alert-danger');
+                }
+            });
         },
 
 

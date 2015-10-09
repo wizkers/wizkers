@@ -52,7 +52,7 @@ define(function (require) {
             this.flotplot_settings = {
                 // points: 150,
                 // preload: 4096,  // Use this when creating a plot with a fixed number of data points
-                                   // (used for the Sigma-25)
+                // (used for the Sigma-25)
                 // log: false,     // Override log display
                 showtips: true,
                 selectable: false,
@@ -149,7 +149,7 @@ define(function (require) {
 
             // Adjust whether we want a log display, or linear (setup in global settings)
             var log_disabled = (this.flotplot_settings.log) && (this.flotplot_settings.log == false);
-            if (settings.get('cpmscale') == "log" ) {
+            if (settings.get('cpmscale') == "log") {
                 this.plotOptions.yaxis = {
                     min: 1,
                     //ticks: [1,10,30,50,100,500,1000,1500],
@@ -233,12 +233,11 @@ define(function (require) {
                     var chartheight;
                     if (self.flotplot_settings.vertical_stretch) {
                         chartheight = window.innerHeight - $(self.el).offset().top - 20;
+                        if (settings.get("showstream"))
+                            chartheight -= ($('#showstream').height() + 20);
                     } else {
-                        chartheight = $(self.el.parentElement).height() - 20;
+                        chartheight = $(self.el.parentElement).height();
                     }
-                    if (settings.get("showstream"))
-                        chartheight -= ($('#showstream').height() + 20);
-
                     $('.chart', self.el).css('height', chartheight + 'px');
                 }
                 this.rsc = rsc;
@@ -291,7 +290,7 @@ define(function (require) {
                 var a = [];
                 if (this.flotplot_settings != undefined) {
                     for (var i = 0; i < this.flotplot_settings.preload; i++)
-                        a[i] = [i,0];
+                        a[i] = [i, 0];
                 }
                 this.livedata.push(a);
                 idx = this.sensors.length - 1;
