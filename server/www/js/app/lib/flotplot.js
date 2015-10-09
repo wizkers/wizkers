@@ -125,7 +125,8 @@ define(function (require) {
         // the window resize callback lives on as a zombie and tries to resize
         // any chart anywhere...
         onClose: function () {
-            if (this.flotplot_settings.vertical_stretch) {
+            if (this.flotplot_settings.vertical_stretch ||
+                this.flotplot_settings.vertical_stretch_parent) {
                 $(window).off('resize', this.rsc);
             }
         },
