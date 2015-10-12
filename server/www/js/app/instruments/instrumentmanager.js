@@ -122,7 +122,7 @@ define(function (require) {
             this.supportedInstruments['fcbtusbv1'] = {
                 name: 'Fried Circuits Bluetooth backpack',
                 type: 'app/instruments/fcbtusbv1/fcbtusbv1',
-                settings: null',
+                settings: null,
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
             this.supportedInstruments['bgeigie'] = {
