@@ -129,8 +129,26 @@ var vizapp = {
     //   - server : use a remote server for device connection & database
     //   - cordova: run as an embedded Cordova application on Android
     //   - others to be defined 
-    type: "cordova",
+    type: 'cordova',
+    
+    // State can be "running" or "paused". Only updated in Cordova mode.
+    // Can be checked by various tasks to skip display when app paused, and
+    // save battery. (see Flotplot)
+    state: 'running'
 };
+
+var pauseListener = function() {
+    console.log('Paused');
+    vizapp.state = 'paused';
+}
+
+var resumeListener = function() {
+    console.log('Resumed');
+    vizapp.state = 'running';
+}
+
+document.addEventListener("pause", pauseListener, false);
+document.addEventListener("resume", resumeListener, false);
 
 var router;
 

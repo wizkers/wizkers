@@ -336,6 +336,10 @@ define(function (require) {
         // loading a large number of points before redrawing
         appendPoint: function (data) {
             this.fastAppendPoint(data);
+            // Save lots of battery by skipping the redraw when the plot is running
+            // in a Cordova app and the app is not in front (screen off, etc)
+            if (vizapp.state == 'paused')
+                return;
             this.redraw();
             return this; // This lets us chain multiple operations
         }
