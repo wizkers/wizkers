@@ -32,52 +32,6 @@ define(function (require) {
         Backbone = require('backbone'),
         Instrument = require(['app/models/instrument']);
 
-    var OnyxInstrument = require('app/instruments/onyx/onyx'),
-        OnyxSettingsView = require('app/instruments/onyx/settings');
-
-    var FCOledInstrument = require('app/instruments/fcoledv1/fcoled'),
-        FCOledSettingsView = require('app/instruments/fcoledv1/settings');
-
-    var W433Instrument = require('app/instruments/w433/w433'),
-        W433SettingsView = require('app/instruments/w433/settings');
-
-    var ElecraftInstrument = require('app/instruments/elecraft/elecraft'),
-        ElecraftSettingsView = require('app/instruments/elecraft/settings');
-
-    var RemoteElecraftInstrument = require('app/instruments/elecraft_remote/elecraft_remote'),
-        RemoteElecraftSettingsView = require('app/instruments/elecraft_remote/settings');
-
-    var Fluke289Instrument = require('app/instruments/fluke28x/fluke'),
-        Fluke289SettingsView = require('app/instruments/fluke28x/settings');
-
-    var USBGeigerInstrument = require('app/instruments/usbgeiger/usb_geiger'),
-        USBGeigerSettingsView = require('app/instruments/usbgeiger/settings');
-
-    var HeliumGeigerInstrument = require('app/instruments/heliumgeiger/heliumgeiger'),
-        HeliumGeigerSettingsView = require('app/instruments/heliumgeiger/settings');
-
-    var HawkNestInstrument = require('app/instruments/hawknest/hawknest'),
-        HawkNestSettingsView = require('app/instruments/hawknest/settings');
-
-    var SimpleSerialInstrument = require('app/instruments/simple_serial/simple_serial'),
-        SimpleSerialSettingsView = require('app/instruments/simple_serial/settings');
-
-    var Sark110Instrument = require('app/instruments/sark110/sark110'),
-        Sark110SettingsView = require('app/instruments/sark110/settings');
-
-    var Sigma25Instrument = require('app/instruments/sigma25/sigma25'),
-        Sigma25SettingsView = require('app/instruments/sigma25/settings');
-
-    var BlueOnyxInstrument = require('app/instruments/blue_onyx/blue_onyx'),
-        BlueOnyxSettingsView = require('app/instruments/blue_onyx/settings');
-
-    var FCBTInstrument = require('app/instruments/fcbtusbv1/fcbtusbv1'),
-        FCBTSettingsView = require('app/instruments/fcbtusbv1/settings');
-
-    var PowerLogInstrument = require('app/instruments/powerlog_1/powerlog_1'),
-        PowerLogSettingsView = require('app/instruments/powerlog_1/settings');
-
-
     var InstrumentManager = function () {
 
         // current_instrument is a Backbone Model instance
@@ -87,50 +41,50 @@ define(function (require) {
         this.supportedInstruments = {
             "onyx": {
                 name: "SafeCast Onyx",
-                type: OnyxInstrument,
-                settings: OnyxSettingsView,
+                type: 'app/instruments/onyx/onyx',
+                settings: 'app/instruments/onyx/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "fcoledv1": {
                 name: "Fried Circuits OLED backpack",
-                type: FCOledInstrument,
-                settings: FCOledSettingsView,
+                type: 'app/instruments/fcoledv1/fcoled',
+                settings: 'app/instruments/fcoledv1/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "elecraft": {
                 name: "Elecraft KX3",
-                type: ElecraftInstrument,
-                settings: ElecraftSettingsView,
+                type: 'app/instruments/elecraft/elecraft',
+                settings: 'app/instruments/elecraft/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "usbgeiger": {
                 name: "USB Geiger",
-                type: USBGeigerInstrument,
-                settings: USBGeigerSettingsView,
+                type: 'app/instruments/usbgeiger/usb_geiger',
+                settings: 'app/instruments/usbgeiger/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "fluke28x": {
                 name: "Fluke 287/289 Series multimeter",
-                type: Fluke289Instrument,
-                settings: Fluke289SettingsView,
+                type: 'app/instruments/fluke28x/fluke',
+                settings: 'app/instruments/fluke28x/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "simple_serial": {
                 name: "Simple serial terminal",
-                type: SimpleSerialInstrument,
-                settings: SimpleSerialSettingsView,
+                type: 'app/instruments/simple_serial/simple_serial',
+                settings: 'app/instruments/simple_serial/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "sigma25": {
                 name: "Kromek Sigma25",
-                type: Sigma25Instrument,
-                settings: Sigma25SettingsView,
+                type: 'app/instruments/sigma25/sigma25',
+                settings: 'app/instruments/sigma25/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "powerlog_1": {
                 name: "PowerCost Monitor",
-                type: PowerLogInstrument,
-                settings: PowerLogSettingsView,
+                type: 'app/instruments/powerlog_1/powerlog_1',
+                settings: 'app/instruments/powerlog_1/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             }
         };
@@ -139,20 +93,20 @@ define(function (require) {
         if (vizapp.type == "server") {
             this.supportedInstruments["w433"] = {
                 name: "Aerodynes W433 Weather receiver",
-                type: W433Instrument,
-                settings: W433SettingsView,
+                type: 'app/instruments/w433/w433',
+                settings: 'app/instruments/w433/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             };
             this.supportedInstruments["heliumgeiger"] = {
                 name: "Radius Hawk (Helium)",
-                type: HeliumGeigerInstrument,
-                settings: HeliumGeigerSettingsView,
+                type: 'app/instruments/heliumgeiger/heliumgeiger',
+                settings: 'app/instruments/heliumgeiger/settings',
                 connectionsettings: 'app/views/instrument/helium'
             };
             this.supportedInstruments["hawknest"] = {
                 name: "Hawk Nest (Pinocc.io)",
-                type: HawkNestInstrument,
-                settings: HawkNestSettingsView,
+                type: 'app/instruments/hawknest/hawknest',
+                settings: 'app/instruments/hawknest/settings',
                 connectionsettings: 'app/views/instrument/pinoccio'
             };
         }
@@ -161,14 +115,20 @@ define(function (require) {
         if (vizapp.type == 'chrome' || vizapp.type == 'cordova') {
             this.supportedInstruments['blue_onyx'] = {
                 name: 'Medcom Blue Onyx',
-                type: BlueOnyxInstrument,
-                settings: BlueOnyxSettingsView,
+                type: 'app/instruments/blue_onyx/blue_onyx',
+                settings: 'app/instruments/blue_onyx/settings',
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
             this.supportedInstruments['fcbtusbv1'] = {
                 name: 'Fried Circuits Bluetooth backpack',
-                type: FCBTInstrument,
-                settings: FCBTSettingsView,
+                type: 'app/instruments/fcbtusbv1/fcbtusbv1',
+                settings: 'app/instruments/fcbtusbv1/settings',
+                connectionsettings: 'app/views/instrument/bluetooth'
+            };
+            this.supportedInstruments['bgeigie'] = {
+                name: 'Safecast bGeigie',
+                type: 'app/instruments/bgeigie/bgeigie',
+                settings: null,
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
         }
@@ -177,14 +137,14 @@ define(function (require) {
         if (vizapp.type == 'chrome') {
             this.supportedInstruments['sark110'] = {
                 name: 'Sark110 Antenna Analyzer',
-                type: Sark110Instrument,
-                settings: Sark110SettingsView,
+                type: 'app/instruments/sark110/sark110',
+                settings: 'app/instruments/sark110/settings',
                 connectionsettings: 'app/views/instrument/usbhid'
             };
             this.supportedInstruments['elecraft_remote'] = {
                 name: 'Remote Elecraft KX3',
-                type: RemoteElecraftInstrument,
-                settings: RemoteElecraftSettingsView,
+                type: 'app/instruments/elecraft_remote/elecraft_remote',
+                settings: 'app/instruments/elecraft_remote/settings',
                 connectionsettings: 'app/views/instrument/webrtc'
             };
         }
@@ -199,6 +159,20 @@ define(function (require) {
             require([this.supportedInstruments[instrument].connectionsettings], function (view) {
                 callback(new view(arg));
             });
+        }
+
+        /**
+         * The optional extra settings in the "Instrument Details" view. These are settings
+         * that are required to connect to the instrument.
+         * @param {String}   instrument The instrument type
+         * @param {Object}   arg        Argument to be passed at view creation
+         * @param {Function} callback   Callback once the view is created
+         */
+        this.getInstrumentSettings = function (instrument, arg, callback) {
+            if (this.supportedInstruments[instrument].settings != null)
+                require([this.supportedInstruments[instrument].settings], function (view) {
+                    callback(new view(arg));
+                });
         }
 
         /**
@@ -218,18 +192,20 @@ define(function (require) {
         }
 
         this.setInstrument = function (instrument) {
+            var self = this;
             var type = instrument.get('type');
             for (var ins in this.supportedInstruments) {
                 if (ins == type) {
                     current_instrument = instrument;
-                    // Nifty: we extend our instrument manager with the methods of our instrument.
-                    // (since all instruments support the same API, a change of instrument
-                    // overrides the methods)
-                    var instrumentObject = new this.supportedInstruments[ins].type;
-                    _.extend(this, instrumentObject);
-                    linkManager.setDriver(this.getDriver());
-
-                    this.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
+                    // Dynamically load the instrument:
+                    require([this.supportedInstruments[ins].type], function (instrumentObject) {
+                        // Nifty: we extend our instrument manager with the methods of our instrument.
+                        // (since all instruments support the same API, a change of instrument
+                        // overrides the methods)
+                        _.extend(self, new instrumentObject());
+                        linkManager.setDriver(self.getDriver());
+                        self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
+                    });
                 }
             }
         }

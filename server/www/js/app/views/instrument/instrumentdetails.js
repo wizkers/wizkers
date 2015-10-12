@@ -60,16 +60,13 @@ define(function (require) {
                 if (vizapp.type == "cordova")
                     $('.hide-cordova', this.el).hide();
 
-
                 // If the instrument type has got its own extra settings, then render those here:
-                var insSettingsView = instrumentManager.supportedInstruments[insType].settings;
-                if (insSettingsView != null) {
-                    var settingsView = new insSettingsView({
-                        model: this.model
-                    });
-                    $('#metadata', this.el).html(settingsView.el);
+                instrumentManager.getInstrumentSettings(insType, {
+                    model: this.model
+                }, function (settingsView) {
+                    $('#metadata', self.el).html(settingsView.el);
                     settingsView.render();
-                }
+                });
 
                 // Last, load the port settings view: Wizkers now supports various kinds of connections, now
                 // only serial ports. This means that instruments plugins are in charge of telling Wizkers
