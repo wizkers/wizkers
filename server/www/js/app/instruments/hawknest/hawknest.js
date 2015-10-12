@@ -55,13 +55,6 @@ define(function(require) {
                     return [ "radioactivity" ];
         }
         
-        // This has to be a backbone view
-        this.getSettings = function(arg, callback) {
-            require(['app/instruments/hawknest/settings'], function(view) {
-                callback(new view(arg));
-            });
-        };
-
         // This has to be a Backbone view
         // This is the full screen live view graph (not a small widget)
         this.getLiveDisplay = function(arg, callback) {

@@ -173,7 +173,7 @@ define(function (require) {
                     var chartheight = window.innerHeight - $(self.el).offset().top - numviewheight - 55;
                     $('.geigerchart', self.el).css('height', chartheight + 'px');
                     // Then tell the chart to resize itself
-                    if (self.plot)
+                    if (self.plot && self.plot.rsc)
                         self.plot.rsc();
                 }
                 if (this.rsc)

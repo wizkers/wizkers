@@ -44,14 +44,6 @@ define(function(require) {
                     return [ "voltage", "current", "capacity", "resistance", "temperature" ];
         }
 
-
-        // This has to be a backbone view
-        this.getSettings = function(arg, callback) {
-            require(['app/instruments/fluke28x/settings'], function(view) {
-                callback(new view(arg));
-            });
-        };
-
         // This has to be a Backbone view
         this.getLiveDisplay = function(arg, callback) {
             require(['app/instruments/fluke28x/display_live'], function(view) {

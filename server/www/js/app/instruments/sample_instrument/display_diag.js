@@ -16,3 +16,48 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+ * Diag and settings screen for the instrument
+ *
+ * @author Edouard Lafargue, ed@lafargue.name
+ *
+ */
+
+define(function(require) {
+    "use strict";
+    
+    var $       = require('jquery'),
+        _       = require('underscore'),
+        Backbone = require('backbone'),
+        template = require('js/tpl/instruments/SampleInstrument.js');
+
+    return Backbone.View.extend({
+
+        initialize:function () {
+            linkManager.on('input', this.showInput, this);
+
+            if (!linkManager.isRecording())
+                linkManager.stopLiveStream();
+        },
+
+        events: {
+        },
+
+        onClose: function() {
+            console.log("[Sample Instrument] Diag view closing...");
+            linkManager.off('input', this.showInput);
+        },
+
+        render:function () {
+            var self = this;
+            this.$el.html(template(this.model.toJSON()));
+
+            this.refresh();
+            return this;
+        },
+        
+        showInput: function(data) {
+        }
+    });
+});

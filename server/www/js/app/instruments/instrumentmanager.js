@@ -42,13 +42,13 @@ define(function (require) {
             "onyx": {
                 name: "SafeCast Onyx",
                 type: 'app/instruments/onyx/onyx',
-                settings: 'app/instruments/onyx/settings',
+                settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "fcoledv1": {
                 name: "Fried Circuits OLED backpack",
                 type: 'app/instruments/fcoledv1/fcoled',
-                settings: 'app/instruments/fcoledv1/settings',
+                settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "elecraft": {
@@ -60,13 +60,13 @@ define(function (require) {
             "usbgeiger": {
                 name: "USB Geiger",
                 type: 'app/instruments/usbgeiger/usb_geiger',
-                settings: 'app/instruments/usbgeiger/settings',
+                settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "fluke28x": {
                 name: "Fluke 287/289 Series multimeter",
                 type: 'app/instruments/fluke28x/fluke',
-                settings: 'app/instruments/fluke28x/settings',
+                settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "simple_serial": {
@@ -78,13 +78,13 @@ define(function (require) {
             "sigma25": {
                 name: "Kromek Sigma25",
                 type: 'app/instruments/sigma25/sigma25',
-                settings: 'app/instruments/sigma25/settings',
+                settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "powerlog_1": {
                 name: "PowerCost Monitor",
                 type: 'app/instruments/powerlog_1/powerlog_1',
-                settings: 'app/instruments/powerlog_1/settings',
+                settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             }
         };
@@ -100,13 +100,13 @@ define(function (require) {
             this.supportedInstruments["heliumgeiger"] = {
                 name: "Radius Hawk (Helium)",
                 type: 'app/instruments/heliumgeiger/heliumgeiger',
-                settings: 'app/instruments/heliumgeiger/settings',
+                settings: null,
                 connectionsettings: 'app/views/instrument/helium'
             };
             this.supportedInstruments["hawknest"] = {
                 name: "Hawk Nest (Pinocc.io)",
                 type: 'app/instruments/hawknest/hawknest',
-                settings: 'app/instruments/hawknest/settings',
+                settings: null,
                 connectionsettings: 'app/views/instrument/pinoccio'
             };
         }
@@ -116,13 +116,13 @@ define(function (require) {
             this.supportedInstruments['blue_onyx'] = {
                 name: 'Medcom Blue Onyx',
                 type: 'app/instruments/blue_onyx/blue_onyx',
-                settings: 'app/instruments/blue_onyx/settings',
+                settings: null,
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
             this.supportedInstruments['fcbtusbv1'] = {
                 name: 'Fried Circuits Bluetooth backpack',
                 type: 'app/instruments/fcbtusbv1/fcbtusbv1',
-                settings: 'app/instruments/fcbtusbv1/settings',
+                settings: null',
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
             this.supportedInstruments['bgeigie'] = {

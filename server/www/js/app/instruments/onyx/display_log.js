@@ -32,6 +32,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         simpleplot = require('app/lib/flotplot'),
+        fileutils = require('app/lib/fileutils'),
         template = require('js/tpl/instruments/OnyxLogView.js');
 
     // Load the flot library & flot time plugin:
@@ -52,19 +53,6 @@ define(function (require) {
             // Need this to make sure "render" will always be bound to our context.
             // -> required for the _.after below.
             _.bindAll(this, "render");
-
-            // Now fetch all the contents, then render
-            var renderGraph = _.after(this.deviceLogs.length, this.render);
-            this.deviceLogs.each(function (log) {
-                log.entries.fetch({
-                    success: renderGraph,
-                    xhr: function () {
-                        var xhr = $.ajaxSettings.xhr();
-                        xhr.onprogress = self.handleProgress;
-                        return xhr;
-                    }
-                });
-            });
 
             // We will pass this when we create plots, this is the global
             // config for the look and feel of the plot
@@ -111,6 +99,20 @@ define(function (require) {
             // TODO: save color palette in settings ?
             // My own nice color palette:
             this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"];
+
+            // Now fetch all the contents, then render
+            var renderGraph = _.after(this.deviceLogs.length, this.render);
+            this.deviceLogs.each(function (log) {
+                log.entries.fetch({
+                    success: renderGraph,
+                    xhr: function () {
+                        var xhr = $.ajaxSettings.xhr();
+                        xhr.onprogress = self.handleProgress;
+                        return xhr;
+                    }
+                });
+            });
+
         },
 
         handleProgress: function (e) {
@@ -261,6 +263,8 @@ define(function (require) {
             }
             var uri = encodeURI(csv);
             window.open(uri);
+            
+            fileutils.newLogFile("gabuzo");
         },
 
         addPlot: function () {
@@ -352,11 +356,13 @@ define(function (require) {
                                 value: entry.get('data').max,
                                 name: "Maximum",
                                 timestamp: stamp,
-                                options: {lines: {
-                                    show: true,
-                                    fill: true
+                                options: {
+                                    lines: {
+                                        show: true,
+                                        fill: true
+                                    },
+                                    fillBetween: "min"
                                 },
-                                fillBetween: "min"},
                             });
                         }
 
