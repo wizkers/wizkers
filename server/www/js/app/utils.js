@@ -143,12 +143,14 @@ define(function (require) {
             var deg = Math.floor(coord.lat);
             var min = (Math.abs(coord.lat - deg) * 60);
             var sec = (min - Math.floor(min));
-            ret.lat = deg + '&deg;&nbsp;' + Math.floor(min) + '\'&nbsp;' + (sec * 60).toFixed(3) + '"&nbsp;' + ((deg >= 0) ? 'N' : 'S');
+            ret.lat = ((deg < 100) ? '&nbsp;' : '') + ((deg < 10) ? '&nbsp;' : '') +
+                deg + '&deg;&nbsp;' + Math.floor(min) + '\'&nbsp;' + (sec * 60).toFixed(3) + '"&nbsp;' + ((deg >= 0) ? 'N' : 'S');
 
             deg = Math.floor(coord.lng);
             min = (Math.abs(coord.lng - deg) * 60);
             sec = (min - Math.floor(min));
-            ret.lng = ((deg < 100) ? '&nbsp;' : '') + deg + '&deg;&nbsp;' + Math.floor(min) + '\'&nbsp;' + (sec * 60).toFixed(3) + '"&nbsp;' + ((deg >= 0) ? 'E' : 'W');
+            ret.lng = ((deg < 100) ? '&nbsp;' : '') + ((deg < 100) ? '&nbsp;' : '') +
+                deg + '&deg;&nbsp;' + Math.floor(min) + '\'&nbsp;' + (sec * 60).toFixed(3) + '"&nbsp;' + ((deg >= 0) ? 'E' : 'W');
 
             return ret;
         },
