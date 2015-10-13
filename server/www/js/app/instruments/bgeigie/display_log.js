@@ -120,7 +120,8 @@ define(function (require) {
         events: {
             "click .resetZoom": "resetZoom",
             "click #cpmscale": "cpmScaleToggle",
-            "click #send-to-api": "uploadLog"
+            "click #send-to-api": "generateLog",
+            "click #send-log": "sendLog"
         },
 
         resetZoom: function () {
@@ -129,20 +130,6 @@ define(function (require) {
             this.plot.addPlot();
             this.plot.redraw();
             return false;
-        },
-
-        cpmScaleToggle: function (event) {
-            return;
-            var change = {};
-            if (event.target.checked) {
-                change["cpmscale"] = "log";
-            } else {
-                change["cpmscale"] = "linear";
-            }
-            settings.set(change);
-            this.render();
-            this.addPlot();
-
         },
 
         render: function () {
@@ -169,19 +156,27 @@ define(function (require) {
                 this.overview.onClose();
         },
 
-        uploadLog: function () {
+        /**
+         * Generates a Safecast bGeigie compliant 'drive' file, then
+         * call the uploadLog method for the actual upload
+         */
+        generateLog: function () {
             var self = this;
+            $('#send-to-api', this.el).html('Generating...').addClass('btn-success').attr('disabled', true);;
             fileutils.newLogFile("safecast-upload.log", function (file) {
                 file.createWriter(function (fileWriter) {
-                    // fileWriter.seek(fileWriter.length);
+                    // ToDo: create the header for the file
                     for (var i = 0; i < self.deviceLogs.length; i++) {
                         var currentLog = self.deviceLogs.at(i);
                         var entries = currentLog.entries;
-
+                        // Now iterate over all the log entries and generate
+                        // the aggregate log files.
                         var index = 0;
                         var write = function (evt) {
-                            if (index == entries.length)
+                            if (index == entries.length) {
+                                self.addMetadata(file);
                                 return;
+                            }
                             var entry = entries.at(index);
                             index++;
                             var data = entry.get('data');
@@ -192,12 +187,28 @@ define(function (require) {
                         };
                         fileWriter.onwrite = write;
                         write(0);
-
                     }
                 }, function (e) {
                     console.log(e);
                 });
             });
+        },
+
+        /**
+         * Upload the log to Safecast
+         * @param {Object} file The file descriptor for the log.
+         */
+        addMetadata: function (file) {
+            $('#send-to-api', this.el).html('Done').removeAttr('disabled');
+            this.logfile = file;
+            // ToDo: ask the user a couple of extra questions on the drive
+            // (fill in defaults to make it easy), and do the upload.
+            $('#UploadModal', this.el).modal('show');
+        },
+
+        sendLog: function () {
+        
+        
         },
 
         addPlot: function () {

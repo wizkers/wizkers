@@ -128,7 +128,7 @@ define(function (require) {
             this.supportedInstruments['bgeigie'] = {
                 name: 'Safecast bGeigie',
                 type: 'app/instruments/bgeigie/bgeigie',
-                settings: null,
+                settings: 'app/instruments/bgeigie/settings',
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
         }

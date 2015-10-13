@@ -45,3 +45,35 @@
         </div>
     </div>
 </div>
+
+<!-- The modal to do the upload -->
+<div class="container">
+    <div id="UploadModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3 id="myModalLabel" class="modal-title">Ready for upload</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="horizontal">
+                        <span>Credits:&nbsp;</span>
+                        <input id="credits" name="credits" type="text" />
+                    </div><br>
+                    <div class="horizontal">
+                        <span>Cities:&nbsp;</span>
+                        <input id="cities" name="cities" type="text" />
+                    </div>
+                    <div>Description (optional):
+                        <textarea id="description" name="description" style="width: 90%;" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    <button class="btn send-log btn-primary">Upload to Safecast </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
