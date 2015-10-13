@@ -207,6 +207,20 @@ define(function (require) {
         },
 
         sendLog: function () {
+            var self = this;
+
+            var apikey;
+            if (instrumentManager.getInstrument().get('metadata'))
+                apikey = instrumentManager.getInstrument().get('metadata').apikey;
+
+            if (typeof apikey == 'undefined') {
+                $('#UploadModal', self.el).modal('hide');
+                $('#errorreason', this.el).html("API Key missing");
+                $('#errordetail', this.el).html("Please add your api.safecast.org API key in the bGeigie configuration settings.");
+                $('#ErrorModal').modal();
+                return;
+            }
+
             // We are going to use the fileutils library to do the file transfers,
             // wo that we can abstract between platforms (android, server, etc)
 
@@ -224,11 +238,24 @@ define(function (require) {
                 'http://dev.safecast.org/bgeigie_imports.json',
                 function (success) {
                     console.log('success', success);
-                    $('#UploadModal', this.el).modal('hide');
+                    $('#UploadModal', self.el).modal('hide');
+                    $('#myErrorLabel', self.el).html("Success");
+                    $('#errorreason', self.el).html("Your log was uploaded to Safecast");
+                    $('#errordetail', self.el).html("Keep up the good work (proper details coming up real soon)");
+                    $('#ErrorModal').modal('show');
+
                 },
                 function (failure) {
                     console.log('failure', failure);
-                    $('#UploadModal', this.el).modal('hide');
+                    $('#UploadModal', self.el).modal('hide');
+                    var errorDescription = "Could not upload the file";
+                    if (failure.body && failure.body.indexOf('md5sum') > -1) {
+                        errorDescription = "This log is already uploaded, no need to resubmit it";
+                    }
+                    $('#errorreason', self.el).html("Upload Error");
+                    $('#errordetail', self.el).html(errorDescription);
+                    $('#ErrorModal').modal('show');
+
                 }, options);
         },
 
