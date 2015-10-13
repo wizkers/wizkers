@@ -88,9 +88,25 @@ define(function (require) {
                 console.log(e);
             });
         };
-        
-        
-        
+
+        this.FileUploadOptions = function () {
+            return new FileUploadOptions();
+        }
+
+        /**
+         * Send the contents of a file to a remote endpoint.
+         * @param {[[Type]]} fileURI [[Description]]
+         * @param {[[Type]]} server  [[Description]]
+         * @param {[[Type]]} success [[Description]]
+         * @param {[[Type]]} failure [[Description]]
+         * @param {[[Type]]} option  [[Description]]
+         */
+        this.sendFile = function (fileURI, server, success, failure, options) {
+            var ft = new FileTransfer();
+            ft.upload(fileURI, encodeURI(server), success, failure, options);
+        }
+
+
     }
 
     return new fileUtils;

@@ -121,7 +121,7 @@ define(function (require) {
             "click .resetZoom": "resetZoom",
             "click #cpmscale": "cpmScaleToggle",
             "click #send-to-api": "generateLog",
-            "click #send-log": "sendLog"
+            "click .send-log": "sendLog"
         },
 
         resetZoom: function () {
@@ -207,8 +207,29 @@ define(function (require) {
         },
 
         sendLog: function () {
-        
-        
+            // We are going to use the fileutils library to do the file transfers,
+            // wo that we can abstract between platforms (android, server, etc)
+
+            var options = fileutils.FileUploadOptions();
+            options.fileKey = 'bgeigie_import[source]';
+            options.fileName = this.logfile.nativeURL.substr(this.logfile.nativeURL.lastIndexOf('/') + 1);
+            options.mimeType = "text/plain";
+
+            var params = {
+                api_key: instrumentManager.getInstrument().get('metadata').apikey,
+                'bgeigie_import[name]': 'bgeigie.log'
+            };
+            options.params = params;
+            fileutils.sendFile(this.logfile.nativeURL,
+                'http://dev.safecast.org/bgeigie_imports.json',
+                function (success) {
+                    console.log('success', success);
+                    $('#UploadModal', this.el).modal('hide');
+                },
+                function (failure) {
+                    console.log('failure', failure);
+                    $('#UploadModal', this.el).modal('hide');
+                }, options);
         },
 
         addPlot: function () {
