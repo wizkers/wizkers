@@ -133,6 +133,11 @@ define(function (require) {
                 $('#map_row', this.el).empty();
             }
 
+            if (!this.display_graph) {
+                $('#geigerchart_row', this.el).empty();
+            }
+
+            
             if (this.display_graph)
                 this.addPlot();
 
@@ -216,8 +221,10 @@ define(function (require) {
 
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
-            $(window).off('resize', this.rsc);
-            this.plot.onClose();
+            if (this.rsc)
+                $(window).off('resize', this.rsc);
+            if (this.plot)
+                this.plot.onClose();
 
         },
 
