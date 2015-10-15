@@ -48,45 +48,41 @@ define(function (require) {
             this.connectionView = null;
             console.log("Render instrument details");
             var insType = this.model.get('type');
-            linkManager.once('ports', function (portlist) {
-                $(this.el).html(template(_.extend(this.model.toJSON(), {
-                    instypes: instrumentManager.supportedInstruments,
-                    ports: portlist
-                })));
 
-                if (vizapp.type == "chrome")
-                    $('.hide-chrome', this.el).hide();
+            $(this.el).html(template(_.extend(this.model.toJSON(), {
+                instypes: instrumentManager.supportedInstruments
+            })));
 
-                if (vizapp.type == "cordova")
-                    $('.hide-cordova', this.el).hide();
+            if (vizapp.type == "chrome")
+                $('.hide-chrome', this.el).hide();
 
-                // If the instrument type has got its own extra settings, then render those here:
-                instrumentManager.getInstrumentSettings(insType, {
-                    model: this.model
-                }, function (settingsView) {
-                    $('#metadata', self.el).html(settingsView.el);
-                    settingsView.render();
-                });
+            if (vizapp.type == "cordova")
+                $('.hide-cordova', this.el).hide();
 
-                // Last, load the port settings view: Wizkers now supports various kinds of connections, now
-                // only serial ports. This means that instruments plugins are in charge of telling Wizkers
-                // what sort of connection selector they want to use.
-                if (this.connectionView != null && this.connectionView.onClose != undefined)
-                    this.connectionView.onClose();
+            // If the instrument type has got its own extra settings, then render those here:
+            instrumentManager.getInstrumentSettings(insType, {
+                model: this.model
+            }, function (settingsView) {
+                $('#metadata', self.el).html(settingsView.el);
+                settingsView.render();
+            });
 
-                instrumentManager.getConnectionSettingsFor(insType, {
-                    model: this.model,
-                    ports: portlist
-                }, function (view) {
-                    $('#portsettings', self.el).html(view.el);
-                    view.render();
-                    // Keep a reference to tell the view to close
-                    // when we close this view
-                    self.connectionView = view;
-                });
+            // Last, load the port settings view: Wizkers now supports various kinds of connections, now
+            // only serial ports. This means that instruments plugins are in charge of telling Wizkers
+            // what sort of connection selector they want to use.
+            if (this.connectionView != null && this.connectionView.onClose != undefined)
+                this.connectionView.onClose();
 
-            }, this);
-            linkManager.getPorts(insType);
+            instrumentManager.getConnectionSettingsFor(insType, {
+                model: this.model
+            }, function (view) {
+                $('#portsettings', self.el).html(view.el);
+                view.render();
+                // Keep a reference to tell the view to close
+                // when we close this view
+                self.connectionView = view;
+            });
+
             return this;
         },
 

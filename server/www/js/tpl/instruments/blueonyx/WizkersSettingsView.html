@@ -10,3 +10,14 @@
     </div>
 </div>
 </div>
+<div class="col-md-6">
+<div class="form-group">
+    <label for="name" class="col-md-3 control-label">Display Graph:</label>
+    <div class="col-md-9">
+        <select id="wizkers_settings.display_graph" name="wizkers_settings.display_graph" class="form-control">
+            <option <%= wizkers_settings.display_graph == 'false' ? 'selected':'' %> value="false">No</option>
+            <option <%= wizkers_settings.display_graph == 'true'  ? 'selected':'' %> value="true">Yes</option>
+        </select>
+    </div>
+</div>
+</div>

@@ -85,6 +85,5 @@ define(function (require) {
             linkManager.getPorts(insType);
         }
 
-
     });
 });

@@ -33,15 +33,17 @@ define(function (require) {
     return Backbone.View.extend({
 
         initialize: function (options) {
-            // We are using the "radio_data_macros" key in instrument properties
             if (this.model.get('wizkers_settings') == undefined) {
                 this.model.set('wizkers_settings', {
                     display_gmaps: (vizapp.type == 'cordova') ? 'true' : 'false',
+                    display_graph: true,
                 });
             }
         },
 
         render: function () {
+            // Those settings should only be available in Cordova mode because
+            // we don't support maps in the Chrome app yet
             if (vizapp.type != 'cordova')
                 return this;
             $(this.el).html(template(this.model.toJSON()));

@@ -208,6 +208,25 @@ define(function (require) {
 
         sendLog: function () {
             var self = this;
+            
+            // Before going further, we want to make sure the "credits" and "cities" fields
+            // are not empty
+            var ok = true;
+            if ($('#credits').val() == '') {
+                $('#credits').parent().parent().addClass('has-error');
+                ok = false;
+            } else {
+                $('#credits').parent().parent().removeClass('has-error');
+            }
+            if ($('#cities').val() == '') {
+                $('#cities').parent().parent().addClass('has-error');
+                ok = false;
+            } else {
+                $('#cities').parent().parent().removeClass('has-error');
+            }
+            
+            if (!ok)
+                return;
 
             var apikey;
             if (instrumentManager.getInstrument().get('metadata'))
@@ -255,7 +274,6 @@ define(function (require) {
                     $('#errorreason', self.el).html("Upload Error");
                     $('#errordetail', self.el).html(errorDescription);
                     $('#ErrorModal').modal('show');
-
                 }, options);
         },
 

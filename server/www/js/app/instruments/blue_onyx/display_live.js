@@ -64,14 +64,19 @@ define(function (require) {
             }
 
             this.display_map = false;
-            var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
-            if (wz_settings == undefined)
-                this.display_map = true;
-            else if (wz_settings.display_gmaps == 'true')
-                this.display_map = true;
-
-            if (vizapp.type == 'chrome')
-                this.display_map = false;
+            this.display_graph = true;
+            if (vizapp.type == 'cordova') {
+                var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
+                if (wz_settings) {
+                    if (wz_settings.display_gmaps == 'true')
+                        this.display_map = true;
+                    if (wz_settings.display_graph == 'false')
+                        this.display_map = false;
+                } else {
+                    // Happens when the user never explicitely set the map option
+                    this.display_map = true;
+                }
+            }
 
             // We will pass this when we create plots, this is the global
             // config for the look and feel of the plot

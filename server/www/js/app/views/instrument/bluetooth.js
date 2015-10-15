@@ -31,7 +31,7 @@ define(function (require) {
     return Backbone.View.extend({
 
         initialize: function (options) {
-            this.ports = options.ports;
+            this.ports = [];
             this.refresh();
         },
 
@@ -56,11 +56,16 @@ define(function (require) {
         },
 
         refresh: function () {
+            var self = this;
             // Catch a "Refresh" value here which indicates we should
             // just ask for a list of ports again:
             var insType = this.model.get('type');
-            linkManager.once('ports', this.refreshDevices, this);
+            linkManager.on('ports', this.refreshDevices, this);
             linkManager.getPorts(insType);
+            // Remove the callback after 15 seconds
+            setTimeout(function () {
+                linkManager.off('ports', self.refreshDevices, self);
+            }, 15000);
         }
 
     });

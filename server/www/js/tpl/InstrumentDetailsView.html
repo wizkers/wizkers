@@ -5,33 +5,34 @@
             <legend>Instrument Details</legend>
         </div>
     </div>
-    <form class="form-horizontal">        
+    <form class="form-horizontal">
         <div class="row">
             <div class="col-md-5">
                 <div class="form-group">
                     <label for="name" class="col-md-3 control-label">Name</label>
                     <div class="col-md-9">
-                        <input type="text" class="form-control" name="name" value="<%= name %>"/>
+                        <input type="text" class="form-control" name="name" value="<%= name %>" />
                         <span class="help-inline"></span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="name" class="col-md-3 control-label">Type</label>
-                        <div class="col-md-9">
-                            <select name="type" class="form-control">
-                                <% for(var ins in instypes) { %>
-                                <option
-                                <%= type == ins ?'selected':'' %>
-                                value="<%= ins %>"><%= instypes[ins].name %></option>
-                                <% } %>                                
-                            </select>
-                            <span class="help-inline"></span>
-                        </div>
+                    <div class="col-md-9">
+                        <select name="type" class="form-control">
+                            <% for(var ins in instypes) { %>
+                                <option <%= type == ins ? 'selected': '' %>
+                                    value="<%= ins %>">
+                                        <%= instypes[ins].name %>
+                                </option>
+                                <% } %>
+                        </select>
+                        <span class="help-inline"></span>
+                    </div>
                 </div>
                 <div class="form-group" id="portsettings">
                     <!-- Start Connection DIV -->
                     <!-- End Connection DIV -->
-                </div>      
+                </div>
                 <div class="form-group">
                     <label for="liveviewspan" class="col-md-3 control-label">Live view length</label>
                     <div class="col-md-9">
@@ -57,13 +58,15 @@
                         <div class="col-md-9 input-group">
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkbox" name="autoconnect" <%= (autoconnect) ? 'checked' : '' %>> Autoconnect<br>
-                                    <input type="checkbox" name="autorecord" <%= (autorecord) ? 'checked' : '' %>> Autorecord
+                                    <input type="checkbox" name="autoconnect" <%=( autoconnect) ? 'checked' : '' %>> Autoconnect
+                                    <br>
+                                    <input type="checkbox" name="autorecord" <%=( autorecord) ? 'checked' : '' %>> Autorecord
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!--
                 <div class="form-group">
                     
                     <div class="col-md-12">
@@ -71,46 +74,57 @@
                     <p>Unique ID: <span id="uniqueid"><%= uuid %></span></p>
                         </div>
                 </div>
-
+-->
             </div>
             <div class="col-md-4">
-                <div class="control-group">
-                    <label for="description" class="control-label">Notes</label>
-                    <div class="controls">
-                            <textarea id="comment" class="form-control" name="comment" style="width: 90%;" rows="6"><%= comment %></textarea>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label for="metadata" class="control-label">Extra settings</label>
-                    <div class="controls">
-                            <div id="metadata">This device types does not require extra settings.</div>
-                    </div>
-                </div>
-            </div> 
-            <div class="col-md-3">
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="well hidden-xs" style="text-align: center;margin: 0px auto;">
-                        <p><img id="icon" width="180" src="<%= icon === '' ? 'js/app/instruments/' + type + '/icon.png' : 'pics/instruments/' + icon %>"/></p>
-                        <% if (vizapp.type == "server") { %>
-                            <!--<p style="color:#999;">To change the icon, drag a new picture from your computer onto the box above.</p>-->
-                            <% } %>
+                        <div class="control-group">
+                            <label for="description" class="control-label">Notes</label>
+                            <div class="controls">
+                                <textarea id="comment" class="form-control" name="comment" style="width: 90%;" rows="6">
+                                    <%= comment %>
+                                </textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                       <br />
-                        <div class="well hide-cordova">
-                            <p>Drop a backup file on the box below to import instrument settings from a backup:</p>
-                            <div style="width:120px; height:107px; position:relative;margin: 0px auto;">
-                                <div style="position:absolute; bottom:0;"><img id="restore-area" width="120" src="img/package-open.png"/></div>
+                        <br>
+                        <div class="control-group">
+                            <label for="metadata" class="control-label">Extra settings</label>
+                            <div class="controls">
+                                <div id="metadata">This device types does not require extra settings.</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-    </div>
+            <div class="col-md-3">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="well hidden-xs" style="text-align: center;margin: 0px auto;">
+                            <p><img id="icon" width="180" src="<%= icon === '' ? 'js/app/instruments/' + type + '/icon.png' : 'pics/instruments/' + icon %>" /></p>
+                            <% if (vizapp.type == "server") { %>
+                                <!--<p style="color:#999;">To change the icon, drag a new picture from your computer onto the box above.</p>-->
+                                <% } %>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <br />
+                        <div class="well hide-cordova">
+                            <p>Drop a backup file on the box below to import instrument settings from a backup:</p>
+                            <div style="width:120px; height:107px; position:relative;margin: 0px auto;">
+                                <div style="position:absolute; bottom:0;"><img id="restore-area" width="120" src="img/package-open.png" /></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
         <div class="row">
@@ -121,7 +135,7 @@
             </div>
             <div class="col-md-3">
                 <div class="alert alert-success" style="display: none">
-                        <b>Success!</b> Instrument saved successfully
+                    <b>Success!</b> Instrument saved successfully
                 </div>
             </div>
         </div>
@@ -129,21 +143,23 @@
 
 </div>
 
-    <!-- Instrument delete modal -->
+<!-- Instrument delete modal -->
 <div class="container">
     <div id="deleteConfirm" class="modal" data-backdrop="true" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog"><div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3 id="myModalLabel">Confirm delete</h3>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="myModalLabel">Confirm delete</h3>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this Instrument? This cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">No</button>
+                    <button class="btn btn-primary" id="do-delete">Yes, delete it</button>
+                </div>
             </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this Instrument? This cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">No</button>
-                <button class="btn btn-primary" id="do-delete">Yes, delete it</button>
-            </div>
-        </div></div>
+        </div>
     </div>
 </div>
