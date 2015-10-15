@@ -344,7 +344,7 @@ define(function (require) {
                     // log...
                     var stamp = new Date(entry.get('timestamp')).getTime();
                     if (entry.get('data').cpm != undefined) {
-                        var cpm = parseFloat((type == 'onyxlog') ? entry.get('data').cpm : entry.get('data').cpm.value);
+                        var cpm = entry.get('data').cpm.value;
                         this.plot.fastAppendPoint({
                             name: 'CPM',
                             value: cpm,

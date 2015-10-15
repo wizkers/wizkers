@@ -71,7 +71,7 @@ define(function (require) {
                     if (wz_settings.display_gmaps == 'true')
                         this.display_map = true;
                     if (wz_settings.display_graph == 'false')
-                        this.display_map = false;
+                        this.display_graph = false;
                 } else {
                     // Happens when the user never explicitely set the map option
                     this.display_map = true;
@@ -133,7 +133,8 @@ define(function (require) {
                 $('#map_row', this.el).empty();
             }
 
-            this.addPlot();
+            if (this.display_graph)
+                this.addPlot();
 
             if (this.display_map) {
                 this.map = new mapWidget();
@@ -148,8 +149,6 @@ define(function (require) {
                     // - Then, we know the size of the numview: $('#numview').height();
                     // - Last, remove 55 pixels to account for all the margins around the map/divs/thumbnails
                     // ... now do the equation
-                    //$('.map_container', this.el).css('height', $(this.el).parent().css('height'));
-
                     var self = this;
                     var rsc = function () {
                         var chartheight = $('#geigerchart_row', self.el).outerHeight();
@@ -169,6 +168,8 @@ define(function (require) {
                 }
             } else {
                 // Implement a resizer for the Geiger chart only
+                if (!this.display_graph)
+                    return;
                 var self = this;
                 var rsc = function () {
                     var numviewheight = 0;
@@ -248,6 +249,9 @@ define(function (require) {
         },
 
         disp_cpm: function (data, ts) {
+            if (!this.display_graph)
+                return;
+            
             if (data.cpm != undefined) {
                 var cpm = parseFloat(data.cpm.value);
 
@@ -302,17 +306,17 @@ define(function (require) {
                         lat: data.loc.coords.latitude,
                         lng: data.loc.coords.longitude
                     };
-
                     this.map.addMarker(this.lastMarker);
                 }
 
-                // We want to add points/markers to the line of logging at points every X meters ?
+                // We want to add points/markers to the line of logging at points every 50 meters
+                // ToDo: check how the API renders it and do the same
                 var d = utils.CoordDistance({
                         lat: data.loc.coords.latitude,
                         lng: data.loc.coords.longitude
                     },
                     this.lastMarker);
-                if (d > 50) {
+                if (d > 50/1000) {
                     this.lastMarker = {
                         lat: data.loc.coords.latitude,
                         lng: data.loc.coords.longitude

@@ -112,7 +112,7 @@ define(function (require) {
         },
 
         /**
-         * Distance between two points.
+         * Distance between two points. Returns the difference in km
          * @param {Object} loc1 Location 1 {lat: XXX, lon:YYY}
          * @param {Object} loc2 Location 2 {lat: XXX, lon:YYY}
          */
