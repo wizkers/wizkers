@@ -38,6 +38,8 @@ require.config({
         jquery: 'lib/jquery-1.11.0',
         backbone: 'lib/backbone-1.1.2',
         localstorage: 'lib/backbone.localStorage-1.1.14',
+        pouchdb: 'lib/pouchdb-5.0.0',
+        backbonepouch: 'lib/backbone-pouch',
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',
         text: 'lib/text',
@@ -86,6 +88,9 @@ require.config({
         'underscore': {
             exports: '_'
         },
+        'backbonepouch': {
+            deps: [ 'pouchdb' ]
+        },
         // Define Bootstrap's main JS, then all plugins which depend on it:
         'bootstrap': {
             deps: ['jquery']
@@ -130,19 +135,19 @@ var vizapp = {
     //   - cordova: run as an embedded Cordova application on Android
     //   - others to be defined 
     type: 'cordova',
-    
+
     // State can be "running" or "paused". Only updated in Cordova mode.
     // Can be checked by various tasks to skip display when app paused, and
     // save battery. (see Flotplot)
     state: 'running'
 };
 
-var pauseListener = function() {
+var pauseListener = function () {
     console.log('Paused');
     vizapp.state = 'paused';
 }
 
-var resumeListener = function() {
+var resumeListener = function () {
     console.log('Resumed');
     vizapp.state = 'running';
 }

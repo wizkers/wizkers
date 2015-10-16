@@ -31,7 +31,12 @@ define(function (require) {
     "use strict";
 
     var $ = require('jquery'),
+        PouchDB = require('pouchdb'),
         Backbone = require('backbone');
+
+    // Defines BackbonePouch (someone said 'ugly' ?)
+    require('backbonepouch');
+
     var bidb = null;
 
     if (vizapp.type == "chrome") {
@@ -73,6 +78,11 @@ define(function (require) {
                     this.storeName = "entries";
                 }
 
+                if (vizapp.type == 'cordova') {
+                    this.sync = BackbonePouch.sync({
+                        db: new PouchDB('logentries')
+                    });
+                }
             },
 
             defaults: {
@@ -94,17 +104,40 @@ define(function (require) {
 
             initialize: function (models, options) {
 
-
-                // If we run as a chrome app, the backbone indexeddb adapter also
-                // wants models to have the proper database and store properties defined
                 if (vizapp.type == "chrome") {
                     this.database = logs_database;
                     this.storeName = "entries";
                 }
+                if (vizapp.type == 'cordova') {
+                    var self = this;
 
+                    // Don't call before logsessionid is defined!!
+                    this.sync = BackbonePouch.sync({
+                        //db: new PouchDB('logentries-' + this.id),
+                        db: new PouchDB('logentries'),
+                        fetch: 'query',
+                        options: {
+                            query: {
+                                include_docs: true,
+                                fun: {
+                                    map: function (doc, emit) {
+                                        if (doc.logsessionid === self.logsessionid) {
+                                            emit(doc.position, null)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+
+                    this.parse = function (result) {
+                        return _.pluck(result.rows, 'doc');
+                    }
+                }
             },
 
-            //url:   is not defined by default, LogEntries is
+            // url: is not defined by default, LogEntries is
             // nested inside of Log
 
             idAttribute: "_id",
@@ -205,7 +238,11 @@ define(function (require) {
                  */
                 console.log("Device Log: refreshing pointer to log entries URL for Log ID " + this.id);
                 if (vizapp.type == "cordova") {
-                    this.entries.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
+                    // this.entries.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
+
+                    if (this.id != undefined)
+                        this.entries.logsessionid = this.id;
+
                 } else if (vizapp.type == "chrome") {
                     // Also set the log session ID property of the entries
                     if (this.id != undefined)
@@ -287,8 +324,6 @@ define(function (require) {
 
             initialize: function (models, options) {
 
-                // If we run as a chrome app, the backbone indexeddb adapter also
-                // wants models to have the proper database and store properties defined
                 if (vizapp.type == "chrome") {
                     this.database = logs_database;
                     this.storeName = "logs";
@@ -324,7 +359,6 @@ define(function (require) {
                         });
                 });
             },
-
 
             // Create a new subset collection of only some log sessions
             getLogSubset: function (logSessionIDs) {
