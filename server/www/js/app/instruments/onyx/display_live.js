@@ -60,21 +60,41 @@ define(function (require) {
             }
 
             this.display_map = false;
-            var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
-            if (wz_settings == undefined)
-                this.display_map = true;
-            else if (wz_settings.display_gmaps == 'true')
-                this.display_map = true;
-
-            if (vizapp.type == 'chrome')
-                this.display_map = false;
+            this.display_graph = true;
+            if (vizapp.type == 'cordova') {
+                var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
+                if (wz_settings) {
+                    if (wz_settings.display_gmaps == 'true')
+                        this.display_map = true;
+                    if (wz_settings.display_graph == 'false')
+                        this.display_graph = false;
+                } else {
+                    // Happens when the user never explicitely set the map option
+                    this.display_map = true;
+                }
+            }
 
 
             // We will pass this when we create plots, this is the global
             // config for the look and feel of the plot
             this.plotoptions = {
                 points: livepoints,
-                vertical_stretch_parent: true
+                vertical_stretch_parent: true,
+                plot_options: {
+                    xaxis: {
+                        mode: "time",
+                        show: true,
+                        timeformat: "%H:%M",
+                        timezone: settings.get("timezone")
+                    },
+                    grid: {
+                        hoverable: true
+                    },
+                    legend: {
+                        position: "ne"
+                    }
+                }
+
             };
 
             // Keep an array for moving average over the last X samples
@@ -360,7 +380,7 @@ define(function (require) {
                             lng: data.loc.coords.longitude
                         },
                         this.lastMarker);
-                    if (d > 15/1000) {
+                    if (d > 15 / 1000) {
                         this.lastMarker = {
                             lat: data.loc.coords.latitude,
                             lng: data.loc.coords.longitude,

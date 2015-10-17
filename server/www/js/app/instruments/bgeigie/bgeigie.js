@@ -45,7 +45,6 @@ define(function (require) {
             return current_numview;
         };
 
-
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities    
         this.getCaps = function () {

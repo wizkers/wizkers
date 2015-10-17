@@ -64,7 +64,7 @@ define(function (require) {
             var dirpath = [WIZKERS_DIR, WIZKERS_LOGS_DIR];
             resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (rootDirEntry) {
                 createDir(rootDirEntry, dirpath, function (dir) {
-                    dir.getFile("log.txt", {
+                    dir.getFile(filename, {
                         create: true
                     }, function (file) {
                         callback(file);

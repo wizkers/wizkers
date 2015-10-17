@@ -32,6 +32,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         simpleplot = require('app/lib/flotplot'),
+        utils = require('app/utils'),
         fileutils = require('app/lib/fileutils'),
         template = require('js/tpl/instruments/OnyxLogView.js');
 
@@ -177,25 +178,11 @@ define(function (require) {
 
             // Remove the window resize bindings on our plots:
             this.plot.onClose();
-            this.overview.onClose();
+            if (this.overview)
+                this.overview.onClose();
             // Restore the settings since we don't want them to be saved when changed from
             // the home screen
             settings.fetch();
-        },
-
-        // Generate a "blob:"  URL to download (all) the data;
-        downloadJSON: function () {
-            var json = "";
-            for (var i = 0; i < this.deviceLogs.length; i++) {
-                json += "{timestamp:" + this.devicesLogs.at(i).get('timestamp') +
-                    ",cpm:" + this.onyxlog.at(i).get('cpm') + "},";
-            }
-
-            var jsonBlob = new Blob([json], {
-                type: 'application/json'
-            });
-            var url = window.URL.createObjectURL(jsonBlob);
-            $('.ctrl-save', this.el).attr('href', url);
         },
 
         downloadCSV: function () {
@@ -262,9 +249,20 @@ define(function (require) {
                 }
             }
             var uri = encodeURI(csv);
-            window.open(uri);
-            
-            fileutils.newLogFile("gabuzo");
+            if (vizapp.type != 'cordova') {
+                window.open(uri);
+            } else {
+                var self = this;
+                // In Cordova mode, we create a file
+                fileutils.newLogFile("onyxlog.log", function (file) {
+                    file.createWriter(function (fileWriter) {
+                        fileWriter.write(csv);
+                        $('#errorreason', self.el).html("Log saved");
+                        $('#errordetail', self.el).html("Your logfile was saved on your device in \"Wizkers/logs/onyxlog.log\". Connect using USB to transfer the file to your computer.");
+                        $('#ErrorModal').modal();
+                    });
+                });
+            }
         },
 
         addPlot: function () {
@@ -286,13 +284,19 @@ define(function (require) {
                 this.plot.render();
             }
 
-            this.overview = new simpleplot({
-                model: this.model,
-                settings: this.plotOverviewSettings
-            });
-            if (this.overview != null) {
+            // We don't create an overview on small screens, does not make sense
+            if (!(utils.checkBreakpoint('sm') || utils.checkBreakpoint('xs'))) {
+                this.overview = new simpleplot({
+                    model: this.model,
+                    settings: this.plotOverviewSettings
+                });
+            }
+
+            if (this.overview) {
                 $('#overview', this.el).empty().append(this.overview.el);
                 this.overview.render();
+            } else {
+                $('#overview-container', this.el).empty();
             }
 
             // Restore current zoom level if it exists:
@@ -335,11 +339,12 @@ define(function (require) {
                             value: cpm,
                             timestamp: stamp
                         });
-                        this.overview.fastAppendPoint({
-                            name: 'CPM',
-                            value: cpm,
-                            timestamp: stamp
-                        });
+                        if (this.overview)
+                            this.overview.fastAppendPoint({
+                                name: 'CPM',
+                                value: cpm,
+                                timestamp: stamp
+                            });
 
                         // If we have min/max values in the recording and we have a proper CPM reading
                         // (not CPM30) then record those as well:
@@ -375,11 +380,12 @@ define(function (require) {
                             'value': cpm2,
                             timestamp: stamp
                         });
-                        this.overview.fastAppendPoint({
-                            'name': "CPM2",
-                            'value': cpm2,
-                            timestamp: stamp
-                        });
+                        if (this.overview)
+                            this.overview.fastAppendPoint({
+                                'name': "CPM2",
+                                'value': cpm2,
+                                timestamp: stamp
+                            });
                     }
                 }
                 if (ret.length)
@@ -389,7 +395,8 @@ define(function (require) {
                     });
             }
             this.plot.redraw();
-            this.overview.redraw();
+            if (this.overview)
+                this.overview.redraw();
             return data;
         },
 
