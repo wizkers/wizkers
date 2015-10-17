@@ -30,7 +30,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
-        template = require('js/tpl/instruments/blueonyx/NumView.js');
+        template = require('js/tpl/instruments/bgeigie/NumView.js');
 
 
     return Backbone.View.extend({
@@ -48,7 +48,7 @@ define(function (require) {
 
         render: function () {
             var self = this;
-            console.log('Main render of Onyx numeric view');
+            console.log('Main render of bGeigie numeric view');
             $(this.el).html(template());
             // We need to force the Live view to resize the map at this
             // stage, becaure we just changed the size of the numview
@@ -59,14 +59,14 @@ define(function (require) {
         },
 
         onClose: function () {
-            console.log("Onyx numeric view closing...");
+            console.log("bGeigie numeric view closing...");
             linkManager.off('input', this.showInput, this);
         },
 
         showInput: function (data) {
 
-            if (typeof (data.devicetag) != 'undefined')
-                $('#devicetag', this.el).html(data.devicetag);
+            if (data.replay_ts != undefined)
+                return;
 
             if (typeof (data.cpm) == 'undefined')
                 return;
@@ -77,20 +77,27 @@ define(function (require) {
             if (usv) {
                 $('#liveusvh', this.el).html(usv.toFixed(3) + "&nbsp;&mu;Sv/h");
             }
-            
+            if (count) {
+                $('#count', this.el).html(count);
+            }
+
             if (data.loc_status && data.loc_status == 'OK') {
-                var coord = utils.coordToString({ lat: data.loc.coords.latitude, lng: data.loc.coords.longitude});
+                var coord = utils.coordToString({
+                    lat: data.loc.coords.latitude,
+                    lng: data.loc.coords.longitude
+                });
                 $('#lat', this.el).html(coord.lat);
                 $('#lon', this.el).html(coord.lng);
+                $('#sats', this.el).html(data.loc.sats);
             } else if (data.loc_status) {
-                $('#lat',this.el).html('GPS: ' + data.loc_status);
-                $('#lon',this.el).html('');
+                $('#lat', this.el).html('GPS: ' + data.loc_status);
+                $('#lon', this.el).html('');
             }
 
             // Create a blinking effect to indicate that we received data:
             $('#readingvalid', this.el).addClass('label-info').removeClass('label-danger').removeClass('label-success');
             setTimeout(function () {
-                $('#readingvalid',this.el).removeClass('label-info');
+                $('#readingvalid', this.el).removeClass('label-info');
                 if (data.cpm.valid)
                     $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('OK');
                 else

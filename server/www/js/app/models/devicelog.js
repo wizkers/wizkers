@@ -80,7 +80,7 @@ define(function (require) {
 
                 if (vizapp.type == 'cordova') {
                     this.sync = BackbonePouch.sync({
-                        db: new PouchDB('logentries')
+                        db: new PouchDB('logentries',  {adapter: 'websql'})
                     });
                 }
             },
@@ -104,17 +104,16 @@ define(function (require) {
 
             initialize: function (models, options) {
 
-                if (vizapp.type == "chrome") {
+                if (vizapp.type == 'chrome') {
                     this.database = logs_database;
-                    this.storeName = "entries";
+                    this.storeName = 'entries';
                 }
                 if (vizapp.type == 'cordova') {
                     var self = this;
 
                     // Don't call before logsessionid is defined!!
                     this.sync = BackbonePouch.sync({
-                        //db: new PouchDB('logentries-' + this.id),
-                        db: new PouchDB('logentries'),
+                        db: new PouchDB('logentries',  {adapter: 'websql'}),
                         fetch: 'query',
                         options: {
                             query: {
@@ -130,7 +129,6 @@ define(function (require) {
                         }
                     });
 
-
                     this.parse = function (result) {
                         return _.pluck(result.rows, 'doc');
                     }
@@ -140,7 +138,7 @@ define(function (require) {
             // url: is not defined by default, LogEntries is
             // nested inside of Log
 
-            idAttribute: "_id",
+            idAttribute: '_id',
             model: LogEntry,
 
             // Maintain our collection in order automatically by adding a comparator:
@@ -150,9 +148,9 @@ define(function (require) {
             // on the fetch - in server mode, that condition is part of the REST API and executed
             // on the server.
             fetch: function (callback) {
-                console.log("[devicelogs.js] Should fetch all entries for logsessionid " + this.logsessionid);
+                console.log('[devicelogs.js] Should fetch all entries for logsessionid ' + this.logsessionid);
                 // Add a condition for the instrumentid
-                if (vizapp.type == "chrome")
+                if (vizapp.type == 'chrome')
                     callback.conditions = {
                         logsessionid: this.logsessionid
                     };
@@ -189,16 +187,16 @@ define(function (require) {
         // A log session references a series of log entries for one device.
         Log = Backbone.Model.extend({
 
-            idAttribute: "_id",
+            idAttribute: '_id',
 
             initialize: function () {
                 var self = this;
 
                 // If we run as a chrome app, the backbone indexeddb adapter also
                 // wants models to have the proper database and store properties defined
-                if (vizapp.type == "chrome") {
+                if (vizapp.type == 'chrome') {
                     this.database = logs_database;
-                    this.storeName = "logs";
+                    this.storeName = 'logs';
                 }
 
                 // A log contains... entries (surprising, eh?). Nest

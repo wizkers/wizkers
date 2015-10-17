@@ -58,7 +58,7 @@ define(function(require) {
         
         // Prepare the post options:
         post_options = {
-            host: (instance == "production") ? "api.safecast.org" : "dev.safecast.org",
+            host: (instance == 'production') ? 'api.safecast.org' : 'dev.safecast.org',
             port: 80,
             method: 'POST',
             path: '/measurements.json',

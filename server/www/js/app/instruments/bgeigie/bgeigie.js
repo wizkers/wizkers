@@ -49,7 +49,8 @@ define(function (require) {
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities    
         this.getCaps = function () {
-            return ['LiveDisplay', 'NumDisplay', 'LogView', 'WizkersSettings'
+            return ['LiveDisplay', 'NumDisplay', 'LogView', 'WizkersSettings',
+                    'WantReplay'
                    ];
         };
 
@@ -71,7 +72,7 @@ define(function (require) {
         // This is a Backbone view
         // This is a numeric display
         this.getNumDisplay = function (arg, callback) {
-            require(['app/instruments/blue_onyx/display_numeric'], function (view) {
+            require(['app/instruments/bgeigie/display_numeric'], function (view) {
                 current_numview = new view(arg);
                 callback(current_numview);
             });

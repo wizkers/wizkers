@@ -34,6 +34,7 @@ define(function (require) {
         simpleplot = require('app/lib/flotplot'),
         utils = require('app/utils'),
         fileutils = require('app/lib/fileutils'),
+        httprequest = require('app/lib/httprequest'),
         template = require('js/tpl/instruments/bgeigie/LogView.js');
 
     // Load the flot library & flot time plugin:
@@ -165,7 +166,8 @@ define(function (require) {
             $('#send-to-api', this.el).html('Generating...').addClass('btn-success').attr('disabled', true);;
             fileutils.newLogFile("safecast-upload.log", function (file) {
                 file.createWriter(function (fileWriter) {
-                    // ToDo: create the header for the file
+                    // ToDo: create the header for the file, though the API
+                    // does not seem to mind too much it's not there...
                     for (var i = 0; i < self.deviceLogs.length; i++) {
                         var currentLog = self.deviceLogs.at(i);
                         var entries = currentLog.entries;
@@ -195,6 +197,26 @@ define(function (require) {
         },
 
         /**
+         * Same as generateLog but keeps the log in-memory only, to avoid
+         * requiring access to the filesystem, which can be creepy.
+         */
+        generateInMemoryLog: function () {
+            var inMemLog = '';
+            for (var i = 0; i < self.deviceLogs.length; i++) {
+                var currentLog = self.deviceLogs.at(i);
+                var entries = currentLog.entries;
+                for (entry in entries) {
+                    var data = entries[entry].get('data');
+                    // Sometimes, we get entries without a valid reading, detect this
+                    if (data.nmea) {
+                        inMemLog += (data.nmea + '\n');
+                    }
+                }
+                this.addMetadata(inMemLog);
+            }
+        },
+
+        /**
          * Upload the log to Safecast
          * @param {Object} file The file descriptor for the log.
          */
@@ -208,7 +230,7 @@ define(function (require) {
 
         sendLog: function () {
             var self = this;
-            
+
             // Before going further, we want to make sure the "credits" and "cities" fields
             // are not empty
             var ok = true;
@@ -224,7 +246,7 @@ define(function (require) {
             } else {
                 $('#cities').parent().parent().removeClass('has-error');
             }
-            
+
             if (!ok)
                 return;
 
@@ -240,41 +262,87 @@ define(function (require) {
                 return;
             }
 
-            // We are going to use the fileutils library to do the file transfers,
-            // wo that we can abstract between platforms (android, server, etc)
-
-            var options = fileutils.FileUploadOptions();
-            options.fileKey = 'bgeigie_import[source]';
-            options.fileName = this.logfile.nativeURL.substr(this.logfile.nativeURL.lastIndexOf('/') + 1);
-            options.mimeType = "text/plain";
 
             var params = {
                 api_key: instrumentManager.getInstrument().get('metadata').apikey,
                 'bgeigie_import[name]': 'bgeigie.log'
             };
-            options.params = params;
-            fileutils.sendFile(this.logfile.nativeURL,
-                'http://dev.safecast.org/bgeigie_imports.json',
-                function (success) {
-                    console.log('success', success);
-                    $('#UploadModal', self.el).modal('hide');
-                    $('#myErrorLabel', self.el).html("Success");
-                    $('#errorreason', self.el).html("Your log was uploaded to Safecast");
-                    $('#errordetail', self.el).html("Keep up the good work (proper details coming up real soon)");
-                    $('#ErrorModal').modal('show');
 
-                },
-                function (failure) {
-                    console.log('failure', failure);
-                    $('#UploadModal', self.el).modal('hide');
-                    var errorDescription = "Could not upload the file";
-                    if (failure.body && failure.body.indexOf('md5sum') > -1) {
-                        errorDescription = "This log is already uploaded, no need to resubmit it";
+            // Two possibilities: we are either sending an in-mem log (string), or
+            // a file
+            if (typeof this.logfile == 'string') {
+                var post_options = {
+                    host: 'dev.safecast.org',
+                    port: 80,
+                    method: 'POST',
+                    path: '/bgeigie_imports.json',
+                    headers: {
+                        'X-Datalogger': 'wizkers.io Safecast driver',
+                        'Content-Type': 'application/x-www-form-urlencoded',
                     }
-                    $('#errorreason', self.el).html("Upload Error");
-                    $('#errordetail', self.el).html(errorDescription);
-                    $('#ErrorModal').modal('show');
-                }, options);
+                };
+
+                params['bgeigie_import[source]'] = this.logfile;
+                var post_data = httprequest.stringify(params);
+                var post_request = httprequest.request(post_options, function (res) {
+                    var err = true;
+                    console.log("[Safecast log file post] API Request result");
+                    // this is the xmlhttprequest
+                    switch (this.status) {
+                    case 0: // Cannot connect
+                        console.log('Cannot connect to Safecast');
+                        break;
+                    case 201: // success
+                        console.log(this.statusText);
+                        err = false;
+                        break;
+                    default:
+                        console.log(this.statusText);
+                        break;
+                    }
+                });
+                post_request.send(post_data);
+
+            } else {
+                // We are going to use the fileutils library to do the file transfers,
+                // so that we can abstract between platforms (android, server, etc)
+
+                // The downside here is that this means the app will require access to the
+                // filesystem, which can freak people out. The alternative is to do all in-memory.
+
+                var options = fileutils.FileUploadOptions();
+                options.fileKey = 'bgeigie_import[source]';
+                options.fileName = this.logfile.nativeURL.substr(this.logfile.nativeURL.lastIndexOf('/') + 1);
+                options.mimeType = 'text/plain';
+
+                options.params = params;
+                fileutils.sendFile(this.logfile.nativeURL,
+                    'http://dev.safecast.org/bgeigie_imports.json',
+                    function (success) {
+                        console.log('success', success);
+                        $('#UploadModal', self.el).modal('hide');
+                        $('#myErrorLabel', self.el).html('Success');
+                        $('#errorreason', self.el).html('Your log was uploaded to Safecast');
+                        $('#errordetail', self.el).html('Keep up the good work (proper details coming up real soon)');
+                        $('#ErrorModal').modal('show');
+                        self.sendMetadata(success);
+                    },
+                    function (failure) {
+                        console.log('failure', failure);
+                        $('#UploadModal', self.el).modal('hide');
+                        var errorDescription = 'Could not upload the file';
+                        if (failure.body && failure.body.indexOf('md5sum') > -1) {
+                            errorDescription = 'This log is already uploaded, no need to resubmit it';
+                        }
+                        $('#errorreason', self.el).html('Upload Error');
+                        $('#errordetail', self.el).html(errorDescription);
+                        $('#ErrorModal').modal('show');
+                    }, options);
+            }
+        },
+        
+        sendMetadata: function(arg) {
+            console.log('Should send the metadata now', arg);
         },
 
         addPlot: function () {

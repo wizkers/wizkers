@@ -137,7 +137,7 @@ define(function (require) {
                 $('#geigerchart_row', this.el).empty();
             }
 
-            
+
             if (this.display_graph)
                 this.addPlot();
 
@@ -217,15 +217,12 @@ define(function (require) {
         },
 
         onClose: function () {
-            console.log("Onyx live view closing...");
-
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
             if (this.rsc)
                 $(window).off('resize', this.rsc);
             if (this.plot)
                 this.plot.onClose();
-
         },
 
         movingAverager: function (newpoint, buffer) {
@@ -258,7 +255,7 @@ define(function (require) {
         disp_cpm: function (data, ts) {
             if (!this.display_graph)
                 return;
-            
+
             if (data.cpm != undefined) {
                 var cpm = parseFloat(data.cpm.value);
 
@@ -323,10 +320,36 @@ define(function (require) {
                         lng: data.loc.coords.longitude
                     },
                     this.lastMarker);
-                if (d > 50/1000) {
+                if (d > 50 / 1000) {
+                    if (data.cpm == undefined)
+                        return;
+
+                    var cpm = parseFloat(data.cpm.value);
+                    var image = 'white.png';
+                    if (cpm >= 1050) {
+                        image = 'grey.png';
+                    }else if (cpm >= 680) {
+                        image = 'darkRed.png';
+                    } else if (cpm >= 420) {
+                        image = 'red.png';
+                    } else if (cpm >= 350) {
+                        image = 'darkOrange.png';
+                    } else if (cpm >= 280) {
+                        image = 'orange.png';
+                    } else if (cpm >= 175) {
+                        image = 'yellow.png';
+                    } else if (cpm >= 105) {
+                        image = 'lightGreen.png';
+                    } else if (cpm >= 70) {
+                        image = 'green.png';
+                    } else if (cpm >= 35) {
+                        image = 'midgreen.png'
+                    }
+                        
                     this.lastMarker = {
                         lat: data.loc.coords.latitude,
-                        lng: data.loc.coords.longitude
+                        lng: data.loc.coords.longitude,
+                        icon: 'js/app/instruments/blue_onyx/markers/' + image
                     };
                     this.map.addMarker(this.lastMarker);
                 }

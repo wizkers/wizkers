@@ -306,6 +306,9 @@ define(function (require) {
             currentLogSession.save(null, {
                 success: function () {
                     linkManager.startRecording(currentLogSession.id); // Tell our backend to start recording.
+                },
+                error: function(obj, err) {
+                    console.log(err);
                 }
             });
 

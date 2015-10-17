@@ -41,9 +41,8 @@ define(function (require) {
         var SERIAL_PORT_UUID = 'A1E8F5B1-696B-4E4C-87C6-69DFE0B0093B';
 
         // This is the CPM to µSv/h conversion coefficient for the tube
-        // in the Blue Onyx. A proper µSv/h output should also take a conversion
-        // coefficient into account for calibration.
-        var conversionCoefficient = 0.00294;
+        // in the bGeigie. This is the default bGeigie value
+        var conversionCoefficient = 1/334;
 
 
         // small utility to convert DDMM.MMM or DDDMM.MMM to decimal
@@ -192,13 +191,14 @@ define(function (require) {
             var cpm = parseInt(fields[3]);
             var lat = parseDecDeg(fields[7], fields[8]);
             var lng = parseDecDeg(fields[9], fields[10]);
+            var sats = parseInt(fields[13]);
 
             var response = {
                 cpm: {
                     value: cpm,
                     count: parseInt(fields[5]),
                     usv: cpm * conversionCoefficient,
-                    valid: true
+                    valid: fields[6] == 'A'
                 },
                 nmea: data,
                 batt_ok: false,
@@ -206,9 +206,10 @@ define(function (require) {
                     coords: {
                         latitude: lat,
                         longitude: lng
-                    }
+                    },
+                    sats: sats
                 },
-                loc_status: 'OK'
+                loc_status: (fields[12] == 'A') ? 'OK' : 'No GPS Lock'
             };
 
             self.trigger('data', response);

@@ -44,7 +44,7 @@ define(function (require) {
             // mechanism will turn it into one single reference for every flotplot instance, which is now what we want!
             // Make sure the chart takes all the window height:
             this.rsc = null;
-            
+
             this.markers = [];
 
         },
@@ -94,10 +94,17 @@ define(function (require) {
         },
 
         addMarker: function (marker) {
-            this.markers.push(new google.maps.Marker({
-                position: marker,
+            var mk = {
+                position: {
+                    lat: marker.lat,
+                    lng: marker.lng
+                },
                 map: this.map,
-            }));
+            };
+            if (marker.icon)
+                mk['icon'] = marker.icon;
+
+            this.markers.push(new google.maps.Marker(mk));
         },
 
         /**
