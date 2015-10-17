@@ -39,6 +39,8 @@ require.config({
         backbone: 'lib/backbone-1.1.2',
         chromestorage: 'lib/backbone.chromestorage',
         bbindexeddb: 'lib/backbone-indexeddb',
+        pouchdb: 'lib/pouchdb-5.0.0',
+        backbonepouch: 'lib/backbone-pouch',
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',
         text: 'lib/text',
@@ -47,11 +49,11 @@ require.config({
         dsp: 'lib/dsp',
         chroma: 'lib/chroma',
         resampler: 'lib/resampler',
-        
+
         // Analytics wrapper:
         ga_bundle: 'lib/google-analytics-bundle',
         stats: 'app/analytics',
-        
+
         // WebRTC adapter shim to abstract from
         // navigator implementations
         peerjs: 'lib/peer-0.3.14',
@@ -144,11 +146,11 @@ var router;
 require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager',
          'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'chromestorage'], function ($, Backbone, Router, Settings, InstrumentManager,
     LinkManager, OutputManager, Instrument, Analytics) {
-    
+
     // Initialize our Analytics object to get stats on app usage
     stats = new Analytics();
     stats.init('UA-66729721-1');
-    
+
     // Get our settings here, and
     // share them afterwards, rather than requesting it
     // everytime...

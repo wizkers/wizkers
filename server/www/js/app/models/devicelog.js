@@ -78,9 +78,13 @@ define(function (require) {
                     this.storeName = "entries";
                 }
 
+                // Separate by database for performance reasons on mobile (avoid a
+                // mapreduce query, each log has it own database, massive difference).
                 if (vizapp.type == 'cordova') {
                     this.sync = BackbonePouch.sync({
-                        db: new PouchDB('logentries',  {adapter: 'websql'})
+                        db: new PouchDB('logentries-' + this.get('logsessionid'), {
+                            adapter: 'websql'
+                        })
                     });
                 }
             },
@@ -111,24 +115,8 @@ define(function (require) {
                 if (vizapp.type == 'cordova') {
                     var self = this;
 
-                    // Don't call before logsessionid is defined!!
-                    this.sync = BackbonePouch.sync({
-                        db: new PouchDB('logentries',  {adapter: 'websql'}),
-                        fetch: 'query',
-                        options: {
-                            query: {
-                                include_docs: true,
-                                fun: {
-                                    map: function (doc, emit) {
-                                        if (doc.logsessionid === self.logsessionid) {
-                                            emit(doc.position, null)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-
+                    // The PouchDB query bundles the results in the 'rows' key,
+                    // so return the content of this key, rather that "results"
                     this.parse = function (result) {
                         return _.pluck(result.rows, 'doc');
                     }
@@ -238,9 +226,20 @@ define(function (require) {
                 if (vizapp.type == "cordova") {
                     // this.entries.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
 
-                    if (this.id != undefined)
+                    if (this.id != undefined) {
                         this.entries.logsessionid = this.id;
-
+                        this.entries.sync = BackbonePouch.sync({
+                            db: new PouchDB('logentries-' + this.id, {
+                                adapter: 'websql'
+                            }),
+                            fetch: 'allDocs',
+                            options: {
+                                allDocs: {
+                                    include_docs: true
+                                }
+                            }
+                        });
+                    }
                 } else if (vizapp.type == "chrome") {
                     // Also set the log session ID property of the entries
                     if (this.id != undefined)

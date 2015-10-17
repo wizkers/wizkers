@@ -194,7 +194,6 @@ define(function (require) {
                 rsc();
             }
 
-
             return this;
         },
 
@@ -231,7 +230,7 @@ define(function (require) {
 
             // Keep our data to the length we want
             if (buffer.length >= this.movingAvgPoints)
-                buffer = buffer.slice(1);
+                buffer.shift();
 
             // Now compute the average
             var avg = 0;
@@ -256,7 +255,7 @@ define(function (require) {
             if (!this.display_graph)
                 return;
 
-            if (data.cpm != undefined) {
+            if ( data.cpm != undefined) {
                 var cpm = parseFloat(data.cpm.value);
 
                 var dp = {
@@ -264,14 +263,13 @@ define(function (require) {
                     value: cpm,
                     timestamp: ts
                 };
-
-                this.plot.appendPoint(dp);
+                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp) : this.plot.appendPoint(dp);
                 dp = {
                     name: "AVG",
                     value: this.movingAverager(cpm, this.movingAvgData),
                     timestamp: ts
-                }
-                this.plot.appendPoint(dp);
+                };
+                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp) : this.plot.appendPoint(dp);
             }
         },
 
@@ -302,50 +300,50 @@ define(function (require) {
                 i.scrollTop(i[0].scrollHeight - i.height());
             }
 
+            if (data.cpm == undefined)
+                return;
+
+            var cpm = parseFloat(data.cpm.value);
+            var image = 'white.png';
+            if (cpm >= 1050) {
+                image = 'grey.png';
+            } else if (cpm >= 680) {
+                image = 'darkRed.png';
+            } else if (cpm >= 420) {
+                image = 'red.png';
+            } else if (cpm >= 350) {
+                image = 'darkOrange.png';
+            } else if (cpm >= 280) {
+                image = 'orange.png';
+            } else if (cpm >= 175) {
+                image = 'yellow.png';
+            } else if (cpm >= 105) {
+                image = 'lightGreen.png';
+            } else if (cpm >= 70) {
+                image = 'green.png';
+            } else if (cpm >= 35) {
+                image = 'midgreen.png'
+            }
+
             // Now update the map (if it exists) to show the current location/measurement
             if (this.map && data.loc_status && data.loc_status == 'OK') {
                 this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                 if (this.lastMarker == null) {
                     this.lastMarker = {
                         lat: data.loc.coords.latitude,
-                        lng: data.loc.coords.longitude
+                        lng: data.loc.coords.longitude,
+                        icon: 'js/app/instruments/blue_onyx/markers/' + image
                     };
                     this.map.addMarker(this.lastMarker);
                 }
 
-                // We want to add points/markers to the line of logging at points every 50 meters
-                // ToDo: check how the API renders it and do the same
+                // We want to add points/markers to the line of logging at points every 15 meters
                 var d = utils.CoordDistance({
                         lat: data.loc.coords.latitude,
                         lng: data.loc.coords.longitude
                     },
                     this.lastMarker);
-                if (d > 50 / 1000) {
-                    if (data.cpm == undefined)
-                        return;
-
-                    var cpm = parseFloat(data.cpm.value);
-                    var image = 'white.png';
-                    if (cpm >= 1050) {
-                        image = 'grey.png';
-                    }else if (cpm >= 680) {
-                        image = 'darkRed.png';
-                    } else if (cpm >= 420) {
-                        image = 'red.png';
-                    } else if (cpm >= 350) {
-                        image = 'darkOrange.png';
-                    } else if (cpm >= 280) {
-                        image = 'orange.png';
-                    } else if (cpm >= 175) {
-                        image = 'yellow.png';
-                    } else if (cpm >= 105) {
-                        image = 'lightGreen.png';
-                    } else if (cpm >= 70) {
-                        image = 'green.png';
-                    } else if (cpm >= 35) {
-                        image = 'midgreen.png'
-                    }
-                        
+                if (d > 15 / 1000) {
                     this.lastMarker = {
                         lat: data.loc.coords.latitude,
                         lng: data.loc.coords.longitude,

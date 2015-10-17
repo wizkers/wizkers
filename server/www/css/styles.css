@@ -194,8 +194,8 @@ a.plain:hover {
 
 .smallreading {
     font-size: 24px;
-    /* font-weight: bold; */
-    float: right;
+    /* font-weight: bold;
+    float: right; */
 }
 
 .well h3 {

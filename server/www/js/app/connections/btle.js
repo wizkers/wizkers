@@ -128,7 +128,7 @@ define(function (require) {
                         description: chrome.runtime.lastError.message
                     });
                     // Do a disconnect to make sure we end up in a sane state:
-                    chrome.bluetoothLowEnergy.disconnect(devAddress);
+                    // chrome.bluetoothLowEnergy.disconnect(devAddress);
                     return;
                 }
                 portOpen = true;
