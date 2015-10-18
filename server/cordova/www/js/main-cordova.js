@@ -72,6 +72,7 @@ require.config({
         '*': {
             'socketio': 'app/chromeSocket',
             'connections_serial': 'app/connections/cordovaSerial',
+            'connections_tcp': 'app/connections/chromeTcpSerial',
             'connections_hid': 'app/connections/usbhid',
             'connections_btle': 'app/connections/cordovaBTLE',
             'connections_webrtc': 'app/connections/webrtc',
@@ -89,7 +90,7 @@ require.config({
             exports: '_'
         },
         'backbonepouch': {
-            deps: [ 'pouchdb' ]
+            deps: ['pouchdb']
         },
         // Define Bootstrap's main JS, then all plugins which depend on it:
         'bootstrap': {
