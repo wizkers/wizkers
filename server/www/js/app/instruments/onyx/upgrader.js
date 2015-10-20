@@ -43,6 +43,10 @@ define(function (require) {
         },
 
         firmware: "",
+        
+        prevent_failure: function() {
+            console.log("User tried to exit the upgraded");
+        },
 
         initialize: function () {
             linkManager.on('input', this.showInput, this);
@@ -137,6 +141,8 @@ define(function (require) {
             }
             stats.fullEvent('Firmare', 'fw_upgrade_start', 'onyx');
             $("#device_upgrade", this.el).attr('disabled', true);
+            // Prevent a click on the Navbar which would crash the firmware upgrade!
+            $(".navbar-fixed-top a").click(function(e){e.preventDefault();})
             utils.hideAlert();
             utils.showAlert('Info', "Starting upgrade, please wait", 'bg-info');
             // Switch to our uploader driver
@@ -194,6 +200,7 @@ define(function (require) {
                 if (data.chipID != 420) {
                     $('#chipversion', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-remove');
                     $('#chipid', this.el).html(' --- Chip ID unsupported, please contact Medcom.');
+                    $(".navbar-fixed-top a").unbind('click');
                 } else {
                     stats.fullEvent('Firmware', 'fw_upload_start', 'onyx');
                     $('#chipversion', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
@@ -209,6 +216,7 @@ define(function (require) {
             } else if (data.run_mode) {
                 if (data.run_mode == 'firmware') {
                     utils.showAlert('Success', 'Firmware Upgrade was successful, device is restarting', 'bg-success');
+                    $(".navbar-fixed-top a").unbind('click');
                 }
             } else if (data.version) {
                 $('#bootloader', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
