@@ -193,7 +193,7 @@ define(function (require) {
                 // be in bootloader mode, and this requires writing "0" to the
                 // relevant service/characteristic
                 setTimeout(function () {
-                    if ((new Date().getTime() - lastUpdate) > 4000) {
+                    if ((new Date().getTime() - lastUpdate) > 6000) {
                         console.log("Do a Onyx bootloader mode cancel");
                         port.write(abutils.str2ab("0"), {
                             service_uuid: HEART_RATE_SERVICE_UUID,

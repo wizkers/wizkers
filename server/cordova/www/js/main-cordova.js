@@ -158,12 +158,12 @@ document.addEventListener("resume", resumeListener, false);
 
 var router;
 
-require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'localstorage'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
+require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'localstorage'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
 
 
     // Initialize our Analytics object to get stats on app usage
     stats = new Analytics();
-    //stats.init('');
+    stats.init('UA-66729721-1');
 
     // Get our settings here, and
     // share them afterwards, rather than requesting it
