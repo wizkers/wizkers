@@ -181,12 +181,22 @@ define(function (require) {
          */
         this.onDataReady = function (data) {
             // Remove any carriage return
-            data = data.replace('\n', '');
+            data = data.replace('\r\n', '');
             var fields = data.split(',');
             if (fields[0] != '$BNRDD') {
                 console.log('Unknown bGeigie sentence');
                 return;
             }
+            
+            // Since we have a checksum, check it
+            var chk = 0;
+            for (var i = 1; i < data.indexOf('*'); i++) {
+                chk = chk ^ data.charCodeAt(i);
+            }
+            var sum = parseInt(data.substr(data.indexOf('*')+1), 16);
+            if ( chk != sum)
+                return;
+
 
             var cpm = parseInt(fields[3]);
             var lat = parseDecDeg(fields[7], fields[8]);
