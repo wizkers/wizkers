@@ -403,7 +403,7 @@ define(function (require) {
                 data: data
             });
             if (data_buffer.length > data_buffer_max)
-                data_buffer = data_buffer.slice(1);
+                data_buffer.shift();
             if (!suspend_data)
                 self.trigger('serialEvent', data);
         }

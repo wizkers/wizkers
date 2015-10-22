@@ -303,7 +303,6 @@ define(function (require) {
 
         // This is where we get notifications
         function onCharacteristicValueChanged(chrc) {
-            console.log(chrc);
             // Pass it on to the driver
             self.trigger('data', chrc);
         }
