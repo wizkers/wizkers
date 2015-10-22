@@ -223,8 +223,8 @@ var HawkNest = function () {
                                 result.metadata.probes[val.probeid].battery = val.battery;
                             if (val.charging != undefined)
                                 result.metadata.probes[val.probeid].charging = val.charging;
-                            if (val.temp != undefined)
-                                result.metadata.probes[val.probeid].temp = val.temp;
+                            if (val.type == 'temp' && val.c != undefined)
+                                result.metadata.probes[val.probeid].temp = val.c;
                             instrument = result; // Otherwise we'll keep on adding the probes!
                             debug(result.metadata.probes[val.probeid]);
                             return dbs.instruments.put(result);
