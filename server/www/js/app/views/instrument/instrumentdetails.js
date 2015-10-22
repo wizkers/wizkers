@@ -45,7 +45,6 @@ define(function (require) {
         render: function () {
             var self = this;
 
-            this.connectionView = null;
             console.log("Render instrument details");
             var insType = this.model.get('type');
 
@@ -58,6 +57,9 @@ define(function (require) {
 
             if (vizapp.type == "cordova")
                 $('.hide-cordova', this.el).hide();
+            
+            if (this.model.id)
+                $('.selectins', self.el).removeAttr('disabled');
 
             // If the instrument type has got its own extra settings, then render those here:
             instrumentManager.getInstrumentSettings(insType, {
@@ -91,6 +93,7 @@ define(function (require) {
             "change #otherports": "selectPort",
             "click .save": "beforeSave",
             "click .delete": "deleteInstrument",
+            "click .selectins": "selectInstrument",
             "click .export": "exportSettings",
             "click #do-delete": "doDeleteInstrument",
             "dragover #icon": "dragOver",
@@ -222,12 +225,17 @@ define(function (require) {
                         // Force an instrument reload if we changed the settings
                         router.switchinstrument(model.id);
                     }
+                    $('.selectins', self.el).removeAttr('disabled');
                 },
                 error: function () {
                     console.log('Instrument: error saving');
                     utils.showAlert('Error:', 'An error occurred while trying to save intrument config', 'alert-danger');
                 }
             });
+        },
+        
+        selectInstrument: function() {
+            router.switchinstrument(this.model.id);
         },
 
         deleteInstrument: function (event) {
