@@ -121,6 +121,7 @@ define(function (require) {
         // This just connects to the device
         this.open = function () {
             chrome.bluetoothLowEnergy.connect(devAddress, function () {
+                console.log('BTLE', 'Bluetooth connect completed');
                 if (chrome.runtime.lastError) {
                     self.trigger('status', {
                         openerror: true,
