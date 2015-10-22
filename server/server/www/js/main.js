@@ -38,6 +38,8 @@ require.config({
         jquery: 'lib/jquery-1.11.0',
         backbone: 'lib/backbone-1.1.2',
         localstorage: 'lib/backbone.localStorage-1.1.14',
+        pouchdb: 'lib/pouchdb-5.0.0',
+        backbonepouch: 'lib/backbone-pouch',
 
         underscore: 'lib/underscore-1.6.0',
         snap: 'lib/snap.svg-0.2.0',
