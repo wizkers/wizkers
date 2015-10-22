@@ -51,8 +51,8 @@ define(function (require) {
             currentCharacteristics = null,
             self = this,
             devAddress = path,
-            service_uuid = settings.service_uuid,
-            characteristic_uuid = settings.characteristic_uuid,
+            service_uuid = settings.service_uuid.toLowerCase(),
+            characteristic_uuid = settings.characteristic_uuid.toLowerCase(),
             connectionId = -1;
 
 
