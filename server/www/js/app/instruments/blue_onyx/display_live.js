@@ -72,6 +72,11 @@ define(function (require) {
                         this.display_map = true;
                     if (wz_settings.display_graph == 'false')
                         this.display_graph = false;
+                    if (wz_settings.screen_no_dim == 'true') {
+                        keepscreenon.enable();
+                    } else {
+                        keepscreenon.disable();
+                    }
                 } else {
                     // Happens when the user never explicitely set the map option
                     this.display_map = true;
@@ -255,7 +260,7 @@ define(function (require) {
             if (!this.display_graph)
                 return;
 
-            if ( data.cpm != undefined) {
+            if (data.cpm != undefined) {
                 var cpm = parseFloat(data.cpm.value);
 
                 var dp = {
@@ -263,13 +268,13 @@ define(function (require) {
                     value: cpm,
                     timestamp: ts
                 };
-                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp) : this.plot.appendPoint(dp);
+                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp): this.plot.appendPoint(dp);
                 dp = {
                     name: "AVG",
                     value: this.movingAverager(cpm, this.movingAvgData),
                     timestamp: ts
                 };
-                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp) : this.plot.appendPoint(dp);
+                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp): this.plot.appendPoint(dp);
             }
         },
 

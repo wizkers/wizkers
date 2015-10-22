@@ -1,23 +1,38 @@
 <!-- this is inside a row div -->
-<div class="col-md-6">
-<div class="form-group">
-    <label for="name" class="col-md-3 control-label">Display Maps:</label>
-    <div class="col-md-9">
-        <select id="wizkers_settings.display_gmaps" name="wizkers_settings.display_gmaps" class="form-control">
-            <option <%= wizkers_settings.display_gmaps == 'false' ? 'selected':'' %> value="false">No</option>
-            <option <%= wizkers_settings.display_gmaps == 'true'  ? 'selected':'' %> value="true">Yes</option>
-        </select>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="name" class="col-md-3 control-label">Display Maps:</label>
+            <div class="col-md-9">
+                <select id="wizkers_settings.display_gmaps" name="wizkers_settings.display_gmaps" class="form-control">
+                    <option <%= wizkers_settings.display_gmaps == 'false' ? 'selected':'' %> value="false">No</option>
+                    <option <%= wizkers_settings.display_gmaps == 'true'  ? 'selected':'' %> value="true">Yes</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="name" class="col-md-3 control-label">Display Graph:</label>
+            <div class="col-md-9">
+                <select id="wizkers_settings.display_graph" name="wizkers_settings.display_graph" class="form-control">
+                    <option <%= wizkers_settings.display_graph == 'false' ? 'selected':'' %> value="false">No</option>
+                    <option <%= wizkers_settings.display_graph == 'true'  ? 'selected':'' %> value="true">Yes</option>
+                </select>
+            </div>
+        </div>
     </div>
 </div>
-</div>
-<div class="col-md-6">
-<div class="form-group">
-    <label for="name" class="col-md-3 control-label">Display Graph:</label>
-    <div class="col-md-9">
-        <select id="wizkers_settings.display_graph" name="wizkers_settings.display_graph" class="form-control">
-            <option <%= wizkers_settings.display_graph == 'false' ? 'selected':'' %> value="false">No</option>
-            <option <%= wizkers_settings.display_graph == 'true'  ? 'selected':'' %> value="true">Yes</option>
-        </select>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="name" class="col-md-3 control-label">Prevent screen dim:</label>
+            <div class="col-md-9">
+                <select id="wizkers_settings.screen_no_dim" name="wizkers_settings.screen_no_dim" class="form-control">
+                    <option <%= wizkers_settings.screen_no_dim == 'false' ? 'selected':'' %> value="false">No</option>
+                    <option <%= wizkers_settings.screen_no_dim == 'true'  ? 'selected':'' %> value="true">Yes</option>
+                </select>
+            </div>
+        </div>
     </div>
-</div>
 </div>

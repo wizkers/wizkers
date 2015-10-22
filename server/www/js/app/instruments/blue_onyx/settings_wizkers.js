@@ -36,7 +36,8 @@ define(function (require) {
             if (this.model.get('wizkers_settings') == undefined) {
                 this.model.set('wizkers_settings', {
                     display_gmaps: (vizapp.type == 'cordova') ? 'true' : 'false',
-                    display_graph: true,
+                    display_graph: 'true',
+                    screen_no_dim: 'false'
                 });
             }
         },
