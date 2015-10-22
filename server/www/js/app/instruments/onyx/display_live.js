@@ -339,30 +339,33 @@ define(function (require) {
                     linkManager.startLiveStream(this.model.get('liveviewperiod'));
                 }
             } else {
-
-                var cpm = parseFloat(data.cpm.value);
-                var image = 'white.png';
-                if (cpm >= 1050) {
-                    image = 'grey.png';
-                } else if (cpm >= 680) {
-                    image = 'darkRed.png';
-                } else if (cpm >= 420) {
-                    image = 'red.png';
-                } else if (cpm >= 350) {
-                    image = 'darkOrange.png';
-                } else if (cpm >= 280) {
-                    image = 'orange.png';
-                } else if (cpm >= 175) {
-                    image = 'yellow.png';
-                } else if (cpm >= 105) {
-                    image = 'lightGreen.png';
-                } else if (cpm >= 70) {
-                    image = 'green.png';
-                } else if (cpm >= 35) {
-                    image = 'midgreen.png'
-                }
+                
+                if (data.cpm == undefined)
+                    return;
 
                 if (this.map && data.loc_status && data.loc_status == 'OK') {
+                    var cpm = parseFloat(data.cpm.value);
+                    var image = 'white.png';
+                    if (cpm >= 1050) {
+                        image = 'grey.png';
+                    } else if (cpm >= 680) {
+                        image = 'darkRed.png';
+                    } else if (cpm >= 420) {
+                        image = 'red.png';
+                    } else if (cpm >= 350) {
+                        image = 'darkOrange.png';
+                    } else if (cpm >= 280) {
+                        image = 'orange.png';
+                    } else if (cpm >= 175) {
+                        image = 'yellow.png';
+                    } else if (cpm >= 105) {
+                        image = 'lightGreen.png';
+                    } else if (cpm >= 70) {
+                        image = 'green.png';
+                    } else if (cpm >= 35) {
+                        image = 'midgreen.png'
+                    }
+
                     this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                     if (this.lastMarker == null) {
                         this.lastMarker = {
