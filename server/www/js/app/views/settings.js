@@ -72,7 +72,9 @@ define(function (require) {
                         chrome.storage.local.QUOTA_BYTES + " bytes quota.</p>");
                 });
 
-                if (instrumentManager.getCaps().indexOf("Upgrader") > -1) {
+                // Disable instrument upgrades on Cordova for now. They work, but they're bound to lead to
+                // just too many issues support-wise.
+                if (instrumentManager.getCaps().indexOf("Upgrader") > -1 && vizapp.type != 'cordova') {
                     $('#device_upgrade', this.el).show();
                 }
 

@@ -54,6 +54,9 @@ define(function (require) {
             // them properly when we close
             this.instrumentLiveView = null;
             this.instrumentNumericView = null;
+            
+            // Avoid changing the button states all the time
+            this.currentState = 'undefined';
 
             // We manage the instrument UniqueID and storage of its
             // properties in the home view (this is common across all
@@ -129,11 +132,10 @@ define(function (require) {
                             if (instrumentManager.getCaps().indexOf("WantReplay") > -1) {
                                 console.log('[Home view] Replaying previous datapoints');
                                 // Our instrument supports live view replay, so we ask for it:
-                                setTimeout( function() {
+                                setTimeout(function () {
                                     view.clear();
                                     linkManager.requestReplay();
-                                }
-                                           , 500);
+                                }, 500);
                             }
                         }
                     }
@@ -214,25 +216,30 @@ define(function (require) {
 
             // If we are just a 'viewer' in server mode, then disable all buttons.
             if (vizapp.type == 'server' && (settings.get('currentUserRole') == 'viewer')) {
-                if (linkManager.isConnected()) {
+                if (linkManager.isConnected() && this.currentState != 'connected') {
                     $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-stop"></span>&nbsp;' +
                             this.instrument.get('name') + ' connected')
                         .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning');
-                } else {
+                    this.currentState = 'connected';
+                } else if (this.currentState != 'idle') {
                     $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-play"></span>' +
                             this.instrument.get('name') + ' not connected')
                         .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning');
+                    this.currentState = 'idle';
                 }
                 return;
             }
 
             // Depending on port status, update our controller
             // connect button:
-            if (linkManager.isConnected()) {
+            if (linkManager.isConnected() && this.currentState != 'connected') {
                 $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-stop"></span>&nbsp;Disconnect ' + this.instrument.get('name'))
                     .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 $('.btn-enable-connected', this.el).removeAttr('disabled');
-
+                if (vizapp.type == 'cordova')
+                    cordova.plugins.backgroundMode.setDefaults({
+                        title: 'Connected to ' + this.instrument.get('name')
+                    });
                 if (this.instrumentUniqueID == null) {
                     linkManager.getUniqueID();
                 }
@@ -240,11 +247,16 @@ define(function (require) {
                 if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || !linkManager.isConnected()) {
                     $('.ctrl-diag', self.el).attr('disabled', true);
                 }
-            } else {
+                this.currentState = 'connected';
+            } else if (!linkManager.isConnected() && this.currentState != 'idle') {
                 $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-play"></span>&nbsp;Connect to ' + this.instrument.get('name'))
                     .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 $('.btn-enable-connected', this.el).attr('disabled', true);
-
+                if (vizapp.type == 'cordova')
+                    cordova.plugins.backgroundMode.setDefaults({
+                        title: 'Idle.',
+                    });
+                this.currentState = 'idle';
             }
             if (data.recording) {
                 $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording').addClass('btn-success')
@@ -255,7 +267,6 @@ define(function (require) {
             }
 
         },
-
 
         ctrlConnect: function (event) {
             var self = this;
@@ -288,6 +299,10 @@ define(function (require) {
                 $('#RecordModal').modal();
             } else {
                 linkManager.stopRecording();
+                if (vizapp.type == 'cordova')
+                    cordova.plugins.backgroundMode.setDefaults({
+                        text: 'Recording stopped.',
+                    });
             }
         },
 
@@ -306,8 +321,12 @@ define(function (require) {
             currentLogSession.save(null, {
                 success: function () {
                     linkManager.startRecording(currentLogSession.id); // Tell our backend to start recording.
+                    if (vizapp.type == 'cordova')
+                        cordova.plugins.backgroundMode.setDefaults({
+                            text: 'Recording.',
+                        });
                 },
-                error: function(obj, err) {
+                error: function (obj, err) {
                     console.log(err);
                 }
             });

@@ -161,6 +161,15 @@ var router;
 require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'localstorage'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
 
 
+    // Cordova-specific: we don't want Wizkers to be automatically shut down by the OS
+    // when it is in the background (this can happen otherwise)
+    cordova.plugins.backgroundMode.setDefaults({
+        title: 'Idle',
+        text: 'Wizkers is running'
+    });
+    cordova.plugins.backgroundMode.enable();
+
+
     // Initialize our Analytics object to get stats on app usage
     stats = new Analytics();
     stats.init('UA-66729721-1');
