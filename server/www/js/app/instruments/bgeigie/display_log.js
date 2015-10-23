@@ -325,7 +325,7 @@ define(function (require) {
 
                 options.params = params;
                 fileutils.sendFile(this.logfile.nativeURL,
-                    'http://dev.safecast.org/bgeigie_imports.json',
+                    'http://api.safecast.org/bgeigie_imports.json',
                     function (success) {
                         console.log('success', success);
                         $('#UploadModal', self.el).modal('hide');
