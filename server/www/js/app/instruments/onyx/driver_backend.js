@@ -137,7 +137,20 @@ define(function (require) {
         
         var newLocation = function (loc) {
             location_status = 'OK';
-            current_loc = loc;
+            // loc is an object with functions, not a pure JSON
+            // structure, which causes issues w/ indexeddb, so we copy
+            // just what we want into current loc - also saves storage space
+            current_loc = {
+                coords: {
+                    accuracy: loc.coords.accuracy,
+                    altitude: loc.coords.altitude,
+                    altitudeAccuracy: loc.coords.altitudeAccuracy,
+                    latitude: loc.coords.latitude,
+                    longitude: loc.coords.longitude,
+                    heading: loc.coords.heading,
+                    speed: loc.coords.speed
+                }
+            };
         }
 
         var geolocationError = function (err) {

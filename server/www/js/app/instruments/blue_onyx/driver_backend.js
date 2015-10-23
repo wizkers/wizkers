@@ -232,7 +232,18 @@ define(function (require) {
 
         var newLocation = function (loc) {
             location_status = 'OK';
-            current_loc = loc;
+            current_loc = {
+                coords: {
+                    accuracy: loc.coords.accuracy,
+                    altitude: loc.coords.altitude,
+                    altitudeAccuracy: loc.coords.altitudeAccuracy,
+                    latitude: loc.coords.latitude,
+                    longitude: loc.coords.longitude,
+                    heading: loc.coords.heading,
+                    speed: loc.coords.speed
+                }
+            };
+
         }
 
         var geolocationError = function (err) {
