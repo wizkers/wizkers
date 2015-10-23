@@ -101,6 +101,9 @@ define(function (require) {
             settings.save(null, {
                 success: function () {}
             });
+            
+            // Explicitely switch the instrument in the router.
+            router.switchinstrument(theID);
             return false;
         },
     });

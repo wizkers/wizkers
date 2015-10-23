@@ -273,12 +273,19 @@ define(function (require) {
                     }, 30000);
                 }
                 if (status.address) {
-                    device_names[status.address] = {
-                        name: status.name || status.address,
-                        address: status.address
-                    };
-                    console.log('New BT Device', status);
-                    self.trigger('ports', device_names);
+                    // Don't issue 'ports' messages repeatedly when scanning,
+                    // because the BTLE subsystem triggers events several times
+                    // per second for each devices it sees as long as it sees them
+                    if (device_names[status.address] == undefined ||
+                        ( device_names[status.address] == undefined && device_names[status.address].name == status.address
+                          && status.name != undefined)) {
+                        device_names[status.address] = {
+                            name: status.name || status.address,
+                            address: status.address
+                        };
+                        console.log('New BT Device', status);
+                        self.trigger('ports', device_names);
+                    }
                 }
             }
 

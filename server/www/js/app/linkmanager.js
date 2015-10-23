@@ -54,8 +54,10 @@ define(function (require) {
             // This is called whenever we switch instrument
             this.setDriver = function (driver) {
                 this.driver = driver;
-                socket.emit('driver', this.driver.getBackendDriverName());
-                socket.emit('ports', '');
+                
+                // This is legacy, should not be called anymore
+                // socket.emit('driver', this.driver.getBackendDriverName());
+                // socket.emit('ports', '');
                 console.log('Link manager: updated link manager driver for current instrument');
             };
 

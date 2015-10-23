@@ -43,9 +43,6 @@ define(function (require) {
     return Backbone.View.extend({
 
         initialize: function (options) {
-            linkManager.on('status', this.updatestatus, this);
-            linkManager.on('input', this.parseInput, this);
-            linkManager.on('uniqueID', this.updateUID, this);
 
             this.listenTo(outputManager, 'outputTriggered', this.updateOutputStatus);
             instrumentManager.on('instrumentChanged', this.updateInstrument, this);
@@ -54,9 +51,11 @@ define(function (require) {
             // them properly when we close
             this.instrumentLiveView = null;
             this.instrumentNumericView = null;
-            
-            // Avoid changing the button states all the time
-            this.currentState = 'undefined';
+
+            // Avoid changing the button states all the time at each status update.
+            // Especially important on mobile devices to save a bit of battery.
+            this.currentState = 'undef';
+            this.recordingState = 'undef';
 
             // We manage the instrument UniqueID and storage of its
             // properties in the home view (this is common across all
@@ -86,6 +85,22 @@ define(function (require) {
             // re-render. In particular,the manager is usually updated after 1st rendering
             // of the home view after selecting an instrument.
             this.instrument = instrumentManager.getInstrument();
+
+            // Before rendering, we need to properly close and unregister everything
+
+            linkManager.off('status', this.updatestatus);
+            linkManager.off('input', this.parseInput);
+            linkManager.off('uniqueID', this.updateUID);
+
+            if (this.instrumentLiveView != null)
+                this.instrumentLiveView.onClose();
+
+            if (this.instrumentNumericView != null)
+                this.instrumentNumericView.onClose();
+
+            this.currentState = 'undef';
+            this.recordingState = 'undef';
+
             this.render();
         },
 
@@ -153,6 +168,12 @@ define(function (require) {
                 });
             }
 
+            // Don't hook the events before this point, no need!
+            // and creates a race condition on buttons update as well.
+            linkManager.on('status', this.updatestatus, this);
+            linkManager.on('input', this.parseInput, this);
+            linkManager.on('uniqueID', this.updateUID, this);
+
             linkManager.requestStatus();
             return this;
         },
@@ -160,10 +181,10 @@ define(function (require) {
         onClose: function () {
             console.log("Home view closing...");
 
-            linkManager.off('status', this.updatestatus, this);
-            linkManager.off('input', this.parseInput, this);
-            linkManager.off('uniqueID', this.updateUID, this);
-            instrumentManager.off('instrumentChanged', this.updateInstrument, this);
+            linkManager.off('status', this.updatestatus);
+            linkManager.off('input', this.parseInput);
+            linkManager.off('uniqueID', this.updateUID);
+            instrumentManager.off('instrumentChanged', this.updateInstrument);
 
             if (this.instrumentLiveView != null)
                 this.instrumentLiveView.onClose();
@@ -171,9 +192,6 @@ define(function (require) {
             if (this.instrumentNumericView != null)
                 this.instrumentNumericView.onClose();
 
-            // Restore the settings since we don't want them to be saved when changed from
-            // the home screen
-            this.model.fetch();
         },
 
         updateUID: function (uid) {
@@ -213,6 +231,8 @@ define(function (require) {
             // First of all, if we don't have an instrument, no need to update our status:
             if (this.instrument == null)
                 return;
+
+            console.log('Home view', 'update status - ' + new Date().getSeconds());
 
             // If we are just a 'viewer' in server mode, then disable all buttons.
             if (vizapp.type == 'server' && (settings.get('currentUserRole') == 'viewer')) {
@@ -258,12 +278,14 @@ define(function (require) {
                     });
                 this.currentState = 'idle';
             }
-            if (data.recording) {
+            if (data.recording && this.recordingState != 'recording') {
                 $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording').addClass('btn-success')
                     .removeClass('btn-danger').attr('disabled', false);
-            } else {
+                this.recordingState = 'recording';
+            } else if (this.recordingState != 'not recording') {
                 $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-download"></span>&nbsp;Record').addClass('btn-danger')
                     .removeClass('btn-success');
+                this.recordingState = 'not recording';
             }
 
         },

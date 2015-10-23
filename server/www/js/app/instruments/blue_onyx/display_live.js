@@ -122,7 +122,7 @@ define(function (require) {
 
         render: function () {
             var self = this;
-            console.log('Main render of Onyx live view');
+            console.log('Main render of Blue Onyx live view');
             $(this.el).html(template());
 
             // Remove all the contents of the raw data stream if we don't want it
@@ -221,6 +221,7 @@ define(function (require) {
         },
 
         onClose: function () {
+            console.log("Blue Onyx live view closing");
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
             if (this.rsc)

@@ -48,7 +48,7 @@ define(function (require) {
 
         render: function () {
             var self = this;
-            console.log('Main render of Onyx numeric view');
+            console.log('Main render of Blue Onyx numeric view');
             $(this.el).html(template());
             // We need to force the Live view to resize the map at this
             // stage, becaure we just changed the size of the numview
@@ -59,7 +59,7 @@ define(function (require) {
         },
 
         onClose: function () {
-            console.log("Onyx numeric view closing...");
+            console.log("Blue Onyx numeric view closing...");
             linkManager.off('input', this.showInput, this);
         },
 

@@ -92,9 +92,12 @@ define(function (require) {
 
             // When the current instrument model changes, we need to update
             // the link manager type:
+            /**
+             * I find this confusing - better call the switchInstrument method from where it's needed
             settings.on('change:currentInstrument', function (model, insId) {
                 self.switchinstrument(insId);
             });
+            */
 
         },
 
@@ -114,8 +117,7 @@ define(function (require) {
          */
         switchinstrument: function (insId, closeprevious) {
             var self = this;
-            if (closeprevious === undefined)
-                closeprevious = true;
+            closeprevious =  closeprevious || true;
             console.log('New instrument ID, updating the link manager type and jumping to home screen');
             require(['app/models/instrument'], function (model) {
                 var ins = new model.Instrument({
