@@ -282,7 +282,7 @@ define(function (require) {
                 $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording').addClass('btn-success')
                     .removeClass('btn-danger').attr('disabled', false);
                 this.recordingState = 'recording';
-            } else if (this.recordingState != 'not recording') {
+            } else if (data.recording == false && this.recordingState != 'not recording') {
                 $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-download"></span>&nbsp;Record').addClass('btn-danger')
                     .removeClass('btn-success');
                 this.recordingState = 'not recording';

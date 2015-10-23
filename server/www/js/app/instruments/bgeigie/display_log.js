@@ -174,7 +174,12 @@ define(function (require) {
                         // Now iterate over all the log entries and generate
                         // the aggregate log files.
                         var index = 0;
-                        var write = function (evt) {
+                        var write = function (str) {
+                            if (typeof str == 'string') {
+                                fileWriter.write(str + '\n');
+                                return;
+                            }
+                                
                             if (index == entries.length) {
                                 self.addMetadata(file);
                                 return;
@@ -188,7 +193,7 @@ define(function (require) {
                             }
                         };
                         fileWriter.onwrite = write;
-                        write(0);
+                        write('# Android Safecast:Drive log');
                     }
                 }, function (e) {
                     console.log(e);
@@ -265,19 +270,22 @@ define(function (require) {
 
             var params = {
                 api_key: instrumentManager.getInstrument().get('metadata').apikey,
-                'bgeigie_import[name]': 'bgeigie.log'
+                'bgeigie_import[name]': 'bgeigie.log',
+                'bgeigie_import[credits]': $('#credits').val(),
+                'bgeigie_import[cities]': $('#cities').val(),
+                'bgeigie_import[description]': $('#description').val()
             };
 
             // Two possibilities: we are either sending an in-mem log (string), or
             // a file
             if (typeof this.logfile == 'string') {
                 var post_options = {
-                    host: 'dev.safecast.org',
+                    host: 'api.safecast.org',
                     port: 80,
                     method: 'POST',
                     path: '/bgeigie_imports.json',
                     headers: {
-                        'X-Datalogger': 'wizkers.io Safecast driver',
+                        'X-Datalogger': 'wizkers.io Safecast Drive app',
                         'Content-Type': 'application/x-www-form-urlencoded',
                     }
                 };
@@ -323,9 +331,8 @@ define(function (require) {
                         $('#UploadModal', self.el).modal('hide');
                         $('#myErrorLabel', self.el).html('Success');
                         $('#errorreason', self.el).html('Your log was uploaded to Safecast');
-                        $('#errordetail', self.el).html('Keep up the good work (proper details coming up real soon)');
+                        $('#errordetail', self.el).html('Keep up the good work :)');
                         $('#ErrorModal').modal('show');
-                        self.sendMetadata(success);
                     },
                     function (failure) {
                         console.log('failure', failure);
@@ -341,10 +348,6 @@ define(function (require) {
             }
         },
         
-        sendMetadata: function(arg) {
-            console.log('Should send the metadata now', arg);
-        },
-
         addPlot: function () {
             var self = this;
 

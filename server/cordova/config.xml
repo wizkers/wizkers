@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<widget id="io.wizkers.wizkersapp" version="a0.10.6" xmlns="http://www.w3.org/ns/widgets" xmlns:gap= "http://phonegap.com/ns/1.0" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="io.wizkers.wizkersapp" version="a0.10.7" xmlns="http://www.w3.org/ns/widgets" xmlns:gap= "http://phonegap.com/ns/1.0" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Wizkers</name>
     <description>
         A utility to interface with measurement devices and more.

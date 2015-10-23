@@ -30,6 +30,7 @@ var paths = {
     chrome_dist: 'dist/chrome/', // Where we distribute the Chrome app (ready for packaging for Chrome app store)
     // All javascript is minified there.
     chrome_debug: 'dist/chrome-debug/', // Debug build (not minified)
+    cordova_debug: 'dist/cordova-debug/',
     cordova_dist: 'dist/cordova/',
     server_dist: 'dist/server/',
 
@@ -120,7 +121,6 @@ gulp.task('chrome_copy_build', ['build'], function () {
     return gulp.src([paths.build + '/www/**/*'], {
             base: paths.build
         })
-        .pipe(gulp.dest(paths.chrome_dist))
         .pipe(gulp.dest(paths.chrome_debug));
 });
 
@@ -144,7 +144,7 @@ gulp.task('cordova_copy_build', ['build'], function () {
     return gulp.src([paths.build + '/www/**/*'], {
             base: paths.build
         })
-        .pipe(gulp.dest(paths.cordova_dist));
+        .pipe(gulp.dest(paths.cordova_debug));
 });
 
 /**
@@ -154,7 +154,8 @@ gulp.task('cordova', ['build', 'cordova_copy_build'], function () {
     return gulp.src(paths.cordova_files, {
             base: 'cordova'
         })
-        .pipe(gulp.dest(paths.cordova_dist));
+        .pipe(gulp.dest(paths.cordova_dist))
+        .pipe(gulp.dest(paths.cordova_debug));
 });
 
 /**

@@ -38,6 +38,7 @@ require.config({
         jquery: 'lib/jquery-1.11.0',
         backbone: 'lib/backbone-1.1.2',
         localstorage: 'lib/backbone.localStorage-1.1.14',
+        bbindexeddb: 'lib/backbone-indexeddb',
         pouchdb: 'lib/pouchdb-5.0.0',
         backbonepouch: 'lib/backbone-pouch',
         underscore: 'lib/underscore-1.6.0',
@@ -158,66 +159,73 @@ document.addEventListener("resume", resumeListener, false);
 
 var router;
 
-require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'localstorage'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
+// We cannot launch this before the Cordova framework has initialized:
+
+document.addEventListener('deviceready', go, false);
 
 
-    // Cordova-specific: we don't want Wizkers to be automatically shut down by the OS
-    // when it is in the background (this can happen otherwise)
-    cordova.plugins.backgroundMode.setDefaults({
-        title: 'Idle',
-        text: 'Wizkers is running'
-    });
-    cordova.plugins.backgroundMode.enable();
+function go() {
+    require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'localstorage'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
 
 
-    // Initialize our Analytics object to get stats on app usage
-    stats = new Analytics();
-    stats.init('UA-66729721-1');
+        // Cordova-specific: we don't want Wizkers to be automatically shut down by the OS
+        // when it is in the background (this can happen otherwise)
+        cordova.plugins.backgroundMode.setDefaults({
+            title: 'Idle',
+            text: 'Wizkers is running'
+        });
+        cordova.plugins.backgroundMode.enable();
 
-    // Get our settings here, and
-    // share them afterwards, rather than requesting it
-    // everytime...
-    settings = new Settings({
-        id: 1
-    });
 
-    // Create our instrument manager: in charge of creating/deleting
-    // instruments as necessary, as well as providing a list of
-    // instruments to other parts who need those
-    instrumentManager = new InstrumentManager();
+        // Initialize our Analytics object to get stats on app usage
+        stats = new Analytics();
+        stats.init('UA-66729721-1');
 
-    // Create our output manager: in charge of connecting instrument outputs
-    // to third party data consumers.
-    outputManager = new OutputManager();
+        // Get our settings here, and
+        // share them afterwards, rather than requesting it
+        // everytime...
+        settings = new Settings({
+            id: 1
+        });
 
-    // Create our link manager: it is in charge of talking
-    // to the server-side controller interface through a socket.io
-    // web socket. It is passed to all views that need it.
-    linkManager = new LinkManager();
+        // Create our instrument manager: in charge of creating/deleting
+        // instruments as necessary, as well as providing a list of
+        // instruments to other parts who need those
+        instrumentManager = new InstrumentManager();
 
-    settings.fetch({
-        success: function () {
-            var insId = settings.get('currentInstrument');
-            if (insId != null) {
-                router = new Router();
-                router.switchinstrument(insId, false); // second argument prevents router from closing instrument
-                Backbone.history.start();
-            } else {
-                router = new Router();
-                Backbone.history.start();
-            }
-        },
-        error: function (model, response, option) {
-            // Will happen at startup with "Record not found" in response
-            settings.save(null, {
-                success: function () {
+        // Create our output manager: in charge of connecting instrument outputs
+        // to third party data consumers.
+        outputManager = new OutputManager();
+
+        // Create our link manager: it is in charge of talking
+        // to the server-side controller interface through a socket.io
+        // web socket. It is passed to all views that need it.
+        linkManager = new LinkManager();
+
+        settings.fetch({
+            success: function () {
+                var insId = settings.get('currentInstrument');
+                if (insId != null) {
+                    router = new Router();
+                    router.switchinstrument(insId, false); // second argument prevents router from closing instrument
+                    Backbone.history.start();
+                } else {
                     router = new Router();
                     Backbone.history.start();
-                },
-                error: function () {
-                    console.log("Could not create application settings, we're done here...");
                 }
-            });
-        }
+            },
+            error: function (model, response, option) {
+                // Will happen at startup with "Record not found" in response
+                settings.save(null, {
+                    success: function () {
+                        router = new Router();
+                        Backbone.history.start();
+                    },
+                    error: function () {
+                        console.log("Could not create application settings, we're done here...");
+                    }
+                });
+            }
+        });
     });
-});
+}
