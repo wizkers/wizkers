@@ -141,7 +141,10 @@ var vizapp = {
     // State can be "running" or "paused". Only updated in Cordova mode.
     // Can be checked by various tasks to skip display when app paused, and
     // save battery. (see Flotplot)
-    state: 'running'
+    state: 'running',
+    
+    // Used in a couple of locations, lets us change the app name easily.
+    appname: 'Wizkers'
 };
 
 var pauseListener = function () {
@@ -172,7 +175,7 @@ function go() {
         // when it is in the background (this can happen otherwise)
         cordova.plugins.backgroundMode.setDefaults({
             title: 'Idle',
-            text: 'Wizkers is running'
+            text: vizapp.appname + ' is running'
         });
         cordova.plugins.backgroundMode.enable();
 

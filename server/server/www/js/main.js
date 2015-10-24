@@ -138,7 +138,16 @@ var vizapp = {
     //   - server : use a remote server for device connection & database
     //   - cordova: run as an embedded Cordova application on Android
     //   - others to be defined 
-    type: "server"
+    type: "server",
+    
+    // State can be "running" or "paused". Only updated in Cordova mode.
+    // Can be checked by various tasks to skip display when app paused, and
+    // save battery. (see Flotplot)
+    state: 'running',
+    
+    // Used in a couple of locations, lets us change the app name easily.
+    appname: 'Wizkers'
+
 };
 
 var router;
