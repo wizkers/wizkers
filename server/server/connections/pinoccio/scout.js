@@ -82,6 +82,10 @@ var Scout = function (sock) {
     sock.on('close', function(data) {
         debug('Socket close', data);
     });
+    
+    sock.on('error', function(data) {
+        debug('Socket error (will close)', data);
+    });
 
     /**
      * The main role of this is to respawn the stream which
