@@ -80,8 +80,8 @@ define(function(require) {
             if (typeof(data.cpm) == 'undefined')
                 return;
             
-            var cpm = parseFloat(data.cpm.value).toFixed(3);
-            var cpm2 = parseFloat(data.cpm2.value).toFixed(3);
+            var cpm = parseFloat(data.cpm.value).toFixed(0);
+            var cpm2 = parseFloat(data.cpm2.value).toFixed(0);
             readings[data.probeid] = { cpm: cpm, cpm2: cpm2};
 
             if (data.probeid != probeid)
@@ -89,7 +89,7 @@ define(function(require) {
             
             $('#livecpm', this.el).html(cpm);
             $('#livecpm2', this.el).html(cpm2);
-            $('#liveusvh', this.el).html(cpm2/100);
+            $('#liveusvh', this.el).html((parseFloat(data.cpm2.value)/100).toFixed(3));
             
         },
 
