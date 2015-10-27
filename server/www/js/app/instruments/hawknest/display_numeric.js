@@ -60,6 +60,7 @@ define(function(require) {
                 if (readings[probeid] != undefined) {
                     $('#livecpm', this.el).html(readings[probeid].cpm);
                     $('#livecpm2', this.el).html(readings[probeid].cpm2);
+                    $('#liveusvh', this.el).html((parseFloat(readings[probeid].cpm2)/100).toFixed(3));
                 }
             }
             return this;
