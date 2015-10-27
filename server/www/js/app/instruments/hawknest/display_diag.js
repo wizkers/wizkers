@@ -86,6 +86,7 @@ define(function (require) {
             $('#lastseen',this.el).html(ls + ' minute' + ((ls == '1') ? '':'s') +' ago');
             $('#lastseenfull', this.el).html(new Date(pid.ts).toISOString());
             $('#voltage', this.el).html(pid.voltage/100 + 'V');
+            $('#temp', this.el).html(pid.temp + '&deg;C');
         },
         
         updateProbeName: function(e) {
