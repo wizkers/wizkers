@@ -30,7 +30,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         utils    = require('app/utils'),
-        template = require('js/tpl/instruments/HawkNestNumView.js');
+        template = require('js/tpl/instruments/hawknest/HawkNestNumView.js');
 
 
     var probeid = '-';
@@ -89,6 +89,7 @@ define(function(require) {
             
             $('#livecpm', this.el).html(cpm);
             $('#livecpm2', this.el).html(cpm2);
+            $('#liveusvh', this.el).html(cpm2/100);
             
         },
 

@@ -32,7 +32,7 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
-        template = require('js/tpl/instruments/HawkNestLiveView.js');
+        template = require('js/tpl/instruments/hawknest/HawkNestLiveView.js');
 
     require('bootstrap');
     
@@ -194,7 +194,7 @@ define(function (require) {
             if (data.cpm != undefined) {
                 var cpm = parseFloat(data.cpm.value);
                 var datapoint = {
-                    'name': "CPM-" + data.probeid,
+                    'name': "&alpha;&beta;&gamma;-" + data.probeid,
                     'value': cpm,
                     'timestamp': data.devicestamp
                 };
@@ -204,7 +204,7 @@ define(function (require) {
             if (data.cpm2 != undefined) {
                 var cpm2 = parseFloat(data.cpm2.value);
                 var datapoint = {
-                    'name': "CPM2-" + data.probeid,
+                    'name': "&gamma;-" + data.probeid,
                     'value': cpm2,
                     'timestamp': data.devicestamp
                 };
