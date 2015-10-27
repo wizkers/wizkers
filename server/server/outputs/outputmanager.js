@@ -93,8 +93,10 @@ var output = function (data, insid) {
         var output = active[idx];
         if (alarm(output, data) || regular(output)) {
             debug("Output triggered with this data " + data);
-            output.plugin.sendData(data);
-            output.last = new Date().getTime();
+            output.plugin.sendData(data, function (success) {
+                if (success)
+                    output.last = new Date().getTime();
+            });
         }
     }
 };
