@@ -103,12 +103,13 @@ define(function (require) {
         this.getPorts = function () {
             self.trigger('ports', ["OTG Serial"]);
         }
-        
-        this.open = function() {
+
+        this.open = function () {
             console.log("cordovaSerial: openPort");
             serial.requestPermission(
                 function (success) {
                     serial.open({
+                            "sleepOnPause": false,
                             "baudRate": "" + mySettings.baudRate,
                             "dataBits": "" + mySettings.dataBits,
                             "dtr": mySettings.dtr
@@ -125,11 +126,11 @@ define(function (require) {
                     );
                 },
                 function (error) {
-                            self.trigger('status', {
-                                openerror: true,
-                                reason: 'Port not found or permission error',
-                                description: 'Not able to find an OTG port on this device - or you didn\'t accept to connect.'
-                            });
+                    self.trigger('status', {
+                        openerror: true,
+                        reason: 'Port not found or permission error',
+                        description: 'Not able to find an OTG port on this device - or you didn\'t accept to connect.'
+                    });
                 }
             );
         }
@@ -186,7 +187,7 @@ define(function (require) {
             parser(self, data);
 
         };
-        
+
         function onError() {
             console.log('[cordovaSerial] Error registering serial read callback');
         };
@@ -206,7 +207,7 @@ define(function (require) {
             self.trigger('status', {
                 portopen: true
             });
-            serial.registerReadCallback( onRead, onError);
+            serial.registerReadCallback(onRead, onError);
         };
 
         // Now hook up our own event listeners:
