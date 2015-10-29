@@ -47,7 +47,7 @@ define(function (require) {
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities    
         this.getCaps = function () {
-            return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView",
+            return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView", 'WizkersSettings',
                     "LogManagementView", "Upgrader", "WantReplay"
                    ];
         };
@@ -152,5 +152,15 @@ define(function (require) {
                 callback(new view(arg));
             });
         }
+
+        // The screen for the "Settings" top level menu. This covers settings
+        // for the Wizkers app, not the instrument itself (those are done on the DiagDisplay
+        // screen).
+        this.getWizkersSettings = function (arg, callback) {
+            require(['app/instruments/blue_onyx/settings_wizkers'], function (view) {
+                callback(new view(arg));
+            });
+        };
+
     };
 });

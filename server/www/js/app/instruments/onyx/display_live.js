@@ -68,6 +68,11 @@ define(function (require) {
                         this.display_map = true;
                     if (wz_settings.display_graph == 'false')
                         this.display_graph = false;
+                    if (wz_settings.screen_no_dim == 'true') {
+                        keepscreenon.enable();
+                    } else {
+                        keepscreenon.disable();
+                    }
                 } else {
                     // Happens when the user never explicitely set the map option
                     this.display_map = true;
@@ -130,8 +135,13 @@ define(function (require) {
                 $('#map_row', this.el).empty();
             }
 
-            linkManager.requestStatus();
-            this.addPlot();
+            if (!this.display_graph) {
+                $('#geigerchart_row', this.el).empty();
+            }
+
+
+            if (this.display_graph)
+                this.addPlot();
 
             if (this.display_map) {
                 this.map = new mapWidget();
@@ -167,6 +177,8 @@ define(function (require) {
                 }
             } else {
                 // Implement a resizer for the Geiger chart only
+                if (!this.display_graph)
+                    return;
                 var self = this;
                 var rsc = function () {
                     var numviewheight = 0;
@@ -210,11 +222,12 @@ define(function (require) {
 
         onClose: function () {
             console.log("Onyx live view closing...");
-
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
-            this.plot.onClose();
-
+            if (this.rsc)
+                $(window).off('resize', this.rsc);
+            if (this.plot)
+                this.plot.onClose();
         },
 
         movingAverager: function (newpoint, buffer) {
@@ -254,6 +267,9 @@ define(function (require) {
         },
 
         disp_cpm: function (data, ts) {
+            if (!this.display_graph)
+                return;
+
             if (data.cpm != undefined) {
                 var cpm = parseFloat(data.cpm.value);
 
@@ -263,13 +279,13 @@ define(function (require) {
                     'timestamp': ts
                 };
 
-                this.plot.appendPoint(dp);
+                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp): this.plot.appendPoint(dp);
                 dp = {
                     'name': "AVG",
                     'value': this.movingAverager(cpm, this.movingAvgData),
                     'timestamp': ts
-                }
-                this.plot.appendPoint(dp);
+                };
+                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp): this.plot.appendPoint(dp);
             }
             if (data.cpm2 != undefined) {
                 var cpm2 = parseFloat(data.cpm2.value);
@@ -278,13 +294,13 @@ define(function (require) {
                     'value': cpm2,
                     'timestamp': ts
                 };
-                this.plot.appendPoint(dp);
+                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp): this.plot.appendPoint(dp);
                 dp = {
                     'name': "AVG2",
                     'value': this.movingAverager(cpm2, this.movingAvgData2),
                     'timestamp': ts
                 };
-                this.plot.appendPoint(dp);
+                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp): this.plot.appendPoint(dp);
             }
         },
 
@@ -339,7 +355,7 @@ define(function (require) {
                     linkManager.startLiveStream(this.model.get('liveviewperiod'));
                 }
             } else {
-                
+
                 if (data.cpm == undefined)
                     return;
 
