@@ -216,6 +216,9 @@ define(function (require) {
 
         parseInput: function (data) {
             if (data.openerror) {
+                // Reset the currentStatus to make sure our buttons get back to the
+                // correct state
+                this.currentState = 'error';
                 // Give feedback to the user on why we could not open the device
                 if (data.reason)
                     $('#errorreason', this.el).html(data.reason);

@@ -122,6 +122,18 @@ define(function (require) {
                 });
             }, function (error) {
                 console.log('Disconnect error', error);
+                if (error.error == 'isDisconnected') {
+                    // Already disconnected, so we can close
+                    bluetoothle.close(function (result) {
+                        console.log(result);
+                        portOpen = false;
+                        self.trigger('status', {
+                            portopen: portOpen
+                        });
+                    }, function (error) {}, {
+                        address: devAddress
+                    });
+                }
             }, {
                 address: devAddress
             });
@@ -197,8 +209,18 @@ define(function (require) {
             }
             if (result.status == 'disconnected') {
                 console.log(result);
-                // OK, the device disappeared: wait for (??) minutes
-                // before giving up. Or let it retry forever ?
+                // OK, the device disappeared: we need to close
+                // the connection. Note: we might want to auto-reconnect
+                // in a future version, TbD.
+                bluetoothle.close(function (result) {
+                    console.log(result);
+                    portOpen = false;
+                    self.trigger('status', {
+                        portopen: portOpen
+                    });
+                }, function (error) {}, {
+                    address: devAddress
+                });
             }
         }
 

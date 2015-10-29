@@ -62,7 +62,7 @@ define(function (require) {
             // we get a "pending" error. cmd_queue is a FIFO (we send the oldest command
             // and push new ones to the top. We have a "busy" flag that prevents us from sending
             // a command while we are waiting for another.
-            if (!self.portOpen ||  cmd == '')
+            if (!portOpen ||  cmd == '')
                 return;
 
             // We try to be a bit accomodating: detect strings, and
@@ -84,11 +84,11 @@ define(function (require) {
 
         this.close = function (port) {
             console.log("[cordovaSerial] closeInstrument");
-            if (!self.portOpen)
+            if (!portOpen)
                 return;
 
             serial.close(function (success) {
-                self.portOpen = false;
+                portOpen = false;
                 self.trigger('status', {
                     portopen: false
                 });
@@ -122,6 +122,10 @@ define(function (require) {
                                 reason: 'Port not found',
                                 description: 'Not able to find an OTG port on this phone/tablet.'
                             });
+                            portOpen = false;
+                            self.trigger('status', {
+                                portopen: false
+                            });
                         }
                     );
                 },
@@ -130,6 +134,10 @@ define(function (require) {
                         openerror: true,
                         reason: 'Port not found or permission error',
                         description: 'Not able to find an OTG port on this device - or you didn\'t accept to connect.'
+                    });
+                    portOpen = false;
+                    self.trigger('status', {
+                        portopen: false
                     });
                 }
             );
@@ -152,7 +160,6 @@ define(function (require) {
                 return;
             queue_busy = true;
             var cmd = cmd_queue[0].command; // Get the oldest command
-
             serial.write(cmd, function () {
                 // Success callback
                 cmd_queue.shift(); // remove oldest command
@@ -162,6 +169,12 @@ define(function (require) {
             }, function () {
                 console.log("cordovaSerial - error, retrying command");
                 queue_busy = false;
+                if (!portOpen) {
+                    // If the port got closed, just flush the command queue and
+                    // abort.
+                    cmd_queue = [];
+                    return;
+                }
                 processCmdQueue();
             });
         };
@@ -203,9 +216,9 @@ define(function (require) {
             // Flush our command queue and busy status:
             cmd_queue = [];
             queue_busy = false;
-            self.portOpen = true;
+            portOpen = true;
             self.trigger('status', {
-                portopen: true
+                portopen: portOpen
             });
             serial.registerReadCallback(onRead, onError);
         };
