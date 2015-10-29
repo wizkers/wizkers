@@ -142,7 +142,7 @@ var vizapp = {
     // Can be checked by various tasks to skip display when app paused, and
     // save battery. (see Flotplot)
     state: 'running',
-    
+
     // Used in a couple of locations, lets us change the app name easily.
     appname: 'Wizkers'
 };
@@ -170,6 +170,10 @@ document.addEventListener('deviceready', go, false);
 function go() {
     require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'localstorage'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
 
+        // Implement back button navigation as per Android app design guidelines.
+        document.addEventListener("backbutton", function (b) {
+            window.history.back();
+        }, true)
 
         // Cordova-specific: we don't want Wizkers to be automatically shut down by the OS
         // when it is in the background (this can happen otherwise)
