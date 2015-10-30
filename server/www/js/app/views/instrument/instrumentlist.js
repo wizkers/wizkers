@@ -66,7 +66,6 @@ define(function (require) {
             if (status.open) {
                 $('#connected', this.el).show();
             }
-
         },
 
         events: {
@@ -122,7 +121,10 @@ define(function (require) {
             console.log("[Instrument List] OnClose");
             var s = this.inslist.length;
             for (var i = 0; i < s; i++) {
-                this.inslist.pop().onClose();
+                var ins = this.inslist.pop();
+                ins.onClose();
+                ins.remove();
+                ins.off(); // Unbinds all callbacks on this view
             }
         },
 

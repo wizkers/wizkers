@@ -69,7 +69,6 @@ define(function (require) {
                 }
                 this.currentView.remove();
                 this.currentView.off(); // Unbinds all callbacks on this view
-                delete this.currentView; // Force (for Cordova mode, where memory is more of a problem)
             }
             this.contentEL.html(view.el);
             if (!skiprender)

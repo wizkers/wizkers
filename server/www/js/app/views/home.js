@@ -45,7 +45,7 @@ define(function (require) {
         initialize: function (options) {
 
             this.listenTo(outputManager, 'outputTriggered', this.updateOutputStatus);
-            instrumentManager.on('instrumentChanged', this.updateInstrument, this);
+            this.listenTo(instrumentManager, 'instrumentChanged', this.updateInstrument);
 
             // Keep a reference to our instrument views to close
             // them properly when we close
@@ -178,9 +178,9 @@ define(function (require) {
 
             // Don't hook the events before this point, no need!
             // and creates a race condition on buttons update as well.
-            linkManager.on('status', this.updatestatus, this);
-            linkManager.on('input', this.parseInput, this);
-            linkManager.on('uniqueID', this.updateUID, this);
+            this.listenTo(linkManager, 'status', this.updatestatus);
+            this.listenTo(linkManager,'input', this.parseInput);
+            this.listenTo(linkManager,'uniqueID', this.updateUID);
 
             linkManager.requestStatus();
             return this;
@@ -188,17 +188,19 @@ define(function (require) {
 
         onClose: function () {
             console.log("Home view closing...");
+            
+            this.stopListening(linkManager);
+            this.stopListening(instrumentManager);
 
-            linkManager.off('status', this.updatestatus);
-            linkManager.off('input', this.parseInput);
-            linkManager.off('uniqueID', this.updateUID);
-            instrumentManager.off('instrumentChanged', this.updateInstrument);
-
-            if (this.instrumentLiveView != null)
+            if (this.instrumentLiveView != null) {
                 this.instrumentLiveView.onClose();
+                this.instrumentLiveView.remove();
+            }
 
-            if (this.instrumentNumericView != null)
+            if (this.instrumentNumericView != null) {
                 this.instrumentNumericView.onClose();
+                this.instrumentNumericView.remove();
+            }
 
         },
 
