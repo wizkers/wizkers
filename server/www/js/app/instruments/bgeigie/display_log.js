@@ -173,7 +173,7 @@ define(function (require) {
                                 fileWriter.write(str + '\n');
                                 return;
                             }
-                                
+
                             if (index == entries.length) {
                                 self.addMetadata(file);
                                 return;
@@ -341,7 +341,7 @@ define(function (require) {
                     }, options);
             }
         },
-        
+
         addPlot: function () {
             var self = this;
 
@@ -356,10 +356,6 @@ define(function (require) {
                 model: this.model,
                 settings: this.plotSettings
             });
-            if (this.plot != null) {
-                $('.geigerchart', this.el).empty().append(this.plot.el);
-                this.plot.render();
-            }
 
             // We don't create an overview on small screens, does not make sense
             if (!(utils.checkBreakpoint('sm') || utils.checkBreakpoint('xs'))) {
@@ -374,6 +370,11 @@ define(function (require) {
                 this.overview.render();
             } else {
                 $('#overview-container', this.el).empty();
+            }
+
+            if (this.plot != null) {
+                $('.geigerchart', this.el).empty().append(this.plot.el);
+                this.plot.render();
             }
 
             // Restore current zoom level if it exists:
