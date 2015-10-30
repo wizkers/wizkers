@@ -172,7 +172,13 @@ function go() {
 
         // Implement back button navigation as per Android app design guidelines.
         document.addEventListener("backbutton", function (b) {
+            // If we are at the home menu level, 'back' will pause the app and attempt
+            // to go to the previous Android screen before we started Wizkers
+            if (window.location.hash == '') {
+                navigator.Backbutton.goBack();
+            } else {
             window.history.back();
+            }
         }, true)
 
         // Cordova-specific: we don't want Wizkers to be automatically shut down by the OS

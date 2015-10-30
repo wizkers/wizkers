@@ -21,4 +21,5 @@
     <plugin name="de.appplant.cordova.plugin.background-mode" spec="^0.6.4" />
     <plugin name="cordova-plugin-device" spec="^1.0.1" />
     <plugin name="cordova-plugin-inappbrowser" spec="^1.0.1" />
+    <plugin name="cordova-plugin-backbutton" spec="^0.3.0" />
 </widget>
