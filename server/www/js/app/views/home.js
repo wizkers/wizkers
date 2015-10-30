@@ -40,6 +40,8 @@ define(function (require) {
     // library. In this file, we use it for 'modal' calls.
     require('bootstrap');
 
+    var ticks = ['.', 'o', 'O'];
+
     return Backbone.View.extend({
 
         initialize: function (options) {
@@ -63,11 +65,13 @@ define(function (require) {
             this.instrumentUniqueID = null;
 
             this.instrument = instrumentManager.getInstrument();
-            
+
             // Performance improvement: we keep a cache of the jQuery queries
             // we do most often:
             this.ctrlconnect = null;
             this.ctrlrecord = null;
+
+            this.tick = 0;
 
         },
 
@@ -122,7 +126,7 @@ define(function (require) {
             var self = this;
             console.log('Main render of Home view');
             this.$el.html(template(this.model.toJSON()));
-            
+
             this.ctrlconnect = $('.ctrl-connect', this.el);
             this.ctrlrecord = $('.ctrl-record', this.el);
 
@@ -179,8 +183,8 @@ define(function (require) {
             // Don't hook the events before this point, no need!
             // and creates a race condition on buttons update as well.
             this.listenTo(linkManager, 'status', this.updatestatus);
-            this.listenTo(linkManager,'input', this.parseInput);
-            this.listenTo(linkManager,'uniqueID', this.updateUID);
+            this.listenTo(linkManager, 'input', this.parseInput);
+            this.listenTo(linkManager, 'uniqueID', this.updateUID);
 
             linkManager.requestStatus();
             return this;
@@ -188,7 +192,7 @@ define(function (require) {
 
         onClose: function () {
             console.log("Home view closing...");
-            
+
             this.stopListening(linkManager);
             this.stopListening(instrumentManager);
 
@@ -246,6 +250,18 @@ define(function (require) {
                 return;
 
             console.log('Home view', 'update status - ' + new Date().getSeconds());
+
+            if (vizapp.state == 'paused') {
+                return;
+                /**
+                cordova.plugins.backgroundMode.configure({
+                        text: 'Running in background '  + ticks[this.tick++]
+                    });
+                if (this.tick == ticks.length)
+                    this.tick = 0;
+                */
+            }
+
 
             // If we are just a 'viewer' in server mode, then disable all buttons.
             if (vizapp.type == 'server' && (settings.get('currentUserRole') == 'viewer')) {
@@ -309,7 +325,7 @@ define(function (require) {
                 return;
             this.ctrlconnect.addClass('btn-warning')
                 .removeClass('btn-success').removeClass('btn-danger').attr('disabled', true);
-            
+
             var id = instrumentManager.getInstrument().id;
             if (id != null) {
                 if (!linkManager.isConnected()) {

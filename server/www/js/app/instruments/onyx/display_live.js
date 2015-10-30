@@ -148,20 +148,37 @@ define(function (require) {
                     // - We know the size of the chart: $('.geigerchart',self.el).parent().height()
                     //     Note: .parent() is the enclosing .thumbnail
                     // - Then, we know the size of the numview: $('#numview').height();
-                    // - Last, remove 55 pixels to account for all the margins around the map/divs/thumbnails
+                    // - Last, remove 50 pixels to account for all the margins around the map/divs/thumbnails
                     // ... now do the equation
                     //$('.map_container', this.el).css('height', this.$el.parent().css('height'));
 
                     var self = this;
                     var rsc = function () {
+                        // We want the chart to be 18% of the screen
+                        if (self.display_graph) {
+                            self.$('.geigerchart').height(window.innerHeight * 0.16);
+                            if (self.plot && self.plot.rsc)
+                                self.plot.rsc();
+                        }
                         var chartheight = $('#geigerchart_row', self.el).outerHeight();
                         var numviewheight = 0;
                         // We want to take the numview height into account if screen is xs or sm
                         if (utils.checkBreakpoint('xs') || utils.checkBreakpoint('sm'))
                             numviewheight = $('#numview').outerHeight();
-                        var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 55;
-                        $('.map_container > .mapwidget', self.el).css('height', mapheight + 'px');
-                        self.map.resize(mapheight);
+                        var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 50;
+                        if (mapheight < 50) {
+                            self.$('#map_row').hide();
+                            // Readjust the graph to take the rest of the space:
+                            var chartheight = window.innerHeight - $(self.el).offset().top - numviewheight - 50;
+                            self.$('.geigerchart').height(chartheight);
+                            // Then tell the chart to resize itself
+                            if (self.plot && self.plot.rsc)
+                                self.plot.rsc();
+                        } else {
+                            self.$('#map_row').show();
+                            $('.map_container > .mapwidget', self.el).height(mapheight);
+                            self.map.resize(mapheight);
+                        }
                     }
                     if (this.rsc)
                         $(window).off('resize', this.rsc);

@@ -177,7 +177,7 @@ function go() {
             if (window.location.hash == '') {
                 navigator.Backbutton.goBack();
             } else {
-            window.history.back();
+                window.history.back();
             }
         }, true)
 
@@ -187,6 +187,11 @@ function go() {
             title: 'Idle',
             text: vizapp.appname + ' is running'
         });
+
+        cordova.plugins.backgroundMode.onfailure = function (errorCode) {
+            console.log(errorCode);
+        };
+
         cordova.plugins.backgroundMode.enable();
 
 
