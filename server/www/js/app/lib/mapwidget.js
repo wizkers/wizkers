@@ -31,6 +31,13 @@ define(function (require) {
         _ = require('underscore'),
         utils = require('app/utils'),
         Backbone = require('backbone');
+    
+    
+    // There is a known issue on the Google Maps javascript framework which makes it impossible
+    // to really delete a map. For this reason, the right thing to do is to have a singleton instance
+    // of "map" and reuse it every time, otherwise we get a bad memory leak
+    // see https://code.google.com/p/gmaps-api-issues/issues/detail?id=3803
+    var globalMap = null;
 
     return Backbone.View.extend({
 
@@ -79,18 +86,23 @@ define(function (require) {
                 $.getScript('https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&callback=GMAPLoaded');
 
             } else {
-                var mapOptions = {
-                    zoom: 11,
-                    center: new google.maps.LatLng(0, 0),
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
-                };
-                this.map = new google.maps.Map(this.el, mapOptions);
+                if (globalMap == null) {
+                    var mapOptions = {
+                        zoom: 11,
+                        center: new google.maps.LatLng(0, 0),
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+                    globalMap = new google.maps.Map(this.el, mapOptions);
+                } else {
+                    // Reuse the map's div and reinject it into our DOM
+                    $(this.el).append(globalMap.getDiv());
+                }
             }
 
         },
 
         setCenter: function (lat, lng) {
-            this.map.setCenter(new google.maps.LatLng(lat, lng));
+            globalMap.setCenter(new google.maps.LatLng(lat, lng));
         },
 
         addMarker: function (marker) {
@@ -99,7 +111,7 @@ define(function (require) {
                     lat: marker.lat,
                     lng: marker.lng
                 },
-                map: this.map,
+                map: globalMap,
             };
             if (marker.icon)
                 mk['icon'] = marker.icon;
@@ -112,7 +124,7 @@ define(function (require) {
          */
         resize: function () {
             if (typeof (google) != 'undefined')
-                google.maps.event.trigger(this.map, 'resize');
+                google.maps.event.trigger(globalMap, 'resize');
         }
 
     });
