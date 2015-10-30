@@ -376,18 +376,17 @@ define(function (require) {
                         image = 'midgreen.png'
                     }
 
-                    this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                     if (this.lastMarker == null) {
                         this.lastMarker = {
                             lat: data.loc.coords.latitude,
                             lng: data.loc.coords.longitude,
                             icon: 'js/app/instruments/blue_onyx/markers/' + image
                         };
-
                         this.map.addMarker(this.lastMarker);
+                        this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                     }
 
-                    // We want to add points/markers to the line of logging at points every 15 meters ?
+                    // We want to add points/markers to the line of logging at points every 15 meters
                     var d = utils.CoordDistance({
                             lat: data.loc.coords.latitude,
                             lng: data.loc.coords.longitude
@@ -400,6 +399,7 @@ define(function (require) {
                             icon: 'js/app/instruments/blue_onyx/markers/' + image
                         };
                         this.map.addMarker(this.lastMarker);
+                        this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                     }
                 }
 

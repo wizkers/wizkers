@@ -334,8 +334,8 @@ define(function (require) {
                         lng: data.loc.coords.longitude,
                         icon: 'js/app/instruments/blue_onyx/markers/' + image
                     };
-                    this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                     this.map.addMarker(this.lastMarker);
+                    this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                 }
 
                 // We want to add points/markers to the line of logging at points every 15 meters

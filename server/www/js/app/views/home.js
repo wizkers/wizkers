@@ -124,7 +124,7 @@ define(function (require) {
             this.$el.html(template(this.model.toJSON()));
             
             this.ctrlconnect = $('.ctrl-connect', this.el);
-            this.ctrlrecord = $('.ctrl - record', this.el);
+            this.ctrlrecord = $('.ctrl-record', this.el);
 
             if (vizapp.type == 'server') {
                 // If we're running with a backend server, we need to disable some elements
