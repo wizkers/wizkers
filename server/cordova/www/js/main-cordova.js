@@ -35,7 +35,7 @@ require.config({
 
         // Below we manage our versions explicitely, so that
         // we can upgrade easily
-        jquery: 'lib/jquery-1.11.0',
+        jquery: 'lib/jquery-2.1.4',
         backbone: 'lib/backbone-1.1.2',
         localstorage: 'lib/backbone.localStorage-1.1.14',
         bbindexeddb: 'lib/backbone-indexeddb',

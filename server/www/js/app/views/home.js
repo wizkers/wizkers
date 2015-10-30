@@ -63,6 +63,11 @@ define(function (require) {
             this.instrumentUniqueID = null;
 
             this.instrument = instrumentManager.getInstrument();
+            
+            // Performance improvement: we keep a cache of the jQuery queries
+            // we do most often:
+            this.ctrlconnect = null;
+            this.ctrlrecord = null;
 
         },
 
@@ -117,6 +122,9 @@ define(function (require) {
             var self = this;
             console.log('Main render of Home view');
             $(this.el).html(template(this.model.toJSON()));
+            
+            this.ctrlconnect = $('.ctrl-connect', this.el);
+            this.ctrlrecord = $('.ctrl-record', this.el);
 
             if (vizapp.type == 'server') {
                 // If we're running with a backend server, we need to disable some elements
@@ -240,12 +248,12 @@ define(function (require) {
             // If we are just a 'viewer' in server mode, then disable all buttons.
             if (vizapp.type == 'server' && (settings.get('currentUserRole') == 'viewer')) {
                 if (linkManager.isConnected() && this.currentState != 'connected') {
-                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-stop"></span>&nbsp;' +
+                    this.ctrlconnect.html('<span class="glyphicon glyphicon-stop"></span>&nbsp;' +
                             this.instrument.get('name') + ' connected')
                         .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning');
                     this.currentState = 'connected';
                 } else if (this.currentState != 'idle') {
-                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-play"></span>' +
+                    this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>' +
                             this.instrument.get('name') + ' not connected')
                         .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning');
                     this.currentState = 'idle';
@@ -256,7 +264,7 @@ define(function (require) {
             // Depending on port status, update our controller
             // connect button:
             if (linkManager.isConnected() && this.currentState != 'connected') {
-                $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-stop"></span>&nbsp;Disconnect ' + this.instrument.get('name'))
+                this.ctrlconnect.html('<span class="glyphicon glyphicon-stop"></span>&nbsp;Disconnect ' + this.instrument.get('name'))
                     .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 $('.btn-enable-connected', this.el).removeAttr('disabled');
                 if (vizapp.type == 'cordova')
@@ -272,7 +280,7 @@ define(function (require) {
                 }
                 this.currentState = 'connected';
             } else if (!linkManager.isConnected() && this.currentState != 'idle') {
-                $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-play"></span>&nbsp;Connect to ' + this.instrument.get('name'))
+                this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Connect to ' + this.instrument.get('name'))
                     .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 $('.btn-enable-connected', this.el).attr('disabled', true);
                 if (vizapp.type == 'cordova')
@@ -282,11 +290,11 @@ define(function (require) {
                 this.currentState = 'idle';
             }
             if (data.recording && this.recordingState != 'recording') {
-                $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording').addClass('btn-success')
+                this.ctrlrecord.html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording').addClass('btn-success')
                     .removeClass('btn-danger').attr('disabled', false);
                 this.recordingState = 'recording';
             } else if (data.recording == false && this.recordingState != 'not recording') {
-                $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-download"></span>&nbsp;Record').addClass('btn-danger')
+                this.ctrlrecord.html('<span class="glyphicon glyphicon-download"></span>&nbsp;Record').addClass('btn-danger')
                     .removeClass('btn-success');
                 this.recordingState = 'not recording';
             }
@@ -295,19 +303,19 @@ define(function (require) {
 
         ctrlConnect: function (event) {
             var self = this;
-            if ($('.ctrl-connect', this.el).attr('disabled'))
+            if (this.ctrlconnect.attr('disabled'))
                 return;
-            $('.ctrl-connect', this.el).addClass('btn-warning')
+            this.ctrlconnect.addClass('btn-warning')
                 .removeClass('btn-success').removeClass('btn-danger').attr('disabled', true);
             // First, get serial port settings (assume Serial for now)
             var id = instrumentManager.getInstrument().id;
             if (id != null) {
                 if (!linkManager.isConnected()) {
-                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-play"></span>&nbsp;Opening...')
+                    this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Opening...')
                     self.instrumentUniqueID = null; // Just in case we change the instrument
                     linkManager.openInstrument(id);
                 } else {
-                    $('.ctrl-connect', this.el).html('<span class="glyphicon glyphicon-play"></span>&nbsp;Closing...')
+                    this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Closing...')
                     if (linkManager.isStreaming())
                         linkManager.stopLiveStream();
                     linkManager.closeInstrument(id);
@@ -317,7 +325,7 @@ define(function (require) {
 
         ctrlRecord: function () {
             var self = this;
-            if ($('.ctrl-record', this.el).attr('disabled')) {
+            if (this.ctrlrecord.attr('disabled')) {
                 return;
             }
             if (!linkManager.isRecording()) {
@@ -356,7 +364,7 @@ define(function (require) {
                 }
             });
 
-            $('.ctrl-record', this.el).html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording...').addClass('btn-success')
+            this.ctrlrecord.html('<span class="glyphicon glyphicon-pause"></span>&nbsp;Recording...').addClass('btn-success')
                 .removeClass('btn-danger').attr('disabled', false);
         },
 
