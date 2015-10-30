@@ -222,7 +222,10 @@ define(function (require) {
                  * Depending on runmode, we are either defining a URL or
                  * relying on backbone localstorage
                  */
-                console.log("Device Log: refreshing pointer to log entries URL for Log ID " + this.id);
+                if (this.id == this.entries.logsessionid)
+                    return; // no need to update if not necessary!
+                
+                console.log("Device Log: refreshing pointer to log entries " + this.entries.logsessionid + " URL for Log ID " + this.id);
                 if (vizapp.type == "cordova") {
                     // this.entries.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
 

@@ -65,6 +65,7 @@ define(function (require) {
             skiprender = skiprender || false;
             if (this.currentView) {
                 this.currentView.remove();
+                this.currentView.off(); // Unbinds all callbacks on this view
                 if (this.currentView.onClose) {
                     this.currentView.onClose();
                 }

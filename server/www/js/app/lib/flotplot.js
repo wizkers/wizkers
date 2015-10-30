@@ -149,7 +149,7 @@ define(function (require) {
             try {
                 this.plot = $.plot($(".chart", this.el), [{
                     data: [],
-                    label: "??",
+                    label: "",
                     color: this.color
             }], this.plotOptions);
             } catch (e) {

@@ -34,21 +34,18 @@ define(function(require) {
     
     "use strict";
     
-    var _ = require('underscore'),
-        Backbone = require('backbone');
-
-    var Rest = function() {
+    var Rest = {
         
-        this.wantOnly = function() {
+        wantOnly: function() {
             return [];
-        }
+        },
         
-        this.requestAllData = function() {
+        requestAllData: function() {
             return false;
-        }
+        },
         
         // We do not enforce a strict number of fields.
-        this.outputFields = function() {
+        outputFields: function() {
             return "variable";
             /*
             return { "field1": { "name": "Field 1", "required": true },
@@ -61,8 +58,6 @@ define(function(require) {
              */
         }
     };
-
-    _.extend(Rest.prototype, Backbone.Events);
     
     return Rest;
 

@@ -34,29 +34,23 @@ define(function(require) {
     
     "use strict";
     
-    var _ = require('underscore'),
-        Backbone = require('backbone');
-
-    var Rest = function() {
+    var Rigctld = {
         
-        this.wantOnly = function() {
+        wantOnly: function() {
             return ['transceiver'];
-        }
+        },
         
         // We want all data, override the "When to send it" tab
-        this.requestAllData = function() {
+        requestAllData: function() {
             return true;
-        }
-
+        },
         
         // We do not enforce a strict number of fields.
-        this.outputFields = function() {
-            return "none";
+        outputFields: function() {
+            return 'none';
         }
     };
 
-    _.extend(Rest.prototype, Backbone.Events);
-    
-    return Rest;
+    return Rigctld;
 
 });

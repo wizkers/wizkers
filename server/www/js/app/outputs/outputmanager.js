@@ -219,7 +219,7 @@ define(function(require) {
         this.getOutputFields = function(type) {
             var out = this.supportedOutputs[type];
             if (out != undefined) {
-                return new out.plugin().outputFields();
+                return out.plugin.outputFields();
             }
             return {};
         }
@@ -229,7 +229,7 @@ define(function(require) {
         this.pluginWantsAllData = function(type) {
             var out = this.supportedOutputs[type];
             if (out != undefined) {
-                return new out.plugin().requestAllData();
+                return out.plugin.requestAllData();
             }
             return false;
         }
@@ -244,7 +244,7 @@ define(function(require) {
             console.info("Caps: " + caps);
             var accepted = {};
             _.each(this.supportedOutputs, function(out, type) {
-                var wo = new out.plugin().wantOnly();
+                var wo = out.plugin.wantOnly();
                 var wantit = false;
                 if (wo.length > 0) {
                     for (var want in wo) {
@@ -255,13 +255,9 @@ define(function(require) {
                 }
                 if (wantit)
                     accepted[type] = out;
-
             });
-            
-            return accepted;
-            
+            return accepted;   
         }
-
         
         // Forward events coming form outputs
         this.dispatchOutputEvents = function(evt) {

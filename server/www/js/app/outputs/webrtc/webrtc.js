@@ -34,28 +34,23 @@ define(function(require) {
     
     "use strict";
     
-    var _ = require('underscore'),
-        Backbone = require('backbone');
-
-    var WebRTC = function() {
+    var WebRTC = {
         
-        this.wantOnly = function() {
+        wantOnly: function() {
             return [];
-        }
+        },
         
-        this.requestAllData = function() {
+        requestAllData: function() {
             return true;
-        }
+        },
         
         // We do not support the concept of configurable output fields
         // with this plugin.
-        this.outputFields = function() {
+        outputFields: function() {
             return "none";
         }
     };
 
-    _.extend(WebRTC.prototype, Backbone.Events);
-    
     return WebRTC;
 
 });

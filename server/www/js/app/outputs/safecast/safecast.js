@@ -35,20 +35,17 @@ define(function(require) {
     
     "use strict";
     
-    var _ = require('underscore'),
-        Backbone = require('backbone');
-
-    var Safecast = function() {
+    var Safecast = {
         
-        this.wantOnly = function() {
+        wantOnly: function() {
             return [ "radioactivity" ];
-        }
+        },
         
-        this.requestAllData = function() {
+        requestAllData: function() {
             return false;
-        }
+        },
 
-        this.outputFields = function() {
+        outputFields: function() {
             return { "radiation": { "name": "Radiation Level", "required": true },
                      "unit"     : { "name": "Unit", "required": true},
                      "latitude" : { "name": "Latitude", "required": true },
@@ -63,8 +60,6 @@ define(function(require) {
         }
     };
 
-    _.extend(Safecast.prototype, Backbone.Events);
-    
     return Safecast;
 
 });
