@@ -33,9 +33,6 @@ define(function (require) {
         simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/sigma25/Sigma25LiveView.js');
 
-    // Load the flot library:
-    require('flot');
-
     return Backbone.View.extend({
 
         initialize: function (options) {
@@ -92,7 +89,7 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of Sigma25 live view');
-            $(this.el).html(template());
+            this.$el.html(template());
 
             // Hide the raw data stream if we don't want it
             if (!this.showstream) {

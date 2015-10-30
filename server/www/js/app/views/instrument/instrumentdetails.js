@@ -48,7 +48,7 @@ define(function (require) {
             console.log("Render instrument details");
             var insType = this.model.get('type');
 
-            $(this.el).html(template(_.extend(this.model.toJSON(), {
+            this.$el.html(template(_.extend(this.model.toJSON(), {
                 instypes: instrumentManager.supportedInstruments
             })));
 

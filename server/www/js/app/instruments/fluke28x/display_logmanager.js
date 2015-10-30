@@ -53,7 +53,7 @@ define(function (require) {
         },
 
         render: function () {
-            $(this.el).html(template());
+            this.$el.html(template());
             // The link manager is always connected when we initialize (main.js makes sure of that)
             // so we send a few commands to initialize the contents of the display:
             linkManager.driver.getMemInfo();

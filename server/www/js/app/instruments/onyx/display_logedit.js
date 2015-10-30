@@ -61,7 +61,7 @@ define(function(require) {
             });
 
 
-            $(this.el).html(template({entries: logEntries}));
+            this.$el.html(template({entries: logEntries}));
 
             $('#log_size',this.el).html(this.deviceLogs.getOverallLength());
             $('#log_start',this.el).html(new Date(this.deviceLogs.getLogsStart()).toString());

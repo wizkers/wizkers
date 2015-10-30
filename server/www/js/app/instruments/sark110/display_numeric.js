@@ -48,7 +48,7 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of Sark110 numeric view');
-            $(this.el).html(template());
+            this.$el.html(template());
             $('#startfreq', this.el).val(12000000);
             $('#endfreq', this.el).val(16000000);
             $('#centerfreq', this.el).val(14000000);

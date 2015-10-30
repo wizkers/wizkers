@@ -33,12 +33,6 @@ define(function (require) {
         simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/powerlog_1/LiveView.js');
 
-    // Load the flot library & flot time plugin:
-    require('flot');
-    require('flot_time');
-    require('flot_resize');
-
-
     return Backbone.View.extend({
 
         initialize: function (options) {
@@ -77,7 +71,7 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of Powerlog live view');
-            $(this.el).html(template());
+            this.$el.html(template());
 
             // Hide the raw data stream if we don't want it
             if (!this.showstream) {

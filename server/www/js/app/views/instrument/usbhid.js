@@ -33,7 +33,7 @@ define(function (require) {
         initialize: function (options) {},
 
         render: function () {
-            $(this.el).html(template());
+            this.$el.html(template());
             return this;
         }
 

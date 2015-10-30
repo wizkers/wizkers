@@ -84,7 +84,7 @@ define(function (require) {
 
         render: function () {
             var self = this;
-            $(this.el).html(template());
+            this.$el.html(template());
 
             var s = Snap("#kx3");
             Snap.load("img/KX3.svg", function (f) {

@@ -64,7 +64,7 @@ define(function (require) {
                 cursorBlink: true,
                 useStyle: false, // Use the default styling from term.js
             });
-            $(this.el).html(template({bg:this.term.colors[256], fg: this.term.colors[257]}));
+            this.$el.html(template({bg:this.term.colors[256], fg: this.term.colors[257]}));
             
             this.term.open($('#terminal', this.el)[0]);
             this.term.on('data', this.handleKeypress);

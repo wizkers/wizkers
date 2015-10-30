@@ -43,7 +43,7 @@ define(function (require) {
         },
 
         render: function () {
-            $(this.el).html(template());
+            this.$el.html(template());
             linkManager.driver.logstatus();
             return this;
         },

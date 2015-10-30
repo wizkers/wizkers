@@ -72,7 +72,7 @@ define(function (require) {
         render: function () {
             var self = this;
             // Extract the correct frequency memory from our model        
-            $(this.el).html(template(this.mem));
+            this.$el.html(template(this.mem));
 
             // Now make the fields editable in-line, along with the right
             // validation options - don't get out of the bands in particular -
@@ -359,11 +359,11 @@ define(function (require) {
 
             // Sort frequencies by VFOA numerical order
 
-            $(this.el).html('<div class="item active"></div>');
+            this.$el.html('<div class="item active"></div>');
 
             for (var screen = 0; screen < len / 4; screen++) {
                 // console.log("rendering screen " + screen);
-                if (screen) $(this.el).append('<div class="item other-' + screen + '"></div>');
+                if (screen) this.$el.append('<div class="item other-' + screen + '"></div>');
                 for (var i = screen * 4; i < Math.min(len, screen * 4 + 4); i++) {
                     $(screen ? '.other-' + screen : '.active', this.el).append(new ElecraftFrequencyItemView({
                         model: this.model,

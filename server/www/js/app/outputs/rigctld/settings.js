@@ -51,7 +51,7 @@ define(function(require) {
             },
 
             render:function () {
-                $(this.el).html(template({metadata: this.metadata}));
+                this.$el.html(template({metadata: this.metadata}));
                 return this;
             },
     

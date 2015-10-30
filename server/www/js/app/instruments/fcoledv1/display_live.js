@@ -92,7 +92,7 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of OLED Backpack live view');
-            $(this.el).html(template());
+            this.$el.html(template());
             linkManager.requestStatus();
 
             this.color = 1;

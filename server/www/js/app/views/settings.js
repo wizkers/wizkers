@@ -62,7 +62,7 @@ define(function (require) {
         render: function () {
             var self = this;
 
-            $(this.el).html(template(this.model.toJSON()));
+            this.$el.html(template(this.model.toJSON()));
 
             // Depending on the runmode, we can display additional info
             if (vizapp.type == "chrome") {

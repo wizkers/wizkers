@@ -121,10 +121,10 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of Home view');
-            $(this.el).html(template(this.model.toJSON()));
+            this.$el.html(template(this.model.toJSON()));
             
             this.ctrlconnect = $('.ctrl-connect', this.el);
-            this.ctrlrecord = $('.ctrl-record', this.el);
+            this.ctrlrecord = $('.ctrl - record', this.el);
 
             if (vizapp.type == 'server') {
                 // If we're running with a backend server, we need to disable some elements
@@ -247,7 +247,7 @@ define(function (require) {
 
             // If we are just a 'viewer' in server mode, then disable all buttons.
             if (vizapp.type == 'server' && (settings.get('currentUserRole') == 'viewer')) {
-                if (linkManager.isConnected() && this.currentState != 'connected') {
+                if (data.portopen && this.currentState != 'connected') {
                     this.ctrlconnect.html('<span class="glyphicon glyphicon-stop"></span>&nbsp;' +
                             this.instrument.get('name') + ' connected')
                         .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning');
@@ -263,7 +263,7 @@ define(function (require) {
 
             // Depending on port status, update our controller
             // connect button:
-            if (linkManager.isConnected() && this.currentState != 'connected') {
+            if (data.portopen && this.currentState != 'connected') {
                 this.ctrlconnect.html('<span class="glyphicon glyphicon-stop"></span>&nbsp;Disconnect ' + this.instrument.get('name'))
                     .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 $('.btn-enable-connected', this.el).removeAttr('disabled');
@@ -275,11 +275,11 @@ define(function (require) {
                     linkManager.getUniqueID();
                 }
                 // Depending on device capabilities, enable/disable "Diag view" button
-                if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || !linkManager.isConnected()) {
+                if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || !data.portopen) {
                     $('.ctrl-diag', self.el).attr('disabled', true);
                 }
                 this.currentState = 'connected';
-            } else if (!linkManager.isConnected() && this.currentState != 'idle') {
+            } else if (!data.portopen && this.currentState != 'idle') {
                 this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Connect to ' + this.instrument.get('name'))
                     .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 $('.btn-enable-connected', this.el).attr('disabled', true);
@@ -307,7 +307,7 @@ define(function (require) {
                 return;
             this.ctrlconnect.addClass('btn-warning')
                 .removeClass('btn-success').removeClass('btn-danger').attr('disabled', true);
-            // First, get serial port settings (assume Serial for now)
+            
             var id = instrumentManager.getInstrument().id;
             if (id != null) {
                 if (!linkManager.isConnected()) {

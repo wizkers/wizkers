@@ -35,10 +35,6 @@ define(function(require) {
         roseplot = require('app/lib/flotwindrose'),
         template = require('js/tpl/instruments/W433LiveView.js');
 
-    // Load the flot library & flot time plugin:
-    require('flot');
-    require('flot_time');
-
     return Backbone.View.extend({
 
         initialize:function (options) {
@@ -57,7 +53,7 @@ define(function(require) {
         },
 
         render:function () {
-            $(this.el).html(template());
+            this.$el.html(template());
             return this;
         },
 

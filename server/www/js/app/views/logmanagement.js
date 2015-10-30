@@ -145,7 +145,7 @@ define(function (require) {
                 return b.startstamp < a.startstamp ? 1 : a.startstamp < b.startstamp ? -1 : 0
             })
 
-            $(this.el).html(template({
+            this.$el.html(template({
                 deviceLogs: dl,
                 selected: this.selectedLogs,
                 instrumentid: instrumentManager.getInstrument().id

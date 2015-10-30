@@ -36,12 +36,6 @@ define(function (require) {
         fileutils = require('app/lib/fileutils'),
         template = require('js/tpl/instruments/OnyxLogView.js');
 
-    // Load the flot library & flot time plugin:
-    require('flot');
-    require('flot_time');
-    require('flot_resize');
-    require('flot_selection');
-
     return Backbone.View.extend({
 
         initialize: function () {
@@ -162,7 +156,7 @@ define(function (require) {
             var self = this;
             console.log('Main render of Log details view');
 
-            $(this.el).html(template());
+            this.$el.html(template());
 
             this.addPlot();
             if (this.packedData == null || this.packedData.length == 0)

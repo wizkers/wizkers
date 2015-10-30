@@ -33,10 +33,6 @@ define(function (require) {
         simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/sark110/Sark110LiveView.js');
 
-    // Load the flot library & flot time plugin:
-    require('flot');
-    require('flot_resize');
-
     var gamma = function (r, x) {
         // Reflection coefficient
         return Math.sqrt(Math.pow(r - 50, 2) + Math.pow(x, 2)) / Math.sqrt(Math.pow(r + 50, 2) + Math.pow(x, 2));
@@ -96,7 +92,7 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of Sark110 live view');
-            $(this.el).html(template());
+            this.$el.html(template());
 
             // Hide the raw data stream if we don't want it
             if (!this.showstream) {

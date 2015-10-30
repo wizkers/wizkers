@@ -73,7 +73,7 @@ define(function (require) {
                 return; // We delay rendering until we get the media devices back
 
 
-            $(this.el).html(template(_.extend(this.model.toJSON(), {
+            this.$el.html(template(_.extend(this.model.toJSON(), {
                 inputs: this.inputs,
                 outputs: this.outputs,
             })));

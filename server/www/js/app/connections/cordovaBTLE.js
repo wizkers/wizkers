@@ -48,6 +48,7 @@ define(function (require) {
             // reconnect if it comes back
             currentService = null,
             currentCharacteristics = null,
+            connectionRetryDelay = 5, // we will retry to connect in this many seconds
             self = this,
             devAddress = path,
             connectionId = -1;
@@ -148,6 +149,7 @@ define(function (require) {
                 if (status.status != 'enabled')
                     return;
                 bluetoothle.connect(trackConnect, function (err) {
+                    // This is called whenever we lose the connection
                     console.log(err);
                     self.trigger('status', {
                         openerror: true,

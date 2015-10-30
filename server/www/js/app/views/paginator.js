@@ -45,7 +45,7 @@ define(function(require) {
             var len = items.length +1; // +1 for the "Add" card at the end.
             var pageCount = Math.ceil(len / this.options.items);
 
-            $(this.el).html('<ul class="pagination" />');
+            this.$el.html('<ul class="pagination" />');
 
             for (var i=0; i < pageCount; i++) {
                 $('ul', this.el).append("<li" + ((i + 1) === this.options.page ? " class='active'" : "") + "><a href='#" +

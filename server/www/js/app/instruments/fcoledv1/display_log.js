@@ -122,7 +122,7 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of OLED Backpack log view');
-            $(this.el).html(template());
+            this.$el.html(template());
 
             if (this.packedData == null || this.packedData.length == 0)
                 this.packedData = this.packData();

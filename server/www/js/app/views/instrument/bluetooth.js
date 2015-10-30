@@ -44,7 +44,7 @@ define(function (require) {
         },
 
         render: function () {
-            $(this.el).html(template(_.extend(this.model.toJSON(), {
+            this.$el.html(template(_.extend(this.model.toJSON(), {
                 ports: this.ports
             })));
             return this;

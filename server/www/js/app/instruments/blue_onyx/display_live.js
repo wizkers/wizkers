@@ -34,11 +34,6 @@ define(function (require) {
         mapWidget = require('app/lib/mapwidget'),
         template = require('js/tpl/instruments/blueonyx/LiveView.js');
 
-    // Load the flot library & flot time plugin:
-    require('flot');
-    require('flot_time');
-    require('flot_resize');
-
     return Backbone.View.extend({
 
         initialize: function (options) {
@@ -123,7 +118,7 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of Blue Onyx live view');
-            $(this.el).html(template());
+            this.$el.html(template());
 
             // Remove all the contents of the raw data stream if we don't want it
             // (hiding it is not enough to make it disappear from the layout (it will take
@@ -333,13 +328,13 @@ define(function (require) {
 
             // Now update the map (if it exists) to show the current location/measurement
             if (this.map && data.loc_status && data.loc_status == 'OK') {
-                this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                 if (this.lastMarker == null) {
                     this.lastMarker = {
                         lat: data.loc.coords.latitude,
                         lng: data.loc.coords.longitude,
                         icon: 'js/app/instruments/blue_onyx/markers/' + image
                     };
+                    this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                     this.map.addMarker(this.lastMarker);
                 }
 
@@ -356,6 +351,9 @@ define(function (require) {
                         icon: 'js/app/instruments/blue_onyx/markers/' + image
                     };
                     this.map.addMarker(this.lastMarker);
+                    // Only recenter the map if we moved significantly, otherwise the API makes
+                    // useless calls to the Google servers, wasting quota + bandwidth
+                    this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                 }
             }
             this.disp_cpm(data);

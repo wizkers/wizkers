@@ -95,7 +95,7 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of Hawk Nest live view');
-            $(this.el).html(template());
+            this.$el.html(template());
 
             // Hide the raw data stream if we don't want it
             if (!this.showstream) {

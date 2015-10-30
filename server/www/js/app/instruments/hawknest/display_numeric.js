@@ -53,7 +53,7 @@ define(function(require) {
 
         render:function () {
             var self = this;
-            $(this.el).html(template());
+            this.$el.html(template());
             if (probeid != '-') {
                 var pname = instrumentManager.getInstrument().get('metadata').probes[probeid].name || probeid;
                 $("#probeid",this.el).html(pname);

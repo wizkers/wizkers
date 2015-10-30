@@ -43,7 +43,7 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of FLuke289 numeric view');
-            $(this.el).html(template());
+            this.$el.html(template());
             return this;
         },
 

@@ -47,7 +47,7 @@ define(function (require) {
             // we don't support maps in the Chrome app yet
             if (vizapp.type != 'cordova')
                 return this;
-            $(this.el).html(template(this.model.toJSON()));
+            this.$el.html(template(this.model.toJSON()));
             return this;
         },
 

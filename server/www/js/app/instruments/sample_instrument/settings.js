@@ -30,7 +30,7 @@ window.SampleInstrumentSettingsView = Backbone.View.extend({
     },
 
     render:function () {
-        $(this.el).html(this.template({mappings: this.mappings}));
+        this.$el.html(this.template({mappings: this.mappings}));
         return this;
     },
     

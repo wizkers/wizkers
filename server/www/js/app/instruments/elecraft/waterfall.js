@@ -111,7 +111,7 @@ define(function (require) {
 
             var self = this;
 
-            $(this.el).html(template());
+            this.$el.html(template());
 
             $("#xtrafunc-popin", this.el).hide();
 

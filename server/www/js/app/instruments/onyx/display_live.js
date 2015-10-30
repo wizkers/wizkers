@@ -34,12 +34,6 @@ define(function (require) {
         mapWidget = require('app/lib/mapwidget'),
         template = require('js/tpl/instruments/onyx/OnyxLiveView.js');
 
-    // Load the flot library & flot time plugin:
-    require('flot');
-    require('flot_time');
-    require('flot_resize');
-
-
     return Backbone.View.extend({
 
         initialize: function (options) {
@@ -122,7 +116,7 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of Onyx live view');
-            $(this.el).html(template());
+            this.$el.html(template());
 
             // Hide the raw data stream if we don't want it
             if (!this.showstream) {
@@ -156,7 +150,7 @@ define(function (require) {
                     // - Then, we know the size of the numview: $('#numview').height();
                     // - Last, remove 55 pixels to account for all the margins around the map/divs/thumbnails
                     // ... now do the equation
-                    //$('.map_container', this.el).css('height', $(this.el).parent().css('height'));
+                    //$('.map_container', this.el).css('height', this.$el.parent().css('height'));
 
                     var self = this;
                     var rsc = function () {

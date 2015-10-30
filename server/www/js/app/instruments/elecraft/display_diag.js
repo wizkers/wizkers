@@ -91,7 +91,7 @@ define(function (require) {
 
         render: function () {
             var self = this;
-            $(this.el).html(template());
+            this.$el.html(template());
 
             // Hide the raw data stream if we don't want it
             if (!this.showstream) {

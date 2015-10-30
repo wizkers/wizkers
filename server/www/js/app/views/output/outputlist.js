@@ -41,7 +41,7 @@ define(function (require) {
         initialize: function () {},
 
         render: function () {
-            $(this.el).html(template(this.model.toJSON()));
+            this.$el.html(template(this.model.toJSON()));
             this.updateButtonStatus(this.model.get('enabled'));
             return this;
         },
@@ -101,7 +101,7 @@ define(function (require) {
             var startPos = (this.options.page - 1) * items;
             var endPos = Math.min(startPos + items, len + 1);
 
-            $(this.el).html('<div class="col-md-12"><div class="row thumbnails"></div></div>');
+            this.$el.html('<div class="col-md-12"><div class="row thumbnails"></div></div>');
             var editok = true;
             // Ask to hide the instrument setting in case we are a viewer or operator in server mode, because
             // the server won't let us retrieve the instrument parmeters anyway
@@ -122,7 +122,7 @@ define(function (require) {
                 }
             }
 
-            $(this.el).append(new Paginator({
+            this.$el.append(new Paginator({
                 model: this.model,
                 page: this.options.page,
                 viewname: 'outputs',

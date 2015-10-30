@@ -56,7 +56,7 @@ define(function(require) {
         },
 
         render: function () {
-            $(this.el).html(template());
+            this.$el.html(template());
             // Initialize our sliders
             $(".eq",this.el).slider({reversed:true});
             

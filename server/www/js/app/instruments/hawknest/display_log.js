@@ -182,7 +182,7 @@ define(function (require) {
             var self = this;
             console.log('Main render of Log details view');
 
-            $(this.el).html(template());
+            this.$el.html(template());
 
             this.addPlot();
             if (this.packedData == null || this.packedData.length == 0)

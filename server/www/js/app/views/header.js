@@ -32,7 +32,7 @@ define(function(require) {
         },
 
         render: function () {
-            $(this.el).html(template());
+            this.$el.html(template());
             if (vizapp.type == 'server') {
                 // If we're running with a backend server, we need to hide some elements
                 // in case we are only a 'viewer'. This is not relevant if we're running as an app,
@@ -43,16 +43,8 @@ define(function(require) {
                 }
             }
             return this;
-        },
-
-        selectMenuItem: function (menuItem) {
-            $('.nav li').removeClass('active');
-            $('.nav .add-option').hide();
-            if (menuItem) {
-                $('.' + menuItem).addClass('active');
-                $('.' + menuItem + '-add').show();
-            }
         }
+
     });
     
 });

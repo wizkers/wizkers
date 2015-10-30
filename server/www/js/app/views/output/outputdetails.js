@@ -74,7 +74,7 @@ define(function(require) {
 
             console.log("Render output details");
             
-            $(this.el).html(template(_.extend(this.model.toJSON(), {outtypes: outputManager.getOutputsForCurrentInstrument(),
+            this.$el.html(template(_.extend(this.model.toJSON(), {outtypes: outputManager.getOutputsForCurrentInstrument(),
                                                                    outputfields: this.outputfields
                                                                    })));
 

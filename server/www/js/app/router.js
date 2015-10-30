@@ -64,13 +64,14 @@ define(function (require) {
         switchView: function (view, skiprender) {
             skiprender = skiprender || false;
             if (this.currentView) {
-                this.currentView.remove();
-                this.currentView.off(); // Unbinds all callbacks on this view
                 if (this.currentView.onClose) {
                     this.currentView.onClose();
                 }
+                this.currentView.remove();
+                this.currentView.off(); // Unbinds all callbacks on this view
+                delete this.currentView; // Force (for Cordova mode, where memory is more of a problem)
             }
-            $('#content').html(view.el);
+            this.contentEL.html(view.el);
             if (!skiprender)
                 view.render();
             this.currentView = view;
@@ -90,6 +91,11 @@ define(function (require) {
             // within a callback, otherwise the "onClose" methods will never
             // be called.
             _.bindAll(this, "switchinstrument");
+            
+            // Performance: cache jQuery queries we will do often through the life
+            // of the application. Strong impact on memory usage (important on Cordova) and
+            // overall performance
+            this.contentEL = $('#content');
 
             // When the current instrument model changes, we need to update
             // the link manager type:
@@ -157,7 +163,7 @@ define(function (require) {
                     model: settings
                 });
                 self.switchView(homeView);
-                self.headerView.selectMenuItem('home-menu');
+                //self.headerView.selectMenuItem('home-menu');
             });
         },
 
@@ -170,7 +176,7 @@ define(function (require) {
                     model: settings
                 }, function (view) {
                     self.switchView(view);
-                    self.headerView.selectMenuItem('home-menu');
+                    //self.headerView.selectMenuItem('home-menu');
                 });
             } else {
                 this.navigate('/', true);
@@ -185,7 +191,7 @@ define(function (require) {
                 model: settings
             }, function (view) {
                 self.switchView(view);
-                self.headerView.selectMenuItem('home-menu');
+                //self.headerView.selectMenuItem('home-menu');
             });
         },
 
@@ -213,7 +219,7 @@ define(function (require) {
                         self.switchView(new view({
                             collection: logs
                         }));
-                        self.headerView.selectMenuItem('management-menu');
+                        //self.headerView.selectMenuItem('management-menu');
                     });
                 },
                 error: function (msg) {
@@ -279,7 +285,7 @@ define(function (require) {
                             collection: allLogs
                         }, function (view) {
                             self.switchView(view);
-                            self.headerView.selectMenuItem('management-menu');
+                            //self.headerView.selectMenuItem('management-menu');
                         });
                     }
                 });
@@ -306,7 +312,7 @@ define(function (require) {
                         }));
                     }
                 });
-                self.headerView.selectMenuItem('instrument-menu');
+                //self.headerView.selectMenuItem('instrument-menu');
             });
         },
 
@@ -318,7 +324,7 @@ define(function (require) {
                 self.switchView(new view({
                     model: instrument
                 }));
-                self.headerView.selectMenuItem('instrument-menu');
+                //self.headerView.selectMenuItem('instrument-menu');
             });
 
         },
@@ -337,7 +343,7 @@ define(function (require) {
                         }));
                     }
                 });
-                self.headerView.selectMenuItem('instrument-menu');
+                //self.headerView.selectMenuItem('instrument-menu');
             });
 
         },
@@ -364,7 +370,7 @@ define(function (require) {
                             model: outputs,
                             page: p
                         }));
-                        self.headerView.selectMenuItem('output-menu');
+                        //self.headerView.selectMenuItem('output-menu');
                     });
 
                 }
@@ -384,7 +390,7 @@ define(function (require) {
                 self.switchView(new view({
                     model: output
                 }));
-                self.headerView.selectMenuItem('output-menu');
+                //self.headerView.selectMenuItem('output-menu');
             });
 
         },
@@ -404,14 +410,12 @@ define(function (require) {
                                 }));
                             }
                         });
-                        self.headerView.selectMenuItem('output-menu');
+                        //self.headerView.selectMenuItem('output-menu');
                     });
                 }
             });
 
         },
-
-
 
         // Workspace management
         listWorkspaces: function (page) {
@@ -426,7 +430,7 @@ define(function (require) {
                     }));
                 }
             });
-            this.headerView.selectMenuItem('workspace-menu');
+            //this.headerView.selectMenuItem('workspace-menu');
 
         },
 
@@ -436,7 +440,7 @@ define(function (require) {
             this.switchView(new WorkspaceView({
                 model: workspace
             }));
-            this.headerView.selectMenuItem('workspace-menu');
+            //this.headerView.selectMenuItem('workspace-menu');
 
         },
 
@@ -446,7 +450,7 @@ define(function (require) {
                 stats.sendAppView('about');
                 var aboutView = new view();
                 self.switchView(aboutView);
-                self.headerView.selectMenuItem('about-menu');
+                //self.headerView.selectMenuItem('about-menu');
             });
         },
 
@@ -458,7 +462,7 @@ define(function (require) {
                     model: settings
                 });
                 self.switchView(settingsView);
-                self.headerView.selectMenuItem('settings-menu');
+                //self.headerView.selectMenuItem('settings-menu');
             });
         },
 

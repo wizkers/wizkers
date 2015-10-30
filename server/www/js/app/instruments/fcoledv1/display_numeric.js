@@ -87,7 +87,7 @@ define(function(require) {
         render:function () {
             var self = this;
             console.log('Main render of FC Oled Backpack numeric view');
-            $(this.el).html(template());
+            this.$el.html(template());
             return this;
         },
 

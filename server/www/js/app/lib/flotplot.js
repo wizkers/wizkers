@@ -37,7 +37,6 @@ define(function (require) {
     require('flot_time');
     require('flot_selection');
     require('flot_fillbetween');
-    require('flot_resize');
 
     return Backbone.View.extend({
 
@@ -129,11 +128,16 @@ define(function (require) {
                 this.flotplot_settings.vertical_stretch_parent) {
                 $(window).off('resize', this.rsc);
             }
+
+            // Explicitely destroy the plot, otherwise we will leaki DOM references and
+            // memory (https://github.com/flot/flot/issues/1129)
+            if (this.plot)
+                this.plot.destroy();
         },
 
         render: function () {
             console.log("Rendering a simple chart widget");
-            $(this.el).html('<div class="chart" style="position: relative; width:100%; height: 100px;"></div>');
+            this.$el.html('<div class="chart" style="position: relative; width:100%; height: 100px;"></div>');
             this.addPlot();
             return this;
         },
@@ -235,7 +239,7 @@ define(function (require) {
                 });
             }
 
-            $('.chart', this.el).css('height', $(this.el).parent().css('height'));
+            $('.chart', this.el).css('height', this.$el.parent().css('height'));
             if (this.flotplot_settings.vertical_stretch ||
                 this.flotplot_settings.vertical_stretch_parent) {
                 var self = this;
@@ -249,6 +253,12 @@ define(function (require) {
                         chartheight = $(self.el.parentElement).height();
                     }
                     $('.chart', self.el).css('height', chartheight + 'px');
+                    // Manually resize the plot (no need for the Flot-resize plugin
+                    // to do this, since it adds stupid timers and other niceties...
+                    self.plot.resize();
+                    self.plot.setupGrid();
+                    self.plot.draw();
+
                 }
                 this.rsc = rsc;
                 $(window).on('resize', this.rsc);

@@ -29,13 +29,13 @@ window.WorkspaceListView = Backbone.View.extend({
         var startPos = (this.options.page - 1) * items;
         var endPos = Math.min(startPos + items, len);
 
-        $(this.el).html('<ul class="thumbnails"></ul>');
+        this.$el.html('<ul class="thumbnails"></ul>');
 
         for (var i = startPos; i < endPos; i++) {
             $('.thumbnails', this.el).append(new WorkspaceListItemView({model: layouts[i], settings: this.options.settings}).render().el);
         }
 
-        $(this.el).append(new Paginator({model: this.model, page: this.options.page, items: items}).render().el);
+        this.$el.append(new Paginator({model: this.model, page: this.options.page, items: items}).render().el);
 
         return this;
     }
@@ -51,7 +51,7 @@ window.WorkspaceListItemView = Backbone.View.extend({
     },
 
     render: function () {
-        $(this.el).html(this.template(this.model.toJSON()));
+        this.$el.html(this.template(this.model.toJSON()));
         return this;
     },
     

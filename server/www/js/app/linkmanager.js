@@ -192,6 +192,10 @@ define(function (require) {
                         streaming = data.streaming;
                         recording = data.recording;
                     }
+                } else {
+                    // Automatically complete a partial status
+                    data.portopen = connected;
+                    data.recording = recording;
                 }
                 // Tell anyone who would be listening that status is updated
                 self.trigger('status', data);

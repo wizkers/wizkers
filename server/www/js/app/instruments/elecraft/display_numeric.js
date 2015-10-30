@@ -32,11 +32,6 @@ define(function (require) {
         simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/elecraft/ElecraftNumView.js');
 
-    //require('bootstrap');
-    require('flot');
-    require('flot_time');
-    require('flot_resize');
-
     return Backbone.View.extend({
 
         initialize: function () {
@@ -76,7 +71,7 @@ define(function (require) {
         },
 
         render: function () {
-            $(this.el).html(template());
+            this.$el.html(template());
             this.addPlot();
             return this;
         },

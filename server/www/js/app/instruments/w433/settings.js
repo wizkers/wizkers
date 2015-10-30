@@ -46,7 +46,7 @@ define(function(require) {
             },
 
             render:function () {
-                $(this.el).html(template({mappings: this.mappings}));
+                this.$el.html(template({mappings: this.mappings}));
                 return this;
             },
     

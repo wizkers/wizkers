@@ -72,7 +72,7 @@ define(function (require) {
 
         render: function () {
 
-            $(this.el).html(template({
+            this.$el.html(template({
                 metadata: this.metadata,
                 inputs: this.inputs,
                 outputs: this.outputs

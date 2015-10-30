@@ -50,7 +50,7 @@ define(function (require) {
         },
 
         render: function () {
-            $(this.el).html(template(this.model.toJSON()));
+            this.$el.html(template(this.model.toJSON()));
             return this;
         },
 
