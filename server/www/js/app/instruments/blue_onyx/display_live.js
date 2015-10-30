@@ -167,8 +167,8 @@ define(function (require) {
                         if (utils.checkBreakpoint('xs') || utils.checkBreakpoint('sm'))
                             numviewheight = $('#numview').outerHeight();
                         var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 55;
-                        $('.map_container > .map', self.el).css('height', mapheight + 'px');
-                        self.map.resize();
+                        $('.map_container > .mapwidget', self.el).css('height', mapheight + 'px');
+                        self.map.resize(mapheight);
                     }
                     if (this.rsc)
                         $(window).off('resize', this.rsc);

@@ -42,7 +42,7 @@ define(function (require) {
     return Backbone.View.extend({
 
         tagName: "div",
-        className: "map",
+        className: "mapwidget",
 
 
         initialize: function (options) {
@@ -94,8 +94,9 @@ define(function (require) {
                     };
                     globalMap = new google.maps.Map(this.el, mapOptions);
                 } else {
-                    // Reuse the map's div and reinject it into our DOM
-                    $(this.el).append(globalMap.getDiv());
+                    // Reuse the map's div and reinject it into our DOM.
+                    this.$el.replaceWith(globalMap.getDiv())
+                    this.setElement(globalMap.getDiv());
                 }
             }
 
@@ -122,9 +123,9 @@ define(function (require) {
         /**
          * Needs to be called in case the enclosing div was resized
          */
-        resize: function () {
+        resize: function (mapheight) {
             if (typeof (google) != 'undefined')
-                google.maps.event.trigger(globalMap, 'resize');
+                google.maps.event.trigger(globalMap, 'resize');            
         }
 
     });
