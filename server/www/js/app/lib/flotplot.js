@@ -129,10 +129,14 @@ define(function (require) {
                 $(window).off('resize', this.rsc);
             }
 
-            // Explicitely destroy the plot, otherwise we will leaki DOM references and
+            try {
+            // Explicitely destroy the plot, otherwise we will leak DOM references and
             // memory (https://github.com/flot/flot/issues/1129)
             if (this.plot)
                 this.plot.destroy();
+            } catch (err) {
+                console.log('Plot destroy error', err);
+            }
         },
 
         render: function () {

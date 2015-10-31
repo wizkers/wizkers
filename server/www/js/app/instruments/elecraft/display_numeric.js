@@ -43,6 +43,7 @@ define(function (require) {
             this.plotoptions = {
                 points: 150, // 2.5 minutes @ 1 Hz
                 log: false,
+                vertical_stretch_parent: true,
                 plot_options: {
                     xaxes: [{
                             mode: "time",
