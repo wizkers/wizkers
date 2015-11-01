@@ -200,7 +200,8 @@ define(function (require) {
                         return;
                     portOpen = true;
                     self.trigger('status', {
-                        portopen: portOpen
+                        portopen: portOpen,
+                        services: r.services
                     });
                 }, function (err) {
                     console.log(err);
@@ -229,7 +230,7 @@ define(function (require) {
         // This is where we get notifications
         function subscribeSuccess(chrc) {
             if (chrc.status == 'subscribedResult') {
-                // Our driversdon't want this base64 stuff, sorry
+                // Our drivers don't want this base64 stuff, sorry
                 chrc.value = bluetoothle.encodedStringToBytes(chrc.value)
                     // Pass it on to the driver
                 self.trigger('data', chrc);

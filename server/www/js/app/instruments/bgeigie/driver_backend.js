@@ -97,9 +97,13 @@ define(function (require) {
                 return;
             }
             isopen = stat.portopen;
-            if (isopen) {
+            if (isopen && stat.services) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
+                console.log('We found those services', stat.services);
+                // ToDo: depending on the services we found, we can subscribe
+                // to different service/characteristic UUIDs so that we can support
+                // multiple versions of the Bluetooth module.
                 port.subscribe({
                     service_uuid: CUSTOM_SERVICE_UUID,
                     characteristic_uuid: SERIAL_PORT_UUID
