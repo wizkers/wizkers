@@ -38,6 +38,7 @@ define(function (require) {
     // of "map" and reuse it every time, otherwise we get a bad memory leak
     // see https://code.google.com/p/gmaps-api-issues/issues/detail?id=3803
     var globalMap = null;
+    var globalMarkers = [];
 
     return Backbone.View.extend({
 
@@ -46,14 +47,7 @@ define(function (require) {
 
 
         initialize: function (options) {
-
-            // Beware: we define "this.rsc" here because if we define it as a "var" on top, the requireJS caching
-            // mechanism will turn it into one single reference for every flotplot instance, which is now what we want!
-            // Make sure the chart takes all the window height:
             this.rsc = null;
-
-            this.markers = [];
-
         },
 
         // We have to call onClose when removing this view, because otherwise
@@ -119,7 +113,7 @@ define(function (require) {
             if (marker.icon)
                 mk['icon'] = marker.icon;
 
-            this.markers.push(new google.maps.Marker(mk));
+            globalMarkers.push(new google.maps.Marker(mk));
         },
 
         /**
