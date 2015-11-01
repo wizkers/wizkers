@@ -57,35 +57,36 @@ define(function (require) {
             this.currentCR = 0;
             this.currentLR = 0;
 
-            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
+            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"];
 
-                // We will pass this when we create plots, this is the global
-                // config for the look and feel of the plot
-                this.plotoptions = {
-                    points: 150, // 2.5 minutes @ 1 Hz
-                    log: false,
-                    plot_options: {
-                        xaxes: [{
-                                mode: "time",
-                                show: true,
-                                timeformat: "%M:%S",
-                                ticks: 5,
-                                timezone: settings.get("timezone")
+            // We will pass this when we create plots, this is the global
+            // config for the look and feel of the plot
+            this.plotoptions = {
+                points: 150, // 2.5 minutes @ 1 Hz
+                log: false,
+                vertical_stretch_parent: true,
+                plot_options: {
+                    xaxes: [{
+                            mode: "time",
+                            show: true,
+                            timeformat: "%M:%S",
+                            ticks: 5,
+                            timezone: settings.get("timezone")
                         },
                        ],
-                        yaxis: {
-                            min: 0
-                        },
-                        grid: {
-                            hoverable: true,
-                            clickable: true
-                        },
-                        legend: {
-                            position: "ne"
-                        },
-                        colors: this.palette,
-                    }
-                };
+                    yaxis: {
+                        min: 0
+                    },
+                    grid: {
+                        hoverable: true,
+                        clickable: true
+                    },
+                    legend: {
+                        position: "ne"
+                    },
+                    colors: this.palette,
+                }
+            };
 
         },
 
@@ -189,6 +190,12 @@ define(function (require) {
 
         tab_shown: function (e) {
             if (e.target.innerText == 'KXPA100') {
+                // First of all, we need to ask all the graphs to resize to occupy
+                // all their parent divs:
+                this.tempplot.plot.resize();
+                this.amppowerplot.plot.resize();
+                this.voltplot.plot.resize();
+                this.swrplot.plot.resize();
                 linkManager.sendCommand('^CR;^LR;');
                 linkManager.sendCommand('^AT;^AN;');
                 linkManager.sendCommand('^BY;^MD;');
