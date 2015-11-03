@@ -209,6 +209,13 @@ define(function (require) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
             port.off('data', format);
+            
+            // If we are streaming, stop it!
+            // The Home view does this explicitely, but if we switch
+            // instrument while it is open, then it's up to the driver to do it.
+            if (streaming)
+                this.stopLiveStream();
+            
             port_close_requested = true;
             port.close();
         }

@@ -134,7 +134,7 @@ define(function (require) {
                 }
             }
         };
-        
+
         var newLocation = function (loc) {
             location_status = 'OK';
             // loc is an object with functions, not a pure JSON
@@ -158,7 +158,7 @@ define(function (require) {
             if (err.code == 3) {
                 location_status = 'no fix (timeout)';
             } else
-            location_status = err.message;
+                location_status = err.message;
         }
 
 
@@ -182,6 +182,12 @@ define(function (require) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
             port.off('data', format);
+            // If we are streaming, stop it!
+            // The Home view does this explicitely, but if we switch
+            // instrument while it is open, then it's up to the driver to do it.
+            if (streaming)
+                this.stopLiveStream();
+
             port_close_requested = true;
             port.close();
         }

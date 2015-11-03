@@ -145,7 +145,12 @@ define(function (require) {
             linkManager.off('status', this.updatestatus, this);
             linkManager.off('input', this.showInput, this);
             
-            linkManager.driver.stopTextStream();
+            // Note:  the 'onClose' method is called after we changed
+            // the driver, so we don't have access to our Elecraft driver
+            // anymore: TODO: refactor to first call a "closeDriver" method
+            // before changing the instrument ? to be determined...
+            
+            // linkManager.driver.stopTextStream();
 
             if (this.ElecraftFrequencyListView != null)
                 this.ElecraftFrequencyListView.onClose();
