@@ -116,7 +116,8 @@ define(function (require) {
             "click .resetZoom": "resetZoom",
             "click #cpmscale": "cpmScaleToggle",
             "click #send-to-api": "generateLog",
-            "click .send-log": "sendLog"
+            "click .send-log": "sendLog",
+            "click .csv-export": "saveToCSV"
         },
 
         resetZoom: function () {
@@ -151,6 +152,59 @@ define(function (require) {
                 this.overview.onClose();
         },
 
+        saveToCSV: function () {
+            var self = this;
+            $('#csv-export', this.el).html('Generating...').addClass('btn-success').attr('disabled', true);
+            var fname = "safecast-drive" + new Date().getTime() + ".csv";
+            fileutils.newLogFile(fname, function (file) {
+                file.createWriter(function (fileWriter) {
+                    // ToDo: create the header for the file, though the API
+                    // does not seem to mind too much it's not there...
+                    for (var i = 0; i < self.deviceLogs.length; i++) {
+                        var currentLog = self.deviceLogs.at(i);
+                        var entries = currentLog.entries;
+                        // Now iterate over all the log entries and generate
+                        // the aggregate log files.
+                        var index = 0;
+                        var write = function (str) {
+                            if (typeof str == 'string') {
+                                fileWriter.write(str + '\n');
+                                return;
+                            }
+                            if (index == entries.length) {
+                                $('#UploadModal', self.el).modal('hide');
+                                $('#myErrorLabel', self.el).html('Success');
+                                $('#errorreason', self.el).html('Your log was saved as CSV');
+                                $('#errordetail', self.el).html('you can find it in /wizkers/logs/' + fname + ' on your device.');
+                                $('#ErrorModal').modal('show');
+                                return;
+                            }
+                            var entry = entries.at(index++);
+                            var data = entry.get('data');
+                            // Sometimes, we get entries without a valid reading, detect this
+                            if (data && data.cpm) {
+                                fileWriter.write(new Date(entry.get('timestamp')).toISOString() + ',');
+                                fileWriter.write(data.cpm.value + ',' +
+                                    data.cpm.count + ',' +
+                                    data.cpm.usv + ',');
+                                if (data.loc) {
+                                    fileWriter.write(data.loc.coords.latitude + ',' +
+                                        data.loc.coords.longigute + ',' +
+                                        data.loc.coords.sats + ',' +
+                                        data.loc_status);
+                                }
+                                fileWriter.write('\n');
+                            }
+                        };
+                        fileWriter.onwrite = write;
+                        write('# Android Safecast:Drive CSV Export\nTimestamp,CPM,count,usv,latitude,longitude,sats,lock');
+                    }
+                }, function (e) {
+                    console.log(e);
+                });
+            });
+        },
+
         /**
          * Generates a Safecast bGeigie compliant 'drive' file, then
          * call the uploadLog method for the actual upload
@@ -178,11 +232,10 @@ define(function (require) {
                                 self.addMetadata(file);
                                 return;
                             }
-                            var entry = entries.at(index);
-                            index++;
+                            var entry = entries.at(index++);
                             var data = entry.get('data');
                             // Sometimes, we get entries without a valid reading, detect this
-                            if (data.nmea) {
+                            if (data && data.nmea) {
                                 fileWriter.write(data.nmea + '\n');
                             }
                         };

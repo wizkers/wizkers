@@ -1,0 +1,45 @@
+<div class="row">
+    <div class="form-group col-md-6">
+        <label for="type" class="col-md-6 control-label">Number of fields:</label>
+        <div class="input-group col-md-6">
+            <input type="number" step="1" min="1" class="form-control" name="numfields" value="<%= metadata['numfields'] %>"/>
+        </div>
+    </div>
+    <div class="col-md-6">
+    <p>Select how many data fields should be sent with each call. Press "Save" after updating this value.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-12">
+        <label for="type" class="col-md-2 control-label">Filename:</label>
+        <div class="input-group col-md-10">
+            <input type="text" class="form-control" name="filename" value="<%= metadata['filename'] %>"/>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-12">
+        <label for="type" class="col-md-2 control-label">Text template:</label>
+        <div class="input-group col-md-10">
+            <input type="text" class="form-control" name="texttemplate" value="<%= metadata['texttemplate'] %>"/>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3">&nbsp;</div>
+    <div class="col-md-9">
+    <p>Use tags formatted like this: "&lt;%=field1%&gt;"</p>
+        <p>Example:<br> Voltage:&lt;%=field1%&gt;, Current:&lt;%=field2%&gt;</p>
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-6">
+        <label for="type" class="col-md-6 control-label">Overwrite or append the file:</label>
+        <div class="input-group col-md-6">
+            <select name="writemode" class="form-control">
+                <option value="overwrite" <%= metadata['writemode'] == 'overwrite' ?'selected':'' %>>Overwrite</option>
+                <option value="append" <%= metadata['writemode'] == 'append' ?'selected':'' %>>Append</option>
+            </select>
+        </div>
+    </div>
+</div>

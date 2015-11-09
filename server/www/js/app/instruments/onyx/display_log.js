@@ -187,7 +187,7 @@ define(function (require) {
                 var entries = currentLog.entries;
                 var type = currentLog.get('logtype');
                 if (type == 'live') {
-                    csv += "CPM, CPM30, USV, COUNT, Valid\n";
+                    csv += "CPM, CPM30, USV, COUNT, Valid, latitude, longitude, altitude, accuracy, loc_status\n";
                 } else if (entries.at(0) && entries.at(0).get('data').min != undefined) {
                     // We have new generation log type with min/max values
                     csv += "cpm, cpm_min, cpm_max, counts, duration (s), is_cpm_30, time on device (ISO String)\n";
@@ -238,6 +238,13 @@ define(function (require) {
                                 ',' + data.duration +
                                 ',' + data.time;
                         }
+                        if (data.loc) {
+                            csv += ',' + data.loc.coords.latitude +
+                                ',' + data.loc.coords.longitude +
+                                ',' + data.loc.coords.altitude +
+                                ',' + data.loc.coords.accuracy +
+                                ',' + data.loc_status;
+                        }
                         csv += '\n';
                     }
                 }
@@ -248,11 +255,12 @@ define(function (require) {
             } else {
                 var self = this;
                 // In Cordova mode, we create a file
-                fileutils.newLogFile("onyxlog.log", function (file) {
+                var fname = 'onyxlog-' + new Date().getTime() + '.csv';
+                fileutils.newLogFile(fname, function (file) {
                     file.createWriter(function (fileWriter) {
                         fileWriter.write(csv);
-                        $('#errorreason', self.el).html("Log saved");
-                        $('#errordetail', self.el).html("Your logfile was saved on your device in \"Wizkers/logs/onyxlog.log\". Connect using USB to transfer the file to your computer.");
+                        $('#errorreason', self.el).html('Log saved');
+                        $('#errordetail', self.el).html('Your logfile was saved on your device in "Wizkers/logs/' + fname + '"');
                         $('#ErrorModal').modal();
                     });
                 });

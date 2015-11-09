@@ -32,6 +32,7 @@ var dbs = require('../pouch-config'),
 
 var Safecast = require('./safecast.js');
 var Rest = require('./rest.js');
+var Text = require('./text.js');
 
 /////////////////
 // Private variales
@@ -41,7 +42,8 @@ var drivers = {};
 var activeOutputs = {};
 var availableOutputs = {
     "safecast": Safecast,
-    "rest": Rest
+    "rest": Rest,
+    "text": Text
 };
 
 ////////////////
