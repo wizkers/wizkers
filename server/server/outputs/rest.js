@@ -100,7 +100,7 @@ module.exports = function rest() {
 
 
 
-    this.sendData = function (data, cb) {
+    this.sendData = function (data, idx, cb) {
         var self = this;
         var post_data = '';
 
@@ -156,7 +156,7 @@ module.exports = function rest() {
                     output_ref._rev = result._rev;
                     dbs.outputs.put(output_ref, function (err, result) {});
                 });
-                cb(true);
+                cb(true, idx);
             });
 
         });
@@ -168,7 +168,7 @@ module.exports = function rest() {
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
-            cb(false);
+            cb(false, idx);
         });
 
         if (post_options.method == 'POST') {

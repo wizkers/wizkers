@@ -65,7 +65,7 @@ module.exports = function text() {
         return utils.JSONflatten(data)[mappings[key]];
     };
 
-    this.sendData = function (data, cb) {
+    this.sendData = function (data, idx, cb) {
         var self = this;
         var post_data = '';
 
@@ -88,7 +88,7 @@ module.exports = function text() {
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
-            cb(false);
+            cb(false, idx);
         }
 
         if (settings.writemode == 'append') {
@@ -102,7 +102,7 @@ module.exports = function text() {
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
-            cb(false);
+            cb(false, idx);
         } else {
             output_ref.lastsuccess = new Date().getTime();
             output_ref.lastmessage = 'Success: wrote ' + contents;
@@ -110,7 +110,7 @@ module.exports = function text() {
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
-            cb(true);
+            cb(true, idx);
         }
     };
 };

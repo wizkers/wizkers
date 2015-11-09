@@ -94,10 +94,17 @@ var output = function (data, insid) {
     for (var idx in active) {
         var output = active[idx];
         if (alarm(output, data) || regular(output)) {
-            debug("Output triggered with this data " + data);
-            output.plugin.sendData(data, function (success) {
+            debug('Output triggered with this data', data);
+            // We need to pass the index to the sendData call, so that it can be passed
+            // back for the callback: this is because by the time the callback is called,
+            // the object reference for 'output' will probably have changed, unless we only have
+            // one output: so we cannot use 'output' in the callback even though it's still defined
+            // in the closure. We therefore pass 'idx' and get it back as 'oidx'. numbers are not passed
+            // by reference, so we're OK.
+            output.plugin.sendData(data, idx, function (success, oidx) {
+                debug('Output trigger success is ' + success + ' for output ' + oidx);
                 if (success)
-                    output.last = new Date().getTime();
+                    active[oidx].last = new Date().getTime();
             });
         }
     }

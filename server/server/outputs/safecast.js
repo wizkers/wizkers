@@ -71,9 +71,10 @@ module.exports = function safecast() {
     /**
      * Ask the plugin to send data to the backend.
      * @param {Object}   data The data to send
+     * @param {Number}   idx   The output index (required for the callback)  
      * @param {Function} cb   Callback that is triggered after success or failure.
      */
-    this.sendData = function (data, cb) {
+    this.sendData = function (data, idx, cb) {
         debug("[Safecast Output plugin] Sending data to Safecast");
 
         // Step one: prepare the structure
@@ -93,7 +94,7 @@ module.exports = function safecast() {
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
             // Tell our caller that we couldn't send the data
-            cb(false);
+            cb(false, idx);
             return;
         }
 
@@ -136,7 +137,7 @@ module.exports = function safecast() {
                     // Tell our backend we were able to send the data.
                     // Note that this does not reflect whether the backend was
                     // happy about it or not, just that we managed to send the data.
-                    cb(true);
+                    cb(true, idx);
                 });
             });
         });
@@ -148,7 +149,7 @@ module.exports = function safecast() {
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
             // We were not able to send the data - the output manager will retry
-            cb(false);
+            cb(false, idx);
         });
 
 
