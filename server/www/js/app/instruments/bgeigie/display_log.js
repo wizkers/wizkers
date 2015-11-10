@@ -181,9 +181,9 @@ define(function (require) {
                             }
                             var entry = entries.at(index++);
                             var data = entry.get('data');
+                            var line = new Date(entry.get('timestamp')).toISOString() + ',';
                             // Sometimes, we get entries without a valid reading, detect this
                             if (data && data.cpm) {
-                                var line = new Date(entry.get('timestamp')).toISOString() + ',';
                                 line += data.cpm.value + ',' +
                                     data.cpm.count + ',' +
                                     data.cpm.usv + ',';
@@ -193,9 +193,9 @@ define(function (require) {
                                         data.loc.sats + ',' +
                                         data.loc_status;
                                 }
-                                // Careful: only ONE '.write' call in the write callback...
-                                fileWriter.write(line + '\n');
                             }
+                            // Careful: only ONE '.write' call in the write callback...
+                            fileWriter.write(line + '\n');
                         };
                         fileWriter.onwrite = write;
                         write('# Android Safecast:Drive CSV Export\nTimestamp,CPM,count,usv,latitude,longitude,sats,lock');
@@ -238,6 +238,8 @@ define(function (require) {
                             // Sometimes, we get entries without a valid reading, detect this
                             if (data && data.nmea) {
                                 fileWriter.write(data.nmea + '\n');
+                            } else {
+                                fileWriter.write('# break\n');
                             }
                         };
                         fileWriter.onwrite = write;
