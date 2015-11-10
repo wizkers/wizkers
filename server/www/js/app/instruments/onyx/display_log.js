@@ -180,7 +180,7 @@ define(function (require) {
         },
 
         downloadCSV: function () {
-            var header = 'data:text/csv; charset=utf-8,';
+            var header = 'data:text/csv; charset=utf-8,\n';
             var csv = header + "Timestamp (UTC), ";
             for (var i = 0; i < this.deviceLogs.length; i++) {
                 var currentLog = this.deviceLogs.at(i);

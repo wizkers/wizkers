@@ -278,8 +278,12 @@ define(function (require) {
         addMetadata: function (file) {
             $('#send-to-api', this.el).html('Done').removeAttr('disabled');
             this.logfile = file;
-            // ToDo: ask the user a couple of extra questions on the drive
+            // Ask the user a couple of extra questions on the drive
             // (fill in defaults to make it easy), and do the upload.
+            var descr = this.deviceLogs.at(0).get('description');
+            if (descr) {
+                $('#description').val(descr);
+            }
             $('#UploadModal', this.el).modal('show');
         },
 
@@ -317,6 +321,8 @@ define(function (require) {
                 return;
             }
 
+            // Disable the send button to make sure the user does not touch multiple times
+            $('.send-log', this.el).html('Sending...').addClass('btn-success').attr('disabled', true);;
 
             var params = {
                 api_key: instrumentManager.getInstrument().get('metadata').apikey,
