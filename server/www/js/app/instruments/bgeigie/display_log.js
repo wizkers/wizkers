@@ -117,7 +117,7 @@ define(function (require) {
             "click #cpmscale": "cpmScaleToggle",
             "click #send-to-api": "generateLog",
             "click .send-log": "sendLog",
-            "click .csv-export": "saveToCSV"
+            "click #csv-export": "saveToCSV"
         },
 
         resetZoom: function () {
@@ -183,17 +183,18 @@ define(function (require) {
                             var data = entry.get('data');
                             // Sometimes, we get entries without a valid reading, detect this
                             if (data && data.cpm) {
-                                fileWriter.write(new Date(entry.get('timestamp')).toISOString() + ',');
-                                fileWriter.write(data.cpm.value + ',' +
+                                var line = new Date(entry.get('timestamp')).toISOString() + ',';
+                                line += data.cpm.value + ',' +
                                     data.cpm.count + ',' +
-                                    data.cpm.usv + ',');
+                                    data.cpm.usv + ',';
                                 if (data.loc) {
-                                    fileWriter.write(data.loc.coords.latitude + ',' +
-                                        data.loc.coords.longigute + ',' +
-                                        data.loc.coords.sats + ',' +
-                                        data.loc_status);
+                                    line += data.loc.coords.latitude + ',' +
+                                        data.loc.coords.longitude + ',' +
+                                        data.loc.sats + ',' +
+                                        data.loc_status;
                                 }
-                                fileWriter.write('\n');
+                                // Careful: only ONE '.write' call in the write callback...
+                                fileWriter.write(line + '\n');
                             }
                         };
                         fileWriter.onwrite = write;
