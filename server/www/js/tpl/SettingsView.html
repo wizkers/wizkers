@@ -31,7 +31,7 @@
     <div class="row">
         <div class="col-md-12">
             Display time in:&nbsp;
-            <select style="width:65%" name="timezone">
+            <select style="width:65%" name="timezone" class="form-control">
                 <option value="UTC" <%= timezone=="GMT" ? 'selected="selected"' : '' %>>GMT</option>
                 <option value="browser" <%= timezone=="browser" ? 'selected="selected"' : '' %>>Browser timezone</option>
             </select>
@@ -68,7 +68,7 @@
     <div class="row">
         <div class="col-md-12">
             Default Graph Scale:
-            <select style="width:65%" name="cpmscale">
+            <select style="width:65%" name="cpmscale" class="form-control">
                 <option value="linear" <%= cpmscale=="linear" ? 'selected="selected"' : '' %> >Linear</option>
                 <option value="log" <%= cpmscale=="log" ? 'selected="selected"' : '' %> >Logarithmic</option>
             </select>
