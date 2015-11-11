@@ -130,6 +130,7 @@ module.exports = function safecast() {
                 dbs.outputs.get(output_ref._id, function (err, result) {
                     if (err) {
                         debug('Safecast output API request result storage error ' + err);
+                        cb(false, idx);
                         return;
                     }
                     output_ref._rev = result._rev;
@@ -145,6 +146,10 @@ module.exports = function safecast() {
         post_request.on('error', function (err) {
             output_ref.lastmessage = 'Error:' + err;
             dbs.outputs.get(output_ref._id, function (err, result) {
+                if (err) {
+                    debug('Safecast  output API request result storage error after post error ' + err);
+                    return;
+                }
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
