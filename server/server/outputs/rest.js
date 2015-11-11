@@ -144,6 +144,10 @@ module.exports = function rest() {
             }
             // self.trigger('outputTriggered', { 'name': 'rest', 'error': err, 'message': this.statusText } );
             dbs.outputs.get(output_ref._id, function (err, result) {
+                if (err) {
+                    debug('Error saving output status', err);
+                    return;
+                }
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
@@ -153,6 +157,10 @@ module.exports = function rest() {
                 debug(data);
                 output_ref.lastmessage = data.toString('utf8');
                 dbs.outputs.get(output_ref._id, function (err, result) {
+                    if (err) {
+                        debug('Error saving output status', err);
+                        return;
+                    }
                     output_ref._rev = result._rev;
                     dbs.outputs.put(output_ref, function (err, result) {});
                 });
@@ -165,6 +173,10 @@ module.exports = function rest() {
         post_request.on('error', function (err) {
             output_ref.lastmessage = 'Error:' + err;
             dbs.outputs.get(output_ref._id, function (err, result) {
+                if (err) {
+                    debug('Error saving output status', err);
+                    return;
+                }
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });

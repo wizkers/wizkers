@@ -99,6 +99,10 @@ module.exports = function text() {
         if (bytes == 0) {
             output_ref.lastmessage = 'Error: file write error for ' + contents;
             dbs.outputs.get(output_ref._id, function (err, result) {
+                if (err) {
+                    debug('Error saving to DB after output error', err);
+                    return;
+                }
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
@@ -107,6 +111,10 @@ module.exports = function text() {
             output_ref.lastsuccess = new Date().getTime();
             output_ref.lastmessage = 'Success: wrote ' + contents;
             dbs.outputs.get(output_ref._id, function (err, result) {
+                if (err) {
+                    debug('Error saving to DB after output success', err);
+                    return;
+                }
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
