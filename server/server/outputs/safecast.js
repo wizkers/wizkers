@@ -90,6 +90,11 @@ module.exports = function safecast() {
             debug(data);
             output_ref.lastmessage = 'Missing required fields in the data';
             dbs.outputs.get(output_ref._id, function (err, result) {
+                if (err) {
+                    debug('Safecast output error at missing required fields warning' + err);
+                    debug('Our output reference was', output_ref);
+                    return;
+                }
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
@@ -129,7 +134,8 @@ module.exports = function safecast() {
                 output_ref.lastmessage = data;
                 dbs.outputs.get(output_ref._id, function (err, result) {
                     if (err) {
-                        debug('Safecast output API request result storage error ' + err);
+                        debug('Safecast output API request result storage error', err);
+                        debug('Our output reference was', output_ref);
                         cb(false, idx);
                         return;
                     }
@@ -147,7 +153,8 @@ module.exports = function safecast() {
             output_ref.lastmessage = 'Error:' + err;
             dbs.outputs.get(output_ref._id, function (err, result) {
                 if (err) {
-                    debug('Safecast  output API request result storage error after post error ' + err);
+                    debug('Safecast output API request result storage error after post error', err);
+                    debug('Our output reference was', output_ref);
                     return;
                 }
                 output_ref._rev = result._rev;
@@ -161,6 +168,11 @@ module.exports = function safecast() {
         debug("[Safecast Output] Sending data to " + post_options.host);
         output_ref.last = new Date().getTime();
         dbs.outputs.get(output_ref._id, function (err, result) {
+            if (err) {
+                debug('Safecast output result storage error after updating last attempt', err);
+                debug('Our output reference was', output_ref);
+                return;
+            }
             output_ref._rev = result._rev;
             dbs.outputs.put(output_ref, function (err, result) {});
         });

@@ -146,6 +146,7 @@ module.exports = function rest() {
             dbs.outputs.get(output_ref._id, function (err, result) {
                 if (err) {
                     debug('Error saving output status', err);
+                    debug('Our output ref is', output_ref);
                     return;
                 }
                 output_ref._rev = result._rev;
@@ -159,6 +160,7 @@ module.exports = function rest() {
                 dbs.outputs.get(output_ref._id, function (err, result) {
                     if (err) {
                         debug('Error saving output status', err);
+                        debug('Our output ref is', output_ref);
                         return;
                     }
                     output_ref._rev = result._rev;
@@ -175,6 +177,7 @@ module.exports = function rest() {
             dbs.outputs.get(output_ref._id, function (err, result) {
                 if (err) {
                     debug('Error saving output status', err);
+                    debug('Our output ref is', output_ref);
                     return;
                 }
                 output_ref._rev = result._rev;

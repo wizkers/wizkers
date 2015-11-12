@@ -85,6 +85,10 @@ module.exports = function text() {
         if (fh < 0) {
             output_ref.lastmessage = 'Error: could not open file';
             dbs.outputs.get(output_ref._id, function (err, result) {
+                if (err) {
+                    debug('Error saving error message in output status', err);
+                    debug('Our output ref is', output_ref);
+                }
                 output_ref._rev = result._rev;
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
@@ -101,6 +105,7 @@ module.exports = function text() {
             dbs.outputs.get(output_ref._id, function (err, result) {
                 if (err) {
                     debug('Error saving to DB after output error', err);
+                    debug('Our output ref is', output_ref);
                     return;
                 }
                 output_ref._rev = result._rev;
@@ -113,6 +118,7 @@ module.exports = function text() {
             dbs.outputs.get(output_ref._id, function (err, result) {
                 if (err) {
                     debug('Error saving to DB after output success', err);
+                    debug('Our output ref is', output_ref);
                     return;
                 }
                 output_ref._rev = result._rev;
