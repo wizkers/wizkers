@@ -37,7 +37,7 @@ module.exports = function safecast() {
     // Load the settings for this plugin
     this.setup = function (output) {
 
-        debug("[Safecast Output plugin] Setup a new instance");
+        debug('Setup a new instance');
         mappings = output.mappings;
         settings = output.metadata;
         output_ref = output;
@@ -75,7 +75,7 @@ module.exports = function safecast() {
      * @param {Function} cb   Callback that is triggered after success or failure.
      */
     this.sendData = function (data, idx, cb) {
-        debug("[Safecast Output plugin] Sending data to Safecast");
+        debug('Sending data to Safecast');
 
         // Step one: prepare the structure
         var unit = this.resolveMapping("unit", data);
@@ -86,7 +86,7 @@ module.exports = function safecast() {
 
         // If any of those are empty, abort:
         if (unit == undefined || radiation == undefined || lat == undefined || lon == undefined) {
-            debug("[Safecast Output]  Data error, some required fields are empty");
+            debug('Data error, some required fields are empty');
             debug(data);
             output_ref.lastmessage = 'Missing required fields in the data';
             dbs.outputs.get(output_ref._id, function (err, result) {
@@ -153,7 +153,7 @@ module.exports = function safecast() {
             output_ref.lastmessage = 'Error:' + err;
             dbs.outputs.get(output_ref._id, function (err, result) {
                 if (err) {
-                    debug('Safecast output API request result storage error after post error', err);
+                    debug('API request result storage error after post error', err);
                     debug('Our output reference was', output_ref);
                     return;
                 }
@@ -165,18 +165,18 @@ module.exports = function safecast() {
         });
 
 
-        debug("[Safecast Output] Sending data to " + post_options.host);
+        debug('Sending data to', post_options.host);
         output_ref.last = new Date().getTime();
         dbs.outputs.get(output_ref._id, function (err, result) {
             if (err) {
-                debug('Safecast output result storage error after updating last attempt', err);
+                debug('Result storage error after updating last attempt', err);
                 debug('Our output reference was', output_ref);
                 return;
             }
             output_ref._rev = result._rev;
             dbs.outputs.put(output_ref, function (err, result) {});
         });
-        debug(post_data);
+        // debug(post_data);
         post_request.write(post_data);
         post_request.end();
 
