@@ -73,7 +73,6 @@ define(function (require) {
                 }
             }
 
-
             // We will pass this when we create plots, this is the global
             // config for the look and feel of the plot
             this.plotoptions = {
@@ -93,7 +92,6 @@ define(function (require) {
                         position: "ne"
                     }
                 }
-
             };
 
             // Keep an array for moving average over the last X samples

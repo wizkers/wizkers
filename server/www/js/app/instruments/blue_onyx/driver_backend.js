@@ -121,7 +121,7 @@ define(function (require) {
                 loc: current_loc,
                 loc_status: location_status
             };
-            
+
             self.trigger('data', response);
         };
 
@@ -173,6 +173,14 @@ define(function (require) {
                 if (stat.description != undefined)
                     resp.description = stat.description;
                 self.trigger('data', resp);
+                return;
+            }
+
+            if (stat.reconnecting != undefined) {
+                // Forward the message to front-end
+                self.trigger('data', {
+                    reconnecting: stat.reconnecting
+                });
                 return;
             }
 
@@ -251,7 +259,7 @@ define(function (require) {
             if (err.code == 3) {
                 location_status = 'no fix (timeout)';
             } else
-            location_status = err.message;
+                location_status = err.message;
         }
 
 
