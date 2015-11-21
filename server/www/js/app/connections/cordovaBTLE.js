@@ -48,10 +48,10 @@ define(function (require) {
             // reconnect if it comes back
             currentService = null,
             currentCharacteristics = null,
-            connectionRetryDelay = 5, // we will retry to connect in this many seconds
             self = this,
             devAddress = path,
-            connectionId = -1;
+            connectionId = -1,
+            timeoutCheckTimer = 0;
 
 
         ///////////
@@ -144,22 +144,14 @@ define(function (require) {
         // This just connects to the device
         this.open = function () {
 
+            // Setup a callback in case we time out
+            timeoutCheckTimer = setTimeout(checkConnectDelay, 15000);
+
             // Callback once we know Bluetooth is enabled
             function doConnect(status) {
                 if (status.status != 'enabled')
                     return;
-                bluetoothle.connect(trackConnect, function (err) {
-                    // This is called whenever we lose the connection
-                    console.log(err);
-                    self.trigger('status', {
-                        openerror: true,
-                        reason: 'Device connection error',
-                        description: 'Android error: ' + err.message
-                    });
-                    // Do a disconnect to make sure we end up in a sane state:
-                    self.close();
-                    return;
-                }, {
+                bluetoothle.connect(trackConnect, trackError, {
                     address: devAddress
                 });
 
@@ -177,7 +169,7 @@ define(function (require) {
 
         /////////////
         // Private methods
-        /////////////
+        /////////////   
 
 
         /////////////
@@ -199,10 +191,20 @@ define(function (require) {
                     if (r.status != 'discovered')
                         return;
                     portOpen = true;
+                    if (timeoutCheckTimer) {
+                        clearTimeout(timeoutCheckTimer);
+                        timeoutCheckTimer = 0;
+                    }
                     self.trigger('status', {
                         portopen: portOpen,
                         services: r.services
                     });
+                    // Need to send this to tell the front-end we're done reconnecting
+                    // and back to normal
+                    self.trigger('status', {
+                        reconnecting: false
+                    });
+
                 }, function (err) {
                     console.log(err);
                 }, {
@@ -212,19 +214,48 @@ define(function (require) {
             }
             if (result.status == 'disconnected') {
                 console.log(result);
-                // OK, the device disappeared: we need to close
-                // the connection. Note: we might want to auto-reconnect
-                // in a future version, TbD.
-                bluetoothle.close(function (result) {
-                    console.log(result);
-                    portOpen = false;
-                    self.trigger('status', {
-                        portopen: portOpen
-                    });
-                }, function (error) {}, {
+                // OK, the device disappeared: we will try to
+                // reconnect as long as the user does not explicitely
+                // ask to close
+                portOpen = false;
+                // Just keep reconnecting forever...
+                //timeoutCheckTimer = setTimeout(checkConnectDelay, 60000);
+                // We lost the connection, try to get it back
+                bluetoothle.reconnect(trackConnect, trackError, {
                     address: devAddress
                 });
+                self.trigger('status', {
+                    reconnecting: true
+                });
             }
+        }
+
+        function trackError(err) {
+            // This is called whenever we lose the connection
+            console.log(err);
+            if (!portOpen) {
+                // if the port was not open and we got an error callback, this means
+                // we were not able to connect in the first place...
+                self.trigger('status', {
+                    openerror: true,
+                    reason: 'Device connection error',
+                    description: 'Android error: ' + err.message
+                });
+                // Do a disconnect to make sure we end up in a sane state:
+                self.close();
+            } else {
+                portOpen = false;
+                // Just keep reconnecting forever...
+                //timeoutCheckTimer = setTimeout(checkConnectDelay, 60000);
+                // We lost the connection, try to get it back
+                bluetoothle.reconnect(trackConnect, trackError, {
+                    address: devAddress
+                });
+                self.trigger('status', {
+                    reconnecting: true
+                });
+            }
+            return;
         }
 
         // This is where we get notifications
@@ -235,6 +266,13 @@ define(function (require) {
                     // Pass it on to the driver
                 self.trigger('data', chrc);
             }
+        }
+
+        // Make sure that if after X seconds we have no connection, we cancel
+        // the attempt
+        function checkConnectDelay() {
+            if (!portOpen)
+                self.close();
         }
 
         console.log("[cordovaBTLE] Cordova BTLE Library loaded");

@@ -116,9 +116,9 @@ define(function (require) {
         updateOutputStatus: function (evt) {
             console.log("[Home view] Got an update from an output plugin");
             if (evt.error) {
-                $("#outputstatus", this.el).html("Outputs Error").addClass('btn-danger').removeClass('btn-success').removeClass('btn-info')
+                this.$("#outputstatus").html("Outputs Error").addClass('btn-danger').removeClass('btn-success').removeClass('btn-info')
             } else {
-                $("#outputstatus", this.el).html("Outputs OK").addClass('btn-success').removeClass('btn-danger').removeClass('btn-info')
+                this.$("#outputstatus").html("Outputs OK").addClass('btn-success').removeClass('btn-danger').removeClass('btn-info')
             }
         },
 
@@ -127,15 +127,22 @@ define(function (require) {
             console.log('Main render of Home view');
             this.$el.html(template(this.model.toJSON()));
 
-            this.ctrlconnect = $('.ctrl-connect', this.el);
-            this.ctrlrecord = $('.ctrl-record', this.el);
+            this.ctrlconnect = this.$('.ctrl-connect');
+            this.ctrlrecord = this.$('.ctrl-record');
+
+            // Depending on device capabilities, enable/disable "Diag view" button
+            // New in 2015.11: completely hide it rather than just disable it.
+            // (careful, getCaps is only defined once an instrument is loaded)
+            if (instrumentManager.getCaps && instrumentManager.getCaps().indexOf("DiagDisplay") == -1) {
+                this.$('.ctrl-diag').hide();
+            }
 
             if (vizapp.type == 'server') {
                 // If we're running with a backend server, we need to disable some elements
                 // in case we are only a 'viewer'. This is not relevant if we're running as an app,
                 // since we're always an admin there
                 if (settings.get('currentUserRole') == 'viewer') {
-                    $('#control-area button', this.el).attr('disabled', true);
+                    this.$('#control-area button').attr('disabled', true);
                 }
             }
             if (this.instrumentLiveView != null)
@@ -153,7 +160,7 @@ define(function (require) {
                 }, function (view) {
                     self.instrumentLiveView = view;
                     if (view != null) {
-                        $('#liveview').html(view.el);
+                        self.$('#liveview').html(view.el);
                         view.render();
                         if (linkManager.isConnected()) {
                             if (instrumentManager.getCaps().indexOf("WantReplay") > -1) {
@@ -174,7 +181,7 @@ define(function (require) {
                 }, function (view) {
                     self.instrumentNumericView = view;
                     if (view != null) {
-                        $('#numview').html(view.el);
+                        self.$('#numview').html(view.el);
                         view.render();
                     }
                 });
@@ -235,9 +242,9 @@ define(function (require) {
                 this.currentState = 'error';
                 // Give feedback to the user on why we could not open the device
                 if (data.reason)
-                    $('#errorreason', this.el).html(data.reason);
+                    this.$('#errorreason').html(data.reason);
                 if (data.description)
-                    $('#errordetail', this.el).html(data.description);
+                    this.$('#errordetail').html(data.description);
 
                 $('#ErrorModal').modal();
             }
@@ -284,7 +291,7 @@ define(function (require) {
             if (data.portopen && this.currentState != 'connected') {
                 this.ctrlconnect.html('<span class="glyphicon glyphicon-stop"></span>&nbsp;Disconnect ' + this.instrument.get('name'))
                     .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
-                $('.btn-enable-connected', this.el).removeAttr('disabled');
+                this.$('.btn-enable-connected').removeAttr('disabled');
                 if (vizapp.type == 'cordova')
                     cordova.plugins.backgroundMode.setDefaults({
                         title: 'Connected to ' + this.instrument.get('name')
@@ -292,15 +299,11 @@ define(function (require) {
                 if (this.instrumentUniqueID == null) {
                     linkManager.getUniqueID();
                 }
-                // Depending on device capabilities, enable/disable "Diag view" button
-                if (instrumentManager.getCaps().indexOf("DiagDisplay") == -1 || !data.portopen) {
-                    $('.ctrl-diag', self.el).attr('disabled', true);
-                }
                 this.currentState = 'connected';
             } else if (!data.portopen && this.currentState != 'idle') {
                 this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Connect to ' + this.instrument.get('name'))
                     .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
-                $('.btn-enable-connected', this.el).attr('disabled', true);
+                this.$('.btn-enable-connected').attr('disabled', true);
                 if (vizapp.type == 'cordova')
                     cordova.plugins.backgroundMode.setDefaults({
                         title: 'Idle.',
@@ -362,8 +365,8 @@ define(function (require) {
             $('#RecordModal').modal('hide');
 
             var currentLogSession = new Devicelog.Log();
-            currentLogSession.set('name', $('#recordingname', this.el).val());
-            currentLogSession.set('description', $('#description', this.el).val());
+            currentLogSession.set('name', this.$('#recordingname').val());
+            currentLogSession.set('description', this.$('#description').val());
             currentLogSession.set('logtype', 'live');
             // No need to set instrument ID, it is updated when creating the
             // log session on the server side. In Chrome mode, the log store is

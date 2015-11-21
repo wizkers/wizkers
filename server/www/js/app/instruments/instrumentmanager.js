@@ -191,7 +191,7 @@ define(function (require) {
             current_instrument = null;
         }
 
-        this.setInstrument = function (instrument) {
+        this.setInstrument = function (instrument, cb) {
             var self = this;
             var type = instrument.get('type');
             for (var ins in this.supportedInstruments) {
@@ -205,6 +205,7 @@ define(function (require) {
                         _.extend(self, new instrumentObject());
                         linkManager.setDriver(self.getDriver());
                         self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
+                        cb();
                     });
                 }
             }

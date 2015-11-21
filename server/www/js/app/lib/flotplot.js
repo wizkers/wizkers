@@ -43,7 +43,7 @@ define(function (require) {
         initialize: function (options) {
 
             // Beware: we define "this.rsc" here because if we define it as a "var" on top, the requireJS caching
-            // mechanism will turn it into one single reference for every flotplot instance, which is now what we want!
+            // mechanism will turn it into one single reference for every flotplot instance, which is not what we want!
             // Make sure the chart takes all the window height:
             this.rsc = null;
 
@@ -73,7 +73,7 @@ define(function (require) {
                         position: "ne",
                         // container: $('#legend')
                     },
-                    colors: ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
+                    colors: [(settings.get('default_graph_color') ? settings.get('default_graph_color') : "#e27c48"), "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
                 },
 
                 get: function (key) {

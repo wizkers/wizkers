@@ -140,14 +140,15 @@ define(function (require) {
                         // instruments at the same time.
                         if (vizapp.type != "server")
                             if (closeprevious) linkManager.closeInstrument(); // Stop former link manager
-                        instrumentManager.setInstrument(ins);
-                        // Last, query the link manager to check the status of the port
-                        // of the instrument: on a Chrome app, the result will be a closed port,
-                        // but in server mode, the instrument might be open already
-                        linkManager.requestStatus(insId);
+                        instrumentManager.setInstrument(ins, function() {
+                            // Last, query the link manager to check the status of the port
+                            // of the instrument: on a Chrome app, the result will be a closed port,
+                            // but in server mode, the instrument might be open already
+                            linkManager.requestStatus(insId);
 
-                        // We need to jump to the main screen now:
-                        self.navigate('/', true);
+                            // We need to jump to the main screen now:
+                            self.navigate('/', true);
+                        });
                     }
                 });
             });

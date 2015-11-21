@@ -68,6 +68,10 @@ define(function (require) {
             if (data.replay_ts != undefined)
                 return;
 
+            if (data.reconnecting != 'undefined') {
+                $('#numview_in', this.el).css('color', data.reconnecting ? '#a1a1a1' : '#000000');
+            }
+
             if (typeof (data.cpm) == 'undefined')
                 return;
             var cpm = parseFloat(data.cpm.value);

@@ -96,6 +96,11 @@ define(function (require) {
                 self.trigger('data', resp);
                 return;
             }
+            if (stat.reconnecting != undefined) {
+                // Forward the message to front-end
+                self.trigger('data', {reconnecting:stat.reconnecting});
+                return;
+            }                
             isopen = stat.portopen;
             if (isopen && stat.services) {
                 // Should run any "onOpen" initialization routine here if

@@ -384,6 +384,7 @@ define(function (require) {
                     'http://api.safecast.org/bgeigie_imports.json',
                     function (success) {
                         console.log('success', success);
+                        stats.instrumentEvent('safecast_upload', 'success');
                         $('#UploadModal', self.el).modal('hide');
                         $('#myErrorLabel', self.el).html('Success');
                         $('#errorreason', self.el).html('Your log was uploaded to Safecast');
@@ -400,6 +401,7 @@ define(function (require) {
                         $('#errorreason', self.el).html('Upload Error');
                         $('#errordetail', self.el).html(errorDescription);
                         $('#ErrorModal').modal('show');
+                        stats.instrumentEvent('safecast_upload', errorDescription);
                     }, options);
             }
         },

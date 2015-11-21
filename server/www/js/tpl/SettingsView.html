@@ -7,118 +7,119 @@
         </div>
     </div>
     <div class="row">
-    <div id="instrument-settings"></div>
+        <div class="col-md-12">
+            <div id="instrument-settings"></div>
+        </div>
     </div>
 </div>
 
-<div class="col-md-4 well">
-    <div class="row">
-        <div class="col-md-12">
-            <h4>Application settings</h4>
-            <p>
-                <a href="#" role="button" id="reset" class="btn btn-danger">Reset all settings.</a>
-                <% if (vizapp.type=="chrome" ) { %>
-                    <button type="button" class="btn btn-danger" id="reset_storage">Reset all storage</button>
-                    <% } %>
-            </p>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
+<div class="col-md-4">
+    <div class="panel panel-default">
+        <div class="panel-heading">
             <h4>User interface</h4>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            Display time in:&nbsp;
-            <select style="width:65%" name="timezone" class="form-control">
-                <option value="UTC" <%= timezone=="GMT" ? 'selected="selected"' : '' %>>GMT</option>
-                <option value="browser" <%= timezone=="browser" ? 'selected="selected"' : '' %>>Browser timezone</option>
-            </select>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <% var palette=[ "#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ] %>
-                Graph color: <span id="currentcpmcolor" class="badge" style="background:<%=palette[cpmcolor]%>;width:20%;">&nbsp;</span>
-                <div class="btn-group">
-                    <a class="btn dropdown-toggle" data-toggle="dropdown">
-                        <span class="caret"></span>
-                    </a>
-                    <ul name="cpmcolor" class="dropdown-menu" role="menu">
-                        <li><a class="cpmcolor" role="menuitem"><span title="0" class="badge" style="background:#e27c48;width:100%;">&nbsp;</span></a>
-                        </li>
-                        <li><a class="cpmcolor" role="menuitem"><span title="1" class="badge" style="background:#5a3037;width:100%;">&nbsp;</span></a>
-                        </li>
-                        <li><a class="cpmcolor" role="menuitem"><span title="2" class="badge" style="background:#f1ca4f;width:100%;">&nbsp;</span></a>
-                        </li>
-                        <li><a class="cpmcolor" role="menuitem"><span title="3" class="badge" style="background:#acbe80;width:100%;">&nbsp;</span></a>
-                        </li>
-                        <li><a class="cpmcolor" role="menuitem"><span title="4" class="badge" style="background:#77b1a7;width:100%;">&nbsp;</span></a>
-                        </li>
-                        <li><a class="cpmcolor" role="menuitem"><span title="5" class="badge" style="background:#858485;width:100%;">&nbsp;</span></a>
-                        </li>
-                        <li><a class="cpmcolor" role="menuitem"><span title="6" class="badge" style="background:#d9c7ad;width:100%;">&nbsp;</span></a>
-                        </li>
-                    </ul>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <p>
+                        <a href="#" role="button" id="reset" class="btn btn-danger">Reset all settings.</a>
+                        <% if (vizapp.type=="chrome" ) { %>
+                            <button type="button" class="btn btn-danger" id="reset_storage">Reset all storage</button>
+                            <% } %>
+                    </p>
                 </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h4>User interface</h4>
+                </div>
+            </div>
+            <div class="row">
+            <div class="col-md-12">
+                Display time in:&nbsp;
+                <select style="width:65%" name="timezone" class="form-control">
+                    <option value="UTC" <%= timezone=="GMT" ? 'selected="selected"' : '' %>>GMT</option>
+                    <option value="browser" <%= timezone=="browser" ? 'selected="selected"' : '' %>>Local timezone</option>
+                </select>
+            </div>
         </div>
+            <div class="row">
+            <div class="col-md-12">
+                <% var palette=[ "#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad" ] %>
+                    Graph color: <span id="currentcpmcolor" class="badge" style="background:<%=palette[cpmcolor]%>;width:20%;">&nbsp;</span>
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                        </a>
+                        <ul name="cpmcolor" class="dropdown-menu" role="menu">
+                            <li><a class="cpmcolor" role="menuitem"><span title="0" class="badge" style="background:#e27c48;width:100%;">&nbsp;</span></a>
+                            </li>
+                            <li><a class="cpmcolor" role="menuitem"><span title="1" class="badge" style="background:#5a3037;width:100%;">&nbsp;</span></a>
+                            </li>
+                            <li><a class="cpmcolor" role="menuitem"><span title="2" class="badge" style="background:#f1ca4f;width:100%;">&nbsp;</span></a>
+                            </li>
+                            <li><a class="cpmcolor" role="menuitem"><span title="3" class="badge" style="background:#acbe80;width:100%;">&nbsp;</span></a>
+                            </li>
+                            <li><a class="cpmcolor" role="menuitem"><span title="4" class="badge" style="background:#77b1a7;width:100%;">&nbsp;</span></a>
+                            </li>
+                            <li><a class="cpmcolor" role="menuitem"><span title="5" class="badge" style="background:#858485;width:100%;">&nbsp;</span></a>
+                            </li>
+                            <li><a class="cpmcolor" role="menuitem"><span title="6" class="badge" style="background:#d9c7ad;width:100%;">&nbsp;</span></a>
+                            </li>
+                        </ul>
+                    </div>
+            </div>
 
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            Default Graph Scale:
-            <select style="width:65%" name="cpmscale" class="form-control">
-                <option value="linear" <%= cpmscale=="linear" ? 'selected="selected"' : '' %> >Linear</option>
-                <option value="log" <%= cpmscale=="log" ? 'selected="selected"' : '' %> >Logarithmic</option>
-            </select>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <input type="checkbox" name="showstream" <%= showstream ? 'checked' : '' %>>&nbsp;Show debug output on interface
+            <div class="row">
+                <div class="col-md-12">
+                    Default Graph Scale:
+                    <select style="width:65%" name="cpmscale" class="form-control">
+                        <option value="linear" <%= cpmscale=="linear" ? 'selected="selected"' : '' %> >Linear</option>
+                        <option value="log" <%= cpmscale=="log" ? 'selected="selected"' : '' %> >Logarithmic</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <input type="checkbox" name="showstream" <%= showstream ? 'checked' : '' %>>&nbsp;Show debug output on interface
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12" id="statistics_enable" style="display:none;">
+                    <input type="checkbox" name="enablestats" <%= enablestats ? 'checked' : '' %>>&nbsp;Allow wizkers to collect technical usage metrics.
+                </div>
+            </div>
+            <div class="row">
+            <div class="col-md-12">
+                <div id="chromesettings"></div>
+            </div>
         </div>
-    </div>
-
-
-    <div class="row">
-        <div class="col-md-12" id="statistics_enable" style="display:none;">
-            <input type="checkbox" name="enablestats" <%= enablestats ? 'checked' : '' %>>&nbsp;Allow wizkers to collect technical usage metrics.
+            <div class="row">
+            <div class="col-md-12">
+                <br>
+                <br>
+                <hr>
+                <br>
+                <p>
+                    Debug:
+                </p>
+                <ul>
+                    <li>Timezone:
+                        <%= timezone %>
+                    </li>
+                    <li>Graph color:
+                        <%= cpmcolor %>
+                    </li>
+                    <li>CPM Scale:
+                        <%= cpmscale %>
+                    </li>
+                    <li>Show debug output:
+                        <%= showstream %>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
-
-
-    <div class="row">
-        <div class="col-md-12">
-            <div id="chromesettings"></div>
-        </div>
-    </div>
-
-
-    <div class="row">
-        <div class="col-md-12">
-            <br>
-            <br>
-            <hr>
-            <br>
-            <p>
-                Debug:
-            </p>
-            <ul>
-                <li>Timezone:
-                    <%= timezone %>
-                </li>
-                <li>Graph color:
-                    <%= cpmcolor %>
-                </li>
-                <li>CPM Scale:
-                    <%= cpmscale %>
-                </li>
-                <li>Show debug output:
-                    <%= showstream %>
-                </li>
-            </ul>
         </div>
     </div>
 </div>

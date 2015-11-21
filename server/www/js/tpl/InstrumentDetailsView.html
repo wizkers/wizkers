@@ -66,15 +66,6 @@
                         </div>
                     </div>
                 </div>
-                <!--
-                <div class="form-group">
-                    
-                    <div class="col-md-12">
-                        <h4>Instrument information</h4>
-                    <p>Unique ID: <span id="uniqueid"><%= uuid %></span></p>
-                        </div>
-                </div>
--->
             </div>
             <div class="col-md-4">
                 <div class="row">
@@ -82,8 +73,8 @@
                         <div class="control-group">
                             <label for="description" class="control-label">Notes</label>
                             <div class="controls">
-                                <textarea id="comment" class="form-control" name="comment" style="width: 90%;" rows="6">
-                                    <%= comment %>
+                                <textarea id="comment" class="form-control" name="comment" style="width: 90%;" rows="3">
+<%= comment %>
                                 </textarea>
                             </div>
                         </div>
@@ -127,14 +118,14 @@
         </div>
 
 
-        <div class="row">
-            <div class="form-actions col-xs-6">
+        <div class="row" style="margin-bottom: 10px;">
+            <div class="form-actions col-xs-8">
                 <button type="button" class="btn btn-primary save">Save</button>
                 <button type="button" class="btn btn-default delete">Delete</button>
                 <button type="button" class="btn btn-default selectins" disabled>Select</button>
                 <button type="button" class="btn btn-default export hide-cordova">Export Settings</button>
             </div>
-            <div class="col-md-3 col-xs-6">
+            <div class="col-md-3 col-xs-4">
                 <div class="alert alert-success" style="display: none">
                     <b>Success!</b> Instrument saved successfully
                 </div>

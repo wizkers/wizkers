@@ -89,6 +89,7 @@ define(function (require) {
             if (instrumentManager.getInstrument() && (this.model.id == instrumentManager.getInstrument().id)) {
                 // If so, just return to main screen
                 router.navigate('/', true);
+                return;
             }
             // Now store the instrument ID in our settings
             // Note: this is only to remember it at next application start.

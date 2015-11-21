@@ -140,7 +140,7 @@ define(function (require) {
         selectColor: function (event) {
             var self = this;
             console.log("Selected color: " + event.target.title);
-            this.model.set('cpmcolor', event.target.title);
+            this.model.set('default_graph_color', event.target.title);
             this.model.save({
                 success: function () {
                     self.render;
