@@ -62,13 +62,13 @@ define(function (require) {
 
         /**
          * Send data
-         * cmd has to be either a String or an ArrayBuffer
-         * @param {integer} reportId the reportId to use, or 0 if none
          * @param {ArrayBuffer} data The command, already formatted for sending.
+         * @param {Object} info contains the service_uuid and characterictic_uuid to write to
          */
-        this.write = function (reportId, data, callback) {
-            if (!portOpen)
+        this.write = function (data, info, callback) {
+            if (!portOpen || info == undefined || callback == undefined)
                 return;
+            // chrome.bluetoothLowEnergy.writeCharacteristicValue(info.characteristic_uuid, data, callback);
         };
 
         /**
@@ -234,7 +234,7 @@ define(function (require) {
                                 function () {
                                     if (chrome.runtime.lastError) {
                                         console.log(
-                                            'Failed to enable Heart Rate Measurement notifications: ' +
+                                            'Failed to enable characteristics notifications: ' +
                                             chrome.runtime.lastError.message);
                                         return;
                                     }

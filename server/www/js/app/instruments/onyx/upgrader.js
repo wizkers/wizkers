@@ -43,8 +43,8 @@ define(function (require) {
         },
 
         firmware: "",
-        
-        prevent_failure: function() {
+
+        prevent_failure: function () {
             console.log("User tried to exit the upgraded");
         },
 
@@ -142,7 +142,10 @@ define(function (require) {
             stats.fullEvent('Firmare', 'fw_upgrade_start', 'onyx');
             $("#device_upgrade", this.el).attr('disabled', true);
             // Prevent a click on the Navbar which would crash the firmware upgrade!
-            $(".navbar-fixed-top a").click(function(e){e.preventDefault();})
+            this.dumbUserHandler = function (e) {
+                e.preventDefault();
+            }
+            $(".navbar-fixed-top a").click(this.dumbUserHandler)
             utils.hideAlert();
             utils.showAlert('Info', "Starting upgrade, please wait", 'bg-info');
             // Switch to our uploader driver
@@ -216,7 +219,7 @@ define(function (require) {
             } else if (data.run_mode) {
                 if (data.run_mode == 'firmware') {
                     utils.showAlert('Success', 'Firmware Upgrade was successful, device is restarting', 'bg-success');
-                    $(".navbar-fixed-top a").unbind('click');
+                    $(".navbar-fixed-top a").unbind('click', this.dumbUserHandler);
                 }
             } else if (data.version) {
                 $('#bootloader', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
