@@ -271,8 +271,15 @@ define(function (require) {
         // Make sure that if after X seconds we have no connection, we cancel
         // the attempt
         function checkConnectDelay() {
-            if (!portOpen)
+            console.log('Check connect delay timeout');
+            if (!portOpen) {
                 self.close();
+                self.trigger('status', {
+                    openerror: true,
+                    reason: 'Device connection error',
+                    description: 'Could not connect to device.'
+                });
+            }
         }
 
         console.log("[cordovaBTLE] Cordova BTLE Library loaded");
