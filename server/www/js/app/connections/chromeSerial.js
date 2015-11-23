@@ -115,7 +115,7 @@ define(function (require) {
         }
 
         // Has to be called by the backend_driver to actually open the port.
-        this.open = function() {
+        this.open = function () {
             // We try to use the same API as the Node serialport API, so we need to
             // translate some of the arguments:
             var chromeSerialSettings = {
@@ -155,8 +155,8 @@ define(function (require) {
                 }
             });
         }
-        
-        this.flush = function(cb) {
+
+        this.flush = function (cb) {
             if (!self.portOpen)
                 return;
             chrome.serial.flush(self.connectionId, cb);
@@ -240,12 +240,13 @@ define(function (require) {
         function onError(info) {
             console.log("[chromeSerial] We got an error from the driver: " + info.error);
             self.trigger('status', {
-                    openerror: true,
-                    reason: 'Port error - driver triggered an error, trying to recover.',
-                    description: info.error
+                openerror: true,
+                reason: 'Port error - driver triggered an error, trying to recover.',
+                description: info.error
             });
             switch (info.error) {
             case "system_error":
+            case "parity_error":
                 if (!self.portOpen)
                     break;
                 self.close();
@@ -256,7 +257,7 @@ define(function (require) {
                 break;
             }
         };
-        
+
 
         function onOpen(openInfo) {
             if (!openInfo) {
