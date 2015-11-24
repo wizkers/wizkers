@@ -73,7 +73,7 @@ define(function(require) {
             
             if (data.cpm) {
                 var cpm = parseFloat(data.cpm.value);
-                $('#livecpm', this.el).html(cpm.toFixed(3));
+                $('#livecpm', this.el).html(cpm.toFixed(0));
                 //$('#liveusvh', this.el).html((cpm*0.00294).toFixed(3) + "&nbsp;&mu;Sv/h");
                 if (data.cpm.valid)
                      $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('VALID');
@@ -96,12 +96,12 @@ define(function(require) {
                 if (data.cpm2) {
                     $('.dual_input', this.el).show();
                     cpm = parseFloat(data.cpm2.value);
-                    $('#livecpm_2', this.el).html(cpm.toFixed(3));
+                    $('#livecpm_2', this.el).html(cpm.toFixed(0));
                     //$('#liveusvh', this.el).html((cpm*0.00294).toFixed(3) + "&nbsp;&mu;Sv/h");
                     if (data.cpm2.valid)
-                         $('#readingvalid_2', this.el).removeClass('label-danger').addClass('label-success').html('VALID (2)');
+                         $('#readingvalid_2', this.el).removeClass('label-danger').addClass('label-success').html('VALID');
                     else
-                        $('#readingvalid_2', this.el).removeClass('label-success').addClass('label-danger').html('INVALID (2)');
+                        $('#readingvalid_2', this.el).removeClass('label-success').addClass('label-danger').html('INVALID');
 
                     if (cpm > this.maxreading_2) {
                         this.maxreading_2 = cpm;
