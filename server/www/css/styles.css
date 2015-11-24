@@ -105,8 +105,8 @@ a.plain:hover {
       margin-bottom: 4px;
 }
   
-/* Same as btn-sm */
-@media (min-width: 769px) and (max-width: 992px) {
+/* Similar to btn-sm, but adjusted to 7" tablets */
+@media (min-width: 600px) and (max-width: 992px) {
     .btn-responsive {
       padding: 5px 10px;
       font-size: 12px;
@@ -115,8 +115,9 @@ a.plain:hover {
     }
 }
 
+
 /* Same as btn-xs */
-@media (max-width: 768px) {
+@media (max-width: 599px) {
     .btn-responsive {
       padding: 1px 5px;
       font-size: 12px;
