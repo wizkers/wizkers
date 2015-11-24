@@ -246,6 +246,7 @@ define(function (require) {
                     }
                     if (data.msg == 'firmware flashed') {
                         stats.fullEvent('Firmware', 'upgrade_success', 'onyx');
+                        $(".navbar-fixed-top a").unbind('click', this.dumbUserHandler);
                         $('#flashprogrammed', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
                     }
                 }
