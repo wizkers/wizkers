@@ -41,7 +41,7 @@ require.config({
         bbindexeddb: 'lib/backbone-indexeddb',
         pouchdb: 'lib/pouchdb-5.0.0',
         backbonepouch: 'lib/backbone-pouch',
-        underscore: 'lib/underscore-1.6.0',
+        underscore: 'lib/underscore-1.8.3',
         snap: 'lib/snap.svg-0.2.0',
         text: 'lib/text',
 
