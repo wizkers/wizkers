@@ -46,6 +46,12 @@ define(function (require) {
             port_open_requested = false,
             isopen = false;
 
+        // If possible, we want to keep track of the location of the measurement.
+        var current_loc = null,
+            location_status = '',
+            watchid = null;
+
+
         var portSettings = function () {
             return {
                 baudRate: 115200,
@@ -132,6 +138,11 @@ define(function (require) {
                 } else {
                     jsresp.raw = data;
                 }
+                // Add location info to data containing a CPM information:
+                if (jsresp.cpm) {
+                    jsresp.loc = current_loc;
+                    jsresp.loc_status = location_status;
+                }
                 self.trigger('data', jsresp);
             } catch (err) {
                 console.log('Not able to parse data from device:\n' + data + '\n' + err);
@@ -163,16 +174,49 @@ define(function (require) {
             if (isopen) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
+                //
+                // Regularly ask the navigator for current position and refresh map
+                if (watchid == null) {
+                    watchid = navigator.geolocation.watchPosition(newLocation, geolocationError, {
+                        maximumAge: 10000,
+                        timeout: 20000,
+                        enableHighAccuracy: true
+                    });
+                }
+
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
                     port.off('status', stat);
                     port_close_requested = false;
+                    if (watchid != null)
+                        navigator.geolocation.clearWatch(watchid);
                 }
             }
         };
 
+        var newLocation = function (loc) {
+            location_status = 'OK';
+            current_loc = {
+                coords: {
+                    accuracy: loc.coords.accuracy,
+                    altitude: loc.coords.altitude,
+                    altitudeAccuracy: loc.coords.altitudeAccuracy,
+                    latitude: loc.coords.latitude,
+                    longitude: loc.coords.longitude,
+                    heading: loc.coords.heading,
+                    speed: loc.coords.speed
+                }
+            };
+        }
 
+        var geolocationError = function (err) {
+            console.log('Location error', err);
+            if (err.code == 3) {
+                location_status = 'no fix (timeout)';
+            } else
+                location_status = err.message;
+        }
 
         /////////////
         // Public methods
@@ -199,8 +243,8 @@ define(function (require) {
         this.isOpen = function () {
             return isopen;
         }
-        
-        this.isOpenPending = function() {
+
+        this.isOpenPending = function () {
             return port_open_requested;
         }
 
