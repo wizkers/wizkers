@@ -56,6 +56,11 @@ define(function(require) {
             var self = this;
             console.log('Main render of Onyx numeric view');
             this.$el.html(template());
+            // We need to force the Live view to resize the map at this
+            // stage, becaure we just changed the size of the numview
+            if (instrumentManager.liveViewRef() && instrumentManager.liveViewRef().rsc) {
+                instrumentManager.liveViewRef().rsc();
+            };
             return this;
         },
 

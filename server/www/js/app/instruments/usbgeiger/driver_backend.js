@@ -52,7 +52,7 @@ define(function (require) {
                 dataBits: 8,
                 parity: 'none',
                 stopBits: 1,
-                dtr: false,
+                dtr: true,
                 flowControl: false,
                 // We get non-printable characters on some outputs, so
                 // we have to make sure we use "binary" encoding below,

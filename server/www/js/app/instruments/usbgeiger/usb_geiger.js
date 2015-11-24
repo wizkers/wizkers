@@ -34,19 +34,26 @@ define(function (require) {
 
     return function () {
 
-        // Helper function: get driver capabilites for display.
-        // returns a simple array of capabilities    
-        this.getCaps = function () {
-            return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView",
-                    "Upgrader", "WantReplay"
-                   ];
-        };
-
-        // Convenient function when views want to talk to each other: keep a central
+        // Convenience function when views want to talk to each other: keep a central
         // reference to those here
         var current_liveview = null;
         var current_numview = null;
 
+        this.liveViewRef = function () {
+            return current_liveview;
+        };
+
+        this.numViewRef = function () {
+            return current_numview;
+        };
+
+        // Helper function: get driver capabilites for display.
+        // returns a simple array of capabilities    
+        this.getCaps = function () {
+            return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView", 'WizkersSettings',
+                    "Upgrader", "WantReplay"
+                   ];
+        };
 
         // Return the type of data reading that this instrument generates. Can be used
         // by output plugins to accept data from this instrument or not.
@@ -138,5 +145,15 @@ define(function (require) {
 
         // Render a log edit table for a log collection for the device
         this.getLogEditView = function (arg, callback) {}
+        
+                // The screen for the "Settings" top level menu. This covers settings
+        // for the Wizkers app, not the instrument itself (those are done on the DiagDisplay
+        // screen).
+        this.getWizkersSettings = function (arg, callback) {
+            require(['app/instruments/blue_onyx/settings_wizkers'], function (view) {
+                callback(new view(arg));
+            });
+        };
+
     };
 });
