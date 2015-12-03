@@ -28,6 +28,8 @@ define(function (require) {
     "use strict";
 
     var driver_frontend = require('app/instruments/onyx/driver_frontend');
+    var uploader_frontend = require('app/instruments/bluegiga/uploader_frontend');
+
 
     // Convenient function when views want to talk to each other: keep a central
     // reference to those here
@@ -49,7 +51,7 @@ define(function (require) {
         // returns a simple array of capabilities    
         this.getCaps = function () {
             return ['LiveDisplay', 'NumDisplay', 'LogView', 'WizkersSettings',
-                    'WantReplay'
+                    'WantReplay', 'Upgrader'
                    ];
         };
 
@@ -86,6 +88,16 @@ define(function (require) {
         this.getDriver = function () {
             return new driver_frontend();
         };
+        
+        /**
+         * This is the upgrader view
+         */
+        this.getUpgrader = function (arg, callback) {
+            require(['app/instruments/bluegiga/upgrader'], function (view) {
+                callback(new view(arg));
+            });
+        };
+
 
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser or as a Cordova native app.
@@ -94,6 +106,15 @@ define(function (require) {
                 callback(new driver(arg));
             });
         };
+        
+        // Browser implementation of the backend firmware uploader, when we
+        // run the app fullun in-browser or as a Cordova native app.
+        this.getBackendUploaderDriver = function (arg, callback) {
+            require(['app/instruments/bluegiga/uploader_backend'], function (driver) {
+                callback(new driver(arg));
+            });
+        };
+
 
         // Return a Backbone view which is a mini graph
         this.getMiniLogview = function (arg, callback) {
