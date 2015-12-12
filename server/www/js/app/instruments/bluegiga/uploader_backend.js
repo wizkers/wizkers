@@ -192,14 +192,28 @@ define(function (require) {
 
         /**
          * Flash the device. Steps are as follows:
-         *    1. Init Bootloader
-         *    2. Get/Check Version
-         *    3. Get/Check ChipID
-         *    -> Those are done right after Bootloader init.
-         *    4. Write Unprotect
-         *    6. Erase Flash
-         *    7. Program Flash
-         *    8. Issue GO command to start FW (?)
+         * 
+         * see: http://community.silabs.com/t5/Wireless-Knowledge-Base/REFERENCE-Updating-BLE-module-firmware-using-OTA-DFU/ta-p/147801
+         * 
+         * Assuming your peripheral device has implemented the proper server-side support for receiving an OTA image as described above,
+         * the client-side OTA procedure is as follows (assuming you have the .ota file already and have connected to the peripheral and
+         * discovered the GATT structure):
+         * 
+         * Write command (0x04) to control point characteristic to power on flash (not needed for internal flash)
+         * Write command(s) (0x00 and then 0x01) to control point characteristic to erase flash
+         *          (not needed for internal flash, see ERASE NOTE above)
+         * Write command (0x02) to control point characteristic to reset flash write address pointer (not needed for internal flash)
+         * Repeatedly write blocks of data in 16-byte or 20-byte increments to data transfer
+         *          characteristic until all pages have been written
+         *          
+         * PACKET SIZE NOTE: the maximum single BLE packet payload size is 20 bytes, but this not break evenly into a 2048-byte page of
+         * flash. It is important to ensure that data is transferred breaks on page boundaries, since otherwise logic to handle this must
+         * be added to the receiving end. However, using a packet size that is page-boundary-friendly (such as 16) for every transfer
+         * results in wasted potential throughput. Therefore, the recommended solution is to keep track of the transfer position on the
+         * client side, and write 20-byte packets exactly 12 times (240 bytes) followed by one 16-byte packet, for a total of 256 bytes.
+         * This will divide evenly into nearly any commonly sized flash page whether you use internal or external flash.
+         * 
+         * Write command (0x03) to control point characteristic to trigger DFU mode reset
          */
         var flashBoard = function () {
             console.log('***************** Start Flashing ********************');
