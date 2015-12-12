@@ -55,6 +55,14 @@ define(function (require) {
             if (instrumentManager.liveViewRef() && instrumentManager.liveViewRef().rsc) {
                 instrumentManager.liveViewRef().rsc();
             };
+
+            // Cache the query for energy efficiency/memory efficiency
+            this.batt_icon = $('#batteryempty', this.el);
+            this.lat_span = $('#lat', this.el);
+            this.lon_span = $('#lon', this.el);
+            this.valid_label = $('#readingvalid', this.el);
+            this.cpm_span = $('#livecpm', this.el);
+            this.usv_span = $('#liveusvh', this.el);
             return this;
         },
 
@@ -65,36 +73,42 @@ define(function (require) {
 
         showInput: function (data) {
 
-            if (typeof (data.devicetag) != 'undefined')
-                $('#devicetag', this.el).html(data.devicetag);
-
             if (typeof (data.cpm) == 'undefined')
                 return;
             var cpm = parseFloat(data.cpm.value);
             var usv = parseFloat(data.cpm.usv);
             var count = parseInt(data.cpm.count);
-            $('#livecpm', this.el).html(cpm.toFixed(0));
+            this.cpm_span.html(cpm.toFixed(0));
             if (usv) {
-                $('#liveusvh', this.el).html(usv.toFixed(3) + "&nbsp;&mu;Sv/h");
+                this.usv_span.html(usv.toFixed(3) + "&nbsp;&mu;Sv/h");
             }
-            
+
+            if (!data.batt_ok) {
+                this.batt_icon.show();
+            } else {
+                this.batt_icon.hide();
+            }
+
             if (data.loc_status && data.loc_status == 'OK') {
-                var coord = utils.coordToString({ lat: data.loc.coords.latitude, lng: data.loc.coords.longitude});
-                $('#lat', this.el).html(coord.lat);
-                $('#lon', this.el).html(coord.lng);
+                var coord = utils.coordToString({
+                    lat: data.loc.coords.latitude,
+                    lng: data.loc.coords.longitude
+                });
+                this.lat_span.html(coord.lat);
+                this.lon_span.html(coord.lng);
             } else if (data.loc_status) {
-                $('#lat',this.el).html('GPS: ' + data.loc_status);
-                $('#lon',this.el).html('');
+                this.lat_span.html('GPS: ' + data.loc_status);
+                this.lon_span.html('');
             }
 
             // Create a blinking effect to indicate that we received data:
-            $('#readingvalid', this.el).addClass('label-info').removeClass('label-danger').removeClass('label-success');
+            this.valid_label.addClass('label-info').removeClass('label-danger').removeClass('label-success');
             setTimeout(function () {
-                $('#readingvalid',this.el).removeClass('label-info');
+                this.valid_label.removeClass('label-info');
                 if (data.cpm.valid)
-                    $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('OK');
+                    this.valid_label.removeClass('label-danger').addClass('label-success').html('OK');
                 else
-                    $('#readingvalid', this.el).removeClass('label-success').addClass('label-danger').html('V');
+                    this.valid_label.removeClass('label-success').addClass('label-danger').html('V');
             }, 250);
 
         },
