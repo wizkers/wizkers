@@ -119,6 +119,12 @@ define(function (require) {
                 settings: null,
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
+            this.supportedInstruments['inspector_ble'] = {
+                name: 'Medcom Inspector BLE',
+                type: 'app/instruments/inspector_ble/inspector_ble',
+                settings: null,
+                connectionsettings: 'app/views/instrument/bluetooth'
+            };
             this.supportedInstruments['fcbtusbv1'] = {
                 name: 'Fried Circuits Bluetooth backpack',
                 type: 'app/instruments/fcbtusbv1/fcbtusbv1',
