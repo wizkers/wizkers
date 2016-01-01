@@ -332,8 +332,8 @@ define(function (require) {
             // KXPA100 mode off during transfer
             taking_screenshot = true;
             $('#px3-screenshot').html('Wait...');
-            linkManager.sendCommand('MN146;');
-            linkManager.sendCommand('MP;');
+            linkManager.sendCommand('MN146;'); // PA Mode menu
+            linkManager.sendCommand('MP;'); // Read the value
             // Now wait for the MP value to come back
         },
 
@@ -543,11 +543,15 @@ define(function (require) {
                     if (taking_screenshot) {
                         taking_screenshot = false;
                         // PA Mode off if it was on, take screenshot, but we need to wait for the amp to settle
-                        if (pamode_on)
+                        if (pamode_on) {
                             linkManager.sendCommand('MP000;MN255;');
-                        setTimeout(function () {
+                            setTimeout(function () {
+                                linkManager.sendCommand('#BMP;'); // PA Mode off, take Screenshot
+                            }, 1500);
+                        } else {
+                            linkManager.sendCommand('MN255;'); // Get back to normal menu
                             linkManager.sendCommand('#BMP;'); // PA Mode off, take Screenshot
-                        }, 2000);
+                        }
                     }
                 }
             }

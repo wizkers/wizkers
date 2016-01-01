@@ -75,6 +75,8 @@ define(function (require) {
 
             if (typeof (data.cpm) == 'undefined')
                 return;
+            
+            var self = this;
             var cpm = parseFloat(data.cpm.value);
             var usv = parseFloat(data.cpm.usv);
             var count = parseInt(data.cpm.count);
@@ -104,11 +106,11 @@ define(function (require) {
             // Create a blinking effect to indicate that we received data:
             this.valid_label.addClass('label-info').removeClass('label-danger').removeClass('label-success');
             setTimeout(function () {
-                this.valid_label.removeClass('label-info');
+                self.valid_label.removeClass('label-info');
                 if (data.cpm.valid)
-                    this.valid_label.removeClass('label-danger').addClass('label-success').html('OK');
+                    self.valid_label.removeClass('label-danger').addClass('label-success').html('OK');
                 else
-                    this.valid_label.removeClass('label-success').addClass('label-danger').html('V');
+                    self.valid_label.removeClass('label-success').addClass('label-danger').html('V');
             }, 250);
 
         },
