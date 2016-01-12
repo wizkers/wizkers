@@ -205,7 +205,7 @@ var HawkNest = function () {
                     });
                 }
 
-            } else if (val.type == 'power' || val.type == 'temp') {
+            } else if (val.type == 'power' || val.type == 'temp' || val.type == 'solar') {
                 // We need to add the probeID otherwise the front-end won't be able
                 // to tell what probe this reading is for!
                 val.probeid = probes[data.token].probeid;
@@ -219,8 +219,10 @@ var HawkNest = function () {
                             result.metadata.probes[val.probeid].ts = new Date().getTime();
                             if (val.voltage != undefined)
                                 result.metadata.probes[val.probeid].voltage = val.voltage;
-                            if (val.battery != undefined)
+                            if (val.type == 'power' && val.battery != undefined)
                                 result.metadata.probes[val.probeid].battery = val.battery;
+                            if (val.type == 'solar' && val.battery != undefined)
+                                result.metadata.probes[val.probeid].solarbattvoltage = val.battery;
                             if (val.charging != undefined)
                                 result.metadata.probes[val.probeid].charging = val.charging;
                             if (val.type == 'temp' && val.c != undefined)
