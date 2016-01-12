@@ -36,13 +36,19 @@ define(function (require) {
             port_open_requested = false,
             isopen = false,
             parser = Serialport.parsers.readline(' '); // Parse line on "space" character
-        
+
         var CUSTOM_SERVICE_UUID = '39b31fec-b63a-4ef7-b163-a7317872007f';
         var SERIAL_PORT_UUID = 'd68236af-266f-4486-b42d-80356ed5afb7';
 
         // This is the CPM to µSv/h conversion coefficient for the tube
         // in the Inspector.
-        var conversionCoefficient = 1/334;
+        var conversionCoefficient = 1 / 334;
+
+        // If possible, we want to keep track of the location of the measurement.
+        var current_loc = null,
+            location_status = '',
+            watchid = null;
+
 
         /////////////
         // Private methods
@@ -85,9 +91,11 @@ define(function (require) {
             }
             if (stat.reconnecting != undefined) {
                 // Forward the message to front-end
-                self.trigger('data', {reconnecting:stat.reconnecting});
+                self.trigger('data', {
+                    reconnecting: stat.reconnecting
+                });
                 return;
-            }                
+            }
             isopen = stat.portopen;
             if (isopen && stat.services) {
                 // Should run any "onOpen" initialization routine here if
@@ -101,14 +109,50 @@ define(function (require) {
                     characteristic_uuid: SERIAL_PORT_UUID
                 });
 
+                // Now regularly ask the navigator for current position and refresh map
+                if (watchid == null) {
+                    watchid = navigator.geolocation.watchPosition(newLocation, geolocationError, {
+                        maximumAge: 10000,
+                        timeout: 20000,
+                        enableHighAccuracy: true
+                    });
+                }
+
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
                     port.off('status', stat);
                     port_close_requested = false;
+                    if (watchid != null)
+                        navigator.geolocation.clearWatch(watchid);
                 }
             }
         };
+
+        var newLocation = function (loc) {
+            location_status = 'OK';
+            current_loc = {
+                coords: {
+                    accuracy: loc.coords.accuracy,
+                    altitude: loc.coords.altitude,
+                    altitudeAccuracy: loc.coords.altitudeAccuracy,
+                    latitude: loc.coords.latitude,
+                    longitude: loc.coords.longitude,
+                    heading: loc.coords.heading,
+                    speed: loc.coords.speed
+                }
+            };
+        }
+
+        var geolocationError = function (err) {
+            console.log('Location error', err);
+            if (err.code == 3) {
+                location_status = 'no fix (timeout)';
+            } else
+                location_status = err.message;
+        }
+
+
 
         /////////////
         // Public methods
@@ -167,26 +211,26 @@ define(function (require) {
 
         /**
          *This is called by the serial parser (see 'format' above)
-         * For some mysterious reason, the bGeigie outputs an NMEA-like
-         * sentence, which is very 90's like, but mostly a pain.
-         * 
-         * The Safecast API wants this NMEA data, so we will keep it intact
-         * in our own database for easy log export, but add a JSON copy for
-         * ease of use for a couple of fields.
          */
         this.onDataReady = function (data) {
-            // Remove any carriage return
+            // Remove the comma            
             data = data.replace(',', '');
+            if (data.length == 0)
+                return;
 
             var cpm = parseInt(data);
-
-            var response = {
-                cpm: {
-                    value: cpm,
-                },
-            };
-
-            self.trigger('data', response);
+            if (cpm != undefined) {
+                var response = {
+                    cpm: {
+                        value: cpm,
+                        usv: cpm * 0.00294,
+                        valid: true
+                    },
+                    loc: current_loc,
+                    loc_status: location_status
+                };
+                self.trigger('data', response);
+            }
         };
     }
 

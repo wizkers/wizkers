@@ -18,8 +18,8 @@
  */
 
 /**
- * A Safecast Blue Onyx instrument. Only works on Chrome apps on
- * Chromebooks, and eventually on Cordova too...
+ * A Medcom Blue Onyx instrument. Only works on Chrome apps on
+ * Chromebooks, and on Cordova too...
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
