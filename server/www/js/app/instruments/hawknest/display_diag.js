@@ -86,7 +86,7 @@ define(function (require) {
             $('#lastseen',this.el).html(ls + ' minute' + ((ls == '1') ? '':'s') +' ago');
             $('#lastseenfull', this.el).html(new Date(pid.ts).toISOString());
             $('#voltage', this.el).html(pid.voltage/100 + 'V');
-            $('#voltage_solar', this.el).html(pid.solarbattvoltage + ' - uncalibrated');
+            $('#voltage_solar', this.el).html((pid.solarbattvoltage * 0.0171).toFixed(2) + 'V');
             $('#temp', this.el).html(pid.temp + '&deg;C');
         },
         
