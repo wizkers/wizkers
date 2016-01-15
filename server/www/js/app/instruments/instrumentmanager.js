@@ -137,6 +137,12 @@ define(function (require) {
                 settings: 'app/instruments/bgeigie/settings',
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
+            this.supportedInstruments['safecast_air'] = {
+                name: 'Safecast Air',
+                type: 'app/instruments/safecast_air/safecast_air',
+                settings: 'app/instruments/safecast_air/settings',
+                connectionsettings: 'app/views/instrument/bluetooth'
+            };
         }
 
         // The instruments below are only supported in Chrome runmode:
