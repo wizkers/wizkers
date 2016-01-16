@@ -1,0 +1,100 @@
+<!-- We are starting inside a "row" div -->
+<div class="col-md-9">
+    <div class="row">
+        <div class="col-xs-12" id="control-area">
+<!--
+<div class="pull-right hidden-sm">
+                <button disabled role="button" id="outputstatus" class="btn btn-responsive btn-info">Output status</button>
+            </div>
+-->
+            <button role="button" disabled class="ctrl-connect btn btn-responsive  btn-warning"><span class="glyphicon glyphicon-play-circle"></span>&nbsp;Connect to Instrument</button>
+            <button disabled role="button" class="ctrl-diag btn btn-responsive btn-enable-connected btn-info">Device setup</button>
+            <button role="button" disabled class="ctrl-record btn btn-responsive btn-enable-connected btn-danger"><span class="glyphicon glyphicon-download"></span>&nbsp;Record</button>
+        </div>
+    </div>
+    <!-- row-fluid -->
+    <div id="liveview" class="row">
+        <div class="col-md-12">
+            <div class="row thumbnails">
+                <div class="col-md-3 col-sm-2">
+                    <div class="thumbnail glowthumbnail select" style="text-align:center;">
+                        <h4>Welcome to Safecast:Drive</h4>
+
+                        <p>Ready for a drive? Everything starts with your first instrument: switch on your bGeigie, and click on "Add Instrument" below to configure it.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-2">
+                    <div class="thumbnail glowthumbnail select" style="text-align:center;"><a href="#instruments/add" class="plain"><h5>Add instrument</h5><p style="font-size:6em;"><span class="glyphicon glyphicon-plus-sign"></span></p><p>Create a new instrument</p></a>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-2">
+                    <div class="thumbnail glowthumbnail select" style="text-align:center;">
+                        <h4>Need help ?</h4>
+
+                        <p>Visit <a onclick="window.open('http://safecast.org/', '_system')">Safecast.org</a> for more details.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--/col-md--->
+
+<div class="col-md-3">
+    <div class="well" style="padding: 10px;" id="numview">
+    </div>
+</div>
+<!--/col-md--->
+
+<!-- The "Record" modal -->
+<div class="container">
+    <div id="RecordModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3 id="myModalLabel" class="modal-title">Session record</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="horizontal">
+                        <span>Recording name:&nbsp;</span>
+                        <input id="recordingname" name="recordingname" type="text" />
+                    </div>
+                    <div>Description:
+                        <textarea id="description" name="description" style="width: 90%;" rows="6"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    <button class="btn start-record btn-primary">Start recording</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- The "Error" modal -->
+<div class="container">
+    <div id="ErrorModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myErrorLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3 id="myErrorLabel" class="modal-title">Error</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="horizontal">
+                        <b>Error:&nbsp;</b><span id="errorreason"></span>
+                        <p><b>Details:&nbsp;</b>
+                            <span id="errordetail"></span>
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

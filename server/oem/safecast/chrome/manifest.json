@@ -1,0 +1,31 @@
+{
+    "manifest_version": 2,
+    "name": "Safecast Drive",
+    "description": "The Chrome app to connect to your Safecast devices",
+    "version": "0.1.0",
+    "offline_enabled": true,
+    "app": {
+        "background": {
+            "scripts": ["background.js"]
+        }
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "permissions": [
+    "serial",
+    "storage",
+    "unlimitedStorage",
+    "fileSystem",
+    "http://*/*",
+    "https://*/*",
+    "geolocation"
+    ],
+    "bluetooth": {
+        "uuids": ["180d", "ffe0", "ef080d8c-c3be-41ff-bd3f-05a5f4795d7f", 
+                 "A1E8F5B1-696B-4E4C-87C6-69DFE0B0093B" ], 
+        "low_energy": true
+    }
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="E. Lafargue, edouard@lafargue.name">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <!--<link href="css/magic-bootstrap.css" rel="stylesheet" media="screen">-->
+    <style type="text/css">
+        body {
+            padding-top: 55px;
+        }
+        /* Required for fixed navbar */
+    </style>
+    <link href="css/bootstrap-lightbox.min.css" rel="stylesheet" />
+    <link href="css/bootstrap-editable.css" rel="stylesheet" />
+    <link href="css/cards-carousel.css" rel="stylesheet" />
+    <link href="css/slider.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet">
+    <!-- Apply my own styles last ! -->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="img/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="img/ico/favicon.png">
+
+</head>
+
+<body>
+    <!-- Header contents loaded by the application (menubar) -->
+    <div class="header"></div>
+
+    <!-- <div style="padding: 0 15px; margin: 5px;"> <!-- Make the main content full screen -->
+    <div class="container-fluid">
+        <div class="row" id="content">
+            <!-- The div below is where the application runs -->
+            <p style="text-align:center;">Safecast Drive</p>
+            
+            <img style="display: block; margin-left: auto; margin-right: auto;" src="img/safecast-square-ct.png">
+            
+            <p style="text-align:center;">Loading...</p>
+        </div>
+    </div>
+    <footer class="navbar navbar-fixed-bottom" style="z-index: -100; opacity: 0.3;">
+        <div class="container-fluid" style="text-align:right;">
+            <br/>
+            <br/>&copy; Ed Lafargue 2013-2015 ed@wizkers.io</p>
+        </div>
+    </footer>
+
+    <script data-main="js/main-chrome" src="js/lib/require.js"></script>
+    <div class="screen-xs visible-xs"></div>
+    <div class="screen-sm visible-sm"></div>
+    <div class="screen-md visible-md"></div>
+    <div class="screen-lg visible-lg"></div>
+
+</body>
+
+</html>

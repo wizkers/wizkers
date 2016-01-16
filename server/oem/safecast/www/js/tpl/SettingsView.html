@@ -1,0 +1,47 @@
+<div class="col-md-8 ">
+    <div class="row">
+        <div class="col-md-12">
+            <h4>Settings for this instrument</h4>
+            <p id="no-settings">There are no specific settings for this instrument.</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="instrument-settings"></div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-4">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>User interface</h4>
+        </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-12">
+                Display time in:&nbsp;
+                <select style="width:65%" name="timezone" class="form-control">
+                    <option value="UTC" <%= timezone=="GMT" ? 'selected="selected"' : '' %>>GMT</option>
+                    <option value="browser" <%= timezone=="browser" ? 'selected="selected"' : '' %>>Local timezone</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                Default Graph Scale:
+                <select style="width:65%" name="cpmscale" class="form-control">
+                    <option value="linear" <%= cpmscale=="linear" ? 'selected="selected"' : '' %> >Linear</option>
+                    <option value="log" <%= cpmscale=="log" ? 'selected="selected"' : '' %> >Logarithmic</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                </br>
+                <input type="checkbox" name="showstream" <%= showstream ? 'checked' : '' %>>&nbsp;Show debug output on interface
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
