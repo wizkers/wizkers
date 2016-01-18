@@ -100,6 +100,10 @@ define(function (require) {
                 }
             };
 
+            // Keep track of the readings we detected, and keep a reference to the
+            // plots where they are displayed.
+            this.probes = {};
+
             // Keep an array for moving average over the last X samples
             // In Live view, we fix this at 1 minute. In log management, we will
             // make this configurable
@@ -211,14 +215,13 @@ define(function (require) {
         },
 
         addPlot: function () {
-            var self = this;
-            this.plot = new simpleplot({
+            this.probes['All'] = new simpleplot({
                 model: this.model,
                 settings: this.plotoptions
             });
-            if (this.plot != null) {
-                $('.geigerchart', this.el).append(this.plot.el);
-                this.plot.render();
+            if (this.probes['All'] != null) {
+                $('.geigerchart', this.el).append(this.probes['All'].el);
+                this.probes['All'].render();
             }
         },
 
@@ -227,6 +230,13 @@ define(function (require) {
             this.addPlot();
             this.suspendGraph = true;
         },
+
+        selectProbe: function (evt) {
+            var pid = $(evt.target).data('probe');
+            // We need to tell the num view we got a new probe ID:
+            instrumentManager.numViewRef().selectProbe(pid);
+        },
+
 
         onClose: function () {
             console.log("Blue Onyx live view closing");
@@ -287,7 +297,7 @@ define(function (require) {
             }
         },
 
-        // We get there whenever we receive something from the serial port
+        // We get there whenever we receive something from the driver port
         showInput: function (data) {
             var self = this;
 
@@ -314,37 +324,16 @@ define(function (require) {
                 i.scrollTop(i[0].scrollHeight - i.height());
             }
 
-            if (data.cpm == undefined)
+            if (data.gps == undefined)
                 return;
 
-            var cpm = parseFloat(data.cpm.value);
-            var image = 'white.png';
-            if (cpm >= 1050) {
-                image = 'grey.png';
-            } else if (cpm >= 680) {
-                image = 'darkRed.png';
-            } else if (cpm >= 420) {
-                image = 'red.png';
-            } else if (cpm >= 350) {
-                image = 'darkOrange.png';
-            } else if (cpm >= 280) {
-                image = 'orange.png';
-            } else if (cpm >= 175) {
-                image = 'yellow.png';
-            } else if (cpm >= 105) {
-                image = 'lightGreen.png';
-            } else if (cpm >= 70) {
-                image = 'green.png';
-            } else if (cpm >= 35) {
-                image = 'midgreen.png'
-            }
-
+            var image = 'darkOrange.png';
             // Now update the map (if it exists) to show the current location/measurement
-            if (this.map && data.loc_status && data.loc_status == 'OK') {
+            if (this.map) {
                 if (this.lastMarker == null) {
                     this.lastMarker = {
-                        lat: data.loc.coords.latitude,
-                        lng: data.loc.coords.longitude,
+                        lat: data.gps.lat,
+                        lng: data.gps.lon,
                         icon: 'js/app/instruments/blue_onyx/markers/' + image
                     };
                     this.map.addMarker(this.lastMarker);
@@ -369,7 +358,38 @@ define(function (require) {
                     this.map.setCenter(data.loc.coords.latitude, data.loc.coords.longitude);
                 }
             }
-            this.disp_cpm(data);
+
+            if (data.gas) {
+                // Add the gas reading values to the graph. We are creating a different
+                // graph for each gas reading
+                for (type in data.gas) {
+                    if (!this.probes.hasOwnProperty(type)) {
+                        this.probes[type] = new simpleplot({
+                            model: this.model,
+                            settings: this.plotoptions
+                        });
+
+                        $('#probes-select', this.el).append('<li role="presentation" class="probe-tab" ><a data-toggle="tab" href="#probes-' + type + '" data-probe="' + type + '">' + types + '</a></li>');
+                        $('#probes-content', this.el).append('<div class="tab-pane" id="probes-' + type + '"><div class="thumbnail">' +
+                            '<div class="chart" id="chart-' + type + '"></div></div></div>');
+                        // Need to activate the tab before adding the plot, otherwise we get a "invalid plot dimensions" error
+                        // when rendering the plot
+                        $('#probes-select a:last', this.el).tab('show');
+                        $('#chart-' + type, this.el).append(this.probes[type].el);
+                        this.probes[type].render();
+                        instrumentManager.numViewRef().selectProbe(type);
+                    }
+                    // By now we know we have a proper graph to add the gas reading to:
+                    var rdng = parseFloat(data.gas.ppbFlt);
+                    var datapoint = {
+                        'name': type,
+                        'value': rdng
+                    };
+                    this.probes[type].appendPoint(datapoint);
+                }
+            }
+
+            //            this.disp_cpm(data);
         },
     });
 });

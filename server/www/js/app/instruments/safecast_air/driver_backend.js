@@ -41,18 +41,6 @@ define(function (require) {
         var SERIAL_PORT_UUID = 'A1E8F5B1-696B-4E4C-87C6-69DFE0B0093B';
 
 
-        // small utility to convert DDMM.MMM or DDDMM.MMM to decimal
-        var parseDecDeg = function (c, hemi) {
-            var i = c.indexOf('.');
-            var deg = c.substring(0, i - 2);
-            var decMin = c.substring(i - 2, c.length - 1);
-            var decDeg = parseInt(deg, 10) + (decMin / 60);
-            if (hemi === 'W' || hemi === 'S')
-                decDeg *= -1;
-            return decDeg;
-        };
-
-
         /////////////
         // Private methods
         /////////////
@@ -190,7 +178,7 @@ define(function (require) {
          *           "ang":295.18,
          *           "fix":true,
          *           "num":8},
-     *           "gas": [
+         *       "gas": [
      *              {
      *                  "type":"NO2",
      *                  "hdr":0,
@@ -290,7 +278,6 @@ define(function (require) {
                 console.log(data);
                 return;
             }
-            
             self.trigger('data', fields);
         };
     }
