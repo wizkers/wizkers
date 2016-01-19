@@ -138,9 +138,10 @@ define(function (require) {
         movingAverager: function (newpoint, buffer) {
 
             buffer.push(newpoint);
+
             // Keep our data to the length we want
             if (buffer.length >= this.movingAvgPoints)
-                buffer = buffer.slice(1);
+                buffer.shift();
 
             // Now compute the average
             var avg = 0;

@@ -1,13 +1,25 @@
 <!-- this is added within a row area -->
 <div class="col-md-12">
-    <div class="row" id="geigerchart_row">
-        <div class="col-md-12">
-            <div class="thumbnail">
-                <div class="geigerchart chart"></div>
+    <div id="geigerchart_row">
+        <div class="row">
+            <div class="col-md-12" style="padding-top:5px; padding-bottom:5px;">
+                <ul class="nav nav-tabs" id="probes-select">
+                    <li role="presentation" class="active probe-tab"><a href="#probes-default" data-toggle="tab">All</a></li>
+                </ul>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="tab-content" id="probes-content">
+                    <div class="tab-pane active" id="probes-default">
+                        <div class="thumbnail">
+                            <div class="geigerchart chart"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>   
+        </div>
     </div>
-
     <div class="row" id="map_row">
         <div class="col-md-12">
             <div class="thumbnail">
@@ -15,7 +27,6 @@
             </div>
         </div>
     </div>
-
     <div class="row" id="showstream">
         <div class="col-md-12">
             <div class="well">

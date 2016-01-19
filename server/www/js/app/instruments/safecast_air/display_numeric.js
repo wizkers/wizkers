@@ -41,6 +41,9 @@ define(function (require) {
             this.minreading = -1;
             this.valid = false;
             this.validinit = false;
+            this.probeid = '-';
+            var readings = {};
+
             linkManager.on('input', this.showInput, this);
         },
 
@@ -55,12 +58,25 @@ define(function (require) {
             if (instrumentManager.liveViewRef() && instrumentManager.liveViewRef().rsc) {
                 instrumentManager.liveViewRef().rsc();
             };
+            if (this.probeid != '-') {
+                var pname = instrumentManager.getInstrument().get('metadata').probes[this.probeid].name || this.probeid;
+                $("#probeid", this.el).html(pname);
+                if (readings[this.probeid] != undefined) {
+                    // TODO
+                }
+            }
+
             return this;
         },
 
         onClose: function () {
             console.log("bGassy numeric view closing...");
             linkManager.off('input', this.showInput, this);
+        },
+
+        selectProbe: function (pid) {
+            probeid = pid;
+            this.render();
         },
 
         showInput: function (data) {
@@ -72,23 +88,24 @@ define(function (require) {
                 $('#numview_in', this.el).css('color', data.reconnecting ? '#a1a1a1' : '#000000');
             }
 
-            if (typeof (data.cpm) == 'undefined')
+            if (typeof (data.gas) == 'undefined')
                 return;
-            var cpm = parseFloat(data.cpm.value);
-            var usv = parseFloat(data.cpm.usv);
-            var count = parseInt(data.cpm.count);
-            $('#livecpm', this.el).html(cpm.toFixed(0));
-            if (usv) {
-                $('#liveusvh', this.el).html(usv.toFixed(3) + "&nbsp;&mu;Sv/h");
-            }
-            if (count) {
-                $('#count', this.el).html(count);
-            }
 
-            if (data.loc_status && data.loc_status == 'OK') {
+            /**
+            readings[data.probeid] = { cpm: cpm, cpm2: cpm2};
+
+            if (data.probeid != probeid)
+                return;
+            
+            $('#livecpm', this.el).html(cpm);
+            $('#livecpm2', this.el).html(cpm2);
+            $('#liveusvh', this.el).html((parseFloat(data.cpm2.value)/100).toFixed(3));
+            */
+            
+            if (data.gps) {
                 var coord = utils.coordToString({
-                    lat: data.loc.coords.latitude,
-                    lng: data.loc.coords.longitude
+                    lat: data.gps.lat,
+                    lng: data.gps.lon
                 });
                 $('#lat', this.el).html(coord.lat);
                 $('#lon', this.el).html(coord.lng);

@@ -120,7 +120,7 @@ define(function (require) {
         // for the Wizkers app, not the instrument itself (those are done on the DiagDisplay
         // screen).
         this.getWizkersSettings = function(arg, callback) {
-            require(['app/instruments/safecast_air/settings_wizkers'], function(view) {
+            require(['app/instruments/blue_onyx/settings_wizkers'], function(view) {
                 callback(new view(arg));
             });
         };

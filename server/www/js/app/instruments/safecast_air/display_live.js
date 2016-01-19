@@ -275,28 +275,6 @@ define(function (require) {
             }
         },
 
-        disp_cpm: function (data, ts) {
-            if (!this.display_graph)
-                return;
-
-            if (data.cpm != undefined) {
-                var cpm = parseFloat(data.cpm.value);
-
-                var dp = {
-                    name: "CPM",
-                    value: cpm,
-                    timestamp: ts
-                };
-                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp): this.plot.appendPoint(dp);
-                dp = {
-                    name: "AVG",
-                    value: this.movingAverager(cpm, this.movingAvgData),
-                    timestamp: ts
-                };
-                (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp): this.plot.appendPoint(dp);
-            }
-        },
-
         // We get there whenever we receive something from the driver port
         showInput: function (data) {
             var self = this;
@@ -388,8 +366,6 @@ define(function (require) {
                     this.probes[type].appendPoint(datapoint);
                 }
             }
-
-            //            this.disp_cpm(data);
         },
     });
 });
