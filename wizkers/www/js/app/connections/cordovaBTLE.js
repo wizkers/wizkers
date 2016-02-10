@@ -71,8 +71,8 @@ define(function (require) {
             bluetoothle.write(callback, callback, {
                 value: encodedString,
                 address: devAddress,
-                serviceUuid: info.service_uuid,
-                characteristicUuid: info.characteristic_uuid,
+                service: info.service_uuid,
+                characteristic: info.characteristic_uuid,
             });
         };
 
@@ -98,8 +98,8 @@ define(function (require) {
 
             var params = {
                 address: devAddress,
-                serviceUuid: subscribeInfo.service_uuid,
-                characteristicUuid: subscribeInfo.characteristic_uuid,
+                service: subscribeInfo.service_uuid,
+                characteristic: subscribeInfo.characteristic_uuid,
                 isNotification: true
             };
             bluetoothle.subscribe(subscribeSuccess, function (err) {

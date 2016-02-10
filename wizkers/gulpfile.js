@@ -37,7 +37,7 @@ var paths = {
     // Application paths: (need to be in arrays)
     templates: ['www/js/tpl/**/*.html'],
     css: ['www/css/*', 'www/fonts/*', 'www/img/**/*'],
-    libs: ['www/js/lib/**/*.js'],
+    libs: ['www/js/lib/**/*'],
     jsapp: ['www/js/app/**/*.js', 'www/js/app/**/*.png'],
 
     // Files specific to each kind of run mode (chrome, cordova, server)
