@@ -72,6 +72,10 @@ define(function (require) {
         },
 
         showInput: function (data) {
+            
+            if (data.reconnecting != 'undefined') {
+                $('#numview_in', this.el).css('color', data.reconnecting ? '#a1a1a1' : '#000000');
+            }
 
             if (typeof (data.cpm) == 'undefined')
                 return;

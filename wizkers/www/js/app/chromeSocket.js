@@ -292,6 +292,13 @@ define(function (require) {
                 console.log(status);
             }
 
+            function startScan() {
+                bluetoothle.startScan(startScanSuccess, startScanError, {
+                    "serviceUuids": [],
+                    allowDuplicates: true
+                });
+            };
+
             function success(status) {
                 if (status.status == 'enabled') {
                     // Before anything else, make sure we have the right permissions (Android 6 and above, not
@@ -300,12 +307,11 @@ define(function (require) {
                         if (!status.hasPermission) {
                             bluetoothle.requestPermission(function (status) {
                                 if (status.requestPermission) {
-                                    bluetoothle.startScan(startScanSuccess, startScanError, {
-                                        "serviceUuids": [],
-                                        allowDuplicates: true
-                                    });
+                                    startScan();
                                 }
                             });
+                        } else {
+                            startScan();
                         }
                     });
                 } else {
