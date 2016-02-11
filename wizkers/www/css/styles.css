@@ -4,9 +4,11 @@
  * E. Lafargue 2014
  **/
 
+/**
 body {
   font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', sans-serif;
 }
+*/
 
 
 
@@ -189,7 +191,7 @@ a.plain:hover {
 
 
 .bigreading {
-    font-size: 48px;
+    font-size: 5em;
 /*    font-weight: bold; */
 }
 
