@@ -32,7 +32,7 @@ define(function (require) {
         Backbone = require('backbone'),
         Paginator = require('app/views/paginator'),
         template = require('js/tpl/InstrumentListItemView.js');
-
+        
     var InstrumentListItemView = Backbone.View.extend({
 
         tagName: "div",
