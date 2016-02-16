@@ -1,10 +1,13 @@
 <div class="panel panel-default">
-<div class="panel-body select" >
+<div class="panel-heading">
+    <h6><%= instrument.name %></h6>
+    </div>
+<div class="panel-body select" style="text-align: center;" >
     <span class="label label-success pull-right" style="display: none" id="connected">Connected</span>
+    
     <a href="#" class="plain">
         <img style="width:100%;" src="<%= instrument.icon === '' ? 'js/app/instruments/' + instrument.type + '/icon.png' : 'pics/instruments/' + instrument.icon %>"
             >
-        <h5><%= instrument.name %></h5>
     </a>
         <% if (edit) { %>
             <a class="btn btn-mini btn-default edit" href="#instruments/<%= instrument._id %>">Edit</a>

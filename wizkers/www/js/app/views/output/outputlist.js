@@ -31,12 +31,13 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         Paginator = require('app/views/paginator'),
+        utils = require('app/utils'),
         template = require('js/tpl/OutputListItemView.js');
 
     var OutputListItemView = Backbone.View.extend({
 
         tagName: "div",
-        className: "col-md-3 col-sm-2",
+        className: "col-md-3 col-xs-6",
 
         initialize: function () {},
 
@@ -101,7 +102,7 @@ define(function (require) {
             var startPos = (this.options.page - 1) * items;
             var endPos = Math.min(startPos + items, len + 1);
 
-            this.$el.html('<div class="col-md-12"><div class="row thumbnails"></div></div>');
+            this.$el.html('<div class="col-md-12 thumbnails"></div></div>');
             var editok = true;
             // Ask to hide the instrument setting in case we are a viewer or operator in server mode, because
             // the server won't let us retrieve the instrument parmeters anyway
@@ -110,14 +111,24 @@ define(function (require) {
                     editok = false;
             }
 
+	        var rowName = 'row0';
+            if (!utils.checkBreakpoint('xs')) {
+                this.$('.thumbnails').append('<div class="row row0"></div>');
+            }
             for (var i = startPos; i < endPos; i++) {
+                // If we are on a XS screen, make sure we have a nice row break
+                // and no funky layout
+                if (utils.checkBreakpoint('xs') && !((i-startPos) % 2)) {
+                    rowName = 'row' + Math.floor((i-startPos)/2);
+                    this.$('.thumbnails').append('<div class="row ' + rowName  + '"></div>');
+                }
                 if (i < len) {
-                    $('.thumbnails', this.el).append(new OutputListItemView({
+                    $('.' + rowName, this.el).append(new OutputListItemView({
                         model: outputs[i]
                     }).render().el);
                 } else {
                     // Add a "Add Output" card at the end:
-                    $('.thumbnails', this.el).append('<div class="col-md-3 col-sm-2"><div class="thumbnail glowthumbnail select" style="text-align:center;"><a href="#outputs/add" class="plain"><h5>Add output</h5><p style="font-size:6em;"><span class="glyphicon glyphicon-plus-sign"></span></p><p>Create a new output</p></a></div></div>');
+                    $('.' + rowName, this.el).append('<div class="col-md-3 col-xs-6"><div class="panel panel-default"><div class="panel-heading"><h6>Add output</h6></div><div class="panel-body" style="text-align:center;"><a href="#outputs/add" class="plain"><p style="font-size:6em; margin-bottom:0px;"><span class="glyphicon glyphicon-plus-sign"></span></p><p>New output</p></a></div></div>');
 
                 }
             }
