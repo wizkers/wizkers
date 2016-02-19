@@ -31,12 +31,13 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         Paginator = require('app/views/paginator'),
+        utils = require('app/utils'),
         template = require('js/tpl/InstrumentListItemView.js');
-
+        
     var InstrumentListItemView = Backbone.View.extend({
 
         tagName: "div",
-        className: "col-md-3 col-sm-2",
+        className: "col-md-2 col-xs-6",
 
         initialize: function (options) {
             this.model.bind("change", this.render, this);
@@ -133,11 +134,11 @@ define(function (require) {
             var instruments = this.model.models;
             var len = instruments.length;
 
-            var items = 4;
+            var items = 6;
             var startPos = (this.options.page - 1) * items;
             var endPos = Math.min(startPos + items, len+1);
 
-            this.$el.html('<div class="col-md-12"><div class="row thumbnails"></div></div>');
+            this.$el.html('<div class="col-md-12 thumbnails"></div>');
             var editok = true;
             // Ask to hide the instrument setting in case we are a viewer or operator in server mode, because
             // the server won't let us retrieve the instrument parmeters anyway
@@ -146,16 +147,26 @@ define(function (require) {
                     editok = false;
             }
 
+            var rowName = 'row0';
+            if (!utils.checkBreakpoint('xs')) {
+                    this.$('.thumbnails').append('<div class="row row0"></div>');
+                }
             for (var i = startPos; i < endPos; i++) {
+                // If we are on a XS screen, make sure we have a nice row break
+                // and no funky layout
+                if (utils.checkBreakpoint('xs') && !((i-startPos) % 2)) {
+                    rowName = 'row' + Math.floor((i-startPos)/2);
+                    this.$('.thumbnails').append('<div class="row ' + rowName  + '"></div>');
+                }
                 if (i < len) {
                     this.inslist.push(new InstrumentListItemView({
                         model: instruments[i],
                         edit: editok
                     }));
-                    $('.thumbnails', this.el).append(this.inslist[this.inslist.length - 1].render().el);
+                    $('.' + rowName, this.el).append(this.inslist[this.inslist.length - 1].render().el);
                 } else {
                     // Add a "Add Instrument" card at the end:
-                    $('.thumbnails', this.el).append('<div class="col-md-3 col-sm-2"><div class="thumbnail glowthumbnail select" style="text-align:center;"><a href="#instruments/add" class="plain"><h5>Add instrument</h5><p style="font-size:6em;"><span class="glyphicon glyphicon-plus-sign"></span></p><p>Create a new instrument</p></a></div></div>');
+                    $('.' + rowName, this.el).append('<div class="col-md-2 col-xs-6"><div class="panel panel-default"><div class="panel-heading"><h6>Add instrument</h6></div><div class="panel-body select" style="text-align: center;" ><a href="#instruments/add" class="plain"><p style="font-size:5em; margin-bottom:0px;"><span class="glyphicon glyphicon-plus-sign"></span></p><p>New</p></a></div></div></div>');
                 }
             }
 
