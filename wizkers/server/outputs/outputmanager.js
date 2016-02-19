@@ -93,7 +93,7 @@ var output = function (data, insid) {
     var active = activeOutputs[insid];
     for (var idx in active) {
         var output = active[idx];
-        if (alarm(output, data) || regular(output)) {
+        if (alarm(output,data) || regular(output)) {
             debug('Output triggered with this data', data);
             // We need to pass the index to the sendData call, so that it can be passed
             // back for the callback: this is because by the time the callback is called,
@@ -103,8 +103,9 @@ var output = function (data, insid) {
             // by reference, so we're OK.
             output.plugin.sendData(data, idx, function (success, oidx) {
                 debug('Output trigger success is ' + success + ' for output ' + oidx);
-                if (success)
+                if (success) {
                     active[oidx].last = new Date().getTime();
+                }
             });
         }
     }
@@ -138,13 +139,8 @@ var alarm = function (output, data) {
     var freq = output.config.alrmfrequency;
     if (freq == 0)
         return false; // zero is alarm disabled
-    if ((output.last_alarm == undefined) ||
-        ((new Date().getTime() - output.last_alarm) > freq * 1000)
-    ) {
-        output.last_alarm = new Date().getTime();
+    if ((new Date().getTime() - output.last) > freq * 1000)
         return true;
-    }
-
     return false;
 };
 

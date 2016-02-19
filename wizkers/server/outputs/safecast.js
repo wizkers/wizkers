@@ -96,6 +96,7 @@ module.exports = function safecast() {
                     return;
                 }
                 output_ref._rev = result._rev;
+                output_ref.last = new Date().getTime();
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
             // Tell our caller that we couldn't send the data
