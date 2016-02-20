@@ -66,7 +66,6 @@ define(function(require) {
     
     return {
         
-        
         /**
          * <p>Converts an arbitrary value to a Query String representation.</p>
          *
@@ -123,6 +122,28 @@ define(function(require) {
           if (!s && name) return name + "=";
           return s;
         },
+        
+        textify: function(obj) {
+            var body = '';
+            for (var key in obj) {
+                body += key + '=' + obj[key] + '\n';
+            }
+            return body;
+        },
+
+        multipart: function(obj, filekey) {
+            var fd = new FormData();
+            for (var key in obj) {
+                if (key == filekey) {
+                    var filePart = [ obj[key] ];
+                    var myBlob = new Blob( filePart, { type:'text/plain'});
+                    fd.append(key, myBlob, "file.log");
+                } else
+                    fd.append(key, obj[key]);
+            }
+            return fd;
+        },
+
         
         // Returns a function that will do a XMLhttpRequest for us
         request: function(options, callback) {

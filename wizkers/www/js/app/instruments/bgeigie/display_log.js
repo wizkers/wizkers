@@ -115,7 +115,7 @@ define(function (require) {
         events: {
             "click .resetZoom": "resetZoom",
             "click #cpmscale": "cpmScaleToggle",
-            "click #send-to-api": "generateLog",
+            "click #send-to-api": "generateInMemoryLog",
             "click .send-log": "sendLog",
             "click #csv-export": "saveToCSV"
         },
@@ -257,11 +257,11 @@ define(function (require) {
          */
         generateInMemoryLog: function () {
             var inMemLog = '';
-            for (var i = 0; i < self.deviceLogs.length; i++) {
-                var currentLog = self.deviceLogs.at(i);
+            for (var i = 0; i < this.deviceLogs.length; i++) {
+                var currentLog = this.deviceLogs.at(i);
                 var entries = currentLog.entries;
-                for (entry in entries) {
-                    var data = entries[entry].get('data');
+                for (var i = 0; i <  entries.length; i++) {
+                    var data = entries.at(i).get('data');
                     // Sometimes, we get entries without a valid reading, detect this
                     if (data.nmea) {
                         inMemLog += (data.nmea + '\n');
@@ -342,12 +342,11 @@ define(function (require) {
                     path: '/bgeigie_imports.json',
                     headers: {
                         'X-Datalogger': 'wizkers.io Safecast Drive app',
-                        'Content-Type': 'application/x-www-form-urlencoded',
                     }
                 };
 
                 params['bgeigie_import[source]'] = this.logfile;
-                var post_data = httprequest.stringify(params);
+                var post_data = httprequest.multipart(params, 'bgeigie_import[source]');
                 var post_request = httprequest.request(post_options, function (res) {
                     var err = true;
                     console.log("[Safecast log file post] API Request result");
