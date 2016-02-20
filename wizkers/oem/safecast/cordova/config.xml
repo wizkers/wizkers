@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.wizkers.safecast.drive" version="a0.1.7" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:gap="http://phonegap.com/ns/1.0">
+<widget id="io.wizkers.safecast.drive" version="a0.2.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:gap="http://phonegap.com/ns/1.0">
     <name>Safecast:Drive</name>
     <description>
         Connect your bGeigie BLE to your phone and upload your drives.
@@ -11,15 +11,15 @@
     <content src="cordova.html" />
     <access origin="*" />
     <plugin name="fr.drangies.cordova.serial" spec="https://github.com/elafargue/cordovarduino.git" />
-    <plugin name="com.mediamatrixdoo.keepscreenon" spec="^1.0.1" />
-    <plugin name="cordova-plugin-bluetoothle" spec="^2.4.0" />
-    <plugin name="cordova-plugin-file" spec="^3.0.0" />
-    <plugin name="cordova-plugin-file-transfer" spec="^1.3.0" />
-    <plugin name="cordova-plugin-geolocation" spec="^1.0.1" />
+    <plugin name="com.mediamatrixdoo.keepscreenon" spec="https://github.com/zoxxx/PhoneGap-KeepScreenOn-plugin.git" />
+    <plugin name="cordova-plugin-bluetoothle" spec="^3.0.1" />
+    <plugin name="cordova-plugin-file" spec="^4.1.1" />
+    <plugin name="cordova-plugin-file-transfer" spec="^1.5.0" />
+    <plugin name="cordova-plugin-geolocation" spec="^2.1.0" />
     <plugin name="cordova-plugin-google-analytics" spec="^0.8.0" />
-    <plugin name="cordova-plugin-whitelist" spec="^1.0.0" />
-    <plugin name="de.appplant.cordova.plugin.background-mode" spec="^0.6.4" />
-    <plugin name="cordova-plugin-device" spec="^1.0.1" />
-    <plugin name="cordova-plugin-inappbrowser" spec="^1.0.1" />
+    <plugin name="cordova-plugin-whitelist" spec="^1.2.1" />
+    <plugin name="de.appplant.cordova.plugin.background-mode" spec="https://github.com/katzer/cordova-plugin-background-mode.git" />
+    <plugin name="cordova-plugin-device" spec="^1.1.1" />
+    <plugin name="cordova-plugin-inappbrowser" spec="^1.3.0" />
     <plugin name="cordova-plugin-backbutton" spec="^0.3.0" />
 </widget>
