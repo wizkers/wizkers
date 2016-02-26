@@ -17,20 +17,26 @@
         <div class="col-md-12">
             <div class="row thumbnails">
                 <div class="col-md-3 col-sm-2">
-                    <div class="thumbnail glowthumbnail select" style="text-align:center;">
+                    <div style="text-align:center;">
                         <h4>Welcome to Safecast:Drive</h4>
 
                         <p>Ready for a drive? Everything starts with your first instrument: switch on your bGeigie, and click on "Add Instrument" below to configure it.</p>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-2">
-                    <div class="thumbnail glowthumbnail select" style="text-align:center;"><a href="#instruments/add" class="plain"><h5>Add instrument</h5><p style="font-size:6em;"><span class="glyphicon glyphicon-plus-sign"></span></p><p>Create a new instrument</p></a>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h6>Add Instrument</h6>
+                        </div>
+                        <div class="panel-body select" style="text-align: center;" >
+                            <a href="#instruments/add" class="plain"><h5>Add instrument</h5><p style="font-size:5em; margin-bottom:0px;"><span class="glyphicon glyphicon-plus-sign"></span></p><p>Create a new instrument</p>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-2">
-                    <div class="thumbnail glowthumbnail select" style="text-align:center;">
+                    <div style="text-align:center;">
                         <h4>Need help ?</h4>
-
                         <p>Visit <a onclick="window.open('http://safecast.org/', '_system')">Safecast.org</a> for more details.</p>
                     </div>
                 </div>
@@ -39,13 +45,11 @@
         </div>
     </div>
 </div>
-<!--/col-md--->
 
 <div class="col-md-3">
-    <div class="well" style="padding: 10px;" id="numview">
-    </div>
+    <div id="numview" style="background:#fafafa; margin-top: 10px; margin-bottom: 0px;"></div>
 </div>
-<!--/col-md--->
+
 
 <!-- The "Record" modal -->
 <div class="container">
