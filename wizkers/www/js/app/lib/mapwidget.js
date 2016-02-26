@@ -68,7 +68,7 @@ define(function (require) {
             var self = this;
             if (typeof (google) == 'undefined') {
                 console.log('Error: Google maps API did not load');
-                this.$el.html('<h4>Maps are not available yet</h4>');
+                this.$el.html('<h4>Maps loading...</h4>');
                 // TODO: this breaks on Chrome apps due to their inflexible content security
                 // policy (we can't inject Javascript in the DOM).
                 // We want to dynamically load the Google Maps API at this point:

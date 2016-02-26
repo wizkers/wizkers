@@ -363,6 +363,14 @@ define(function (require) {
                         console.log(this.statusText);
                         break;
                     }
+                    if (!err) {
+                        stats.instrumentEvent('safecast_upload', 'success');
+                        $('#UploadModal', self.el).modal('hide');
+                        $('#myErrorLabel', self.el).html('Success');
+                        $('#errorreason', self.el).html('Your log was uploaded to Safecast');
+                        $('#errordetail', self.el).html('Keep up the good work :)');
+                        $('#ErrorModal').modal('show');
+                    }
                 });
                 post_request.send(post_data);
 
