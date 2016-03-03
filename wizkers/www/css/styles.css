@@ -192,6 +192,7 @@ a.plain:hover {
 
 .bigreading {
     font-size: 5em;
+    line-height: 1em;
 /*    font-weight: bold; */
 }
 

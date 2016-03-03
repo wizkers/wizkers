@@ -42,6 +42,8 @@ define(function (require) {
 
             this.deviceinitdone = false;
             
+            this.update_count = 0;
+            
             // The Sigma25 has got 4096 channels, we keep those in an array
             this.channels = [];
             // We need to initialize it to zeroes so that we can
@@ -159,7 +161,8 @@ define(function (require) {
                         });
                     }
                 }
-                this.plot.redraw();
+                if (! (this.update_count++ % 500))
+                    this.plot.redraw();
             }
         },
     });

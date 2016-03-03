@@ -31,7 +31,7 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        template = require('js/tpl/instruments/FCOledLogView.js');
+        template = require('js/tpl/instruments/fcoled/FCOledLogView.js');
 
     // Load the flot library & flot time plugin:
     require('flot');

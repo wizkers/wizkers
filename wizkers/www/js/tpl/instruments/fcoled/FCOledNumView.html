@@ -1,0 +1,69 @@
+<div class="row">
+    <div class="col-md-12">
+        <h4 >Live reading</h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <span class="bigreading" id="livev">00.000</span>&nbsp;V
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <span class="bigreading" id="livea">0.000</span>&nbsp;mA
+    </div>
+</div>
+
+<h6>Sessions stats</h6>
+
+<table>
+    <tr>
+        <td>Duration</td>
+        <td><span id="sessionlength">00:00:00</span></td>
+    </tr>
+    <tr>
+        <td>mWh</td>
+        <td><span id="mwh"></span></td>
+    </tr>
+    <tr>
+        <td>mAh</td>
+        <td><span id="mah"></span></td>
+    </tr>
+</table>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h6>Commands</h6>
+        </div>
+    <div class="panel-body" >
+        <span style="float:left;">Screen:&nbsp;</span>
+        <div id="screen" class="btn-group-sm">
+        <button type="button" class="btn btn-default">1</button>
+        <button type="button" class="btn btn-default">2</button>
+        <button type="button" class="btn btn-default">3</button>
+        <button type="button" class="btn btn-default">4</button>
+        <button type="button" class="btn btn-default">5</button>
+        <button type="button" class="btn btn-default">6</button>
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon">Refresh (ms)</span>
+            <input type="number" min="150" id="refresh" class="form-control" placeholder="1000">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" id="refresh-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                </span>
+        </div><br>
+        <div class="input-group">
+            <span class="input-group-addon">Alarm (mA)</span>
+            <input type="number" min="0" id="alarm" class="form-control" placeholder="350">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" id="alarm-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                </span>
+        </div>
+        <br>
+        <button type="button" id="raz" class="btn btn-danger">Reset energy readings</button>
+    </div>
+</div>
+
+</div>
+

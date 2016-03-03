@@ -32,7 +32,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         utils    = require('app/utils'),
-        template = require('js/tpl/instruments/FCOledNumView.js');
+        template = require('js/tpl/instruments/fcoled/FCOledNumView.js');
     
     return Backbone.View.extend({
 

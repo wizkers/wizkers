@@ -33,7 +33,7 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
-        template = require('js/tpl/instruments/FCOledLiveView.js');
+        template = require('js/tpl/instruments/fcoled/FCOledLiveView.js');
 
     return Backbone.View.extend({
 
