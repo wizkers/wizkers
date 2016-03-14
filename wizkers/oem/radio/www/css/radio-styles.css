@@ -21,3 +21,7 @@
 .navbar-inverse .navbar-brand:focus, .navbar-inverse .navbar-brand:hover {
     color: #000000;
 }
+
+.navbar-inverse .navbar-toggle .icon-bar {
+    background-color: rgba(0, 0, 0, 0.8);
+}

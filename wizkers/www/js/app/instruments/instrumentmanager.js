@@ -63,6 +63,12 @@ define(function (require) {
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
+            "elecraft_xg3": {
+                name: "Elecraft XG3",
+                type: 'app/instruments/elecraft_xg3/elecraft_xg3',
+                settings: null,
+                connectionsettings: 'app/views/instrument/serialport'
+            },
             "usbgeiger": {
                 name: "USB Geiger",
                 type: 'app/instruments/usbgeiger/usb_geiger',
