@@ -176,15 +176,19 @@ define(function (require) {
                 });
 
                 // Now start the numeric display (the one on the right)
-                instrumentManager.getNumDisplay({
-                    model: this.instrument
-                }, function (view) {
-                    self.instrumentNumericView = view;
-                    if (view != null) {
-                        self.$('#numview').html(view.el);
-                        view.render();
+                if (instrumentManager.getCaps().indexOf("NumDisplay") >= 0) {
+                    instrumentManager.getNumDisplay({
+                        model: this.instrument
+                    }, function (view) {
+                        self.instrumentNumericView = view;
+                        if (view != null) {
+                            self.$('#numview').html(view.el);
+                            view.render();
+                        }
+                    }); } else {
+                        self.$('#numview').remove();
+                        self.$('#home-left').removeClass('col-md-9').addClass('col-md-12');
                     }
-                });
             }
 
             // Don't hook the events before this point, no need!

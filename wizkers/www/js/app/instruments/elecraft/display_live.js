@@ -73,8 +73,6 @@ define(function (require) {
                 });
             }
 
-
-
             linkManager.on('status', this.updateStatus, this);
             linkManager.on('input', this.showInput, this);
         },

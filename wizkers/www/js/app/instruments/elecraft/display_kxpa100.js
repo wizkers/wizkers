@@ -27,6 +27,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
+        Snap = require('snap'),
         simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/elecraft/KXPA100.js');
         
