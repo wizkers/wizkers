@@ -56,6 +56,8 @@ define(function (require) {
             this.KXPAPoller = null;
             this.currentCR = 0;
             this.currentLR = 0;
+            this.currentInputPower = 0;
+            this.currentOutputPower = 0;
 
             this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"];
 
@@ -98,6 +100,17 @@ define(function (require) {
             if (!this.showstream) {
                 $('.showstream', this.el).css('visibility', 'hidden');
             }
+            
+            var s = Snap("#kxpa100-front");
+            Snap.load('js/app/instruments/elecraft/KXPA100-Front-Path.svg', function (f) {
+                s.add(f);
+                // Set display constraints for the radio panel:
+                s.attr({
+                    width: "100%",
+                });
+                //$("#kx3").height($("#kx3").width() * 0.42);
+            });
+
 
             require(['app/instruments/elecraft/equalizer'], function (view) {
                 self.elecraftRXEQ = new view({
@@ -200,7 +213,7 @@ define(function (require) {
                 linkManager.sendCommand('^AT;^AN;');
                 linkManager.sendCommand('^BY;^MD;');
                 linkManager.sendCommand('^OP;^SI;');
-                this.KXPAPoller = setInterval(this.queryKXPA.bind(this), 1000);
+                this.KXPAPoller = setInterval(this.queryKXPA.bind(this), 500);
             } else {
                 clearInterval(this.KXPAPoller);
             }
@@ -276,7 +289,7 @@ define(function (require) {
             }
             setTimeout(function () {
                 linkManager.sendCommand('^AN;')
-            }, 50);
+            }, 100);
         },
 
         atub_click: function (e) {
@@ -362,24 +375,69 @@ define(function (require) {
             if ((event.target.id == "manualcmd" && event.keyCode == 13) || (event.target.id != "manualcmd"))
                 linkManager.sendCommand($('#manualcmd', this.el).val());
         },
+        
+        updatePowerLED: function(power) {
+            var ledOn = "#20ff00";
+            var ledDim = "#00aa2a";
+            var ledOff = "#4e6e56";
+            var pl = [ 25, 50, 60, 70, 80,90, 100, 110];
+            for (var l = 0; l < pl.length; l++) {
+                var col = ledOff;
+                if (power >= pl[l]) {
+                    col = ledOn;
+                } else if (l > 0 && power > pl[l-1]) {
+                    col = ledDim;
+                } else if (l == 0 && power > 0) {
+                    col = ledDim;
+                }
+                $("#kxpa100-front #power_" + pl[l]).css('fill', col);
+            }
+        },
+
+        updateSWRLED: function(swr) {
+            var ledOn = "#20ff00";
+            var ledDim = "#00aa2a";
+            var ledOff = "#4e6e56";
+            swr = swr * 10;
+            var pl = [ 10, 12, 15, 20, 30];
+            for (var l = 0; l < pl.length; l++) {
+                var col = ledOff;
+                if (swr >= pl[l]) {
+                    col = ledOn;
+                } else if (l > 0 && swr > pl[l-1]) {
+                    col = ledDim;
+                } else if (l == 0 && swr > 0) {
+                    col = ledDim;
+                }
+                $("#kxpa100-front #swr_" + pl[l]).css('fill', col);
+            }
+        },
 
         // All the UI updates related to KXPA100
         handleKXAInput: function (data) {
+            // Note: need to match the SVG def for LED off color
+            var ledOn = "#20ff00";
+            var ledOff = "#4e6e56";
             var cmd = data.substr(1, 2);
             var val = parseInt(data.substr(3)) / 10;
             var stamp = new Date().getTime();
+            // If we are getting input, then the amp is on...
+            $("#kxpa100-front #led_on").css('fill', ledOn);
             if (cmd == "PI") {
                 $("#kxpa-inputpower").html(val);
                 this.amppowerplot.appendPoint({
                     'name': "In",
                     'value': val
                 });
+                this.currentInputPower = val;
             } else if (cmd == "PF") {
                 $("#kxpa-forwardpower").html(val);
                 this.amppowerplot.appendPoint({
                     'name': "Fwd",
                     'value': val
                 });
+                this.updatePowerLED(val);
+                this.currentOutputPower = val;
             } else if (cmd == "PV") {
                 $("#kxpa-reflectedpower").html(val);
                 this.amppowerplot.appendPoint({
@@ -412,11 +470,16 @@ define(function (require) {
             } else if (cmd == 'BN') {
                 $("#kxpa-band", this.el).html(data.substr(3));
             } else if (cmd == 'SW') {
-                $("#kxpa-lastswr", this.el).html(data.substr(3));
+                $("#kxpa-lastswr", this.el).html(val);
                 this.swrplot.appendPoint({
                     'name': "SWR",
                     'value': val
                 });
+                if (this.currentOutputPower > 0) {
+                    this.updateSWRLED(val);
+                } else {
+                    this.updateSWRLED(0);
+                }
             } else if (data.charAt(1) == 'F') {
                 $("#kxpa-frequency", this.el).html(data.substr(2));
             } else if (cmd == 'CR') {
@@ -448,13 +511,34 @@ define(function (require) {
                 }
                 $('#kxpa-ind', this.el).html(sum);
             } else if (cmd == 'AT') {
-                $('#kxpa-pa-attenuator', this.el).prop('checked', (data.substr(-1, 1) == "1"));
+                var att_on = (data.substr(-1, 1) == "1");
+                $('#kxpa-pa-attenuator', this.el).prop('checked', att_on);
+                $("#kxpa100-front #led_att").css('fill', att_on ? ledOn : ledOff);
             } else if (cmd == 'AN') {
-                $('#kxpa-antenna', this.el).val('ant' + data.substr(-1, 1));
+                var ant = parseInt(data.substr(-1, 1));
+                $('#kxpa-antenna', this.el).val('ant' + ant);
+                $("#kxpa100-front #ant_" + ant).css('fill', ledOn);
+                $("#kxpa100-front #ant_" + (3-ant)).css('fill', ledOff);
             } else if (cmd == 'BY') {
                 $('#kxpa-atu-bypass', this.el).prop('checked', (data.substr(-1, 1) == "B"));
             } else if (cmd == 'MD') {
-                $('#kxpa-mode', this.el).val('kxpa-mode-' + data.substr(-1, 1));
+                var md = data.substr(-1, 1);
+                $('#kxpa-mode', this.el).val('kxpa-mode-' + md);
+                $("#kxpa100-front #led_auto").css('fill', ledOff);
+                $("#kxpa100-front #led_byp").css('fill', ledOff);
+                $("#kxpa100-front #led_man").css('fill', ledOff);
+                switch (md) {
+                 case 'A':
+                     $("#kxpa100-front #led_auto").css('fill', ledOn);
+                 break;
+                 case 'M':
+                     $("#kxpa100-front #led_man").css('fill', ledOn);
+                 break;
+                 case 'B':
+                     $("#kxpa100-front #led_byp").css('fill', ledOn);
+                 break; 
+                }
+                
             } else if (cmd == 'SI') {
                 $('#kxpa-caps-tx', this.el).prop('checked', (data.substr(-1, 1) == "T"));
             } else if (cmd == 'OP') {

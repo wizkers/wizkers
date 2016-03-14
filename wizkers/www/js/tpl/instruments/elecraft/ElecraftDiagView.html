@@ -115,30 +115,14 @@
                         <div class="col-md-6">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <h4>Amplifier</h4>
+                                    <legend>Amplifier</legend>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <div class="panel panel-default">
                                         <div class="panel-body">
-                                            <div class="col-md-4">
-                                                Input Power: <span id="kxpa-inputpower">0.0</span>
-                                                <br> Drain Current: <span id="kxpa-inputcurrent">0.0</span>
-                                                <br> Supply Voltage: <span id="kxpa-inputvoltage">.0</span>
-                                                <br> Dissipated Power: <span id="kxpa-dissipatedpower">0.0</span>
-                                                <br> Temperature: <span id="kxpa-temperature">0.0</span>
-                                                <br>
-                                            </div>
-                                            <div class="col-md-4">
-                                                Forward Power: <span id="kxpa-forwardpower">0.0</span>
-                                                <br> Reflected Power: <span id="kxpa-reflectedpower">0.0</span>
-                                                <br> Last SWR: <span id="kxpa-lastswr">0.0</span>
-                                                <br> Frequency: <span id="kxpa-frequency"></span>
-                                                <br> Band: <span id="kxpa-band"></span>
-                                                <br>
-                                            </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-12">
                                                 <p>Fault: <span id="kxpa-fault">NO FAULT</span>
                                                 </p>
                                                 <div class="checkbox">
@@ -151,6 +135,39 @@
                                                         <input type="checkbox" id="kxpa-pa-attenuator">Attenuator
                                                     </label>
                                                 </div>
+                                                <br> Temperature: <span id="kxpa-temperature">0.0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <svg id="kxpa100-front"  viewBox="0 0 267 171" preserveAspectRatio="xMidYMid"></svg>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="col-md-4">
+                                                <small>
+                                                Input Power: <span id="kxpa-inputpower">0.0</span>
+                                                <br>Forward Power: <span id="kxpa-forwardpower">0.0</span>
+                                                <br> Reflected Power: <span id="kxpa-reflectedpower">0.0</span>
+                                                </small>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small>
+                                                Last SWR: <span id="kxpa-lastswr">0.0</span>
+                                                <br> Frequency: <span id="kxpa-frequency"></span>
+                                                <br> Band: <span id="kxpa-band"></span>
+                                                </small>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small>
+                                                Dissipated Power: <span id="kxpa-dissipatedpower">0.0</span>
+                                                <br>Drain Current: <span id="kxpa-inputcurrent">0.0</span>
+                                                <br> Supply Voltage: <span id="kxpa-inputvoltage">.0</span>
+                                                </small>
                                             </div>
                                         </div>
                                     </div>
@@ -160,7 +177,7 @@
                         <div class="col-md-6">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <h4>Antenna Tuner</h4>
+                                    <legend>Antenna Tuner</legend>
                                 </div>
                             </div>
                             <div class="row">
@@ -169,19 +186,27 @@
                                         <div class="panel-body">
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <p>Mode:
-                                                        <select id="kxpa-mode">
-                                                            <option value="kxpa-mode-A">Auto</option>
-                                                            <option value="kxpa-mode-M">Manual</option>
-                                                            <option value="kxpa-mode-B">Bypass</option>
-                                                        </select>
-                                                    </p>
-                                                    <p>Antenna:
-                                                        <select id="kxpa-antenna">
-                                                            <option value="ant1">1</option>
-                                                            <option value="ant2">2</option>
-                                                        </select>
-                                                    </p>
+                                                    <div class="form-horizontal">
+                                                            <label for="kxpa-mode" class="col-md-5 control-label">
+                                                                Mode:
+                                                            </label>
+                                                            <div class="col-md-7">
+                                                                <select class="form-control" id="kxpa-mode">
+                                                                    <option value="kxpa-mode-A">Auto</option>
+                                                                    <option value="kxpa-mode-M">Manual</option>
+                                                                    <option value="kxpa-mode-B">Bypass</option>
+                                                                </select>
+                                                            </div>
+                                                            <label for="kxpa-antenna" class="col-md-5 control-label">
+                                                                Antenna:
+                                                            </label>
+                                                            <div class="col-md-7">
+                                                                <select class="form-control"  id="kxpa-antenna">
+                                                                    <option value="ant1">1</option>
+                                                                    <option value="ant2">2</option>
+                                                                </select>
+                                                            </div>
+                                                    </div>
                                                     <p>Tune</p>
 
                                                     <div class="checkbox">
@@ -316,41 +341,42 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+<!--                     <div class="row">
                         <div class="col-md-3">
-                            <h4>Power</h4>
+                            <h6>Power</h6>
                         </div>
                         <div class="col-md-3">
-                            <h4>Temperature</h4>
+                            <h6>Temperature</h6>
                         </div>
                         <div class="col-md-3">
-                            <h4>Supply</h4>
+                            <h6>Supply</h6>
                         </div>
                         <div class="col-md-3">
-                            <h4>SWR</h4>
+                            <h6>SWR</h6>
                         </div>
                     </div>
+-->
                     <!-- Add here Amplifier graphs -->
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="thumbnail">
-                                <div class="amppowerchart chart" style="position: relative; height:200px;"></div>
-                            </div>
+                            
+                                <div class="amppowerchart chart" style="position: relative; height:190px;"></div>
+                            
                         </div>
                         <div class="col-md-3">
-                            <div class="thumbnail">
-                                <div class="amptempchart chart" style="position: relative; height:200px;"></div>
-                            </div>
+                            
+                                <div class="amptempchart chart" style="position: relative; height:190px;"></div>
+                            
                         </div>
                         <div class="col-md-3">
-                            <div class="thumbnail">
-                                <div class="ampvoltagechart chart" style="position: relative; height:200px;"></div>
-                            </div>
+                            
+                                <div class="ampvoltagechart chart" style="position: relative; height:190px;"></div>
+                            
                         </div>
                         <div class="col-md-3">
-                            <div class="thumbnail">
-                                <div class="ampswrchart chart" style="position: relative; height:200px;"></div>
-                            </div>
+                            
+                                <div class="ampswrchart chart" style="position: relative; height:190px;"></div>
+                            
                         </div>
                     </div>
 

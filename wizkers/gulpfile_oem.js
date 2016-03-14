@@ -52,7 +52,7 @@ var paths = {
     templates: ['www/js/tpl/**/*.html'],
     css: ['www/css/*', 'www/fonts/*', 'www/img/**/*'],
     libs: ['www/js/lib/**/*.js'],
-    jsapp: ['www/js/app/**/*.js', 'www/js/app/**/*.png'],
+    jsapp: ['www/js/app/**/*.js', 'www/js/app/**/*.png', 'www/js/app/**/*.svg'],
 
     // OEM Overlays which are common to all run modes (in www)
     oem_www_files: [ oem_directory + '/www/**/*.js', oem_directory + '/www/**/*.png', oem_directory + '/www/css/*'],
