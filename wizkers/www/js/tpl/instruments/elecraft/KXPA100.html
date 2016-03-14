@@ -6,7 +6,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <div class="col-md-12">
@@ -22,12 +22,17 @@
                                     <input type="checkbox" id="kxpa-pa-attenuator">Attenuator
                                 </label>
                             </div>
-                            <br> Temperature: <span id="kxpa-temperature">0.0</span>
+                            <small>
+                            Dissipated Power: <span id="kxpa-dissipatedpower">0.0</span>
+                            <br>Drain Current: <span id="kxpa-inputcurrent">0.0</span>
+                            <br>Supply Voltage: <span id="kxpa-inputvoltage">.0</span>
+                            <br>Temperature: <span id="kxpa-temperature">0.0</span>
+                            </small>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <svg id="kxpa100-front"  viewBox="0 0 267 171" preserveAspectRatio="xMidYMid"></svg>
             </div>
         </div>
@@ -39,21 +44,18 @@
                             <small>
                             Input Power: <span id="kxpa-inputpower">0.0</span>
                             <br>Forward Power: <span id="kxpa-forwardpower">0.0</span>
-                            <br> Reflected Power: <span id="kxpa-reflectedpower">0.0</span>
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small>
-                            Last SWR: <span id="kxpa-lastswr">0.0</span>
-                            <br> Frequency: <span id="kxpa-frequency"></span>
+                            Reflected Power: <span id="kxpa-reflectedpower">0.0</span>
+                            <br>Last SWR: <span id="kxpa-lastswr">0.0</span>
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small>
+                            Frequency: <span id="kxpa-frequency"></span>
                             <br> Band: <span id="kxpa-band"></span>
-                            </small>
-                        </div>
-                        <div class="col-md-4">
-                            <small>
-                            Dissipated Power: <span id="kxpa-dissipatedpower">0.0</span>
-                            <br>Drain Current: <span id="kxpa-inputcurrent">0.0</span>
-                            <br> Supply Voltage: <span id="kxpa-inputvoltage">.0</span>
                             </small>
                         </div>
                     </div>

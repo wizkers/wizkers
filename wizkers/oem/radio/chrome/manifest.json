@@ -1,0 +1,44 @@
+{
+    "manifest_version": 2,
+    "name": "Wizkers:Radio",
+    "description": "The Universal Chrome app for Elecraft radios, and more to come!",
+    "version": "0.1.1",
+    "offline_enabled": true,
+    "app": {
+        "background": {
+            "scripts": ["background.js"]
+        }
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "permissions": [
+    "serial",
+    "storage",
+    "unlimitedStorage",
+    "audioCapture",
+    "fileSystem",
+    "http://*/*",
+    "https://*/*",
+    "geolocation",
+    "hid",
+        {
+            "usbDevices": [
+                {
+                    "vendorId": 1155,
+                    "productId": 22352
+                }
+            ]
+        }
+    ],
+    "sockets": {
+        "tcpServer": {
+            "listen": ":4532"
+        },
+        "tcp": {
+            "connect": ""
+        }
+    }
+}

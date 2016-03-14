@@ -325,6 +325,9 @@ define(function(require) {
         // All the UI updates related to KXPA100
         handleKXAInput: function (data) {
             
+            if (typeof data != 'string')
+                return;
+            
             if (data.charAt(0) != '^')
                 return;
                 
