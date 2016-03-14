@@ -165,7 +165,9 @@ define(function (require) {
         /////////////
 
         function onSocketCreated(createInfo) {
-            if (chrome.runtime.lastError) {
+            // Note: this API also works on Cordova with the cordova-plugin-chrome-apps-sockets-tcp plugin,
+            // but in that case, chrome.runtime is not defined.
+            if (chrome.runtime && chrome.runtime.lastError) {
                 self.trigger('status', {
                     openerror: true,
                     reason: 'Socket error',
