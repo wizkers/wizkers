@@ -29,7 +29,7 @@
 define(function(require) {
     "use strict";
     
-    var frontend_driver = require('app/instruments/elecraft/driver_frontend');
+    var frontend_driver = require('app/instruments/elecraft_xg3/driver_frontend');
     
     return  function() {
         // Helper function: get driver capabilites.
@@ -67,7 +67,7 @@ define(function(require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.
         this.getBackendDriver = function(arg, callback) {
-            require(['app/instruments/elecraft/driver_backend'], function(driver) {
+            require(['app/instruments/elecraft_xg3/driver_backend'], function(driver) {
                 callback(new driver(arg));
             });
         };

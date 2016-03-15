@@ -38,7 +38,10 @@ define(function (require) {
 
         initialize: function (options) {
             this.deviceinitdone = false;
+            this.currentBand = -1;
+            this.currentLevel = -1;
             linkManager.on('status', this.updateStatus, this);
+            linkManager.on('input', this.showInput, this);
         },
 
         render: function () {
@@ -62,29 +65,63 @@ define(function (require) {
         
         onClose: function () {
             linkManager.off('status', this.updatestatus, this);            
+            linkManager.off('input', this.showInput, this);
         },
         
         updateStatus: function (data) {
             if (data.portopen && !this.deviceinitdone) {
-                // TODO
+                linkManager.startLiveStream();
                 this.deviceinitdone = true;
-
-                linkManager.driver.getRequestedPower();
             } else if (!data.portopen) {
                 this.deviceinitdone = false;
-                // TODO
             }
         },
         
         handleXG3Button: function (e) {
             console.log(e.target.id);
-            // var code = this.buttonCodes[e.target.id];
-            // if (code != null) {
-            //    linkManager.sendCommand('SW' + code + ';');
-            // }
+            var b = e.target.id.split('_');
+            if (b[0] == 'led') {
+                linkManager.driver.setBand(b[1]);
+            } else if (b[0] == 'level') {
+                linkManager.driver.setLevel(b[1]);
+            }
         },
+        
+        updateBandLED: function(band) {
+            var ledOff = "#6c552a";
+            var ledOn = "#fda317"
+            var bands = [ 160, 80, 60, 40, 30, 20, 17, 15, 12, 10, 6, 2];
+            if (band != this.currentBand) {
+                this.$('#xg3-front #led_' + bands[this.currentBand]).css('fill', ledOff);
+                this.$('#xg3-front #led_' + bands[band]).css('fill', ledOn);
+                this.currentBand = band;
+            }
+        },
+        
+        updateLevelLED: function(level) {
+            var ledOff = "#6c552a";
+            var ledOn = "#fda317"
+            var levels = [ 0, 33, 73, 107];
+            if (level != this.currentLevel) {
+                this.$('#xg3-front #level_' + levels[this.currentLevel] + '_dBm').css('fill', ledOff);
+                this.$('#xg3-front #level_' + levels[level] + '_dBm').css('fill', ledOn);
+                this.currentLevel = level;
+            }
+        },
+        showInput: function(data) {
+            console.log(data);
+            var cmdarg = data.split(',');
+            if( cmdarg[0] === 'I') {
+                var f = parseInt(cmdarg[1])/1e6;
+                // Only change field if we are not editing it and the value is different
+                if (!this.$('#vfoa-direct:focus').length && this.$('#vfoa-direct').val() != f)
+                    this.$('#vfoa-direct').val(parseInt(cmdarg[1])/1e6);
+                
+                this.updateBandLED(parseInt(cmdarg[3]));
+                this.updateLevelLED(parseInt(cmdarg[2]));
 
-
+            }
+        }
         
     });
 });
