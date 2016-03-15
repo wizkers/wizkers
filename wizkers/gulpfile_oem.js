@@ -55,7 +55,7 @@ var paths = {
     jsapp: ['www/js/app/**/*.js', 'www/js/app/**/*.png', 'www/js/app/**/*.svg'],
 
     // OEM Overlays which are common to all run modes (in www)
-    oem_www_files: [ oem_directory + '/www/**/*.js', oem_directory + '/www/**/*.png', oem_directory + '/www/css/*'],
+    oem_www_files: [ oem_directory + '/www/**/*.js', oem_directory + '/www/**/*.png', oem_directory + '/www/**/*.svg', oem_directory + '/www/css/*'],
     oem_www_templates: [oem_directory + '/www/js/tpl/**/*.html'],
     oem_server_files: [oem_directory + '/server/**/*'],
 

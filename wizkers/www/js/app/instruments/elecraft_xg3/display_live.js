@@ -51,7 +51,7 @@ define(function (require) {
             this.$el.html(template());
             
             var s = Snap("#xg3-front");
-            Snap.load('js/app/instruments/elecraft_xg3/XG3-Path.svg', function (f) {
+            Snap.load('js/app/instruments/elecraft_xg3/XG3-path.svg', function (f) {
                 f.select("#layer1").click(function (e) {
                     self.handleXG3Button(e);
                 });
