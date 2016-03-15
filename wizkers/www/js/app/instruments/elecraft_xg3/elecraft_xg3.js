@@ -35,20 +35,13 @@ define(function(require) {
         // Helper function: get driver capabilites.
         // returns a simple array of capabilities    
         this.getCaps = function() {
-            return ["LiveDisplay", "NumDisplay", "DiagDisplay"];
+            return ["LiveDisplay", "DiagDisplay"];
         };
 
         // This is a Backbone view
         this.getLiveDisplay = function(arg, callback) {
             require(['app/instruments/elecraft_xg3/display_live'], function(view) {
                 callback(new view(arg));
-            });
-        };
-
-        // This is a Backbone view
-        this.getNumDisplay = function(arg, callback) {
-            require(['app/instruments/elecraft_xg3/display_numeric'], function(view) {
-                callback( new view(arg));
             });
         };
 

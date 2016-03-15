@@ -40,6 +40,7 @@ define(function (require) {
             this.deviceinitdone = false;
             this.currentBand = -1;
             this.currentLevel = -1;
+            this.applyMemChange = false;
             linkManager.on('status', this.updateStatus, this);
             linkManager.on('input', this.showInput, this);
         },
@@ -63,6 +64,18 @@ define(function (require) {
             return this;
         },
         
+        events: {
+          'click #vfoa-direct-btn': 'setVFO',
+          'keypress input#vfoa-direct': 'setVFO',
+          'click #vfomem-save': 'saveMEM',
+          'click #show_beacon_help': 'showHelp',
+          'click #beacon-mem-btn': 'setBeacon',
+          'keypress input#beacon-mem': 'setBeacon',
+          'click #send-beacon': 'sendBeacon',
+          'click #send-beacon-cw': 'sendCW',
+          'click #send-beacon-rtty': 'sendRTTY'
+        },
+        
         onClose: function () {
             linkManager.off('status', this.updatestatus, this);            
             linkManager.off('input', this.showInput, this);
@@ -77,6 +90,49 @@ define(function (require) {
             }
         },
         
+        setVFO: function () {
+            if ((event.target.id == "vfoa-direct" && event.keyCode == 13) || (event.target.id != "vfoa-direct")) {
+                var v = $('#vfoa-direct').val();
+                linkManager.driver.setVFO(v);
+                if (!linkManager.isStreaming())
+                    linkManager.startLiveStream();
+            }
+        },
+        
+        saveMEM: function() {
+            this.applyMemChange = true;
+            if (!linkManager.isStreaming())
+                linkManager.startLiveStream();
+            else
+                linkManager.driver.getMems();
+        },
+
+        setBeacon: function () {
+            if ((event.target.id == "beacon-mem" && event.keyCode == 13) || (event.target.id != "beacon-mem")) {
+                var v = $('#beacon-mem').val();
+                linkManager.driver.setBeacon(v);
+            }
+        },
+        
+        sendBeacon: function() {
+            linkManager.stopLiveStream();
+            linkManager.driver.sendBeacon('');
+        },
+        
+        sendCW: function() {
+            linkManager.stopLiveStream();
+            linkManager.driver.sendCW(this.$('#beacon-direct').val());
+        },
+        
+        sendRTTY: function() {
+            linkManager.stopLiveStream();
+            linkManager.driver.sendRTTY(this.$('#beacon-direct').val());
+        },
+        
+        showHelp: function() {
+            this.$('#BeaconHelp').modal();
+        },
+        
         handleXG3Button: function (e) {
             console.log(e.target.id);
             var b = e.target.id.split('_');
@@ -85,6 +141,8 @@ define(function (require) {
             } else if (b[0] == 'level') {
                 linkManager.driver.setLevel(b[1]);
             }
+            if (!linkManager.isStreaming())
+                linkManager.startLiveStream();
         },
         
         updateBandLED: function(band) {
@@ -120,6 +178,39 @@ define(function (require) {
                 this.updateBandLED(parseInt(cmdarg[3]));
                 this.updateLevelLED(parseInt(cmdarg[2]));
 
+            } else if (cmdarg[0] === 'M') {
+                // Band memories, populate the fields
+                var bands = {
+                    "00": "160",
+                    "01": "80",
+                    "02": "60",
+                    "03": "40",
+                    "04": "30",
+                    "05": "20",
+                    "06": "17",
+                    "07": "15",
+                    "08": "12",
+                    "09": "10",
+                    "10": "6",
+                    "11": "2"
+                };
+                var f = parseInt(cmdarg[2])/1e6;
+                
+                if (!this.applyMemChange) {
+                    this.$('#vfo-' + bands[cmdarg[1]]).val(f);
+                } else {
+                    // We want to update the memories: do it only if the new value
+                    // is different from the current one:
+                    var nf = this.$('#vfo-' + bands[cmdarg[1]]).val();
+                    console.log('Current: ' + f + ' - New: ' + nf);
+                    if (f != nf) {
+                        linkManager.driver.setMEM(cmdarg[1], nf);
+                    }
+                    if (cmdarg[1] == '11')
+                        this.applyMemChange = false;
+                }         
+            } else if (cmdarg[0] === 'WM') {
+                this.$('#beacon-mem').val(cmdarg[1]);
             }
         }
         

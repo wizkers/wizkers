@@ -1,5 +1,5 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * (c) 2016 Edouard Lafargue, ed@lafargue.name
  *
  * This file is part of Wizkers.
  *
@@ -16,3 +16,38 @@
  * You should have received a copy of the GNU General Public License
  * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
  */
+define(function(require) {
+    "use strict";
+    
+    var $       = require('jquery'),
+        _       = require('underscore'),
+        Backbone = require('backbone'),
+        template = require('js/tpl/instruments/elecraft_xg3/DiagView.js');
+
+    return Backbone.View.extend({
+
+        initialize:function () {
+            linkManager.on('input', this.showInput, this);
+
+            if (!linkManager.isRecording())
+                linkManager.stopLiveStream();
+        },
+
+        events: {
+        },
+
+        onClose: function() {
+            console.log("[XG3] Diag view closing...");
+            linkManager.off('input', this.showInput);
+        },
+
+        render:function () {
+            var self = this;
+            this.$el.html(template(this.model.toJSON()));
+            return this;
+        },
+        
+        showInput: function(data) {
+        }
+    });
+});

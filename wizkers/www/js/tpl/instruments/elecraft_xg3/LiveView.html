@@ -1,124 +1,173 @@
-<div class="col-md-12">
+<div class="col-md-3">
+    <svg id="xg3-front"  viewBox="0 0 206 383" preserveAspectRatio="xMidYMid"></svg>
+</div>
+<div class="col-md-4">
     <div class="row">
-        <div class="col-md-4">
-            <svg id="xg3-front"  viewBox="0 0 206 383" preserveAspectRatio="xMidYMid"></svg>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <p>Direct control</p>
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">Current frequency (MHz)</span>
+                            <input  id="vfoa-direct" type="number" class="form-control" step="0.01" placeholder="14.070">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" id="vfoa-direct-btn" type="button">
+                                    <span class="glyphicon glyphicon-check"></span></button>
+                            </span>
+                        </div> <!-- Current frequency -->
+                </div>
+            </div>
         </div>
-        <div class="col-md-8">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <p>Direct control</p>
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">Current frequency (MHz)</span>
-                                    <input  id="vfoa-direct" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" id="vfoa-direct-btn" type="button">
-                                            <span class="glyphicon glyphicon-check"></span></button>
-                                    </span>
-                                </div> <!-- Current frequency -->
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">Step size</span>
-                                    <input  id="vfoa-step" type="number" class="form-control" value="0.01" placeholder="0.01">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" id="vfoa-step-btn" type="button">
-                                            <span class="glyphicon glyphicon-check"></span></button>
-                                    </span>
-                                </div> <!-- Current frequency -->
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-8">
+                    <h6>Frequency Memories</h6>
+                    </div>
+                    <div class="col-xs-4">
+                        <button role="button" class="btn btn-sm btn-default" id="vfomem-save">
+                            Save</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">160</span>
+                            <input  id="vfo-160" type="number" class="form-control" step="0.01" placeholder="1.82">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">17</span>
+                            <input  id="vfo-17" type="number" class="form-control" step="0.01" placeholder="18.12">
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">80</span>
+                            <input  id="vfo-80" type="number" class="form-control" step="0.01" placeholder="3.52">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">15</span>
+                            <input  id="vfo-15" type="number" class="form-control" step="0.01" placeholder="21.02">
+                        </div>
+                    </div>
+                </div>      
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">60</span>
+                            <input  id="vfo-60" type="number" class="form-control" step="0.01" placeholder="5.3305">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">12</span>
+                            <input  id="vfo-12" type="number" class="form-control" step="0.01" placeholder="24.9">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">40</span>
+                            <input  id="vfo-40" type="number" class="form-control" step="0.01" placeholder="7.02">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">10</span>
+                            <input  id="vfo-10" type="number" class="form-control" step="0.01" placeholder="28.02">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">30</span>
+                            <input  id="vfo-30" type="number" class="form-control" step="0.01" placeholder="10.12">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">6</span>
+                            <input  id="vfo-6" type="number" class="form-control" step="0.01" placeholder="50.12">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">20</span>
+                            <input  id="vfo-20" type="number" class="form-control" step="0.01" placeholder="14.02">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">2</span>
+                            <input  id="vfo-2" type="number" class="form-control" step="0.01" placeholder="144.22">
+                        </div>
+                    </div>
+                </div>
+                </div>
             </div>
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <h6>Frequency Memories</h6>
-                      <div class="row">
-                          <div class="col-md-6">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h6>Sweep control</h6>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h6>Beacon Mode</h6>
                                 <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">160</span>
-                                    <input  id="vfo-160" type="number" class="form-control" step="0.01" placeholder="14.070">
+                                    <span class="input-group-addon">Beacon</span>
+                                    <input  id="beacon-mem" type="text" maxlength="60" class="form-control" >
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" id="beacon-mem-btn" type="button">
+                                            <span class="glyphicon glyphicon-check"></span></button>
+                                    </span>
                                 </div>
-                          </div>
-                          <div class="col-md-6">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <button class="btn btn-default btn-sm" id="show_beacon_help">Syntax help</button>
+                        </div>
+                        <div class="col-md-3 col-md-offset-6">
+                            <button class="btn btn-primary btn-sm" id="send-beacon">Send Beacon</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
                                 <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">17</span>
-                                    <input  id="vfo-17" type="number" class="form-control" step="0.01" placeholder="14.070">
+                                    <span class="input-group-addon">Send immediately</span>
+                                    <input  id="beacon-direct" type="text" maxlength="60" class="form-control" >
                                 </div>
-                          </div>
-                      </div>
-                      <div class="row">
-                          <div class="col-md-6">
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">80</span>
-                                    <input  id="vfo-80" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                </div>
-                          </div>
-                          <div class="col-md-6">
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">15</span>
-                                    <input  id="vfo-15" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                </div>
-                          </div>
-                      </div>      
-                      <div class="row">
-                          <div class="col-md-6">
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">60</span>
-                                    <input  id="vfo-60" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                </div>
-                          </div>
-                          <div class="col-md-6">
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">12</span>
-                                    <input  id="vfo-12" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                </div>
-                          </div>
-                      </div>
-                      <div class="row">
-                          <div class="col-md-6">
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">40</span>
-                                    <input  id="vfo-40" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                </div>
-                          </div>
-                          <div class="col-md-6">
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">10</span>
-                                    <input  id="vfo-10" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                </div>
-                          </div>
-                      </div>
-                      <div class="row">
-                          <div class="col-md-6">
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">30</span>
-                                    <input  id="vfo-30" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                </div>
-                          </div>
-                          <div class="col-md-6">
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">6</span>
-                                    <input  id="vfo-6" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                </div>
-                          </div>
-                      </div>
-                      <div class="row">
-                          <div class="col-md-6">
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">20</span>
-                                    <input  id="vfo-20" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                </div>
-                          </div>
-                          <div class="col-md-6">
-                                <div class="input-group input-group-sm input-margin">
-                                    <span class="input-group-addon">2</span>
-                                    <input  id="vfo-2" type="number" class="form-control" step="0.01" placeholder="14.070">
-                                </div>
-                          </div>
-                      </div>
-
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-6">
+                            <button class="btn btn-primary btn-sm" id="send-beacon-cw">Send as CW</button>
+                            <button class="btn btn-primary btn-sm" id="send-beacon-rtty">Send as RTTY</button>
                         </div>
                     </div>
                 </div>
@@ -126,3 +175,77 @@
         </div>
     </div>
 </div>
+
+<!-- The "Help" modal for strings -->
+<div class="container">
+    <div id="BeaconHelp" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="horizontal">
+                            <small>
+                            <table class="table">
+                                <tr>
+                                    <th>Command</th>
+                                    <th>Description</th>
+                                </tr>
+                                <tr>
+                                    <td>{</td>
+                                    <td>Turn on RTTY mode.</td>
+                                </tr>
+                                <tr>
+                                    <td>}</td>
+                                    <td>Turn on CW mode.</td>
+                                </tr>
+                                <tr>
+                                    <td>~nn</td>
+                                    <td>Send RTTY diddles (LTRS) for nn seconds (00 to 99)</td>
+                                </tr>
+                                <tr>
+                                    <td>\n \r \b</td>
+                                    <td>Send LF, CR or BELL(RTTY only)</td>
+                                </tr>
+                                <tr>
+                                    <td>\</td>
+                                    <td>sends the character following the ‘\’ without translation. i.e. \$ or \#</td>
+                                </tr>
+                                <tr>
+                                    <td>[nn</td>
+                                    <td>changes wpm to nn (05 to 50) (CW only)</td>
+                                </tr>
+                                <tr>
+                                    <td>^n</td>
+                                    <td>set level to n (0 = 0 dBm, 1 = -33, 2 = -73, 3 = -107)</td>
+                                </tr>
+                                <tr>
+                                    <td>:nn</td>
+                                    <td>turn carrier on for nn seconds (00 to 99)</td>
+                                </tr>
+                                <tr>
+                                    <td>$nn</td>
+                                    <td>pauses for nn seconds (00 to 99)</td>
+                                </tr>
+                                <tr>
+                                    <td>|nn</td>
+                                    <td>recall band/memory nn (0 to 11)</td>
+                                </tr>
+                                <tr>
+                                    <td>#</td>
+                                    <td>repeat entire sequence</td>
+                                </tr>
+                                <tr>
+                                    <td>_</td>
+                                    <td>Space</td>
+                                </tr>
+                            </table>
+                            </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -56,18 +56,53 @@ define(function (require) {
         // All commands below are fully free and depend on
         // the instrument's capabilities
 
-        this.setVFO = function (f, vfo) {
+        this.setVFO = function (f) {
             var freq = ("00000000000" + (parseInt(f * 1e6).toString())).slice(-11); // Nifty, eh ?
             if (freq.indexOf("N") > -1) { // detect "NaN" in the string
                 console.log("Invalid VFO spec");
-                lm.sendCommand((vfo == 'A' ||  vfo == 'a') ? 'FA;' : 'FB;');
             } else {
-                console.log("VFO" + vfo + ": " + freq);
-                lm.sendCommand(((vfo == 'A' ||  vfo == 'a') ? 'FA' : 'FB') + freq + ';');
+                lm.sendCommand('F,' + freq + ';');
             }
-            lm.sendCommand('BN;'); // Refresh band number (radio does not send it automatically)
+        }
+        
+        this.getMems = function() {
+            lm.sendCommand('M,00;M,01;M,02;M,03;M,04;M,05;M,06;M,07;M,08;M,09;M,10;M,11;');
+        }
+        
+        this.setMEM = function( band, f) {
+            var freq = ("00000000000" + (parseInt(f * 1e6).toString())).slice(-11); // Nifty, eh ?
+            if (freq.indexOf("N") > -1) { // detect "NaN" in the string
+                console.log("Invalid VFO spec");
+            } else {
+                lm.sendCommand('M,' + band + ',' + freq + ';');
+            }
+        }
+        
+        this.sendCW = function(s) {
+            if( s != '')
+                lm.sendCommand('W,' + s + ';');
+        }
+        
+        this.sendBeacon = function(s) {
+            // Note: reprograms Sweep1 function
+            lm.sendCommand('PF,01,01;S,01;');
+        }
+        this.sendRTTY = function(s) {
+            lm.sendCommand('RT,' + s + ';');
         }
 
+        this.setBeacon = function (s) {
+            lm.sendCommand('WM,' + s + ';');
+        }
+        
+        this.setWPM = function(wpm) {
+            lm.sendCommand('WP,' + wpm + ';');
+        }
+
+        this.getWPM = function(wpm) {
+            lm.sendCommand('WP;');
+        }
+        
         this.setBand = function (band) {
             // We use a band number in meters (with a "m"), this function translates into the XG3 values:
             var bands = {
