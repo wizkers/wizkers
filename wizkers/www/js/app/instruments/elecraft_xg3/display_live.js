@@ -73,7 +73,9 @@ define(function (require) {
           'keypress input#beacon-mem': 'setBeacon',
           'click #send-beacon': 'sendBeacon',
           'click #send-beacon-cw': 'sendCW',
-          'click #send-beacon-rtty': 'sendRTTY'
+          'click #send-beacon-rtty': 'sendRTTY',
+          'click #beacon-wpm-btn': 'setWPM',
+          'keypress input#beacon-wpm': 'setWPM'
         },
         
         onClose: function () {
@@ -105,6 +107,13 @@ define(function (require) {
                 linkManager.startLiveStream();
             else
                 linkManager.driver.getMems();
+        },
+
+        setWPM: function () {
+            if ((event.target.id == "beacon-wpm" && event.keyCode == 13) || (event.target.id != "beacon-wpm")) {
+                var v = $('#beacon-wpm').val();
+                linkManager.driver.setWPM(v);
+            }
         },
 
         setBeacon: function () {
@@ -211,6 +220,8 @@ define(function (require) {
                 }         
             } else if (cmdarg[0] === 'WM') {
                 this.$('#beacon-mem').val(cmdarg[1]);
+            } else if (cmdarg[0] === 'WP') {
+                this.$('#beacon-wpm').val(cmdarg[1]);
             }
         }
         

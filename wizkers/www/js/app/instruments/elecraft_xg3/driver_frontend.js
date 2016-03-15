@@ -78,6 +78,10 @@ define(function (require) {
             }
         }
         
+        this.setWPM = function(wpm) {
+            lm.sendCommand('WP,' + wpm + ';');
+        }
+        
         this.sendCW = function(s) {
             if( s != '')
                 lm.sendCommand('W,' + s + ';');
