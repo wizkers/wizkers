@@ -89,7 +89,7 @@ define(function(require) {
             var band = $(evt.target).data('band');
             this.setting_band = true;
             this.new_band_val = evt.value;
-            var cmd = (this.options.eq == 'rx') ? 'MN008;' : 'MN009;';
+            var cmd = (this.options.eq == 'rx') ? 'MD2;MN008;' : 'MD2;MN009;';
             cmd += 'SWT' + this.bandCommands[band-1] + ';DB;';
             linkManager.sendCommand(cmd);
             // Now we gotta wait for the callback
@@ -118,10 +118,10 @@ define(function(require) {
                     data.substr(0,7) == "DBTX EQ" ) {
                     linkManager.sendCommand("SWT"+this.bandCommands[this.band++]+";DB;");
                 } else {
-                    console.log(data);
+                    // console.log(data);
                     var band = data.substr(3,4);
                     var val = parseInt(data.substr(7));
-                    console.log("Band " + band + " is " + val);
+                    // console.log("Band " + band + " is " + val);
                     var sliderIndex = this.bandValues.indexOf(band)+1;
                     if (sliderIndex > -1) {
                         $(".eq-" + sliderIndex, this.el).slider('setValue',val);

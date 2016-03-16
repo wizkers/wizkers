@@ -1,9 +1,8 @@
 <div class="col-md-12">
     <div class="row">
         <div class="col-md-12">
-            <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+            <ul class="nav nav-tabs" id="settingsTabs" role="tablist" style="margin-bottom: 5px;">
                 <li class="active" role="presentation"><a href="#general" data-toggle="tab">Diagnostics</a>
-                </li>
                 </li>
                 <li role="presentation"><a href="#kx3" data-toggle="tab">KX3</a>
                 </li>
@@ -12,7 +11,6 @@
                 <li role="presentation"><a href="#px3" data-toggle="tab">PX3</a>
                 </li>
             </ul>
-            <br>
         </div>
     </div>
     <div class="row">
@@ -74,41 +72,39 @@
                 <div class="tab-pane" id="kx3">
                     <div class="row">
                         <div class="col-md-12">
-                            <legend>Audio</legend>
+                            <ul class="nav nav-tabs" id="radioSettings" role="tablist" style="margin-bottom: 5px;">
+                                <li class="active" role="presentation"><a href="#kx3-audio" data-toggle="tab">Audio</a>
+                                </li>
+                                <li role="presentation"><a href="#kx3-bands" data-toggle="tab">Band config</a>
+                                </li>
+                                <li role="presentation"><a href="#kx3-radiocfg" data-toggle="tab">Radio config</a>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <h4>RX Equalizer</h4>
-                            <div id="kx3-rxeq"></div>
-                        </div>
-                        <div class="col-md-3">
-                            <h4>TX Equalizer</h4>
-                            <div id="kx3-txeq"></div>
-                        </div>
-                        <div class="col-md-3">
-                            <h4>Speech Compression</h4>
-                            <div class="form-control slider-bg-info">
-                                <input type="text" id="cmp-control" data-slider-value="0" data-slider-min="0" data-slider-max="40" data-slider-step="1">
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="row">
-                        <p>&nbsp;</p>
-                    </div>
-                    <!--
                     <div class="row">
                         <div class="col-md-12">
-                            <legend>Calibration</legend>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="kx3-audio">
+                                    <div id="settings-audio"></div>
+                                </div>
+                                <div class="tab-pane" id="kx3-bands">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <legend>Band config</legend>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="kx3-radiocfg">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <legend>Radio config</legend>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            RX Calibration freq: <span id="kx3-refcal"></span>
-                        </div>
-                    </div>
-                    -->
                 </div>
                 <div class="tab-pane" id="kxpa100">
  
