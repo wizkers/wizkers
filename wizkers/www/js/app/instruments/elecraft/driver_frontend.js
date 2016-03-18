@@ -154,6 +154,11 @@ define(function (require) {
             var center = ("0000" + Math.floor(ct * 1000)).slice(-4);
             lm.sendCommand('IS ' + center + ';'); // Note the space!
         }
+        
+        this.setRptOfs = function(o) {
+            var ofs = ("000" + (parseInt(o/20).toString())).slice(-3);
+            lm.sendCommand('MN007;MP' + ofs + ';MN255;');
+        }
 
         this.setBand = function (band) {
             // We use a band number in meters (with a "m"), this function translates into the KX3 values:

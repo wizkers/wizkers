@@ -1,0 +1,161 @@
+<div class="row" id="settingsband-int">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12">
+                <div style="text-align:center; padding-bottom: 5px;">
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-160m">160</input>
+                        </label>
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-80m">80</input>
+                        </label>
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-60m">60</input>
+                        </label>
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-40m">40</input>
+                        </label>
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-30m">30</input>
+                        </label>
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-20m">20</input>
+                        </label>
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-17m">17</input>
+                        </label>
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-15m">15</input>
+                        </label>
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-12m">12</input>
+                        </label>
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-10m">10</input>
+                        </label>
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-6m">6</input>
+                        </label>                        
+                        <label class="btn btn-responsive btn-default band-btn">
+                            <input type="radio" name="bands" id="band-2m">2</input>
+                        </label>
+                    </div>
+                </div>
+            </div> 
+        </div><!-- Band Buttons -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label for="bnd-map" class="col-xs-5 control-label">
+                                    Band enabled:
+                                </label>
+                                <div class="col-xs-7">
+                                    <select class="form-control menu-dropdown" id="bnd-map">
+                                        <option value="32">No</option>
+                                        <option value="0">Yes</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="am-mode" class="col-xs-5 control-label">
+                                    AM Mode:
+                                </label>
+                                <div class="col-xs-7">
+                                    <select class="form-control menu-dropdown" id="am-mode">
+                                        <option value="0">Off</option>
+                                        <option value="64">On</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="fm-mode" class="col-xs-5 control-label">
+                                    FM Mode:
+                                </label>
+                                <div class="col-xs-7">
+                                    <select class="form-control menu-dropdown" id="fm-mode">
+                                        <option value="0">Off</option>
+                                        <option value="128">On</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="preamp" class="col-xs-5 control-label">
+                                    Preamp:
+                                </label>
+                                <div class="col-xs-7">
+                                    <select class="form-control menu-dropdown" id="preamp">
+                                        <option value="1">10dB</option>
+                                        <option value="2">20dB</option>
+                                        <option value="3">30dB</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="rx-iso" class="col-xs-5 control-label">
+                                    RX ISO:
+                                </label>
+                                <div class="col-xs-7">
+                                    <select class="form-control menu-dropdown" id="rx-iso">
+                                        <option value="0">Off</option>
+                                        <option value="1">On</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="vfo-nr" class="col-xs-5 control-label">
+                                    VFO NR:
+                                </label>
+                                <div class="col-xs-7">
+                                    <select class="form-control menu-dropdown" id="vfo-nr">
+                                        <option value="0">Off</option>
+                                        <option value="32">On</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label for="rpt-ofs" class="col-xs-5 control-label">
+                                    Repeater offset:
+                                </label>
+                                <div class="col-xs-7">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" step="20" id="rpt-ofs" placeholder="600">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" id="rpt-ofs-cmd" type="button">
+                                                <span class="glyphicon glyphicon-check"></span></button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="rx-shft" class="col-xs-5 control-label">
+                                    RX Shift:
+                                </label>
+                                <div class="col-xs-7">
+                                    <select class="form-control menu-dropdown" id="rx-shft">
+                                        <option value="0">Normal</option>
+                                        <option value="1">8 kHz</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
