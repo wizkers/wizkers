@@ -45,7 +45,8 @@ define(function(require) {
         events: {
             'slideStop #cmp-control': 'setCP',
             'change .menu-dropdown': 'simpleMenuChange',
-            'click .agc-spd': 'setAGCSpeed'
+            'click .agc-spd': 'setAGCSpeed',
+            'change .agc-param': 'setAGCParam'
         },
 
         onClose: function() {
@@ -78,6 +79,8 @@ define(function(require) {
                         self.elecraftRXEQ.render();
                     }
                 });
+           } else {
+               this.triggerInit();
            }
         },
         
@@ -102,6 +105,28 @@ define(function(require) {
 
         setCP: function (e) {
             linkManager.driver.setCP(e.value);
+        },
+        
+        setAGCParam: function() {
+            console.log(event.target.id);
+            var id = event.target.id;
+            var agc_set = {
+                'agc-thr': '19',
+                'agc-atk': '27',
+                'agc-hdl': '20',
+                'agc-slp': '21'
+            }
+            var t = $(event.target);
+            var v = t.val();
+            var min = parseInt(t.attr('min'));
+            var max = parseInt(t.attr('max'));
+            if (v < min) v = min;
+            if (v > max) v = max; 
+            var val = ("000" + v).slice(-3);
+            var cmd = 'MN074;SWT' + agc_set[id] + ';MP';
+            linkManager.sendCommand(cmd + val + ';');
+            this.menulist = [ [ id, cmd + ';' ]];
+            this.getNextMenu();
         },
         
         getMenus: function() {

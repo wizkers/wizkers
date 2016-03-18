@@ -48,46 +48,51 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <h6>AGC Thresholds</h6>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-addon">Thr</span>
-                                        <input type="number" id="agc-thr" class="form-control" placeholder="5">
+                                        <input type="number" id="agc-thr" step="1" min="4" max="8" class="form-control agc-param" placeholder="5">
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-addon">Atk</span>
-                                    <input type="number" id="agc-atk" class="form-control" placeholder="215">
+                                    <input type="number" id="agc-atk" step="1" min="200" max="255" class="form-control agc-param" placeholder="215">
                                 </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-addon">Hld</span>
-                                    <input type="number" id="agc-hld" class="form-control" placeholder="0">
+                                    <input type="number" id="agc-hld" step="1" min="0" max="200" class="form-control agc-param" placeholder="0">
                                 </div>
                                 </div>
-                                <div class="col-md-3">
+<!--
+                                <div class="col-md-4">
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-addon">Dcy-S</span>
-                                    <input type="number" id="agc-dcy" class="form-control" placeholder="40">
+                                    <input type="number" id="agc-dcy" class="form-contro" placeholder="40">
                                 </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-addon">Dcy-F</span>
                                     <input type="number" class="form-control" placeholder="140">
                                 </div>
                                 </div>
-                                <div class="col-md-3">
+-->
+                                <div class="col-md-4">
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-addon">Slp</span>
-                                    <input type="number" id="agc-slp" class="form-control" placeholder="15">
+                                    <input type="number" id="agc-slp" step="1" min="10" max="15" class="form-control agc-param" placeholder="15">
                                 </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-addon">Pls</span>
-                                    <input type="text" id="agc-pls" class="form-control" placeholder="Nor">
+                                    <select class="form-control menu-dropdown" id="agc-pls">
+                                        <option value="0">Nor</option>
+                                        <option value="2">Off</option>
+                                    </select>
                                 </div>
                                 </div>
                             </div>
@@ -155,7 +160,7 @@
                     </select>
                 </div>
                 <div class="col-xs-3">
-                    <input type="number" id="tx-essb-val" class="form-control" placeholder="3.0" step="0.1" min="3" max="4">
+                    <input type="number" disabled id="tx-essb-val" class="form-control" placeholder="3.0" step="0.1" min="3" max="4">
                 </div>
             </div>
         </div>

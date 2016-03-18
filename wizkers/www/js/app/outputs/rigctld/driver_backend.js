@@ -58,6 +58,7 @@ define(function (require) {
         var vfob_frequency = 0;
         var vfoa_bandwidth = 0;
         var radio_mode = "RTTY";
+        var xmit = 0;     // 0 is RX, 1 is TX
 
         // Load the settings for this plugin
         this.setup = function (output) {
@@ -154,8 +155,8 @@ define(function (require) {
             // makes communication more reliable if we start missing data,
             // but sometimes, software sends "T" commands twice in a row, hence the
             // test below:
-            if (cmd == previouscmd && cmd != "T")
-                return;
+            // if (cmd == previouscmd && cmd != "T")
+            //    return;
             previouscmd = cmd;
             switch (cmd) {
             case "\\d": // "mp_state":
@@ -186,16 +187,21 @@ define(function (require) {
                 c.close();
                 break;
             case "v": // Which VFO ?
-                c.sendMessage("VFO\n");
+                c.sendMessage("VFOA\n");
                 break;
             case "s": // "Get Split VFO" -> VFOB
                 c.sendMessage("0\nVFOA\n");
                 break;
+            case 't':
+                c.sendMessage("" + xmit + "\n");
+                break;
             case "T":
                 if (data.substr(2) == "1") {
                     linkManager.sendCommand('TX;');
+                     xmit = 1;
                 } else {
                     linkManager.sendCommand("RX;");
+                    xmit = 0;
                 }
                 c.sendMessage("RPRT 0\n");
                 break;

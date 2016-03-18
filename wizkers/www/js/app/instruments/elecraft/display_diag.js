@@ -58,9 +58,7 @@ define(function (require) {
         render: function () {
             var self = this;
             this.$el.html(template());
-            
-            linkManager.sendCommand('MN072;MP004;'); // Enable Tech mode to reach every menu
-                        
+                                    
             require(['app/instruments/elecraft/display_kxpa100'], function(view) {
                self.KXPA100 = new view();
                $('#kxpa100', self.el).append(self.KXPA100.el);
@@ -96,6 +94,8 @@ define(function (require) {
                 this.KXPA100.onClose();
             if (this.SettingsAudio)
                 this.SettingsAudio.onClose();
+            if (this.BandSettigns)
+                this.BandSettings.onClose();
         },
 
         events: {
@@ -116,9 +116,8 @@ define(function (require) {
             if (e.target.innerText == 'KX3' &&
                 this.$('#settings-audio').is(':visible')) {
                 this.$('#kx3').css({'opacity': '0.3', 'pointer-events': 'none'});
-                this.SettingsAudio.refresh();
                 this.SettingsAudio.once('initialized', this.focusKX3, this);
-
+                this.SettingsAudio.refresh();
             }
             
             if (e.target.innerText == 'Band config' &&
@@ -148,6 +147,7 @@ define(function (require) {
         },
 
         queryKX3: function () {
+            linkManager.sendCommand('MN072;MP004;MN255;'); // Enable Tech mode to reach every menu
             $("#kx3-sn", this.el).html(instrumentManager.getInstrument().get('uuid'));
             linkManager.sendCommand("RVM;RVD;OM;CP;");
         },
@@ -163,7 +163,7 @@ define(function (require) {
 
             // Update our raw data monitor
             var i = $('#input', this.el);
-            var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
+            var scroll = (i.val() + data + '\n').split('\n');
             // Keep max 50 lines:
             if (scroll.length > 50) {
                 scroll = scroll.slice(scroll.length - 50);
