@@ -109,7 +109,7 @@ define(function(require) {
             // Last thing: query GT settings before asking for the menus
             // so that we keep track of initial settings
             this.querying = true;
-            linkManager.sendCommand('MD;GT;');
+            linkManager.sendCommand('CP;MD;GT;');
         },
 
         setCP: function (e) {
@@ -286,10 +286,13 @@ define(function(require) {
                 this.getMenus();
             } else if (this.querying && cmd == 'MD') {
                 this.initial_mode = val;
-            }else if ((cmd == 'MP' || cmd == 'DS') && this.menumode != '') {
+            } else if ((cmd == 'MP' || cmd == 'DS') && this.menumode != '') {
                 // Happens when we are reading from a menu
                 this.parseMenu(data);
-            }
+            } else if (cmd == 'CP') {
+                    // Speech compression
+                    this.$('#cmp-control').slider('setValue', parseInt(data.substr(2)));
+                } 
         }
     });
 });

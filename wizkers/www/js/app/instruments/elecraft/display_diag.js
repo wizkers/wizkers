@@ -151,7 +151,7 @@ define(function (require) {
         queryKX3: function () {
             linkManager.sendCommand('MN072;MP004;MN255;'); // Enable Tech mode to reach every menu
             $("#kx3-sn", this.el).html(instrumentManager.getInstrument().get('uuid'));
-            linkManager.sendCommand("RVM;RVD;OM;CP;");
+            linkManager.sendCommand("RVM;RVD;OM;");
         },
 
         sendcmd: function (event) {
@@ -214,9 +214,10 @@ define(function (require) {
                 var da3 = data.substr(0, 3);
                 if (da3 == 'RVM') {
                     $("#kx3-fw-mcu", this.el).html(data.substr(3));
-                } else if (da2 == 'CP') {
-                    // Speech compression
-                    $('#cmp-control', this.el).slider('setValue', parseInt(data.substr(2)));
+                } else if (data == 'PX3' ) {
+                    linkManager.sendCommand('#RVM;');
+                } else if (data.substr(0,4) == '#RVM') {
+                    this.$('#px3-fw').html('v' + data.substr(4));
                 } else if (da3 == 'RVD') {
                     $("#kx3-fw-dsp", this.el).html(data.substr(3));
                 } else if (da3 == '^RV') {
@@ -224,6 +225,8 @@ define(function (require) {
                 } else if (da3 == '^SN') {
                     this.$('#kxpa-sn').html(data.substr(3));
                 } else if (da2 == 'OM') {
+                    
+                    linkManager.sendCommand('=;;'); // Try to detect PX3
                     // Display what options are installed/enabled
                     setLabel("#opt-kxat3", this.el, (data.charAt(3) == 'A'));
                     setLabel("#opt-kxpa100", this.el, (data.charAt(4) == 'P'));
