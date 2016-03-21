@@ -52,6 +52,8 @@ define(function (require) {
             linkManager.stopLiveStream();
             linkManager.on('input', this.showInput, this);
             this.menumode = '';
+            this.kxpa100 = false;
+            this.px3 = false;
 
         },
 
@@ -217,6 +219,10 @@ define(function (require) {
                     $('#cmp-control', this.el).slider('setValue', parseInt(data.substr(2)));
                 } else if (da3 == 'RVD') {
                     $("#kx3-fw-dsp", this.el).html(data.substr(3));
+                } else if (da3 == '^RV') {
+                    this.$('#kxpa-fwrv').html(data.substr(3));
+                } else if (da3 == '^SN') {
+                    this.$('#kxpa-sn').html(data.substr(3));
                 } else if (da2 == 'OM') {
                     // Display what options are installed/enabled
                     setLabel("#opt-kxat3", this.el, (data.charAt(3) == 'A'));
