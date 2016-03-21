@@ -64,6 +64,7 @@ define(function(require) {
         },
         
         setBand: function (e) {
+            console.log('[settings_band] setBand');
             var band = e.target.innerText;
             linkManager.driver.setBand(band);
             linkManager.sendCommand('BN;');
@@ -144,6 +145,11 @@ define(function(require) {
             var val = data.substr(2);
             
             if (cmd == 'BN') {
+                // We need to check for this, because in some modes (AI2; for instance)
+                // the KX3 echoes BNXX when changing band, and in others (AI0) it doesn't
+                // which means we can end up with two "BN" messages when changing band.
+                if (this.menulist != '')
+                    return;
                 var bnd = this.bands[parseInt(val)];
                 // Update the band selection radio buttons too:
                 this.$(".band-btn").removeClass("active");

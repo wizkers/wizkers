@@ -46,7 +46,8 @@ define(function(require) {
             'slideStop #cmp-control': 'setCP',
             'change .menu-dropdown': 'simpleMenuChange',
             'click .agc-spd': 'setAGCSpeed',
-            'change .agc-param': 'setAGCParam'
+            'change .agc-param': 'setAGCParam',
+            'change #af-lim': 'setAFLim'
         },
 
         onClose: function() {
@@ -61,6 +62,7 @@ define(function(require) {
         render:function () {
             var self = this;
             this.$el.html(template());
+            this.current_mode = '';
             return this;
         },
         
@@ -88,7 +90,7 @@ define(function(require) {
             var self = this;
             require(['app/instruments/elecraft/equalizer'], function (view) {
                 self.elecraftTXEQ = new view({
-                    'eq': 'tx'
+                    eq: 'tx'
                 });
                 if (self.elecraftTXEQ != null) {
                     $('#kx3-txeq', self.el).html(self.elecraftTXEQ.el);
@@ -105,6 +107,20 @@ define(function(require) {
 
         setCP: function (e) {
             linkManager.driver.setCP(e.value);
+        },
+        
+        setAFLim: function () {
+            var t = $(event.target);
+            var v = t.val();
+            var min = parseInt(t.attr('min'));
+            var max = parseInt(t.attr('max'));
+            if (v < min) v = min;
+            if (v > max) v = max; 
+            var val = ("000" + v).slice(-3);
+            var cmd = 'MN047;MP' + val + ';';
+            linkManager.sendCommand(cmd);
+            this.menulist = [ [ 'al-lim', 'MN047;MP;' ]];
+            this.getNextMenu();
         },
         
         setAGCParam: function() {
@@ -141,13 +157,14 @@ define(function(require) {
                 [ 'agc-thr', 'MN074;SWT19;MP;'],
                 [ 'agc-atk', 'MN074;SWT27;MP;'],
                 [ 'agc-hld', 'MN074;SWT20;MP;'],
-                [ 'agc-dcy', 'MN074;SWT28;MP;'],
+                // [ 'agc-dcy', 'MN074;SWT28;MP;'],
                 [ 'agc-slp', 'MN074;SWT21;MP;'],
                 [ 'agc-pls', 'MN074;SWT29;MP;'],
                 [ 'afx-md', 'MN105;MP;'],
                 [ 'micbias', 'MN135;MP;'],
                 [ 'micbtn' , 'MN082;MP;'],
-                [ 'tx-essb', 'MN096;DS;']
+                [ 'tx-essb', 'MN096;DS;'],
+                [ 'af-lim',  'MN047;MP;']
             ];
             this.getNextMenu();            
         },
@@ -208,8 +225,9 @@ define(function(require) {
                     this.$('#tx-essb').val((txt.substr(2,3) == 'OFF') ? 0: 1);
                     this.$('#tx-essb-val').val(parseFloat(txt.substr(6)));
                     break;
-
-                    
+                case 'af-lim' :
+                    this.$('#af-lim').val(parseInt(data.substr(2)));
+                    break;
             }
             linkManager.sendCommand('MN255;');
             this.getNextMenu();
@@ -260,7 +278,7 @@ define(function(require) {
             if ((cmd == 'MP' || cmd == 'DS') && this.menumode != '') {
                 // Happens when we are reading from a menu
                 this.parseMenu(data);
-            } 
+            }
         }
     });
 });

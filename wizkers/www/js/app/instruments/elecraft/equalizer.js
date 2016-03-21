@@ -59,9 +59,8 @@ define(function(require) {
             this.$el.html(template());
             // Initialize our sliders
             $(".eq",this.el).slider({reversed:true});
-            
+            linkManager.sendCommand('AI2;');            
             this.refresh();
-            
             return this;
         },
     
@@ -72,14 +71,15 @@ define(function(require) {
             this.bandCommands = [ 19, 27, 20, 28, 21, 29, 32, 33, 34];
             this.bandValues = [ '0.05', '0.10', '0.20', '0.40', '0.80', '1.60', '2.40', '3.20'];
             if (this.options.eq == 'rx') {
-                linkManager.sendCommand("MN008;DB;");
+                linkManager.sendCommand("MD;MN008;DB;");
             } else {
-                linkManager.sendCommand("MN009;DB;");
+                linkManager.sendCommand("MD;MN009;DB;");
             }
         },
 
         onClose: function() {
             this.stopListening();
+            linkManager.sendCommand('AI0;');
         },
      
         setBand: function(evt) {
@@ -89,7 +89,7 @@ define(function(require) {
             var band = $(evt.target).data('band');
             this.setting_band = true;
             this.new_band_val = evt.value;
-            var cmd = (this.options.eq == 'rx') ? 'MD2;MN008;' : 'MD2;MN009;';
+            var cmd = (this.options.eq == 'rx') ? 'MN008;' : 'MN009;';
             cmd += 'SWT' + this.bandCommands[band-1] + ';DB;';
             linkManager.sendCommand(cmd);
             // Now we gotta wait for the callback
@@ -113,11 +113,30 @@ define(function(require) {
                }
                 linkManager.sendCommand(cmd + 'DB;');
                 return;
+            } else if (data.substr(0,2) == 'IF') {
+                // We want the mode:
+                var m = parseInt(data.substr(29,1));
+                if (m == 6 || m == 9) {
+                    // Disable EQ when we're in data mode, since it cannot be
+                    // adjusted
+                    this.$el.css({'opacity': '0.3', 'pointer-events': 'none'});
+                } else {
+                    this.$el.css({'opacity': '1', 'pointer-events': ''});
+                }
+            } else if (data.substr(0,2) == 'MD') {
+                var val = parseInt(data.substr(2));
+                if (val == 6 || val == 9) {
+                    // Disable EQ when we're in data mode, since it cannot be
+                    // adjusted
+                    this.$el.css({'opacity': '0.3', 'pointer-events': 'none'});
+                } else {
+                    this.$el.css({'opacity': '1', 'pointer-events': ''});
+                }
             } else if (this.refreshing) {
                 if (data.substr(0,7) == "DBRX EQ" ||
                     data.substr(0,7) == "DBTX EQ" ) {
                     linkManager.sendCommand("SWT"+this.bandCommands[this.band++]+";DB;");
-                } else {
+                } else if (data.substr(0,2) == 'DB') {
                     // console.log(data);
                     var band = data.substr(3,4);
                     var val = parseInt(data.substr(7));
@@ -131,7 +150,7 @@ define(function(require) {
                     } else {
                         linkManager.sendCommand('MN255;'); // Exit menu
                         this.refreshing = false;
-                        this.band = 0;
+                        this.band = 0; 
                         this.trigger('initialized');
                     }
                 }
