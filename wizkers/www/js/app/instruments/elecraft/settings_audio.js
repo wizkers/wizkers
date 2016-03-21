@@ -94,7 +94,7 @@ define(function(require) {
                 });
                 if (self.elecraftTXEQ != null) {
                     $('#kx3-txeq', self.el).html(self.elecraftTXEQ.el);
-                    self.elecraftTXEQ.once('initialized', self.getMenus, self);
+                    self.elecraftTXEQ.once('initialized', self.queryKX3, self);
                     self.elecraftTXEQ.render();
                 }
             });
@@ -103,6 +103,13 @@ define(function(require) {
         
         triggerInit: function() {
             this.trigger('initialized');
+        },
+        
+        queryKX3: function() {
+            // Last thing: query GT settings before asking for the menus
+            // so that we keep track of initial settings
+            this.querying = true;
+            linkManager.sendCommand('MD;GT;');
         },
 
         setCP: function (e) {
@@ -119,29 +126,34 @@ define(function(require) {
             var val = ("000" + v).slice(-3);
             var cmd = 'MN047;MP' + val + ';';
             linkManager.sendCommand(cmd);
-            this.menulist = [ [ 'al-lim', 'MN047;MP;' ]];
+            this.menulist = [ [ 'af-lim', 'MN047;MP;' ]];
             this.getNextMenu();
         },
         
         setAGCParam: function() {
             console.log(event.target.id);
             var id = event.target.id;
+            this.setting_agc_param = 1;
             var agc_set = {
-                'agc-thr': '19',
-                'agc-atk': '27',
-                'agc-hdl': '20',
-                'agc-slp': '21'
+                'agc-thr': 'MN074;SWT19;MP',
+                'agc-atk': 'MN074;SWT27;MP',
+                'agc-hdl': 'MN074;SWT20;MP',
+                'agc-slp': 'MN074;SWT21;MP',
+                'agc-dcy-s': 'GT004;MN074;SWT28;MP',
+                'agc-dcy-f': 'GT002;MN074;SWT28;MP'
             }
+            var agc_dcy =  (id == 'agc-dcy-s') || (id == 'agc-dcy-f');
             var t = $(event.target);
-            var v = t.val();
+            var v = parseInt(t.val());
             var min = parseInt(t.attr('min'));
             var max = parseInt(t.attr('max'));
             if (v < min) v = min;
             if (v > max) v = max; 
             var val = ("000" + v).slice(-3);
-            var cmd = 'MN074;SWT' + agc_set[id] + ';MP';
-            linkManager.sendCommand(cmd + val + ';');
-            this.menulist = [ [ id, cmd + ';' ]];
+            var cmd = agc_set[id];
+            console.log('Set AGC param:' + cmd + val);
+            linkManager.sendCommand(cmd + val + ';MN255;' + ( agc_dcy ? 'GT' + this.initial_dcy + ';' : ''));
+            this.menulist = [ [ id, cmd + ';' + ( agc_dcy ? 'GT' + this.initial_dcy + ';' : '')]];
             this.getNextMenu();
         },
         
@@ -153,11 +165,12 @@ define(function(require) {
                 [ 'agc-spd-cw', 'MN129;MD3;MP;'],
                 [ 'agc-spd-fm', 'MN129;MD4;MP;'],
                 [ 'agc-spd-am', 'MN129;MD5;MP;'],
-                [ 'agc-spd-data', 'MN129;MD6;MP;'],
+                [ 'agc-spd-data', 'MN129;MD6;MP;MD' + this.initial_mode + ';'],
                 [ 'agc-thr', 'MN074;SWT19;MP;'],
                 [ 'agc-atk', 'MN074;SWT27;MP;'],
                 [ 'agc-hld', 'MN074;SWT20;MP;'],
-                // [ 'agc-dcy', 'MN074;SWT28;MP;'],
+                [ 'agc-dcy-s', 'GT004;MN074;SWT28;MP;GT' + this.initial_dcy + ';'],
+                [ 'agc-dcy-f', 'GT002;MN074;SWT28;MP;GT' + this.initial_dcy + ';'],
                 [ 'agc-slp', 'MN074;SWT21;MP;'],
                 [ 'agc-pls', 'MN074;SWT29;MP;'],
                 [ 'afx-md', 'MN105;MP;'],
@@ -199,17 +212,6 @@ define(function(require) {
                 case 'agc-spd-data':
                     this.$('#agc-spd-data').html('DATA:' + (val & 0x2 ? 'Fast' : 'Slow'));
                     break;
-                case 'agc-md' :
-                case 'agc-thr':
-                case 'agc-atk':
-                case 'agc-hld':
-                case 'agc-dcy':
-                case 'agc-slp':
-                case 'afx-md' :
-                case 'micbias': // Bit 4 is bias enable
-                case 'micbtn' : // MIC BTN: bit 0 is ptt enable, bit 2 is up/dn enable
-                    this.$('#' + this.menumode).val(val);
-                    break;
                 case 'tx-essb': // data is a DS screen
                     var txt = "";
                     val = data.substr(2);
@@ -227,6 +229,9 @@ define(function(require) {
                     break;
                 case 'af-lim' :
                     this.$('#af-lim').val(parseInt(data.substr(2)));
+                    break;
+                default:
+                    this.$('#' + this.menumode).val(val);
                     break;
             }
             linkManager.sendCommand('MN255;');
@@ -264,7 +269,7 @@ define(function(require) {
             }
             // Enable refresh of the value by setting menumode
             this.menumode = toggles[agc][0];
-            linkManager.sendCommand(toggles[agc][1] + 'UP;MP;');
+            linkManager.sendCommand(toggles[agc][1] + 'UP;MP;MN255;MD' + this.initial_mode + ';');
         },
         
         showInput: function(data) {
@@ -274,8 +279,14 @@ define(function(require) {
 
             var cmd = data.substr(0, 2);
             var val = data.substr(2);
-
-            if ((cmd == 'MP' || cmd == 'DS') && this.menumode != '') {
+            
+            if (this.querying && cmd == 'GT') {
+                this.initial_dcy = val;
+                this.querying = false;
+                this.getMenus();
+            } else if (this.querying && cmd == 'MD') {
+                this.initial_mode = val;
+            }else if ((cmd == 'MP' || cmd == 'DS') && this.menumode != '') {
                 // Happens when we are reading from a menu
                 this.parseMenu(data);
             }

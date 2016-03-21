@@ -59,7 +59,7 @@ define(function(require) {
             this.$el.html(template());
             // Initialize our sliders
             $(".eq",this.el).slider({reversed:true});
-            linkManager.sendCommand('AI2;');            
+            linkManager.sendCommand('AI1;');            
             this.refresh();
             return this;
         },
