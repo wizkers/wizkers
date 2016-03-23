@@ -36,8 +36,14 @@ define(function (require) {
             isopen = false,
             lastUpdate = new Date().getTime();
 
-        var HEART_RATE_SERVICE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
-        var HEART_RATE_MEASUREMENT_UUID = '00002a37-0000-1000-8000-00805f9b34fb';
+        var HEART_RATE_SERVICE_UUID = '180d';
+        var HEART_RATE_MEASUREMENT_UUID = '2a37';
+        
+        // Device information  uuids:
+        var DEV_INFO='180a';
+        var MFG_NAME = '2a24';
+        var MODEL_NUMBER = '2a24';
+        var SERIAL_NUMBER = '2a25';
 
         // We need to write a "0" (string) to this characteristic to get the BlueOnyx
         // to start sending measurements, because it boots in Bootloader mode and remains there
@@ -71,6 +77,9 @@ define(function (require) {
         // Format can act on incoming data from the counter, and then
         // forwards the data to the app through a 'data' event.
         var format = function (data) {
+            if (!(data.value && data.service && data.characteristic))
+                return;
+
             var response = '';
             var updt = new Date().getTime();
 
@@ -80,49 +89,56 @@ define(function (require) {
             // The Heart Rate Measurement Characteristic does not allow 'read'
             // operations and its value can only be obtained via notifications, so the
             // |value| field might be undefined here.
-            if (!data.value) {
-                console.log('No Heart Rate Measurement value received yet');
-                return;
+            
+            if (data.service == HEART_RATE_SERVICE_UUID && data.characteristic == HEART_RATE_MEASUREMENT_UUID) {
+                var valueBytes = new Uint8Array(data.value);
+                if (valueBytes.length < 2) {
+                    console.log('Invalid Heart Rate Measurement value');
+                    return;
+                }
+
+                // Keep track of the time since we last got a packet - if this is more than
+                // 6 seconds, then we missed one (or more) and the CPM count cannot be trusted
+                var valid = false;
+                if ((updt - lastUpdate) < 6000)
+                    valid = true;
+
+                lastUpdate = updt;
+
+                // The first byte is the counts in the last 5 seconds
+                var count = valueBytes[0] + (valueBytes[1] << 8);
+                var battery_ok = (valueBytes[2] == 0x01);
+
+                var cpm = updateCPM(count);
+
+                // This is the CPM to µSv/h conversion coefficient for the tube
+                // in the Blue Onyx. A proper µSv/h output should also take a conversion
+                // coefficient into account for calibration.
+                var conversionCoefficient = 0.00294;
+
+                var response = {
+                    cpm: {
+                        value: cpm.cpm,
+                        usv: cpm.cpm * conversionCoefficient,
+                        valid: valid && cpm.valid
+                    },
+                    cp5s: count,
+                    batt_ok: battery_ok,
+                    loc: current_loc,
+                    loc_status: location_status
+                };
+
+                self.trigger('data', response);
+            } else if (data.service == DEV_INFO && data.characteristic == SERIAL_NUMBER) {
+                // The SN of the Blue Onyx is the MAC
+                var res = '';
+                for (var i in data.value) {
+                    res += ('0' + data.value[i].toString(16)).slice(-2) + ':';
+                }
+                self.trigger('data', {
+                    uniqueID: res.substr(0,res.length-1)
+                });
             }
-
-            var valueBytes = new Uint8Array(data.value);
-            if (valueBytes.length < 2) {
-                console.log('Invalid Heart Rate Measurement value');
-                return;
-            }
-
-            // Keep track of the time since we last got a packet - if this is more than
-            // 6 seconds, then we missed one (or more) and the CPM count cannot be trusted
-            var valid = false;
-            if ((updt - lastUpdate) < 6000)
-                valid = true;
-
-            lastUpdate = updt;
-
-            // The first byte is the counts in the last 5 seconds
-            var count = valueBytes[0] + (valueBytes[1] << 8);
-            var battery_ok = (valueBytes[2] == 0x01);
-
-            var cpm = updateCPM(count);
-
-            // This is the CPM to µSv/h conversion coefficient for the tube
-            // in the Blue Onyx. A proper µSv/h output should also take a conversion
-            // coefficient into account for calibration.
-            var conversionCoefficient = 0.00294;
-
-            var response = {
-                cpm: {
-                    value: cpm.cpm,
-                    usv: cpm.cpm * conversionCoefficient,
-
-                    valid: valid && cpm.valid
-                },
-                batt_ok: battery_ok,
-                loc: current_loc,
-                loc_status: location_status
-            };
-
-            self.trigger('data', response);
         };
 
         /**
@@ -262,7 +278,6 @@ define(function (require) {
                 location_status = err.message;
         }
 
-
         /////////////
         // Public methods
         /////////////
@@ -304,7 +319,9 @@ define(function (require) {
         // this is a standardized call across all drivers.
         //
         // TODO: Returns the instrument GUID.
-        this.sendUniqueID = function () {};
+        this.sendUniqueID = function () {
+            port.read(DEV_INFO, SERIAL_NUMBER);            
+        };
 
         // period in seconds
         this.startLiveStream = function (period) {};

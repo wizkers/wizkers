@@ -260,7 +260,7 @@ define(function (require) {
             if (this.instrument == null)
                 return;
 
-            console.log('Home view', 'update status - ' + new Date().getSeconds());
+            // console.log('Home view', 'update status - ' + new Date().getSeconds());
 
             if (vizapp.state == 'paused') {
                 return;

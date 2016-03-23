@@ -128,7 +128,7 @@ define(function (require) {
             this.supportedInstruments['blue_onyx'] = {
                 name: 'Medcom Blue Onyx',
                 type: 'app/instruments/blue_onyx/blue_onyx',
-                settings: null,
+                settings: 'app/instruments/blue_onyx/settings',
                 connectionsettings: 'app/views/instrument/bluetooth'
             };
             this.supportedInstruments['inspector_ble'] = {

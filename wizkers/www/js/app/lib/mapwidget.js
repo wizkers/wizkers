@@ -77,7 +77,7 @@ define(function (require) {
                     self.render();
                 };
 
-                $.getScript('https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&callback=GMAPLoaded');
+                $.getScript('https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&key=AIzaSyDFxVE9J3JhpF93yH46GF3BE6fYBDOXK7s&callback=GMAPLoaded');
 
             } else {
                 if (globalMap == null) {

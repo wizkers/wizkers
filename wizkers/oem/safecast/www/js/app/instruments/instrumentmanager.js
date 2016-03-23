@@ -53,6 +53,12 @@ define(function (require) {
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
+            'blue_onyx': {
+                name: 'Medcom Blue Onyx',
+                type: 'app/instruments/blue_onyx/blue_onyx',
+                settings: 'app/instruments/blue_onyx/settings',
+                connectionsettings: 'app/views/instrument/bluetooth'
+            }
         };
 
         /**

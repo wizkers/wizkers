@@ -130,17 +130,6 @@ define(function (require) {
         },
 
         cpmScaleToggle: function (event) {
-            return;
-            var change = {};
-            if (event.target.checked) {
-                change["cpmscale"] = "log";
-            } else {
-                change["cpmscale"] = "linear";
-            }
-            settings.set(change);
-            this.render();
-            this.addPlot();
-
         },
 
         editLog: function () {

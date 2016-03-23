@@ -27,7 +27,7 @@
 define(function (require) {
     "use strict";
 
-    var driver_frontend = require('app/instruments/onyx/driver_frontend');
+    var driver_frontend = require('app/instruments/blue_onyx/driver_frontend');
 
     // Convenient function when views want to talk to each other: keep a central
     // reference to those here
@@ -110,7 +110,7 @@ define(function (require) {
 
         // Render a log (or list of logs) for the device.
         this.getLogView = function (arg, callback) {
-            require(['app/instruments/onyx/display_log'], function (view) {
+            require(['app/instruments/blue_onyx/display_log'], function (view) {
                 callback(new view(arg));
             });
         }

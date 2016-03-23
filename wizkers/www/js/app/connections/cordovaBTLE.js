@@ -50,9 +50,7 @@ define(function (require) {
             currentCharacteristics = null,
             self = this,
             devAddress = path,
-            connectionId = -1,
             timeoutCheckTimer = 0;
-
 
         ///////////
         // Public methods
@@ -77,12 +75,29 @@ define(function (require) {
         };
 
         /**
-         * Read data from the BTLE device (not implemented)
+         * Read data from the open BTLE device
          */
-        this.read = function () {
+        this.read = function (service, characteristic) {
             if (!portOpen)
                 return;
-            // self.trigger('data', data);
+                
+            var readError = function(e) {
+                console.log('[cordovaBTLE] Read error: ' + e);
+            };
+            
+            var readSuccess = function(s) {
+                // Our drivers don't want this base64 stuff, sorry
+                s.value = bluetoothle.encodedStringToBytes(s.value)
+                    // Pass it on to the driver
+                self.trigger('data', s);
+            };
+            
+            bluetoothle.read(readSuccess,readError,{
+                'address': devAddress,
+                'service': service,
+                'characteristic': characteristic
+            });
+
         }
 
         /**
