@@ -68,7 +68,7 @@ define(function (require) {
         download_fw: function () {
             var self = this;
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'http://www.wizkers.io/download/774/', true);
+            xhr.open('GET', 'https://www.dropbox.com/s/8f20yv0u2vlv8vg/geigerlink-firmware.hex?dl=1', true);
             xhr.responseType = 'text';
 
             xhr.onload = function (e) {

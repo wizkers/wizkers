@@ -1,0 +1,114 @@
+<div class="col-md-2">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="thumbnail">
+                <p>Data points: <span id="log_size">0</span></p>
+                <p>Start:
+                    <br><small><span id="log_start">0</span></small></p>
+                <p>End:
+                    <br><small><span id="log_end">0</span></small></p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+                <button type="button" id="send-to-api" class="btn btn-primary">Send to Safecast</button>
+                <button type="button" id="csv-export" class="btn btn-default">Save to file</button>
+        </div>
+    </div>
+</div>
+<div class="col-md-10">
+    <div class="row hidden-sm" id="overview-container">
+        <div class="col-md-10">
+            <div class="thumbnail" style="margin-bottom: 5px">
+                <div id="overview" class="chart" style="z-index: 0; height:100px;cursor:crosshair;"></div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <a href="#" role="button" class="resetZoom btn btn-default">Reset Zoom</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="thumbnail" style="margin-top: 5px; margin-bottom: 5px">
+                <div class="geigerchart chart" style="cursor:crosshair;">
+                    <div class="spinner circles">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <p id="loadtext" style="text-align:center;">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- The modal to do the upload -->
+<div class="container">
+    <div id="UploadModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3 id="myModalLabel" class="modal-title">Ready for upload</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="credits" class="col-xs-2 control-label">Credits</label>
+                            <div class="col-xs-10">
+                                <input type="text" class="form-control" id="credits" name="credits">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="cities" class="col-xs-2 control-label">Cities</label>
+                            <div class="col-xs-10">
+                                <input type="text" class="form-control" id="cities" name="cities">
+                            </div>
+                        </div>
+                    </div>
+                    <div>Description (optional):
+                        <textarea id="description" name="description" style="width: 90%;" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    <button class="btn send-log btn-primary">Upload to Safecast </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- The "Error" modal -->
+<div class="container">
+    <div id="ErrorModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myErrorLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3 id="myErrorLabel" class="modal-title">Status</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="horizontal">
+                        <b>Status:&nbsp;</b><span id="errorreason"></span>
+                        <p><b>Details:&nbsp;</b>
+                            <span id="errordetail"></span>
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

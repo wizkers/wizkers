@@ -82,7 +82,7 @@ define(function (require) {
             var self = this;
             $('#fw_dl', this.el).html('Downloading...').addClass('btn-warning');
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'http://www.wizkers.io/download/780/', true);
+            xhr.open('GET', 'https://www.dropbox.com/s/tr8q97666qmeufx/onyx-firmware.bin?dl=1', true);
             xhr.responseType = 'arraybuffer';
 
             xhr.onload = function (e) {
