@@ -83,6 +83,7 @@ require.config({
             'connections_hid': 'app/connections/usbhid',
             'connections_btle': 'app/connections/btle',
             'connections_webrtc': 'app/connections/webrtc',
+            'connections_dummy' : 'app/connections/dummy',
             'serialport': 'app/lib/serialport',
         }
     },

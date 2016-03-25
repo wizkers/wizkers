@@ -16,20 +16,50 @@
  * You should have received a copy of the GNU General Public License
  * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
  */
-window.SampleInstrumentNumView = Backbone.View.extend({
 
-    initialize:function () {
-        this.render();
-    },
+/*
+ * Display output of dummy instrument.
+ *
+ * @author Edouard Lafargue, ed@lafargue.name
+ */
 
-    render:function () {
-        this.$el.html(this.template());
-        return this;
-    },
-    
-    onClose: function() {
-        console.log("Instrument numeric view closing...");        
-    },
+define(function (require) {
+    "use strict";
+
+    var $ = require('jquery'),
+        _ = require('underscore'),
+        Backbone = require('backbone'),
+        utils = require('app/utils'),
+        template = require('js/tpl/instruments/sample_instrument/NumView.js');
 
 
+    return Backbone.View.extend({
+
+        initialize: function (options) {
+            linkManager.on('input', this.showInput, this);
+        },
+
+        events: {},
+
+        render: function () {
+            var self = this;
+            this.$el.html(template());
+            return this;
+        },
+
+        onClose: function () {
+            console.log("Onyx numeric view closing...");
+            linkManager.off('input', this.showInput, this);
+        },
+
+        showInput: function (data) {
+
+            if (typeof (data.value) == 'undefined')
+                return;
+            var val = parseFloat(data.value);
+
+            $('#live', this.el).html(val.toFixed(3));
+
+        }
+    });
 });

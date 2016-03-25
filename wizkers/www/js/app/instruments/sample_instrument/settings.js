@@ -16,41 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
  */
-window.SampleInstrumentSettingsView = Backbone.View.extend({
+define(function(require) {
+    "use strict";
     
-    initialize:function () {
-        // Metadata is a simple object looking like this:
-        // {  'address': 'name', 'address2': 'name2', etc... }
-        this.mappings = this.model.get('metadata');
-        if (this.mappings == null) {
-            this.mappings = {};
-            this.model.set('metadata', this.mappings);
-        }
-        this.render();
-    },
-
-    render:function () {
-        this.$el.html(this.template({mappings: this.mappings}));
-        return this;
-    },
+    var Backbone = require('backbone');
     
-    events: {
-        "change" : "change"
-    },
+    return Backbone.View.extend({
     
-    change: function(event) {
-        console.log("Sample Instrument bespoke settings change");
-
-        // Apply the change to the metadata
-        var target = event.target;        
-        this.mappings[target.name] = target.value;
-        this.model.set('metadata',this.mappings);
-        
-        // This view is embedded into another view, so change events
-        // are going to bubble up to the upper view and change attributes
-        // with the same name, so we stop event propagation here:
-        event.stopPropagation();
-    },
-
-
+    });
 });

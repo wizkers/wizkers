@@ -98,8 +98,17 @@ define(function (require) {
                 type: 'app/instruments/powerlog_1/powerlog_1',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
-            }
+            }            
         };
+        
+        if (true) {
+            this.supportedInstruments["sample_instrument"] = {
+                name: "Test dummy instrument",
+                type: 'app/instruments/sample_instrument/sample_instrument',
+                settings: 'app/instruments/sample_instrument/settings',
+                connectionsettings: 'app/views/instrument/dummy'
+            };
+        }
 
         // The instruments below are only supported in Server runmode:
         if (vizapp.type == "server") {

@@ -26,13 +26,12 @@
 
 "use strict";
 
-var serialport = require('serialport'),
-    events = require('events'),
-    serialconnection = require('../connections/serial'),
+var events = require('events'),
+    dummyconnection = require('../connections/dummy'),
     dbs = require('../pouch-config'),
-    debug = require('debug')('wizkers:parsers:powerlog_1');
+    debug = require('debug')('wizkers:parsers:dummy');
 
-var Powerlog = function () {
+var Dummy = function () {
 
     // Driver initialization
     events.EventEmitter.call(this);
@@ -54,28 +53,13 @@ var Powerlog = function () {
 
     var portSettings = function () {
         return {
-            baudRate: 115200,
-            dataBits: 8,
-            parity: 'none',
-            stopBits: 1,
-            dtr: true,
-            flowControl: false,
-            parser: serialport.parsers.readline(),
         }
     };
 
-    // Format can act on incoming data from the counter, and then
+    // Format can act on incoming data, and then
     // forwards the data to the app through a 'data' event.
     var format = function (data) {
-        //console.log('RX', data);
-
-        // All commands now return JSON
-        try {
-            var response = JSON.parse(data);
-            self.emit('data', response);
-        } catch (err) {
-            debug('Not able to parse JSON response from device:\n' + data + '\n' + err);
-        }
+        self.emit('data', data);
     };
 
     // Status returns an object that is concatenated with the
@@ -124,9 +108,10 @@ var Powerlog = function () {
         port_open_requested = true;
         instrumentid = id;
         dbs.instruments.get(id, function (err, item) {
-            port = new serialconnection(item.port, portSettings());
+            port = new dummyconnection(item.port, portSettings());
             port.on('data', format);
             port.on('status', status);
+            port.open();
         });
     }
 
@@ -177,9 +162,8 @@ var Powerlog = function () {
         port.write(data + '\n');
     };
 
-
 }
 
-Powerlog.prototype.__proto__ = events.EventEmitter.prototype;
+Dummy.prototype.__proto__ = events.EventEmitter.prototype;
 
-module.exports = Powerlog;
+module.exports = Dummy;

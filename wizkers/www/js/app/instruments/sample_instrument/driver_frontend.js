@@ -16,39 +16,46 @@
  * You should have received a copy of the GNU General Public License
  * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
  */
-var SampleInstrumentLinkManager = function(linkManager) {
 
-    var self = this;
-    var lm = linkManager;
+/**
+ * The controller communication manager:
+ *
+ *  - provides API to the backend device to use by views
+ *
+ * @author Edouard Lafargue, ed@lafargue.name
+ */
 
 
-    //////
-    //  Standard API:
-    // All link managers need this function:
-    //////
-    this.setBackendDriver = function() {
-        lm.socket.emit('driver','w433');
+define(function(require) {
+    "use strict";
+
+    // linkManager is a reference to the parent link manager
+    return function() {
+
+        var self = this;
+        var lm = linkManager;
+        var streaming = false;
+
+        //////
+        //  Standard API:
+        // All link managers need this function:
+        //////
+        this.getBackendDriverName = function() {
+            return 'dummy';
+        }
+                
+        //////
+        // End of standard API
+        //////
+
+        // All commands below are fully free and depend on
+        // the instrument's capabilities
+
+        this.ping = function() {
+                lm.sendCommand('HELLO');
+        };
+
+        console.log('Front-end link manager driver..');
     }
 
-    // This instrument always streams its data!
-    this.startLiveStream = function() {
-        return true; 
-    }
-        
-    this.stopLiveStream = function() {
-        return false;
-    }
-    
-    
-    //////
-    // End of standard API
-    //////
-    
-    
-    // All commands below are fully free and depend on
-    // the instrument's capabilities
-    
-    console.log('Started Sample instrument link manager driver..');
-
-}
-
+});

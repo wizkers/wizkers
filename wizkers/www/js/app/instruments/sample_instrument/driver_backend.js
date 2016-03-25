@@ -17,26 +17,30 @@
  * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * Browser-side Parser for Arduino "PowerCost Monitor" from http://www.bluelineinnovations.com/
+ *
+ * This Browser-side parser is used when running as a Chrome or Cordova app.
+ * @author Edouard Lafargue, ed@lafargue.name
+ */
+
 define(function (require) {
     "use strict";
 
     var Backbone = require('backbone'),
-        abutils = require('app/lib/abutils'),
-        btleConnection = require('connections_btle');
-
+        dummyConnection = require('connections_dummy'),
+        abutils = require('app/lib/abutils');
 
     var parser = function (socket) {
 
         var self = this,
             socket = socket,
+            livePoller = null, // Reference to the live streaming poller
             streaming = true,
             port = null,
             port_close_requested = false,
             port_open_requested = false,
             isopen = false;
-
-        var HEART_RATE_SERVICE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
-        var HEART_RATE_MEASUREMENT_UUID = '00002a37-0000-1000-8000-00805f9b34fb';
 
         /////////////
         // Private methods
@@ -44,25 +48,13 @@ define(function (require) {
 
         var portSettings = function () {
             return {
-                baudRate: 115200,
-                dataBits: 8,
-                parity: 'none',
-                stopBits: 1,
-                dtr: true,
-                flowControl: false,
-                parser: Serialport.parsers.readline(),
             }
         };
 
         // Format can act on incoming data from the counter, and then
         // forwards the data to the app through a 'data' event.
         var format = function (data) {
-            var response = '';
-
-            // TODO: create 'response' from 'data'
-
-
-            self.trigger('data', response);
+            self.trigger('data', data);
         };
 
         // Status returns an object that is concatenated with the
@@ -104,11 +96,10 @@ define(function (require) {
         this.openPort = function (insid) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
-            port = new btleConnection(ins.get('port'), portSettings());
-            port.open();
+            port = new dummyConnection(ins.get('port'), portSettings());
             port.on('data', format);
             port.on('status', status);
-
+            port.open();
         };
 
         this.closePort = function (data) {
@@ -133,27 +124,30 @@ define(function (require) {
             return streaming;
         };
 
+
         // Called when the app needs a unique identifier.
         // this is a standardized call across all drivers.
         //
-        // TODO: Returns the instrument GUID.
+        // Returns the Geiger counter GUID.
         this.sendUniqueID = function () {
+            self.trigger('data', {
+                uniqueID: '00000000 (n.a.)'
+            });
         };
 
-        // period in seconds
-        this.startLiveStream = function (period) {
-        };
+        // The device always streams
+        this.startLiveStream = function (period) {};
 
-        this.stopLiveStream = function (args) {
-        };
+        this.stopLiveStream = function (args) {};
 
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
         // HTML interface.
         this.output = function (data) {
-            //console.log('TX', data);
-            port.write(data);
+            port.write(data + '\n');
         };
+
+
     }
 
     _.extend(parser.prototype, Backbone.Events);
