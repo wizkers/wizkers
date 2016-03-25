@@ -66,6 +66,22 @@ define(function (require) {
         /////////////
         // Private methods
         /////////////
+        
+        /**
+         * Compare two BLE UUIDs in long and short (16 bit) formats
+         */
+        var sameUuid = function(u1, u2) {
+            if (u1 == u2)
+                return true;
+                
+            if (u1 == u2.substr(4,4))
+                return true;
+                
+            if (u2 == u1.substr(4,4))
+                return true;
+                
+            return false;
+        } 
 
         var portSettings = function () {
             return {
@@ -77,7 +93,7 @@ define(function (require) {
         // Format can act on incoming data from the counter, and then
         // forwards the data to the app through a 'data' event.
         var format = function (data) {
-            if (!(data.value && data.service && data.characteristic))
+            if (!data.value)
                 return;
 
             var response = '';
@@ -90,7 +106,7 @@ define(function (require) {
             // operations and its value can only be obtained via notifications, so the
             // |value| field might be undefined here.
             
-            if (data.service == HEART_RATE_SERVICE_UUID && data.characteristic == HEART_RATE_MEASUREMENT_UUID) {
+            if (sameUuid(data.service,HEART_RATE_SERVICE_UUID) && sameUuid(data.characteristic,HEART_RATE_MEASUREMENT_UUID)) {
                 var valueBytes = new Uint8Array(data.value);
                 if (valueBytes.length < 2) {
                     console.log('Invalid Heart Rate Measurement value');
@@ -129,7 +145,7 @@ define(function (require) {
                 };
 
                 self.trigger('data', response);
-            } else if (data.service == DEV_INFO && data.characteristic == SERIAL_NUMBER) {
+            } else if (sameUuid(data.service, DEV_INFO) && sameUuid(data.characteristic, SERIAL_NUMBER)) {
                 // The SN of the Blue Onyx is the MAC
                 var res = '';
                 for (var i in data.value) {

@@ -25,7 +25,7 @@
     ],
     "bluetooth": {
         "uuids": ["180d", "ffe0", "ef080d8c-c3be-41ff-bd3f-05a5f4795d7f", 
-                 "A1E8F5B1-696B-4E4C-87C6-69DFE0B0093B" ], 
+                 "A1E8F5B1-696B-4E4C-87C6-69DFE0B0093B", "39b31fec-b63a-4ef7-b163-a7317872007f" ], 
         "low_energy": true
     }
 }

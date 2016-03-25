@@ -35,9 +35,7 @@ define(function (require) {
     /**
      * Instanciates a BTLE connection
      * @param {Object} path  Contains the address of the BTLE device we want to connect to.
-     * @param {Object} settings contains two values: service_uuid and characteristic_uuid
-     *                          Todo: also add a flag to return all services for discovery by
-     *                          front-end.
+     * @param {Object} settings (not used).
      */
     var chromeBTLE = function (path, settings) {
 
@@ -51,10 +49,10 @@ define(function (require) {
             currentCharacteristics = null,
             self = this,
             devAddress = path,
-            service_uuid = settings.service_uuid.toLowerCase(),
-            characteristic_uuid = settings.characteristic_uuid.toLowerCase(),
+            requested_service = null,
+            requested_characteristic = null,
+            discovered_services = null,
             connectionId = -1;
-
 
         ///////////
         // Public methods
@@ -84,9 +82,14 @@ define(function (require) {
          */
 
         this.subscribe = function (subscribeInfo) {
-                getServices();
+            if (!portOpen)
+                return;
+                
+            requested_service = subscribeInfo.service_uuid.toLowerCase();
+            requested_characteristic = subscribeInfo.characteristic_uuid.toLowerCase();
+            selectService();
 
-        }
+        };
 
         this.close = function () {
             console.log("[chromeBTLE] Close BTLE connection");
@@ -132,10 +135,6 @@ define(function (require) {
                     // chrome.bluetoothLowEnergy.disconnect(devAddress);
                     return;
                 }
-                portOpen = true;
-                self.trigger('status', {
-                    portopen: portOpen
-                });
 
                 // Track GATT characteristic value changes. This event will be triggered
                 // after successful characteristic value reads and received notifications
@@ -158,6 +157,9 @@ define(function (require) {
                 chrome.bluetoothLowEnergy.onServiceChanged.addListener(function (service) {
                     console.log('[ChromeBTLE] Service changed', service);
                 });
+                
+                // Last, do a service discovery
+                getServices();
 
             });
         }
@@ -176,54 +178,64 @@ define(function (require) {
                     return;
                 }
 
-                var foundService = undefined;
-                services.forEach(function (service) {
-                    if (service.uuid == service_uuid) {
-                        foundService = service;
-                    }
+                portOpen = true;
+                discovered_services = services;
+                self.trigger('status', {
+                    portopen: portOpen,
+                    services: services
                 });
-
-                selectService(foundService);
             });
+        }
+        
+        /**
+         * Return the InstanceID for a service UUID
+         */
+        var selectServiceByUUID = function(uuid) {
+            if (discovered_services == null)
+                return;
+            
+            for (var s in discovered_services) {
+                if (discovered_services[s].uuid == uuid ||
+                    uuid == discovered_services[s].uuid.substr(4,4))
+                    return discovered_services[s];
+            }
+            return null;
         }
 
         // Inspired by Google Bluetooth samples on Github
-        var selectService = function (service) {
+        var selectService = function () {
 
             //if (currentService && (!service || currentService.deviceAddress !== service.deviceAddress)) {
             //    chrome.bluetoothLowEnergy.disconnect(currentService.deviceAddress);
             //}
 
-            currentService = service;
+            currentService = selectServiceByUUID(requested_service);
             currentCharacteristics = null;
 
-            if (!service) {
+            if (!currentService) {
                 console.log('No service selected.');
                 return;
             }
-
-            console.log('GATT service selected: ' + service.instanceId);
+            
+            console.log('GATT service selected: ' + currentService.instanceId);
 
             // Get the characteristics of the selected service.
-            chrome.bluetoothLowEnergy.getCharacteristics(service.instanceId,
+            chrome.bluetoothLowEnergy.getCharacteristics(currentService.instanceId,
                 function (chrcs) {
                     if (chrome.runtime.lastError) {
                         console.log(chrome.runtime.lastError.message);
                         return;
                     }
 
-                    // Make sure that the same service is still selected.
-                    if (service.instanceId != currentService.instanceId) {
-                        return;
-                    }
-
                     if (chrcs.length == 0) {
-                        console.log('Service has no characteristics: ' + service.instanceId);
+                        console.log('Service has no characteristics: ' + currentService.instanceId);
                         return;
                     }
 
                     chrcs.forEach(function (chrc) {
-                        if (chrc.uuid == characteristic_uuid) {
+                        if (chrc.uuid == requested_characteristic ||
+                            requested_characteristic == chrc.uuid.substr(4,4)
+                        ) {
                             console.log('Setting Characteristic: ' +
                                 chrc.instanceId);
                             currentCharacteristics = chrc;
@@ -290,20 +302,27 @@ define(function (require) {
         function onServiceAdded(service) {
             console.log('[ChromeBTLT] Service added', service);
             // Ignore, if the service is not the one we want
-            if (service.uuid != service_uuid) {
+            
+            if (!requested_service)
+                return;
+            if (service.uuid != requested_service) {
                 return;
             }
 
             // If this came from the currently selected device and no service is
             // currently selected, select this service.
             if (service.deviceAddress == devAddress && !currentService) {
-                selectService(service);
+                selectService();
             }
         }
 
         // This is where we get notifications
         function onCharacteristicValueChanged(chrc) {
+            // Modify the response to be consistent with what the Cordova API
+            // returns, so that the higher level drivers understand both
             // Pass it on to the driver
+            chrc.service = chrc.service.uuid;
+            chrc.characteristic = chrc.uuid;
             self.trigger('data', chrc);
         }
 
