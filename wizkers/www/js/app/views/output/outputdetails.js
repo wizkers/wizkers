@@ -124,6 +124,7 @@ define(function(require) {
             } else {
                 $("#mappings", this.el).html('<p>This plugin does not support output fields, it formats its output data by itself.</p>');
             }
+            
 
         },
         
@@ -286,6 +287,14 @@ define(function(require) {
                 this.gotdata = true;
             }
             $(".fieldselect", this.el).html(tableTemplate({fields: flat, outputfields: this.outputfields, selected: this.devicefields}));
+            // Make sure that fieldselect is bound vertically by window height, so that
+            // the scrollbars appear
+            if (vizapp.mode == 'chrome') {
+                var tbheight = window.innerHeight - this.$('#topoutputinfo').height() - $('.header .container').height() - 20;
+                $('.fieldselect', this.el).css('max-height',
+                    tbheight + 'px'
+                ); 
+            }
         },
 
     });

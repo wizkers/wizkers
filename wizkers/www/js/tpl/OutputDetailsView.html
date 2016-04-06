@@ -9,7 +9,7 @@
             </div>
         </div>
 <form class="form-horizontal" role="form">
-        <div class="row">
+        <div class="row" id="topoutputinfo">
             <div class="col-md-3">
                     <div class="form-group">
                         <label for="type" class="col-md-3 control-label">Type:</label>
@@ -192,18 +192,20 @@
             <div class="col-md-12">
                 <legend>Data mapping summary</legend>
                     <p>Below are the data fields required by the plugin and how they are currently configured</p>
-                <div id="mappings"></div>                
+                <div id="mappings"></div>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-md-5">
+            <div class="col-md-12">
                 <div class="form-actions">
                     <button type="button" class="btn btn-primary save">Save</button>
                     <button type="button" class="btn btn-default delete">Delete</button>
                 </div>
             </div>
-            <div class="col-md-7">
+        </div>
+        <div class="row">
+            <div class="col-md-12">
                 <div class="alert alert-success" style="display: none">
                     <b>Success!</b> Instrument saved successfully
                 </div>
