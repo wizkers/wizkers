@@ -257,7 +257,7 @@ define(function (require) {
         
         // Reguest Transceiver name
         var getXcvr = function(c) {
-            sendResponse(["NONE"],c);
+            sendResponse(["KX3"],c);
         }
         
         // Request Transceiver supported modes
@@ -267,20 +267,23 @@ define(function (require) {
             sendResponse([modes], c);
         }
 
+        // Note: we force the response type to 'none' which removes
+        // the type of the <value> tag, as expected by fldigi (XMLRPC spec says
+        // that no type is equivalent to a String.)
         var getBws = function(c) {
-            var bws = [ "Bandwidth"];
+            var bws = [ $.xmlrpc.force('none', 'Bandwidth')];
             for (var i = 50 ; i <= 1000; i += 50)
-                bws.push(i);
+                bws.push($.xmlrpc.force('none', i));
             for (var i = 1100 ; i <= 2000; i += 100)
-                bws.push(i);
+                bws.push($.xmlrpc.force('none', i));
             for (var i = 2200 ; i <= 4000; i += 200)
-                bws.push(i);
+                bws.push($.xmlrpc.force('none', i));
                 
             sendResponse([[bws]], c);
         }
 
         var getBw = function(c) {
-            var bw = [ 3000, ''];
+            var bw = [ $.xmlrpc.force('none', 3000), ''];
             sendResponse([bw], c);
         }
         

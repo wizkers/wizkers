@@ -253,6 +253,8 @@
 			var simpleEncode = encode, simpleDecode = decode;
 			encode = function(value, $xml) {
 				var text = simpleEncode(value);
+				if (tagName == 'none')
+					return text;
 				return $xml(Type.tagName).text(text);
 			};
 			decode = function(node) {
@@ -270,6 +272,7 @@
 		xmlrpc.types[tagName.toLowerCase()] = Type;
 	};
 
+	xmlrpc.makeType('none', true, String, String);
 
 	// Number types
 	var _fromInt = function(value) { return '' + Math.floor(value); };
