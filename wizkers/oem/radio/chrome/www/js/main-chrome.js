@@ -37,6 +37,7 @@ require.config({
         // we can upgrade easily
         jquery: 'lib/jquery-2.1.4',
         backbone: 'lib/backbone-1.2.3',
+        jquery_xmlrpc: 'lib/jquery.xmlrpc',
         chromestorage: 'lib/backbone.chromestorage',
         bbindexeddb: 'lib/backbone-indexeddb',
         pouchdb: 'lib/pouchdb-5.0.0',
@@ -70,6 +71,8 @@ require.config({
         flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
         flot_windrose: 'lib/jquery.flot.windrose',
         flot_jumlib: 'lib/jquery.flot.JUMlib',
+        
+        xmlrpc: 'lib/xmlrpc/xmlrpc'
     },
 
     /*
@@ -100,6 +103,10 @@ require.config({
         },
         'utils': {
             exports: 'utils'
+        },
+        
+        'jquery_xmlrpc': {
+            deps: ['jquery']
         },
 
         // The Flot library, along with our dependencies:

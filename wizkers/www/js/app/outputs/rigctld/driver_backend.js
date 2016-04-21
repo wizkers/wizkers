@@ -38,7 +38,8 @@ define(function (require) {
     var _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
-        Rigctld = require('app/outputs/rigctld/tcp_server');
+        Rigctld = require('app/outputs/rigctld/tcp_server'),
+        XmlRpc = require('xmlrpc');
 
     var Output = function () {
 
@@ -135,9 +136,10 @@ define(function (require) {
                     // Split collected data by delimiter
                     var parts = data.split(delimiter);
                     data = parts.pop();
-                    parts.forEach(function (part, i, array) {
-                        callback(part, tcpConnection);
-                    });
+                    if (parts.length)
+                        parts.forEach(function (part, i, array) {
+                            callback(part, tcpConnection);
+                        });
                 };
             };
             var parser = parserCreator(rigctl_command).bind(this);

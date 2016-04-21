@@ -35,7 +35,7 @@
     ],
     "sockets": {
         "tcpServer": {
-            "listen": ":4532"
+            "listen": [":4532", ":12345"]
         },
         "tcp": {
             "connect": ""

@@ -79,6 +79,17 @@ define(function (require) {
                self.BandSettings.render();
             });
 
+            require(['app/instruments/elecraft/settings_flash'], function(view) {
+               self.FlashSettings = new view();
+               $('#settings-flashx', self.el).append(self.FlashSettings.el);
+               self.FlashSettings.render();
+            });
+
+            require(['app/instruments/elecraft/settings_mems'], function(view) {
+               self.MemSettings = new view();
+               $('#settings-mems', self.el).append(self.MemSettings.el);
+               self.MemSettings.render();
+            });
             self.queryKX3();
 
             // Force rendering of KX3 tab, somehow the drawing on the tab does not work
@@ -96,8 +107,12 @@ define(function (require) {
                 this.KXPA100.onClose();
             if (this.SettingsAudio)
                 this.SettingsAudio.onClose();
-            if (this.BandSettigns)
+            if (this.BandSettings)
                 this.BandSettings.onClose();
+            if (this.FlashSettings)
+                this.FlashSettings.onClose();
+            if (this.MemSettings)
+                this.MemSettings.onClose();
         },
 
         events: {
