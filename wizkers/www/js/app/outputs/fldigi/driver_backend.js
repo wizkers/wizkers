@@ -51,15 +51,28 @@ define(function (require) {
         var previouscmd = '';
 
         // A few driver variables: we keep track of a few things
-        // here for our bare-bones rigctld implementation.
-        //
+        // here
+        
+        var radio_modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
+        
+        var bws_list = [ $.xmlrpc.force('none', 'Bandwidth')];
+            for (var i = 50 ; i <= 1000; i += 50)
+                bws_list.push($.xmlrpc.force('none', i));
+            for (var i = 1100 ; i <= 2000; i += 100)
+                bws_list.push($.xmlrpc.force('none', i));
+            for (var i = 2200 ; i <= 4000; i += 200)
+                bws_list.push($.xmlrpc.force('none', i));
+
+        
         // Note: we do not poll for those values ourselves, we
         // count on the UI to do this - to be reviewed later if
         // necessary...
         var vfoa_frequency = 0;
         var vfob_frequency = 0;
         var vfoa_bandwidth = 0;
-        var radio_mode = "RTTY";
+        var pwr_level_kx3 = 0;
+        var pwr_level_kxpa = 0;
+        var radio_mode = "DATA";
         var xmit = 0;     // 0 is RX, 1 is TX
 
         // Load the settings for this plugin
@@ -100,20 +113,42 @@ define(function (require) {
 
         // In this plugin, we just keep track of the incoming data and
         // only send data upon request on the TCP server interface
+        // The data is the raw stream from the radio, we just pick what
+        // we want there. 
+        //
+        // TODO: refactor to get the processed stream from the radio, so that
+        // we can support any type of transceiver, and not rely on Kenwood/Elecraft
+        // vocabulary.
         this.sendData = function (data) {
             if (typeof data != "string")
                 return;
-            var cmd = data.substr(0, 2);
-            switch (cmd) {
-            case "FA":
-                vfoa_frequency = parseInt(data.substr(2));
-                break;
-            case "FB":
-                vfob_frequency = parseInt(data.substr(2));
-                break;
-            case "BW":
-                vfoa_bandwidth = parseInt(data.substr(2));
-                break;
+            //console.log(data);
+            if (data[0] == '^') {
+                var cmd = data.substr(1,2);
+                switch (cmd) {
+                    case "PF":
+                        pwr_level_kxpa = parseInt(data.substr(3));
+                        break;
+                }
+            } else {
+                switch (data.substr(0, 2)) {
+                case "FA":
+                    vfoa_frequency = parseInt(data.substr(2));
+                    break;
+                case "FB":
+                    vfob_frequency = parseInt(data.substr(2));
+                    break;
+                case "BW":
+                case "FW":
+                    vfoa_bandwidth = parseInt(data.substr(2))*10;
+                    break;
+                case "PO": // KX3 power level
+                    pwr_level_kx3 = parseInt(data.substr(2));
+                    break;
+                case "IF":
+                    radio_mode = radio_modes[parseInt(data.substr(29,1))-1];
+                    break;
+                }
             }
         };
 
@@ -160,7 +195,7 @@ define(function (require) {
                 var xml = new DOMParser().parseFromString(sxml, "text/xml");
                 var json = $.xmlrpc.parseCall(xml);
                 if (json.methodName) {
-                    console.log("Calling:", json.methodName);
+                    //console.log("Calling:", json.methodName);
                     switch (json.methodName) {
                         case "system.listMethods":
                             listMethods(c);
@@ -171,11 +206,17 @@ define(function (require) {
                         case "rig.get_modes":
                             getModes(c);
                             break;
+                        case "rig.set_mode":
+                            setMode(json.params, c);
+                            break;
                         case "rig.get_bws":
                             getBws(c);
                             break;
                         case "rig.get_bw":
                             getBw(c);
+                            break;
+                        case "rig.set_bw":
+                            setBw(json.params[0], c);
                             break;
                         case "rig.get_mode":
                             getMode(c);
@@ -200,6 +241,9 @@ define(function (require) {
                             break;
                         case "rig.get_smeter":
                             getSMeter(c);
+                            break;
+                        case "rig.get_pwrmeter":
+                            getPowerMeter(c);
                             break;
                         default:
                             console.log('Unsupported method:', json.methodName);
@@ -263,33 +307,35 @@ define(function (require) {
         // Request Transceiver supported modes
         // Hardcoded for now, but could query the instrument to get more details
         var getModes = function(c) {
-            var modes = [ "LSB", "USB", "CW", "FM", "AM", "DATA", "CW-R", 'DATA-R'];
+            var modes = [ "LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 'DATA-REV'];
             sendResponse([modes], c);
+        }
+        
+        var setMode = function(params, c) {
+            console.log(params);
+            sendResponse([], c);
         }
 
         // Note: we force the response type to 'none' which removes
         // the type of the <value> tag, as expected by fldigi (XMLRPC spec says
         // that no type is equivalent to a String.)
-        var getBws = function(c) {
-            var bws = [ $.xmlrpc.force('none', 'Bandwidth')];
-            for (var i = 50 ; i <= 1000; i += 50)
-                bws.push($.xmlrpc.force('none', i));
-            for (var i = 1100 ; i <= 2000; i += 100)
-                bws.push($.xmlrpc.force('none', i));
-            for (var i = 2200 ; i <= 4000; i += 200)
-                bws.push($.xmlrpc.force('none', i));
-                
-            sendResponse([[bws]], c);
+        var getBws = function(c) {                
+            sendResponse([[bws_list]], c);
         }
 
         var getBw = function(c) {
-            var bw = [ $.xmlrpc.force('none', 3000), ''];
+            var bw = [ $.xmlrpc.force('none', vfoa_bandwidth), ''];
             sendResponse([bw], c);
+        }
+        
+        var setBw = function(params, c) {
+            console.log(params);
+            sendResponse( [], c);
         }
         
         // Hardcode for now, will update in a future revision
         var getMode = function(c) {
-            var mode = [ 'DATA'];
+            var mode = [ radio_mode ];
             sendResponse(mode, c);
         }
         
@@ -335,6 +381,14 @@ define(function (require) {
         var getSMeter = function(c) {
             var forced = $.xmlrpc.force('i4', 0);
             sendResponse( [forced], c);
+        }
+
+        // Not supported, but fldigi always asks for it (even if we don't
+        // say we support it)
+        var getPowerMeter = function(c) {
+            var pwr = Math.max(pwr_level_kx3, pwr_level_kxpa);
+            // var forced = $.xmlrpc.force('i4', 0);
+            sendResponse( [pwr], c);
         }
 
 

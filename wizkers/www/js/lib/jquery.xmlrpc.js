@@ -169,7 +169,9 @@
 
 		var mname = $response.find('> methodname').text();
 		var json = { methodName: mname};
-		var params = $response.find('> params > param > value > *');
+			// We need to accomodate for nodes with no type, so we don't
+			// look below "value" tags:
+		var params = $response.find('> params > param > value');
 		if (params)
 			json['params'] = params.toArray().map(xmlrpc.parseNode);
 		return json;
@@ -210,11 +212,19 @@
 		if (node === undefined) {
 			return null;
 		}
-		var nodename = node.nodeName.toLowerCase();
-		if (nodename in xmlrpc.types) {
-			return xmlrpc.types[nodename].decode(node);
-		} else {
-			throw new Error('Unknown type ' + nodename);
+		var contents = $(node).find("> *");
+		if (contents.length) {
+			var node = contents[0];
+			var nodename = node.nodeName.toLowerCase();
+			if (nodename in xmlrpc.types) {
+				return xmlrpc.types[nodename].decode(node);
+			} else {
+				throw new Error('Unknown type ' + nodename);
+			}
+		} else  {
+			// No type. XMLRPC says no type is text, so decode
+			// as text:
+			return node.innerHTML;
 		}
 	};
 

@@ -70,6 +70,8 @@ require.config({
         flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
         flot_windrose: 'lib/jquery.flot.windrose',
         flot_jumlib: 'lib/jquery.flot.JUMlib',
+        
+        dygraph: 'lib/dygraph-combined-dev'
     },
 
     /*
@@ -101,6 +103,11 @@ require.config({
         },
         'utils': {
             exports: 'utils'
+        },
+        
+        'dygraph': {
+            deps: ['jquery'],
+            exports: 'Dygraph'
         },
 
         // The Flot library, along with our dependencies:

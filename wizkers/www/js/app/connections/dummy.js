@@ -74,7 +74,7 @@ define(function (require) {
 
         // Has to be called by the backend_driver to actually open the port.
         this.open = function () {
-            timer = setInterval(output_random_data, 1000);
+            timer = setInterval(output_random_data, 100);
             this.trigger('status', {
                     portopen: true
                 });
@@ -85,7 +85,9 @@ define(function (require) {
         ///////////
         var output_random_data = function() {
             self.trigger('data',
-                { value: Math.random()*100 });
+                { value: Math.random()*100,
+                    value2: Math.random()*10
+                 });
         };
     
 
