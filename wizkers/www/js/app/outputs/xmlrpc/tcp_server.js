@@ -86,7 +86,7 @@ define(function(require) {
      */
     var Rigctld = function(ipaddr) {
         
-        console.log("Starting Rigctld server");
+        console.log("Starting XML-RPC server on port 12345");
         var addr = ipaddr;
         var port = 12345;
         var maxConnections = 10;
@@ -126,7 +126,7 @@ define(function(require) {
          * @see https://developer.chrome.com/apps/sockets_tcpServer#method-disconnect
          */
         this.disconnect = function() {
-            if (this.serverSocketId) {
+            if (serverSocketId) {
               tcps.onAccept.removeListener(onAccept);
               tcps.onAcceptError.removeListener(onAcceptError);
               tcps.close(serverSocketId);
@@ -138,8 +138,8 @@ define(function(require) {
                 console.log(ex);
               }
             }
-            openSockets=[];
-            serverSocketId=0;
+            openSockets = [];
+            serverSocketId = 0;
         };
 
         /**
@@ -181,13 +181,8 @@ define(function(require) {
             if (info.socketId != serverSocketId)
               return;
 
-            // if (openSockets.length >= maxConnections) {
-            //  onNoMoreConnectionsAvailable(info.clientSocketId);
-            //  return;
-           //  }
-
             var tcpConnection = new TcpConnection(info.clientSocketId);
-            // openSockets.push(tcpConnection);
+            openSockets.push(tcpConnection);
 
             tcpConnection.requestSocketInfo(onSocketInfo);
             log('[TCP Server] Incoming connection handled.');
@@ -195,7 +190,7 @@ define(function(require) {
           }
 
           var onAcceptError = function(info) {
-            if (info.socketId != this.serverSocketId)
+            if (info.socketId != serverSocketId)
               return;
 
             error('[TCP Server] Unable to accept incoming connection. Error code=' + info.resultCode);
@@ -365,14 +360,11 @@ define(function(require) {
     };
     
   };
-
-
-
     
-    return {
-        server: Rigctld,
-        connection: TcpConnection
-    }
+  return {
+      server: Rigctld,
+      connection: TcpConnection
+  }
 });
         
         

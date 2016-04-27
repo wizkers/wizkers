@@ -38,8 +38,8 @@ define(function (require) {
     var RestSettings = require('app/outputs/rest/settings');
     var Rigctld = require('app/outputs/rigctld/rigctld');
     var RigctldSettings = require('app/outputs/rigctld/settings');
-    var FlRig = require('app/outputs/fldigi/fldigi');
-    var FlRigdSettings = require('app/outputs/fldigi/settings');
+    var FlRig = require('app/outputs/xmlrpc/fldigi');
+    var FlRigdSettings = require('app/outputs/xmlrpc/settings');
     var WebRTCOutput = require('app/outputs/webrtc/webrtc');
     var WebRTCOutputSettings = require('app/outputs/webrtc/settings');
     var TextOutput = require('app/outputs/text/text');
@@ -153,10 +153,10 @@ define(function (require) {
                 backend: 'app/outputs/rigctld/driver_backend',
                 settings: RigctldSettings
             },
-            "fldigi": {
+            "xmlrpc": {
                 name: "Flrig XML-RPC server",
                 plugin: FlRig,
-                backend: 'app/outputs/fldigi/driver_backend',
+                backend: 'app/outputs/xmlrpc/driver_backend',
                 settings: FlRigdSettings
             },
             "webrtc": {

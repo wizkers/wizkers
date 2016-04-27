@@ -38,7 +38,7 @@ define(function (require) {
     var _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
-        Rigctld = require('app/outputs/fldigi/tcp_server');
+        TCPServer = require('app/outputs/xmlrpc/tcp_server');
 
    require('jquery_xmlrpc'); // Load the Xmlrpc jQuery plugin
 
@@ -78,7 +78,7 @@ define(function (require) {
         // Load the settings for this plugin
         this.setup = function (output) {
 
-            console.log("[Rigctld Output plugin] Setup a new instance");
+            console.log("[XMLRPC Output plugin] Setup a new instance");
             output_ref = output;
             mappings = output.get('mappings');
             settings = output.get('metadata');
@@ -92,14 +92,14 @@ define(function (require) {
             if (rigserver) {
                 rigserver.disconnect();
             }
-            rigserver = new Rigctld.server(settings.ipaddress);
+            rigserver = new TCPServer.server(settings.ipaddress);
             rigserver.start(onRequestCallback);
 
         };
 
         this.onClose = function () {
             if (rigserver) {
-                console.log('[Rigctld] Closing existing server');
+                console.log('[xmlrpc] Closing existing server');
                 rigserver.disconnect();
             }
         }
@@ -127,7 +127,7 @@ define(function (require) {
                 var cmd = data.substr(1,2);
                 switch (cmd) {
                     case "PF":
-                        pwr_level_kxpa = parseInt(data.substr(3));
+                        pwr_level_kxpa = Math.ceil(parseInt(data.substr(3))/10);
                         break;
                 }
             } else {
@@ -143,10 +143,11 @@ define(function (require) {
                     vfoa_bandwidth = parseInt(data.substr(2))*10;
                     break;
                 case "PO": // KX3 power level
-                    pwr_level_kx3 = parseInt(data.substr(2));
+                    pwr_level_kx3 = Math.ceil(parseInt(data.substr(2))/10);
                     break;
                 case "IF":
                     radio_mode = radio_modes[parseInt(data.substr(29,1))-1];
+                    console.log(data);
                     break;
                 }
             }
@@ -192,64 +193,64 @@ define(function (require) {
                sxml = buffer.substr(idx);
             }
             
-                var xml = new DOMParser().parseFromString(sxml, "text/xml");
-                var json = $.xmlrpc.parseCall(xml);
-                if (json.methodName) {
-                    //console.log("Calling:", json.methodName);
-                    switch (json.methodName) {
-                        case "system.listMethods":
-                            listMethods(c);
-                            break;
-                        case "rig.get_xcvr":
-                            getXcvr(c);
-                            break;
-                        case "rig.get_modes":
-                            getModes(c);
-                            break;
-                        case "rig.set_mode":
-                            setMode(json.params, c);
-                            break;
-                        case "rig.get_bws":
-                            getBws(c);
-                            break;
-                        case "rig.get_bw":
-                            getBw(c);
-                            break;
-                        case "rig.set_bw":
-                            setBw(json.params[0], c);
-                            break;
-                        case "rig.get_mode":
-                            getMode(c);
-                            break;
-                        case "rig.get_sideband":
-                            getSideband(c);
-                            break;
-                        case "rig.set_ptt":
-                            setPtt(json.params[0], c);
-                            break;
-                        case "rig.get_ptt":
-                            getPtt(c);
-                            break;
-                        case "rig.get_vfo":
-                            getVfo(c);
-                            break;
-                        case "rig.set_vfo":
-                            setVfo(json.params, c);
-                            break;
-                        case "rig.get_notch":
-                            getNotch(c);
-                            break;
-                        case "rig.get_smeter":
-                            getSMeter(c);
-                            break;
-                        case "rig.get_pwrmeter":
-                            getPowerMeter(c);
-                            break;
-                        default:
-                            console.log('Unsupported method:', json.methodName);
-                            break; 
-                    }
+            var xml = new DOMParser().parseFromString(sxml, "text/xml");
+            var json = $.xmlrpc.parseCall(xml);
+            if (json.methodName) {
+                //console.log("Calling:", json.methodName);
+                switch (json.methodName) {
+                    case "system.listMethods":
+                        listMethods(c);
+                        break;
+                    case "rig.get_xcvr":
+                        getXcvr(c);
+                        break;
+                    case "rig.get_modes":
+                        getModes(c);
+                        break;
+                    case "rig.set_mode":
+                        setMode(json.params, c);
+                        break;
+                    case "rig.get_bws":
+                        getBws(c);
+                        break;
+                    case "rig.get_bw":
+                        getBw(c);
+                        break;
+                    case "rig.set_bw":
+                        setBw(json.params[0], c);
+                        break;
+                    case "rig.get_mode":
+                        getMode(c);
+                        break;
+                    case "rig.get_sideband":
+                        getSideband(c);
+                        break;
+                    case "rig.set_ptt":
+                        setPtt(json.params[0], c);
+                        break;
+                    case "rig.get_ptt":
+                        getPtt(c);
+                        break;
+                    case "rig.get_vfo":
+                        getVfo(c);
+                        break;
+                    case "rig.set_vfo":
+                        setVfo(json.params, c);
+                        break;
+                    case "rig.get_notch":
+                        getNotch(c);
+                        break;
+                    case "rig.get_smeter":
+                        getSMeter(c);
+                        break;
+                    case "rig.get_pwrmeter":
+                        getPowerMeter(c);
+                        break;
+                    default:
+                        console.log('Unsupported method:', json.methodName);
+                        break; 
                 }
+            }
             
         };
         
@@ -262,7 +263,6 @@ define(function (require) {
             c.sendMessage('Content-Type: text/xml\n');
             c.sendMessage('Content-length: ' + body.length + '\n\n');
             c.sendMessage(body);
-            // c.sendMessage('\');            
         }
                 
         var listMethods = function(c) {

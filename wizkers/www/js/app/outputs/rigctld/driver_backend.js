@@ -38,8 +38,7 @@ define(function (require) {
     var _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
-        Rigctld = require('app/outputs/rigctld/tcp_server'),
-        XmlRpc = require('xmlrpc');
+        Rigctld = require('app/outputs/rigctld/tcp_server');
 
     var Output = function () {
 
