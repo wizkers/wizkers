@@ -34,6 +34,8 @@ define(function(require) {
         },
 
         events: {
+            'click #cmdsend': "sendcmd",
+            'keypress input#manualcmd': "sendcmd"
         },
 
         onClose: function() {
@@ -46,8 +48,25 @@ define(function(require) {
             this.$el.html(template(this.model.toJSON()));
             return this;
         },
+
+        sendcmd: function (event) {
+            // We react both to button press & Enter key press
+            if ((event.target.id == "manualcmd" && event.keyCode == 13) || (event.target.id != "manualcmd"))
+                linkManager.sendCommand(this.$('#manualcmd').val());
+        },
+
         
         showInput: function(data) {
+            // Update our raw data monitor
+            var i = $('#input', this.el);
+            var scroll = (i.val() + data + '\n').split('\n');
+            // Keep max 50 lines:
+            if (scroll.length > 50) {
+                scroll = scroll.slice(scroll.length - 50);
+            }
+            i.val(scroll.join('\n'));
+            // Autoscroll:
+            i.scrollTop(i[0].scrollHeight - i.height());
         }
     });
 });

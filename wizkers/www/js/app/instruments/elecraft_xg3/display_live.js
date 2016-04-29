@@ -75,7 +75,9 @@ define(function (require) {
           'click #send-beacon-cw': 'sendCW',
           'click #send-beacon-rtty': 'sendRTTY',
           'click #beacon-wpm-btn': 'setWPM',
-          'keypress input#beacon-wpm': 'setWPM'
+          'keypress input#beacon-wpm': 'setWPM',
+          'click #output-enable': 'toggleOutput',
+          'click #do-sweep': 'doSweep'
         },
         
         onClose: function () {
@@ -92,9 +94,20 @@ define(function (require) {
             }
         },
         
+        toggleOutput: function() {
+          var enabled = $(event.target).is(":checked");
+          linkManager.driver.outputEnable(enabled);  
+        },
+        
+        doSweep: function() {
+            // we'll do the actual sweep in the callback
+            this.sweepPending = true;
+            linkManager.driver.getSweepMem(1);
+        },
+        
         setVFO: function () {
             if ((event.target.id == "vfoa-direct" && event.keyCode == 13) || (event.target.id != "vfoa-direct")) {
-                var v = $('#vfoa-direct').val();
+                var v = this.$('#vfoa-direct').val();
                 linkManager.driver.setVFO(v);
                 if (!linkManager.isStreaming())
                     linkManager.startLiveStream();
@@ -175,6 +188,11 @@ define(function (require) {
                 this.currentLevel = level;
             }
         },
+        
+        toFString: function(f) {
+            return ("00000000000" + (parseInt(f * 1e6).toString())).slice(-11);    
+        },
+        
         showInput: function(data) {
             console.log(data);
             var cmdarg = data.split(',');
@@ -183,11 +201,37 @@ define(function (require) {
                 // Only change field if we are not editing it and the value is different
                 if (!this.$('#vfoa-direct:focus').length && this.$('#vfoa-direct').val() != f)
                     this.$('#vfoa-direct').val(parseInt(cmdarg[1])/1e6);
-                
+                this.$('#output-enable').prop('checked', (cmdarg[4] == '01'));
                 this.updateBandLED(parseInt(cmdarg[3]));
                 this.updateLevelLED(parseInt(cmdarg[2]));
 
-            } else if (cmdarg[0] === 'M') {
+            } else if (cmdarg[0] == 'Q') {
+                if (this.sweepPending) {
+                    this.sweepPending = false;
+                    var start = this.toFString(this.$('#sweep-start-1').val());
+                    var stop = this.toFString(this.$('#sweep-stop-1').val());
+                    var step = this.toFString(this.$('#sweep-step-1').val());
+                    var time = ("00000" + (parseInt(this.$('#sweep-step-time-1').val()).toString())).slice(-5);
+                    var repeat = this.$('#sweep-repeat-1').is(':checked') ? '01' : '00';
+                    // Check if we have changed the arguments. If yes, then
+                    // program the sweep memory. If no, just play the sweep memory
+                    if ( start == cmdarg[2] && stop == cmdarg[3] &&
+                        step == cmdarg[4] && time == cmdarg[5] &&
+                        repeat == cmdarg[6]) {
+                        linkManager.driver.doSweep();
+                    } else {                
+                        linkManager.driver.setSweep(start,stop,step,time,repeat);
+                    }
+                } else {
+                    // Fill in the fields:
+                    this.$('#sweep-start-1').val(parseInt(cmdarg[2])/1e6);
+                    this.$('#sweep-stop-1').val(parseInt(cmdarg[3])/1e6);
+                    this.$('#sweep-step-1').val(parseInt(cmdarg[4])/1e6);
+                    this.$('#sweep-step-time-1').val(parseInt(cmdarg[5]));
+                    this.$('#sweep-repeat-1').prop('checked', (cmdarg[6]) == '01');
+                }
+
+                } else if (cmdarg[0] === 'M') {
                 // Band memories, populate the fields
                 var bands = {
                     "00": "160",

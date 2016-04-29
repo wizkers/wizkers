@@ -65,6 +65,21 @@ define(function (require) {
             }
         }
         
+        this.getSweepMem = function(mem) {
+            lm.sendCommand('Q,' + mem + ';');
+        }
+        
+        this.setSweep = function(start,stop,step,time,repeat) {            
+            // At the moment, we just use Sweep memory 1 to do the sweeps (the UI only
+            // lets up program one sweep set).
+            lm.sendCommand('Q,1,' + start + ',' + stop + ',' + step + ',' + time + ',' + repeat + ';');
+            this.doSweep();            
+        }
+        
+        this.doSweep = function() {
+            lm.sendCommand('PF01,00;S,01;');
+        }
+        
         this.getMems = function() {
             lm.sendCommand('M,00;M,01;M,02;M,03;M,04;M,05;M,06;M,07;M,08;M,09;M,10;M,11;');
         }
@@ -105,6 +120,10 @@ define(function (require) {
 
         this.getWPM = function(wpm) {
             lm.sendCommand('WP;');
+        }
+        
+        this.outputEnable = function(enable) {
+            lm.sendCommand('O,' + (enable ? '1' : '0') + ';');
         }
         
         this.setBand = function (band) {

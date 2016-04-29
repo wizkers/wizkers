@@ -109,9 +109,7 @@ define(function (require) {
 
         function queryRadio() {
 
-            // This is queried every second - we stage our queries in order
-            // to avoid overloading the radio, not sure that is totally necessary, but
-            // it won't hurt
+            // This is queried every second
             
             port.write('I;'); // Ask for frequency
 
@@ -188,6 +186,7 @@ define(function (require) {
                 // Ask for all memories
                 port.write('M,00;M,01;M,02;M,03;M,04;M,05;M,06;M,07;M,08;M,09;M,10;M,11;');
                 port.write('WM;WP;');
+                port.write('Q,1;');
                 
                 livePoller = setInterval(queryRadio.bind(this), (period) ? period * 1000 : 1000);
                 streaming = true;

@@ -15,6 +15,10 @@
                                     <span class="glyphicon glyphicon-check"></span></button>
                             </span>
                         </div> <!-- Current frequency -->
+                        <div class="input-group input-group-sm input-margin">
+                            <span class="input-group-addon">Enable output</span>
+                            <input  id="output-enable" type="checkbox">
+                        </div>
                 </div>
             </div>
         </div>
@@ -120,15 +124,6 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <h6>Sweep control</h6>
-                    </div>
-            </div>
-        </div>
-    </div>
 </div>
 <div class="col-sm-5">
     <div class="row">
@@ -148,12 +143,12 @@
                                 </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-xs-3">
+                    <div class="row" style="margin-top: 5px;">
+                        <div class="col-xs-6">
                             <button class="btn btn-default btn-sm" id="show_beacon_help">Syntax help</button>
                         </div>
-                        <div class="col-md-3 col-md-offset-6 col-sm-5 col-sm-offset-4">
-                            <button class="btn btn-primary btn-sm" id="send-beacon">Send Beacon</button>
+                        <div class="col-xs-6">
+                            <button class="btn btn-primary btn-sm pull-right" id="send-beacon">Send Beacon</button>
                         </div>
                     </div>
                     <div class="row">
@@ -164,7 +159,7 @@
                                 </div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row" style="margin-top: 5px;">
                         <div class="col-md-6 col-md-offset-6 col-sm-8 col-sm-offset-4">
                             <button class="btn btn-primary btn-sm" id="send-beacon-cw">Send as CW</button>
                             <button class="btn btn-primary btn-sm" id="send-beacon-rtty">Send as RTTY</button>
@@ -182,7 +177,54 @@
                                 </div>
                         </div>
                     </div>
-
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h6>Sweep control</h6>
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <div class="input-group input-group-sm input-margin">
+                                <span class="input-group-addon">Start</span>
+                                <input  id="sweep-start-1" type="number" class="form-control" step="0.01" placeholder="14.0">
+                            </div>
+                        </div>
+                        <div class="col-xs-6">
+                            <div class="input-group input-group-sm input-margin">
+                                <span class="input-group-addon">End</span>
+                                <input  id="sweep-stop-1" type="number" class="form-control" step="0.01" placeholder="14.1">
+                            </div>
+                        </div>
+                    </div>                
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <div class="input-group input-group-sm input-margin">
+                                <span class="input-group-addon">Step</span>
+                                <input  id="sweep-step-1" type="number" class="form-control" step="0.01" placeholder="0.1">
+                            </div>
+                        </div>
+                        <div class="col-xs-6">
+                            <div class="input-group input-group-sm input-margin">
+                                <span class="input-group-addon">Step time (ms)</span>
+                                <input  id="sweep-step-time-1" type="number" class="form-control" step="1" placeholder="100">
+                            </div>
+                        </div>
+                    </div>                
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <div class="input-group input-group-sm input-margin">
+                                <span class="input-group-addon">Repeat</span>
+                                <input  id="sweep-repeat-1" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="col-xs-6">
+                            <button class="btn btn-primary btn-sm pull-right" id="do-sweep">Sweep</button>
+                        </div>
+                    </div>                
                 </div>
             </div>
         </div>

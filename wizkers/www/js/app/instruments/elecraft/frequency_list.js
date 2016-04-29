@@ -64,6 +64,7 @@ define(function (require) {
                 this.allmems[this.band] = [];
             }
             this.mem = this.allmems[this.band][this.frequency]; // should always be defined
+            this.mem['index'] = this.frequency; // So that we can create a unique ID to refer to it later
 
             _.bindAll(this, 'checkFreqBoundaries');
             _.bindAll(this, 'changeEvent');
@@ -373,7 +374,6 @@ define(function (require) {
                     }).render().el);
                 }
             }
-
             return this;
         },
 
@@ -408,7 +408,36 @@ define(function (require) {
             } else if (cmd == "FA") {
                 // Got a frequency: locate if we have a frequency card
                 // on that frequency.
+                if (this.current_freq == val)
+                    return;
+                this.current_freq = val;
+                var freq = parseInt(val)/1e6;
+                this.highlightCards(freq);
             }
+        },
+        
+        highlightCards: function(freq) {
+            var bfreq = this.frequencies[this.current_band];
+            var found_exact_freq_idx = [];
+            var found_band_freq_idx = [];
+            for (var idx in bfreq) {
+                if (bfreq[idx].vfoa == freq)
+                    found_exact_freq_idx.push(idx);
+                if ((bfreq[idx].vfoa <= freq) && (bfreq[idx].vfob >= freq))
+                    found_band_freq_idx.push(idx);
+            }
+            // Now we know what cards are either with VFOA exactly that frequency,
+            // and which ones have a VFOA-VFOB interval containing our frequency.
+            // We can adjust their color. We'll go by index number through jQuery
+            // CSS queries:
+            // To go faster, clear all existing backgrounds:
+            this.$('.panel-body').removeClass('bg-success').removeClass('bg-info');
+            for (var i=0; i < found_band_freq_idx.length; i++) {
+                this.$('#freq-card-' + found_band_freq_idx[i] + ' .panel-body').addClass('bg-info');
+            }
+            for (var i=0; i < found_exact_freq_idx.length; i++) {
+                this.$('#freq-card-' + found_exact_freq_idx[i] + ' .panel-body').removeClass('bg-info').addClass('bg-success');
+            }            
         },
 
         // Called from our containing view to add a new frequency for this band.
