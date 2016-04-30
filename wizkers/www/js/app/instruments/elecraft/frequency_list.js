@@ -400,6 +400,7 @@ define(function (require) {
                 if (this.current_band == new_band)
                     return; // Avoid useles re-renders;
                 this.current_band = new_band;
+                this.current_freq = null;
                 console.log(this.current_band);
                 this.render();
             } else if (cmd == "MD" && this.addingFrequency) {

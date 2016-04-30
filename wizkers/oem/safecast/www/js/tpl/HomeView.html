@@ -2,44 +2,55 @@
 <div class="col-md-9">
     <div class="row">
         <div class="col-xs-12" id="control-area">
-<!--
-<div class="pull-right hidden-sm">
-                <button disabled role="button" id="outputstatus" class="btn btn-responsive btn-info">Output status</button>
-            </div>
--->
-            <button role="button" disabled class="ctrl-connect btn btn-responsive  btn-warning"><span class="glyphicon glyphicon-play-circle"></span>&nbsp;Connect to Instrument</button>
-            <button disabled role="button" class="ctrl-diag btn btn-responsive btn-enable-connected btn-info">Device setup</button>
-            <button role="button" disabled class="ctrl-record btn btn-responsive btn-enable-connected btn-danger"><span class="glyphicon glyphicon-download"></span>&nbsp;Record</button>
+
+            <button role="button" disabled class="ctrl-connect btn btn-warning"><span class="glyphicon glyphicon-play-circle"></span>&nbsp;Connect</button>
+            <button role="button" disabled class="ctrl-record btn btn-enable-connected btn-danger"><span class="glyphicon glyphicon-download"></span>&nbsp;Record</button>
         </div>
     </div>
     <!-- row-fluid -->
     <div id="liveview" class="row">
         <div class="col-md-12">
-            <div class="row thumbnails">
-                <div class="col-md-3 col-sm-2">
+            <div class="row">
+                <div class="col-md-12">
                     <div style="text-align:center;">
                         <h4>Welcome to Safecast:Drive</h4>
-
-                        <p>Ready for a drive? Please log in to the Safecast API. If you do not have a Safecast account, please visit <a onclick="window.open('https://api.safecast.org/', '_system')" >api.safecast.org</a> to create one.</p>
+                        <p>Ready for a drive? Please enter your email address and Safecast password below to sign in . If you do not have a Safecast account, please visit <a onclick="window.open('https://api.safecast.org/', '_system')" >api.safecast.org</a> to create one.</p>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-2">
+            </div>
+            <div class="row">
+                <div class="col-md-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h6>API Login</h6>
+                            <h6>Sign in</h6>
                         </div>
-                        <div class="panel-body select" style="text-align: center;" >
-                            <p>TODO: insert login fields here. Manage Safecast API settings at application level.</p>
+                        <div class="panel-body">
+                            <div class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="name" class="col-md-3 control-label">Email</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" id="username" name="username" />
+                                    </div>
+                                    <label for="password" class="col-md-3 control-label">Password</label>
+                                    <div class="col-md-9">
+                                        <input type="password" class="form-control" id="password" name="password" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pull-right">
+                                <br/>
+                                <button role="button" class="btn btn-info" id="login">Login</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-2">
+            </div>
+            <div class="row">
+                <div class="col-md-12">
                     <div style="text-align:center;">
-                        <h4>Need help ?</h4>
-                        <p>Visit <a onclick="window.open('http://safecast.org/', '_system')">Safecast.org</a> for more details.</p>
+                        <p>We need you to sign in so that you can publish the data from your Geiger counter onto the <a onclick="window.open('https://safecast.org/', '_system')" >http://safecast.org/</a> website.</p>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

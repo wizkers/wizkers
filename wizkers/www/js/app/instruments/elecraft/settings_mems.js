@@ -42,7 +42,7 @@ define(function(require) {
         },
         
         events: {
-            "click #memread": "readMemory"
+            "click #memread": "readMemoryLoc"
         },
 
         onClose: function() {
@@ -51,18 +51,121 @@ define(function(require) {
 
         render:function () {
             var self = this;
-            this.$el.html(template());
+            this.$el.html(template());            
             return this;
         },
         
         refresh: function() {
+            // Now, we only want to scroll the table, not the whole page.
+            // We have to do this because the offset is not computed before
+            // we show the tab for the first time.
+            var tbheight = window.innerHeight - $(this.el).offset().top - 150;
+            this.$('#tablewrapper').css('max-height', tbheight + 'px');
+
+            if (this.rnbs_state != true)
+                this.readNormalBandMemoryState(true);
         },
         
-        readMemory: function() {
+        /**
+         * Read the configuration of the standard band memories on the KX3.
+         *  We have 11 band memories, with config stored at 0100 to 0100 + 0xA0
+         * 
+         *  starting: true if we start a read operation
+         *  address: number
+         *  data: the data just read, as a hex string
+         */
+        readNormalBandMemoryState: function(starting, address, data) {
+            if (starting) {
+                this.rnbs_address = 0x0100;
+                this.rnbs_data_string = "";
+                this.rnbs = [];
+                this.readMemory(this.rnbs_address, 0x40);
+                return;
+            }
+            
+            // We are doing a very basic implementation here, the best would be to
+            // have readMemory accept any block length, but this is overkill for our usage imho
+            if (address == 0x0100) {
+                this.rnbs_data_string += data;
+                this.readMemory(0x0140, 0x40);
+                return;
+            } else if (address == 0x0140){
+                this.rnbs_data_string += data;
+                this.readMemory(0x0180, 0x30);
+                return;
+                
+            }
+            if (address != 0x0180) {
+                console.log("Oh oh, error here, we should have address == 0x0180 at this stage");
+                return;
+            }
+            this.rnbs_data_string += data;
+            var b = abu.hextoab(this.rnbs_data_string);
+            // We can now decode the 11 basic band memories:
+            for (var i = 0; i < b.length/16; i++) {
+                var b1 = b.slice(i*16, (i+1)* 16);
+                var f1 = this.decodeVFO(b1.slice(0,5));
+                var f2 = this.decodeVFO(b1.slice(5,10));
+                var idx = b1[0x0f];
+                console.log("F1:", f1, " - F2:", f2, " - Index", idx);
+            }
+            this.readTransverterBandMemoryState(true);
+        },
+        
+        readTransverterBandMemoryState: function(starting, address, data) {
+            if (starting) {
+                this.rtbs_address = 0x0200;
+                this.rtbs_data_string = "";
+                this.rtbs = [];
+                this.readMemory(this.rtbs_address, 0x40);
+                return;
+            }
+            
+            // We are doing a very basic implementation here, the best would be to
+            // have readMemory accept any block length, but this is overkill for our usage imho
+            if (address == 0x0200) {
+                this.rtbs_data_string += data;
+                this.readMemory(0x0240, 0x40);
+                return;
+            } else if (address == 0x0240){
+                this.rtbs_data_string += data;
+                this.readMemory(0x0280, 0x10);
+                return;
+                
+            }
+            if (address != 0x0280) {
+                console.log("Oh oh, error here, we should have address == 0x0280 at this stage");
+                return;
+            }
+            this.rtbs_data_string += data;
+            var b = abu.hextoab(this.rtbs_data_string);
+            // We can now decode the 11 basic band memories:
+            for (var i = 0; i < b.length/16; i++) {
+                var b1 = b.slice(i*16, (i+1)* 16);
+                var f1 = this.decodeVFO(b1.slice(0,5));
+                var f2 = this.decodeVFO(b1.slice(5,10));
+                var idx = b1[0x0f];
+                console.log(abu.hexdump(b1));
+                console.log("F1:", f1, " - F2:", f2, " - Index", idx);
+            }
+            this.rnbs_state = true;          
+            this.rtbs_state = true;
+        },
+        
+        readMemoryLoc: function() {
+          var i = $('#flashdump', this.el);
+          var base_address = 0x0C00 + 0x40 *parseInt(this.$("#memtoread").val());
+          this.readMemory(base_address, 0x40);
+        },
+        
+        /**
+         * Read a memory location. Block length has to be <= 0x40
+         */
+        readMemory: function(base_address, block_length) {
           var i = $('#flashdump', this.el);
           console.log("Read flash location");
-          var address = ("0000" + (0x0C00 + 0x40 * parseInt(this.$("#memtoread").val())).toString(16)).slice(-4);
-          var l = "40";
+          var address = ("0000" + (base_address).toString(16)).slice(-4);
+          var l = ("00" + (block_length).toString(16)).slice(-2);
           if ( parseInt(address,16) > 0xFFFF) {
               i.val("Error: address must be between 0000 and FFFF");
               return;
@@ -233,6 +336,14 @@ define(function(require) {
                 // If we detect we have a frequency memory address, then decode what we can:
                 if ((address >= 0x0c00) && (address <= 0x3Dc0) && ( address % 0x40 == 0)) {
                     this.decodeMemory(b, (address-0x0C00)/0x40);
+                } else
+                if ((address >= 0x0100) && (address <= 0x0180)) {
+                    // This is the band memory state configuration
+                    this.readNormalBandMemoryState(false, address, buf);
+                }
+                if ((address >= 0x0200) && (address <= 0x0280)) {
+                    // This is the transverter band memory state configuration
+                    this.readTransverterBandMemoryState(false, address, buf);
                 }
                 
             }

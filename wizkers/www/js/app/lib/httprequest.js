@@ -166,9 +166,8 @@ define(function(require) {
             
             return new function() {
                 this.send = function(data) {
-                    console.log("[httprequest] send - " + data);
                     xhr.send(data);
-                    console.log(xhr);}
+                }
             }
         }          
     }

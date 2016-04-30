@@ -141,6 +141,10 @@ define(function (require) {
                 this.BandSettings != undefined ) {
                 this.BandSettings.refresh();
             }
+            
+            if (e.target.innerText == 'Memories') {
+                this.MemSettings.refresh();
+            }
 
         },
         
