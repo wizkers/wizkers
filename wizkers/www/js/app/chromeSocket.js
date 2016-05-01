@@ -265,13 +265,14 @@ define(function (require) {
             var device_names = {};
             // OK, we have Bluetooth, let's do the discovery now
             function startScanSuccess(status) {
-                // Stop discovery after 30 seconds.
+                // Stop discovery after 15 seconds.
                 if (status.status == 'scanStarted') {
                     setTimeout(function () {
                         bluetoothle.stopScan(function () {
                             console.log('Stopped scan');
+                            self.trigger('status', {scanning: false});
                         }, function () {});
-                    }, 30000);
+                    }, 15000);
                 }
                 if (status.address) {
                     // Don't issue 'ports' messages repeatedly when scanning,
@@ -295,7 +296,7 @@ define(function (require) {
 
             function startScan() {
                 bluetoothle.startScan(startScanSuccess, startScanError, {
-                    "serviceUuids": [ filter ],
+                    "services": [ filter ],
                     allowDuplicates: true
                 });
             };
@@ -308,6 +309,7 @@ define(function (require) {
                         if (!status.hasPermission) {
                             bluetoothle.requestPermission(function (status) {
                                 if (status.requestPermission) {
+                                    self.trigger('status', {scanning: true});
                                     startScan();
                                 }
                             });

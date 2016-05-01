@@ -121,6 +121,7 @@ define(function (require) {
                 console.log("[Safecast log file post] API Request result", this);
                 // this is the xmlhttprequest
                 switch (this.status) {
+                case 504: // Gateway timeout
                 case 0: // Cannot connect
                     console.log('Cannot connect to Safecast');
                     self.$('#errorreason').html('Safecast is not responding');

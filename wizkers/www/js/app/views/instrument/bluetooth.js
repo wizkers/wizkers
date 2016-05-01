@@ -33,6 +33,7 @@ define(function (require) {
         initialize: function (options) {
             this.ports = [];
             this.refresh();
+            linkManager.on('status', this.updatestatus, this);
         },
 
         events: {
@@ -41,6 +42,16 @@ define(function (require) {
 
         onClose: function () {
             console.log("Bluetooth connexion settings closing");
+            linkManager.off('status', this.updatestatus, this);
+        },
+        
+        updatestatus: function(status) {
+            if (status.scanning != undefined) {
+                if (status.scanning)
+                    this.$('#spinner1').show();
+                else
+                    this.$('#spinner1').hide();                
+            }
         },
 
         render: function () {

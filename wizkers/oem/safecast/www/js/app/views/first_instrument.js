@@ -27,17 +27,53 @@ define(function(require) {
     return Backbone.View.extend({
 
         initialize:function () {
+            linkManager.on('status', this.updatestatus, this);
         },
 
         events: {
+            'click #create-instrument': 'createInstrument'
         },
 
         onClose: function() {
-            console.log("[Safecast] First instrument view...");
+            console.log("[Safecast] First instrument view closing");
+            linkManager.on('status', this.updatestatus, this);
         },
         
         setApiKey: function(k) {
             this.apiKey = k;
+        },
+        
+        createInstrument: function() {
+            // OK, that's it: we now have all the info we need to create
+            // a new bGeigie
+            
+            this.instrument.set('metadata', {'apikey': this.apiKey});
+            this.instrument.set('type', 'bgeigie');
+            this.instrument.set('name', 'My bGeigie');
+            this.instrument.set('port', this.$('#port').val());
+            this.instrument.save(null, {
+                success: function (model) {
+                        settings.set({
+                            currentInstrument: model.id
+                        });
+                        settings.save(); // will trigger an instrument change from the router
+                        router.switchinstrument(model.id);
+                },
+                error: function () {
+                    console.log('Instrument: error saving');
+                    utils.showAlert('Error:', 'An error occurred while trying to save intrument config', 'alert-danger');
+                }
+            });
+        },
+        
+        updatestatus: function(status) {
+            console.log('Status', status);
+            if (status.scanning != undefined) {
+                if (status.scanning)
+                    this.$('#create-instrument').prop('disabled', true);
+                else
+                    this.$('#create-instrument').prop('disabled', false).html('Connect');                
+            }
         },
 
         render:function () {
@@ -45,9 +81,9 @@ define(function(require) {
             this.$el.html(template());
             
             require(['app/models/instrument'], function (model) {
-                var instrument = new model.Instrument();
+                self.instrument = new model.Instrument();
                 instrumentManager.getConnectionSettingsFor("bgeigie", {
-                    model: instrument
+                    model: self.instrument
                 }, function (view) {
                     self.$('#portsettings').html(view.el);
                     view.render();
