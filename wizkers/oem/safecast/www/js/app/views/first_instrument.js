@@ -71,8 +71,12 @@ define(function(require) {
             if (status.scanning != undefined) {
                 if (status.scanning)
                     this.$('#create-instrument').prop('disabled', true);
-                else
-                    this.$('#create-instrument').prop('disabled', false).html('Connect');                
+                else {
+                    // If we have several devices detected, then we need
+                    // to warn the user !
+                    
+                    this.$('#create-instrument').prop('disabled', false).html('Connect');
+                }
             }
         },
 

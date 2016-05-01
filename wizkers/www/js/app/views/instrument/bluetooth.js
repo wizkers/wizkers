@@ -47,10 +47,11 @@ define(function (require) {
         
         updatestatus: function(status) {
             if (status.scanning != undefined) {
-                if (status.scanning)
-                    this.$('#spinner1').show();
-                else
-                    this.$('#spinner1').hide();                
+                if (status.scanning) {
+                    this.$('#refresh').html('<img src="img/loading.gif">');
+                } else {
+                    this.$('#refresh').html('<span class="glyphicon glyphicon-refresh"></span>');
+                }                
             }
         },
 
@@ -62,8 +63,23 @@ define(function (require) {
         },
 
         refreshDevices: function (devices) {
-            this.ports = devices;
-            this.filter = this.model.get('filter');
+            // Now, reorder the list of devices by RSSI
+            // when we are in Cordova mode (the RSSI is not returned
+            // in Chrome mode)
+            if (vizapp.type == 'cordova') {
+                this.ports = [];
+                for (var i in devices) {
+                    this.ports.push(devices[i]);                
+                }
+                this.ports.sort(function(a,b) {
+                    if (a.rssi > b.rssi)
+                        return 1;
+                    if (a.rssi < b.rssi)
+                        return -1;
+                    return 0;                    
+                });
+            } else 
+                this.ports = devices;
             this.render();
         },
 

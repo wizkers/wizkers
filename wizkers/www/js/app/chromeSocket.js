@@ -282,7 +282,8 @@ define(function (require) {
                         (device_names[status.address] == undefined && device_names[status.address].name == status.address && status.name != undefined)) {
                         device_names[status.address] = {
                             name: status.name || status.address,
-                            address: status.address
+                            address: status.address,
+                            rssi: status.rssi
                         };
                         console.log('New BT Device', status);
                         self.trigger('ports', device_names);
@@ -366,10 +367,12 @@ define(function (require) {
 
             // Now begin the discovery process.
             chrome.bluetooth.startDiscovery(function () {
+                self.trigger('status', {scanning: true});
                 // Stop discovery after 30 seconds.
                 setTimeout(function () {
+                    self.trigger('status', {scanning: false});
                     chrome.bluetooth.stopDiscovery(function () {});
-                }, 30000);
+                }, 15000);
             });
         }
 
