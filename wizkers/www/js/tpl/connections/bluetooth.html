@@ -4,13 +4,13 @@
         <div class="col-md-10 col-xs-10">
         <select id="port" name="port" class="form-control">
             <%
-               if (ports[port] == undefined) { %>
+               if (ports[port] == undefined && port != '') { %>
                 <option disabled selected value="<%= port %>"><%= port %></option>
                <% }
                %>
             <% for(var i in ports) { %>
             <option
-                <%= port == i ? 'selected':'' %>
+                <%= (port == i || ports.length == 1) ? 'selected':'' %>
                 value="<%= ports[i].address %>"><%= ports[i].name %></option>
             <% } %>
         </select>

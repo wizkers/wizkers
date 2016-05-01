@@ -295,7 +295,7 @@ define(function (require) {
 
             function startScan() {
                 bluetoothle.startScan(startScanSuccess, startScanError, {
-                    "serviceUuids": [],
+                    "serviceUuids": [ filter ],
                     allowDuplicates: true
                 });
             };
