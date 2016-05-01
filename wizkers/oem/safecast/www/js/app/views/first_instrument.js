@@ -56,9 +56,7 @@ define(function(require) {
                     self.connectionView = view;
                 });
             });
-            
             return this;
         },
-
     });
 });

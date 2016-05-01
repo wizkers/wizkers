@@ -45,7 +45,8 @@ define(function (require) {
                 name: 'Safecast bGeigie',
                 type: 'app/instruments/bgeigie/bgeigie',
                 settings: 'app/instruments/bgeigie/settings',
-                connectionsettings: 'app/views/instrument/bluetooth'
+                connectionsettings: 'app/views/instrument/bluetooth',
+                connectionfilter: 'ef080d8c-c3be-41ff-bd3f-05a5f4795d7f'
             },
             "onyx": {
                 name: "Safecast Onyx",
@@ -73,6 +74,12 @@ define(function (require) {
             });
         }
 
+        this.getConnectionFilterFor = function (instrument) {
+            if (this.supportedInstruments[instrument] == undefined)
+                return '';
+            return this.supportedInstruments[instrument].connectionfilter;
+            
+        }
         /**
          * The optional extra settings in the "Instrument Details" view. These are settings
          * that are required to connect to the instrument.

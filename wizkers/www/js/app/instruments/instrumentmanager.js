@@ -156,7 +156,8 @@ define(function (require) {
                 name: 'Safecast bGeigie',
                 type: 'app/instruments/bgeigie/bgeigie',
                 settings: 'app/instruments/bgeigie/settings',
-                connectionsettings: 'app/views/instrument/bluetooth'
+                connectionsettings: 'app/views/instrument/bluetooth',
+                connectionfilter: 'ef080d8c-c3be-41ff-bd3f-05a5f4795d7f'
             };
             this.supportedInstruments['safecast_air'] = {
                 name: 'Safecast Air',
@@ -190,6 +191,15 @@ define(function (require) {
          */
         this.getConnectionSettingsFor = function (instrument, arg, callback) {
             require([this.supportedInstruments[instrument].connectionsettings], function (view) {
+                // Some instruments have a connection filter - mostly BTLE now, to only
+                // display devices that provide certain UUIDs. We add this to the
+                // arguments in the callback.
+                var filter =  this.supportedInstruments[instrument].connectionfilter;
+                if (arg != undefined) {
+                    arg['filter'] = filter;
+                } else {
+                    arg = { 'filter': filter};
+                }
                 callback(new view(arg));
             });
         }
@@ -218,6 +228,13 @@ define(function (require) {
             if (this.supportedInstruments[instrument] == undefined)
                 return '';
             return this.supportedInstruments[instrument].connectionsettings;
+        }
+
+        this.getConnectionFilterFor = function (instrument) {
+            if (this.supportedInstruments[instrument] == undefined)
+                return '';
+            return this.supportedInstruments[instrument].connectionfilter;
+            
         }
 
         this.clear = function () {

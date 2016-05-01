@@ -243,12 +243,13 @@ define(function (require) {
                     break;
                 }
             } else if (ct == 'app/views/instrument/bluetooth') {
+                var filter = instrumentManager.getConnectionFilterFor(insType);
                 switch (vizapp.type) {
                 case 'chrome':
-                    discoverBluetooth();
+                    discoverBluetooth(filter);
                     break;
                 case 'cordova':
-                    cordovaDiscoverBluetooth();
+                    cordovaDiscoverBluetooth(filter);
                     break;
                 }
             } else {
@@ -259,7 +260,7 @@ define(function (require) {
         /**
          * Only in Cordova mode, that's pretty obvious
          */
-        var cordovaDiscoverBluetooth = function () {
+        var cordovaDiscoverBluetooth = function (filter) {
 
             var device_names = {};
             // OK, we have Bluetooth, let's do the discovery now
@@ -327,10 +328,14 @@ define(function (require) {
             });
         }
 
-        var discoverBluetooth = function () {
+        var discoverBluetooth = function (filter) {
             var device_names = {};
 
             var updateDeviceName = function (device) {
+                if (filter != undefined) {
+                    if (device.uuids.indexOf(filter) == -1)
+                        return;
+                }
                 device_names[device.address] = {
                     name: device.name,
                     address: device.address

@@ -52,6 +52,7 @@ define(function (require) {
 
         refreshDevices: function (devices) {
             this.ports = devices;
+            this.filter = this.model.get('filter');
             this.render();
         },
 
