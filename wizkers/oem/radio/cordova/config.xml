@@ -15,7 +15,6 @@
     <plugin name="cordova-plugin-bluetoothle" spec="^3.0.1" />
     <plugin name="cordova-plugin-file" spec="^4.1.1" />
     <plugin name="cordova-plugin-file-transfer" spec="^1.5.0" />
-    <plugin name="cordova-plugin-geolocation" spec="^2.1.0" />
     <plugin name="cordova-plugin-google-analytics" spec="^0.8.0" />
     <plugin name="cordova-plugin-whitelist" spec="^1.2.1" />
     <plugin name="de.appplant.cordova.plugin.background-mode" spec="https://github.com/katzer/cordova-plugin-background-mode.git" />

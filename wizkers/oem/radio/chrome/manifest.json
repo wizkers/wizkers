@@ -22,7 +22,6 @@
     "fileSystem",
     "http://*/*",
     "https://*/*",
-    "geolocation",
     "hid",
         {
             "usbDevices": [
