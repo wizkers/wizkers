@@ -38,7 +38,7 @@ define(function (require) {
     var _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
-        Rigctld = require('app/outputs/rigctld/tcp_server');
+        Rigctld = require('app/lib/tcp_server');
 
     var Output = function () {
 
@@ -77,8 +77,8 @@ define(function (require) {
             if (rigserver) {
                 rigserver.disconnect();
             }
-            rigserver = new Rigctld.server(settings.ipaddress);
-            rigserver.listen(onAcceptCallback);
+            rigserver = new Rigctld.server(settings.ipaddress, 4532);
+            rigserver.start(onAcceptCallback);
 
         };
 

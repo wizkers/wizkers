@@ -38,7 +38,7 @@ define(function (require) {
     var _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
-        TCPServer = require('app/outputs/xmlrpc/tcp_server');
+        TCPServer = require('app/lib/tcp_server');
 
    require('jquery_xmlrpc'); // Load the Xmlrpc jQuery plugin
 
@@ -92,7 +92,7 @@ define(function (require) {
             if (rigserver) {
                 rigserver.disconnect();
             }
-            rigserver = new TCPServer.server(settings.ipaddress);
+            rigserver = new TCPServer.server(settings.ipaddress, 12345);
             rigserver.start(onRequestCallback);
 
         };

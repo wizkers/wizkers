@@ -358,13 +358,13 @@ define(function (require) {
             var len = fr.length;
             console.log("Frequency list: " + len + " frequencies");
 
-            // Sort frequencies by VFOA numerical order
-
             this.$el.html('<div class="item active"></div>');
+            this.frequencyPageStarts = [];
 
             for (var screen = 0; screen < len / 4; screen++) {
                 // console.log("rendering screen " + screen);
                 if (screen) this.$el.append('<div class="item other-' + screen + '"></div>');
+                this.frequencyPageStarts.push(parseFloat(fr[screen*4].vfoa));
                 for (var i = screen * 4; i < Math.min(len, screen * 4 + 4); i++) {
                     $(screen ? '.other-' + screen : '.active', this.el).append(new ElecraftFrequencyItemView({
                         model: this.model,
@@ -390,7 +390,7 @@ define(function (require) {
         showInput: function (data) {
             if (typeof data != "string")
                 return; // data is sometimes an object when we get a serial port error
-
+                
             // Follow band changes to update our frequency cards
             var cmd = data.substr(0, 2);
             var val = data.substr(2);
@@ -400,9 +400,13 @@ define(function (require) {
                 if (this.current_band == new_band)
                     return; // Avoid useles re-renders;
                 this.current_band = new_band;
-                this.current_freq = null;
                 console.log(this.current_band);
                 this.render();
+                if (this.current_freq) {
+                    var freq = parseInt(this.current_freq)/1e6;
+                    this.findFrequencyCardPage(freq);
+                    this.highlightCards(freq);
+                }
             } else if (cmd == "MD" && this.addingFrequency) {
                 this.addingFrequency = false;
                 this.modeCallback(val);
@@ -413,8 +417,20 @@ define(function (require) {
                     return;
                 this.current_freq = val;
                 var freq = parseInt(val)/1e6;
+                this.findFrequencyCardPage(freq);
                 this.highlightCards(freq);
             }
+        },
+        
+        findFrequencyCardPage: function(freq) {
+            // move the frequency carousel to display the cards that cover the current
+            // vfo A frequency
+            var idx = 0;
+            for (var i=0; i < this.frequencyPageStarts.length; i++) {
+                if (freq >= this.frequencyPageStarts[i])
+                    idx = i;
+            }
+            $('#frequency-selector').carousel(idx);
         },
         
         highlightCards: function(freq) {

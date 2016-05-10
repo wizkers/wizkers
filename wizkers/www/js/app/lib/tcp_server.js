@@ -1,23 +1,21 @@
 /*
- * Rigctl emulation in Chrome
- *
- * Inspiration from https://github.com/GoogleChrome/chrome-app-samples/blob/master/samples/tcpserver/tcp-server.js
- Copyright 2012 Google Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-Author: Renato Mangini (mangini@chromium.org)
+ * XMP-RPC server in Chrome
  * 
+ * Inspiration from https://github.com/GoogleChrome/chrome-app-samples/blob/master/samples/tcpserver/tcp-server.js
+ * Copyright 2012 Google Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License attempt
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * Author: Renato Mangini (mangini@chromium.org)
  */
 
 define(function(require) {
@@ -84,11 +82,11 @@ define(function(require) {
      *  port is a reference to the serial port
      *  channel is the communication channel with the app (equiv to socket.io)
      */
-    var Rigctld = function(ipaddr) {
+    var Rigctld = function(ipaddr, tcpport) {
         
         console.log("Starting XML-RPC server on port 12345");
         var addr = ipaddr;
-        var port = 12345;
+        var port = tcpport;
         var maxConnections = 10;
         var isListening = false;
         

@@ -194,9 +194,10 @@ define(function (require) {
                 } else if (cmd == "DB") {
                     // We catch interesting stuff on Display B and add it to the plots
                     // dynamically
-                    var cmd2 = data.substr(2, 4);
+                    var cmd4 = data.substr(2, 4);
+                    var cmd2 = data.substr(2,2);
                     var val = 0;
-                    switch (cmd2) {
+                    switch (cmd4) {
                     case "PA.I":
                         val = parseInt(data.substr(7, 2));
                         this.tempplot.appendPoint({
@@ -219,6 +220,22 @@ define(function (require) {
                             'value': val
                         });
                         break;
+                    }
+                    switch (cmd2) {
+                        case 'PS':
+                            val = parseFloat(data.substr(5,4));
+                            this.voltplot.appendPoint({
+                                'name': 'PS',
+                                'value': val
+                            });
+                            break;
+                        case 'BT':
+                            val = parseFloat(data.substr(5,4));
+                            this.voltplot.appendPoint({
+                                'name': 'BT',
+                                'value': val
+                            });
+                            break;
                     }
                 }
             }
