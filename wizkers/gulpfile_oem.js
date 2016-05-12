@@ -14,7 +14,7 @@ var _s = require('underscore.string');
 
 gulp.task('default', function () {
     console.log("*******************");
-    console.log("Targets: build chrome cordova server");
+    console.log("Targets: build chrome cordova nwjs server");
     console.log("*******************");
 });
 
@@ -43,10 +43,12 @@ var paths = {
     build: 'build', // Where we compile the templates and build the javascript distribution
     chrome_dist: 'dist/chrome/', // Where we distribute the Chrome app (ready for packaging for Chrome app store)
     // All javascript is minified there.
-    chrome_debug: 'dist/chrome-debug/', // Debug build (not minified)
+    chrome_debug:  'dist/chrome-debug/', // Debug build (not minified)
     cordova_debug: 'dist/cordova-debug/',
-    cordova_dist: 'dist/cordova/',
-    server_dist: 'dist/server/',
+    cordova_dist:  'dist/cordova/',
+    server_dist:   'dist/server/',
+    nwjs_debug:    'dist/nwjs-debug/',
+    nwjs_dist:     'dist/nwjs/',
 
     // Application paths: (need to be in arrays)
     templates: ['www/js/tpl/**/*.html'],
@@ -60,9 +62,10 @@ var paths = {
     oem_server_files: [oem_directory + '/server/**/*'],
 
     // Files specific to each kind of run mode (chrome, cordova, server)
-    server_files: ['server/**/*'],
-    chrome_files: [oem_directory + '/chrome/**/*'],
-    cordova_files: [oem_directory + '/cordova/**/*']
+    server_files:  ['server/**/*'],
+    chrome_files:  [oem_directory + '/chrome/**/*'],
+    cordova_files: [oem_directory + '/cordova/**/*'],
+    nwjs_files:    [oem_directory + '/nwjs/**/*']
 }
 
 console.log(paths.templates);
@@ -219,6 +222,28 @@ gulp.task('cordova', ['build', 'cordova_copy_build'], function () {
         .pipe(gulp.dest(paths.cordova_dist))
         .pipe(gulp.dest(paths.cordova_debug));
 });
+
+/**
+ * Copy the build files to the Node Webkit directory
+ */
+gulp.task('nwjs_copy_build', ['build'], function () {
+    return gulp.src([paths.build + '/www/**/*'], {
+            base: paths.build
+        })
+        .pipe(gulp.dest(paths.nwjs_debug));
+});
+
+/**
+ * Build the NWJS app
+ */
+gulp.task('nwjs', ['build', 'nwjs_copy_build'], function () {
+    return gulp.src(paths.nwjs_files, {
+            base: oem_directory + '/nwjs'
+        })
+        .pipe(gulp.dest(paths.nwjs_dist))
+        .pipe(gulp.dest(paths.nwjs_debug));
+});
+
 
 /**
  * Build the Server app. Note: the server overlay can overwrite some files, but won't
