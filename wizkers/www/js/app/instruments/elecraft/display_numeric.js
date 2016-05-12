@@ -61,7 +61,7 @@ define(function (require) {
                         clickable: true
                     },
                     legend: {
-                        position: "ne"
+                        position: "nw"
                     },
                     colors: this.palette,
                 }
