@@ -78,7 +78,7 @@ define(function (require) {
                 rigserver.disconnect();
             }
             rigserver = new Rigctld.server(settings.ipaddress, 4532);
-            rigserver.start(onAcceptCallback);
+            rigserver.start(onAcceptCallback, onErrorCallback);
 
         };
 
@@ -143,9 +143,21 @@ define(function (require) {
             };
             var parser = parserCreator(rigctl_command).bind(this);
 
+            var onError = function(info) {
+                // Act if we receive an error (not needed, because the socket
+                // will automatically close and we will be de-referenced)
+            };
+
             tcpConnection.addDataReceivedListener(function (data) {
                 parser(data);
-            });
+            }, onError);
+        };
+        
+        /**
+         * Called when we get an error on the socket - usually a disconnect for some reason.
+         */
+        var onErrorCallback = function() {
+            
         };
 
         // RIGCTLD Emulation - super light, but does the trick for fldigi...

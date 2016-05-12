@@ -1,5 +1,5 @@
 /*
- * XMP-RPC server in Chrome
+ * Generic TCP server in Chrome
  * 
  * Inspiration from https://github.com/GoogleChrome/chrome-app-samples/blob/master/samples/tcpserver/tcp-server.js
  * Copyright 2012 Google Inc.
@@ -77,14 +77,13 @@ define(function(require) {
 
     
     /**
-     * A rigctl emulator.
      *
      *  port is a reference to the serial port
-     *  channel is the communication channel with the app (equiv to socket.io)
+     * 
      */
     var Rigctld = function(ipaddr, tcpport) {
         
-        console.log("Starting XML-RPC server on port 12345");
+        console.log("Starting TCP server on port". tcpport);
         var addr = ipaddr;
         var port = tcpport;
         var maxConnections = 10;
@@ -94,7 +93,6 @@ define(function(require) {
         var callbacks = {
             listen: null,       // Listening
             connect: null,      // Socket connected
-            disconnect: null,   // Socket disconnected
             recv: null,         // Data received
             sent: null,         // Data sent
         }
@@ -107,21 +105,19 @@ define(function(require) {
         
         
         /**
-         * Connects to the TCP socket, and creates an open socket.
+         * Connects to the TCP server, and creates an open socket.
          *
          * @see https://developer.chrome.com/apps/sockets_tcpServer#method-create
          * @param {Function} callback The function to call on connection
          */
-        this.start =  function(callback) {
+        this.start =  function(connect_callback) {
             // Register connect callback.
-            callbacks.connect = callback;
+            callbacks.connect = connect_callback;
             tcps.create({}, onCreate);
         };
         
         /**
-         * Disconnects from the remote side
-         *
-         * @see https://developer.chrome.com/apps/sockets_tcpServer#method-disconnect
+         * Shutdown the TCP Server and disconnects all its sockets
          */
         this.disconnect = function() {
             if (serverSocketId) {
@@ -145,8 +141,6 @@ define(function(require) {
            * create a socket. If the socket is successfully created
            * we go ahead and start listening for incoming connections.
            *
-           * @private
-           * @see https://developer.chrome.com/apps/sockets_tcpServer#method-listen
            * @param {Object} createInfo The socket details
            */
         var onCreate = function(createInfo) {
@@ -160,60 +154,63 @@ define(function(require) {
             }
           };
 
-          /**
-           * The callback function used for when we attempt to have Chrome
-           * connect to the remote side. If a successful connection is
-           * made then we accept it by opening it in a new socket (accept method)
-           *
-           * @private
-           */
-          var onListenComplete = function(resultCode) {
-            if (resultCode !==0) {
-              error('Unable to listen to socket. Resultcode='+resultCode);
-            }
-            tcps.onAccept.addListener(onAccept);
-            tcps.onAcceptError.addListener(onAcceptError);
+        /**
+         * The callback function used for when we attempt to have Chrome
+         * connect to the remote side. If a successful connection is
+         * made then we accept it by opening it in a new socket (accept method)
+         *
+         * @private
+         */
+        var onListenComplete = function(resultCode) {
+          if (resultCode !==0) {
+            error('Unable to listen to socket. Resultcode='+resultCode);
           }
+          tcps.onAccept.addListener(onAccept);
+          tcps.onAcceptError.addListener(onAcceptError);
+        }
 
-          var onAccept = function (info) {
-            if (info.socketId != serverSocketId)
-              return;
+        var onAccept = function (info) {
+          if (info.socketId != serverSocketId)
+            return;
 
-            var tcpConnection = new TcpConnection(info.clientSocketId);
-            openSockets.push(tcpConnection);
+          var tcpConnection = new TcpConnection(info.clientSocketId);
+          openSockets.push(tcpConnection);
+          tcpConnection.requestSocketInfo(onSocketInfo);
+          console.log('[TCP Server] Incoming connection handled for socket', info.clientSocketId);
 
-            tcpConnection.requestSocketInfo(onSocketInfo);
-            log('[TCP Server] Incoming connection handled.');
+        }
 
-          }
-
-          var onAcceptError = function(info) {
-            if (info.socketId != serverSocketId)
-              return;
-
-            error('[TCP Server] Unable to accept incoming connection. Error code=' + info.resultCode);
-          }
+        var onAcceptError = function(info) {
+          if (info.socketId != serverSocketId)
+            return;
+          error('[TCP Server] Unable to accept incoming connection. Error code=' + info.resultCode);
+        }
           
-          var onNoMoreConnectionsAvailable = function(socketId) {
-            var msg="No more connections available. Try again later\n";
-            _stringToArrayBuffer(msg, function(arrayBuffer) {
-              chrome.sockets.tcp.send(socketId, arrayBuffer,
-                function() {
-                  chrome.sockets.tcp.close(socketId);
-                });
-            });
-          }
+        var onNoMoreConnectionsAvailable = function(socketId) {
+          var msg="No more connections available. Try again later\n";
+          _stringToArrayBuffer(msg, function(arrayBuffer) {
+            chrome.sockets.tcp.send(socketId, arrayBuffer,
+              function() {
+                chrome.sockets.tcp.close(socketId);
+              });
+          });
+        }
 
+        /**
+         * Called by onAccept once the socket is open, so that the server's
+         * "connect" callback is told about the new connection and given a handled
+         * to the tcp socket object.
+         */
         var onSocketInfo = function(tcpConnection, socketInfo) {
             if (callbacks.connect) {
               callbacks.connect(tcpConnection, socketInfo);
             }
-          }
+        }
+                  
+      };  
         
-        
-    }
 
-    /**
+  /**
    * Holds a connection to a client
    *
    * @param {number} socketId The ID of the server<->client socket
@@ -226,8 +223,8 @@ define(function(require) {
     // Callback functions.
     var callbacks = {
       disconnect: null, // Called when socket is disconnected.
-      recv: null,       // Called when client receives data from server.
-      sent: null        // Called when client sends data to server.
+      recv: null,          // Called when client receives data from server.
+      sent: null           // Called when client sends data to server.
     };
 
     log('Established client connection. Listening...');
@@ -272,58 +269,63 @@ define(function(require) {
       chrome.sockets.tcp.setPaused(socketId, false);
     };
     
-      /**
-       * Callback function for when data has been read from the socket.
-       * Converts the array buffer that is read in to a string
-       * and sends it on for further processing by passing it to
-       * the previously assigned callback function.
-       *
-       * @private
-       * @see TcpConnection.prototype.addDataReceivedListener
-       * @param {Object} readInfo The incoming message
-       */
-      var onReceive = function(info) {
-        if (socketId != info.socketId)
-          return;
+    /**
+     * Callback function for when data has been read from the socket.
+     * Converts the array buffer that is read in to a string
+     * and sends it on for further processing by passing it to
+     * the previously assigned callback function.
+     *
+     * @private
+     * @see TcpConnection.prototype.addDataReceivedListener
+     * @param {Object} readInfo The incoming message
+     */
+    var onReceive = function(info) {
+      if (socketId != info.socketId)
+        return;
 
-        // Call received callback if there's data in the response.
-        if (callbacks.recv) {
-          // Convert ArrayBuffer to string.
-          _arrayBufferToString(info.data, callbacks.recv);
+      // Call received callback if there's data in the response.
+      if (callbacks.recv) {
+        // Convert ArrayBuffer to string.
+        _arrayBufferToString(info.data, callbacks.recv);
+      }
+    };
+
+    /**
+     * Sets the callback for when a message is received
+     *
+     * @param {Function} callback The function to call when a message has arrived
+     */
+    this.addDataReceivedListener = function(callback, onError) {
+      // If this is the first time a callback is set, start listening for incoming data.
+      if (!callbacks.recv) {
+        startListening(callback);
+      } else {
+        callbacks.recv = callback;
+      }
+      callbacks.disconnect = onError;
+    };
+    
+    var lastMessage = '';
+
+    /**
+     * Sends a message down the wire to the remote side
+     *
+     * @see https://developer.chrome.com/apps/sockets_tcp#method-send
+     * @param {String} msg The message to send
+     * @param {Function} callback The function to call once the message is sent
+     */
+    this.sendMessage = function(msg, callback) {
+      lastMessage = msg;
+      _stringToArrayBuffer(msg, function(arrayBuffer) {
+            // Register sent callback.
+            callbacks.sent = callback;
+            chrome.sockets.tcp.send(socketId, arrayBuffer, onWriteComplete);
         }
-      };
-
-      /**
-       * Sets the callback for when a message is received
-       *
-       * @param {Function} callback The function to call when a message has arrived
-       */
-      this.addDataReceivedListener = function(callback) {
-        // If this is the first time a callback is set, start listening for incoming data.
-        if (!callbacks.recv) {
-          startListening(callback);
-        } else {
-          callbacks.recv = callback;
-        }
-      };
-
-      /**
-       * Sends a message down the wire to the remote side
-       *
-       * @see https://developer.chrome.com/apps/sockets_tcp#method-send
-       * @param {String} msg The message to send
-       * @param {Function} callback The function to call once the message is sent
-       */
-      this.sendMessage = function(msg, callback) {
-        _stringToArrayBuffer(msg, function(arrayBuffer) {
-              // Register sent callback.
-              callbacks.sent = callback;
-              chrome.sockets.tcp.send(socketId, arrayBuffer, onWriteComplete);
-          }
-        );
-      };
+      );
+    };
       
      var onReceiveError = function (info) {
+       console.log("TCP receive error", info);
         if (socketId != info.socketId)
           return;
         self.close();
@@ -338,6 +340,10 @@ define(function(require) {
      */
     var onWriteComplete = function(writeInfo) {
       //log('onWriteComplete');
+      if (chrome.runtime && chrome.runtime.lastError) {
+        console.log("Error while writing a packet", socketId, chrome.runtime.lastError, writeInfo);
+        console.log("Messaqge not sent:", lastMessage);
+      }
       // Call sent callback.
       if (callbacks.sent) {
         callbacks.sent(writeInfo);
@@ -353,11 +359,13 @@ define(function(require) {
       if (socketId) {
         chrome.sockets.tcp.onReceive.removeListener(onReceive);
         chrome.sockets.tcp.onReceiveError.removeListener(onReceiveError);
+        if (callbacks.disconnect)
+          callbacks.disconnect();
         chrome.sockets.tcp.close(socketId);
       }
-    };
-    
-  };
+    };    
+  
+};
     
   return {
       server: Rigctld,

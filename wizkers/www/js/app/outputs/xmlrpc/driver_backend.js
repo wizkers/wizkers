@@ -159,26 +159,17 @@ define(function (require) {
 
         var onRequestCallback = function (tcpConnection, socketInfo) {
             var info = "[" + socketInfo.peerAddress + ":" + socketInfo.peerPort + "] Connection accepted!";
+            console.info(info);
 
-            console.log(info);
-            // We are going to use a small line parser
-            var parserCreator = function (callback) {
-                var delimiter = "\n";
-                var encoding = "utf8";
-                // Delimiter buffer saved in closure
-                var data = "";
-                // Buffer is a string
-                return function (buffer) {
-                    callback(buffer, tcpConnection);
-                };
+            var onError = function(info) {
+                // Destroy our parser.
             };
-            var parser = parserCreator(xmlParser).bind(this);
 
             tcpConnection.addDataReceivedListener(function (data) {
-                parser(data);
-            });
+                xmlParser(data, tcpConnection);
+            }, onError);
         };
-        
+                
         var xmlParser = function(buffer, c) {
             var idx = buffer.indexOf('<?xml version="1.0"?>');
             var sxml = '';
