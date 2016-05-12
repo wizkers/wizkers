@@ -14,7 +14,7 @@
    height="991"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.2 r9819"
+   inkscape:version="0.91 r13725"
    sodipodi:docname="KX3.svg">
   <defs
      id="defs4">
@@ -43,6 +43,16 @@
        y2="574.21429"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(1.1005291,0,0,0.96858639,-148.8511,13.195214)" />
+    <linearGradient
+        gradientUnits="userSpaceOnUse"
+        id="linearGradient4446"
+        inkscape:collect="always"
+        x1="1042.1327"
+        x2="1182.2855"
+        xlink:href="#linearGradient3868"
+        y1="815.00513"
+        y2="815.00513"
+        />
     <clipPath
        id="clipPath6163"
        clipPathUnits="userSpaceOnUse">
@@ -651,8 +661,8 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.959798"
-     inkscape:cx="1176.8825"
+     inkscape:zoom="0.9899495"
+     inkscape:cx="936.97127"
      inkscape:cy="588.53346"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -661,10 +671,10 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="1680"
-     inkscape:window-height="1002"
-     inkscape:window-x="1026"
-     inkscape:window-y="2182"
+     inkscape:window-width="2632"
+     inkscape:window-height="1486"
+     inkscape:window-x="613"
+     inkscape:window-y="356"
      inkscape:window-maximized="0"
      showguides="true"
      inkscape:guide-bbox="true">
@@ -702,7 +712,7 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(428.21429,-236.86218)"
-     style="display:inline"
+     style="display:inline; pointer-events: none"
      sodipodi:insensitive="true">
     <image
        y="236.86218"
@@ -712,7 +722,7 @@
        height="991"
        width="2325" />
     <rect
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_BAND_PLUS"
        width="122.22845"
        height="65.659912"
@@ -737,10 +747,10 @@
        height="65.659912"
        width="122.22845"
        id="B_BAND_MINUS"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3822" />
     <rect
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_RCL"
        width="68.657021"
        height="32.088482"
@@ -765,10 +775,10 @@
        height="39.945625"
        width="114.37131"
        id="B_STORE"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3826" />
     <rect
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_FREQ_ENT"
        width="122.22845"
        height="65.659912"
@@ -782,7 +792,7 @@
        onmouseover="setAttribute('style','opacity:0.5;fill:#000000;fill-opacity:1;stroke:none');"
        inkscape:label="#rect3828" />
     <rect
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_SCAN"
        width="114.37131"
        height="39.945625"
@@ -807,10 +817,10 @@
        height="65.659912"
        width="122.22845"
        id="B_MSG"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3832" />
     <rect
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_ATU_TUNE"
        width="122.22845"
        height="65.659912"
@@ -835,10 +845,10 @@
        height="39.945625"
        width="160.79988"
        id="B_REC"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3836" />
     <rect
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_ANT"
        width="160.79988"
        height="39.945625"
@@ -863,10 +873,10 @@
        height="65.659912"
        width="122.22845"
        id="B_XMIT"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3840" />
     <rect
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_PRE"
        width="122.22845"
        height="65.659912"
@@ -891,10 +901,10 @@
        height="65.659912"
        width="122.22845"
        id="B_ATTN"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3844" />
     <rect
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_APF"
        width="122.22845"
        height="65.659912"
@@ -919,7 +929,7 @@
        height="65.659912"
        width="122.22845"
        id="B_SPOT"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3848" />
     <rect
        onmouseover="setAttribute('style','opacity:0.5;fill:#000000;fill-opacity:1;stroke:none');"
@@ -933,31 +943,27 @@
        height="39.945625"
        width="123.65702"
        id="B_TUNE"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3850" />
-    <path
-       sodipodi:type="arc"
-       style="fill:url(#linearGradient3874);fill-opacity:1;stroke:#686868;stroke-width:4.64603472;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       id="path3858"
-       sodipodi:cx="1547.1428"
-       sodipodi:cy="574.21429"
-       sodipodi:rx="74.285713"
-       sodipodi:ry="66.071426"
-       d="m 1621.4285,574.21429 c 0,36.49025 -33.2588,66.07143 -74.2857,66.07143 -41.0268,0 -74.2857,-29.58118 -74.2857,-66.07143 0,-36.49024 33.2589,-66.07142 74.2857,-66.07142 41.0269,0 74.2857,29.58118 74.2857,66.07142 z"
-       transform="matrix(0.90865385,0,0,1.0324324,-292.96015,223.23901)" />
-    <path
-       sodipodi:type="arc"
-       style="fill:none;stroke:#ff0000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       id="path3882"
-       sodipodi:cx="1539.725"
-       sodipodi:cy="693.25757"
-       sodipodi:rx="208.34396"
-       sodipodi:ry="211.8795"
-       d="m 1748.0689,693.25757 c 0,117.01782 -93.2787,211.8795 -208.3439,211.8795 -115.0652,0 -208.344,-94.86168 -208.344,-211.8795 0,-117.01782 93.2788,-211.8795 208.344,-211.8795 115.0652,0 208.3439,94.86168 208.3439,211.8795 z"
-       transform="translate(-428.21429,236.86218)" />
+    <ellipse
+       style="fill:#212121;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill-opacity:1;pointer-events:visible"
+       id="vfoa-wheel"
+       transform="translate(-428.21429,236.86218)"
+       cx="1539.725"
+       cy="693.25757"
+       rx="208.34396"
+       ry="211.8795" />
+    <ellipse
+       style="fill:url(#linearGradient4446);fill-opacity:1;stroke:#686868;stroke-width:4.64603472;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="vfoa-dip"
+       cx="1112.2091"
+       cy="815.00513"
+       rx="67.75341"
+       ry="67.75341"
+       />
     <text
        xml:space="preserve"
-       style="font-size:64px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       style="font-style:normal;font-weight:normal;font-size:64px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
        x="414.64282"
        y="505.00504"
        id="_vfoA"
@@ -966,22 +972,22 @@
          id="VFOA"
          x="414.64282"
          y="505.00504"
-         style="font-size:140px;font-style:normal;font-variant:normal;font-stretch:normal;font-family:'Let\'s go Digital';-inkscape-font-specification:'Let\'s go Digital Bold Italic'">88.888.888</tspan></text>
+         style="font-style:normal;font-variant:normal;font-stretch:normal;font-size:140px;font-family:'Let\'s go Digital';-inkscape-font-specification:'Let\'s go Digital Bold Italic'">88.888.888</tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text3148"
        y="655.86218"
        x="686.92853"
-       style="font-size:64px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       style="font-style:normal;font-weight:normal;font-size:64px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
        xml:space="preserve"><tspan
-         style="font-size:90px;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Let\'s go Digital';-inkscape-font-specification:'Let\'s go Digital Bold Italic'"
+         style="font-variant:normal;font-weight:bold;font-stretch:normal;font-size:90px;font-family:'Let\'s go Digital';-inkscape-font-specification:'Let\'s go Digital Bold Italic'"
          y="655.86218"
          x="686.92853"
          id="VFOB"
          sodipodi:role="line">00:00:00</tspan></text>
     <rect
        inkscape:label="#rect3848"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_CMP"
        width="122.22845"
        height="65.659912"
@@ -1005,11 +1011,11 @@
        height="65.659912"
        width="122.22845"
        id="B_DLY"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3848" />
     <rect
        inkscape:label="#rect3848"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_RATE"
        width="122.22845"
        height="65.659912"
@@ -1033,11 +1039,11 @@
        height="65.659912"
        width="122.22845"
        id="B_DISP"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3848" />
     <rect
        inkscape:label="#rect3848"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_XIT"
        width="122.22845"
        height="65.659912"
@@ -1061,11 +1067,11 @@
        height="65.659912"
        width="122.22845"
        id="B_A_TO_B"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3848" />
     <rect
        inkscape:label="#rect3848"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_A_SLASH_B"
        width="122.22845"
        height="65.659912"
@@ -1089,11 +1095,11 @@
        height="65.659912"
        width="122.22845"
        id="B_MODE"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3848" />
     <rect
        inkscape:label="#rect3848"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_DATA"
        width="122.22845"
        height="65.659912"
@@ -1117,11 +1123,11 @@
        height="65.659912"
        width="122.22845"
        id="B_RIT"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3848" />
     <rect
        inkscape:label="#rect3850"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_NR"
        width="106.51416"
        height="39.945625"
@@ -1145,11 +1151,11 @@
        height="39.945625"
        width="106.51416"
        id="B_NB"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3850" />
     <rect
        inkscape:label="#rect3850"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_NTCH"
        width="123.65702"
        height="39.945625"
@@ -1173,11 +1179,11 @@
        height="39.945625"
        width="123.65702"
        id="B_CWT"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3850" />
     <rect
        inkscape:label="#rect3850"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_PITCH"
        width="123.65702"
        height="39.945625"
@@ -1201,11 +1207,11 @@
        height="39.945625"
        width="123.65702"
        id="B_VOX"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3850" />
     <rect
        inkscape:label="#rect3850"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_KHZ"
        width="123.65702"
        height="39.945625"
@@ -1229,7 +1235,7 @@
        height="39.945625"
        width="123.65702"
        id="B_MENU"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3850" />
     <rect
        onmouseover="setAttribute('style','opacity:0.5;fill:#000000;fill-opacity:1;stroke:none');"
@@ -1243,11 +1249,11 @@
        height="39.945625"
        width="123.65702"
        id="B_PF1"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3850" />
     <rect
        inkscape:label="#rect3850"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_PF2"
        width="123.65702"
        height="39.945625"
@@ -1261,7 +1267,7 @@
        onmouseover="setAttribute('style','opacity:0.5;fill:#000000;fill-opacity:1;stroke:none');" />
     <rect
        inkscape:label="#rect3850"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_TEXT"
        width="123.65702"
        height="39.945625"
@@ -1285,7 +1291,7 @@
        height="39.945625"
        width="123.65702"
        id="B_SPLIT"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3850" />
     <rect
        onmouseover="setAttribute('style','opacity:0.5;fill:#000000;fill-opacity:1;stroke:none');"
@@ -1299,11 +1305,11 @@
        height="39.945625"
        width="123.65702"
        id="B_ALT"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        inkscape:label="#rect3850" />
     <rect
        inkscape:label="#rect3850"
-       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none"
+       style="opacity:0.01000001;fill:#000000;fill-opacity:1;stroke:none;pointer-events:visible"
        id="B_REV"
        width="123.65702"
        height="39.945625"

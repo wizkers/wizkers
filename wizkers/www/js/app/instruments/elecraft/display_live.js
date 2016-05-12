@@ -38,6 +38,7 @@ define(function (require) {
     // Need to load these, but no related variables.
     require('bootstrap');
     require('bootstrapslider');
+    require('jquery_mousewheel');
 
     // Match macro fields:
     var matchTempl = function (str, args) {
@@ -53,6 +54,8 @@ define(function (require) {
 
             this.textOutputBuffer = [];
             this.transmittingText = false;
+            
+            this.vfoangle = 0;
 
             // Keep the value of the previous VFO value to avoid
             // unnecessary redraws of the front panel.
@@ -84,18 +87,26 @@ define(function (require) {
             var self = this;
             this.$el.html(template());
 
-            var s = Snap("#kx3");
+            this.faceplate = Snap("#kx3");
             Snap.load("img/KX3.svg", function (f) {
                 f.select("#layer1").click(function (e) {
                     self.handleKX3Button(e);
                 });
-                s.add(f);
+                self.faceplate.add(f);
                 // Set display constraints for the radio panel:
-                s.attr({
+                self.faceplate.attr({
                     width: "100%",
                 });
                 $("#kx3 .icon").css('visibility', 'hidden');
                 $("#kx3").height($("#kx3").width() * 0.42);
+                
+                // Initialize the VFO rotating dip element:
+                var c = self.faceplate.select('#vfoa-wheel');;
+                var bb = c.getBBox();
+                self.vfodip = self.faceplate.select('#vfoa-dip');
+                var bb2 = self.vfodip.getBBox();
+                self.dip_x = (bb.width-(bb2.width+ bb2.y-bb.y))/2;
+                self.dip_y = (bb.height-(bb2.height + bb2.y-bb.y))/2;
 
                 // I was not able to make the SVG resize gracefully, so I have to do this
                 $("#kx3").resize(function (e) {
@@ -187,7 +198,20 @@ define(function (require) {
             "click #data-me": "sendME",
             "click #data-brag": "sendBRAG",
             "click #mem-left": "hideOverflow",
-            "click #mem-right": "hideOverlow"
+            "click #mem-right": "hideOverlow",
+            "mousewheel #vfoa-wheel": "vfoAWheel"
+        },
+        
+        vfoAWheel: function(e) {
+            // console.log('Mousewheel',e);
+            this.vfoangle += e.deltaY/2 % 360;
+            var tx = this.dip_x * (Math.cos(this.vfoangle*Math.PI/360));
+            var ty = this.dip_y * (1+Math.sin(this.vfoangle*Math.PI/360));
+            this.vfodip.transform('t' + tx + ',' + ty);
+            var step = Math.floor(Math.min(Math.abs(e.deltaY)/50, 7));
+            var cmd = ((e.deltaY>0) ? 'UP' : 'DN') + step + ';';
+            linkManager.sendCommand(cmd);
+
         },
 
         hideOverflow: function () {
