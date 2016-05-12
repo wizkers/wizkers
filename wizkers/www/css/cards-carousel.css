@@ -43,14 +43,16 @@
 }
 
 .frequency-carousel .panel-heading .btn-vfoa {
-    width: 60%;
-    float: left;
+    width: 100%;
+    line-height: 1em;
+/*    float: left; */
 }
+
+
 .frequency-carousel .panel-heading .btn-vfob {
-    width: 40%;
-    text-align: right;
-    float: left;
-}
+    line-height: 1em;
+ }
+
 
 .frequency-carousel .panel-footer p
 {
