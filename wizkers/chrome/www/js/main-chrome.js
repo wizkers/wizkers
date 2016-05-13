@@ -42,7 +42,7 @@ require.config({
         pouchdb: 'lib/pouchdb-5.0.0',
         backbonepouch: 'lib/backbone-pouch',
         underscore: 'lib/underscore-1.8.3',
-        snap: 'lib/snap.svg-0.2.0',
+        snap: 'lib/snap.svg-0.4.1',
         text: 'lib/text',
 
         // Signal processing libs

@@ -30,7 +30,7 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        template = require('js/tpl/instruments/OnyxDiagView.js');
+        template = require('js/tpl/instruments/onyx/OnyxDiagView.js');
 
     return Backbone.View.extend({
 

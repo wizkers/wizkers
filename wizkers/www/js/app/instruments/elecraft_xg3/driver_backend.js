@@ -184,12 +184,16 @@ define(function (require) {
                 console.log("[XG3] Starting live data stream");
                 
                 // Ask for all memories
-                port.write('M,00;M,01;M,02;M,03;M,04;M,05;M,06;M,07;M,08;M,09;M,10;M,11;');
                 port.write('WM;WP;');
                 port.write('Q,1;');
-                
-                livePoller = setInterval(queryRadio.bind(this), (period) ? period * 1000 : 1000);
-                streaming = true;
+                // The XG3 needs time to recover every once in a while, especially after sending
+                // a beacon - unless we implement a full-blown flow control using ";" as our
+                // echo characted, we just have to add a couple of timeouts:
+                setTimeout( function() {
+                    port.write('M,00;M,01;M,02;M,03;M,04;M,05;M,06;M,07;M,08;M,09;M,10;M,11;');                
+                    livePoller = setInterval(queryRadio.bind(this), (period) ? period * 1000 : 1000);
+                    streaming = true;
+                }, 300);
             }
         };
 

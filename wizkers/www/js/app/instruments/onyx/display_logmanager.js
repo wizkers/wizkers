@@ -32,7 +32,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         Devicelog = require('app/models/devicelog'),
-        template = require('js/tpl/instruments/OnyxLogManagementView.js');
+        template = require('js/tpl/instruments/onyx/OnyxLogManagementView.js');
 
     return Backbone.View.extend({
 

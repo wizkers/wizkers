@@ -41,6 +41,7 @@ define(function (require) {
             this.currentBand = -1;
             this.currentLevel = -1;
             this.applyMemChange = false;
+            this.bands = [ 160, 80, 60, 40, 30, 20, 17, 15, 12, 10, 6, 2];
             linkManager.on('status', this.updateStatus, this);
             linkManager.on('input', this.showInput, this);
         },
@@ -137,8 +138,22 @@ define(function (require) {
         },
         
         sendBeacon: function() {
-            linkManager.stopLiveStream();
-            linkManager.driver.sendBeacon('');
+            // If we are not streaming, this means we are currently
+            // sending a beacon
+            if (!linkManager.isStreaming()) {
+                this.$('#send-beacon').html('Send Beacon').removeClass('btn-danger');                
+                this.$('.disable-beacon').attr('disabled',false);
+                this.$('#xg3-front').css({'opacity': '1', 'pointer-events': ''});
+                // Whatever character will stop the beacon
+                linkManager.sendCommand(';');
+                setTimeout(linkManager.startLiveStream, 200);
+            } else {
+                linkManager.stopLiveStream();
+                this.$('.disable-beacon').attr('disabled',true);
+                this.$('#xg3-front').css({'opacity': '0.3', 'pointer-events': 'none'});
+                this.$('#send-beacon').html('Stop Beacon').addClass('btn-danger');
+                linkManager.driver.sendBeacon('');
+            }
         },
         
         sendCW: function() {
@@ -162,6 +177,16 @@ define(function (require) {
                 linkManager.driver.setBand(b[1]);
             } else if (b[0] == 'level') {
                 linkManager.driver.setLevel(b[1]);
+            } else if (b[0] == 'btn' && b[1] == 'band') {
+                if (b[2] == 'plus') {
+                    linkManager.driver.setBandDirect((this.currentBand+1) % 12);                    
+                } else {
+                    linkManager.driver.setBandDirect((this.currentBand-1) % 12);                    
+                }
+            } else if (b[1] == 'onoff') {
+                this.$('#output-enable').click();
+            } else if (b[0] == 'circle4271') {
+                linkManager.driver.setLevelDirect((this.currentLevel+1)%3 +1);
             }
             if (!linkManager.isStreaming())
                 linkManager.startLiveStream();
@@ -170,10 +195,9 @@ define(function (require) {
         updateBandLED: function(band) {
             var ledOff = "#6c552a";
             var ledOn = "#fda317"
-            var bands = [ 160, 80, 60, 40, 30, 20, 17, 15, 12, 10, 6, 2];
             if (band != this.currentBand) {
-                this.$('#xg3-front #led_' + bands[this.currentBand]).css('fill', ledOff);
-                this.$('#xg3-front #led_' + bands[band]).css('fill', ledOn);
+                this.$('#xg3-front #led_' + this.bands[this.currentBand]).css('fill', ledOff);
+                this.$('#xg3-front #led_' + this.bands[band]).css('fill', ledOn);
                 this.currentBand = band;
             }
         },

@@ -32,7 +32,7 @@ define(function(require) {
         _       = require('underscore'),
         Backbone = require('backbone'),
         utils    = require('app/utils'),
-        template = require('js/tpl/instruments/Fluke289LiveView.js');
+        template = require('js/tpl/instruments/Fluke289/Fluke289LiveView.js');
     
     // Load the flot library & flot time plugin:
     require('flot');

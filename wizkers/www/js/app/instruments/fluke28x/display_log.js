@@ -40,7 +40,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        template = require('js/tpl/instruments/Fluke289LogView.js');
+        template = require('js/tpl/instruments/Fluke289/Fluke289LogView.js');
     
     require('flot');
     require('flot_time');

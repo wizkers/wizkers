@@ -9,15 +9,15 @@
                     <p>Direct control</p>
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">Current frequency (MHz)</span>
-                            <input  id="vfoa-direct" type="number" class="form-control" step="0.01" placeholder="14.070">
+                            <input  id="vfoa-direct" type="number" class="form-control disable-beacon" step="0.01" placeholder="14.070">
                             <span class="input-group-btn">
-                                <button class="btn btn-default" id="vfoa-direct-btn" type="button">
+                                <button class="btn btn-default disable-beacon" id="vfoa-direct-btn" type="button">
                                     <span class="glyphicon glyphicon-check"></span></button>
                             </span>
                         </div> <!-- Current frequency -->
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">Enable output</span>
-                            <input  id="output-enable" type="checkbox">
+                            <input  id="output-enable" type="checkbox" class="disable-beacon">
                         </div>
                 </div>
             </div>
@@ -32,7 +32,7 @@
                     <h6>Frequency Memories</h6>
                     </div>
                     <div class="col-xs-4">
-                        <button role="button" class="btn btn-sm btn-default" id="vfomem-save">
+                        <button role="button" class="btn btn-sm btn-default disable-beacon" id="vfomem-save">
                             Save</button>
                     </div>
                 </div>
@@ -40,13 +40,13 @@
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">160</span>
-                            <input  id="vfo-160" type="number" class="form-control" step="0.01" placeholder="1.82">
+                            <input  id="vfo-160" type="number" class="form-control disable-beacon" step="0.01" placeholder="1.82">
                         </div>
                     </div>
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">17</span>
-                            <input  id="vfo-17" type="number" class="form-control" step="0.01" placeholder="18.12">
+                            <input  id="vfo-17" type="number" class="form-control disable-beacon" step="0.01" placeholder="18.12">
                         </div>
                     </div>
                 </div>
@@ -54,13 +54,13 @@
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">80</span>
-                            <input  id="vfo-80" type="number" class="form-control" step="0.01" placeholder="3.52">
+                            <input  id="vfo-80" type="number" class="form-control disable-beacon" step="0.01" placeholder="3.52">
                         </div>
                     </div>
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">15</span>
-                            <input  id="vfo-15" type="number" class="form-control" step="0.01" placeholder="21.02">
+                            <input  id="vfo-15" type="number" class="form-control disable-beacon" step="0.01" placeholder="21.02">
                         </div>
                     </div>
                 </div>      
@@ -68,13 +68,13 @@
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">60</span>
-                            <input  id="vfo-60" type="number" class="form-control" step="0.01" placeholder="5.3305">
+                            <input  id="vfo-60" type="number" class="form-control disable-beacon" step="0.01" placeholder="5.3305">
                         </div>
                     </div>
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">12</span>
-                            <input  id="vfo-12" type="number" class="form-control" step="0.01" placeholder="24.9">
+                            <input  id="vfo-12" type="number" class="form-control disable-beacon" step="0.01" placeholder="24.9">
                         </div>
                     </div>
                 </div>
@@ -82,13 +82,13 @@
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">40</span>
-                            <input  id="vfo-40" type="number" class="form-control" step="0.01" placeholder="7.02">
+                            <input  id="vfo-40" type="number" class="form-control disable-beacon" step="0.01" placeholder="7.02">
                         </div>
                     </div>
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">10</span>
-                            <input  id="vfo-10" type="number" class="form-control" step="0.01" placeholder="28.02">
+                            <input  id="vfo-10" type="number" class="form-control disable-beacon" step="0.01" placeholder="28.02">
                         </div>
                     </div>
                 </div>
@@ -96,13 +96,13 @@
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">30</span>
-                            <input  id="vfo-30" type="number" class="form-control" step="0.01" placeholder="10.12">
+                            <input  id="vfo-30" type="number" class="form-control disable-beacon" step="0.01" placeholder="10.12">
                         </div>
                     </div>
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">6</span>
-                            <input  id="vfo-6" type="number" class="form-control" step="0.01" placeholder="50.12">
+                            <input  id="vfo-6" type="number" class="form-control disable-beacon" step="0.01" placeholder="50.12">
                         </div>
                     </div>
                 </div>
@@ -110,13 +110,13 @@
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">20</span>
-                            <input  id="vfo-20" type="number" class="form-control" step="0.01" placeholder="14.02">
+                            <input  id="vfo-20" type="number" class="form-control disable-beacon" step="0.01" placeholder="14.02">
                         </div>
                     </div>
                     <div class="col-xs-6">
                         <div class="input-group input-group-sm input-margin">
                             <span class="input-group-addon">2</span>
-                            <input  id="vfo-2" type="number" class="form-control" step="0.01" placeholder="144.22">
+                            <input  id="vfo-2" type="number" class="form-control disable-beacon" step="0.01" placeholder="144.22">
                         </div>
                     </div>
                 </div>
@@ -135,9 +135,9 @@
                             <h6>Beacon Mode</h6>
                                 <div class="input-group input-group-sm input-margin">
                                     <span class="input-group-addon">Beacon</span>
-                                    <input  id="beacon-mem" type="text" maxlength="60" class="form-control" >
+                                    <input  id="beacon-mem" type="text" maxlength="60" class="form-control disable-beacon" >
                                     <span class="input-group-btn">
-                                        <button class="btn btn-default" id="beacon-mem-btn" type="button">
+                                        <button class="btn btn-default disable-beacon" id="beacon-mem-btn" type="button">
                                             <span class="glyphicon glyphicon-check"></span></button>
                                     </span>
                                 </div>
@@ -155,23 +155,23 @@
                         <div class="col-md-12">
                                 <div class="input-group input-group-sm input-margin">
                                     <span class="input-group-addon">Send immediately</span>
-                                    <input  id="beacon-direct" type="text" maxlength="60" class="form-control" >
+                                    <input  id="beacon-direct" type="text" maxlength="60" class="form-control disable-beacon" >
                                 </div>
                         </div>
                     </div>
                     <div class="row" style="margin-top: 5px;">
                         <div class="col-md-6 col-md-offset-6 col-sm-8 col-sm-offset-4">
-                            <button class="btn btn-primary btn-sm" id="send-beacon-cw">Send as CW</button>
-                            <button class="btn btn-primary btn-sm" id="send-beacon-rtty">Send as RTTY</button>
+                            <button class="btn btn-primary btn-sm disable-beacon" id="send-beacon-cw">Send as CW</button>
+                            <button class="btn btn-primary btn-sm disable-beacon" id="send-beacon-rtty">Send as RTTY</button>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 col-xs-8">
                                 <div class="input-group input-group-sm input-margin">
                                     <span class="input-group-addon">Morse WPM</span>
-                                    <input  id="beacon-wpm" type="number" class="form-control" >
+                                    <input  id="beacon-wpm" type="number" class="form-control disable-beacon" >
                                     <span class="input-group-btn">
-                                        <button class="btn btn-default" id="beacon-wpm-btn" type="button">
+                                        <button class="btn btn-default disable-beacon" id="beacon-wpm-btn" type="button">
                                             <span class="glyphicon glyphicon-check"></span></button>
                                     </span>
                                 </div>
@@ -190,13 +190,13 @@
                         <div class="col-xs-6">
                             <div class="input-group input-group-sm input-margin">
                                 <span class="input-group-addon">Start</span>
-                                <input  id="sweep-start-1" type="number" class="form-control" step="0.01" placeholder="14.0">
+                                <input  id="sweep-start-1" type="number" class="form-control disable-beacon" step="0.01" placeholder="14.0">
                             </div>
                         </div>
                         <div class="col-xs-6">
                             <div class="input-group input-group-sm input-margin">
                                 <span class="input-group-addon">End</span>
-                                <input  id="sweep-stop-1" type="number" class="form-control" step="0.01" placeholder="14.1">
+                                <input  id="sweep-stop-1" type="number" class="form-control disable-beacon" step="0.01" placeholder="14.1">
                             </div>
                         </div>
                     </div>                
@@ -204,13 +204,13 @@
                         <div class="col-xs-6">
                             <div class="input-group input-group-sm input-margin">
                                 <span class="input-group-addon">Step</span>
-                                <input  id="sweep-step-1" type="number" class="form-control" step="0.01" placeholder="0.1">
+                                <input  id="sweep-step-1" type="number" class="form-control disable-beacon" step="0.01" placeholder="0.1">
                             </div>
                         </div>
                         <div class="col-xs-6">
                             <div class="input-group input-group-sm input-margin">
                                 <span class="input-group-addon">Step time (ms)</span>
-                                <input  id="sweep-step-time-1" type="number" class="form-control" step="1" placeholder="100">
+                                <input  id="sweep-step-time-1" type="number" class="form-control disable-beacon" step="1" placeholder="100">
                             </div>
                         </div>
                     </div>                
@@ -218,11 +218,11 @@
                         <div class="col-xs-6">
                             <div class="input-group input-group-sm input-margin">
                                 <span class="input-group-addon">Repeat</span>
-                                <input  id="sweep-repeat-1" type="checkbox">
+                                <input  id="sweep-repeat-1" type="checkbox" class="disable-beacon">
                             </div>
                         </div>
                         <div class="col-xs-6">
-                            <button class="btn btn-primary btn-sm pull-right" id="do-sweep">Sweep</button>
+                            <button class="btn btn-primary btn-sm pull-right disable-beacon" id="do-sweep">Sweep</button>
                         </div>
                     </div>                
                 </div>

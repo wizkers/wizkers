@@ -38,11 +38,14 @@ define(function(require) {
         initialize:function () {
             this.menulist = [];
             this.menumode = '';
+            this.readingAllMemsIndex = 100;
             linkManager.on('input', this.showInput, this);
         },
         
         events: {
-            "click #memread": "readMemoryLoc"
+            "click #memread": "readMemoryManual",
+            "click #readmems": "getAllMems",
+            "click .memory-channel": "tuneMem"
         },
 
         onClose: function() {
@@ -67,6 +70,30 @@ define(function(require) {
         },
         
         /**
+         * Tune to a direct mem
+         */
+        tuneMem: function(e) {            
+            var mem = $(e.target).data('channel');
+            linkManager.driver.memoryChannel(mem);
+        },
+        
+        /**
+         * Read all radio memories
+         */
+        getAllMems: function() {
+            this.readingAllMemsIndex = 0;
+            this.getAllMemsLoop();
+        },
+        
+        getAllMemsLoop: function() {
+            if (this.readingAllMemsIndex < 99) {
+                this.readMemoryLoc(this.readingAllMemsIndex++);
+            } else {
+                this.readingAllMemsIndex = 100;
+            }
+        },
+        
+        /**
          * Read the configuration of the standard band memories on the KX3.
          *  We have 11 band memories, with config stored at 0100 to 0100 + 0xA0
          * 
@@ -76,6 +103,7 @@ define(function(require) {
          */
         readNormalBandMemoryState: function(starting, address, data) {
             if (starting) {
+                console.info('readNormalBandMemoryState');
                 this.rnbs_address = 0x0100;
                 this.rnbs_data_string = "";
                 this.rnbs = [];
@@ -114,6 +142,7 @@ define(function(require) {
         
         readTransverterBandMemoryState: function(starting, address, data) {
             if (starting) {
+                console.info("readTransverterBandMemoryState");
                 this.rtbs_address = 0x0200;
                 this.rtbs_data_string = "";
                 this.rtbs = [];
@@ -152,9 +181,13 @@ define(function(require) {
             this.rtbs_state = true;
         },
         
-        readMemoryLoc: function() {
-          var i = $('#flashdump', this.el);
-          var base_address = 0x0C00 + 0x40 *parseInt(this.$("#memtoread").val());
+        readMemoryManual: function() {
+            var mem = parseInt(this.$("#memtoread").val());
+            this.readMemoryLoc(mem);
+        },
+        
+        readMemoryLoc: function(mem) {
+          var base_address = 0x0C00 + 0x40 * mem;
           this.readMemory(base_address, 0x40);
         },
         
@@ -264,6 +297,11 @@ define(function(require) {
             row += '<td></td>';
             row += '<td></td></tr>';
             this.$('#freqtable').append(row);
+            // If we are in a "read all memories loop", then call the next location
+            // reader
+            if (this.readingAllMemsIndex != 100) {
+                this.getAllMemsLoop();
+            }
             return;
           }
             
@@ -307,10 +345,10 @@ define(function(require) {
           }
           
           // Create a table row:
-          var row = '<tr id="' + id + '"><td>' + id + '</td>';
-          row += '<td>' + label + '</td>';
-          row += '<td>' + description + '</td>';
-          row += '<td>' + vfoa + '</td>';
+          var row = '<tr id="mem-idx-' + id + '"><td><button class="btn btn-default memory-channel" data-channel="' + id + '">' + id + '</button></td>';
+          row += '<td><input class="form-control" length="5" disabled value="' + label + '"></td>';
+          row += '<td><input class="form-control" length="16" disabled value="' + description + '"></td>';
+          row += '<td><input class="form-control" disabled value="' + vfoa + '"></td>';
           row += '<td>' + this.makeModeDropdown(modea, id, datamoderev, cwmoderev) + '</td>';
           row += '<td>' + this.makeDataModeDropdown(datamode, id) + '</td>';
           row += '<td>' + vfob + '</td>';
@@ -320,6 +358,12 @@ define(function(require) {
           row += '<td>' + this.makePLToneDropdown(tone,id) + '</td></tr>';
 
           this.$('#freqtable').append(row);
+          
+          // If we are in a "read all memories loop", then call the next location
+          // reader
+          if (this.readingAllMemsIndex != 100) {
+              this.getAllMemsLoop();
+          }
           
         },
         

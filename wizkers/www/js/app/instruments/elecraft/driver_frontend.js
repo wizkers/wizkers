@@ -101,6 +101,11 @@ define(function (require) {
             };
             lm.sendCommand('DT' + submodes[submode] + ';');
         }
+        
+        this.memoryChannel = function(mem) {
+            var s = ("000" + mem).slice(-3);
+            lm.sendCommand('MC' + s + ';');   
+        }
 
         this.setVFO = function (f, vfo) {
             var freq = ("00000000000" + (parseInt(f * 1e6).toString())).slice(-11); // Nifty, eh ?

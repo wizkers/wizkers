@@ -182,16 +182,18 @@ define(function (require) {
 
         showInput: function (data) {
 
-            // Update our raw data monitor
-            var i = $('#input', this.el);
-            var scroll = (i.val() + data + '\n').split('\n');
-            // Keep max 50 lines:
-            if (scroll.length > 50) {
-                scroll = scroll.slice(scroll.length - 50);
+            if (typeof data == "string") {
+                // Update our raw data monitor
+                var i = $('#input', this.el);
+                var scroll = (i.val() + data + '\n').split('\n');
+                // Keep max 50 lines:
+                if (scroll.length > 50) {
+                    scroll = scroll.slice(scroll.length - 50);
+                }
+                i.val(scroll.join('\n'));
+                // Autoscroll:
+                i.scrollTop(i[0].scrollHeight - i.height());
             }
-            i.val(scroll.join('\n'));
-            // Autoscroll:
-            i.scrollTop(i[0].scrollHeight - i.height());
 
             if (data.screenshot != undefined) {
                 // Restore PA Mode from state before screenshot:

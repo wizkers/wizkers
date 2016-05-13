@@ -33,7 +33,7 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         Devicelog = require('app/models/devicelog'),
-        template = require('js/tpl/instruments/Fluke289LogManagementView.js'),
+        template = require('js/tpl/instruments/Fluke289/Fluke289LogManagementView.js'),
         tls_template = require('js/tpl/instruments/Fluke289/Fluke289TrendlogSummary.js'),
         mml_template = require('js/tpl/instruments/Fluke289/Fluke289MinMaxLogSummary.js');
 

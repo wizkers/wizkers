@@ -31,7 +31,7 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        template = require('js/tpl/instruments/Sark110SettingsView.js');
+        template = require('js/tpl/instruments/sark110/Sark110SettingsView.js');
 
     return Backbone.View.extend({
         initialize: function () {

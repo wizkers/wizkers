@@ -29,7 +29,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
-        template = require('js/tpl/instruments/Fluke289NumView.js');
+        template = require('js/tpl/instruments/Fluke289/Fluke289NumView.js');
 
     return Backbone.View.extend({
 

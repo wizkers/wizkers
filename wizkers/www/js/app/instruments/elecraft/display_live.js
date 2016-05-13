@@ -204,12 +204,12 @@ define(function (require) {
         
         vfoAWheel: function(e) {
             // console.log('Mousewheel',e);
-            this.vfoangle += e.deltaY/2 % 360;
+            this.vfoangle -= e.deltaY/2 % 360;
             var tx = this.dip_x * (Math.cos(this.vfoangle*Math.PI/360));
             var ty = this.dip_y * (1+Math.sin(this.vfoangle*Math.PI/360));
             this.vfodip.transform('t' + tx + ',' + ty);
             var step = Math.floor(Math.min(Math.abs(e.deltaY)/50, 7));
-            var cmd = ((e.deltaY>0) ? 'UP' : 'DN') + step + ';';
+            var cmd = ((e.deltaY < 0) ? 'UP' : 'DN') + step + ';FA;';
             linkManager.sendCommand(cmd);
 
         },
@@ -552,7 +552,12 @@ define(function (require) {
             } else if (cmd == "PC") {
                 $("#power-direct").val(parseInt(val));
             } else if (cmd == "FA") {
-                $("#vfoa-direct").val(parseInt(val) / 1e6);
+                var f = parseInt(val);
+                // Need to do this in this order because of IEEE float precision issues
+                var f2 = (f - Math.floor(f/1e6)*1e6)/1e3;
+                $("#vfoa-direct").val(f/1e6);
+                var st = Math.floor(f/1e6) + '.' + ((f2<100) ? '0' : '' ) + f2;
+                $("#kx3 #VFOA").text(st);
             } else if (cmd == "FB") {
                 $("#vfob-direct").val(parseInt(val) / 1e6);
             } else if (cmd == "AG") {

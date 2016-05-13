@@ -29,7 +29,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        template = require('js/tpl/instruments/Fluke289DiagView.js');
+        template = require('js/tpl/instruments/Fluke289/Fluke289DiagView.js');
 
     return Backbone.View.extend({
 

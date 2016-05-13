@@ -126,6 +126,12 @@ define(function (require) {
             lm.sendCommand('O,' + (enable ? '1' : '0') + ';');
         }
         
+        this.setBandDirect = function(num) {
+            if (num > 11)
+                return;
+            lm.sendCommand('C,' + ("00" + num).slice(-2) + ';');
+        }
+        
         this.setBand = function (band) {
             // We use a band number in meters (with a "m"), this function translates into the XG3 values:
             var bands = {
@@ -146,6 +152,12 @@ define(function (require) {
             if (typeof (bandcode) != 'undefined') {
                 lm.sendCommand('C,' + bandcode + ';');
             }
+        }
+
+        this.setLevelDirect = function(num) {
+            if (num > 4)
+                return;
+            lm.sendCommand('L,' + ("00" + num).slice(-2) + ';');
         }
 
         this.setLevel = function (band) {

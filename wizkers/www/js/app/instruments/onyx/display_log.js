@@ -34,7 +34,7 @@ define(function (require) {
         simpleplot = require('app/lib/flotplot'),
         utils = require('app/utils'),
         fileutils = require('app/lib/fileutils'),
-        template = require('js/tpl/instruments/OnyxLogView.js');
+        template = require('js/tpl/instruments/onyx/OnyxLogView.js');
 
     return Backbone.View.extend({
 

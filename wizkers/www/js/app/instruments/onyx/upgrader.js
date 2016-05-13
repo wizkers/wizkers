@@ -31,7 +31,7 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         abu = require('app/lib/abutils'),
-        template = require('js/tpl/instruments/OnyxUpgrader.js');
+        template = require('js/tpl/instruments/onyx/OnyxUpgrader.js');
 
     // Upgrader view
     return Backbone.View.extend({
