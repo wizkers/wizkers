@@ -58,7 +58,7 @@ define(function(require) {
         render: function () {
             this.$el.html(template());
             // Initialize our sliders
-            $(".eq",this.el).slider({reversed:true});
+            this.$(".eq").slider({reversed:true});
             linkManager.sendCommand('AI1;');            
             this.refresh();
             return this;
@@ -96,6 +96,10 @@ define(function(require) {
         },
      
         showInput: function(data) {
+            if (!this.$el.is(':visible')) {
+                return;
+            }
+
             if (this.setting_band && (data.substr(0,2) == 'DB')) {
                 var current_val = parseInt(data.substr(7));
                 var diff = this.new_band_val - current_val;

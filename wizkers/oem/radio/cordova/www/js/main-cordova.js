@@ -37,6 +37,8 @@ require.config({
         // we can upgrade easily
         jquery: 'lib/jquery-2.1.4',
         backbone: 'lib/backbone-1.2.3',
+        jquery_mousewheel: 'lib/jquery.mousewheel',
+        jquery_xmlrpc: 'lib/jquery.xmlrpc',
         localstorage: 'lib/backbone.localStorage-1.1.16',
         bbindexeddb: 'lib/backbone-indexeddb',
         pouchdb: 'lib/pouchdb-5.0.0',
@@ -106,7 +108,9 @@ require.config({
         'utils': {
             exports: 'utils'
         },
-
+        'jquery_xmlrpc': {
+            deps: ['jquery']
+        },
         // The Flot library, along with our dependencies:
         'flot': {
             deps: ['jquery'],

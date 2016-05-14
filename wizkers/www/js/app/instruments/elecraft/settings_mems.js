@@ -346,8 +346,8 @@ define(function(require) {
           
           // Create a table row:
           var row = '<tr id="mem-idx-' + id + '"><td><button class="btn btn-default memory-channel" data-channel="' + id + '">' + id + '</button></td>';
-          row += '<td><input class="form-control" length="5" disabled value="' + label + '"></td>';
-          row += '<td><input class="form-control" length="16" disabled value="' + description + '"></td>';
+          row += '<td><input class="form-control" size="6" maxlength="5" disabled value="' + label + '"></td>';
+          row += '<td><input class="form-control" size="17" maxlength="16" disabled value="' + description + '"></td>';
           row += '<td><input class="form-control" disabled value="' + vfoa + '"></td>';
           row += '<td>' + this.makeModeDropdown(modea, id, datamoderev, cwmoderev) + '</td>';
           row += '<td>' + this.makeDataModeDropdown(datamode, id) + '</td>';
