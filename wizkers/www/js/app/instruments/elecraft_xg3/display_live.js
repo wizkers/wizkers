@@ -41,6 +41,8 @@ define(function (require) {
             this.currentBand = -1;
             this.currentLevel = -1;
             this.applyMemChange = false;
+            this.sweepPending = false;
+            this.sweeping = false;
             this.bands = [ 160, 80, 60, 40, 30, 20, 17, 15, 12, 10, 6, 2];
             linkManager.on('status', this.updateStatus, this);
             linkManager.on('input', this.showInput, this);
@@ -101,9 +103,23 @@ define(function (require) {
         },
         
         doSweep: function() {
-            // we'll do the actual sweep in the callback
-            this.sweepPending = true;
-            linkManager.driver.getSweepMem(1);
+            if (this.sweeping) {
+                this.$('#do-sweep').html('Sweep').removeClass('btn-danger');
+                this.$('.disable-beacon').attr('disabled',false);
+                this.$('#send-beacon').attr('disabled',false);
+                this.$('#xg3-front').css({'opacity': '1', 'pointer-events': ''});
+                this.sweeping = false;
+                // This stops sweeping:
+                linkManager.driver.getSweepMem(1);
+            } else {
+                this.$('#do-sweep').html('Stop sweep').addClass('btn-danger');
+                this.$('.disable-beacon').attr('disabled',true);
+                this.$('#send-beacon').attr('disabled',true);
+                this.$('#xg3-front').css({'opacity': '0.3', 'pointer-events': 'none'});
+                // we'll do the actual sweep in the callback
+                this.sweepPending = true;
+                linkManager.driver.getSweepMem(1);
+            }
         },
         
         setVFO: function () {
@@ -143,6 +159,7 @@ define(function (require) {
             if (!linkManager.isStreaming()) {
                 this.$('#send-beacon').html('Send Beacon').removeClass('btn-danger');                
                 this.$('.disable-beacon').attr('disabled',false);
+                this.$('#do-sweep').attr('disabled',false);
                 this.$('#xg3-front').css({'opacity': '1', 'pointer-events': ''});
                 // Whatever character will stop the beacon
                 linkManager.sendCommand(';');
@@ -150,6 +167,7 @@ define(function (require) {
             } else {
                 linkManager.stopLiveStream();
                 this.$('.disable-beacon').attr('disabled',true);
+                this.$('#do-sweep').attr('disabled',true);
                 this.$('#xg3-front').css({'opacity': '0.3', 'pointer-events': 'none'});
                 this.$('#send-beacon').html('Stop Beacon').addClass('btn-danger');
                 linkManager.driver.sendBeacon('');
@@ -237,6 +255,7 @@ define(function (require) {
                     var step = this.toFString(this.$('#sweep-step-1').val());
                     var time = ("00000" + (parseInt(this.$('#sweep-step-time-1').val()).toString())).slice(-5);
                     var repeat = this.$('#sweep-repeat-1').is(':checked') ? '01' : '00';
+                    this.sweeping = true;
                     // Check if we have changed the arguments. If yes, then
                     // program the sweep memory. If no, just play the sweep memory
                     if ( start == cmdarg[2] && stop == cmdarg[3] &&

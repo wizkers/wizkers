@@ -77,7 +77,7 @@ define(function (require) {
         }
         
         this.doSweep = function() {
-            lm.sendCommand('PF01,00;S,01;');
+            lm.sendCommand('PF,01,00;S,01;');
         }
         
         this.getMems = function() {
