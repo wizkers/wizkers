@@ -102,18 +102,28 @@ define(function (require) {
             lm.sendCommand('DT' + submodes[submode] + ';');
         }
         
+        this.tune = function(tuning) {
+            if (tuning) {
+                lm.sendCommand('MN023;MP001;MN255;'); // Bypass ATU
+                lm.sendCommand('SWH16;'); // TUNE keypress
+            } else {
+                lm.sendCommand('SWH16;'); // TUNE keypress
+                lm.sendCommand(';;;MN023;MP002;MN255;'); // Enable ATU
+            }
+        }
+        
         this.memoryChannel = function(mem) {
             var s = ("000" + mem).slice(-3);
             lm.sendCommand('MC' + s + ';');   
         }
 
         this.setVFO = function (f, vfo) {
-            var freq = ("00000000000" + (parseInt(f * 1e6).toString())).slice(-11); // Nifty, eh ?
+            var freq = ("00000000000" + (parseInt(f*1e6 ).toString())).slice(-11); // Nifty, eh ?
             if (freq.indexOf("N") > -1) { // detect "NaN" in the string
-                console.log("Invalid VFO spec");
+                console.warn("Invalid VFO spec");
                 lm.sendCommand((vfo == 'A' ||  vfo == 'a') ? 'FA;' : 'FB;');
             } else {
-                console.log("VFO" + vfo + ": " + freq);
+                //console.log("VFO" + vfo + ": " + freq);
                 lm.sendCommand(((vfo == 'A' ||  vfo == 'a') ? 'FA' : 'FB') + freq + ';');
             }
             lm.sendCommand('BN;'); // Refresh band number (radio does not send it automatically)

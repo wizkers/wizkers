@@ -69,6 +69,12 @@ define(function (require) {
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
+            "elecraft_siggen": {
+                name: "KX3 Antenna analyzer",
+                type: 'app/instruments/elecraft_siggen/elecraft_siggen',
+                settings: null,
+                connectionsettings: 'app/views/instrument/serialport'
+            },
             "usbgeiger": {
                 name: "USB Geiger",
                 type: 'app/instruments/usbgeiger/usb_geiger',
