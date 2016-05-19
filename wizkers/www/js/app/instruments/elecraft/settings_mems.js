@@ -371,8 +371,8 @@ define(function(require) {
             if (!this.$el.is(':visible')) {
                 return;
             }
-            var cmd = data.substr(0, 2);
-            var val = data.substr(2);
+            var cmd = data.raw.substr(0, 2);
+            var val = data.raw.substr(2);
             if (cmd == "ER") {
                 var buf = val.substr(6, val.length -8);
                 var b = abu.hextoab(buf);

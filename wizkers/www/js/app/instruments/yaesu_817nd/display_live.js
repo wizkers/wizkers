@@ -32,7 +32,7 @@ define(function (require) {
         Backbone = require('backbone'),
         Snap = require('snap'),
         utils = require('app/utils'),
-        template = require('js/tpl/instruments/elecraft/ElecraftLiveView.js');
+        template = require('js/tpl/instruments/yaesu_817nd/LiveView.js');
 
 
     // Need to load these, but no related variables.
@@ -87,9 +87,9 @@ define(function (require) {
             var self = this;
             this.$el.html(template());
 
-            this.faceplate = Snap("#kx3");
-            Snap.load("js/app/instruments/elecraft/KX3.svg", function (f) {
-                f.select("#layer1").click(function (e) {
+            this.faceplate = Snap("#ft817");
+            Snap.load("js/app/instruments/yaesu_817nd/FT-817ND.svg", function (f) {
+                f.select("#layer2").click(function (e) {
                     self.handleKX3Button(e);
                 });
                 self.faceplate.add(f);
@@ -209,7 +209,7 @@ define(function (require) {
             var ty = this.dip_y * (1+Math.sin(this.vfoangle*Math.PI/360));
             this.vfodip.transform('t' + tx + ',' + ty);
             var step = Math.floor(Math.min(Math.abs(e.deltaY)/50, 7));
-            var cmd = ((e.deltaY < 0) ? 'UP' : 'DN') + step + ';DS;';
+            var cmd = ((e.deltaY < 0) ? 'UP' : 'DN') + step + ';FA;';
             linkManager.sendCommand(cmd);
 
         },
@@ -500,23 +500,11 @@ define(function (require) {
         },
 
         showInput: function (data) {
-            if (data.raw == undefined)
-                return; // Detect error messages which don't contain what we need.
+            if (typeof data != "string")
+                return; // data is sometimes an object when we get a serial port error
             // Now update our display depending on the data we received:
-            
-            // If we have a pre-parsed element, use it (faster!)
-            if (data.vfoa) {
-                $("#vfoa-direct").val(data.vfoa/1e6);
-                return;
-            } else if (data.vfob) {
-                $("#vfob-direct").val(data.vfob / 1e6);
-                return;
-            }
-            
-            // No pre-parsed data, we are using the raw
-            // string in the packet:
-            var cmd = data.raw.substr(0, 2);
-            var val = data.raw.substr(2);
+            var cmd = data.substr(0, 2);
+            var val = data.substr(2);
             if (cmd == "DB") {
                 // VFO B Text
                 if (this.oldVFOB == val)
@@ -563,6 +551,15 @@ define(function (require) {
 
             } else if (cmd == "PC") {
                 $("#power-direct").val(parseInt(val));
+            } else if (cmd == "FA") {
+                var f = parseInt(val);
+                // Need to do this in this order because of IEEE float precision issues
+                var f2 = (f - Math.floor(f/1e6)*1e6)/1e3;
+                $("#vfoa-direct").val(f/1e6);
+                var st = Math.floor(f/1e6) + '.' + ((f2<100) ? '0' : '' ) + f2;
+                $("#kx3 #VFOA").text(st);
+            } else if (cmd == "FB") {
+                $("#vfob-direct").val(parseInt(val) / 1e6);
             } else if (cmd == "AG") {
                 $("#ag-control", this.el).slider('setValue', parseInt(val));
             } else if (cmd == "RG") {

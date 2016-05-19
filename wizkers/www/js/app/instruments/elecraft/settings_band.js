@@ -108,7 +108,7 @@ define(function(require) {
         },
         
         parseMenu: function(data) {
-            var val = parseInt(data.substr(2));
+            var val = parseInt(data.raw.substr(2));
             console.log('[band settings] Parsing menu ' + this.menumode + ' with value ' + val);
             switch (this.menumode) {
                 case 'rpt-ofs':
@@ -141,8 +141,8 @@ define(function(require) {
             if (!this.$el.is(':visible')) {
                 return;
             }
-            var cmd = data.substr(0, 2);
-            var val = data.substr(2);
+            var cmd = data.raw.substr(0, 2);
+            var val = data.raw.substr(2);
             
             if (cmd == 'BN') {
                 // We need to check for this, because in some modes (AI2; for instance)

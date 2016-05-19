@@ -120,34 +120,34 @@ define(function (require) {
         // we can support any type of transceiver, and not rely on Kenwood/Elecraft
         // vocabulary.
         this.sendData = function (data) {
-            if (typeof data != "string")
+            if (typeof data != 'object')
                 return;
-            //console.log(data);
+            if (data.vfoa) {
+                vfoa_frequency = data.vfoa;
+                return;
+              } else if (data.vfob) {
+                vfob_frequency = data.vfob;
+                return;
+            }
+
             if (data[0] == '^') {
-                var cmd = data.substr(1,2);
+                var cmd = data.raw.substr(1,2);
                 switch (cmd) {
                     case "PF":
-                        pwr_level_kxpa = Math.ceil(parseInt(data.substr(3))/10);
+                        pwr_level_kxpa = Math.ceil(parseInt(data.raw.substr(3))/10);
                         break;
                 }
             } else {
-                switch (data.substr(0, 2)) {
-                case "FA":
-                    vfoa_frequency = parseInt(data.substr(2));
-                    break;
-                case "FB":
-                    vfob_frequency = parseInt(data.substr(2));
-                    break;
+                switch (data.raw.substr(0, 2)) {
                 case "BW":
                 case "FW":
-                    vfoa_bandwidth = parseInt(data.substr(2))*10;
+                    vfoa_bandwidth = parseInt(data.raw.substr(2))*10;
                     break;
                 case "PO": // KX3 power level
-                    pwr_level_kx3 = Math.ceil(parseInt(data.substr(2))/10);
+                    pwr_level_kx3 = Math.ceil(parseInt(data.raw.substr(2))/10);
                     break;
                 case "IF":
-                    radio_mode = radio_modes[parseInt(data.substr(29,1))-1];
-                    console.log(data);
+                    radio_mode = radio_modes[parseInt(data.raw.substr(29,1))-1];
                     break;
                 }
             }

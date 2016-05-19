@@ -100,8 +100,8 @@ define(function(require) {
                 return;
             }
 
-            if (this.setting_band && (data.substr(0,2) == 'DB')) {
-                var current_val = parseInt(data.substr(7));
+            if (this.setting_band && (data.raw.substr(0,2) == 'DB')) {
+                var current_val = parseInt(data.raw.substr(7));
                 var diff = this.new_band_val - current_val;
                 if (diff == 0) {
                     // We will get this once the band is set
@@ -117,9 +117,9 @@ define(function(require) {
                }
                 linkManager.sendCommand(cmd + 'DB;');
                 return;
-            } else if (data.substr(0,2) == 'IF') {
+            } else if (data.raw.substr(0,2) == 'IF') {
                 // We want the mode:
-                var m = parseInt(data.substr(29,1));
+                var m = parseInt(data.raw.substr(29,1));
                 if (m == 6 || m == 9) {
                     // Disable EQ when we're in data mode, since it cannot be
                     // adjusted
@@ -127,8 +127,8 @@ define(function(require) {
                 } else {
                     this.$el.css({'opacity': '1', 'pointer-events': ''});
                 }
-            } else if (data.substr(0,2) == 'MD') {
-                var val = parseInt(data.substr(2));
+            } else if (data.raw.substr(0,2) == 'MD') {
+                var val = parseInt(data.raw.substr(2));
                 if (val == 6 || val == 9) {
                     // Disable EQ when we're in data mode, since it cannot be
                     // adjusted
@@ -137,13 +137,13 @@ define(function(require) {
                     this.$el.css({'opacity': '1', 'pointer-events': ''});
                 }
             } else if (this.refreshing) {
-                if (data.substr(0,7) == "DBRX EQ" ||
-                    data.substr(0,7) == "DBTX EQ" ) {
+                if (data.raw.substr(0,7) == "DBRX EQ" ||
+                    data.raw.substr(0,7) == "DBTX EQ" ) {
                     linkManager.sendCommand("SWT"+this.bandCommands[this.band++]+";DB;");
-                } else if (data.substr(0,2) == 'DB') {
+                } else if (data.raw.substr(0,2) == 'DB') {
                     // console.log(data);
-                    var band = data.substr(3,4);
-                    var val = parseInt(data.substr(7));
+                    var band = data.raw.substr(3,4);
+                    var val = parseInt(data.raw.substr(7));
                     // console.log("Band " + band + " is " + val);
                     var sliderIndex = this.bandValues.indexOf(band)+1;
                     if (sliderIndex > -1) {

@@ -322,12 +322,12 @@ define(function (require) {
             if (this.flotplot_settings.points) this.trimLiveData(idx);
             if (data.index != undefined) {
                 this.livedata[idx][data.index] = [data.index, data.value];
-            } else  if (data.timestamp != undefined) {
-                var stamp = (data.timestamp != undefined) ? new Date(data.timestamp).getTime() : new Date().getTime();
-                this.livedata[idx].push([stamp, data.value]);
             } else if (data.xval != undefined) {
                 this.livedata[idx].push([data.xval, data.value]);
-            }
+            } else {
+                var stamp = (data.timestamp != undefined) ? new Date(data.timestamp).getTime() : new Date().getTime();
+                this.livedata[idx].push([stamp, data.value]);
+            } 
             return this; // This lets us chain multiple operations
         },
 

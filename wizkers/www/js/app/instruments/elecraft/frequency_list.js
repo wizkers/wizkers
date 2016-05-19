@@ -392,8 +392,8 @@ define(function (require) {
                 return; // data is sometimes an object when we get a serial port error
                 
             // Follow band changes to update our frequency cards
-            var cmd = data.substr(0, 2);
-            var val = data.substr(2);
+            var cmd = data.raw.substr(0, 2);
+            var val = data.raw.substr(2);
 
             if (cmd == "BN") {
                 var new_band = this.bands[parseInt(val)];

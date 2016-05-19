@@ -182,10 +182,10 @@ define(function (require) {
 
         showInput: function (data) {
 
-            if (typeof data == "string") {
+            if (data.raw != undefined) {
                 // Update our raw data monitor
                 var i = $('#input', this.el);
-                var scroll = (i.val() + data + '\n').split('\n');
+                var scroll = (i.val() + data.raw + '\n').split('\n');
                 // Keep max 50 lines:
                 if (scroll.length > 50) {
                     scroll = scroll.slice(scroll.length - 50);
@@ -231,37 +231,37 @@ define(function (require) {
                 $('#bmdownload', this.el).width(data.downloading + "%");
             } else {
                 // Populate fields depending on what we get:
-                var da2 = data.substr(0, 2);
-                var da3 = data.substr(0, 3);
+                var da2 = data.raw.substr(0, 2);
+                var da3 = data.raw.substr(0, 3);
                 if (da3 == 'RVM') {
-                    $("#kx3-fw-mcu", this.el).html(data.substr(3));
+                    $("#kx3-fw-mcu", this.el).html(data.raw.substr(3));
                 } else if (data == 'PX3' ) {
                     linkManager.sendCommand('#RVM;');
-                } else if (data.substr(0,4) == '#RVM') {
-                    this.$('#px3-fw').html('v' + data.substr(4));
+                } else if (data.raw.substr(0,4) == '#RVM') {
+                    this.$('#px3-fw').html('v' + data.raw.substr(4));
                 } else if (da3 == 'RVD') {
-                    $("#kx3-fw-dsp", this.el).html(data.substr(3));
+                    $("#kx3-fw-dsp", this.el).html(data.raw.substr(3));
                 } else if (da3 == '^RV') {
-                    this.$('#kxpa-fwrv').html(data.substr(3));
+                    this.$('#kxpa-fwrv').html(data.raw.substr(3));
                 } else if (da3 == '^SN') {
-                    this.$('#kxpa-sn').html(data.substr(3));
+                    this.$('#kxpa-sn').html(data.raw.substr(3));
                 } else if (da2 == 'OM') {
                     
                     linkManager.sendCommand('=;;'); // Try to detect PX3
                     // Display what options are installed/enabled
-                    setLabel("#opt-kxat3", this.el, (data.charAt(3) == 'A'));
-                    setLabel("#opt-kxpa100", this.el, (data.charAt(4) == 'P'));
-                    setLabel("#opt-kxfl3", this.el, (data.charAt(5) == 'F'));
-                    setLabel("#opt-kxat100", this.el, (data.charAt(9) == 'T'));
-                    setLabel("#opt-kxbc3", this.el, (data.charAt(10) == 'B'));
-                    setLabel("#opt-kx3-2m", this.el, (data.charAt(11) == 'X'));
+                    setLabel("#opt-kxat3", this.el, (data.raw.charAt(3) == 'A'));
+                    setLabel("#opt-kxpa100", this.el, (data.raw.charAt(4) == 'P'));
+                    setLabel("#opt-kxfl3", this.el, (data.raw.charAt(5) == 'F'));
+                    setLabel("#opt-kxat100", this.el, (data.raw.charAt(9) == 'T'));
+                    setLabel("#opt-kxbc3", this.el, (data.raw.charAt(10) == 'B'));
+                    setLabel("#opt-kx3-2m", this.el, (data.raw.charAt(11) == 'X'));
 
-                    if (data.charAt(4) == 'P') {
+                    if (data.raw.charAt(4) == 'P') {
                         // Query the KXPA100 for its serial number
                         linkManager.sendCommand('^SN;^RV;');
                     }
                 } else if (da2 == 'MP') {
-                    pamode_on = (data.substr(2) === '000') ? false : true;
+                    pamode_on = (data.raw.substr(2) === '000') ? false : true;
                     if (taking_screenshot) {
                         taking_screenshot = false;
                         // PA Mode off if it was on, take screenshot, but we need to wait for the amp to settle
@@ -278,8 +278,5 @@ define(function (require) {
                 }
             }
         }
-
-
     });
-
 });

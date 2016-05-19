@@ -39,7 +39,7 @@ define(function (require) {
     var Serialport = require('serialport'),
         serialConnection = require('connections_serial'),
         tcpConnection = require('connections_tcp'),
-        Bitmap = require('app/lib/bitmap');
+        abu = require('app/lib/abutils');
 
 
     var parser = function (socket) {
@@ -53,34 +53,16 @@ define(function (require) {
             port_close_requested = false,
             port_open_requested = true,
             isopen = false;
-
-        // Because Elecraft radios are not 100% consistent with their protocols,
-        // we need to use a pure raw parser for data input, and most of the time,
-        // forward that data to a readline parser. But sometimes, we will need the
-        // raw input, for instance for Bitmap requests
-        var second_parser = Serialport.parsers.readline(';', 'binary');
-
-        // Flag to indicate we are receiving a bitmap
-        var waiting_for_bmp = false;
-        var bitmap = new Uint8Array(131768);
-        var bitmap_index = 0;
-        var oldpercent = 0;
+            
+        // We need to manage a command queue, because we
+        // cannot tell what the data in means if we don't know
+        // the command that was sent. The joys of async programming.
+        var commandQueue = [],
+            queue_busy = false;
 
         /////////////
         // Private methods
         /////////////
-
-        // Send the bitmap back to the front-end
-        function sendBitmap() {
-            var bm = new Bitmap(bitmap);
-            bm.init();
-            var data = bm.getData();
-            socket.trigger('serialEvent', {
-                screenshot: data,
-                width: bm.getWidth(),
-                height: bm.getHeight()
-            });
-        };
 
         var portSettings = function () {
             return {
@@ -98,39 +80,17 @@ define(function (require) {
             }
         };
 
-
         // Format can act on incoming data from the radio, and then
         // forwards the data to the app through a 'data' event.
         //
-        // data is an ArrayBuffer
-        // We are trying to pre-format as much data as we can here into
-        // json objects, so that we don't do parsing everywhere later on.
+        // data is an ArrayBuffer;
         var format = function (data) {
-
-            if (!waiting_for_bmp) {
-                second_parser(self, data); // Careful not to use 'this' since 'this' in this context
-                // is chromeSerial !!
+            if (commandQueue.length == 0) {
+                console.error("Received data but we didn't send a command");
                 return;
             }
-
-            // We are receiving a Bitmap: we know it is 131638 bytes plus a checksum
-            // Copy the data we received into our bitmap array buffer:
-            var tmpArray = new Uint8Array(data);
-            bitmap.set(tmpArray, bitmap_index);
-            bitmap_index += data.byteLength;
-            var percent = Math.floor(bitmap_index / 1000 / 132 * 100);
-            if (percent != oldpercent) {
-                self.trigger('data', {
-                    downloading: percent
-                });
-                oldpercent = percent;
-            }
-            if (bitmap_index > 131638) {
-                waiting_for_bmp = false;
-                console.log('[elecraft driver] Got the bitmap!');
-                sendBitmap();
-            }
-
+            queue_busy = false;
+            cmd = commandQueue.shift().command;
         };
 
         var status = function (stat) {
@@ -172,17 +132,56 @@ define(function (require) {
             // This is queried every second - we stage our queries in order
             // to avoid overloading the radio, not sure that is totally necessary, but
             // it won't hurt
+            
+            // port.write('');
 
-            // Query displays and band (does not update by itself)
-            port.write('DB;DS;BN;'); // Query VFO B and VFOA Display
-
-            // Then ask the radio for current figures:
-            port.write('PO;'); // Query actual power output
-
-            // And if we have an amp, then we can get a lot more data:
-            port.write('^PI;^PF;^PV;^TM;');
-            port.write('^PC;^SV;'); // Query voltage & current
         };
+        
+        // Process the latest command in the queue
+        var processQueue = function() {
+            if (queue_busy)
+                return;
+            queue_busy = true;
+            var cmd = commandQueue[0]; // Get the oldest command
+            
+            // Note: UInt8Arrays are initialized at zero
+            var bytes = new Uint8Array(5); // All FT817 commands are 5 bytes long
+            switch(cmd.command) {
+                case 'set_frequency':
+                    console.warn('set_frequency, not implemented');
+                    break;
+                case 'get_frequency':
+                    bytes[4] = 0x03;
+                    commandQueue.shift(); // No response from the radio
+                    break;
+                case 'lock':
+                    bytes[4] = (cmd.arg) ? 0x00 : 0x80;
+                    commandQueue.shift();
+                    break;
+                case 'ptt':
+                    bytes[4] = (cmd.arg) ? 0x08 : 0x88;
+                    commandQueue.shift();
+                    break;
+                case 'clar':
+                    bytes[4] = (cmd.arg) ? 0x05 : 0x85;
+                    commandQueue.shift();
+                    break;
+                case 'toggle_vfo':
+                    bytes[4] = 0x81;
+                    commandQueue.shift();
+                    break;
+                case 'split':
+                    bytes[4] = (cmd.arg) ? 0x02 : 0x82;
+                    commandQueue.shift();
+                    break;
+                case 'power':
+                    bytes[4] = (cmd.arg) ? 0x0f : 0x8f;
+                    commandQueue.shift();
+                    break;
+            }
+            
+            port.write(bytes);
+        }
 
         /////////////
         // Public methods
@@ -243,9 +242,9 @@ define(function (require) {
         this.sendUniqueID = function () {
             this.uidrequested = true;
             try {
-                port.write("MN026;ds;MN255;");
+                port.write('');
             } catch (err) {
-                console.log("Error on serial port while requesting Elecraft UID : " + err);
+                console.log("Error on serial port while requesting  UID : " + err);
             }
         };
 
@@ -253,13 +252,7 @@ define(function (require) {
         this.startLiveStream = function (period) {
             var self = this;
             if (!streaming) {
-                console.log("[Elecraft] Starting live data stream");
-                // The radio can do live streaming to an extent, so we definitely will
-                // take advantage:
-                // K31 enables extended values such as proper BPF reporting
-                // AI2 does not send an initial report, so we ask for the initial data
-                // before...
-                port.write('K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
+                console.log("[FT817-ND] Starting live data stream");
                 livePoller = setInterval(queryRadio.bind(this), (period) ? period * 1000 : 1000);
                 streaming = true;
             }
@@ -267,59 +260,38 @@ define(function (require) {
 
         this.stopLiveStream = function (args) {
             if (streaming) {
-                console.log("[Elecraft] Stopping live data stream");
+                console.log("[FT817-ND] Stopping live data stream");
                 // Stop live streaming from the radio:
-                port.write('AI0;');
+                port.write('');
                 clearInterval(livePoller);
                 streaming = false;
             }
         };
 
-        // Called by the serial parser, cannot be private
-        this.onDataReady = function (data) {
-            
-            if (this.uidrequested && data.substr(0, 5) == "DS@@@") {
-                // We have a Unique ID
-                console.log("Sending uniqueID message");
-                self.trigger('data', {
-                    uniqueID: '' + data.substr(5, 5)
-                });
-                this.uidrequested = false;
-                return;
-            }
-
-            var cmd2 = data.substr(0,2);
-            // We reply with an object containing at least the raw data response,
-            // as well as pre-parsed data to avoid multiple parsing later on.
-            var resp = { raw: data};
-            switch (cmd2) {
-                case "FA":
-                    var f = parseInt(data.substr(2));
-                    resp.vfoa = f;
-                    break;
-                case "FB":
-                    var f = parseInt(data.substr(2));
-                    resp.vfob = f;
-                    break;
-            }
-            
-            self.trigger('data', resp);
-        }
-
-        // output should return a string, and is used to format
-        // the data that is sent on the serial port, coming from the
-        // HTML interface.
+        // Outputs receives the commands from the upper level driver
+        // Data should be a JSON object:
+        // { command: String, args: any};
+        // Command can be:
+        // get_frequency
+        // set_frequency : number
+        // lock: boolean (on/off)
+        // ptt: boolean (on/off)
+        //  set_opmode: String (set operating mode)
+        // clar: boolean (on/off)
+        // set_clar_freq: number
+        // toggle_vfo
+        //  split: boolean (on/off)
+        //  rpt_offset_dir: Number ( 1, -1 or zero)
+        //  rpt_offset_freq: Number
+        //  pl_mode: String  (DCS/CTCSS mode)
+        //  pl_tone: Number
+        //  dcs_code: NUmber
+        //  rx_status
+        //  tx_status
+        //  power: boolean (on/off)
         this.output = function (data) {
-
-            // We want to catch the '#BMP' command to the P3/PX3, because
-            // the data returned if not semicolon-terminated at all..
-            if (data.indexOf('#BMP') != -1) {
-                waiting_for_bmp = true;
-                bitmap_index = 0;
-                console.log('Got a bitmap request, need to switch parsers for a while!');
-            }
-
-            port.write(data);
+            commandQueue.push(data);
+            processQueue();
         };
 
     }

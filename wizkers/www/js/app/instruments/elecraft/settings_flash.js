@@ -133,8 +133,8 @@ define(function(require) {
             if (!this.$el.is(':visible')) {
                 return;
             }
-            var cmd = data.substr(0, 2);
-            var val = data.substr(2);
+            var cmd = data.raw.substr(0, 2);
+            var val = data.raw.substr(2);
             var i = $('#flashdump', this.el);
             if (cmd == "ER") {
                 

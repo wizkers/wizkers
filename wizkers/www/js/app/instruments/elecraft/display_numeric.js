@@ -133,16 +133,16 @@ define(function (require) {
         },
 
         showInput: function (data) {
-            if (typeof data != "string")
+            if (data.raw == undefined)
                 return; // data is sometimes an object when we get a serial port error
 
             var drawPwr = false;
             var drawTemp = false;
             var drawVolt = false;
             // Now update our display depending on the data we received:
-            if (data.charAt(0) == '^') {
-                var cmd = data.substr(1, 2);
-                var val = parseInt(data.substr(3)) / 10;
+            if (data.raw.charAt(0) == '^') {
+                var cmd = data.raw.substr(1, 2);
+                var val = parseInt(data.raw.substr(3)) / 10;
                 var stamp = new Date().getTime();
                 if (cmd == "PI") {
                     $("#kxpa-pi").html(val);
@@ -183,10 +183,10 @@ define(function (require) {
                     });
                 }
             } else {
-                var cmd = data.substr(0, 2);
+                var cmd = data.raw.substr(0, 2);
                 if (cmd == "PO") {
                     // Actual Power Outout
-                    var val = parseInt(data.substr(2)) / 10;
+                    var val = parseInt(data.raw.substr(2)) / 10;
                     this.amppowerplot.appendPoint({
                         'name': "KX3",
                         'value': val
@@ -194,12 +194,12 @@ define(function (require) {
                 } else if (cmd == "DB") {
                     // We catch interesting stuff on Display B and add it to the plots
                     // dynamically
-                    var cmd4 = data.substr(2, 4);
-                    var cmd2 = data.substr(2,2);
+                    var cmd4 = data.raw.substr(2, 4);
+                    var cmd2 = data.raw.substr(2,2);
                     var val = 0;
                     switch (cmd4) {
                     case "PA.I":
-                        val = parseInt(data.substr(7, 2));
+                        val = parseInt(data.raw.substr(7, 2));
                         this.tempplot.appendPoint({
                             'name': "PA.I",
                             'value': val
@@ -207,14 +207,14 @@ define(function (require) {
                         break;
                     case "OSC ":
                     case "OSC*":
-                        val = parseInt(data.substr(6, 2));
+                        val = parseInt(data.raw.substr(6, 2));
                         this.tempplot.appendPoint({
                             'name': "OSC",
                             'value': val
                         });
                         break;
                     case "PA.2":
-                        val = parseInt(data.substr(7, 2));
+                        val = parseInt(data.raw.substr(7, 2));
                         this.tempplot.appendPoint({
                             'name': "PA.2",
                             'value': val
@@ -223,14 +223,14 @@ define(function (require) {
                     }
                     switch (cmd2) {
                         case 'PS':
-                            val = parseFloat(data.substr(5,4));
+                            val = parseFloat(data.raw.substr(5,4));
                             this.voltplot.appendPoint({
                                 'name': 'PS',
                                 'value': val
                             });
                             break;
                         case 'BT':
-                            val = parseFloat(data.substr(5,4));
+                            val = parseFloat(data.raw.substr(5,4));
                             this.voltplot.appendPoint({
                                 'name': 'BT',
                                 'value': val

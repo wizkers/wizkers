@@ -195,7 +195,7 @@ define(function(require) {
         },
         
         parseMenu: function(data) {
-            var val = parseInt(data.substr(2));
+            var val = parseInt(data.raw.substr(2));
             switch (this.menumode) {
                 case 'agc-spd-ssb':
                     this.$('#agc-spd-ssb').html('SSB:' + (val & 0x2 ? 'Fast' : 'Slow'));
@@ -214,7 +214,7 @@ define(function(require) {
                     break;
                 case 'tx-essb': // data is a DS screen
                     var txt = "";
-                    val = data.substr(2);
+                    val = data.raw.substr(2);
                     for (var i = 0; i < 8; i++) {
                         if (val.charCodeAt(i) & 0x80) // Dot on the left side of the character
                             txt += ".";
@@ -228,7 +228,7 @@ define(function(require) {
                     this.$('#tx-essb-val').val(parseFloat(txt.substr(6)));
                     break;
                 case 'af-lim' :
-                    this.$('#af-lim').val(parseInt(data.substr(2)));
+                    this.$('#af-lim').val(parseInt(data.raw.substr(2)));
                     break;
                 default:
                     this.$('#' + this.menumode).val(val);
@@ -277,8 +277,8 @@ define(function(require) {
             if (!this.$el.is(':visible'))
                 return;
 
-            var cmd = data.substr(0, 2);
-            var val = data.substr(2);
+            var cmd = data.raw.substr(0, 2);
+            var val = data.raw.substr(2);
             
             if (this.querying && cmd == 'GT') {
                 this.initial_dcy = val;
@@ -291,7 +291,7 @@ define(function(require) {
                 this.parseMenu(data);
             } else if (cmd == 'CP') {
                     // Speech compression
-                    this.$('#cmp-control').slider('setValue', parseInt(data.substr(2)));
+                    this.$('#cmp-control').slider('setValue', parseInt(data.raw.substr(2)));
                 } 
         }
     });

@@ -325,17 +325,17 @@ define(function(require) {
         // All the UI updates related to KXPA100
         handleKXAInput: function (data) {
             
-            if (typeof data != 'string')
+            if (data.raw == undefined)
                 return;
             
-            if (data.charAt(0) != '^')
+            if (data.raw.charAt(0) != '^')
                 return;
                 
             // Note: need to match the SVG def for LED off color
             var ledOn = "#20ff00";
             var ledOff = "#4e6e56";
-            var cmd = data.substr(1, 2);
-            var val = parseInt(data.substr(3)) / 10;
+            var cmd = data.raw.substr(1, 2);
+            var val = parseInt(data.raw.substr(3)) / 10;
             var stamp = new Date().getTime();
             // If we are getting input, then the amp is on...
             $("#kxpa100-front #led_on").css('fill', ledOn);
@@ -380,11 +380,11 @@ define(function(require) {
                     'value': val
                 });
             } else if (cmd == 'SN') {
-                $("#kxpa-sn", this.el).html(data.substr(3));
+                $("#kxpa-sn", this.el).html(data.raw.substr(3));
             } else if (cmd == 'RV') {
-                $("#kxpa-fwrv", this.el).html(data.substr(3));
+                $("#kxpa-fwrv", this.el).html(data.raw.substr(3));
             } else if (cmd == 'BN') {
-                $("#kxpa-band", this.el).html(data.substr(3));
+                $("#kxpa-band", this.el).html(data.raw.substr(3));
             } else if (cmd == 'SW') {
                 $("#kxpa-lastswr", this.el).html(val);
                 this.swrplot.appendPoint({
@@ -396,10 +396,10 @@ define(function(require) {
                 } else {
                     this.updateSWRLED(0);
                 }
-            } else if (data.charAt(1) == 'F') {
-                $("#kxpa-frequency", this.el).html(data.substr(2));
+            } else if (data.raw.charAt(1) == 'F') {
+                $("#kxpa-frequency", this.el).html(data.raw.substr(2));
             } else if (cmd == 'CR') {
-                var val = parseInt(data.substr(3), 16);
+                var val = parseInt(data.raw.substr(3), 16);
                 this.currentCR = val;
                 var sum = 0;
                 var caps = [10, 22, 40, 82, 150, 300, 660, 1360];
@@ -413,7 +413,7 @@ define(function(require) {
                 }
                 $('#kxpa-cap', this.el).html(sum);
             } else if (cmd == 'LR') {
-                var val = parseInt(data.substr(3), 16);
+                var val = parseInt(data.raw.substr(3), 16);
                 this.currentLR = val;
                 var sum = 0;
                 var inds = [50, 110, 230, 480, 1000, 2100, 4400, 9000];
@@ -427,18 +427,18 @@ define(function(require) {
                 }
                 $('#kxpa-ind', this.el).html(sum);
             } else if (cmd == 'AT') {
-                var att_on = (data.substr(-1, 1) == "1");
+                var att_on = (data.raw.substr(-1, 1) == "1");
                 $('#kxpa-pa-attenuator', this.el).prop('checked', att_on);
                 $("#kxpa100-front #led_att").css('fill', att_on ? ledOn : ledOff);
             } else if (cmd == 'AN') {
-                var ant = parseInt(data.substr(-1, 1));
+                var ant = parseInt(data.raw.substr(-1, 1));
                 $('#kxpa-antenna', this.el).val('ant' + ant);
                 $("#kxpa100-front #ant_" + ant).css('fill', ledOn);
                 $("#kxpa100-front #ant_" + (3-ant)).css('fill', ledOff);
             } else if (cmd == 'BY') {
-                $('#kxpa-atu-bypass', this.el).prop('checked', (data.substr(-1, 1) == "B"));
+                $('#kxpa-atu-bypass', this.el).prop('checked', (data.raw.substr(-1, 1) == "B"));
             } else if (cmd == 'MD') {
-                var md = data.substr(-1, 1);
+                var md = data.raw.substr(-1, 1);
                 $('#kxpa-mode', this.el).val('kxpa-mode-' + md);
                 $("#kxpa100-front #led_auto").css('fill', ledOff);
                 $("#kxpa100-front #led_byp").css('fill', ledOff);
@@ -456,9 +456,9 @@ define(function(require) {
                 }
                 
             } else if (cmd == 'SI') {
-                $('#kxpa-caps-tx', this.el).prop('checked', (data.substr(-1, 1) == "T"));
+                $('#kxpa-caps-tx', this.el).prop('checked', (data.raw.substr(-1, 1) == "T"));
             } else if (cmd == 'OP') {
-                $('#kxpa-pa-bypass', this.el).prop('checked', (data.substr(-1, 1) == "0"));
+                $('#kxpa-pa-bypass', this.el).prop('checked', (data.raw.substr(-1, 1) == "0"));
             }
 
         },

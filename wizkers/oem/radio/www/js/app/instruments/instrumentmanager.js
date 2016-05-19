@@ -69,6 +69,12 @@ define(function (require) {
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
+            "yaesu_817nd": {
+                name: "Yaesu 817ND",
+                type: 'app/instruments/yaesu_817nd/yaesu_817nd',
+                settings: 'app/instruments/elecraft/settings',
+                connectionsettings: 'app/views/instrument/serialport'
+            },
             "simple_serial": {
                 name: "Simple serial terminal",
                 type: 'app/instruments/simple_serial/simple_serial',

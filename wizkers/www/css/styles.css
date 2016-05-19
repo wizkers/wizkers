@@ -285,11 +285,16 @@ a.plain:hover {
 }
 
 /*===========
- * KX3 Font
+ * Digital Fonts
  *===================*/
 @font-face {
   font-family: "Let's Go Digital";
   src: url('../fonts/lets-go-digital-regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: "LCD5x8H";
+  src: url('../fonts/lcd5x8h.ttf') format('truetype');
     
 }
 

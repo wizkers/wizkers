@@ -93,7 +93,7 @@ define(function (require) {
         showInput: function (data) {
             if (!this.sweeping)
                 return;
-            var cmd = data.substr(0,2);
+            var cmd = data.raw.substr(0,2);
             
             if (cmd == 'MP') {
                 console.info('Tuner power:', data);
@@ -101,11 +101,11 @@ define(function (require) {
             }
             
             if (cmd == 'FA') {
-                this.freq = parseInt(data.substr(2));
+                this.freq = parseInt(data.raw.substr(2));
                 // Now read main display for SWR
                 linkManager.sendCommand('DS;');
             } else if (cmd == 'DS') {
-                var val = data.substr(2);
+                var val = data.raw.substr(2);
                 var txt = "";
                 for (var i = 0; i < 8; i++) {
                     if (val.charCodeAt(i) & 0x80) // Dot on the left side of the character
