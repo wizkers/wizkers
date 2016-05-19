@@ -54,11 +54,17 @@ define(function (require) {
             port_open_requested = true,
             isopen = false;
             
+        var radio_modes = [ "LSB", "USB", "CW", "CW-R", "AM", "WFM", "FM", "DIG", "PKT" ];
+            
         // We need to manage a command queue, because we
         // cannot tell what the data in means if we don't know
         // the command that was sent. The joys of async programming.
         var commandQueue = [],
             queue_busy = false;
+            
+        // Keep track of TX/RX state so that we can adjust the
+        // status command
+        var tx_status = false;
 
         /////////////
         // Private methods
@@ -86,11 +92,41 @@ define(function (require) {
         // data is an ArrayBuffer;
         var format = function (data) {
             if (commandQueue.length == 0) {
-                console.error("Received data but we didn't send a command");
+                console.error('Received data but we didn\'t send a command');
                 return;
             }
+            
+            if (!queue_busy)
+                return;
+                
+            // At this stage, we know we're expecting a value
             queue_busy = false;
             cmd = commandQueue.shift().command;
+            var resp = {};
+            
+            switch (cmd) {
+                case 'txrx_status':
+                    if (data.length != 1) {
+                        console.error('txrx_status was expecting 1 byte, got ', data.length);
+                    }
+                    if (tx_status) {
+                        resp.pwr = data[0] & 0xf;
+                        tx_status =   (data[0] & 0x80) != 0;
+                        resp.ptt = tx_status;
+                        resp.hi_swr = (data[0] & 0x40) != 0;
+                        resp.split =  (data[0] & 0x20) != 0;
+                    } else {
+                        resp.smeter = data[0] & 0xf;
+                        resp.squelch = (data[0] & 0x80) != 0;
+                        resp.pl_code = (data[0] & 0x40) != 0;
+                        resp.discr   = (data[0] & 0x20) != 0;
+                    }
+                    break;
+                case 'get_frequency':
+                    
+                    break;
+            }
+            self.trigger('data', resp);
         };
 
         var status = function (stat) {
@@ -153,33 +189,44 @@ define(function (require) {
                 case 'get_frequency':
                     bytes[4] = 0x03;
                     commandQueue.shift(); // No response from the radio
+                    queue_busy = false;
                     break;
                 case 'lock':
                     bytes[4] = (cmd.arg) ? 0x00 : 0x80;
                     commandQueue.shift();
+                    queue_busy = false;
                     break;
                 case 'ptt':
                     bytes[4] = (cmd.arg) ? 0x08 : 0x88;
+                    tx_status = cmd.arg;
                     commandQueue.shift();
+                    queue_busy = false;
                     break;
                 case 'clar':
                     bytes[4] = (cmd.arg) ? 0x05 : 0x85;
                     commandQueue.shift();
+                    queue_busy = false;
                     break;
                 case 'toggle_vfo':
                     bytes[4] = 0x81;
                     commandQueue.shift();
+                    queue_busy = false;
                     break;
                 case 'split':
                     bytes[4] = (cmd.arg) ? 0x02 : 0x82;
                     commandQueue.shift();
+                    queue_busy = false;
                     break;
                 case 'power':
                     bytes[4] = (cmd.arg) ? 0x0f : 0x8f;
                     commandQueue.shift();
+                    queue_busy = false;
+                    break;
+                case 'txrx_status':
+                    // tx_status = true if we are transmitting
+                    bytes[4] = (tx_status) ? 0xf7 : 0xe7;
                     break;
             }
-            
             port.write(bytes);
         }
 
@@ -272,23 +319,22 @@ define(function (require) {
         // Data should be a JSON object:
         // { command: String, args: any};
         // Command can be:
-        // get_frequency
-        // set_frequency : number
-        // lock: boolean (on/off)
-        // ptt: boolean (on/off)
-        //  set_opmode: String (set operating mode)
-        // clar: boolean (on/off)
-        // set_clar_freq: number
-        // toggle_vfo
-        //  split: boolean (on/off)
-        //  rpt_offset_dir: Number ( 1, -1 or zero)
-        //  rpt_offset_freq: Number
-        //  pl_mode: String  (DCS/CTCSS mode)
-        //  pl_tone: Number
-        //  dcs_code: NUmber
-        //  rx_status
-        //  tx_status
-        //  power: boolean (on/off)
+        //  get_frequency   : 
+        //  set_frequency   : number
+        //  lock            : boolean (on/off)
+        //  ptt             : boolean (on/off)
+        //  set_opmode      : String (set operating mode)
+        //  clar            : boolean (on/off)
+        //  set_clar_freq   : number
+        //  toggle_vfo
+        //  split           : boolean (on/off)
+        //  rpt_offset_dir  : Number ( 1, -1 or zero)
+        //  rpt_offset_freq : Number
+        //  pl_mode         : String  (DCS/CTCSS mode)
+        //  pl_tone         : Number
+        //  dcs_code        : NUmber
+        //  txrx_status
+        //  power           : boolean (on/off)
         this.output = function (data) {
             commandQueue.push(data);
             processQueue();

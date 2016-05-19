@@ -29,13 +29,13 @@
 define(function(require) {
     'use strict';
     
-    var frontend_driver = require('app/instruments/elecraft/driver_frontend');
+    var frontend_driver = require('app/instruments/yaesu_817nd/driver_frontend');
     
     return  function() {
         // Helper function: get driver capabilites.
         // returns a simple array of capabilities    
         this.getCaps = function() {
-            return ['LiveDisplay', 'NumDisplay', 'DiagDisplay', 'WizkersSettings'];
+            return ['LiveDisplay', 'NumDisplay', 'DiagDisplay'];
         };
         
         // Return the type of data reading that this instrument generates. Can be used
@@ -54,7 +54,7 @@ define(function(require) {
 
         // This is a Backbone view
         this.getNumDisplay = function(arg, callback) {
-            require(['app/instruments/elecraft/display_numeric'], function(view) {
+            require(['app/instruments/yaesu_817nd/display_numeric'], function(view) {
                 callback( new view(arg));
             });
         };
@@ -74,20 +74,11 @@ define(function(require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.
         this.getBackendDriver = function(arg, callback) {
-            require(['app/instruments/elecraft/driver_backend'], function(driver) {
+            require(['app/instruments/yaesu_817nd/driver_backend'], function(driver) {
                 callback(new driver(arg));
             });
         };
         
-        // The screen for the "Settings" top level menu. This covers settings
-        // for the Wizkers app, not the instrument itself (those are done on the DiagDisplay
-        // screen).
-        this.getWizkersSettings = function(arg, callback) {
-            require(['app/instruments/elecraft/settings_wizkers'], function(view) {
-                callback(new view(arg));
-            });
-        };
-
         // Return a Backbone view which is a mini graph
         this.getMiniLogview = function(arg) {
             return null;
