@@ -57,8 +57,11 @@ define(function (require) {
         var vfoa_frequency = 0;
         var vfob_frequency = 0;
         var vfoa_bandwidth = 0;
+        var pwr_level_kxpa = 0;
+        var pwr_level_kx3 = 0;
         var radio_mode = "RTTY";
         var xmit = 0;     // 0 is RX, 1 is TX
+        var radio_modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
 
         // Load the settings for this plugin
         this.setup = function (output) {

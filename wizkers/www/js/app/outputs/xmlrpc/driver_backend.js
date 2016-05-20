@@ -62,7 +62,9 @@ define(function (require) {
                 bws_list.push($.xmlrpc.force('none', i));
             for (var i = 2200 ; i <= 4000; i += 200)
                 bws_list.push($.xmlrpc.force('none', i));
-
+                
+         // Cache a couple of references to save CPU
+         var domParser = new DOMParser();
         
         // Note: we do not poll for those values ourselves, we
         // count on the UI to do this - to be reviewed later if
@@ -184,7 +186,7 @@ define(function (require) {
                sxml = buffer.substr(idx);
             }
             
-            var xml = new DOMParser().parseFromString(sxml, "text/xml");
+            var xml = domParser.parseFromString(sxml, "text/xml");
             var json = $.xmlrpc.parseCall(xml);
             if (json.methodName) {
                 //console.log("Calling:", json.methodName);

@@ -7,50 +7,6 @@
                         <svg id="ft817"  viewBox="0 0 313 90" preserveAspectRatio="xMidYMid"></svg>
                 </div>
             </div><!-- radio -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div style="text-align:center; padding-bottom: 5px;">
-                            <div class="btn-group" data-toggle="buttons">
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-160m">160</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-80m">80</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-60m">60</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-40m">40</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-30m">30</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-20m">20</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-17m">17</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-15m">15</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-12m">12</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-10m">10</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-6m">6</input>
-                                </label>
-                                <label class="btn btn-responsive btn-default band-btn">
-                                    <input type="radio" name="bands" id="band-2m">2</input>
-                                </label>
-                            </div>
-                        </div>
-                </div> 
-            </div><!-- Band Buttons -->
         
         <!-- ******* -->
 
@@ -59,183 +15,56 @@
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div class="input-group input-group-sm input-margin">
-                        <span class="input-group-addon">VFO A</span>
+                        <span class="input-group-addon">VFO</span>
                             <input  id="vfoa-direct" type="number" class="form-control" step="0.00001" placeholder="14.070">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" id="vfoa-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
                             </span>
                        </div> <!-- VFOA -->
                     <div class="input-group input-group-sm input-margin">
-                        <span class="input-group-addon">VFO B</span>
-                            <input  id="vfob-direct" type="number" class="form-control" step="0.00001" placeholder="14.070">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" id="vfob-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
-                            </span>
+                        <span class="input-group-addon">VFO A/B Toggle</span>
                     </div> <!-- VFOB -->
                     <div class="input-group input-group-sm input-margin">
-                        <span class="input-group-addon">Power</span>
-                            <input  type="number" min="0" id="power-direct" class="form-control">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" id="power-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
-                            </span>
-                       </div> <!-- Power -->
-                    <div class="input-group input-group-sm input-margin">
-                        <span class="input-group-addon">AF</span>
+                        <span class="input-group-addon">Clar.</span>
                         <div class="form-control slider-bg-info">
                           <input type="text" id="ag-control" data-slider-value="0" data-slider-min="0" data-slider-max="60" data-slider-step="1">
                         </div>
-                    </div> <!-- AF -->
-                    <div class="input-group input-group-sm input-margin">
-                        <span class="input-group-addon">RF</span>
-                        <div class="form-control slider-bg-info-rev">
-                          <input type="text" id="rf-control" data-slider-value="0" data-slider-min="-60" data-slider-max="0" data-slider-step="1">
-                        </div>
-                    </div> <!-- RF -->
-                    <div class="input-group input-group-sm input-margin">
-                        <span class="input-group-addon">MIC</span>
-                        <div class="form-control slider-bg-info">
-                          <input type="text" id="mic-control" data-slider-value="0" data-slider-min="0" data-slider-max="80" data-slider-step="1">
-                        </div>
-                    </div> <!-- MG -->
-                    
-                    <div class="input-group input-group-sm input-margin">
-                        <span class="input-group-addon">BW</span>
-                        <div class="form-control slider-bg-info">
-                          <input type="text" id="bpf-control" data-slider-value="0" data-slider-min="0" data-slider-max="4" data-slider-step=".1">
-                        </div>
-                    </div> <!-- Bandpass -->
-                    <div class="input-group input-group-sm input-margin">
-                        <span class="input-group-addon">CT</span>
-                        <div class="form-control">
-                          <input type="text" id="ct-control" data-slider-value="0" data-slider-min="0" data-slider-max="3" data-slider-step="0.01">
-                            
-                        </div>
-                        <span class="input-group-btn">
-                                <button class="btn btn-default" id="ct-center" type="button"><span class="glyphicon glyphicon-asterisk"></span></button>
-                            </span>
-                    </div> <!-- Center freq -->
-
+                    </div> <!-- CLAR -->
                 </div>
             </div>
         </div> <!-- direct input -->
     </div> <!-- radio and direct input -->
+    <div class="row">
+        <div id="xtrafunc-leftside" style="overflow: hidden;" class="col-md-7">
+            <div id="memories">
             <div class="row">
-                <div id="xtrafunc-leftside" style="overflow: hidden; margin-top: -15px;" class="col-md-7">
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a href="#memories" data-toggle="tab">Memories</a></li>
-                        <li><a href="#data-term" data-toggle="tab">Data</a></li>
-                        <!--
-                        <li><a href="#audio-settings" data-toggle="tab">Audio</a></li>
-                        <li><a href="#logging" data-toggle="tab">Logging</a></li>
-                        -->
-                    </ul>
-                <!-- Tab panes -->
-                <div class="tab-content">
-                  <div class="tab-pane active" id="memories">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <h6><span id="freq-slider-band">20m</span> frequencies</h6>
+                <div class="col-md-4">
+                    <h6><span id="freq-slider-band">20m</span> frequencies</h6>
+                </div>
+                <div class="col-md-8">
+                    <!-- Controls -->
+                    
+                        <div class="pull-right" style="margin-top: 5px; margin-bottom: 5px;">
+                            <button role="button" class="btn btn-info store-frequency"><span class="glyphicon glyphicon-plus"></span></button>
+                            <a class="left btn btn-success" href="#frequency-selector" id="mem-left"
+                                data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
+                            <a class="right btn btn-success" href="#frequency-selector" id="mem-right"
+                                    data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
                         </div>
-                        <div class="col-md-8">
-                            <!-- Controls -->
-                            
-                                <div class="pull-right" style="margin-top: 5px; margin-bottom: 5px;">
-                                    <button role="button" class="btn btn-info store-frequency"><span class="glyphicon glyphicon-plus"></span></button>
-                                    <a class="left btn btn-success" href="#frequency-selector" id="mem-left"
-                                        data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
-                                    <a class="right btn btn-success" href="#frequency-selector" id="mem-right"
-                                            data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
-                                </div>
-                            
-                        </div>
-                    </div> <!-- Frequency cards header -->
-                    <!-- ********** -->
-                    <div id="frequency-selector" class="frequency-carousel carousel slide" data-interval="false" > <!-- Note add data-ride="carousel" to autoplay it -->
-                    <!-- Wrapper for slides -->
-                        <div class="carousel-inner" id="frequency-selector-content">
-                        </div>
-                    </div>                    
-    
-                    </div> <!-- Memories -->
-                  <div class="tab-pane" id="data-term">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="input-group input-margin">
-                                <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-sm btn-primary submode-btn">
-                                        <input type="radio" name="data-submodes" id="data-submode-pskd">PSK D
-                                    </label>
-                                    <label class="btn btn-sm  btn-primary submode-btn">
-                                        <input type="radio" name="data-submodes" id="data-submode-fskd">FSK D
-                                    </label>
-                                    <label class="btn btn-sm  btn-primary submode-btn">
-                                        <input type="radio" name="data-submodes" id="data-submode-dataa">DATA A
-                                    </label>
+                    
+                </div>
+            </div> <!-- Frequency cards header -->
+            <!-- ********** -->
+            <div id="frequency-selector" class="frequency-carousel carousel slide" data-interval="false" > <!-- Note add data-ride="carousel" to autoplay it -->
+            <!-- Wrapper for slides -->
+                <div class="carousel-inner" id="frequency-selector-content">
+                </div>
+            </div>                    
 
-                                </div>&nbsp; &nbsp;
-                                <button type="button" class="btn btn-sm btn-default" id="data-stream-clear">Clear</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3 col-xs-4">
-                            <div class="input-group input-group-sm input-margin" id="data-mycall-grp">
-                                <span class="input-group-addon">Me:</span>
-                                <input type="text" class="form-control" id="data-mycall">
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-xs-8">
-                            <div class="input-group input-margin">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-xs btn-default" id="data-cq">CQ</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-ans">ANS</button>                                
-                                    <button type="button" class="btn btn-xs btn-default" id="data-qso">QSO</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-me">Me</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-brag">Brag</button>                                    
-                                    <button type="button" class="btn btn-xs btn-default" id="data-kn">KN</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-sk">SK</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-xs-12">
-                            <div class="input-group input-group-sm input-margin" id="data-theircall-grp">
-                                <div class="input-group-btn">
-                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                            You: <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu" id="calls-dropdown" role="menu">
-                                        </ul>
-                                </div>
-                                <input type="text" class="form-control" id="data-theircall">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                             <div class="input-group input-group-sm input-margin">
-                                 <span class="input-group-addon">Text:</span>
-                                 <input id="data-text-input" class="form-control" value="" type="text" maxlength="80">
-                                 <span class="input-group-btn"><button type="button" class="btn" id="data-text-send"><span class="glyphicon glyphicon-check"></span></button>
-                                 </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                                <textarea readonly id="data-stream" style="height:120px; width:98%;"></textarea>
-                        </div>
-                    </div>
-                  </div> <!-- Data terminal -->
-<!--
-                    <div class="tab-pane" id="audio-settings"><h4>Audio Settings</h4>
-                      <h4>Audio controls for phone operation will go there</h4>
-                    </div> --><!-- Audio Settings -->
-<!--                  <div class="tab-pane" id="logging"><h4>QSO Log controls will go here</h4>
-                  </div>--><!-- Logging -->
-                </div>
-                </div><!-- Extra functions -->
-                <div id="xtrafunc-rightside" class="col-md-5">
-                    <div id="waterfall"></div>
-                </div>
-            </div> 
+            </div> <!-- Memories -->
+        </div>
+        <div id="xtrafunc-rightside" class="col-md-5">
+            <div id="waterfall"></div>
+        </div>
+    </div> 
 </div>

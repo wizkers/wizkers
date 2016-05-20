@@ -127,6 +127,7 @@ define(function (require) {
                     break;
             }
             self.trigger('data', resp);
+            processQueue();
         };
 
         var status = function (stat) {
@@ -170,6 +171,8 @@ define(function (require) {
             // it won't hurt
             
             // port.write('');
+            // Go a Get_frequency and read VFO eeprom value to know if we are
+            // on VFO A or VFO B.
 
         };
         

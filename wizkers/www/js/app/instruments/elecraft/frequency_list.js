@@ -388,9 +388,20 @@ define(function (require) {
         },
 
         showInput: function (data) {
-            if (typeof data != "string")
+            if (data.raw == undefined)
                 return; // data is sometimes an object when we get a serial port error
-                
+             
+            if (data.vfoa) {
+                // Got a frequency: locate if we have a frequency card
+                // on that frequency.
+                if (this.current_freq == data.vfoa)
+                    return;
+                this.current_freq = data.vfoa;
+                var freq = data.vfoa/1e6;
+                this.findFrequencyCardPage(freq);
+                this.highlightCards(freq);   
+            }
+             
             // Follow band changes to update our frequency cards
             var cmd = data.raw.substr(0, 2);
             var val = data.raw.substr(2);
@@ -403,22 +414,13 @@ define(function (require) {
                 console.log(this.current_band);
                 this.render();
                 if (this.current_freq) {
-                    var freq = parseInt(this.current_freq)/1e6;
+                    var freq = this.current_freq/1e6;
                     this.findFrequencyCardPage(freq);
                     this.highlightCards(freq);
                 }
             } else if (cmd == "MD" && this.addingFrequency) {
                 this.addingFrequency = false;
                 this.modeCallback(val);
-            } else if (cmd == "FA") {
-                // Got a frequency: locate if we have a frequency card
-                // on that frequency.
-                if (this.current_freq == val)
-                    return;
-                this.current_freq = val;
-                var freq = parseInt(val)/1e6;
-                this.findFrequencyCardPage(freq);
-                this.highlightCards(freq);
             }
         },
         
