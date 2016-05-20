@@ -70,6 +70,14 @@ define(function(require) {
 
         return dumped;
     };
+    
+    var decoder, encoder;
+    var enc_ok = false;
+    if ( typeof TextDecoder == 'function') {
+        decoder = new TextDecoder("utf-8");
+        encoder = new TextEncoder("utf-8");
+        enc_ok = true;
+    }
 	
     return {
         
@@ -81,6 +89,10 @@ define(function(require) {
         // this makes our job easier:
             if (str.buffer)
                 return str.buffer;
+
+            if (enc_ok)
+                return encoder.encode(str).buffer;
+            
             var buf=new ArrayBuffer(str.length);
             var bufView=new Uint8Array(buf);
             for (var i=0, j=str.length; i<j; i++) {
@@ -90,6 +102,10 @@ define(function(require) {
         },
 
         ab2str: function(buf) {
+            // Implementation using the TextDecoder API
+            // if present
+            if (enc_ok)
+                return decoder.decode(buf);
             return String.fromCharCode.apply(null, new Uint8Array(buf));
         },
         

@@ -18,8 +18,10 @@
  * Author: Renato Mangini (mangini@chromium.org)
  */
 
-define(function(require) {
+define(function(require) {    
     "use strict";
+    
+    var abu = require('app/lib/abutils');
 
     // Rigctld server emulation:
     var rigctlServer = null;
@@ -28,38 +30,6 @@ define(function(require) {
     // Make our life easier by defining a shortcut
     var tcps = chrome.sockets.tcpServer;
     
-    /**
-   * Converts an array buffer to a string
-   *
-   * @private
-   * @param {ArrayBuffer} buf The buffer to convert
-   * @param {Function} callback The function to call when conversion is complete
-   */
-  function _arrayBufferToString(buf, callback) {
-    var bb = new Blob([new Uint8Array(buf)]);
-    var f = new FileReader();
-    f.onload = function(e) {
-      callback(e.target.result);
-    };
-    f.readAsText(bb);
-  }
-
-  /**
-   * Converts a string to an array buffer
-   *
-   * @private
-   * @param {String} str The string to convert
-   * @param {Function} callback The function to call when conversion is complete
-   */
-  function _stringToArrayBuffer(str, callback) {
-    var bb = new Blob([str]);
-    var f = new FileReader();
-    f.onload = function(e) {
-        callback(e.target.result);
-    };
-    f.readAsArrayBuffer(bb);
-  }
-
 
   /**
    * Wrapper function for logging
@@ -188,11 +158,9 @@ define(function(require) {
           
         var onNoMoreConnectionsAvailable = function(socketId) {
           var msg="No more connections available. Try again later\n";
-          _stringToArrayBuffer(msg, function(arrayBuffer) {
-            chrome.sockets.tcp.send(socketId, arrayBuffer,
+          chrome.sockets.tcp.send(socketId, abu.str2ab(msg),
               function() {
                 chrome.sockets.tcp.close(socketId);
-              });
           });
         }
 
@@ -286,7 +254,7 @@ define(function(require) {
       // Call received callback if there's data in the response.
       if (callbacks.recv) {
         // Convert ArrayBuffer to string.
-        _arrayBufferToString(info.data, callbacks.recv);
+        callbacks.recv(abu.ab2str(info.data));
       }
     };
 
@@ -316,12 +284,9 @@ define(function(require) {
      */
     this.sendMessage = function(msg, callback) {
       lastMessage = msg;
-      _stringToArrayBuffer(msg, function(arrayBuffer) {
-            // Register sent callback.
-            callbacks.sent = callback;
-            chrome.sockets.tcp.send(socketId, arrayBuffer, onWriteComplete);
-        }
-      );
+      // Register sent callback.
+      callbacks.sent = callback;
+      chrome.sockets.tcp.send(socketId, abu.str2ab(msg), onWriteComplete);
     };
       
      var onReceiveError = function (info) {
