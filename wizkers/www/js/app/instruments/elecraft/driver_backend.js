@@ -65,6 +65,10 @@ define(function (require) {
         var bitmap = new Uint8Array(131768);
         var bitmap_index = 0;
         var oldpercent = 0;
+        
+        // Various radio-related variables
+        var radio_modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
+
 
         /////////////
         // Private methods
@@ -300,6 +304,9 @@ define(function (require) {
                 case "FB":
                     var f = parseInt(data.substr(2));
                     resp.vfob = f;
+                    break;
+                case "BN":
+                    resp.mode = radio_modes[parseInt(data.substr(2)) -1];
                     break;
             }
             

@@ -54,11 +54,14 @@ define(function (require) {
             port_open_requested = true,
             isopen = false;
             
-        var radio_modes = [ "LSB", "USB", "CW", "CW-R", "AM", "WFM", "FM", "DIG", "PKT" ];
+        var radio_modes = [ "LSB", "USB", "CW", "CWR", "AM", "WFM", "FM", "DIG", "PKT" ];
         var inputBuffer = new Uint8Array(100); // We usually get fewer than 5 bytes...
         var ibIdx = 0;
         var bytes_expected = 0;
         var watchDog = null;
+        var radio_on = true;
+        var vfo_freq = 0; // Keep track and only send updates when it changes
+        var radio_mode = '';
             
         // We need to manage a command queue, because we
         // cannot tell what the data in means if we don't know
@@ -105,7 +108,7 @@ define(function (require) {
             ibIdx += data.byteLength;
             
             if (ibIdx < bytes_expected) {
-                console.info('Still expecting more bytes in the response');
+                // console.info('Still expecting more bytes in the response');
                 return;
             }
             
@@ -115,6 +118,7 @@ define(function (require) {
                 console.error('We received a complete data packet but we don\'t have the queue_busy flag set');
                 return;
             }
+            //console.info('Ready to process packet');
             
             // We can reset our buffer index now...
             ibIdx = 0;
@@ -127,10 +131,6 @@ define(function (require) {
             
             switch (cmd.command) {
                 case 'txrx_status':
-                    if (data.length != 1) {
-                        console.error('txrx_status was expecting 1 byte, got ', data.length);
-                        return;
-                    }
                     if (tx_status) {
                         resp.pwr = inputBuffer[0] & 0xf;
                         tx_status =   (inputBuffer[0] & 0x80) != 0;
@@ -145,13 +145,27 @@ define(function (require) {
                     }
                     break;
                 case 'get_frequency':
-                    resp.vfoa = bcd2number(inputBuffer, 4) * 10;
-                    resp.mode = radio_modes[inputBuffer[4]];
+                case 'poll_frequency':
+                    var f = bcd2number(inputBuffer, 4) * 10;
+                    var m = radio_modes[inputBuffer[4]];
+                    if (f != vfo_freq) {
+                        resp.vfoa = bcd2number(inputBuffer, 4) * 10;
+                        vfo_freq = f;
+                    }
+                    if (m != radio_mode) {
+                        resp.mode = m;
+                    }
                     break;
                 case 'lock':
                     resp.locked = inputBuffer[0];
+                    break;
+                case 'get_active_vfo':
+                    resp.active_vfo = (inputBuffer[0] & 0x01) ? 'b' : 'a';
+                    break;
             }
-            self.trigger('data', resp);
+            if (Object.keys(resp).length > 0) {
+                self.trigger('data', resp);
+            }
             processQueue();
         };
         
@@ -168,6 +182,21 @@ define(function (require) {
                 f += data[i] & 0xf;
             }
             return f;
+        }
+        
+        /**
+         * Transform an integer number into hex-coded BCD bytes.
+         * The number must fit on 4 bytes, hence be lower than 1 million.
+         */
+        var number2bcd = function(num) {
+            if (typeof num != "number" || num > 10e6)
+                return [ 0,0,0,0];
+            var b = [];
+            var s = ("00000000" + num.toString()).slice(-8);
+            for (var i=0; i < 4; i++) {
+                b[i] = ((s.charCodeAt(i*2)-48) << 4) + (s.charCodeAt(i*2+1)-48); 
+            }
+            return b;
         }
 
         var status = function (stat) {
@@ -213,7 +242,9 @@ define(function (require) {
             // port.write('');
             // Go a Get_frequency and read VFO eeprom value to know if we are
             // on VFO A or VFO B.
-            this.output({ command: 'get_frequency', });
+            this.output({ command: 'poll_frequency' });
+            this.output({ command: 'txrx_status'});
+            this.output({ command: 'get_active_vfo'});
 
         };
         
@@ -223,16 +254,28 @@ define(function (require) {
                 return;
             queue_busy = true;
             var cmd = commandQueue[0]; // Get the oldest command
-            console.log(cmd);
+            // console.log(cmd);
             // Note: UInt8Arrays are initialized at zero
             var bytes = new Uint8Array(5); // All FT817 commands are 5 bytes long
             switch(cmd.command) {
                 case 'set_frequency':
-                    console.warn('set_frequency, not implemented');
+                    var b;
+                    if (typeof cmd.arg == 'string') {
+                        cmd.arg = Math.floor(parseInt(cmd.arg)/10);
+                        b = number2bcd(cmd.arg);
+                    } else {
+                        b = number2bcd(cmd.arg*1e5);
+                    }
+                    for (var i=0; i < 4; i++) {
+                        bytes[i] = b[i];
+                    }
+                    bytes[4] = 0x01;
                     commandQueue.shift(); // No response from the radio
                     queue_busy = false;
                     break;
                 case 'get_frequency':
+                    vfo_freq = 0;
+                case 'poll_frequency':
                     bytes[4] = 0x03;
                     bytes_expected = 5;
                     break;
@@ -252,6 +295,13 @@ define(function (require) {
                     commandQueue.shift();
                     queue_busy = false;
                     break;
+                case 'get_active_vfo':
+                    // We can read the active VFO from the
+                    // eeprom
+                    bytes[1] = 0x55;
+                    bytes[4] = 0xbb;
+                    bytes_expected = 2;
+                    break;
                 case 'toggle_vfo':
                     bytes[4] = 0x81;
                     commandQueue.shift();
@@ -264,12 +314,14 @@ define(function (require) {
                     break;
                 case 'power':
                     bytes[4] = (cmd.arg) ? 0x0f : 0x8f;
+                    radio_on = cmd.arg;
                     commandQueue.shift();
                     queue_busy = false;
                     break;
                 case 'txrx_status':
                     // tx_status = true if we are transmitting
                     bytes[4] = (tx_status) ? 0xf7 : 0xe7;
+                    bytes_expected = 1;
                     break;
             }
             
@@ -372,8 +424,11 @@ define(function (require) {
         // Data should be a JSON object:
         // { command: String, args: any};
         // Command can be:
-        //  get_frequency   : 
-        //  set_frequency   : number
+        //  get_frequency   :
+        //  poll_frequency  : same as get, except that if frequency
+        //                    didn't change, won't send an update
+        //  set_frequency   : number in MHz or number string in Hz.
+        //  get_active_vfo  : 
         //  lock            : boolean (on/off)
         //  ptt             : boolean (on/off)
         //  set_opmode      : String (set operating mode)
@@ -395,6 +450,10 @@ define(function (require) {
             }
             if (data.command == undefined) {
                 console.error('[ft817 output] Missing command key in output command');
+                return;
+            }
+            if (!radio_on && data.command != 'power') {
+                console.warn('[ft817 output] Discarding command because radio is off')
                 return;
             }
             commandQueue.push(data);

@@ -365,7 +365,7 @@ define(function (require) {
         var setVfo = function(params, c) {
             var freq = ("00000000000" + params[0]).slice(-11); // Make sure we have the right number of zeroes
             console.log("Rigctld emulation: set frequency to " + freq);
-            linkManager.sendCommand("FA" + freq + ";");
+            linkManager.driver.setVFO(freq, 'a');
             sendResponse(params, c);
         }
         

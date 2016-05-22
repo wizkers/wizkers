@@ -136,6 +136,9 @@ define(function (require) {
             if (instrumentManager.getCaps && instrumentManager.getCaps().indexOf("DiagDisplay") == -1) {
                 this.$('.ctrl-diag').hide();
             }
+            if (instrumentManager.getCaps && instrumentManager.getCaps().indexOf("Recording") == -1) {
+                this.$('.ctrl-record').hide();
+            }
 
             if (vizapp.type == 'server') {
                 // If we're running with a backend server, we need to disable some elements

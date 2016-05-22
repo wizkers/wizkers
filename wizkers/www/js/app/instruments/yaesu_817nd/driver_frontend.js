@@ -54,20 +54,35 @@ define(function (require) {
         // the instrument's capabilities
         
 
+        // Should accept both a number in MHz or a 11-digit
+        // frequency formatted string in Hz.
+        // This helps because Javascript's floats have IEEE precision
+        // issues leading to rounding errors...
         this.setVFO = function (f, vfo) {
             lm.sendCommand({ command: 'set_frequency',
                              arg: f});
         }
 
-        this.toggleVFO = function (f, vfo) {
+        this.toggleVFO = function () {
             lm.sendCommand({ command: 'toggle_vfo',
-                             arg: f});
+            });
         }
         
         this.lock = function (state) {
             lm.sendCommand({ command: 'lock',
                              arg: state}
                              );
+        }
+        
+        this.power = function(state) {
+            lm.sendCommand({ command: 'power',
+                             arg: state}
+                            );
+        }
+        
+        this.getMode = this.getVFO = function() {
+            lm.sendCommand({ command: 'get_frequency'
+                             });
         }
 
         console.log('Started Elecraft link manager driver..');

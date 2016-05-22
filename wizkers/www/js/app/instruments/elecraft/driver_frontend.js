@@ -117,8 +117,16 @@ define(function (require) {
             lm.sendCommand('MC' + s + ';');   
         }
 
+        /**
+         * We accept either a preformatted string of 11 characters, or a number in MHz, both are OK
+         */
         this.setVFO = function (f, vfo) {
-            var freq = ("00000000000" + (parseInt(f*1e6 ).toString())).slice(-11); // Nifty, eh ?
+            var freq;
+            if (typeof f == 'string') {
+                freq = f;   
+            } else {
+                freq = ("00000000000" + (parseInt(f*1e6 ).toString())).slice(-11); // Nifty, eh ?
+            }
             if (freq.indexOf("N") > -1) { // detect "NaN" in the string
                 console.warn("Invalid VFO spec");
                 lm.sendCommand((vfo == 'A' ||  vfo == 'a') ? 'FA;' : 'FB;');

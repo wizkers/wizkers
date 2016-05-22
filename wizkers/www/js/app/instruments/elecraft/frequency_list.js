@@ -388,20 +388,26 @@ define(function (require) {
         },
 
         showInput: function (data) {
-            if (data.raw == undefined)
-                return; // data is sometimes an object when we get a serial port error
              
+            if (data.mode && this.addingFrequency) {
+                this.addingFrequency = false;
+                this.modeCallback(data.mode);
+            }
+
             if (data.vfoa) {
                 // Got a frequency: locate if we have a frequency card
                 // on that frequency.
-                if (this.current_freq == data.vfoa)
-                    return;
-                this.current_freq = data.vfoa;
-                var freq = data.vfoa/1e6;
-                this.findFrequencyCardPage(freq);
-                this.highlightCards(freq);   
-            }
+                if (this.current_freq != data.vfoa) {
+                    this.current_freq = data.vfoa;
+                    var freq = data.vfoa/1e6;
+                    this.findFrequencyCardPage(freq);
+                    this.highlightCards(freq);
+                }
+            }            
              
+            if (data.raw == undefined)
+                return; // data is sometimes an object when we get a serial port error
+
             // Follow band changes to update our frequency cards
             var cmd = data.raw.substr(0, 2);
             var val = data.raw.substr(2);
@@ -418,10 +424,7 @@ define(function (require) {
                     this.findFrequencyCardPage(freq);
                     this.highlightCards(freq);
                 }
-            } else if (cmd == "MD" && this.addingFrequency) {
-                this.addingFrequency = false;
-                this.modeCallback(val);
-            }
+            } 
         },
         
         findFrequencyCardPage: function(freq) {
@@ -475,7 +478,7 @@ define(function (require) {
             this.frequencies[this.current_band].push({
                 "vfoa": vfoa,
                 "vfob": vfob,
-                "mode": this.modes[parseInt(val) - 1],
+                "mode": val,
                 "name": "Empty"
             });
             // Keep frequencies sorted by VFOA frequency:

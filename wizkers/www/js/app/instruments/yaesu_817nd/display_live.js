@@ -57,6 +57,8 @@ define(function (require) {
             
             this.vfoangle = 0;
             this.locked = 0;
+            this.powered = true;
+            this.vfo = 'VFOx';
 
             // Keep the value of the previous VFO value to avoid
             // unnecessary redraws of the front panel.
@@ -231,6 +233,10 @@ define(function (require) {
                 case 'btn_lock':
                     this.locked = !this.locked;
                     linkManager.driver.lock(this.locked);
+                    break;
+                case 'btn_pwr':
+                    this.powered = !this.powered;
+                    linkManager.driver.power(this.powered);
             }            
         },
 
@@ -238,10 +244,6 @@ define(function (require) {
             if (data.portopen && !this.deviceinitdone) {
                 linkManager.startLiveStream();
                 this.deviceinitdone = true;
-
-                // Ask the radio for a few additional things:
-                // Requested power:
-                linkManager.driver.getRequestedPower();
             } else if (!data.portopen) {
                 this.deviceinitdone = false;
             }
@@ -267,7 +269,7 @@ define(function (require) {
                 var f2 = Math.floor(f/1e6);
                 var f3 = Math.floor((f-f2*1e6)/1000);
                 var f4 = (f-f2*1e6-f3*1000)/10;
-                // f2 = ('000' + f2).slice(-3);
+                f2 = ('   ' + f2).slice(-3);
                 f3 = ('000' + f3).slice(-3);
                 f4 = ('00' + f4).slice(-2);
                 this.$("#vfoa-direct").val(f/1e6);
@@ -277,8 +279,20 @@ define(function (require) {
                 this.$("#ft817 #lcd_line2").text(line2);
             }
             
+            if (data.squelch != undefined) {
+                this.$("#ft817 #busy_led").css('fill', (data.squelch) ? '#707070' : '#35e133');
+            }
+            
+            if (data.smeter != undefined) {
+                this.$("#ft817 #lcd_line3").text('S' + data.smeter);
+            }
+            
+            if (data.active_vfo) {
+                this.vfo = 'VFO' + data.active_vfo;
+            }
+            
             if (data.mode) {
-                var line1 = ('            ' + data.mode).slice(-12);
+                var line1 = this.vfo + '     ' + data.mode;
                 this.$("#ft817 #lcd_line1").text(line1);
             }
             
