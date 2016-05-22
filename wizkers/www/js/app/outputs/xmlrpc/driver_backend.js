@@ -132,7 +132,11 @@ define(function (require) {
                 return;
             }
 
-            if (data[0] == '^') {
+            if (data.raw == undefined)
+                return;
+                
+            // All the commands below are Kenwood style:
+            if (data.raw[0] == '^') {
                 var cmd = data.raw.substr(1,2);
                 switch (cmd) {
                     case "PF":

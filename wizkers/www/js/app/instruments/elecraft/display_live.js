@@ -506,10 +506,10 @@ define(function (require) {
             
             // If we have a pre-parsed element, use it (faster!)
             if (data.vfoa) {
-                $("#vfoa-direct").val(data.vfoa/1e6);
+                this.$("#vfoa-direct").val(data.vfoa/1e6);
                 return;
             } else if (data.vfob) {
-                $("#vfob-direct").val(data.vfob / 1e6);
+                this.$("#vfob-direct").val(data.vfob / 1e6);
                 return;
             }
             
@@ -521,7 +521,7 @@ define(function (require) {
                 // VFO B Text
                 if (this.oldVFOB == val)
                     return;
-                $("#kx3 #VFOB").text(val + "    ");
+                this.$("#kx3 #VFOB").text(val + "    ");
                 this.oldVFOB = val;
             } else if (cmd == "DS") {
                 // VFO A Text, a bit more tricky.

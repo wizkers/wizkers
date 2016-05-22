@@ -55,6 +55,10 @@ define(function (require) {
             isopen = false;
             
         var radio_modes = [ "LSB", "USB", "CW", "CW-R", "AM", "WFM", "FM", "DIG", "PKT" ];
+        var inputBuffer = new Uint8Array(100); // We usually get fewer than 5 bytes...
+        var ibIdx = 0;
+        var bytes_expected = 0;
+        var watchDog = null;
             
         // We need to manage a command queue, because we
         // cannot tell what the data in means if we don't know
@@ -72,7 +76,7 @@ define(function (require) {
 
         var portSettings = function () {
             return {
-                baudRate: 38400,
+                baudRate: 4800,
                 dataBits: 8,
                 parity: 'none',
                 stopBits: 1,
@@ -92,43 +96,79 @@ define(function (require) {
         // data is an ArrayBuffer;
         var format = function (data) {
             if (commandQueue.length == 0) {
-                console.error('Received data but we didn\'t send a command');
+                console.warn('Received data but we didn\'t expect anything', new Uint8Array(data));
+                queue_busy = false;
                 return;
             }
             
-            if (!queue_busy)
+            inputBuffer.set(new Uint8Array(data), ibIdx);
+            ibIdx += data.byteLength;
+            
+            if (ibIdx < bytes_expected) {
+                console.info('Still expecting more bytes in the response');
                 return;
+            }
+            
+            clearTimeout(watchDog);
+                        
+            if (!queue_busy) {
+                console.error('We received a complete data packet but we don\'t have the queue_busy flag set');
+                return;
+            }
+            
+            // We can reset our buffer index now...
+            ibIdx = 0;
+            bytes_expected = 0;
                 
             // At this stage, we know we're expecting a value
+            var cmd = commandQueue.shift();
             queue_busy = false;
-            cmd = commandQueue.shift().command;
             var resp = {};
             
-            switch (cmd) {
+            switch (cmd.command) {
                 case 'txrx_status':
                     if (data.length != 1) {
                         console.error('txrx_status was expecting 1 byte, got ', data.length);
+                        return;
                     }
                     if (tx_status) {
-                        resp.pwr = data[0] & 0xf;
-                        tx_status =   (data[0] & 0x80) != 0;
+                        resp.pwr = inputBuffer[0] & 0xf;
+                        tx_status =   (inputBuffer[0] & 0x80) != 0;
                         resp.ptt = tx_status;
-                        resp.hi_swr = (data[0] & 0x40) != 0;
-                        resp.split =  (data[0] & 0x20) != 0;
+                        resp.hi_swr = (inputBuffer[0] & 0x40) != 0;
+                        resp.split =  (inputBuffer[0] & 0x20) != 0;
                     } else {
-                        resp.smeter = data[0] & 0xf;
-                        resp.squelch = (data[0] & 0x80) != 0;
-                        resp.pl_code = (data[0] & 0x40) != 0;
-                        resp.discr   = (data[0] & 0x20) != 0;
+                        resp.smeter = inputBuffer[0] & 0xf;
+                        resp.squelch = (inputBuffer[0] & 0x80) != 0;
+                        resp.pl_code = (inputBuffer[0] & 0x40) != 0;
+                        resp.discr   = (inputBuffer[0] & 0x20) != 0;
                     }
                     break;
                 case 'get_frequency':
-                    
+                    resp.vfoa = bcd2number(inputBuffer, 4) * 10;
+                    resp.mode = radio_modes[inputBuffer[4]];
                     break;
+                case 'lock':
+                    resp.locked = inputBuffer[0];
             }
             self.trigger('data', resp);
             processQueue();
         };
+        
+        /**
+         * Transform a BCD-coded hex buffer into a decimal number
+         * len is the number of bytes
+         */
+        var bcd2number = function(data, len) {
+            var f = 0;
+            for (var i = 0; i < len; i++) {
+                f *= 10;
+                f += data[i] >> 4;
+                f *= 10;
+                f += data[i] & 0xf;
+            }
+            return f;
+        }
 
         var status = function (stat) {
             port_open_requested = false;
@@ -173,31 +213,33 @@ define(function (require) {
             // port.write('');
             // Go a Get_frequency and read VFO eeprom value to know if we are
             // on VFO A or VFO B.
+            this.output({ command: 'get_frequency', });
 
         };
         
         // Process the latest command in the queue
         var processQueue = function() {
-            if (queue_busy)
+            if (queue_busy || bytes_expected || (commandQueue.length == 0))
                 return;
             queue_busy = true;
             var cmd = commandQueue[0]; // Get the oldest command
-            
+            console.log(cmd);
             // Note: UInt8Arrays are initialized at zero
             var bytes = new Uint8Array(5); // All FT817 commands are 5 bytes long
             switch(cmd.command) {
                 case 'set_frequency':
                     console.warn('set_frequency, not implemented');
-                    break;
-                case 'get_frequency':
-                    bytes[4] = 0x03;
                     commandQueue.shift(); // No response from the radio
                     queue_busy = false;
                     break;
+                case 'get_frequency':
+                    bytes[4] = 0x03;
+                    bytes_expected = 5;
+                    break;
                 case 'lock':
                     bytes[4] = (cmd.arg) ? 0x00 : 0x80;
-                    commandQueue.shift();
-                    queue_busy = false;
+                    bytes_expected = 1; // Radio returns 0x0 if it was unlocked, 0xf if it was locked
+                                        // before the command.
                     break;
                 case 'ptt':
                     bytes[4] = (cmd.arg) ? 0x08 : 0x88;
@@ -230,6 +272,14 @@ define(function (require) {
                     bytes[4] = (tx_status) ? 0xf7 : 0xe7;
                     break;
             }
+            
+            if (bytes_expected) {
+                watchDog = setTimeout( function() {
+                    commandQueue.shift();
+                    queue_busy = 0;
+                    bytes_expected = 0;
+                }, 500);
+            };
             port.write(bytes);
         }
 
@@ -339,6 +389,14 @@ define(function (require) {
         //  txrx_status
         //  power           : boolean (on/off)
         this.output = function (data) {
+            if (typeof data != 'object') {
+                console.error('[ft817 output] Comand is in wrong format (' + typeof data + ')');
+                return;
+            }
+            if (data.command == undefined) {
+                console.error('[ft817 output] Missing command key in output command');
+                return;
+            }
             commandQueue.push(data);
             processQueue();
         };
