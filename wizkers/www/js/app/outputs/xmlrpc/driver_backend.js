@@ -343,14 +343,8 @@ define(function (require) {
         }
 
         var setPtt = function( state, c) {
-            if (state) {
-                linkManager.sendCommand('TX;');
-                    xmit = 1;
-            } else {
-                linkManager.sendCommand("RX;");
-                xmit = 0;
-            }
-            
+            linkManager.driver.ptt(state);
+            xmit = state;            
             sendResponse( [xmit], c);            
         }
         

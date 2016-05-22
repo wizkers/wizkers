@@ -49,10 +49,10 @@ define(function (require) {
         //////
         // End of standard API
         //////
-
-        // All commands below are fully free and depend on
-        // the instrument's capabilities
         
+        //////
+        // Common Radio instrument API
+        /////
 
         // Should accept both a number in MHz or a 11-digit
         // frequency formatted string in Hz.
@@ -62,6 +62,24 @@ define(function (require) {
             lm.sendCommand({ command: 'set_frequency',
                              arg: f});
         }
+
+        this.getMode = this.getVFO = function() {
+            lm.sendCommand({ command: 'get_frequency'
+                             });
+        }
+        
+        /**
+         * if key = true, they transmit
+         */
+        this.ptt = function(key) {
+            lm.sendCommand({ command: 'ptt',
+                                arg: key});
+        }
+
+        // All commands below are fully free and depend on
+        // the instrument's capabilities
+        
+
 
         this.toggleVFO = function () {
             lm.sendCommand({ command: 'toggle_vfo',
@@ -80,10 +98,6 @@ define(function (require) {
                             );
         }
         
-        this.getMode = this.getVFO = function() {
-            lm.sendCommand({ command: 'get_frequency'
-                             });
-        }
 
         console.log('Started Elecraft link manager driver..');
 

@@ -52,6 +52,47 @@ define(function (require) {
         //////
         // End of standard API
         //////
+        
+        //////
+        // Common Radio instrument API
+        /////
+
+        /**
+         * We accept either a preformatted string of 11 characters, or a number in MHz, both are OK
+         */
+        this.setVFO = function (f, vfo) {
+            var freq;
+            if (typeof f == 'string') {
+                freq = f;   
+            } else {
+                freq = ("00000000000" + (parseInt(f*1e6 ).toString())).slice(-11); // Nifty, eh ?
+            }
+            if (freq.indexOf("N") > -1) { // detect "NaN" in the string
+                console.warn("Invalid VFO spec");
+                lm.sendCommand((vfo == 'A' ||  vfo == 'a') ? 'FA;' : 'FB;');
+            } else {
+                //console.log("VFO" + vfo + ": " + freq);
+                lm.sendCommand(((vfo == 'A' ||  vfo == 'a') ? 'FA' : 'FB') + freq + ';');
+            }
+            lm.sendCommand('BN;'); // Refresh band number (radio does not send it automatically)
+        }
+
+        this.getMode = function () {
+            lm.sendCommand('MD;');
+        }
+
+        this.setMode = function (code) {
+            lm.sendCommand('MD' + code + ';');
+        }
+        
+        /**
+         * if key = true, they transmit
+         */
+        this.ptt = function(key) {
+            var cmd = (key) ? 'TX;' : 'RX;';
+            lm.sendCommand(cmd);
+        }
+        
 
         // All commands below are fully free and depend on
         // the instrument's capabilities
@@ -84,13 +125,6 @@ define(function (require) {
             lm.sendCommand('PC;');
         }
 
-        this.getMode = function () {
-            lm.sendCommand('MD;');
-        }
-
-        this.setMode = function (code) {
-            lm.sendCommand('MD' + code + ';');
-        }
 
         this.setSubmode = function (submode) {
             var submodes = {
@@ -117,25 +151,6 @@ define(function (require) {
             lm.sendCommand('MC' + s + ';');   
         }
 
-        /**
-         * We accept either a preformatted string of 11 characters, or a number in MHz, both are OK
-         */
-        this.setVFO = function (f, vfo) {
-            var freq;
-            if (typeof f == 'string') {
-                freq = f;   
-            } else {
-                freq = ("00000000000" + (parseInt(f*1e6 ).toString())).slice(-11); // Nifty, eh ?
-            }
-            if (freq.indexOf("N") > -1) { // detect "NaN" in the string
-                console.warn("Invalid VFO spec");
-                lm.sendCommand((vfo == 'A' ||  vfo == 'a') ? 'FA;' : 'FB;');
-            } else {
-                //console.log("VFO" + vfo + ": " + freq);
-                lm.sendCommand(((vfo == 'A' ||  vfo == 'a') ? 'FA' : 'FB') + freq + ';');
-            }
-            lm.sendCommand('BN;'); // Refresh band number (radio does not send it automatically)
-        }
 
         this.setPower = function (p) {
             var pwr = ("000" + (parseInt(p).toString())).slice(-3); // Nifty, eh ?

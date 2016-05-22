@@ -279,13 +279,13 @@ define(function (require) {
 
         setvfoa: function () {
             if ((event.target.id == "vfoa-direct" && event.keyCode == 13) || (event.target.id != "vfoa-direct")) {
-                linkManager.driver.setVFO($("#vfoa-direct", this.el).val(), "a");
+                linkManager.driver.setVFO(parseFloat(this.$("#vfoa-direct").val()), "a");
             }
         },
 
         setvfob: function () {
             if ((event.target.id == "vfob-direct" && event.keyCode == 13) || (event.target.id != "vfob-direct")) {
-                linkManager.driver.setVFO($("#vfob-direct", this.el).val(), "b");
+                linkManager.driver.setVFO(parseFloat(this.$("#vfob-direct").val()), "b");
             }
         },
 

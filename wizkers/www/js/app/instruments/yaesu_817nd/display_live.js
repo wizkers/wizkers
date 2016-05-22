@@ -217,7 +217,7 @@ define(function (require) {
 
         setvfoa: function () {
             if ((event.target.id == "vfoa-direct" && event.keyCode == 13) || (event.target.id != "vfoa-direct")) {
-                linkManager.driver.setVFO($("#vfoa-direct", this.el).val(), "a");
+                linkManager.driver.setVFO(parseFloat(this.$("#vfoa-direct").val()), 'a');
             }
         },
 

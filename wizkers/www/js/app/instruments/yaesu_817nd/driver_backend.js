@@ -132,17 +132,28 @@ define(function (require) {
             switch (cmd.command) {
                 case 'txrx_status':
                     if (tx_status) {
+                        if ( inputBuffer[0] == 0xff) {
+                            tx_status = false;
+                            break;
+                        }                          
                         resp.pwr = inputBuffer[0] & 0xf;
-                        tx_status =   (inputBuffer[0] & 0x80) != 0;
-                        resp.ptt = tx_status;
+                        // Somehow the PTT bit always remains at zero ??
+                        // resp.ptt =   (inputBuffer[0] & 0x80) != 0;
                         resp.hi_swr = (inputBuffer[0] & 0x40) != 0;
                         resp.split =  (inputBuffer[0] & 0x20) != 0;
                     } else {
+                        // Detect if we are in TX mode: inputBuffer = 255
+                        if ( inputBuffer[0] == 0xff) {
+                            tx_status = true;
+                            break;
+                        }
                         resp.smeter = inputBuffer[0] & 0xf;
                         resp.squelch = (inputBuffer[0] & 0x80) != 0;
                         resp.pl_code = (inputBuffer[0] & 0x40) != 0;
                         resp.discr   = (inputBuffer[0] & 0x20) != 0;
                     }
+                    resp.ptt = tx_status;
+                    // console.log(tx_status, resp);
                     break;
                 case 'get_frequency':
                 case 'poll_frequency':
@@ -244,6 +255,7 @@ define(function (require) {
             // on VFO A or VFO B.
             this.output({ command: 'poll_frequency' });
             this.output({ command: 'txrx_status'});
+            // this.output({ command: 'tx_metering'});
             this.output({ command: 'get_active_vfo'});
 
         };
@@ -279,6 +291,10 @@ define(function (require) {
                     bytes[4] = 0x03;
                     bytes_expected = 5;
                     break;
+                case 'tx_metering':
+                    bytes[4] = 0xbd;
+                    bytes_expected = 2;
+                    break;
                 case 'lock':
                     bytes[4] = (cmd.arg) ? 0x00 : 0x80;
                     bytes_expected = 1; // Radio returns 0x0 if it was unlocked, 0xf if it was locked
@@ -286,7 +302,8 @@ define(function (require) {
                     break;
                 case 'ptt':
                     bytes[4] = (cmd.arg) ? 0x08 : 0x88;
-                    tx_status = cmd.arg;
+                    // tx_status is automatically updated:
+                    // tx_status = cmd.arg;
                     commandQueue.shift();
                     queue_busy = false;
                     break;
