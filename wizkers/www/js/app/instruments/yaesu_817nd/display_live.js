@@ -263,14 +263,14 @@ define(function (require) {
         showInput: function (data) {
             
             if (data.vfoa) {
-                var f = data.vfoa/1e6;
-                var f2 = Math.floor(f);
-                var f3 = Math.floor((f-f2)*1000);
-                var f4 = Math.floor((f-f2-f3/1000) * 100000);
+                var f = data.vfoa;
+                var f2 = Math.floor(f/1e6);
+                var f3 = Math.floor((f-f2*1e6)/1000);
+                var f4 = (f-f2*1e6-f3*1000)/10;
                 // f2 = ('000' + f2).slice(-3);
                 f3 = ('000' + f3).slice(-3);
                 f4 = ('00' + f4).slice(-2);
-                this.$("#vfoa-direct").val(f);
+                this.$("#vfoa-direct").val(f/1e6);
                 // Format frequency as "XXX.XXX.XX"
                 var line2 = (f < 100) ? ' ': '';
                 line2 += f2 + '.' + f3 + '.' + f4;
