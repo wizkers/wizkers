@@ -336,7 +336,7 @@ define(function (require) {
                     commandQueue.shift();
                     queue_busy = false;
                     break;
-                case 'set_opmode':
+                case 'set_mode':
                     bytes[4] = 0x07;
                     var idx = radio_mode.indexOf(cmd.arg);
                     if (idx == -1 ) {
@@ -458,7 +458,7 @@ define(function (require) {
         //  get_active_vfo  : 
         //  lock            : boolean (on/off)
         //  ptt             : boolean (on/off)
-        //  set_opmode      : String (set operating mode)
+        //  set_mode      : String (set operating mode)
         //  clar            : boolean (on/off)
         //  set_clar_freq   : number
         //  toggle_vfo

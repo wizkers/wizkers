@@ -175,7 +175,8 @@ define(function (require) {
             "keypress input#vfoa-direct": "setvfoa",
             "click #vfoa-direct-btn": "setvfoa",
             "mousewheel #vfoa-wheel": "vfoAWheel",
-            "click #vfotoggle": "toggleVFO"
+            "click #vfotoggle": "toggleVFO",
+            "click .mode-btn": "selectMode"
         },
         
         vfoAWheel: function(e) {
@@ -197,10 +198,10 @@ define(function (require) {
         addfrequency: function () {
             this.ElecraftFrequencyListView.addfrequency();
         },
-
-        setBand: function (e) {
-            var band = e.target.innerText;
-            linkManager.driver.setBand(band);
+        
+        selectMode: function(e) {
+            var mode = e.target.innerText;
+            linkManager.driver.setMode(mode);
         },
 
         setvfoa: function () {
@@ -208,7 +209,6 @@ define(function (require) {
                 linkManager.driver.setVFO(parseFloat(this.$("#vfoa-direct").val()), 'a');
             }
         },
-
 
         handleButton: function (e) {
             console.log(e.target.id);

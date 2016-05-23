@@ -182,7 +182,8 @@ define(function (require) {
         }
 
         var controllerCommand = function (data) {
-            driver.output(data);
+            if (driver)
+                driver.output(data);
         }
 
         var startRecording = function (logid) {

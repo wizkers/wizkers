@@ -61,12 +61,17 @@ define(function (require) {
         this.setVFO = function (f, vfo) {
             lm.sendCommand({ command: 'set_frequency',
                              arg: f});
-        }
+        };
 
         this.getMode = this.getVFO = function() {
             lm.sendCommand({ command: 'get_frequency'
                              });
-        }
+        };
+        
+        this.setMode = function(mode) {
+            lm.sendCommand({ command: 'set_mode',
+                              arg: mode});
+        };
         
         /**
          * if key = true, they transmit
@@ -74,7 +79,7 @@ define(function (require) {
         this.ptt = function(key) {
             lm.sendCommand({ command: 'ptt',
                                 arg: key});
-        }
+        };
 
         // All commands below are fully free and depend on
         // the instrument's capabilities
@@ -84,7 +89,7 @@ define(function (require) {
         this.toggleVFO = function () {
             lm.sendCommand({ command: 'toggle_vfo',
             });
-        }
+        };
         
         this.lock = function (state) {
             lm.sendCommand({ command: 'lock',
