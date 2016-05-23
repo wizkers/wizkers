@@ -54,7 +54,8 @@ define(function (require) {
             port_open_requested = true,
             isopen = false;
             
-        var radio_modes = [ "LSB", "USB", "CW", "CWR", "AM", "WFM", "FM", "DIG", "PKT" ];
+        var radio_modes =      [ "LSB", "USB", "CW", "CWR", "AM", "WFM", "FM", "DIG", "PKT" ];
+        var radio_mode_codes = [  0x00,  0x01, 0x02,  0x03, 0x04,  0x08, 0x08,  0x0A,  0x0C ];
         var inputBuffer = new Uint8Array(100); // We usually get fewer than 5 bytes...
         var ibIdx = 0;
         var bytes_expected = 0;
@@ -334,6 +335,15 @@ define(function (require) {
                     radio_on = cmd.arg;
                     commandQueue.shift();
                     queue_busy = false;
+                    break;
+                case 'set_opmode':
+                    bytes[4] = 0x07;
+                    var idx = radio_mode.indexOf(cmd.arg);
+                    if (idx == -1 ) {
+                        console.warn('Invalid mode selected, defaulting to LSB')
+                        idx = 0;
+                    }
+                    bytes[0] = radio_mode_codes[idx];
                     break;
                 case 'txrx_status':
                     // tx_status = true if we are transmitting

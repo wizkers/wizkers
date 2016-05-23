@@ -112,6 +112,10 @@ define(function (require) {
                 vfob_frequency = data.vfob;
                 return;
             }
+            
+            if (data.raw == undefined)
+                return;
+
             if (data[0] == '^') {
                 var cmd = data.raw.substr(1,2);
                 switch (cmd) {
@@ -202,7 +206,7 @@ define(function (require) {
             case "F": // Set Frequency (VFOA):  F 14069582.000000
                 var freq = ("00000000000" + parseFloat(data.substr(2)).toString()).slice(-11); // Nifty, eh ?
                 console.log("Rigctld emulation: set frequency to " + freq);
-                linkManager.sendCommand("FA" + freq + ";");
+                linkManager.driver.setVFO(freq);
                 c.sendMessage("RPRT 0\n");
                 break;
             case "m":
@@ -230,10 +234,10 @@ define(function (require) {
                 break;
             case "T":
                 if (data.substr(2) == "1") {
-                    linkManager.sendCommand('TX;');
+                    linkManager.driver.ptt(true);
                      xmit = 1;
                 } else {
-                    linkManager.sendCommand("RX;");
+                    linkManager.driver.ptt(false);
                     xmit = 0;
                 }
                 c.sendMessage("RPRT 0\n");

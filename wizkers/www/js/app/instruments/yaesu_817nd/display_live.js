@@ -198,21 +198,9 @@ define(function (require) {
             this.ElecraftFrequencyListView.addfrequency();
         },
 
-        setpower: function (e) {
-            if ((event.target.id == "power-direct" && event.keyCode == 13) || (event.target.id != "power-direct") ||
-                (event.type == "click")) {
-                linkManager.driver.setPower($("#power-direct").val());
-            }
-        },
-
         setBand: function (e) {
             var band = e.target.innerText;
             linkManager.driver.setBand(band);
-        },
-
-        setSubmode: function (e) {
-            var submode = e.target.innerText;
-            linkManager.driver.setSubmode(submode);
         },
 
         setvfoa: function () {
@@ -221,11 +209,6 @@ define(function (require) {
             }
         },
 
-
-        buttonCodes: {
-            // The labels are the IDs of the areas on the FT817 front panel SVG:
-            "B_MSG": "T11",
-        },
 
         handleButton: function (e) {
             console.log(e.target.id);
@@ -248,19 +231,6 @@ define(function (require) {
                 this.deviceinitdone = false;
             }
         },
-
-        setIcon: function (name, visible) {
-            $("#kx3 #icon_" + name).css("visibility", (visible) ? "visible" : "hidden");
-        },
-
-        setModeIcon: function (mode) {
-            // We need to update all icons when moving from one mode to another, so
-            // I added this helper function
-            var modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
-            $("#kx3 .mode_icon").css('visibility', 'hidden');
-            $("#kx3 #icon_" + modes[mode - 1]).css('visibility', 'visible');
-        },
-
 
         showInput: function (data) {
             

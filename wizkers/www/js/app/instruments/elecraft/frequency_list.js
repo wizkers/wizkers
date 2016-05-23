@@ -386,6 +386,29 @@ define(function (require) {
             console.log("Frequency list closing");
             linkManager.off('input', this.showInput, this);
         },
+        
+        detectBand: function(freq) {
+          // Detect what band we're in to adjust the frequency tabs
+          var boundaries = {
+            "160m": { min:      0, max:   3000 },
+            "80m" : { min:   3000, max:   4500 },
+            "60m" : { min:   4500, max:   6000 },
+            "40m" : { min:   6000, max:   8500 },
+            "30m" : { min:   8500, max:  13000 },
+            "20m" : { min:  13000, max:  17000 },
+            "17m" : { min:  17000, max:  19000},
+            "15m" : { min:  19000, max:  23000},
+            "12m" : { min:  23000, max:  26000},
+            "10m" : { min:  26000, max:  38000},
+            "6m"  : { min:  38000, max:  54000},
+            "2m"  : { min: 120000, max: 200000 }
+            };
+            freq /= 1000;
+            for (var band in boundaries) {
+                if (freq > boundaries[band].min && freq <= boundaries[band].max)
+                    return band;
+            }  
+        },
 
         showInput: function (data) {
              
@@ -398,33 +421,20 @@ define(function (require) {
                 // Got a frequency: locate if we have a frequency card
                 // on that frequency.
                 if (this.current_freq != data.vfoa) {
+                    // Detect a band change, since not all radio models
+                    // issue a "band" message
                     this.current_freq = data.vfoa;
+                    var b = this.detectBand(this.current_freq);
+                    if (b != this.current_band) {
+                        this.current_band = b;
+                        console.log(this.current_band);
+                        this.render();
+                    }
                     var freq = data.vfoa/1e6;
                     this.findFrequencyCardPage(freq);
                     this.highlightCards(freq);
                 }
-            }            
-             
-            if (data.raw == undefined)
-                return; // data is sometimes an object when we get a serial port error
-
-            // Follow band changes to update our frequency cards
-            var cmd = data.raw.substr(0, 2);
-            var val = data.raw.substr(2);
-
-            if (cmd == "BN") {
-                var new_band = this.bands[parseInt(val)];
-                if (this.current_band == new_band)
-                    return; // Avoid useles re-renders;
-                this.current_band = new_band;
-                console.log(this.current_band);
-                this.render();
-                if (this.current_freq) {
-                    var freq = this.current_freq/1e6;
-                    this.findFrequencyCardPage(freq);
-                    this.highlightCards(freq);
-                }
-            } 
+            }
         },
         
         findFrequencyCardPage: function(freq) {
