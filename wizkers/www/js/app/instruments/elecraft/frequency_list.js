@@ -427,6 +427,7 @@ define(function (require) {
                     var b = this.detectBand(this.current_freq);
                     if (b != this.current_band) {
                         this.current_band = b;
+                        $("#freq-slider-band").html(bnd);
                         console.log(this.current_band);
                         this.render();
                     }

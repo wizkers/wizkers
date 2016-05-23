@@ -576,7 +576,6 @@ define(function (require) {
                 $("#ct-control", this.el).slider('setValue', parseInt(val) / 1000);
             } else if (cmd == "BN") {
                 var bnd = this.bands[parseInt(val)];
-                $("#freq-slider-band", this.el).html(bnd);
                 // Update the band selection radio buttons too:
                 $(".band-btn", this.el).removeClass("active");
                 $("#band-" + bnd).parent().addClass("active");
