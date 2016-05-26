@@ -266,6 +266,11 @@ define(function (require) {
                 port.write('K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
                 livePoller = setInterval(queryRadio.bind(this), (period) ? period * 1000 : 1000);
                 streaming = true;
+            } else {
+                // We are already streaming, but it looks like someone wants a refresh,
+                // just send the initial queries again:
+                console.info("Refreshing live stream (already polling)");
+                port.write('IF;FA;FB;RG;FW;MG;IS;BN;MD;');
             }
         };
 

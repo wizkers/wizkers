@@ -18,11 +18,8 @@
  */
 
 /*
- * Browser-side Parser for Elecraft radios.
+ * Browser-side Parser for Yaesu 817/857 radios.
  *
- * This parser implements elecraft serial commands for:
- *    - KXPA100
- *    - KX3
  *
  * The Browser-side parser is used when running as a Chrome or Cordova app.
  *
@@ -54,8 +51,8 @@ define(function (require) {
             port_open_requested = true,
             isopen = false;
             
-        var radio_modes =      [ "LSB", "USB", "CW", "CWR", "AM", "WFM", "FM", "DIG", "PKT" ];
-        var radio_mode_codes = [  0x00,  0x01, 0x02,  0x03, 0x04,  0x08, 0x08,  0x0A,  0x0C ];
+        var radio_modes =      [ "LSB", "USB", "CW", "CWR", "AM", "WFM", "FM", "DIG", "PKT", "???" ];
+        var radio_mode_codes = [  0x00,  0x01, 0x02,  0x03, 0x04,  0x06, 0x08,  0x0A,  0x0C ];
         var inputBuffer = new Uint8Array(100); // We usually get fewer than 5 bytes...
         var ibIdx = 0;
         var bytes_expected = 0;
@@ -159,7 +156,10 @@ define(function (require) {
                 case 'get_frequency':
                 case 'poll_frequency':
                     var f = bcd2number(inputBuffer, 4) * 10;
-                    var m = radio_modes[inputBuffer[4]];
+                    // Note: on the FT817ND I used for my tests, the packet mode
+                    // actually returns 0xFC for packet, hence the & 0x0f below.
+                    var idx = radio_mode_codes.indexOf(inputBuffer[4] & 0x0f);
+                    var m = radio_modes[(idx == -1) ? radio_modes.length - 1 : idx];
                     if (f != vfo_freq) {
                         resp.vfoa = bcd2number(inputBuffer, 4) * 10;
                         vfo_freq = f;
@@ -201,7 +201,7 @@ define(function (require) {
          * The number must fit on 4 bytes, hence be lower than 1 million.
          */
         var number2bcd = function(num) {
-            if (typeof num != "number" || num > 10e6)
+            if (typeof num != "number" || num > 10e7)
                 return [ 0,0,0,0];
             var b = [];
             var s = ("00000000" + num.toString()).slice(-8);
@@ -338,12 +338,14 @@ define(function (require) {
                     break;
                 case 'set_mode':
                     bytes[4] = 0x07;
-                    var idx = radio_mode.indexOf(cmd.arg);
+                    var idx = radio_modes.indexOf(cmd.arg);
                     if (idx == -1 ) {
                         console.warn('Invalid mode selected, defaulting to LSB')
                         idx = 0;
                     }
                     bytes[0] = radio_mode_codes[idx];
+                    commandQueue.shift();
+                    queue_busy = false;
                     break;
                 case 'txrx_status':
                     // tx_status = true if we are transmitting

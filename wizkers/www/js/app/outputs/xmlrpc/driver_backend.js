@@ -53,7 +53,7 @@ define(function (require) {
         // A few driver variables: we keep track of a few things
         // here
         
-        var radio_modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
+        var radio_modes = [];
         
         var bws_list = [ $.xmlrpc.force('none', 'Bandwidth')];
             for (var i = 50 ; i <= 1000; i += 50)
@@ -88,7 +88,9 @@ define(function (require) {
             // Query the radio for basic frequency info, so that
             // we populate our frequency variables:
             linkManager.sendCommand('FA;FB;BW;'); // Query VFO B and VFOA Display
-
+            
+            // Query our driver for all supported modes:
+            radio_modes = linkManager.driver.getModes();
 
             // Create a rigserver:
             if (rigserver) {
@@ -267,7 +269,6 @@ define(function (require) {
             for (var cmd in commands) {
                 arr.push(cmd);
             }
-
             sendResponse([arr], c);
         };
 
@@ -304,8 +305,7 @@ define(function (require) {
         // Request Transceiver supported modes
         // Hardcoded for now, but could query the instrument to get more details
         var getModes = function(c) {
-            var modes = [ "LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 'DATA-REV'];
-            sendResponse([modes], c);
+            sendResponse([radio_modes], c);
         }
         
         var setMode = function(params, c) {
@@ -330,7 +330,6 @@ define(function (require) {
             sendResponse( [], c);
         }
         
-        // Hardcode for now, will update in a future revision
         var getMode = function(c) {
             var mode = [ radio_mode ];
             sendResponse(mode, c);

@@ -74,6 +74,13 @@ define(function (require) {
         };
         
         /**
+         * Returns a list of all modes supported by the radio
+         */
+        this.getModes = function() {
+            return [ "LSB", "USB", "CW", "CWR", "AM", "WFM", "FM", "DIG", "PKT" ];
+        };
+        
+        /**
          * if key = true, they transmit
          */
         this.ptt = function(key) {

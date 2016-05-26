@@ -32,7 +32,7 @@ define(function (require) {
         Backbone = require('backbone'),
         Snap = require('snap'),
         utils = require('app/utils'),
-        template = require('js/tpl/instruments/elecraft/ElecraftLiveView.js');
+        template = require('js/tpl/instruments/elecraft_kx2/LiveView.js');
 
 
     // Need to load these, but no related variables.
@@ -87,8 +87,8 @@ define(function (require) {
             var self = this;
             this.$el.html(template());
 
-            this.faceplate = Snap("#kx3");
-            Snap.load("js/app/instruments/elecraft/KX3.svg", function (f) {
+            this.faceplate = Snap("#kx2");
+            Snap.load("js/app/instruments/elecraft_kx2/KX2.svg", function (f) {
                 f.select("#layer1").click(function (e) {
                     self.handleKX3Button(e);
                 });
@@ -97,7 +97,8 @@ define(function (require) {
                 self.faceplate.attr({
                     width: "100%",
                 });
-                $("#kx3 .icon").css('visibility', 'hidden');
+                $("#kx2 .icon").css('visibility', 'hidden');
+                // $("#kx2").height($("#kx3").width() * 0.42);
                 
                 // Initialize the VFO rotating dip element:
                 var c = self.faceplate.select('#vfoa-wheel');;
@@ -107,8 +108,14 @@ define(function (require) {
                 self.dip_x = (bb.width-(bb2.width+ bb2.y-bb.y))/2;
                 self.dip_y = (bb.height-(bb2.height + bb2.y-bb.y))/2;
 
+                // I was not able to make the SVG resize gracefully, so I have to do this
+                //$("#kx2").resize(function (e) {
+                //    console.log("SVG container resized");
+                //    $(e.target).height($(e.target).width() * 0.42);
+                //});
 
             });
+
 
             // Initialize our sliding controls:
             $("#rf-control", this.el).slider();
@@ -372,15 +379,15 @@ define(function (require) {
         },
 
         setIcon: function (name, visible) {
-            $("#kx3 #icon_" + name).css("visibility", (visible) ? "visible" : "hidden");
+            $("#kx2 #icon_" + name).css("visibility", (visible) ? "visible" : "hidden");
         },
 
         setModeIcon: function (mode) {
             // We need to update all icons when moving from one mode to another, so
             // I added this helper function
             var modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
-            $("#kx3 .mode_icon").css('visibility', 'hidden');
-            $("#kx3 #icon_" + modes[mode - 1]).css('visibility', 'visible');
+            $("#kx2 .mode_icon").css('visibility', 'hidden');
+            $("#kx2 #icon_" + modes[mode - 1]).css('visibility', 'visible');
         },
 
         validateMacros: function () {
@@ -514,7 +521,7 @@ define(function (require) {
                 // VFO B Text
                 if (this.oldVFOB == val)
                     return;
-                this.$("#kx3 #VFOB").text(val + "    ");
+                this.$("#kx2 #VFOB").text(val + "    ");
                 this.oldVFOB = val;
             } else if (cmd == "DS") {
                 // VFO A Text, a bit more tricky.
@@ -535,7 +542,7 @@ define(function (require) {
                         val2 = 0x20;
                     txt += String.fromCharCode(val2);
                 }
-                $("#kx3 #VFOA").text(txt); //
+                $("#kx2 #VFOA").text(txt); //
                 // Now, decode icon data:
                 var a = val.charCodeAt(8);
                 var f = val.charCodeAt(9);

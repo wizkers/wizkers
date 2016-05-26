@@ -65,6 +65,8 @@ define(function (require) {
             }
             this.mem = this.allmems[this.band][this.frequency]; // should always be defined
             this.mem['index'] = this.frequency; // So that we can create a unique ID to refer to it later
+            if (this.mem.vfob == undefined)
+                this.mem.vfob = '';
 
             _.bindAll(this, 'checkFreqBoundaries');
             _.bindAll(this, 'changeEvent');
@@ -289,6 +291,7 @@ define(function (require) {
             this.options = options || {};
 
             this.bands = ["160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", 0, 0, 0, 0, 0, "2m"];
+            this.current_freq = 0;
 
             // The server lets us specify free-form metadata for each instrument,
             // we are using it for storing our frequencies, per band.
@@ -342,7 +345,7 @@ define(function (require) {
                 mode: "AM",
                 name: "No Memory defined"
             }];
-            this.modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
+            this.modes = linkManager.driver.getModes();
 
             this.addingFrequency = false;
 
@@ -350,6 +353,11 @@ define(function (require) {
         },
 
         render: function () {
+            if (this.current_freq == 0) {
+                linkManager.driver.getVFO('a');
+                return;
+            }
+                   
             var fr = this.frequencies[this.current_band];
             if (fr === undefined) {
                 this.frequencies[this.current_band] = [];
@@ -427,7 +435,7 @@ define(function (require) {
                     var b = this.detectBand(this.current_freq);
                     if (b != this.current_band) {
                         this.current_band = b;
-                        $("#freq-slider-band").html(bnd);
+                        $("#freq-slider-band").html(b);
                         console.log(this.current_band);
                         this.render();
                     }

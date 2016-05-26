@@ -45,12 +45,18 @@ define(function (require) {
                 settings: 'app/instruments/elecraft/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
-            "elecraft_k3": {
-                name: "Elecraft K3",
-                type: 'app/instruments/elecraft_k3/elecraft_k3',
+            "elecraft_kx2": {
+                name: "Elecraft KX2",
+                type: 'app/instruments/elecraft_kx2/elecraft_kx2',
                 settings: 'app/instruments/elecraft/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
+//            "elecraft_k3": {
+//                name: "Elecraft K3",
+//                type: 'app/instruments/elecraft_k3/elecraft_k3',
+//                settings: 'app/instruments/elecraft/settings',
+//                connectionsettings: 'app/views/instrument/serialport'
+//            },
             "elecraft_kxpa100": {
                 name: "Elecraft KXPA100 Standalone",
                 type: 'app/instruments/elecraft_kxpa100/elecraft_kxpa100',
@@ -72,7 +78,7 @@ define(function (require) {
             "yaesu_817nd": {
                 name: "Yaesu 817ND",
                 type: 'app/instruments/yaesu_817nd/yaesu_817nd',
-                settings: 'app/instruments/elecraft/settings',
+                settings: 'app/instruments/yaesu_817nd/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "simple_serial": {

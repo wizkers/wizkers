@@ -75,6 +75,14 @@ define(function (require) {
                 lm.sendCommand(((vfo == 'A' ||  vfo == 'a') ? 'FA' : 'FB') + freq + ';');
             }
             lm.sendCommand('BN;'); // Refresh band number (radio does not send it automatically)
+        };
+        
+        this.getVFO = function(vfo) {
+            if (vfo == 'a' || vfo == 'A') {
+                lm.sendCommand('FA;');
+            } else {
+                lm.sendCommand('FB;');
+            }
         }
 
         this.getMode = function () {
@@ -83,6 +91,13 @@ define(function (require) {
 
         this.setMode = function (code) {
             lm.sendCommand('MD' + code + ';');
+        }
+        
+        /**
+         * Returns a list of all modes supported by the radio
+         */
+        this.getModes = function() {
+            return ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
         }
         
         /**

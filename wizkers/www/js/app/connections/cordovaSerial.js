@@ -50,34 +50,23 @@ define(function (require) {
 
         /**
          * Send data to the serial port.
-         * cmd has to be either a String or an ArrayBuffer
-         * @param {ArrayBuffer} cmd The command, already formatted for sending.
+         * cmd has to be either a String or a UInt8Array
+         * 
          */
         this.write = function (cmd) {
-            // On Unices (Linux, MacOS, ChromeOS etc), everything works fine,
-            // but Windows is much slower and will regularly trigger "pending" errors
-            // if we send too many commands one after another.
-            //
-            // This forces us to keep a stack of pending commands and retry them if
-            // we get a "pending" error. cmd_queue is a FIFO (we send the oldest command
-            // and push new ones to the top. We have a "busy" flag that prevents us from sending
-            // a command while we are waiting for another.
             if (!portOpen ||  cmd == '')
                 return;
 
             // We try to be a bit accomodating: detect strings, and
             // ArrayBuffer-assimilated objects
             switch (typeof cmd) {
-            case 'object': // Probably UInt8Array or similar
-                if (cmd.buffer)
-                    cmd = cmd.buffer;
-                break;
-            }
-
-            cmd_queue.push({
-                'command': cmd,
-                'raw': true
-            }); // Add cmd at the end of the queue
+                case 'object': // Probably UInt8Array or similar
+                    cmd_queue.push({ command: abu.ui8tohex(cmd), hex: true});
+                    break;
+                case 'string':
+                    cmd_queue.push({ command: cmd, hex: false });                
+                    break;
+            } 
             processCmdQueue();
         };
 
@@ -155,28 +144,36 @@ define(function (require) {
 
         this.connectionId = -1;
 
+        var writeSuccessCallback = function () {
+            // Success callback
+            cmd_queue.shift(); // remove oldest command
+            queue_busy = false;
+            if (cmd_queue.length)
+                processCmdQueue();
+        };
+        
+        var writeErrorCallback = function () {
+            console.log("cordovaSerial - error, retrying command");
+            queue_busy = false;
+            if (!portOpen) {
+                // If the port got closed, just flush the command queue and
+                // abort.
+                cmd_queue = [];
+                return;
+            }
+            processCmdQueue();
+        };
+
         function processCmdQueue() {
             if (queue_busy)
                 return;
             queue_busy = true;
             var cmd = cmd_queue[0].command; // Get the oldest command
-            serial.write(cmd, function () {
-                // Success callback
-                cmd_queue.shift(); // remove oldest command
-                queue_busy = false;
-                if (cmd_queue.length)
-                    processCmdQueue();
-            }, function () {
-                console.log("cordovaSerial - error, retrying command");
-                queue_busy = false;
-                if (!portOpen) {
-                    // If the port got closed, just flush the command queue and
-                    // abort.
-                    cmd_queue = [];
-                    return;
-                }
-                processCmdQueue();
-            });
+            if (cmd_queue[0].hex) {
+                serial.writeHex(cmd, writeSuccessCallback, writeErrorCallback);
+            } else {
+                serial.write(cmd, writeSuccessCallback, writeErrorCallback);
+            }
         };
 
 

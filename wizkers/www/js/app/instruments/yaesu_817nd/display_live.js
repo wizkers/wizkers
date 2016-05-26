@@ -100,22 +100,16 @@ define(function (require) {
                 self.faceplate.attr({
                     width: "100%",
                 });
-                $("#kx3 .icon").css('visibility', 'hidden');
-                $("#kx3").height($("#kx3").width() * 0.42);
                 
                 // Initialize the VFO rotating dip element:
+                /*
                 var c = self.faceplate.select('#vfoa-wheel');;
                 var bb = c.getBBox();
                 self.vfodip = self.faceplate.select('#vfoa-dip');
                 var bb2 = self.vfodip.getBBox();
                 self.dip_x = (bb.width-(bb2.width+ bb2.y-bb.y))/2;
                 self.dip_y = (bb.height-(bb2.height + bb2.y-bb.y))/2;
-
-                // I was not able to make the SVG resize gracefully, so I have to do this
-                $("#kx3").resize(function (e) {
-                    console.log("SVG container resized");
-                    $(e.target).height($(e.target).width() * 0.42);
-                });
+                */
 
             });
 
@@ -249,8 +243,10 @@ define(function (require) {
                 this.$("#ft817 #lcd_line2").text(line2);
             }
             
-            if (data.squelch != undefined) {
+            if (data.squelch != undefined && data.ptt == false) {
                 this.$("#ft817 #busy_led").css('fill', (data.squelch) ? '#707070' : '#35e133');
+            } else if (data.ptt) {
+                this.$("#ft817 #busy_led").css('fill', '#ff0000');                
             }
             
             if (data.smeter != undefined) {
@@ -264,6 +260,9 @@ define(function (require) {
             if (data.mode) {
                 var line1 = this.vfo + '     ' + data.mode;
                 this.$("#ft817 #lcd_line1").text(line1);
+                // Update the band selection radio buttons too:
+                this.$(".mode-btn").removeClass("active");
+                this.$("#mode-" + data.mode).parent().addClass("active");
             }
             
             if (data.locked) {
