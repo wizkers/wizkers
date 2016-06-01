@@ -127,7 +127,7 @@ define(function (require) {
                     $('#frequency-selector').html(self.ElecraftFrequencyListView.el);
                     self.ElecraftFrequencyListView.render();
                 }
-                $('#frequency-selector', self.el).carousel();
+                self.$('#frequency-selector').carousel();
             });
 
             // And last, load the waterfall sub view:

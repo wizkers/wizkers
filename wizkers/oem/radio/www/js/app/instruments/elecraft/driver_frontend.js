@@ -97,7 +97,7 @@ define(function (require) {
          * Returns a list of all modes supported by the radio
          */
         this.getModes = function() {
-            return ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
+            return ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", "DATA-REV"];
         }
         
         /**

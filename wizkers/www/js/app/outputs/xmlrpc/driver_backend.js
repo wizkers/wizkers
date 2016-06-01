@@ -91,6 +91,7 @@ define(function (require) {
             
             // Query our driver for all supported modes:
             radio_modes = linkManager.driver.getModes();
+            
 
             // Create a rigserver:
             if (rigserver) {

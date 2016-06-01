@@ -382,6 +382,8 @@ define(function (require) {
                     }).render().el);
                 }
             }
+            $('#frequency-selector').carousel();
+
             return this;
         },
 

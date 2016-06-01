@@ -260,10 +260,22 @@ define(function (require) {
 
 
         function onOpen(openInfo) {
+            if (chrome.runtime.lastError) {
+                console.error('[chromeSerialLib] Open Error', chrome.runtime.lastError.message);
+                self.trigger('status', {
+                        openerror: true,
+                        portopen: false,
+                        reason: chrome.runtime.lastError
+                    });
+                return;
+            }
             if (!openInfo) {
                 console.log("[chromeSerialLib] Open Failed");
                 console.log(openInfo);
-                return;
+                self.trigger('status', {
+                    portopen: false
+                });
+              return;
             }
             self.portOpen = true;
             self.connectionId = openInfo.connectionId;

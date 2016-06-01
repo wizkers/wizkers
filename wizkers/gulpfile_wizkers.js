@@ -6,36 +6,22 @@ var rename = require('gulp-rename');
 var amdOptimize = require('amd-optimize');
 var concat = require('gulp-concat');
 
+
 var fs = require('fs');
 var path = require('path');
 var _ = require("underscore")._;
 var _s = require('underscore.string');
 
+console.log("*******************");
+console.log("*   WIZKERS       *");
+console.log("*******************");
+
 
 gulp.task('default', function () {
     console.log("*******************");
-    console.log("Targets: build chrome cordova nwjs server");
+    console.log("Targets: build chrome cordova server");
     console.log("*******************");
 });
-
-
-console.log ("OEM Build: " + process.env.OEM);
-
-if (process.env.OEM == undefined) {
-    console.error('***********************');
-    console.error(' Error: you need to define the OEM env variable before calling gulp');
-    console.error('for instance: OEM=safecast gulp --gulpfile gulpfile_oem.js');
-    console.error('***********************');
-    process.exit(1);
-    
-}   
-
-var oem_directory = 'oem/' + process.env.OEM;
-
-if (! fs.existsSync(oem_directory)) {
-    console.error('The OEM directory you specified does not exist');
-    process.exit(1);
-}
 
 
 var paths = {
@@ -43,29 +29,21 @@ var paths = {
     build: 'build', // Where we compile the templates and build the javascript distribution
     chrome_dist: 'dist/chrome/', // Where we distribute the Chrome app (ready for packaging for Chrome app store)
     // All javascript is minified there.
-    chrome_debug:  'dist/chrome-debug/', // Debug build (not minified)
+    chrome_debug: 'dist/chrome-debug/', // Debug build (not minified)
     cordova_debug: 'dist/cordova-debug/',
-    cordova_dist:  'dist/cordova/',
-    server_dist:   'dist/server/',
-    nwjs_debug:    'dist/nwjs-debug/',
-    nwjs_dist:     'dist/nwjs/',
+    cordova_dist: 'dist/cordova/',
+    server_dist: 'dist/server/',
 
     // Application paths: (need to be in arrays)
     templates: ['www/js/tpl/**/*.html'],
     css: ['www/css/*', 'www/fonts/*', 'www/img/**/*'],
-    libs: ['www/js/lib/**/*.js'],
+    libs: ['www/js/lib/**/*'],
     jsapp: ['www/js/app/**/*.js', 'www/js/app/**/*.png', 'www/js/app/**/*.svg'],
 
-    // OEM Overlays which are common to all run modes (in www)
-    oem_www_files: [ oem_directory + '/www/**/*.js', oem_directory + '/www/**/*.png', oem_directory + '/www/**/*.svg', oem_directory + '/www/css/*'],
-    oem_www_templates: [oem_directory + '/www/js/tpl/**/*.html'],
-    oem_server_files: [oem_directory + '/server/**/*'],
-
     // Files specific to each kind of run mode (chrome, cordova, server)
-    server_files:  ['server/**/*'],
-    chrome_files:  [oem_directory + '/chrome/**/*'],
-    cordova_files: [oem_directory + '/cordova/**/*'],
-    nwjs_files:    [oem_directory + '/nwjs/**/*']
+    server_files: ['server/**/*'],
+    chrome_files: ['chrome/**/*'],
+    cordova_files: ['cordova/**/*']
 }
 
 console.log(paths.templates);
@@ -85,55 +63,13 @@ var compileTemplate = function (contents) {
     }
 }
 
-/**
- * Returns an array of all the directories below dir (can be an array
- * of muliple directories) with the 'glob' pattern added
- * @param   {Array}  dir  List of directories
- * @param   {String} glob Glob pattern like '/*.js'
- * @returns {Array}  List of all subdirectories with glob pattern
- */
-function makeSrc(dir, glob) {
-    var dirlist = getFolders(dir);
-    return dirlist.map(function (arg) {
-        return arg + glob;
-    });
-}
 
 /*******************
  *  Tasks
  */
 
 
-gulp.task('build', ['css', 'libs', 'jsapp', 'oem_www_overlay', 'templates', 'oem_templates']);
-
-/**
- * Copies all files for the OEM into the build destination, before
- * doing the template calculation.
- *
- * We want to overlay after we copied all the original CSS and Javasscript.
- */
-gulp.task('oem_www_overlay', ['css', 'jsapp'], function () {
-    return gulp.src(paths.oem_www_files, {
-            base: oem_directory
-        })
-        .pipe(gulp.dest(paths.build));
-});
-
-/**
- * Compile all OEM templates and (potentially) overwrites original templates, so
- * it has to happen after the 'templates' task
- */
-gulp.task('oem_templates', ['templates'], function () {
-    return gulp.src(paths.oem_www_templates, {
-            base: oem_directory
-        })
-        .pipe(change(compileTemplate))
-        // .pipe(debug())
-        .pipe(rename(function (path) {
-            path.extname = '.js';
-        }))
-        .pipe(gulp.dest(path.join(paths.build)));
-});
+gulp.task('build', ['css', 'libs', 'jsapp', 'templates']);
 
 /**
  * Compile all templates and copy them to the various dist directories
@@ -195,7 +131,7 @@ gulp.task('chrome_copy_build', ['build'], function () {
  */
 gulp.task('chrome', ['build', 'chrome_copy_build'], function () {
     return gulp.src(paths.chrome_files, {
-            base: oem_directory + '/chrome'
+            base: 'chrome'
         })
         .pipe(gulp.dest(paths.chrome_dist))
         .pipe(gulp.dest(paths.chrome_debug));
@@ -211,53 +147,20 @@ gulp.task('cordova_copy_build', ['build'], function () {
         .pipe(gulp.dest(paths.cordova_debug));
 });
 
-
 /**
  * Build the Cordova app
  */
 gulp.task('cordova', ['build', 'cordova_copy_build'], function () {
     return gulp.src(paths.cordova_files, {
-            base: oem_directory + '/cordova'
+            base: 'cordova'
         })
         .pipe(gulp.dest(paths.cordova_dist))
         .pipe(gulp.dest(paths.cordova_debug));
 });
 
 /**
- * Copy the build files to the Node Webkit directory
+ * Build the Server app.
  */
-gulp.task('nwjs_copy_build', ['build'], function () {
-    return gulp.src([paths.build + '/www/**/*'], {
-            base: paths.build
-        })
-        .pipe(gulp.dest(paths.nwjs_debug));
-});
-
-/**
- * Build the NWJS app
- */
-gulp.task('nwjs', ['build', 'nwjs_copy_build'], function () {
-    return gulp.src(paths.nwjs_files, {
-            base: oem_directory + '/nwjs'
-        })
-        .pipe(gulp.dest(paths.nwjs_dist))
-        .pipe(gulp.dest(paths.nwjs_debug));
-});
-
-
-/**
- * Build the Server app. Note: the server overlay can overwrite some files, but won't
- * delete any.
- */
-gulp.task('server', ['server_original', 'oem_server_overlay']);
-
-gulp.task('oem_server_overlay', ['server_original'], function () {
-    return gulp.src(paths.oem_server_files, {
-            base: oem_directory + '/server'
-        })
-        .pipe(gulp.dest(paths.server_dist));
-});
-
 /**
  * Copy the build files to the server directory
  */
@@ -268,7 +171,7 @@ gulp.task('server_copy_build', ['build'], function () {
         .pipe(gulp.dest(paths.server_dist));
 });
 
-gulp.task('server_original', ['build', 'server_copy_build'], function () {
+gulp.task('server', ['build', 'server_copy_build'], function () {
     return gulp.src(paths.server_files, {
             base: 'server'
         })

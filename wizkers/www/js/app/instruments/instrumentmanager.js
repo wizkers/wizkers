@@ -81,6 +81,12 @@ define(function (require) {
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
+            "kromek_d3s": {
+                name: "Kromek D3S",
+                type: 'app/instruments/kromek_d3s/kromek_d3s',
+                settings: null,
+                connectionsettings: 'app/views/instrument/serialport'
+            },
             "fluke28x": {
                 name: "Fluke 287/289 Series multimeter",
                 type: 'app/instruments/fluke28x/fluke',
@@ -197,15 +203,6 @@ define(function (require) {
          */
         this.getConnectionSettingsFor = function (instrument, arg, callback) {
             require([this.supportedInstruments[instrument].connectionsettings], function (view) {
-                // Some instruments have a connection filter - mostly BTLE now, to only
-                // display devices that provide certain UUIDs. We add this to the
-                // arguments in the callback.
-                var filter =  this.supportedInstruments[instrument].connectionfilter;
-                if (arg != undefined) {
-                    arg['filter'] = filter;
-                } else {
-                    arg = { 'filter': filter};
-                }
                 callback(new view(arg));
             });
         }
