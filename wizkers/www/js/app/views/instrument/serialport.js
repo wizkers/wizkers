@@ -34,11 +34,18 @@ define(function (require) {
         initialize: function (options) {
             console.log(options);
             this.ports = options.ports;
+            this.btlist = {};
             if (this.model.get('tcpip') == undefined) {
                 this.model.set('tcpip', {
                     host: '127.0.0.1',
                     port: 7373,
                     proto: 'tcp'
+                });
+            }
+            if (this.model.get('btspp') == undefined) {
+                this.model.set('btspp', {
+                    mac: '00:00:00:00:00:00',
+                    proto: 'btspp'
                 });
             }
 
@@ -54,14 +61,17 @@ define(function (require) {
             console.log("Serial connection settings closing");
         },
 
-
         render: function () {
             this.$el.html(template(_.extend(this.model.toJSON(), {
-                ports: this.ports
+                ports: this.ports,
+                btlist: this.btlist
             })));
             if (this.model.get('port') != 'TCP/IP')
                 $('.hide-tcp', this.el).hide();
-
+            if (this.model.get('port') != 'Bluetooth')
+                $('.hide-spp', this.el).hide();
+            else
+                this.getBluetoothDevices();
             return this;
         },
 
@@ -70,13 +80,39 @@ define(function (require) {
                 $('.hide-tcp', this.el).show();
             else
                 $('.hide-tcp', this.el).hide();
+            if (e.target.value == 'Bluetooth') {
+                this.getBluetoothDevices();
+                this.render();
+            } else
+                $('.hide-spp', this.el).hide();
         },
 
         refreshDevices: function (devices) {
             this.ports = devices;
             this.render();
         },
-
+        
+        getBluetoothDevices: function() {
+            // Can only be called on Cordova !
+            var self = this;
+            if (Object.keys(this.btlist).length == 0) {
+                // We only do this once, otherwise we end up in an
+                // infinite render tool :)
+                bluetoothSerial.list(
+                    function(list){
+                        for (var d in list) {
+                            self.btlist[list[d].address] = list[d];
+                        }
+                        self.$('.hide-spp').show();
+                        self.render();
+                    },
+                    function(e){
+                        console.error(e);
+                    }
+                );
+            }
+        },
+        
         refresh: function () {
             // Catch a "Refresh" value here which indicates we should
             // just ask for a list of ports again:

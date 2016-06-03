@@ -265,7 +265,7 @@ define(function (require) {
                 self.trigger('status', {
                         openerror: true,
                         portopen: false,
-                        reason: chrome.runtime.lastError
+                        reason: chrome.runtime.lastError.message
                     });
                 return;
             }

@@ -51,7 +51,7 @@ define(function (require) {
                     this.$('#refresh').html('<img src="img/loading.gif">');
                 } else {
                     this.$('#refresh').html('<span class="glyphicon glyphicon-refresh"></span>');
-                }                
+                }
             }
         },
 

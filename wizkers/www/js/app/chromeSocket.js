@@ -240,7 +240,7 @@ define(function (require) {
                     chrome.serial.getDevices(onGetDevices);
                     break;
                 case 'cordova':
-                    self.trigger('ports', ['OTG Serial', 'TCP/IP']);
+                    self.trigger('ports', ['OTG Serial', 'TCP/IP', 'Bluetooth']);
                     break;
                 }
             } else if (ct == 'app/views/instrument/bluetooth') {
