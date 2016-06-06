@@ -56,6 +56,7 @@ define(function (require) {
             this.transmittingText = false;
             
             this.vfoangle = 0;
+            this.oldPageY = 0;
 
             // Keep the value of the previous VFO value to avoid
             // unnecessary redraws of the front panel.
@@ -192,19 +193,38 @@ define(function (require) {
             "click #data-brag": "sendBRAG",
             "click #mem-left": "hideOverflow",
             "click #mem-right": "hideOverlow",
-            "mousewheel #vfoa-wheel": "vfoAWheel"
+            "mousewheel #vfoa-wheel": "vfoAWheel",
+            "touchmove #vfoa-wheel": "vfoAWheelTouch",
+            "touchstart #vfoa-wheel": "vfoAWheelTouchStart"
         },
         
         vfoAWheel: function(e) {
             // console.log('Mousewheel',e);
-            this.vfoangle -= e.deltaY/2 % 360;
-            var tx = this.dip_x * (Math.cos(this.vfoangle*Math.PI/360));
-            var ty = this.dip_y * (1+Math.sin(this.vfoangle*Math.PI/360));
-            this.vfodip.transform('t' + tx + ',' + ty);
-            var step = Math.floor(Math.min(Math.abs(e.deltaY)/50, 7));
-            var cmd = ((e.deltaY < 0) ? 'UP' : 'DN') + step + ';DS;';
-            linkManager.sendCommand(cmd);
+            this.rotateVfoWheel(e.deltaY);
+            e.preventDefault(); // Prevent the page from scrolling!
+        },
 
+        vfoAWheelTouchStart: function(e) {
+            this.oldPageY = e.originalEvent.touches[0].pageY;
+        },
+        
+        // Split in two to speed things up
+        vfoAWheelTouch: function(e) {
+            var ty = e.originalEvent.touches[0].pageY;
+            var deltaY = ty - this.oldPageY;
+            this.oldPageY = ty;
+            this.rotateVfoWheel(deltaY);
+            e.preventDefault(); // Prevent the page from scrolling!
+        },
+        
+        rotateVfoWheel: function(deltaY) {
+            this.vfoangle = (this.vfoangle- deltaY/2) % 360;
+            var tx = this.dip_x * (Math.cos(this.vfoangle*2*Math.PI/360));
+            var ty = this.dip_y * (1+Math.sin(this.vfoangle*2*Math.PI/360));
+            this.vfodip.transform('t' + tx + ',' + ty);
+            var step = Math.floor(Math.min(Math.abs(deltaY)/50, 7));
+            var cmd = ((deltaY < 0) ? 'UP' : 'DN') + step + ';DS;';
+            linkManager.sendCommand(cmd);            
         },
 
         hideOverflow: function () {

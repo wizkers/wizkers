@@ -98,22 +98,10 @@ define(function (require) {
                     width: "100%",
                 });
                 $("#kx2 .icon").css('visibility', 'hidden');
-                // $("#kx2").height($("#kx3").width() * 0.42);
                 
                 // Initialize the VFO rotating dip element:
-                var c = self.faceplate.select('#vfoa-wheel');;
-                var bb = c.getBBox();
-                self.vfodip = self.faceplate.select('#vfoa-dip');
-                var bb2 = self.vfodip.getBBox();
-                self.dip_x = (bb.width-(bb2.width+ bb2.y-bb.y))/2;
-                self.dip_y = (bb.height-(bb2.height + bb2.y-bb.y))/2;
-
-                // I was not able to make the SVG resize gracefully, so I have to do this
-                //$("#kx2").resize(function (e) {
-                //    console.log("SVG container resized");
-                //    $(e.target).height($(e.target).width() * 0.42);
-                //});
-
+                self.vfodip = self.faceplate.select('#vfoa-wheel');
+                
             });
 
 
@@ -199,20 +187,38 @@ define(function (require) {
             "click #data-brag": "sendBRAG",
             "click #mem-left": "hideOverflow",
             "click #mem-right": "hideOverlow",
-            "mousewheel #vfoa-wheel": "vfoAWheel"
+            "mousewheel #vfoa-wheel": "vfoAWheel",
+            "touchmove #vfoa-wheel": "vfoAWheelTouch",
+            "touchstart #vfoa-wheel": "vfoAWheelTouchStart"
         },
-        
+
         vfoAWheel: function(e) {
             // console.log('Mousewheel',e);
-            this.vfoangle -= e.deltaY/2 % 360;
-            var tx = this.dip_x * (Math.cos(this.vfoangle*Math.PI/360));
-            var ty = this.dip_y * (1+Math.sin(this.vfoangle*Math.PI/360));
-            this.vfodip.transform('t' + tx + ',' + ty);
-            var step = Math.floor(Math.min(Math.abs(e.deltaY)/50, 7));
-            var cmd = ((e.deltaY < 0) ? 'UP' : 'DN') + step + ';DS;';
-            linkManager.sendCommand(cmd);
-
+            this.rotateVfoWheel(e.deltaY);
+            e.preventDefault(); // Prevent the page from scrolling!
         },
+
+        vfoAWheelTouchStart: function(e) {
+            this.oldPageY = e.originalEvent.touches[0].pageY;
+        },
+        
+        // Split in two to speed things up
+        vfoAWheelTouch: function(e) {
+            var ty = e.originalEvent.touches[0].pageY;
+            var deltaY = ty - this.oldPageY;
+            this.oldPageY = ty;
+            this.rotateVfoWheel(deltaY);
+            e.preventDefault(); // Prevent the page from scrolling!
+        },
+        
+        rotateVfoWheel: function(deltaY) {
+            this.vfoangle = (this.vfoangle + deltaY/2) % 360;
+            this.vfodip.transform('r' + this.vfoangle );
+            var step = Math.floor(Math.min(Math.abs(deltaY)/50, 7));
+            var cmd = ((deltaY < 0) ? 'UP' : 'DN') + step + ';DS;';
+            linkManager.sendCommand(cmd);            
+        },
+        
 
         hideOverflow: function () {
             // $("#xtrafunc-leftside").css('overflow', 'hidden');

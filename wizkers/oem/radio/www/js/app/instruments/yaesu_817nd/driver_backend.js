@@ -36,6 +36,7 @@ define(function (require) {
     var Serialport = require('serialport'),
         serialConnection = require('connections_serial'),
         tcpConnection = require('connections_tcp'),
+        btConnection = require('connection_btspp'),
         abu = require('app/lib/abutils');
 
 
@@ -378,10 +379,11 @@ define(function (require) {
             if (p == 'TCP/IP') {
                 // Note: we just use the parser info from portSettings()
                 port = new tcpConnection(ins.get('tcpip'), portSettings().parser);
+            } else if (p == 'Bluetooth') {
+                port = new btConnection(ins.get('btspp'), portSettings().parser);
             } else {
                 port = new serialConnection(ins.get('port'), portSettings());
-            }
-            port.open();
+            }            port.open();
             port.on('data', format);
             port.on('status', status);
 

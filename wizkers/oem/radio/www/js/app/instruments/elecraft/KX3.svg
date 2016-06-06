@@ -741,7 +741,7 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(428.21429,-236.86218)"
-     style="display:inline; pointer-events: none;">
+     style="display:inline;">
     <image
        y="236.86218"
        x="-428.21429"
@@ -982,7 +982,7 @@
        rx="208.34396"
        ry="211.8795" />
     <circle
-       style="fill:url(#linearGradient4446);fill-opacity:1;stroke:#686868;stroke-width:4.64603472;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:url(#linearGradient4446);fill-opacity:1;stroke:#686868;stroke-width:4.64603472;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1; pointer-events:none"
        id="vfoa-dip"
        cx="1112.2091"
        cy="815.00513"
