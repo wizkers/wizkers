@@ -29,8 +29,6 @@
 define(function(require) {
     "use strict";
     
-    var frontend_driver = require('app/instruments/elecraft_xg3/driver_frontend');
-    
     return  function() {
         // Helper function: get driver capabilites.
         // returns a simple array of capabilities    
@@ -53,8 +51,10 @@ define(function(require) {
         };
 
         // This is the front-end driver
-        this.getDriver = function() {
-            return new frontend_driver();
+        this.getDriver = function(callback) {
+             require(['app/instruments/elecraft_xg3/driver_frontend'], function(d) {
+                callback(new d());                 
+             });
         };
         
         // This is a browser implementation of the backend driver, when we

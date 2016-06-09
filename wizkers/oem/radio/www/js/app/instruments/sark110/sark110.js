@@ -26,7 +26,6 @@
 define(function(require) {
     "use strict";
     
-    var driver_frontend = require('app/instruments/sark110/driver_frontend');
     // Convenient function when views want to talk to each other: keep a central
     // reference to those here
     var current_liveview = null;
@@ -92,9 +91,11 @@ define(function(require) {
             });
         };
 
-        // This has to be a link manager
-        this.getDriver = function() {
-            return new driver_frontend();
+        // This is the front-end driver
+        this.getDriver = function(callback) {
+             require(['app/instruments/sark110/driver_frontend'], function(d) {
+                callback(new d());                 
+             });
         };
         
         this.getUploader = function() {

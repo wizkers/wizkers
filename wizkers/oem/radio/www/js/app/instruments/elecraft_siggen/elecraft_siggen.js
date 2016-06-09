@@ -30,8 +30,6 @@
 define(function(require) {
     'use strict';
     
-    var frontend_driver = require('app/instruments/elecraft/driver_frontend');
-    
     return  function() {
         
         var current_liveview = null;
@@ -76,8 +74,10 @@ define(function(require) {
         };
 
         // This is the front-end driver
-        this.getDriver = function() {
-            return new frontend_driver();
+        this.getDriver = function(callback) {
+             require(['app/instruments/elecraft/driver_frontend'], function(d) {
+                callback(new d());                 
+             });
         };
         
         // This is a browser implementation of the backend driver, when we
