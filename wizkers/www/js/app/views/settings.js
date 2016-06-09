@@ -65,21 +65,22 @@ define(function (require) {
             this.$el.html(template(this.model.toJSON()));
 
             // Depending on the runmode, we can display additional info
-            if (vizapp.type == "chrome") {
+            if (vizapp.type == 'chrome') {
                 $("#chromesettings", this.el).append("<br><h4>Storage</h4>");
                 chrome.storage.local.getBytesInUse(function (used) {
                     $("#chromesettings", this.el).append("<p>" + used + " bytes used out of a " +
                         chrome.storage.local.QUOTA_BYTES + " bytes quota.</p>");
                 });
 
-                // Disable instrument upgrades on Cordova for now. They work, but they're bound to lead to
-                // just too many issues support-wise.
-                if (instrumentManager.getCaps().indexOf("Upgrader") > -1 && vizapp.type != 'cordova') {
-                    $('#device_upgrade', this.el).show();
-                }
-
                 $('#statistics_enable', this.el).show();
 
+            }
+
+            // Disable instrument upgrades on Cordova for now. They work, but they're bound to lead to
+            // just too many issues support-wise.
+            // NOTE: re-enabled on 2016.06.09 for OTA BLE Updates testing
+            if (instrumentManager.getCaps().indexOf("Upgrader") > -1 ) {
+                $('#device_upgrade', this.el).show();
             }
 
             if (instrumentManager.getCaps().indexOf('WizkersSettings') > -1) {

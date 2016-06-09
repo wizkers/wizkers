@@ -42,6 +42,13 @@ define(function (require) {
 
         onClose: function () {
             console.log("Bluetooth connexion settings closing");
+            var self = this;
+            if (vizapp.type == 'cordova') {
+                bluetoothle.stopScan(function () {
+                            console.log('Stopped scan');
+                            self.trigger('status', {scanning: false});
+                        }, function () {});
+            }
             linkManager.off('status', this.updatestatus, this);
         },
         
@@ -67,7 +74,7 @@ define(function (require) {
             // when we are in Cordova mode (the RSSI is not returned
             // in Chrome mode)
             if (vizapp.type == 'cordova') {
-                this.ports = [];
+                this.ports = [ { address:'00:00:00:00:00:00', name: 'Select here...'}];
                 for (var i in devices) {
                     this.ports.push(devices[i]);                
                 }

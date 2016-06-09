@@ -131,13 +131,19 @@ define(function(require) {
             return body;
         },
 
-        multipart: function(obj, filekey) {
+        /**
+         * Build a multipart form containing a text file.
+         *  obj is all the key/values including the file
+         *  filekey is the key name that contains the file
+         *  fname is the filename that should be used
+         */
+        multipart: function(obj, filekey, fname) {
             var fd = new FormData();
             for (var key in obj) {
                 if (key == filekey) {
                     var filePart = [ obj[key] ];
                     var myBlob = new Blob( filePart, { type:'text/plain'});
-                    fd.append(key, myBlob, "file.log");
+                    fd.append(key, myBlob, fname);
                 } else
                     fd.append(key, obj[key]);
             }

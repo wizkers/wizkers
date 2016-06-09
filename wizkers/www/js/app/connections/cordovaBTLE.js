@@ -118,7 +118,15 @@ define(function (require) {
                 isNotification: true
             };
             bluetoothle.subscribe(subscribeSuccess, function (err) {
-                console.log(err);
+                // We didn't find the service we were looking for, this means
+                // this is probably not the right device. Tell the user!
+                self.trigger('status', {
+                    openerror: true,
+                    reason: 'Could not connect to the BLE service',
+                    description: + err.message
+                });
+                // Do a disconnect to make sure we end up in a sane state:
+                self.close();
             }, params);
         }
 

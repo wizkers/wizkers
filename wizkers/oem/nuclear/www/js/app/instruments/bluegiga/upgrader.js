@@ -39,7 +39,6 @@ define(function (require) {
 
         events: {
             "click #device_upgrade": "go",
-            "click #file_sel": "select_file",
             "click #fw_dl": "download_fw"
         },
 
@@ -83,7 +82,7 @@ define(function (require) {
             var self = this;
             $('#fw_dl', this.el).html('Downloading...').addClass('btn-warning');
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'http://www.wizkers.io/download/780/', true);
+            xhr.open('GET', 'https://www.dropbox.com/s/aqnxixx32hl6kz8/BLEBee-Firmware-BLE113-2.0.1-BLE-SDK1.3.2-b122.ota?dl=1', true);
             xhr.responseType = 'arraybuffer';
 
             xhr.onload = function (e) {
@@ -95,30 +94,6 @@ define(function (require) {
             };
 
             xhr.send();
-        },
-
-        select_file: function () {
-            var self = this;
-            var chosenFileEntry = null;
-
-            chrome.fileSystem.chooseEntry({
-                type: 'openFile'
-            }, function (readOnlyEntry) {
-
-                readOnlyEntry.file(function (file) {
-                    var reader = new FileReader();
-                    reader.onerror = function (e) {
-                        console.log(e);
-                    };
-                    reader.onloadend = function (e) {
-                        self.firmware = e.target.result;
-                        self.validate_fw();
-                    };
-                    // Our data is binary, so we need to put it into an
-                    // arraybuffer, will make our life better:
-                    reader.readAsArrayBuffer(file);
-                });
-            });
         },
 
         validate_fw: function () {
@@ -133,7 +108,6 @@ define(function (require) {
                     'bg-danger');
             }
         },
-
 
         go: function () {
             if (this.firmware.length == 0) {

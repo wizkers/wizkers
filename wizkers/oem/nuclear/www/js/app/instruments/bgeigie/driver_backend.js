@@ -37,8 +37,11 @@ define(function (require) {
             isopen = false,
             parser = Serialport.parsers.readline('\n');
 
-        var CUSTOM_SERVICE_UUID = 'ef080d8c-c3be-41ff-bd3f-05a5f4795d7f';
-        var SERIAL_PORT_UUID = 'A1E8F5B1-696B-4E4C-87C6-69DFE0B0093B';
+        var CUSTOM_SERVICE_UUID  = 'ef080d8c-c3be-41ff-bd3f-05a5f4795d7f';
+        var SERIAL_PORT_UUID     = 'A1E8F5B1-696B-4E4C-87C6-69DFE0B0093B';
+        
+        var v200_service_uuid     = '067978ac-b59f-4ec9-9c09-2ab6e5bdad0b';
+        var v200_serial_port_uuid = '067978ac-b99f-4ec9-9c09-2ab6e5bdad0b';
 
         // This is the CPM to µSv/h conversion coefficient for the tube
         // in the bGeigie. This is the default bGeigie value
@@ -109,9 +112,23 @@ define(function (require) {
                 // ToDo: depending on the services we found, we can subscribe
                 // to different service/characteristic UUIDs so that we can support
                 // multiple versions of the Bluetooth module.
+                var s_uuid = '';
+                var c_uuid = '';
+                for (var i in stat.services) {
+                    if (stat.services[i].uuid == CUSTOM_SERVICE_UUID) {
+                        s_uuid = CUSTOM_SERVICE_UUID;
+                        c_uuid = SERIAL_PORT_UUID;
+                        break;
+                    } else if (stat.services[i].uuid == v200_service_uuid) {
+                        s_uuid = v200_service_uuid;
+                        c_uuid = v200_serial_port_uuid;
+                        break;
+                    }
+                }
+
                 port.subscribe({
-                    service_uuid: CUSTOM_SERVICE_UUID,
-                    characteristic_uuid: SERIAL_PORT_UUID
+                    service_uuid: s_uuid,
+                    characteristic_uuid: c_uuid
                 });
 
             } else {

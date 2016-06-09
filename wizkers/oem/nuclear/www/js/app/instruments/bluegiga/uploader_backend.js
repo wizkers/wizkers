@@ -59,6 +59,11 @@ define(function (require) {
         var OTA_CONTROL_UUID = 'f7bf3564-fb6d-4e53-88a4-5e37e0326063';
         var OTA_DATA_UUID = '984227f3-34fc-4045-a5d0-2c581f81a153';
 
+        // This is how it works:
+        // - Read the OTA file
+        // - Send it on the DATA_UUID by packets of 16 bytes
+        // - After sending the last packet, write 0x03 to the CONTROL_UUID to reset
+        //   the BLE113 to DFU mode. And cross fingers.
 
         /////////////
         // Public methods

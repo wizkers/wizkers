@@ -45,6 +45,7 @@ define(function (require) {
             this.deviceLogs = this.collection;
             this.packedData = null;
             this.previousPoint = null;
+            this.bGeigieSN = 0;
 
             // Need this to make sure "render" will always be bound to our context.
             // -> required for the _.after below.
@@ -265,6 +266,11 @@ define(function (require) {
                     // Sometimes, we get entries without a valid reading, detect this
                     if (data.nmea) {
                         inMemLog += (data.nmea + '\n');
+                        if (this.bGeigieSN == 0) {
+                            var spl = data.nmea.split(',');
+                            var d = spl[2].substr(5,2) + spl[2].substr(8,2);
+                            this.bGeigieSN = spl[1] + '-' + d;
+                        }
                     }
                 }
                 this.addMetadata(inMemLog);
@@ -326,7 +332,7 @@ define(function (require) {
 
             var params = {
                 api_key: instrumentManager.getInstrument().get('metadata').apikey,
-                'bgeigie_import[name]': 'bgeigie.log',
+                'bgeigie_import[name]': this.deviceLogs.at(0).get('name'),
                 'bgeigie_import[credits]': $('#credits').val(),
                 'bgeigie_import[cities]': $('#cities').val(),
                 'bgeigie_import[description]': $('#description').val()
@@ -345,8 +351,8 @@ define(function (require) {
                     }
                 };
 
-                params['bgeigie_import[source]'] = this.logfile;
-                var post_data = httprequest.multipart(params, 'bgeigie_import[source]');
+                params['bgeigie_import[source]'] = this.logfile; // this is the actual contents of the logs
+                var post_data = httprequest.multipart(params, 'bgeigie_import[source]',this.bGeigieSN + '.log');
                 var post_request = httprequest.request(post_options, function (res) {
                     var err = true;
                     console.log("[Safecast log file post] API Request result");

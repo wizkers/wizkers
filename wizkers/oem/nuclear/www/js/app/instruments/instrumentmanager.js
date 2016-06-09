@@ -20,8 +20,6 @@
 /**
  *
  * The Instrument manager handles all interactions with the various instruments.
- * 
- * This is the Safecast Drive version
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -41,26 +39,113 @@ define(function (require) {
 
         // Instruments supported in all runmodes:
         this.supportedInstruments = {
-            "bgeigie": {
-                name: 'Safecast bGeigie',
-                type: 'app/instruments/bgeigie/bgeigie',
-                settings: 'app/instruments/bgeigie/settings',
-                connectionsettings: 'app/views/instrument/bluetooth',
-                connectionfilter: ['ef080d8c-c3be-41ff-bd3f-05a5f4795d7f', '067978ac-b59f-4ec9-9c09-2ab6e5bdad0b']
-            },
             "onyx": {
-                name: "Safecast Onyx",
+                name: "SafeCast Onyx",
                 type: 'app/instruments/onyx/onyx',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
-            'blue_onyx': {
+            "usbgeiger": {
+                name: "USB Geiger",
+                type: 'app/instruments/usbgeiger/usb_geiger',
+                settings: null,
+                connectionsettings: 'app/views/instrument/serialport'
+            },
+            "kromek_d3s": {
+                name: "Kromek D3S",
+                type: 'app/instruments/kromek_d3s/kromek_d3s',
+                settings: null,
+                connectionsettings: 'app/views/instrument/serialport'
+            },
+            "sigma25": {
+                name: "Kromek Sigma25",
+                type: 'app/instruments/sigma25/sigma25',
+                settings: null,
+                connectionsettings: 'app/views/instrument/serialport'
+            },
+        };
+        
+        if (true) {
+            this.supportedInstruments["sample_instrument"] = {
+                name: "Test dummy instrument",
+                type: 'app/instruments/sample_instrument/sample_instrument',
+                settings: 'app/instruments/sample_instrument/settings',
+                connectionsettings: 'app/views/instrument/dummy'
+            };
+        }
+
+        // The instruments below are only supported in Server runmode:
+        if (vizapp.type == "server") {
+            this.supportedInstruments["w433"] = {
+                name: "Aerodynes W433 Weather receiver",
+                type: 'app/instruments/w433/w433',
+                settings: 'app/instruments/w433/settings',
+                connectionsettings: 'app/views/instrument/serialport'
+            };
+            this.supportedInstruments["heliumgeiger"] = {
+                name: "Radius Hawk (Helium)",
+                type: 'app/instruments/heliumgeiger/heliumgeiger',
+                settings: null,
+                connectionsettings: 'app/views/instrument/helium'
+            };
+            this.supportedInstruments["hawknest"] = {
+                name: "Hawk Nest (Pinocc.io)",
+                type: 'app/instruments/hawknest/hawknest',
+                settings: null,
+                connectionsettings: 'app/views/instrument/pinoccio'
+            };
+        }
+
+        // The instruments below are supported in both Chrome and Cordova mode
+        if (vizapp.type == 'chrome' || vizapp.type == 'cordova') {
+            this.supportedInstruments['blue_onyx'] = {
                 name: 'Medcom Blue Onyx',
                 type: 'app/instruments/blue_onyx/blue_onyx',
                 settings: 'app/instruments/blue_onyx/settings',
                 connectionsettings: 'app/views/instrument/bluetooth'
-            }
-        };
+            };
+            this.supportedInstruments['inspector_ble'] = {
+                name: 'Medcom Inspector BLE',
+                type: 'app/instruments/inspector_ble/inspector_ble',
+                settings: null,
+                connectionsettings: 'app/views/instrument/bluetooth'
+            };
+            this.supportedInstruments['fcbtusbv1'] = {
+                name: 'Fried Circuits Bluetooth backpack',
+                type: 'app/instruments/fcbtusbv1/fcbtusbv1',
+                settings: null,
+                connectionsettings: 'app/views/instrument/bluetooth'
+            };
+            this.supportedInstruments['bgeigie'] = {
+                name: 'Safecast bGeigie',
+                type: 'app/instruments/bgeigie/bgeigie',
+                settings: 'app/instruments/bgeigie/settings',
+                connectionsettings: 'app/views/instrument/bluetooth',
+                connectionfilter: 'ef080d8c-c3be-41ff-bd3f-05a5f4795d7f'
+            };
+            this.supportedInstruments['safecast_air'] = {
+                name: 'Safecast Air',
+                type: 'app/instruments/safecast_air/safecast_air',
+                settings: 'app/instruments/safecast_air/settings',
+                connectionsettings: 'app/views/instrument/bluetooth'
+            };
+        }
+
+        // The instruments below are only supported in Chrome runmode:
+        if (vizapp.type == 'chrome') {
+            this.supportedInstruments['sark110'] = {
+                name: 'Sark110 Antenna Analyzer',
+                type: 'app/instruments/sark110/sark110',
+                settings: 'app/instruments/sark110/settings',
+                connectionsettings: 'app/views/instrument/usbhid'
+            };
+            this.supportedInstruments['elecraft_remote'] = {
+                name: 'Remote Elecraft KX3',
+                type: 'app/instruments/elecraft_remote/elecraft_remote',
+                settings: 'app/instruments/elecraft_remote/settings',
+                connectionsettings: 'app/views/instrument/webrtc'
+            };
+        }
 
         /**
          * Get a view that renders the instrument-specific port settings.
@@ -74,12 +159,6 @@ define(function (require) {
             });
         }
 
-        this.getConnectionFilterFor = function (instrument) {
-            if (this.supportedInstruments[instrument] == undefined)
-                return '';
-            return this.supportedInstruments[instrument].connectionfilter;
-            
-        }
         /**
          * The optional extra settings in the "Instrument Details" view. These are settings
          * that are required to connect to the instrument.
@@ -104,6 +183,13 @@ define(function (require) {
             if (this.supportedInstruments[instrument] == undefined)
                 return '';
             return this.supportedInstruments[instrument].connectionsettings;
+        }
+
+        this.getConnectionFilterFor = function (instrument) {
+            if (this.supportedInstruments[instrument] == undefined)
+                return '';
+            return this.supportedInstruments[instrument].connectionfilter;
+            
         }
 
         this.clear = function () {
