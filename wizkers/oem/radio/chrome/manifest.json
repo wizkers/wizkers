@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Wizkers:Radio",
     "description": "The Universal Chrome app for Elecraft radios, and more to come!",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "offline_enabled": true,
     "app": {
         "background": {

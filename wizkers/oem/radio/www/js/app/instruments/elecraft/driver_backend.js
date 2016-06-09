@@ -50,6 +50,7 @@ define(function (require) {
         var serialport = null;
         var livePoller = null; // Reference to the live streaming poller
         var streaming = false,
+            pollCounter = 0,
             port = null,
             port_close_requested = false,
             port_open_requested = true,
@@ -173,11 +174,8 @@ define(function (require) {
         function queryRadio() {
             // TODO: follow radio state over here, so that we only query power
             // when the radio transmits, makes much more sense
-
-            // This is queried every second - we stage our queries in order
-            // to avoid overloading the radio, not sure that is totally necessary, but
-            // it won't hurt
-
+            
+            if (pollCounter++ % 2 == 0) {
             // Query displays and band (does not update by itself)
             port.write('DB;DS;BN;'); // Query VFO B and VFOA Display
 
@@ -187,6 +185,11 @@ define(function (require) {
             // And if we have an amp, then we can get a lot more data:
             port.write('^PI;^PF;^PV;^TM;');
             port.write('^PC;^SV;'); // Query voltage & current
+                
+            } 
+            
+            port.write('BG;'); // Bargraph display
+
         };
 
         /////////////
@@ -266,7 +269,7 @@ define(function (require) {
                 // AI2 does not send an initial report, so we ask for the initial data
                 // before...
                 port.write('K31;IF;FA;FB;RG;FW;MG;IS;BN;MD;AI2;');
-                livePoller = setInterval(queryRadio.bind(this), (period) ? period * 1000 : 1000);
+                livePoller = setInterval(queryRadio.bind(this), 500);
                 streaming = true;
             } else {
                 // We are already streaming, but it looks like someone wants a refresh,

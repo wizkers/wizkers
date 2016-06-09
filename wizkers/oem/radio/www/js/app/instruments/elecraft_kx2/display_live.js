@@ -56,6 +56,7 @@ define(function (require) {
             this.transmittingText = false;
             
             this.vfoangle = 0;
+            this.slevel = 0;
 
             // Keep the value of the previous VFO value to avoid
             // unnecessary redraws of the front panel.
@@ -97,7 +98,7 @@ define(function (require) {
                 self.faceplate.attr({
                     width: "100%",
                 });
-                $("#kx2 .icon").css('visibility', 'hidden');
+                $("#kx2 .icon").hide();
                 
                 // Initialize the VFO rotating dip element:
                 self.vfodip = self.faceplate.select('#vfoa-wheel');
@@ -369,15 +370,20 @@ define(function (require) {
         },
 
         setIcon: function (name, visible) {
-            $("#kx2 #icon_" + name).css("visibility", (visible) ? "visible" : "hidden");
+            if (visible) {
+             this.$("#kx2 #icon_" + name).show();
+            } else {
+             this.$("#kx2 #icon_" + name).hide();
+            }
+            
         },
 
         setModeIcon: function (mode) {
             // We need to update all icons when moving from one mode to another, so
             // I added this helper function
             var modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
-            $("#kx2 .mode_icon").css('visibility', 'hidden');
-            $("#kx2 #icon_" + modes[mode - 1]).css('visibility', 'visible');
+            $("#kx2 .mode_icon").hide()
+            $("#kx2 #icon_" + modes[mode - 1]).show();
         },
 
         validateMacros: function () {
@@ -513,6 +519,25 @@ define(function (require) {
                     return;
                 this.$("#kx2 #VFOB").text(val + "    ");
                 this.oldVFOB = val;
+            }  else if (cmd == 'BG') { 
+                // Bargraph
+                var s = parseInt(val);
+                // We want to optimize drawing so we only hide/unhide the`
+                // difference between 2 readings
+                
+                if (s > this.slevel) {
+                    // We have to show new bars above this.slevel
+                    for (var i = this.slevel+1; i <= s ; i++) {
+                        this.$('#bgs' + i).show();
+                    }
+                } else if (s < this.slevel) {
+                    // We have to hide bars above s
+                    for (var i = s + 1 ; i <= this.slevel ; i++) {
+                        this.$('#bgs' + i).hide();
+                    }
+                } // if s == this.slevel we do nothing, of course
+                                
+                this.slevel = s;
             } else if (cmd == "DS") {
                 // VFO A Text, a bit more tricky.
                 // Avoid useless redraws
