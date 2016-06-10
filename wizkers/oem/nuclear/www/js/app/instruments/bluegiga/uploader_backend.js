@@ -54,10 +54,11 @@ define(function (require) {
         var bytesExpected = 0;
 
         var firmware_binary = null;
+        var packets = [];
         
         var OTA_SERVICE_UUID = '1d14d6ee-fd63-4fa1-bfa4-8f47b42119f0';
         var OTA_CONTROL_UUID = 'f7bf3564-fb6d-4e53-88a4-5e37e0326063';
-        var OTA_DATA_UUID = '984227f3-34fc-4045-a5d0-2c581f81a153';
+        var OTA_DATA_UUID    = '984227f3-34fc-4045-a5d0-2c581f81a153';
 
         // This is how it works:
         // - Read the OTA file
@@ -77,7 +78,6 @@ define(function (require) {
             port.on('data', format);
             port.on('status', status);
         };
-
 
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port
@@ -112,10 +112,6 @@ define(function (require) {
         // use it as the entry point for higher level commands
         // coming from the front-end, such as firmware upload etc...
         this.output = function (data) {
-            //console.log(data);
-            if (data == "bootloader") {
-                startBootloader();
-            } else
             if (data.upload_bin) {
                 firmware_binary = new Uint8Array(data.upload_bin);
                 flashBoard();
@@ -166,7 +162,22 @@ define(function (require) {
                 // Will run any "onOpen" initialization routine here if
                 // necessary.
                 console.log('We found those services', stat.services);
-                onOpen();
+                var found_ota_service = false;
+                for (var i in stat.services) {
+                    if (stat.services[i].uuid == OTA_SERVICE_UUID)
+                        found_ota_service = true;
+                }
+                if (found_ota_service) {
+                    onOpen();
+                } else {
+                    var resp = {
+                        openerror: true,
+                        reason: 'OTA service not found',
+                        description: 'This device does not provide the BlueGiga standard OTA service'
+                    }
+                    self.trigger('data', resp);
+                    self.closePort();
+                }
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
@@ -180,7 +191,8 @@ define(function (require) {
          * Start the protocol
          */
         var onOpen = function (success) {
-            console.log("Need to start sending data to the OTA endpoint");
+            // Tell our front-end that we're ready to get the firmware
+            self.trigger('data', {ota_ready: true});
         };
 
         // Not used
@@ -222,7 +234,50 @@ define(function (require) {
          */
         var flashBoard = function () {
             console.log('***************** Start Flashing ********************');
+            console.info('Fimware byte size', firmware_binary.byteLength);
+
+            if (firmware_binary.byteLength % 256 != 0) {
+                self.trigger('data', {msg: 'Detected corrupt firmware file, not flashing!'});
+                return;
+            }
+
+            var siz = firmware_binary.byteLength;
+            packets = [];
+            // Phase 1: reformat our firmware into a series of packets that we will then send
+            // asynchronously over BLE
+            for (var block = 0; block < siz/256; block++) {
+                // Write 12 packets of 20 bytes:
+                for (var ofs = 0; ofs < 12; ofs++) {
+                    var packet = firmware_binary.subarray(block*256 + ofs*20, block*256 + (ofs+1)*20);
+                    packets.push(packet);
+                    //console.log('Start', block*256 + ofs*20, 'End', block*256 + (ofs+1)*20)
+                    //console.info('packet', packet, '(length:', packet.byteLength, ')');
+                }
+                //console.log('16 byte remainder');
+                var packet = firmware_binary.subarray(block*256 + 240, block*256+256);
+                packets.push(packet);
+                //console.log('Start', block*256 + 240, 'End', block*256 + 256);
+                //console.log(packet, packet.byteLength);
+            }
+
+            console.log(packets);
+            writePacket();
+
         };
+
+        var writeSuccess = function() {
+            if (packets.length) {
+                writePacket();
+            } else {
+                // We are done writing:
+                port.write(OTA_SERVICE_UUID, OTA_CONTROL_UUID, new Uint8Array([0x03]));
+            }
+        };
+
+        var writePacket = function() {
+            var packet = packets.shift();
+            port.write(packet, {service_uuid: OTA_SERVICE_UUID, characterictic_uuid: OTA_DATA_UUID }, writeSuccess);
+        }
     };
 
     _.extend(parser.prototype, Backbone.Events);

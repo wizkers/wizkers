@@ -51,11 +51,13 @@ define(function (require) {
         initialize: function () {
             linkManager.on('input', this.showInput, this);
             linkManager.on('status', this.updateStatus, this);
+            this.flash_ready = false;
             if (!linkManager.isConnected()) {
                 var id = instrumentManager.getInstrument().id;
                 linkManager.openInstrument(id);
             } else {
-                linkManager.driver.version();
+                console.log('Need a closed intrument... shall we close/open?');
+                
             }
         },
 
@@ -68,9 +70,6 @@ define(function (require) {
         },
 
         updateStatus: function (status) {
-            if (status.portopen) {
-                linkManager.driver.version();
-            }
         },
 
         render: function () {
@@ -97,37 +96,34 @@ define(function (require) {
         },
 
         validate_fw: function () {
-            try {
-                //intelhex.parse(this.firmware).data;
-                utils.showAlert('Success', 'Firmware seems valid, click on "Upgrade Firmware" to start the upgrade.',
-                    'bg-success');
+            if (this.firmware.byteLength % 16 == 0) {
+                utils.showAlert('Success', 'Firmware seems valid, click on "Upgrade Firmware" to start the upgrade.', 'alert-success');
                 $("#device_upgrade", this.el).attr('disabled', false).removeClass('btn-danger').addClass('btn-success');
-
-            } catch (e) {
-                utils.showAlert('Error', 'Invalid firmware file, are you sure you picked the right ".hex" firmware file?',
-                    'bg-danger');
+            } else {
+                utils.showAlert('Error', 'Invalid firmware file, contact info@wizkers.io for support.',
+                    'alert-danger');
             }
         },
 
         go: function () {
-            if (this.firmware.length == 0) {
-                utils.showAlert('Error', 'No file selected', 'bg-danger');
+            if (this.firmware.byteLength == 0) {
+                utils.showAlert('Error', 'No file selected', 'alert-danger');
                 return;
             }
-            stats.fullEvent('Firmare', 'fw_upgrade_start', 'onyx');
+            stats.fullEvent('Firmare', 'fw_upgrade_start', 'blebee');
             $("#device_upgrade", this.el).attr('disabled', true);
             // Prevent a click on the Navbar which would crash the firmware upgrade!
-            this.dumbUserHandler = function (e) {
-                e.preventDefault();
-            }
+            // this.dumbUserHandler = function (e) {
+            //    e.preventDefault();
+            // }
             $(".navbar-fixed-top a").click(this.dumbUserHandler)
             utils.hideAlert();
-            utils.showAlert('Info', "Starting upgrade, please wait", 'bg-info');
+            utils.showAlert('Info', "Starting upgrade, please wait", 'alert-info');
             // Switch to our uploader driver
             instrumentManager.startUploader();
             // Wait until we get a confirmation of driver change and
             // open the instrument to put it in bootloader mode:
-            linkManager.once('status', function () {
+            linkManager.once('status', function (status) {
                 linkManager.openBootloader(instrumentManager.getInstrument().id);
             });
 
@@ -150,65 +146,37 @@ define(function (require) {
             }
 
             if (data.openerror) {
-                utils.showAlert('Error', 'Error: serial port not found - check the settings.', 'bg-danger');
+                utils.showAlert('Error', 'Error: could not connect to the BLE module - check your settings.', 'alert-danger');
             }
 
 
             // The first thing we do is ask for the current FW version - we
             // can't upgrade the firmware if the Onyx is not version 12.26-b at least
-            if (data.version && data.status == undefined) {
-                stats.fullEvent('Firmware', 'version_before', 'onyx ' + data.version);
-                if (parseFloat(data.version) >= 12.26) {
-                    $('#file_sel', this.el).attr('disabled', false);
+            if (data.blebee_version != undefined) {
+                if (data.blebee_version == 'v2.0.0') {
                     $('#fw_dl', this.el).attr('disabled', false);
-                    utils.showAlert('OK', 'Device is ready for firmware upgrade.', 'bg-success');
+                    utils.showAlert('Result', 'Your BLEBee needs a firmware upgrade. This will be available soon.', 'alert-success');
 
                 } else {
-                    utils.showAlert('Error', ' Warning: you can only upgrade firmware on Onyx devices already running firmware 12.26-b or higher.', 'bg-danger');
+                    utils.showAlert('Good news', 'Your BLEBee is already in version 2.0.1, no need to upgrade.', 'alert-success');
                 }
                 linkManager.closeInstrument();
                 linkManager.off('status', this.updateStatus);
                 return;
-            }
-
-            // The backend issues a chipID number as soon as
-            // the bootloader is online, we take this as a cue to upload
-            // the firmware to the device.
-            if (data.chipID) {
-                if (data.chipID != 420) {
-                    $('#chipversion', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-remove');
-                    $('#chipid', this.el).html(' --- Chip ID unsupported, please contact Medcom.');
-                    $(".navbar-fixed-top a").unbind('click');
-                } else {
-                    stats.fullEvent('Firmware', 'fw_upload_start', 'onyx');
-                    $('#chipversion', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
-                    $('#chipid', this.el).html('(chipID 420, STM32F1)');
-                    linkManager.sendCommand({
-                        'upload_bin': this.firmware
-                    });
-                }
-            } else if (data.writing) {
+            } else if (data.ota_ready) {
+                linkManager.sendCommand({ upload_bin: this.firmware });
+            }  else if (data.writing) {
                 $("#prog-flash", this.el).width(data.writing + "%");
-            } else if (data.verifying) {
-                $("#prog-flash", this.el).width(data.verifying + "%");
-            } else if (data.run_mode) {
-                if (data.run_mode == 'firmware') {
-                    utils.showAlert('Success', 'Firmware Upgrade was successful, device is restarting', 'bg-success');
-                    $(".navbar-fixed-top a").unbind('click', this.dumbUserHandler);
-                }
-            } else if (data.version) {
-                $('#bootloader', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
-                $('#blversion', this.el).html('( version ' + parseFloat(data.version) / 10 + ')');
-            }
+            } 
 
             if (data.status) {
-                var t = 'bg-info';
+                var t = 'alert-info';
                 switch (data.status) {
                 case 'ok':
-                    t = 'bg-success';
+                    t = 'alert-success';
                     break;
                 case 'error':
-                    t = 'bg-danger';
+                    t = 'alert-danger';
                 }
                 utils.showAlert('Info', data.status + '<br>' + ((data.msg) ? data.msg : ''), t);
 

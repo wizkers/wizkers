@@ -81,6 +81,12 @@ define(function (require) {
                 settings: 'app/instruments/yaesu_817nd/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
+            "slevel_monitor": {
+                name: "S-Level monitor",
+                type: 'app/instruments/slevel_monitor/slevel_monitor',
+                settings: 'app/instruments/slevel_monitor/settings',
+                connectionsettings: 'app/views/instrument/serialport'
+            },
             "simple_serial": {
                 name: "Simple serial terminal",
                 type: 'app/instruments/simple_serial/simple_serial',
@@ -163,7 +169,7 @@ define(function (require) {
                             linkManager.setDriver(driver);
                             self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
                             cb();                            
-                        })
+                        });
                     });
                 }
             }

@@ -107,8 +107,18 @@ define(function (require) {
             var cmd = (key) ? 'TX;' : 'RX;';
             lm.sendCommand(cmd);
         }
+
+        /**
+         * Get the SMeter reading
+         */
+        this.getSmeter = function() {
+            lm.sendCommand('SM;')
+        }
         
 
+        /*********
+         *   End of common radio API
+         */
         // All commands below are fully free and depend on
         // the instrument's capabilities
         this.startTextStream = function () {

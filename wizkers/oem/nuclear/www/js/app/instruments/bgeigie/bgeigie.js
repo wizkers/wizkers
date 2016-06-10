@@ -27,10 +27,6 @@
 define(function (require) {
     "use strict";
 
-    var driver_frontend = require('app/instruments/onyx/driver_frontend');
-    var uploader_frontend = require('app/instruments/bluegiga/uploader_frontend');
-
-
     // Convenient function when views want to talk to each other: keep a central
     // reference to those here
     var current_liveview = null;
@@ -84,9 +80,18 @@ define(function (require) {
             return null;
         };
 
-        // This has to be a link manager
-        this.getDriver = function () {
-            return new driver_frontend();
+        // This is the front-end driver
+        this.getDriver = function(callback) {
+             require(['app/instruments/onyx/driver_frontend'], function(d) {
+                callback(new d());                 
+             });
+        };
+
+        // This is the front-end uploader driver
+        this.getUploader = function(callback) {
+             require(['app/instruments/bluegiga/uploader_frontend'], function(d) {
+                callback(new d());                 
+             });
         };
         
         /**
@@ -97,7 +102,6 @@ define(function (require) {
                 callback(new view(arg));
             });
         };
-
 
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser or as a Cordova native app.

@@ -122,7 +122,11 @@ define(function (require) {
                         // (since all instruments support the same API, a change of instrument
                         // overrides the methods)
                         _.extend(self, new instrumentObject());
-                        linkManager.setDriver(self.getDriver());
+                        self.getDriver(function(driver) {
+                            linkManager.setDriver(driver);
+                            self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
+                            cb();                            
+                        });
                         self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
                         cb();
                     });
@@ -131,11 +135,15 @@ define(function (require) {
         }
 
         this.startUploader = function () {
-            linkManager.setUploader(this.getUploader());
+            this.getUploader(function (ul) {
+                linkManager.setUploader(ul);
+            });
         }
 
         this.stopUploader = function () {
-            linkManager.setDriver(this.getDriver());
+            this.getDriver(function(driver) {
+                linkManager.setDriver(driver);
+            });
         };
 
         // Get the currently loaded instrument

@@ -307,16 +307,19 @@ define(function (require) {
             // as well as pre-parsed data to avoid multiple parsing later on.
             var resp = { raw: data};
             switch (cmd2) {
-                case "FA":
+                case 'FA':
                     var f = parseInt(data.substr(2));
                     resp.vfoa = f;
                     break;
-                case "FB":
+                case 'FB':
                     var f = parseInt(data.substr(2));
                     resp.vfob = f;
                     break;
-                case "BN":
+                case 'BN':
                     resp.mode = radio_modes[parseInt(data.substr(2)) -1];
+                    break;
+                case 'SM':
+                    resp.smeter = parseInt(data.substr(2));
                     break;
             }
             

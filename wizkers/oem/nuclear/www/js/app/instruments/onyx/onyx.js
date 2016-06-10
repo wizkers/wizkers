@@ -26,9 +26,6 @@
 define(function (require) {
     "use strict";
 
-    var driver_frontend = require('app/instruments/onyx/driver_frontend');
-    var uploader_frontend = require('app/instruments/onyx/uploader_frontend');
-
     return function () {
 
         // Convenient function when views want to talk to each other: keep a central
@@ -102,13 +99,18 @@ define(function (require) {
             });
         };
 
-        // This has to be a link manager
-        this.getDriver = function () {
-            return new driver_frontend();
+        // This is the front-end driver
+        this.getDriver = function(callback) {
+             require(['app/instruments/onyx/driver_frontend'], function(d) {
+                callback(new d());                 
+             });
         };
 
-        this.getUploader = function () {
-            return new uploader_frontend();
+        // This is the front-end driver for upload mode
+        this.getUploader = function(callback) {
+             require(['app/instruments/onyx/uploader_frontend'], function(d) {
+                callback(new d());                 
+             });
         };
 
         // This is a browser implementation of the backend driver, when we

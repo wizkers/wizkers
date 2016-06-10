@@ -88,10 +88,13 @@ define(function (require) {
                                 arg: key});
         };
 
-        // All commands below are fully free and depend on
-        // the instrument's capabilities
-        
+        this.getSmeter = function() {
+            // S-Meter data is in the response of that one
+            lm.sendCommand({ command: 'txrx_status'});
+        }
 
+        // All commands below are fully free and depend on
+        // the instrument's capabilities        
 
         this.toggleVFO = function () {
             lm.sendCommand({ command: 'toggle_vfo',

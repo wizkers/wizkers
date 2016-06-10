@@ -118,10 +118,14 @@ define(function (require) {
                     if (stat.services[i].uuid == CUSTOM_SERVICE_UUID) {
                         s_uuid = CUSTOM_SERVICE_UUID;
                         c_uuid = SERIAL_PORT_UUID;
+                        stats.instrumentEvent('blebee_version', 'v2.0.1');
+                        self.trigger('data', { blebee_version: 'v2.0.1'});
                         break;
                     } else if (stat.services[i].uuid == v200_service_uuid) {
                         s_uuid = v200_service_uuid;
                         c_uuid = v200_serial_port_uuid;
+                        stats.instrumentEvent('blebee_version', 'v2.0.0');
+                        self.trigger('data', { blebee_version: 'v2.0.0'});
                         break;
                     }
                 }
@@ -152,7 +156,6 @@ define(function (require) {
             port.open();
             port.on('data', format);
             port.on('status', status);
-
         };
 
         this.closePort = function (data) {

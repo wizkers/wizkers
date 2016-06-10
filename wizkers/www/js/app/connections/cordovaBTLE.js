@@ -65,7 +65,7 @@ define(function (require) {
             if (!portOpen || info == undefined || callback == undefined)
                 return;
 
-            var encodedString = bluetoothle.bytesToEncodedString(new Uint8Array(data));
+            var encodedString = bluetoothle.bytesToEncodedString((data instanceof Uint8Array) ? data : new Uint8Array(data));
             bluetoothle.write(callback, callback, {
                 value: encodedString,
                 address: devAddress,
@@ -120,6 +120,7 @@ define(function (require) {
             bluetoothle.subscribe(subscribeSuccess, function (err) {
                 // We didn't find the service we were looking for, this means
                 // this is probably not the right device. Tell the user!
+                stats.fullEvent('Cordova BLE', 'subscribe_error', err.message);
                 self.trigger('status', {
                     openerror: true,
                     reason: 'Could not connect to the BLE service',
@@ -222,6 +223,7 @@ define(function (require) {
                         portopen: portOpen,
                         services: r.services
                     });
+                    stats.fullEvent('Cordova BLE', 'open_success', '');
                     // Need to send this to tell the front-end we're done reconnecting
                     // and back to normal
                     self.trigger('status', {
@@ -230,6 +232,7 @@ define(function (require) {
 
                 }, function (err) {
                     console.log(err);
+                    stats.fullEvent('Cordova BLE', 'open_error', err.message);
                 }, {
                     address: devAddress
                 });
