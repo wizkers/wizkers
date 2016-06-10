@@ -382,7 +382,8 @@ define(function (require) {
                     }).render().el);
                 }
             }
-            $('#frequency-selector').carousel();
+            // Reset the carousel:
+            $('#frequency-selector').removeData().carousel({interval:false});
 
             return this;
         },

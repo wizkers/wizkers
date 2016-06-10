@@ -1,0 +1,15 @@
+<p><strong>Radio model:</strong>Please select the radio model you want to use for the monitor:
+</p>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 control-label">Radio model:</label>
+    <div class="col-md-9">
+        <select id="radio_type" name="radio_type" class="form-control">
+            <% for(var i in radios) { %>
+            <option
+                <%= radio_type == i ? 'selected':'' %>
+                value="<%= i %>"><%= radios[i].name %></option>
+            <% } %>
+        </select>
+    </div>
+</div>

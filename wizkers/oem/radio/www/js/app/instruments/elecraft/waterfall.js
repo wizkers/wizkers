@@ -404,7 +404,8 @@ define(function (require) {
                     fft.forward(fftbuffer);
                     spectrumbuffer[spectrumidx] = new Float32Array(fft.spectrum);
                     spectrumidx = (spectrumidx + 1) % maxAvg;
-                    requestAnimationFrame(self.drawSpectrogram);
+                    if (!document.hidden)
+                        requestAnimationFrame(self.drawSpectrogram);
                 };
             }());
 

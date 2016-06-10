@@ -78,6 +78,8 @@ define(function(require) {
         encoder = new TextEncoder("utf-8");
         enc_ok = true;
     }
+
+    var nullstring = String.fromCharCode(0);
 	
     return {
         
@@ -104,8 +106,14 @@ define(function(require) {
         ab2str: function(buf) {
             // Implementation using the TextDecoder API
             // if present
-            if (enc_ok)
-                return decoder.decode(buf);
+            if (enc_ok) {
+                // TODO: surely there must be a better way?
+                // Looks like decoder does notreally follow
+                // null terminated strings properly, hence this:
+                var str = decoder.decode(buf);
+                var i = str.indexOf(nullstring);
+                return str.substr(0, (i != -1) ? i :  str.length);
+            }
             return String.fromCharCode.apply(null, new Uint8Array(buf));
         },
         
