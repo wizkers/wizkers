@@ -74,6 +74,9 @@ define(function (require) {
 
         render: function () {
             this.$el.html(template());
+            if (vizapp.type == 'cordova') {
+                keepscreenon.enable();
+            }
             return this;
         },
 
@@ -81,7 +84,10 @@ define(function (require) {
             var self = this;
             $('#fw_dl', this.el).html('Downloading...').addClass('btn-warning');
             var xhr = new XMLHttpRequest();
+            // Version 2.0.1
             xhr.open('GET', 'https://www.dropbox.com/s/aqnxixx32hl6kz8/BLEBee-Firmware-BLE113-2.0.1-BLE-SDK1.3.2-b122.ota?dl=1', true);
+            // Version 2.0.0
+            // xhr.open('GET', 'https://www.dropbox.com/s/uh22hgfmxjp6n18/BLEBee-Firmware-BLE113-2.0.0-BLE-SDK1.3.2-b122.ota?dl=1', true);
             xhr.responseType = 'arraybuffer';
 
             xhr.onload = function (e) {
@@ -97,7 +103,7 @@ define(function (require) {
 
         validate_fw: function () {
             if (this.firmware.byteLength % 16 == 0) {
-                utils.showAlert('Success', 'Firmware seems valid, click on "Upgrade Firmware" to start the upgrade.', 'alert-success');
+                utils.showAlert('Success', 'Firmware looks valid, press "Upgrade Firmware" to start the upgrade.', 'alert-success');
                 $("#device_upgrade", this.el).attr('disabled', false).removeClass('btn-danger').addClass('btn-success');
             } else {
                 utils.showAlert('Error', 'Invalid firmware file, contact info@wizkers.io for support.',
@@ -132,30 +138,16 @@ define(function (require) {
         showInput: function (data) {
             var self = this;
 
-            // Update our raw data monitor
-            if (data.writing == undefined) {
-                var i = $('#input', this.el);
-                var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-                // Keep max 50 lines:
-                if (scroll.length > 50) {
-                    scroll = scroll.slice(scroll.length - 50);
-                }
-                i.val(scroll.join('\n'));
-                // Autoscroll:
-                i.scrollTop(i[0].scrollHeight - i.height());
-            }
-
             if (data.openerror) {
                 utils.showAlert('Error', 'Error: could not connect to the BLE module - check your settings.', 'alert-danger');
             }
-
 
             // The first thing we do is ask for the current FW version - we
             // can't upgrade the firmware if the Onyx is not version 12.26-b at least
             if (data.blebee_version != undefined) {
                 if (data.blebee_version == 'v2.0.0') {
                     $('#fw_dl', this.el).attr('disabled', false);
-                    utils.showAlert('Result', 'Your BLEBee needs a firmware upgrade. This will be available soon.', 'alert-success');
+                    utils.showAlert('Result', 'Your BLEBee needs a firmware upgrade. Press "Get latest firmware" to proceed.', 'alert-warning');
 
                 } else {
                     utils.showAlert('Good news', 'Your BLEBee is already in version 2.0.1, no need to upgrade.', 'alert-success');
@@ -179,20 +171,6 @@ define(function (require) {
                     t = 'alert-danger';
                 }
                 utils.showAlert('Info', data.status + '<br>' + ((data.msg) ? data.msg : ''), t);
-
-                if (data.msg) {
-                    if (data.msg == 'flash write protection disabled, device is resetting') {
-                        $('#writeprotect', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
-                    }
-                    if (data.msg == '...flash erased') {
-                        $('#flasherased', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
-                    }
-                    if (data.msg == 'firmware flashed') {
-                        stats.fullEvent('Firmware', 'upgrade_success', 'onyx');
-                        $(".navbar-fixed-top a").unbind('click', this.dumbUserHandler);
-                        $('#flashprogrammed', this.el).removeClass('glyphicon-hourglass').addClass('glyphicon-check');
-                    }
-                }
             }
         }
     });

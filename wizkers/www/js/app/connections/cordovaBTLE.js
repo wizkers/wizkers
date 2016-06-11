@@ -66,12 +66,18 @@ define(function (require) {
                 return;
 
             var encodedString = bluetoothle.bytesToEncodedString((data instanceof Uint8Array) ? data : new Uint8Array(data));
-            bluetoothle.write(callback, callback, {
+            var params = {
                 value: encodedString,
                 address: devAddress,
                 service: info.service_uuid,
                 characteristic: info.characteristic_uuid,
-            });
+            };
+            if (info.type) {
+                params.type = info.type;
+            }
+            bluetoothle.write(callback, 
+                              function(e) { console.error('BLE Write error', e)},
+                              params);
         };
 
         /**

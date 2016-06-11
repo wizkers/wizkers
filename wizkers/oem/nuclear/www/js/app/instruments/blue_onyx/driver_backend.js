@@ -235,19 +235,12 @@ define(function (require) {
                 setTimeout(function () {
                     if ((new Date().getTime() - lastUpdate) > 6000) {
                         console.log("Do a Onyx bootloader mode cancel");
-                        port.write(abutils.str2ab("0"), {
+                        port.write([0x30], {
                             service_uuid: HEART_RATE_SERVICE_UUID,
                             characteristic_uuid: BLEONYX_MEASURING_MODE
                         }, function (info) {
                             console.log('callback from write', info);
                         });
-                        setTimeout(function () {
-                            // We have to close the port after writing "0", this
-                            // is the case for both Android and MacOS. Otherwise we
-                            // will eventually just get a connection error and port force
-                            // close.
-                            port.close();
-                        }, 1000);
                     }
                 }, 8000);
 

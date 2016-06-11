@@ -55,6 +55,9 @@ define(function (require) {
 
         var firmware_binary = null;
         var packets = [];
+        var total_packets;
+
+        var test_fw = null;
         
         var OTA_SERVICE_UUID = '1d14d6ee-fd63-4fa1-bfa4-8f47b42119f0';
         var OTA_CONTROL_UUID = 'f7bf3564-fb6d-4e53-88a4-5e37e0326063';
@@ -260,23 +263,43 @@ define(function (require) {
                 //console.log(packet, packet.byteLength);
             }
 
-            console.log(packets);
-            writePacket();
+            total_packets = packets.length;
+            if (testIdentical())
+                writePacket();
 
         };
+
+        var testIdentical = function() {
+            var idx = 0;
+            for (var i in packets) {
+                var packet = packets[i];
+                for (var j in packet) {
+                    if (packet[j] != firmware_binary[idx++]) {
+                        console.error('Error, packets not identical to original binary');
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
 
         var writeSuccess = function() {
             if (packets.length) {
                 writePacket();
             } else {
                 // We are done writing:
-                port.write(OTA_SERVICE_UUID, OTA_CONTROL_UUID, new Uint8Array([0x03]));
+                port.write([0x03], {service_uuid: OTA_SERVICE_UUID, characteristic_uuid: OTA_CONTROL_UUID }, function(e){console.log(e);});
+                self.trigger('data', { status:'ok', msg:'Firmware uploaded, flashing now. DO NOT TURN OFF your bGeigie nano before the blue LED turns off.'});
             }
         };
 
         var writePacket = function() {
+            self.trigger('data', { writing: ((total_packets-packets.length)/total_packets)*100});
             var packet = packets.shift();
-            port.write(packet, {service_uuid: OTA_SERVICE_UUID, characterictic_uuid: OTA_DATA_UUID }, writeSuccess);
+            port.write(packet, 
+                       {service_uuid: OTA_SERVICE_UUID, characteristic_uuid: OTA_DATA_UUID, type: 'noResponse' },
+                       writeSuccess
+                       );
         }
     };
 
