@@ -87,7 +87,7 @@ define(function (require) {
             // Version 2.0.1
             xhr.open('GET', 'https://www.dropbox.com/s/aqnxixx32hl6kz8/BLEBee-Firmware-BLE113-2.0.1-BLE-SDK1.3.2-b122.ota?dl=1', true);
             // Version 2.0.0
-            // xhr.open('GET', 'https://www.dropbox.com/s/uh22hgfmxjp6n18/BLEBee-Firmware-BLE113-2.0.0-BLE-SDK1.3.2-b122.ota?dl=1', true);
+            //xhr.open('GET', 'https://www.dropbox.com/s/uh22hgfmxjp6n18/BLEBee-Firmware-BLE113-2.0.0-BLE-SDK1.3.2-b122.ota?dl=1', true);
             xhr.responseType = 'arraybuffer';
 
             xhr.onload = function (e) {
@@ -124,7 +124,7 @@ define(function (require) {
             // }
             $(".navbar-fixed-top a").click(this.dumbUserHandler)
             utils.hideAlert();
-            utils.showAlert('Info', "Starting upgrade, please wait", 'alert-info');
+            utils.showAlert('Info', "Upgrading, please wait. This will take several minutes.", 'alert-info');
             // Switch to our uploader driver
             instrumentManager.startUploader();
             // Wait until we get a confirmation of driver change and

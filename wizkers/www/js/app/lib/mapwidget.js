@@ -38,6 +38,7 @@ define(function (require) {
     // of "map" and reuse it every time, otherwise we get a bad memory leak
     // see https://code.google.com/p/gmaps-api-issues/issues/detail?id=3803
     var globalMap = null;
+    var gmapJSRequested = false;
     var globalMarkers = [];
 
     return Backbone.View.extend({
@@ -76,7 +77,11 @@ define(function (require) {
                 window.GMAPLoaded = function () {
                     self.render();
                 };
-
+                if (gmapJSRequested) {
+                    console.log('Waiting for Google Maps JS already, bailing...');
+                    return;
+                }
+                gmapJSRequested = true;
                 $.getScript('https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&key=AIzaSyDFxVE9J3JhpF93yH46GF3BE6fYBDOXK7s&callback=GMAPLoaded');
 
             } else {
