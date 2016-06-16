@@ -180,7 +180,7 @@ define(function (require) {
             port.write('DB;DS;BN;'); // Query VFO B and VFOA Display
 
             // Then ask the radio for current figures:
-            port.write('PO;'); // Query actual power output
+            port.write('PO;TQ;'); // Query actual power output
 
             // And if we have an amp, then we can get a lot more data:
             port.write('^PI;^PF;^PV;^TM;');
@@ -321,6 +321,8 @@ define(function (require) {
                 case 'SM':
                     resp.smeter = parseInt(data.substr(2));
                     break;
+                case 'TQ':
+                    resp.ptt = data.substr(2) == '1';
             }
             
             self.trigger('data', resp);

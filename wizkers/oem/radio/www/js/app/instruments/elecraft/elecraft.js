@@ -42,7 +42,6 @@ define(function(require) {
                     return [ 'transceiver' ];
         }
 
-
         // This is a Backbone view
         this.getLiveDisplay = function(arg, callback) {
             require(['app/instruments/elecraft/display_live'], function(view) {

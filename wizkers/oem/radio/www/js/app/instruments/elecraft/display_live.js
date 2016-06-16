@@ -64,6 +64,8 @@ define(function (require) {
             this.oldVFOB = null;
             
             this.slevel = 0;
+            this.plevel = 0;
+            this.ptt = false;
 
             // Bad design: this has to be consistent with the settings in settings_wizkers.js
             // (sorry)
@@ -531,6 +533,17 @@ define(function (require) {
                 this.$("#vfob-direct").val(data.vfob / 1e6);
                 return;
             }
+            if (data.ptt != undefined) {
+                if (this.ptt == data.ptt)
+                    return;
+                this.ptt = data.ptt;
+                // Adjust the Bargraph here:
+                // so that we don't do this later and waste cycles
+                for (var i = 0; i < 20; i++) {
+                    this.$('#bgs' + i).hide();
+                }
+                this.slevel = 0;
+            }
             
             // No pre-parsed data, we are using the raw
             // string in the packet:
@@ -545,22 +558,23 @@ define(function (require) {
             } else if (cmd == 'BG') { 
                 // Bargraph
                 var s = parseInt(val);
+                var ofs = (this.ptt) ? 9: 0;
                 // We want to optimize drawing so we only hide/unhide the`
                 // difference between 2 readings
                 
                 if (s > this.slevel) {
                     // We have to show new bars above this.slevel
-                    for (var i = this.slevel+1; i <= s ; i++) {
+                    for (var i = this.slevel+ofs+1; i <= s+ofs ; i++) {
                         this.$('#bgs' + i).show();
                     }
                 } else if (s < this.slevel) {
                     // We have to hide bars above s
-                    for (var i = s + 1 ; i <= this.slevel ; i++) {
+                    for (var i = s + ofs+1 ; i <= this.slevel+ofs ; i++) {
                         this.$('#bgs' + i).hide();
                     }
-                } // if s == this.slevel we do nothing, of course
-                                
+                } // if s == this.slevel we do nothing, of course                                    
                 this.slevel = s;
+
             } else if (cmd == "DS") {
                 // VFO A Text, a bit more tricky.
                 // Avoid useless redraws

@@ -40,6 +40,7 @@ define(function(require) {
             linkManager.on('input', this.showInput, this);
             this.elecraftRXEQ = null;
             this.elecraftTXEQ = null;
+            this.iskx3 = instrumentManager.getInstrument().get('type') == 'elecraft';
         },
 
         events: {
@@ -63,6 +64,11 @@ define(function(require) {
             var self = this;
             this.$el.html(template());
             this.current_mode = '';
+            if (this.iskx3) {
+                this.$('.hide-kx3').hide();                
+            } else {
+                this.$('.hide-kx2').hide();                
+            }
             return this;
         },
         
@@ -163,8 +169,6 @@ define(function(require) {
                 [ 'agc-md', 'MN128;MP;' ],
                 [ 'agc-spd-ssb', 'MN129;MD2;MP;' ],
                 [ 'agc-spd-cw', 'MN129;MD3;MP;'],
-                [ 'agc-spd-fm', 'MN129;MD4;MP;'],
-                [ 'agc-spd-am', 'MN129;MD5;MP;'],
                 [ 'agc-spd-data', 'MN129;MD6;MP;MD' + this.initial_mode + ';'],
                 [ 'agc-thr', 'MN074;SWT19;MP;'],
                 [ 'agc-atk', 'MN074;SWT27;MP;'],
@@ -179,6 +183,10 @@ define(function(require) {
                 [ 'tx-essb', 'MN096;DS;'],
                 [ 'af-lim',  'MN047;MP;']
             ];
+            if (this.iskx3) {
+                this.menulist.push([ 'agc-spd-fm', 'MN129;MD4;MP;']);
+                this.menulist.push([ 'agc-spd-am', 'MN129;MD5;MP;']);
+            }
             this.getNextMenu();            
         },
         

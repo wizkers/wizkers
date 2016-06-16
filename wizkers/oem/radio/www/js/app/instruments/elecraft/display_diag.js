@@ -55,6 +55,8 @@ define(function (require) {
             this.kxpa100 = false;
             this.px3 = false;
 
+            this.iskx3 = instrumentManager.getInstrument().get('type') == 'elecraft';
+
         },
 
         render: function () {
@@ -90,7 +92,14 @@ define(function (require) {
                $('#settings-mems', self.el).append(self.MemSettings.el);
                self.MemSettings.render();
             });
-            self.queryKX3();
+
+            if (this.iskx3) {
+                this.$('.hide-kx3').hide();                
+                this.queryKX3();
+            } else {
+                this.$('.hide-kx2').hide();                
+                this.queryKX2();
+            }
 
             // Force rendering of KX3 tab, somehow the drawing on the tab does not work
             // very well until I click, otherwise
@@ -130,7 +139,7 @@ define(function (require) {
                 this.KXPA100.shown(false);
             }
 
-            if (e.target.innerText == 'KX3' &&
+            if ((e.target.innerText == 'KX3' || e.target.innerText == 'KX2') &&
                 this.$('#settings-audio').is(':visible')) {
                 this.$('#kx3').css({'opacity': '0.3', 'pointer-events': 'none'});
                 this.SettingsAudio.once('initialized', this.focusKX3, this);
@@ -168,6 +177,12 @@ define(function (require) {
         },
 
         queryKX3: function () {
+            linkManager.sendCommand('MN072;MP004;MN255;'); // Enable Tech mode to reach every menu
+            $("#kx3-sn", this.el).html(instrumentManager.getInstrument().get('uuid'));
+            linkManager.sendCommand("RVM;RVD;OM;");
+        },
+
+        queryKX2: function () {
             linkManager.sendCommand('MN072;MP004;MN255;'); // Enable Tech mode to reach every menu
             $("#kx3-sn", this.el).html(instrumentManager.getInstrument().get('uuid'));
             linkManager.sendCommand("RVM;RVD;OM;");
@@ -249,12 +264,13 @@ define(function (require) {
                     
                     linkManager.sendCommand('=;;'); // Try to detect PX3
                     // Display what options are installed/enabled
-                    setLabel("#opt-kxat3", this.el, (data.raw.charAt(3) == 'A'));
-                    setLabel("#opt-kxpa100", this.el, (data.raw.charAt(4) == 'P'));
-                    setLabel("#opt-kxfl3", this.el, (data.raw.charAt(5) == 'F'));
-                    setLabel("#opt-kxat100", this.el, (data.raw.charAt(9) == 'T'));
-                    setLabel("#opt-kxbc3", this.el, (data.raw.charAt(10) == 'B'));
-                    setLabel("#opt-kx3-2m", this.el, (data.raw.charAt(11) == 'X'));
+                    setLabel(".opt-kxat3", this.el, (data.raw.charAt(3) == 'A'));
+                    setLabel(".opt-kxpa100", this.el, (data.raw.charAt(4) == 'P'));
+                    setLabel(".opt-kxfl3", this.el, (data.raw.charAt(5) == 'F'));
+                    setLabel(".opt-kxat100", this.el, (data.raw.charAt(9) == 'T'));
+                    setLabel(".opt-kxbc3", this.el, (data.raw.charAt(10) == 'B'));
+                    setLabel(".opt-kx3-2m", this.el, (data.raw.charAt(11) == 'X'));
+                    setLabel(".opt-kxio2", this.el, (data.raw.charAt(12) == 'I'));
 
                     if (data.raw.charAt(4) == 'P') {
                         // Query the KXPA100 for its serial number

@@ -286,12 +286,12 @@ define(function(require) {
                 flat = { "string" : data };
                 this.gotdata = true;
             }
-            $(".fieldselect", this.el).html(tableTemplate({fields: flat, outputfields: this.outputfields, selected: this.devicefields}));
+            this.$(".fieldselect").html(tableTemplate({fields: flat, outputfields: this.outputfields, selected: this.devicefields}));
             // Make sure that fieldselect is bound vertically by window height, so that
             // the scrollbars appear
-            if (vizapp.mode == 'chrome') {
-                var tbheight = window.innerHeight - this.$('#topoutputinfo').height() - $('.header .container').height() - 20;
-                $('.fieldselect', this.el).css('max-height',
+            if (vizapp.type == 'chrome') {
+                var tbheight = window.innerHeight - this.$('#title1').height() - this.$('#topoutputinfo').height() - this.$('#outputtabsarea').height() - $('.header .container').height() - 20;
+                this.$('#tablewrapper').css('max-height',
                     tbheight + 'px'
                 ); 
             }

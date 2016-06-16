@@ -4,11 +4,13 @@
             <ul class="nav nav-tabs" id="settingsTabs" role="tablist" style="margin-bottom: 5px;">
                 <li class="active" role="presentation"><a href="#general" data-toggle="tab">Diagnostics</a>
                 </li>
-                <li role="presentation"><a href="#kx3" data-toggle="tab">KX3</a>
+                <li class="hide-kx2" role="presentation"><a href="#kx3" data-toggle="tab">KX3</a>
+                </li>
+                <li class="hide-kx3" role="presentation"><a href="#kx3" data-toggle="tab">KX2</a>
                 </li>
                 <li role="presentation"><a href="#kxpa100" data-toggle="tab">KXPA100</a>
                 </li>
-                <li role="presentation"><a href="#px3" data-toggle="tab">PX3</a>
+                <li class="hide-kx2" role="presentation"><a href="#px3" data-toggle="tab">PX3</a>
                 </li>
             </ul>
         </div>
@@ -27,13 +29,19 @@
                         </div>
                         <div class="col-md-4">
                             <p>Options installed/enabled:</p>
-                            <p>
-                                <span class="label label-default" id="opt-kxat3">KXAT3</span>
-                                <span class="label label-default" id="opt-kxpa100">KXPA100</span>
-                                <span class="label label-default" id="opt-kxfl3">KXLF3</span>
-                                <span class="label label-default" id="opt-kxat100">KXAT100</span>
-                                <span class="label label-default" id="opt-kxbc3">KXBC3</span>
-                                <span class="label label-default" id="opt-kx3-2m">KX3-2M</span>
+                            <p class="hide-kx2">
+                                <span class="label label-default opt-kxat3">KXAT3</span>
+                                <span class="label label-default opt-kxpa100">KXPA100</span>
+                                <span class="label label-default opt-kxfl3">KXLF3</span>
+                                <span class="label label-default opt-kxat100">KXAT100</span>
+                                <span class="label label-default opt-kxbc3">KXBC3</span>
+                                <span class="label label-default opt-kx3-2m">KX3-2M</span>
+                            </p>
+                            <p class="hide-kx3">
+                                <span class="label label-default opt-kxat3">KXAT2</span>
+                                <span class="label label-default opt-kxpa100">KXPA100</span>
+                                <span class="label label-default opt-kxat100">KXAT100</span>
+                                <span class="label label-default opt-kxio2">KXIO2</span>
                             </p>
                         </div>
                         <div class="col-md-4">
@@ -43,7 +51,7 @@
                             </p>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row hide-kx2">
                         <div class="col-md-4">
                             <p>PX3 Firmware revision: <span id="px3-fw">not detected</span></p>
                         </div>
@@ -75,7 +83,7 @@
                             <ul class="nav nav-tabs" id="radioSettings" role="tablist" style="margin-bottom: 5px;">
                                 <li class="active" role="presentation"><a href="#kx3-audio" data-toggle="tab">Audio</a>
                                 </li>
-                                <li role="presentation"><a href="#kx3-bands" data-toggle="tab">Band config</a>
+                                <li role="presentation" class="hide-kx2"><a href="#kx3-bands" data-toggle="tab">Band config</a>
                                 </li>
 <!--                                <li role="presentation"><a href="#kx3-radiocfg" data-toggle="tab">Radio config</a>
 -->
@@ -117,7 +125,7 @@
                 <div class="tab-pane" id="kxpa100">
  
                 </div>
-                <div class="tab-pane" id="px3">
+                <div class="tab-pane hide-kx2" id="px3">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="row">

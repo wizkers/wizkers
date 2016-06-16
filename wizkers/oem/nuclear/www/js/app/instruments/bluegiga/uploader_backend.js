@@ -289,6 +289,7 @@ define(function (require) {
             } else {
                 // We are done writing:
                 port.write([0x03], {service_uuid: OTA_SERVICE_UUID, characteristic_uuid: OTA_CONTROL_UUID }, function(e){console.log(e);});
+                stats.fullEvent('Firmware', 'fw_upgrade_success', 'BLEBee');
                 self.trigger('data', { status:'ok', msg:'Firmware uploaded, flashing now. DO NOT TURN OFF your bGeigie nano before the blue LED turns off.'});
             }
         };

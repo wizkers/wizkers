@@ -116,7 +116,7 @@ define(function (require) {
                 utils.showAlert('Error', 'No file selected', 'alert-danger');
                 return;
             }
-            stats.fullEvent('Firmare', 'fw_upgrade_start', 'blebee');
+            stats.fullEvent('Firmware', 'fw_upgrade_start', 'BLEBee');
             $("#device_upgrade", this.el).attr('disabled', true);
             // Prevent a click on the Navbar which would crash the firmware upgrade!
             // this.dumbUserHandler = function (e) {
