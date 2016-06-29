@@ -67,7 +67,7 @@ define(function (require) {
         var bitmap = new Uint8Array(131768);
         var bitmap_index = 0;
         var oldpercent = 0;
-        
+
         // Various radio-related variables
         var radio_modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
 
@@ -174,7 +174,7 @@ define(function (require) {
         function queryRadio() {
             // TODO: follow radio state over here, so that we only query power
             // when the radio transmits, makes much more sense
-            
+
             if (pollCounter++ % 2 == 0) {
             // Query displays and band (does not update by itself)
             port.write('DB;DS;BN;'); // Query VFO B and VFOA Display
@@ -185,9 +185,9 @@ define(function (require) {
             // And if we have an amp, then we can get a lot more data:
             port.write('^PI;^PF;^PV;^TM;');
             port.write('^PC;^SV;'); // Query voltage & current
-                
-            } 
-            
+
+            }
+
             port.write('BG;'); // Bargraph display
 
         };
@@ -220,13 +220,13 @@ define(function (require) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
             port.off('data', format);
-            
+
             // If we are streaming, stop it!
             // The Home view does this explicitely, but if we switch
             // instrument while it is open, then it's up to the driver to do it.
             if (streaming)
                 this.stopLiveStream();
-            
+
             port_close_requested = true;
             port.close();
         }
@@ -291,7 +291,7 @@ define(function (require) {
 
         // Called by the serial parser, cannot be private
         this.onDataReady = function (data) {
-            
+
             if (this.uidrequested && data.substr(0, 5) == "DS@@@") {
                 // We have a Unique ID
                 console.log("Sending uniqueID message");
@@ -315,7 +315,13 @@ define(function (require) {
                     var f = parseInt(data.substr(2));
                     resp.vfob = f;
                     break;
-                case 'BN':
+                case 'IF':
+                    var f = parseInt(data.substr(2,11));
+                    resp.vfoa = f;
+                    var md = radio_modes[parseInt(data.substr(29,1))-1];
+                    resp.mode = md;
+                    break;
+                case 'MD':
                     resp.mode = radio_modes[parseInt(data.substr(2)) -1];
                     break;
                 case 'SM':
@@ -324,7 +330,7 @@ define(function (require) {
                 case 'TQ':
                     resp.ptt = data.substr(2) == '1';
             }
-            
+
             self.trigger('data', resp);
         }
 

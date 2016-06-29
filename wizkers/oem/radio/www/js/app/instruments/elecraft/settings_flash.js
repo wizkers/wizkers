@@ -140,7 +140,7 @@ define(function(require) {
                 
                 var address = parseInt(val.substr(0,4), 16);
                 
-                var scroll = data + '\n';
+                var scroll = data.raw + '\n';
                 // Add the Hex dump below:
                 var buf = val.substr(6, val.length -8);
                 var b = abu.hextoab(buf)

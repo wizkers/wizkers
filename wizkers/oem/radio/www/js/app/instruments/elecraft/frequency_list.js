@@ -416,7 +416,7 @@ define(function (require) {
             };
             freq /= 1000;
             for (var band in boundaries) {
-                if (freq > boundaries[band].min && freq <= boundaries[band].max)
+                if (freq >= boundaries[band].min && freq < boundaries[band].max)
                     return band;
             }  
         },

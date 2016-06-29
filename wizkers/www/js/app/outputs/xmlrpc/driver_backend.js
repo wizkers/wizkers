@@ -52,9 +52,9 @@ define(function (require) {
 
         // A few driver variables: we keep track of a few things
         // here
-        
+
         var radio_modes = [];
-        
+
         var bws_list = [ $.xmlrpc.force('none', 'Bandwidth')];
             for (var i = 50 ; i <= 1000; i += 50)
                 bws_list.push($.xmlrpc.force('none', i));
@@ -62,10 +62,10 @@ define(function (require) {
                 bws_list.push($.xmlrpc.force('none', i));
             for (var i = 2200 ; i <= 4000; i += 200)
                 bws_list.push($.xmlrpc.force('none', i));
-                
+
          // Cache a couple of references to save CPU
          var domParser = new DOMParser();
-        
+
         // Note: we do not poll for those values ourselves, we
         // count on the UI to do this - to be reviewed later if
         // necessary...
@@ -88,10 +88,10 @@ define(function (require) {
             // Query the radio for basic frequency info, so that
             // we populate our frequency variables:
             linkManager.sendCommand('FA;FB;BW;'); // Query VFO B and VFOA Display
-            
+
             // Query our driver for all supported modes:
             radio_modes = linkManager.driver.getModes();
-            
+
 
             // Create a rigserver:
             if (rigserver) {
@@ -119,7 +119,7 @@ define(function (require) {
         // In this plugin, we just keep track of the incoming data and
         // only send data upon request on the TCP server interface
         // The data is the raw stream from the radio, we just pick what
-        // we want there. 
+        // we want there.
         //
         // TODO: refactor to get the processed stream from the radio, so that
         // we can support any type of transceiver, and not rely on Kenwood/Elecraft
@@ -129,15 +129,17 @@ define(function (require) {
                 return;
             if (data.vfoa) {
                 vfoa_frequency = data.vfoa;
-                return;
-              } else if (data.vfob) {
+              }
+            if (data.vfob) {
                 vfob_frequency = data.vfob;
-                return;
+            }
+            if (data.mode) {
+                radio_mode = data.mode;
             }
 
             if (data.raw == undefined)
                 return;
-                
+
             // All the commands below are Kenwood style:
             if (data.raw[0] == '^') {
                 var cmd = data.raw.substr(1,2);
@@ -154,9 +156,6 @@ define(function (require) {
                     break;
                 case "PO": // KX3 power level
                     pwr_level_kx3 = Math.ceil(parseInt(data.raw.substr(2))/10);
-                    break;
-                case "IF":
-                    radio_mode = radio_modes[parseInt(data.raw.substr(29,1))-1];
                     break;
                 }
             }
@@ -178,7 +177,7 @@ define(function (require) {
                 xmlParser(data, tcpConnection);
             }, onError);
         };
-                
+
         var xmlParser = function(buffer, c) {
             var idx = buffer.indexOf('<?xml version="1.0"?>');
             var sxml = '';
@@ -192,7 +191,7 @@ define(function (require) {
             } else {
                sxml = buffer.substr(idx);
             }
-            
+
             var xml = domParser.parseFromString(sxml, "text/xml");
             var json = $.xmlrpc.parseCall(xml);
             if (json.methodName) {
@@ -231,6 +230,9 @@ define(function (require) {
                     case "rig.get_ptt":
                         getPtt(c);
                         break;
+                    case "main.get_frequency": // Deprecated but used by RUMLog
+                        getFrequency(c);
+                        break;
                     case "rig.get_vfo":
                         getVfo(c);
                         break;
@@ -248,15 +250,15 @@ define(function (require) {
                         break;
                     default:
                         console.log('Unsupported method:', json.methodName);
-                        break; 
+                        break;
                 }
             }
-            
+
         };
-        
+
         var sendResponse = function (json, c) {
             var xml = $.xmlrpc.response( json );
-            var body = new window.XMLSerializer().serializeToString(xml);
+            var body = '<?xml version="1.0"?>\n' + new window.XMLSerializer().serializeToString(xml);
             // Send the body with the right headers:
             c.sendMessage('HTTP/1.1 200 OK\n');
             c.sendMessage('WizkersXmlRpc 1.0\n');
@@ -264,7 +266,7 @@ define(function (require) {
             c.sendMessage('Content-length: ' + body.length + '\n\n');
             c.sendMessage(body);
         }
-                
+
         var listMethods = function(c) {
             var arr = [];
             for (var cmd in commands) {
@@ -294,21 +296,22 @@ define(function (require) {
 	            "rig.set_mode": [ "i:i", "set MODE iaw MODE table" ],
 	            "rig.set_notch": [ "d:d", "set NOTCH value in Hz" ],
 	            "rig.set_ptt": [  "i:i", "set PTT 1/0 (on/off)" ],
-	            "rig.set_vfo": [ "d:d", "set current VFO in Hz" ]
+	            "rig.set_vfo": [ "d:d", "set current VFO in Hz" ],
+                "main.get_frequency": [ "d:n", "Returns the RF carrier frequency (deprecated)"],
         };
-        
-        
+
+
         // Reguest Transceiver name
         var getXcvr = function(c) {
             sendResponse(["KX3"],c);
         }
-        
+
         // Request Transceiver supported modes
         // Hardcoded for now, but could query the instrument to get more details
         var getModes = function(c) {
             sendResponse([radio_modes], c);
         }
-        
+
         var setMode = function(params, c) {
             console.log(params);
             sendResponse([], c);
@@ -317,7 +320,7 @@ define(function (require) {
         // Note: we force the response type to 'none' which removes
         // the type of the <value> tag, as expected by fldigi (XMLRPC spec says
         // that no type is equivalent to a String.)
-        var getBws = function(c) {                
+        var getBws = function(c) {
             sendResponse([[bws_list]], c);
         }
 
@@ -325,17 +328,17 @@ define(function (require) {
             var bw = [ $.xmlrpc.force('none', vfoa_bandwidth), ''];
             sendResponse([bw], c);
         }
-        
+
         var setBw = function(params, c) {
             console.log(params);
             sendResponse( [], c);
         }
-        
+
         var getMode = function(c) {
             var mode = [ radio_mode ];
             sendResponse(mode, c);
         }
-        
+
         // Hardcode for now
         var getSideband = function(c) {
             var mode = [ 'U'];
@@ -344,29 +347,34 @@ define(function (require) {
 
         var setPtt = function( state, c) {
             linkManager.driver.ptt(state);
-            xmit = state;            
-            sendResponse( [xmit], c);            
+            xmit = state;
+            sendResponse( [xmit], c);
         }
-        
+
         var getPtt = function (c) {
             sendResponse( [xmit], c);
         }
-        
+
         var getVfo = function (c) {
             sendResponse( [ (vfoa_frequency).toString() ], c);
         }
-        
+
+        var getFrequency = function (c) {
+            var forced = $.xmlrpc.force('double', vfoa_frequency);
+            sendResponse( [forced], c);
+        }
+
         var setVfo = function(params, c) {
             var freq = ("00000000000" + params[0]).slice(-11); // Make sure we have the right number of zeroes
             console.log("Rigctld emulation: set frequency to " + freq);
             linkManager.driver.setVFO(freq, 'a');
             sendResponse(params, c);
         }
-        
+
         var getNotch = function(c) {
             sendResponse( [ 0], c);
         }
-        
+
         // Not supported, but fldigi always asks for it (even if we don't
         // say we support it)
         var getSMeter = function(c) {

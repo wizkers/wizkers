@@ -56,7 +56,6 @@ define(function(require) {
         console.log("Starting TCP server on port". tcpport);
         var addr = ipaddr;
         var port = tcpport;
-        var maxConnections = 10;
         var isListening = false;
         
         // Chrome requires a bunch of callbacks with their TCP Server stack
@@ -90,17 +89,17 @@ define(function(require) {
          * Shutdown the TCP Server and disconnects all its sockets
          */
         this.disconnect = function() {
-            if (serverSocketId) {
-              tcps.onAccept.removeListener(onAccept);
-              tcps.onAcceptError.removeListener(onAcceptError);
-              tcps.close(serverSocketId);
-            }
             for (var i=0; i< openSockets.length; i++) {
               try {
                 openSockets[i].close();
               } catch (ex) {
                 console.log(ex);
               }
+            }
+            if (serverSocketId) {
+              tcps.onAccept.removeListener(onAccept);
+              tcps.onAcceptError.removeListener(onAcceptError);
+              tcps.close(serverSocketId);
             }
             openSockets = [];
             serverSocketId = 0;
@@ -145,6 +144,7 @@ define(function(require) {
 
           var tcpConnection = new TcpConnection(info.clientSocketId);
           openSockets.push(tcpConnection);
+          console.info('We now have', openSockets.length, 'clients connected');
           tcpConnection.requestSocketInfo(onSocketInfo);
           console.log('[TCP Server] Incoming connection handled for socket', info.clientSocketId);
 
@@ -173,8 +173,19 @@ define(function(require) {
             if (callbacks.connect) {
               callbacks.connect(tcpConnection, socketInfo);
             }
+            tcpConnection.addSocketClosedListener(onSocketClose);
         }
-                  
+
+        /**
+         * We need to track when a socket closes too
+         */
+        var onSocketClose = function(tcpConnection) {
+          console.log('TCP Server notified of socket closing');
+          var i = openSockets.indexOf(tcpConnection);
+          openSockets.splice(i,1);
+          console.info('We still have', openSockets.length, 'sockets open.');
+        }
+
       };  
         
 
@@ -272,6 +283,10 @@ define(function(require) {
       }
       callbacks.disconnect = onError;
     };
+
+    this.addSocketClosedListener = function(callback) {
+      callbacks.disconnect = callback;
+    }
     
     var lastMessage = '';
 
@@ -325,7 +340,7 @@ define(function(require) {
         chrome.sockets.tcp.onReceive.removeListener(onReceive);
         chrome.sockets.tcp.onReceiveError.removeListener(onReceiveError);
         if (callbacks.disconnect)
-          callbacks.disconnect();
+          callbacks.disconnect(this);
         chrome.sockets.tcp.close(socketId);
       }
     };    

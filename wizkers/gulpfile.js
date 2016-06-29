@@ -14,7 +14,7 @@ var _s = require('underscore.string');
 
 gulp.task('default', function () {
     console.log("*******************");
-    console.log("Targets: build chrome cordova nwjs server");
+    console.log("Targets: build chrome cordova nwjs electron server");
     console.log("*******************");
 });
 
@@ -49,6 +49,8 @@ var paths = {
     server_dist:   'dist/server/',
     nwjs_debug:    'dist/nwjs-debug/',
     nwjs_dist:     'dist/nwjs/',
+    electron_debug:    'dist/electron-debug/',
+    electron_dist:     'dist/electron/',
 
     // Application paths: (need to be in arrays)
     templates: ['www/js/tpl/**/*.html'],
@@ -65,7 +67,8 @@ var paths = {
     server_files:  ['server/**/*'],
     chrome_files:  [oem_directory + '/chrome/**/*'],
     cordova_files: [oem_directory + '/cordova/**/*'],
-    nwjs_files:    [oem_directory + '/nwjs/**/*']
+    nwjs_files:    [oem_directory + '/nwjs/**/*'],
+    electron_files:    [oem_directory + '/electron/**/*']
 }
 
 console.log(paths.templates);
@@ -243,6 +246,28 @@ gulp.task('nwjs', ['build', 'nwjs_copy_build'], function () {
         .pipe(gulp.dest(paths.nwjs_dist))
         .pipe(gulp.dest(paths.nwjs_debug));
 });
+
+/*
+ * Copy the build files to the Electron directory
+ */
+gulp.task('electron_copy_build', ['build'], function () {
+    return gulp.src([paths.build + '/www/**/*'], {
+            base: paths.build
+        })
+        .pipe(gulp.dest(paths.electron_debug));
+});
+
+/**
+ * Build the Electron app
+ */
+gulp.task('electron', ['build', 'electron_copy_build'], function () {
+    return gulp.src(paths.electron_files, {
+            base: oem_directory + '/electron`'
+        })
+        .pipe(gulp.dest(paths.electron_dist))
+        .pipe(gulp.dest(paths.electron_debug));
+});
+
 
 
 /**

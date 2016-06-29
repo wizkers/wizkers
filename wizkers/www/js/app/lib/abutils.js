@@ -152,7 +152,7 @@ define(function(require) {
         hexdump: function( s ) {
             var dumped = "";
             if (typeof s != "string")
-                s = this.ab2str(s);
+                s = String.fromCharCode.apply(null, new Uint8Array(s));
             var blocks = s.match( /[\s\S.]{1,16}/g );
             for( var block in blocks ) {
                 dumped += dump_block( blocks[block] ) + "\r\n";
