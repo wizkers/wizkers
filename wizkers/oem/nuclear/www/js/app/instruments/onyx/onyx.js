@@ -45,7 +45,7 @@ define(function (require) {
         // returns a simple array of capabilities    
         this.getCaps = function () {
             return ["LiveDisplay", "NumDisplay", "DiagDisplay", "LogView", 'WizkersSettings',
-                    "LogManagementView", "Upgrader", "WantReplay"
+                    "LogManagementView", "Upgrader", "WantReplay", 'Recording'
                    ];
         };
 

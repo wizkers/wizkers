@@ -217,11 +217,15 @@ define(function (require) {
         }
 
         this.startUploader = function () {
-            linkManager.setUploader(this.getUploader());
+            this.getUploader(function (ul) {
+                linkManager.setUploader(ul);
+            });
         }
 
         this.stopUploader = function () {
-            linkManager.setDriver(this.getDriver());
+            this.getDriver(function(driver) {
+                linkManager.setDriver(driver);
+            });
         };
 
         // Get the currently loaded instrument

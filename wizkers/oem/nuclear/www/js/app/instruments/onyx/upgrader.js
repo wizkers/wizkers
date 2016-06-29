@@ -124,19 +124,19 @@ define(function (require) {
             try {
                 //intelhex.parse(this.firmware).data;
                 utils.showAlert('Success', 'Firmware seems valid, click on "Upgrade Firmware" to start the upgrade.',
-                    'bg-success');
+                    'alert-success');
                 $("#device_upgrade", this.el).attr('disabled', false).removeClass('btn-danger').addClass('btn-success');
 
             } catch (e) {
                 utils.showAlert('Error', 'Invalid firmware file, are you sure you picked the right ".hex" firmware file?',
-                    'bg-danger');
+                    'alert-danger');
             }
         },
 
 
         go: function () {
             if (this.firmware.length == 0) {
-                utils.showAlert('Error', 'No file selected', 'bg-danger');
+                utils.showAlert('Error', 'No file selected', 'alert-danger');
                 return;
             }
             stats.fullEvent('Firmare', 'fw_upgrade_start', 'onyx');
@@ -147,7 +147,7 @@ define(function (require) {
             }
             $(".navbar-fixed-top a").click(this.dumbUserHandler)
             utils.hideAlert();
-            utils.showAlert('Info', "Starting upgrade, please wait", 'bg-info');
+            utils.showAlert('Info', "Starting upgrade, please wait", 'alert-info');
             // Switch to our uploader driver
             instrumentManager.startUploader();
             // Wait until we get a confirmation of driver change and
@@ -175,7 +175,7 @@ define(function (require) {
             }
 
             if (data.openerror) {
-                utils.showAlert('Error', 'Error: serial port not found - check the settings.', 'bg-danger');
+                utils.showAlert('Error', 'Error: serial port not found - check the settings.', 'alert-danger');
             }
 
 
@@ -186,10 +186,10 @@ define(function (require) {
                 if (parseFloat(data.version) >= 12.26) {
                     $('#file_sel', this.el).attr('disabled', false);
                     $('#fw_dl', this.el).attr('disabled', false);
-                    utils.showAlert('OK', 'Device is ready for firmware upgrade.', 'bg-success');
+                    utils.showAlert('OK', 'Device is ready for firmware upgrade.', 'alert-success');
 
                 } else {
-                    utils.showAlert('Error', ' Warning: you can only upgrade firmware on Onyx devices already running firmware 12.26-b or higher.', 'bg-danger');
+                    utils.showAlert('Error', ' Warning: you can only upgrade firmware on Onyx devices already running firmware 12.26-b or higher.', 'alert-danger');
                 }
                 linkManager.closeInstrument();
                 linkManager.off('status', this.updateStatus);
@@ -210,7 +210,7 @@ define(function (require) {
                     $('#chipid', this.el).html('(chipID 420, STM32F1)');
                     linkManager.sendCommand({
                         'upload_bin': this.firmware
-                    });
+                     });
                 }
             } else if (data.writing) {
                 $("#prog-flash", this.el).width(data.writing + "%");
@@ -218,7 +218,7 @@ define(function (require) {
                 $("#prog-flash", this.el).width(data.verifying + "%");
             } else if (data.run_mode) {
                 if (data.run_mode == 'firmware') {
-                    utils.showAlert('Success', 'Firmware Upgrade was successful, device is restarting', 'bg-success');
+                    utils.showAlert('Success', 'Firmware Upgrade was successful, device is restarting', 'alert-success');
                     $(".navbar-fixed-top a").unbind('click', this.dumbUserHandler);
                 }
             } else if (data.version) {
@@ -227,13 +227,13 @@ define(function (require) {
             }
 
             if (data.status) {
-                var t = 'bg-info';
+                var t = 'alert-info';
                 switch (data.status) {
                 case 'ok':
-                    t = 'bg-success';
+                    t = 'alert-success';
                     break;
                 case 'error':
-                    t = 'bg-danger';
+                    t = 'alert-danger';
                 }
                 utils.showAlert('Info', data.status + '<br>' + ((data.msg) ? data.msg : ''), t);
 

@@ -350,7 +350,7 @@ define(function (require) {
             console.log('bootloader reset done');
             self.trigger('data', {
                 status: 'ok',
-                msg: 'Waiting 3 seconds for device reboot to bootloader'
+                msg: 'Waiting 5 seconds for device reboot to bootloader'
             });
 
             // Wait 3s then get into Bootloader mode and detect

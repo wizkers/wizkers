@@ -53,7 +53,7 @@ define(function (require) {
         // returns a simple array of capabilities    
         this.getCaps = function () {
             return ['LiveDisplay', 'NumDisplay', 'LogView', 'WizkersSettings',
-                    'WantReplay'
+                    'WantReplay', 'Recording'
                    ];
         };
 
