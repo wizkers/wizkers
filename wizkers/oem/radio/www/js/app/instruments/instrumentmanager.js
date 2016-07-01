@@ -81,6 +81,12 @@ define(function (require) {
                 settings: 'app/instruments/yaesu_817nd/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
+            "yaesu_ft857": {
+                name: "Yaesu FT-857",
+                type: 'app/instruments/yaesu_ft857/yaesu_ft857',
+                settings: 'app/instruments/yaesu_817nd/settings',
+                connectionsettings: 'app/views/instrument/serialport'
+            },
             "slevel_monitor": {
                 name: "S-Level monitor",
                 type: 'app/instruments/slevel_monitor/slevel_monitor',
@@ -168,7 +174,7 @@ define(function (require) {
                         self.getDriver(function(driver) {
                             linkManager.setDriver(driver);
                             self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
-                            cb();                            
+                            cb();
                         });
                     });
                 }
