@@ -27,13 +27,9 @@
 define(function (require) {
     "use strict";
 
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        Snap = require('snap'),
+    var Snap = require('snap'),
         utils = require('app/utils'),
         template = require('js/tpl/instruments/elecraft/ElecraftLiveView.js');
-
 
     // Need to load these, but no related variables.
     require('bootstrap');
@@ -47,6 +43,9 @@ define(function (require) {
         });
     }
 
+    return (function() {
+        // Everything inside of here is private to each instance
+
     return Backbone.View.extend({
 
         initialize: function () {
@@ -54,7 +53,7 @@ define(function (require) {
 
             this.textOutputBuffer = [];
             this.transmittingText = false;
-            
+
             this.vfoangle = 0;
             this.oldPageY = 0;
 
@@ -62,7 +61,7 @@ define(function (require) {
             // unnecessary redraws of the front panel.
             this.oldVFOA = null;
             this.oldVFOB = null;
-            
+
             this.slevel = 0;
             this.plevel = 0;
             this.ptt = false;
@@ -150,12 +149,12 @@ define(function (require) {
         onClose: function () {
             linkManager.off('status', this.updatestatus, this);
             linkManager.off('input', this.showInput, this);
-            
+
             // Note:  the 'onClose' method is called after we changed
             // the driver, so we don't have access to our Elecraft driver
             // anymore: TODO: refactor to first call a "closeDriver" method
             // before changing the instrument ? to be determined...
-            
+
             // linkManager.driver.stopTextStream();
 
             if (this.ElecraftFrequencyListView != null)
@@ -200,7 +199,7 @@ define(function (require) {
             "touchmove #vfoa-wheel": "vfoAWheelTouch",
             "touchstart #vfoa-wheel": "vfoAWheelTouchStart"
         },
-        
+
         vfoAWheel: function(e) {
             // console.log('Mousewheel',e);
             this.rotateVfoWheel(e.deltaY);
@@ -210,7 +209,7 @@ define(function (require) {
         vfoAWheelTouchStart: function(e) {
             this.oldPageY = e.originalEvent.touches[0].pageY;
         },
-        
+
         // Split in two to speed things up
         vfoAWheelTouch: function(e) {
             var ty = e.originalEvent.touches[0].pageY;
@@ -219,7 +218,7 @@ define(function (require) {
             this.rotateVfoWheel(deltaY);
             e.preventDefault(); // Prevent the page from scrolling!
         },
-        
+
         rotateVfoWheel: function(deltaY) {
             this.vfoangle = (this.vfoangle- deltaY/2) % 360;
             var tx = this.dip_x * (Math.cos(this.vfoangle*2*Math.PI/360));
@@ -227,7 +226,7 @@ define(function (require) {
             this.vfodip.transform('t' + tx + ',' + ty);
             var step = Math.floor(Math.min(Math.abs(deltaY)/50, 7));
             var cmd = ((deltaY < 0) ? 'UP' : 'DN') + step + ';DS;';
-            linkManager.sendCommand(cmd);            
+            linkManager.sendCommand(cmd);
         },
 
         hideOverflow: function () {
@@ -524,7 +523,7 @@ define(function (require) {
             if (data.raw == undefined)
                 return; // Detect error messages which don't contain what we need.
             // Now update our display depending on the data we received:
-            
+
             // If we have a pre-parsed element, use it (faster!)
             if (data.vfoa) {
                 this.$("#vfoa-direct").val(data.vfoa/1e6);
@@ -544,7 +543,7 @@ define(function (require) {
                 }
                 this.slevel = 0;
             }
-            
+
             // No pre-parsed data, we are using the raw
             // string in the packet:
             var cmd = data.raw.substr(0, 2);
@@ -555,13 +554,13 @@ define(function (require) {
                     return;
                 this.$("#kx3 #VFOB").text(val + "    ");
                 this.oldVFOB = val;
-            } else if (cmd == 'BG') { 
+            } else if (cmd == 'BG') {
                 // Bargraph
                 var s = parseInt(val);
                 var ofs = (this.ptt) ? 9: 0;
                 // We want to optimize drawing so we only hide/unhide the`
                 // difference between 2 readings
-                
+
                 if (s > this.slevel) {
                     // We have to show new bars above this.slevel
                     for (var i = this.slevel+ofs+1; i <= s+ofs ; i++) {
@@ -572,7 +571,7 @@ define(function (require) {
                     for (var i = s + ofs+1 ; i <= this.slevel+ofs ; i++) {
                         this.$('#bgs' + i).hide();
                     }
-                } // if s == this.slevel we do nothing, of course                                    
+                } // if s == this.slevel we do nothing, of course
                 this.slevel = s;
 
             } else if (cmd == "DS") {
@@ -678,4 +677,5 @@ define(function (require) {
         },
 
     });
+    })();
 });

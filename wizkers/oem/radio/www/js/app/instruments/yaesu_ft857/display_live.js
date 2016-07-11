@@ -90,7 +90,7 @@ define(function (require) {
             var self = this;
             this.$el.html(template());
 
-            this.faceplate = Snap("#ft817");
+            this.faceplate = Snap("#ft857");
             Snap.load("js/app/instruments/yaesu_ft857/FT-857.svg", function (f) {
                 f.select("#layer1").click(function (e) {
                     self.handleButton(e);
@@ -240,17 +240,17 @@ define(function (require) {
                 // Format frequency as "XXX.XXX.XX"
                 var line2 = (f < 100) ? ' ': '';
                 line2 += f2 + '.' + f3 + '.' + f4;
-                this.$("#ft817 #lcd_line2").text(line2);
+                this.$("#ft857 #lcd_line2").text(line2);
             }
 
             if (data.squelch != undefined && data.ptt == false) {
-                this.$("#ft817 #busy_led").css('fill', (data.squelch) ? '#707070' : '#35e133');
+                this.$("#ft857 #busy_led").css('fill', (data.squelch) ? '#707070' : '#35e133');
             } else if (data.ptt) {
-                this.$("#ft817 #busy_led").css('fill', '#ff0000');
+                this.$("#ft857 #busy_led").css('fill', '#ff0000');
             }
 
             if (data.smeter != undefined) {
-                this.$("#ft817 #lcd_line3").text('S' + data.smeter);
+                this.$("#ft857 #lcd_line3").text('S' + data.smeter);
             }
 
             if (data.active_vfo) {
@@ -259,7 +259,7 @@ define(function (require) {
 
             if (data.mode) {
                 var line1 = this.vfo + '     ' + data.mode;
-                this.$("#ft817 #lcd_line1").text(line1);
+                this.$("#ft857 #lcd_line1").text(line1);
                 // Update the band selection radio buttons too:
                 this.$(".mode-btn").removeClass("active");
                 this.$("#mode-" + data.mode).parent().addClass("active");

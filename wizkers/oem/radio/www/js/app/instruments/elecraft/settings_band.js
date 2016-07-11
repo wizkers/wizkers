@@ -26,11 +26,8 @@
 
 define(function(require) {
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
-        Backbone = require('backbone'),
-        template = require('js/tpl/instruments/elecraft/SettingsBand.js');
+
+    var template = require('js/tpl/instruments/elecraft/SettingsBand.js');
 
     return Backbone.View.extend({
 
@@ -39,7 +36,7 @@ define(function(require) {
             this.menumode = '';
             linkManager.on('input', this.showInput, this);
         },
-        
+
         bands: ["160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", 0, 0, 0, 0, 0, "2m"],
 
         events: {
@@ -58,18 +55,18 @@ define(function(require) {
             this.$el.html(template());
             return this;
         },
-        
+
         refresh: function() {
             linkManager.sendCommand('BN;');
         },
-        
+
         setBand: function (e) {
             console.log('[settings_band] setBand');
             var band = e.target.innerText;
             linkManager.driver.setBand(band);
             linkManager.sendCommand('BN;');
-        },  
-        
+        },
+
         setRptOfs: function(e) {
             // We react both to button press & Enter key press
             if ((event.target.id == "rpt-ofs" && event.keyCode == 13) || (event.target.id != "rpt-ofs")) {
@@ -92,9 +89,9 @@ define(function(require) {
                 [ 'rpt-ofs', 'MN007;MP;'],
                 [ 'rx-shft', 'MN142;MP;']
             ];
-            this.getNextMenu();            
+            this.getNextMenu();
         },
-        
+
         getNextMenu: function() {
             var nxt = this.menulist.shift();
             if (nxt != undefined) {
@@ -106,7 +103,7 @@ define(function(require) {
                 console.log('[band settings] Got all menu entries we needed');
             }
         },
-        
+
         parseMenu: function(data) {
             var val = parseInt(data.raw.substr(2));
             console.log('[band settings] Parsing menu ' + this.menumode + ' with value ' + val);
@@ -136,14 +133,14 @@ define(function(require) {
             var n = event.target.id;
             linkManager.sendCommand('MN' + menuNumbers[n] + ';MP' + v + ';MN255;');
         },
-        
+
         showInput: function(data) {
             if (!this.$el.is(':visible')) {
                 return;
             }
             var cmd = data.raw.substr(0, 2);
             var val = data.raw.substr(2);
-            
+
             if (cmd == 'BN') {
                 // We need to check for this, because in some modes (AI2; for instance)
                 // the KX3 echoes BNXX when changing band, and in others (AI0) it doesn't
@@ -158,7 +155,7 @@ define(function(require) {
             } else if (cmd == 'MP' && this.menumode != '') {
                 // Happens when we are reading from a menu
                 this.parseMenu(data);
-            } 
+            }
         }
     });
 });

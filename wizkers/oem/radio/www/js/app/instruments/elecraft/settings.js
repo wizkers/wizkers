@@ -24,10 +24,7 @@
 define(function (require) {
     "use strict";
 
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        template = require('js/tpl/instruments/elecraft/ElecraftSettingsView.js');
+    var template = require('js/tpl/instruments/elecraft/ElecraftSettingsView.js');
 
     require('webrtc_adapter'); // Load WebRTC adapter shim.
 

@@ -24,10 +24,7 @@
 define(function (require) {
     "use strict";
 
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        utils = require('app/utils'),
-        Backbone = require('backbone'),
+    var utils = require('app/utils'),
         template = require('js/tpl/instruments/elecraft/ElecraftWizkersSettingsView.js');
 
     return Backbone.View.extend({

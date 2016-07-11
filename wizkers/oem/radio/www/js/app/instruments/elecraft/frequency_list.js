@@ -25,10 +25,7 @@
 define(function (require) {
     "use strict";
 
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        Snap = require('snap'),
+    var Snap = require('snap'),
         bootbox = require('bootbox'),
         template = require('js/tpl/instruments/elecraft/ElecraftFrequencyItemView.js');
 
@@ -74,7 +71,7 @@ define(function (require) {
 
         render: function () {
             var self = this;
-            // Extract the correct frequency memory from our model        
+            // Extract the correct frequency memory from our model
             this.$el.html(template(this.mem));
 
             // Now make the fields editable in-line, along with the right
@@ -295,7 +292,7 @@ define(function (require) {
 
             // The server lets us specify free-form metadata for each instrument,
             // we are using it for storing our frequencies, per band.
-            // 
+            //
             var metadata = this.model.get('metadata');
             this.frequencies = metadata.frequencies;
             if (this.frequencies == null) {
@@ -357,7 +354,7 @@ define(function (require) {
                 linkManager.driver.getVFO('a');
                 return;
             }
-                   
+
             var fr = this.frequencies[this.current_band];
             if (fr === undefined) {
                 this.frequencies[this.current_band] = [];
@@ -397,7 +394,7 @@ define(function (require) {
             console.log("Frequency list closing");
             linkManager.off('input', this.showInput, this);
         },
-        
+
         detectBand: function(freq) {
           // Detect what band we're in to adjust the frequency tabs
           var boundaries = {
@@ -418,11 +415,11 @@ define(function (require) {
             for (var band in boundaries) {
                 if (freq >= boundaries[band].min && freq < boundaries[band].max)
                     return band;
-            }  
+            }
         },
 
         showInput: function (data) {
-             
+
             if (data.mode && this.addingFrequency) {
                 this.addingFrequency = false;
                 this.modeCallback(data.mode);
@@ -448,7 +445,7 @@ define(function (require) {
                 }
             }
         },
-        
+
         findFrequencyCardPage: function(freq) {
             // move the frequency carousel to display the cards that cover the current
             // vfo A frequency
@@ -459,7 +456,7 @@ define(function (require) {
             }
             $('#frequency-selector').carousel(idx);
         },
-        
+
         highlightCards: function(freq) {
             var bfreq = this.frequencies[this.current_band];
             var found_exact_freq_idx = [];
@@ -481,7 +478,7 @@ define(function (require) {
             }
             for (var i=0; i < found_exact_freq_idx.length; i++) {
                 this.$('#freq-card-' + found_exact_freq_idx[i] + ' .panel-body').removeClass('bg-info').addClass('bg-success');
-            }            
+            }
         },
 
         // Called from our containing view to add a new frequency for this band.

@@ -26,11 +26,8 @@
 
 define(function(require) {
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
-        Backbone = require('backbone'),
-        template = require('js/tpl/instruments/elecraft/SettingsAudio.js');
+
+    var template = require('js/tpl/instruments/elecraft/SettingsAudio.js');
 
     return Backbone.View.extend({
 
@@ -65,13 +62,13 @@ define(function(require) {
             this.$el.html(template());
             this.current_mode = '';
             if (this.iskx3) {
-                this.$('.hide-kx3').hide();                
+                this.$('.hide-kx3').hide();
             } else {
-                this.$('.hide-kx2').hide();                
+                this.$('.hide-kx2').hide();
             }
             return this;
         },
-        
+
         refresh: function() {
            var self = this;
            if (this.elecraftRXEQ == null) {
@@ -91,7 +88,7 @@ define(function(require) {
                this.triggerInit();
            }
         },
-        
+
         makeTXEQ: function () {
             var self = this;
             require(['app/instruments/elecraft/equalizer'], function (view) {
@@ -106,11 +103,11 @@ define(function(require) {
             });
 
         },
-        
+
         triggerInit: function() {
             this.trigger('initialized');
         },
-        
+
         queryKX3: function() {
             // Last thing: query GT settings before asking for the menus
             // so that we keep track of initial settings
@@ -121,21 +118,21 @@ define(function(require) {
         setCP: function (e) {
             linkManager.driver.setCP(e.value);
         },
-        
+
         setAFLim: function () {
             var t = $(event.target);
             var v = t.val();
             var min = parseInt(t.attr('min'));
             var max = parseInt(t.attr('max'));
             if (v < min) v = min;
-            if (v > max) v = max; 
+            if (v > max) v = max;
             var val = ("000" + v).slice(-3);
             var cmd = 'MN047;MP' + val + ';';
             linkManager.sendCommand(cmd);
             this.menulist = [ [ 'af-lim', 'MN047;MP;' ]];
             this.getNextMenu();
         },
-        
+
         setAGCParam: function() {
             console.log(event.target.id);
             var id = event.target.id;
@@ -154,7 +151,7 @@ define(function(require) {
             var min = parseInt(t.attr('min'));
             var max = parseInt(t.attr('max'));
             if (v < min) v = min;
-            if (v > max) v = max; 
+            if (v > max) v = max;
             var val = ("000" + v).slice(-3);
             var cmd = agc_set[id];
             console.log('Set AGC param:' + cmd + val);
@@ -162,7 +159,7 @@ define(function(require) {
             this.menulist = [ [ id, cmd + ';' + ( agc_dcy ? 'GT' + this.initial_dcy + ';' : '')]];
             this.getNextMenu();
         },
-        
+
         getMenus: function() {
             // Get all Audio-related settings through the menu system
             this.menulist = [
@@ -187,9 +184,9 @@ define(function(require) {
                 this.menulist.push([ 'agc-spd-fm', 'MN129;MD4;MP;']);
                 this.menulist.push([ 'agc-spd-am', 'MN129;MD5;MP;']);
             }
-            this.getNextMenu();            
+            this.getNextMenu();
         },
-        
+
         getNextMenu: function() {
             var nxt = this.menulist.shift();
             if (nxt != undefined) {
@@ -201,7 +198,7 @@ define(function(require) {
                 this.triggerInit();
             }
         },
-        
+
         parseMenu: function(data) {
             var val = parseInt(data.raw.substr(2));
             switch (this.menumode) {
@@ -245,7 +242,7 @@ define(function(require) {
             linkManager.sendCommand('MN255;');
             this.getNextMenu();
         },
-        
+
         simpleMenuChange: function() {
             // These are simple menus where we can just set the KX3 menu direct
             var menuNumbers = {
@@ -263,7 +260,7 @@ define(function(require) {
             }
             linkManager.sendCommand('MN' + menuNumbers[event.target.id] + ';MP' + v + ';MN255;');
         },
-        
+
         setAGCSpeed: function() {
             // Toggles between slow and fast AGC speed
             console.log(event.target.id);
@@ -279,15 +276,15 @@ define(function(require) {
             this.menumode = toggles[agc][0];
             linkManager.sendCommand(toggles[agc][1] + 'UP;MP;MN255;MD' + this.initial_mode + ';');
         },
-        
+
         showInput: function(data) {
-            
+
             if (!this.$el.is(':visible'))
                 return;
 
             var cmd = data.raw.substr(0, 2);
             var val = data.raw.substr(2);
-            
+
             if (this.querying && cmd == 'GT') {
                 this.initial_dcy = val;
                 this.querying = false;
@@ -300,7 +297,7 @@ define(function(require) {
             } else if (cmd == 'CP') {
                     // Speech compression
                     this.$('#cmp-control').slider('setValue', parseInt(data.raw.substr(2)));
-                } 
+                }
         }
     });
 });

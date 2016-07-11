@@ -49,9 +49,9 @@
                                 </label>
                             </div>
                         </div>
-                </div> 
+                </div>
             </div><!-- Band Buttons -->
-        
+
         <!-- ******* -->
 
         </div> <!-- radio icon -->
@@ -97,7 +97,7 @@
                           <input type="text" id="mic-control" data-slider-value="0" data-slider-min="0" data-slider-max="80" data-slider-step="1">
                         </div>
                     </div> <!-- MG -->
-                    
+
                     <div class="input-group input-group-sm input-margin">
                         <span class="input-group-addon">BW</span>
                         <div class="form-control slider-bg-info">
@@ -108,7 +108,7 @@
                         <span class="input-group-addon">CT</span>
                         <div class="form-control">
                           <input type="text" id="ct-control" data-slider-value="0" data-slider-min="0" data-slider-max="3" data-slider-step="0.01">
-                            
+
                         </div>
                         <span class="input-group-btn">
                                 <button class="btn btn-default" id="ct-center" type="button"><span class="glyphicon glyphicon-asterisk"></span></button>
@@ -124,6 +124,7 @@
                     <ul class="nav nav-tabs">
                         <li class="active"><a href="#memories" data-toggle="tab">Memories</a></li>
                         <li><a href="#data-term" data-toggle="tab">Data</a></li>
+                        <li><a href="#extra" data-toggle="tab">Extra</a></li>
                         <!--
                         <li><a href="#audio-settings" data-toggle="tab">Audio</a></li>
                         <li><a href="#logging" data-toggle="tab">Logging</a></li>
@@ -138,7 +139,7 @@
                         </div>
                         <div class="col-md-8">
                             <!-- Controls -->
-                            
+
                                 <div class="pull-right" style="margin-top: 5px; margin-bottom: 5px;">
                                     <button role="button" class="btn btn-info store-frequency"><span class="glyphicon glyphicon-plus"></span></button>
                                     <a class="left btn btn-success" href="#frequency-selector" id="mem-left"
@@ -146,7 +147,7 @@
                                     <a class="right btn btn-success" href="#frequency-selector" id="mem-right"
                                             data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
                                 </div>
-                            
+
                         </div>
                     </div> <!-- Frequency cards header -->
                     <!-- ********** -->
@@ -154,8 +155,8 @@
                     <!-- Wrapper for slides -->
                         <div class="carousel-inner" id="frequency-selector-content">
                         </div>
-                    </div>                    
-    
+                    </div>
+
                     </div> <!-- Memories -->
                   <div class="tab-pane" id="data-term">
                     <div class="row">
@@ -188,10 +189,10 @@
                             <div class="input-group input-margin">
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-xs btn-default" id="data-cq">CQ</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-ans">ANS</button>                                
+                                    <button type="button" class="btn btn-xs btn-default" id="data-ans">ANS</button>
                                     <button type="button" class="btn btn-xs btn-default" id="data-qso">QSO</button>
                                     <button type="button" class="btn btn-xs btn-default" id="data-me">Me</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-brag">Brag</button>                                    
+                                    <button type="button" class="btn btn-xs btn-default" id="data-brag">Brag</button>
                                     <button type="button" class="btn btn-xs btn-default" id="data-kn">KN</button>
                                     <button type="button" class="btn btn-xs btn-default" id="data-sk">SK</button>
                                 </div>
@@ -226,6 +227,10 @@
                         </div>
                     </div>
                   </div> <!-- Data terminal -->
+                  <div class="tab-pane" id="extra">
+                      <h5>Extra functions</h5>
+                      <p>Voltage alert</p>
+                      </div>
 <!--
                     <div class="tab-pane" id="audio-settings"><h4>Audio Settings</h4>
                       <h4>Audio controls for phone operation will go there</h4>
@@ -237,5 +242,5 @@
                 <div id="xtrafunc-rightside" class="col-md-5">
                     <div id="waterfall"></div>
                 </div>
-            </div> 
+            </div>
 </div>

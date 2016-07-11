@@ -26,11 +26,8 @@
 
 define(function(require) {
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
-        Backbone = require('backbone'),
-        abu = require('app/lib/abutils'),
+
+    var abu = require('app/lib/abutils'),
         template = require('js/tpl/instruments/elecraft/SettingsFlash.js');
 
     return Backbone.View.extend({
@@ -40,7 +37,7 @@ define(function(require) {
             this.menumode = '';
             linkManager.on('input', this.showInput, this);
         },
-        
+
         events: {
             "click #flashread": "flashRead"
         },
@@ -54,10 +51,10 @@ define(function(require) {
             this.$el.html(template());
             return this;
         },
-        
+
         refresh: function() {
         },
-        
+
         flashRead: function() {
           var i = $('#flashdump', this.el);
           console.log("Read flash location");
@@ -79,7 +76,7 @@ define(function(require) {
           // Now send the mem read command
           linkManager.sendCommand("ER" + address + l + crc + ";");
         },
-        
+
         decodeVFO: function(buf) {
             // Frequencies are stored in BCD-like format
             var f = buf[0] * 1e6;
@@ -87,13 +84,13 @@ define(function(require) {
             f += buf[2] * 1e2;
             f += buf[3] * 1e1;
             f += buf[4];
-            return f/1e6; 
+            return f/1e6;
         },
-        
+
         decodeMemory: function(buf) {
           var vfoa = this.decodeVFO(buf.slice(0,5));
           var vfob = this.decodeVFO(buf.slice(5,10));
-          
+
           // In this code, we assume we have Xverter 1 set to 2m XV1 IF= 50MHz RF = 144MHz
           // The proper Elecraft code check the transverter actual IF and RF. This will break
           // on the 4m transverters, but I don't have one, so...
@@ -101,11 +98,11 @@ define(function(require) {
               vfoa += (144-50);
               vfob += (144-50);
           }
-          
+
           var modes = ['CW', 'LSB', 'USB', 'DATA', 'AM', 'FM'];
           var modea = modes[buf[10] & 0xf];
           var modeb = modes[buf[10] >> 4];
-          
+
           var chars = [ ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
                         'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7',
                         '8', '9', '*', '+', '/', '@', '_', ];
@@ -114,21 +111,21 @@ define(function(require) {
           while (idx < 37) {
               label += chars[buf[idx++]];
           }
-          
+
           // Extract the description string:
           var description = '';
           idx = 37;
           while (buf[idx] != 0 && buf[idx] != 0xff) {
               description += String.fromCharCode(buf[idx++]);
           }
-          
-          
+
+
           return 'This is a Frequency memory.\nVFOA: ' + vfoa + ' - VFOB: ' + vfob + '\n' +
                  'Mode A: ' + modea + ' - Mode B: ' + modeb + '\n' +
                  'Label: ' + label + ' - Description: ' + description;
-          
+
         },
-        
+
         showInput: function(data) {
             if (!this.$el.is(':visible')) {
                 return;
@@ -137,21 +134,21 @@ define(function(require) {
             var val = data.raw.substr(2);
             var i = $('#flashdump', this.el);
             if (cmd == "ER") {
-                
+
                 var address = parseInt(val.substr(0,4), 16);
-                
+
                 var scroll = data.raw + '\n';
                 // Add the Hex dump below:
                 var buf = val.substr(6, val.length -8);
                 var b = abu.hextoab(buf)
                 scroll += abu.hexdump(b);
                 i.val(scroll);
-                
+
                 // If we detect we have a frequency memory address, then decode what we can:
                 if ((address >= 0x0c00) && (address <= 0x3Dc0) && ( address % 0x40 == 0)) {
                     i.val(i.val() + '\n' + this.decodeMemory(b));
                 }
-                
+
             } else if (data == '?') {
                 i.val("Flash read error '?'");
             }

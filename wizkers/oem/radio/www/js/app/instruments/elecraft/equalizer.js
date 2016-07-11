@@ -23,34 +23,31 @@
  */
 define(function(require) {
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
-        Backbone = require('backbone'),
-        template = require('js/tpl/instruments/elecraft/ElecraftEqualizer.js');
-    
+
+    var template = require('js/tpl/instruments/elecraft/ElecraftEqualizer.js');
+
         // Need to load these, but no related variables.
         require('bootstrap');
         require('bootstrapslider');
 
-        
+
  return Backbone.View.extend({
 
         tagName: "div",
         className: "equalizer slider-bg-info-rev",
-    
+
         initialize: function (options) {
             // options can contain a key called "eq" that tells us which EQ to use ('tx' or 'rx')
             // Defaults to 'tx', we only test for 'rx'
             this.options = options || { 'eq': 'tx' };
-            
+
             this.listenTo(linkManager, "input", this.showInput );
-            
+
             this.refreshing = false;
             this.setting_band = 0;
 
         },
-     
+
         events: {
             "slideStop input.eq": "setBand",
         },
@@ -59,11 +56,11 @@ define(function(require) {
             this.$el.html(template());
             // Initialize our sliders
             this.$(".eq").slider({reversed:true});
-            linkManager.sendCommand('AI1;');            
+            linkManager.sendCommand('AI1;');
             this.refresh();
             return this;
         },
-    
+
         refresh: function() {
             this.refreshing = true;
             this.band = 0;
@@ -81,7 +78,7 @@ define(function(require) {
             this.stopListening();
             linkManager.sendCommand('AI0;');
         },
-     
+
         setBand: function(evt) {
             console.log(evt);
             // Turn the spinner on:
@@ -94,7 +91,7 @@ define(function(require) {
             linkManager.sendCommand(cmd);
             // Now we gotta wait for the callback
         },
-     
+
         showInput: function(data) {
             if (!this.$el.is(':visible')) {
                 return;
@@ -113,7 +110,7 @@ define(function(require) {
                 var move = (diff > 0) ? 'UP;' : 'DN;';
                 var cmd = '';
                for (var i = 0; i < Math.abs(diff); i++) {
-                cmd += move;     
+                cmd += move;
                }
                 linkManager.sendCommand(cmd + 'DB;');
                 return;
@@ -154,7 +151,7 @@ define(function(require) {
                     } else {
                         linkManager.sendCommand('MN255;'); // Exit menu
                         this.refreshing = false;
-                        this.band = 0; 
+                        this.band = 0;
                         this.trigger('initialized');
                     }
                 }
@@ -163,5 +160,5 @@ define(function(require) {
 
     });
 
-  
+
 });

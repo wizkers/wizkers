@@ -26,96 +26,95 @@
 define(function (require) {
     "use strict";
 
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        simpleplot = require('app/lib/flotplot'),
+    // vars here will be common to all instances of this module
+    var simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/elecraft/ElecraftNumView.js');
+
+    return (function () {
+
+        var tempplot, amppowerplot, voltplot;
+
+        // vars here will be private to each instance of this module
+        var palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"];
+        // We will pass this when we create plots, this is the global
+        // config for the look and feel of the plot
+        var plotoptions = {
+            points: 150, // 2.5 minutes @ 1 Hz
+            log: false,
+            vertical_stretch_parent: true,
+            plot_options: {
+                xaxes: [{
+                        mode: "time",
+                        show: true,
+                        timeformat: "%H:%M",
+                        ticks: 5,
+                        timezone: settings.get("timezone")
+                    },
+                ],
+                yaxis: {
+                    min: 0
+                },
+                grid: {
+                    hoverable: true,
+                    clickable: true
+                },
+                legend: {
+                    position: "nw"
+                },
+                colors: palette,
+            }
+        };
+
+        var addPlot = function (v) {
+                // Now initialize the plot areas:
+                tempplot = new simpleplot({
+                    model: v.model,
+                    settings: plotoptions
+                });
+                if (tempplot != null) {
+                    $('.tempchart', v.el).append(tempplot.el);
+                    tempplot.render();
+                }
+                amppowerplot = new simpleplot({
+                    model: v.model,
+                    settings: plotoptions
+                });
+                if (amppowerplot != null) {
+                    $('.amppowerchart', v.el).append(amppowerplot.el);
+                    amppowerplot.render();
+                }
+                voltplot = new simpleplot({
+                    model: v.model,
+                    settings: plotoptions
+                });
+                if (voltplot != null) {
+                    $('.voltchart', v.el).append(voltplot.el);
+                    voltplot.render();
+                }
+            }
+
 
     return Backbone.View.extend({
 
         initialize: function () {
-
-            this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"];
-
-            // We will pass this when we create plots, this is the global
-            // config for the look and feel of the plot
-            this.plotoptions = {
-                points: 150, // 2.5 minutes @ 1 Hz
-                log: false,
-                vertical_stretch_parent: true,
-                plot_options: {
-                    xaxes: [{
-                            mode: "time",
-                            show: true,
-                            timeformat: "%H:%M",
-                            ticks: 5,
-                            timezone: settings.get("timezone")
-                        },
-                       ],
-                    yaxis: {
-                        min: 0
-                    },
-                    grid: {
-                        hoverable: true,
-                        clickable: true
-                    },
-                    legend: {
-                        position: "nw"
-                    },
-                    colors: this.palette,
-                }
-            };
-
             linkManager.on('input', this.showInput, this);
             linkManager.on('status', this.updateStatus, this);
         },
 
         render: function () {
             this.$el.html(template());
-            this.addPlot();
+            addPlot(this);
             return this;
         },
-
-        addPlot: function () {
-            var self = this;
-            // Now initialize the plot areas:
-            this.tempplot = new simpleplot({
-                model: this.model,
-                settings: this.plotoptions
-            });
-            if (this.tempplot != null) {
-                $('.tempchart', this.el).append(this.tempplot.el);
-                this.tempplot.render();
-            }
-            this.amppowerplot = new simpleplot({
-                model: this.model,
-                settings: this.plotoptions
-            });
-            if (this.amppowerplot != null) {
-                $('.amppowerchart', this.el).append(this.amppowerplot.el);
-                this.amppowerplot.render();
-            }
-            this.voltplot = new simpleplot({
-                model: this.model,
-                settings: this.plotoptions
-            });
-            if (this.voltplot != null) {
-                $('.voltchart', this.el).append(this.voltplot.el);
-                this.voltplot.render();
-            }
-        },
-
-
 
         onClose: function () {
             console.log("Elecraft numeric view closing...");
             linkManager.off('input', this.showInput, this);
             linkManager.off('status', this.updateStatus, this);
             // Remove the window resize bindings on our plots:
-            this.tempplot.onClose();
-            this.amppowerplot.onClose();
-            this.voltplot.onClose();
+            tempplot.onClose();
+            amppowerplot.onClose();
+            voltplot.onClose();
         },
 
         updateStatus: function (data) {
@@ -132,115 +131,114 @@ define(function (require) {
             }
         },
 
-        showInput: function (data) {
-            if (data.raw == undefined)
-                return; // data is sometimes an object when we get a serial port error
+            showInput: function (data) {
+                if (data.raw == undefined)
+                    return; // data is sometimes an object when we get a serial port error
 
-            var drawPwr = false;
-            var drawTemp = false;
-            var drawVolt = false;
-            // Now update our display depending on the data we received:
-            if (data.raw.charAt(0) == '^') {
-                var cmd = data.raw.substr(1, 2);
-                var val = parseInt(data.raw.substr(3)) / 10;
-                var stamp = new Date().getTime();
-                if (cmd == "PI") {
-                    $("#kxpa-pi").html(val);
-                    this.amppowerplot.appendPoint({
-                        'name': "In",
-                        'value': val
-                    });
-                } else if (cmd == "PF") {
-                    $("#kxpa-pf").html(val);
-                    this.amppowerplot.appendPoint({
-                        'name': "Fwd",
-                        'value': val
-                    });
-                } else if (cmd == "PV") {
-                    $("#kxpa-pv").html(val);
-                    this.amppowerplot.appendPoint({
-                        'name': "R",
-                        'value': val
-                    });
-                } else if (cmd == "TM") {
-                    $("#kxpa-tm").html(val);
-                    this.tempplot.appendPoint({
-                        'name': "PA.X",
-                        'value': val
-                    });
-                } else if (cmd == "PC") {
-                    $("#kxpa-pc").html(val);
-                    this.voltplot.appendPoint({
-                        'name': "A",
-                        'value': val
-                    });
-                } else if (cmd == "SV") {
-                    var val = Math.floor(val) / 100;
-                    $("#kxpa-sv").html(val);
-                    this.voltplot.appendPoint({
-                        'name': "V",
-                        'value': val
-                    });
-                }
-            } else {
-                var cmd = data.raw.substr(0, 2);
-                if (cmd == "PO") {
-                    // Actual Power Outout
-                    var val = parseInt(data.raw.substr(2)) / 10;
-                    this.amppowerplot.appendPoint({
-                        'name': "KX3",
-                        'value': val
-                    });
-                } else if (cmd == "DB") {
-                    // We catch interesting stuff on Display B and add it to the plots
-                    // dynamically
-                    var cmd4 = data.raw.substr(2, 4);
-                    var cmd2 = data.raw.substr(2,2);
-                    var val = 0;
-                    switch (cmd4) {
-                    case "PA.I":
-                        val = parseInt(data.raw.substr(7, 2));
-                        this.tempplot.appendPoint({
-                            'name': "PA.I",
+                var drawPwr = false;
+                var drawTemp = false;
+                var drawVolt = false;
+                // Now update our display depending on the data we received:
+                if (data.raw.charAt(0) == '^') {
+                    var cmd = data.raw.substr(1, 2);
+                    var val = parseInt(data.raw.substr(3)) / 10;
+                    var stamp = new Date().getTime();
+                    if (cmd == "PI") {
+                        $("#kxpa-pi").html(val);
+                        amppowerplot.appendPoint({
+                            'name': "In",
                             'value': val
                         });
-                        break;
-                    case "OSC ":
-                    case "OSC*":
-                        val = parseInt(data.raw.substr(6, 2));
-                        this.tempplot.appendPoint({
-                            'name': "OSC",
+                    } else if (cmd == "PF") {
+                        $("#kxpa-pf").html(val);
+                        amppowerplot.appendPoint({
+                            'name': "Fwd",
                             'value': val
                         });
-                        break;
-                    case "PA.2":
-                        val = parseInt(data.raw.substr(7, 2));
-                        this.tempplot.appendPoint({
-                            'name': "PA.2",
+                    } else if (cmd == "PV") {
+                        $("#kxpa-pv").html(val);
+                        amppowerplot.appendPoint({
+                            'name': "R",
                             'value': val
                         });
-                        break;
+                    } else if (cmd == "TM") {
+                        $("#kxpa-tm").html(val);
+                        tempplot.appendPoint({
+                            'name': "PA.X",
+                            'value': val
+                        });
+                    } else if (cmd == "PC") {
+                        $("#kxpa-pc").html(val);
+                        voltplot.appendPoint({
+                            'name': "A",
+                            'value': val
+                        });
+                    } else if (cmd == "SV") {
+                        var val = Math.floor(val) / 100;
+                        $("#kxpa-sv").html(val);
+                        voltplot.appendPoint({
+                            'name': "V",
+                            'value': val
+                        });
                     }
-                    switch (cmd2) {
-                        case 'PS':
-                            val = parseFloat(data.raw.substr(5,4));
-                            this.voltplot.appendPoint({
-                                'name': 'PS',
+                } else {
+                    var cmd = data.raw.substr(0, 2);
+                    if (cmd == "PO") {
+                        // Actual Power Outout
+                        var val = parseInt(data.raw.substr(2)) / 10;
+                        amppowerplot.appendPoint({
+                            'name': "KX3",
+                            'value': val
+                        });
+                    } else if (cmd == "DB") {
+                        // We catch interesting stuff on Display B and add it to the plots
+                        // dynamically
+                        var cmd4 = data.raw.substr(2, 4);
+                        var cmd2 = data.raw.substr(2,2);
+                        var val = 0;
+                        switch (cmd4) {
+                        case "PA.I":
+                            val = parseInt(data.raw.substr(7, 2));
+                            tempplot.appendPoint({
+                                'name': "PA.I",
                                 'value': val
                             });
                             break;
-                        case 'BT':
-                            val = parseFloat(data.raw.substr(5,4));
-                            this.voltplot.appendPoint({
-                                'name': 'BT',
+                        case "OSC ":
+                        case "OSC*":
+                            val = parseInt(data.raw.substr(6, 2));
+                            tempplot.appendPoint({
+                                'name': "OSC",
                                 'value': val
                             });
                             break;
+                        case "PA.2":
+                            val = parseInt(data.raw.substr(7, 2));
+                            tempplot.appendPoint({
+                                'name': "PA.2",
+                                'value': val
+                            });
+                            break;
+                        }
+                        switch (cmd2) {
+                            case 'PS':
+                                val = parseFloat(data.raw.substr(5,4));
+                                voltplot.appendPoint({
+                                    'name': 'PS',
+                                    'value': val
+                                });
+                                break;
+                            case 'BT':
+                                val = parseFloat(data.raw.substr(5,4));
+                                voltplot.appendPoint({
+                                    'name': 'BT',
+                                    'value': val
+                                });
+                                break;
+                        }
                     }
                 }
             }
-
-        },
-
-    });
+        });
+    })();
 });

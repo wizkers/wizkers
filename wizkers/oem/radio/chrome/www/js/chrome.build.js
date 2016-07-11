@@ -26,7 +26,7 @@
 
 ({
 
-    optimize: 'uglify2',
+    optimize: 'closure',
 
     //If using UglifyJS2 for script optimization, these config options can be
     //used to pass configuration values to UglifyJS2.
@@ -43,10 +43,12 @@
         },
         compress: {
             sequences: true,
+            properties: true,
             dead_code: true,
             conditionals: true,
             booleans: true,
             unused: true,
+            loops: true,
             evaluate: true,
             if_return: true,
             join_vars: true,
@@ -57,7 +59,18 @@
             }
         },
         warnings: true,
-        mangle: true
+        mangle: true,
+    },
+
+    //If using Closure Compiler for script optimization, these config options
+    //can be used to configure Closure Compiler. See the documentation for
+    //Closure compiler for more information.
+    closure: {
+        CompilerOptions: {
+            'languageIn': Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.ECMASCRIPT5
+        },
+        CompilationLevel: 'SIMPLE_OPTIMIZATIONS',
+        loggingLevel: 'WARNING',
     },
 
     preserveLicenseComments: false,
@@ -65,6 +78,7 @@
     appDir: '..',
     baseUrl: 'js',
     dir: '../../../chrome/www/',
+    writeBuildTxt: false,
 
     // Combine everytyhing into one single file
     removeCombined: true,
@@ -73,6 +87,17 @@
     modules: [
         {
             name: 'main-chrome'
+        },
+        /*
+        {
+            name: 'app/instruments/elecraft/elecraft',
+            exclude: ['main-chrome']
+        },
+        {
+            name: 'app/instruments/elecraft_kx2/elecraft_kx2',
+            exclude: ['main-chrome']
         }
+        */
+
     ]
 })

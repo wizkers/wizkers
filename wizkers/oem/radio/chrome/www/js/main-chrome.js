@@ -35,7 +35,7 @@ require.config({
 
         // Below we manage our versions explicitely, so that
         // we can upgrade easily
-        jquery: 'lib/jquery-2.1.4',
+        jquery: 'lib/jquery-2.2.4',
         backbone: 'lib/backbone-1.2.3',
         jquery_xmlrpc: 'lib/jquery.xmlrpc',
         jquery_mousewheel: 'lib/jquery.mousewheel',
@@ -72,7 +72,7 @@ require.config({
         flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
         flot_windrose: 'lib/jquery.flot.windrose',
         flot_jumlib: 'lib/jquery.flot.JUMlib',
-        
+
         xmlrpc: 'lib/xmlrpc/xmlrpc'
     },
 
@@ -106,11 +106,11 @@ require.config({
         'utils': {
             exports: 'utils'
         },
-        
+
         'jquery_xmlrpc': {
             deps: ['jquery']
         },
-        
+
         'jquery_mousewheel': {
             deps: [ 'jquery']
         },
@@ -150,19 +150,19 @@ var vizapp = {
     // run mode of the application. Can be:
     //   - server : use a remote server for device connection & database
     //   - cordova: run as an embedded Cordova application on Android
-    //   - others to be defined 
+    //   - others to be defined
     type: "chrome",
 };
 
 var router;
 
-require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager',
-         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'chromestorage'], function ($, Backbone, Router, Settings, InstrumentManager,
+require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager',
+         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'chromestorage'], function ($, _, Backbone, Router, Settings, InstrumentManager,
     LinkManager, OutputManager, Instrument, Analytics) {
 
     // Initialize our Analytics object to get stats on app usage
     stats = new Analytics();
-    
+
     // Stats for the Chrome app
     stats.init('UA-66729721-6');
 

@@ -23,26 +23,23 @@
  */
 define(function(require) {
     "use strict";
-    
-    var $       = require('jquery'),
-        _       = require('underscore'),
-        Backbone = require('backbone'),
-        Snap = require('snap'),
+
+    var Snap = require('snap'),
         simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/elecraft/KXPA100.js');
-        
+
  return Backbone.View.extend({
 
         tagName: "div",
-    
+
         initialize: function (options) {
-            
+
         this.KXPAPoller = null;
         this.currentCR = 0;
         this.currentLR = 0;
         this.currentInputPower = 0;
         this.currentOutputPower = 0;
-            
+
         this.palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"];
 
         // We will pass this when we create plots, this is the global
@@ -73,11 +70,11 @@ define(function(require) {
                 colors: this.palette,
             }
         };
-        
+
         linkManager.on('input', this.handleKXAInput, this);
 
         },
-     
+
         events: {
             'click input[id*="kxpa-cap"]': 'cap_click',
             'click input[id*="kxpa-ind"]': 'ind_click',
@@ -91,7 +88,7 @@ define(function(require) {
 
         render: function () {
             this.$el.html(template());
-            
+
             var s = Snap("#kxpa100-front");
             Snap.load('js/app/instruments/elecraft/KXPA100-Front-Path.svg', function (f) {
                 s.add(f);
@@ -101,15 +98,15 @@ define(function(require) {
                 });
                 //$("#kx3").height($("#kx3").width() * 0.42);
             });
-            
+
             this.addPlot();
-            
+
             return this;
         },
-    
+
         refresh: function() {
         },
-        
+
         shown: function( sh) {
             if (sh) {
                 // First of all, we need to ask all the graphs to resize to occupy
@@ -127,7 +124,7 @@ define(function(require) {
                 clearInterval(this.KXPAPoller);
             }
         },
-        
+
         onClose: function() {
             linkManager.off('input', this.handleKXAInput, this);
             // Remove the window resize bindings on our plots:
@@ -137,7 +134,7 @@ define(function(require) {
             this.swrplot.onClose();
             clearInterval(this.KXPAPoller);
         },
-        
+
         addPlot: function () {
             // Now initialize the plot areas:
             this.tempplot = new simpleplot({
@@ -173,7 +170,7 @@ define(function(require) {
                 this.swrplot.render();
             }
         },
-        
+
         cap_click: function (e) {
             var val = parseInt(e.target.id.substr(e.target.id.lastIndexOf('-') + 1));
             var caps = [10, 22, 40, 82, 150, 300, 660, 1360];
@@ -274,7 +271,7 @@ define(function(require) {
                 linkManager.sendCommand('^MD;^BY;^CR;^LR;')
             }, 50);
         },
-        
+
         // Called every second when the KXPA100 tab is shown
         queryKXPA: function () {
             // Split in several smaller strings, otherwise the KX3 and Wizkers
@@ -284,7 +281,7 @@ define(function(require) {
             linkManager.sendCommand('^PV;^TM;^SW;');
             linkManager.sendCommand('^PC;^SV;^F;^BN;');
         },
-        
+
         updatePowerLED: function(power) {
             var ledOn = "#20ff00";
             var ledDim = "#00aa2a";
@@ -324,13 +321,13 @@ define(function(require) {
 
         // All the UI updates related to KXPA100
         handleKXAInput: function (data) {
-            
+
             if (data.raw == undefined)
                 return;
-            
+
             if (data.raw.charAt(0) != '^')
                 return;
-                
+
             // Note: need to match the SVG def for LED off color
             var ledOn = "#20ff00";
             var ledOff = "#4e6e56";
@@ -452,9 +449,9 @@ define(function(require) {
                  break;
                  case 'B':
                      $("#kxpa100-front #led_byp").css('fill', ledOn);
-                 break; 
+                 break;
                 }
-                
+
             } else if (cmd == 'SI') {
                 $('#kxpa-caps-tx', this.el).prop('checked', (data.raw.substr(-1, 1) == "T"));
             } else if (cmd == 'OP') {
@@ -466,9 +463,9 @@ define(function(require) {
 
 
 
-     
+
 
     });
 
-  
+
 });

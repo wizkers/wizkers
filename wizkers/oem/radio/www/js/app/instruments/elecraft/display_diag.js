@@ -24,10 +24,7 @@
 define(function (require) {
     "use strict";
 
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        template = require('js/tpl/instruments/elecraft/ElecraftDiagView.js');
+    var template = require('js/tpl/instruments/elecraft/ElecraftDiagView.js');
 
     // Need to load these, but no related variables.
     require('bootstrap');
@@ -62,11 +59,11 @@ define(function (require) {
         render: function () {
             var self = this;
             this.$el.html(template());
-                                    
+
             require(['app/instruments/elecraft/display_kxpa100'], function(view) {
                self.KXPA100 = new view();
                $('#kxpa100', self.el).append(self.KXPA100.el);
-               self.KXPA100.render(); 
+               self.KXPA100.render();
             });
 
             require(['app/instruments/elecraft/settings_audio'], function(view) {
@@ -74,7 +71,7 @@ define(function (require) {
                self.$('#settings-audio').append(self.SettingsAudio.el);
                self.SettingsAudio.render();
             });
-            
+
             require(['app/instruments/elecraft/settings_band'], function(view) {
                self.BandSettings = new view();
                $('#settings-band', self.el).append(self.BandSettings.el);
@@ -94,10 +91,10 @@ define(function (require) {
             });
 
             if (this.iskx3) {
-                this.$('.hide-kx3').hide();                
+                this.$('.hide-kx3').hide();
                 this.queryKX3();
             } else {
-                this.$('.hide-kx2').hide();                
+                this.$('.hide-kx2').hide();
                 this.queryKX2();
             }
 
@@ -145,18 +142,18 @@ define(function (require) {
                 this.SettingsAudio.once('initialized', this.focusKX3, this);
                 this.SettingsAudio.refresh();
             }
-            
+
             if (e.target.innerText == 'Band config' &&
                 this.BandSettings != undefined ) {
                 this.BandSettings.refresh();
             }
-            
+
             if (e.target.innerText == 'Memories') {
                 this.MemSettings.refresh();
             }
 
         },
-        
+
         focusKX3: function() {
             this.$('#kx3').css({'opacity': '1', 'pointer-events': ''});
         },
@@ -193,7 +190,7 @@ define(function (require) {
             if ((event.target.id == "manualcmd" && event.keyCode == 13) || (event.target.id != "manualcmd"))
                 linkManager.sendCommand(this.$('#manualcmd').val());
         },
-        
+
 
         showInput: function (data) {
 
@@ -261,7 +258,7 @@ define(function (require) {
                 } else if (da3 == '^SN') {
                     this.$('#kxpa-sn').html(data.raw.substr(3));
                 } else if (da2 == 'OM') {
-                    
+
                     linkManager.sendCommand('=;;'); // Try to detect PX3
                     // Display what options are installed/enabled
                     setLabel(".opt-kxat3", this.el, (data.raw.charAt(3) == 'A'));

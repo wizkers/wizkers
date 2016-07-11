@@ -1,26 +1,26 @@
 /*
  * Generic TCP server in Chrome
- * 
+ *
  * Inspiration from https://github.com/GoogleChrome/chrome-app-samples/blob/master/samples/tcpserver/tcp-server.js
  * Copyright 2012 Google Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License attempt
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Author: Renato Mangini (mangini@chromium.org)
  */
 
-define(function(require) {    
+define(function(require) {
     "use strict";
-    
+
     var abu = require('app/lib/abutils');
 
     // Rigctld server emulation:
@@ -29,7 +29,7 @@ define(function(require) {
 
     // Make our life easier by defining a shortcut
     var tcps = chrome.sockets.tcpServer;
-    
+
 
   /**
    * Wrapper function for logging
@@ -45,19 +45,19 @@ define(function(require) {
     console.error(msg);
   }
 
-    
+
     /**
      *
      *  port is a reference to the serial port
-     * 
+     *
      */
     var Rigctld = function(ipaddr, tcpport) {
-        
+
         console.log("Starting TCP server on port". tcpport);
         var addr = ipaddr;
         var port = tcpport;
         var isListening = false;
-        
+
         // Chrome requires a bunch of callbacks with their TCP Server stack
         var callbacks = {
             listen: null,       // Listening
@@ -65,14 +65,14 @@ define(function(require) {
             recv: null,         // Data received
             sent: null,         // Data sent
         }
-        
+
         // Sockets open
         var openSockets=[];
 
         // server socket (one server connection, accepts and opens one socket per client)
         var serverSocketId = null;
-        
-        
+
+
         /**
          * Connects to the TCP server, and creates an open socket.
          *
@@ -84,7 +84,7 @@ define(function(require) {
             callbacks.connect = connect_callback;
             tcps.create({}, onCreate);
         };
-        
+
         /**
          * Shutdown the TCP Server and disconnects all its sockets
          */
@@ -155,7 +155,7 @@ define(function(require) {
             return;
           error('[TCP Server] Unable to accept incoming connection. Error code=' + info.resultCode);
         }
-          
+
         var onNoMoreConnectionsAvailable = function(socketId) {
           var msg="No more connections available. Try again later\n";
           chrome.sockets.tcp.send(socketId, abu.str2ab(msg),
@@ -186,8 +186,8 @@ define(function(require) {
           console.info('We still have', openSockets.length, 'sockets open.');
         }
 
-      };  
-        
+      };
+
 
   /**
    * Holds a connection to a client
@@ -216,7 +216,7 @@ define(function(require) {
         chrome.sockets.tcp.getInfo(socketId, function (socketInfo) {
           onSocketInfo(callback, socketInfo); });
     };
-    
+
     /**
      * Callback function for when socket details (socketInfo) is received.
      * Stores the socketInfo for future reference and pass it to the
@@ -228,11 +228,12 @@ define(function(require) {
       if (callback && typeof(callback)!='function') {
         throw "Illegal value for callback: " + callback;
       }
+      console.info("TCP Connection: received socket info", socketInfo);
       socketInfo = socketInfo;
       callback(self, socketInfo);
     }
 
-    
+
     /**
      * Add receive listeners for when a message is received
      *
@@ -247,7 +248,7 @@ define(function(require) {
 
       chrome.sockets.tcp.setPaused(socketId, false);
     };
-    
+
     /**
      * Callback function for when data has been read from the socket.
      * Converts the array buffer that is read in to a string
@@ -287,7 +288,7 @@ define(function(require) {
     this.addSocketClosedListener = function(callback) {
       callbacks.disconnect = callback;
     }
-    
+
     var lastMessage = '';
 
     /**
@@ -303,14 +304,14 @@ define(function(require) {
       callbacks.sent = callback;
       chrome.sockets.tcp.send(socketId, abu.str2ab(msg), onWriteComplete);
     };
-      
+
      var onReceiveError = function (info) {
-       console.log("TCP receive error", info);
+       console.log("TCP receive error", info, '(we are socket' + socketId + ')');
         if (socketId != info.socketId)
           return;
         self.close();
       };
-      
+
     /**
      * Callback for when data has been successfully
      * written to the socket.
@@ -337,21 +338,22 @@ define(function(require) {
      */
     this.close = function() {
       if (socketId) {
+        console.info("Closing socket", socketId);
         chrome.sockets.tcp.onReceive.removeListener(onReceive);
         chrome.sockets.tcp.onReceiveError.removeListener(onReceiveError);
         if (callbacks.disconnect)
           callbacks.disconnect(this);
         chrome.sockets.tcp.close(socketId);
       }
-    };    
-  
+    };
+
 };
-    
+
   return {
       server: Rigctld,
       connection: TcpConnection
   }
 });
-        
-        
-        
+
+
+

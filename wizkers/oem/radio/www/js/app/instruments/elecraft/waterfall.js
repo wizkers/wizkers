@@ -21,7 +21,7 @@
  * A simple waterfall using the web audio API. Does not (yet)
  * support remote audio, this is a visualisation that uses the local
  * microphone only.
- 
+
  * @author Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
  */
@@ -29,10 +29,7 @@ define(function (require) {
 
     "use strict";
 
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        Snap = require('snap'),
+    var Snap = require('snap'),
         DSP = require('dsp'),
         chroma = require('chroma'),
         resampler = require('resampler'),
