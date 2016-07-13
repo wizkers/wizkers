@@ -129,6 +129,7 @@ define(function (require) {
     return Backbone.View.extend({
 
         initialize: function () {
+            view = this;
             this.deviceinitdone = false;
 
             this.textOutputBuffer = [];
@@ -171,7 +172,7 @@ define(function (require) {
 
         render: function () {
             var self = this;
-            view = this;
+
             this.$el.html(template());
 
             var faceplate = Snap("#kx3");

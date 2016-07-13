@@ -26,7 +26,7 @@
 
 ({
 
-    optimize: 'uglify2',
+    optimize: 'closure',
 
     //If using UglifyJS2 for script optimization, these config options can be
     //used to pass configuration values to UglifyJS2.
@@ -60,11 +60,23 @@
         mangle: true
     },
 
+    //If using Closure Compiler for script optimization, these config options
+    //can be used to configure Closure Compiler. See the documentation for
+    //Closure compiler for more information.
+    closure: {
+        CompilerOptions: {
+            'languageIn': Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.ECMASCRIPT5
+        },
+        CompilationLevel: 'SIMPLE_OPTIMIZATIONS',
+        loggingLevel: 'WARNING',
+    },
+
     preserveLicenseComments: false,
     mainConfigFile: "main-cordova.js",
     appDir: '..',
     baseUrl: 'js',
     dir: '../../../cordova/www/',
+    writeBuildTxt: false,
 
     // Combine everytyhing into one single file
     removeCombined: true,

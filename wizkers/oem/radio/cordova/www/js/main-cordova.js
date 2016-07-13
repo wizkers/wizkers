@@ -35,7 +35,7 @@ require.config({
 
         // Below we manage our versions explicitely, so that
         // we can upgrade easily
-        jquery: 'lib/jquery-2.1.4',
+        jquery: 'lib/jquery-2.2.4',
         backbone: 'lib/backbone-1.2.3',
         jquery_mousewheel: 'lib/jquery.mousewheel',
         jquery_xmlrpc: 'lib/jquery.xmlrpc',
@@ -140,14 +140,14 @@ var vizapp = {
     // run mode of the application. Can be:
     //   - server : use a remote server for device connection & database
     //   - cordova: run as an embedded Cordova application on Android
-    //   - others to be defined 
+    //   - others to be defined
     type: 'cordova',
 
     // State can be "running" or "paused". Only updated in Cordova mode.
     // Can be checked by various tasks to skip display when app paused, and
     // save battery. (see Flotplot)
     state: 'running',
-        
+
     // Used in a couple of locations, lets us change the app name easily.
     appname: 'Wizkers:Radio'
 
