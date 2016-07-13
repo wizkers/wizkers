@@ -45,6 +45,86 @@ define(function (require) {
 
     return (function() {
         // Everything inside of here is private to each instance
+        var view; // Reference to the Backbone view, initialize when the view is instanciated
+
+        var vfoangle = 270;
+        var dip_x, dip_y, vfodip, oldPageY;
+        var buttonCodes = {
+            // The labels are the IDs of the areas on the KX3 front panel SVG:
+            "B_BAND_PLUS": "T08",
+            "B_RCL": "H08",
+            "B_BAND_MINUS": "T41",
+            "B_STORE": "H41",
+            "B_FREQ_ENT": "T10",
+            "B_SCAN": "H10",
+            "B_MSG": "T11",
+            "B_REC": "H11",
+            "B_ATU_TUNE": "T44",
+            "B_ANT": "H44",
+            "B_XMIT": "T16",
+            "B_TUNE": "H16",
+            "B_PRE": "T19",
+            "B_NR": "H19",
+            "B_ATTN": "T27",
+            "B_NB": "H27",
+            "B_APF": "T20",
+            "B_NTCH": "H20",
+            "B_SPOT": "T28",
+            "B_CWT": "H28",
+            "B_CMP": "T21",
+            "B_PITCH": "H21",
+            "B_DLY": "T29",
+            "B_VOX": "H29",
+            "B_MODE": "T14",
+            "B_ALT": "H14",
+            "B_DATA": "T17",
+            "B_TEXT": "H17",
+            "B_RIT": "T18",
+            "B_PF1": "H18",
+            "B_RATE": "T12",
+            "B_KHZ": "H12",
+            "B_A_SLASH_B": "T24;MD;",
+            "B_REV": "H24", // Request mode again when swapping VFO's
+            "B_A_TO_B": "T25",
+            "B_SPLIT": "H25",
+            "B_XIT": "T26",
+            "B_PF2": "H26",
+            "B_DISP": "T09",
+            "B_MENU": "H09"
+        };
+
+        var voltAlertThreshold = 0,
+            voltAlertEnabled = false;
+
+        var voltAlertBeep =  new Audio('js/app/instruments/elecraft/600hz.ogg')
+
+        var handleKX3Button = function (e) {
+            console.log(e.target.id);
+            //$("#kx3 #filter-II").css("visibility", "visible");
+            var code = buttonCodes[e.target.id];
+            if (code != null) {
+                linkManager.sendCommand('SW' + code + ';');
+            }
+        };
+
+       var rotateVfoWheel = function(deltaY) {
+            vfoangle = (vfoangle- deltaY/2) % 360;
+            var tx = dip_x * (Math.cos(vfoangle*2*Math.PI/360));
+            var ty = dip_y * (1+Math.sin(vfoangle*2*Math.PI/360));
+            vfodip.transform('t' + tx + ',' + ty);
+            var step = Math.floor(Math.min(Math.abs(deltaY)/50, 7));
+            var cmd = ((deltaY < 0) ? 'UP' : 'DN') + step + ';DS;';
+            linkManager.sendCommand(cmd);
+        };
+
+        var updateVA = function(e) {
+            voltAlertEnabled = view.$('#enable-voltage-alert').is(':checked');
+            voltAlertThreshold = parseFloat(view.$('#voltage-alert-level').val());
+            view.model.set('device_vmon_threshold', voltAlertThreshold);
+            view.model.set('device_vmon_enabled', voltAlertEnabled);
+            view.model.save();
+        }
+
 
     return Backbone.View.extend({
 
@@ -53,9 +133,6 @@ define(function (require) {
 
             this.textOutputBuffer = [];
             this.transmittingText = false;
-
-            this.vfoangle = 0;
-            this.oldPageY = 0;
 
             // Keep the value of the previous VFO value to avoid
             // unnecessary redraws of the front panel.
@@ -79,6 +156,11 @@ define(function (require) {
                     brag: 'Rig: Elecraft KX3. Controller: Wizkers.io'
                 });
             }
+            if (this.model.get('device_vmon_threshold') != undefined &&
+                this.model.get('device_vmon_enabled') != undefined ) {
+                voltAlertThreshold = parseFloat(this.model.get('device_vmon_threshold'));
+                voltAlertEnabled = this.model.get('device_vmon_enabled');
+            }
 
             linkManager.on('status', this.updateStatus, this);
             linkManager.on('input', this.showInput, this);
@@ -89,28 +171,27 @@ define(function (require) {
 
         render: function () {
             var self = this;
+            view = this;
             this.$el.html(template());
 
-            this.faceplate = Snap("#kx3");
+            var faceplate = Snap("#kx3");
             Snap.load("js/app/instruments/elecraft/KX3.svg", function (f) {
                 f.select("#layer1").click(function (e) {
-                    self.handleKX3Button(e);
+                    handleKX3Button(e);
                 });
-                self.faceplate.add(f);
+                faceplate.add(f);
                 // Set display constraints for the radio panel:
-                self.faceplate.attr({
+                faceplate.attr({
                     width: "100%",
                 });
                 self.$("#kx3 .icon").hide();
                 // Initialize the VFO rotating dip element:
-                var c = self.faceplate.select('#vfoa-wheel');;
+                var c = faceplate.select('#vfoa-wheel');;
                 var bb = c.getBBox();
-                self.vfodip = self.faceplate.select('#vfoa-dip');
-                var bb2 = self.vfodip.getBBox();
-                self.dip_x = (bb.width-(bb2.width+ bb2.y-bb.y))/2;
-                self.dip_y = (bb.height-(bb2.height + bb2.y-bb.y))/2;
-
-
+                vfodip = faceplate.select('#vfoa-dip');
+                var bb2 = vfodip.getBBox();
+                dip_x = (bb.width-(bb2.width+ bb2.y-bb.y))/2;
+                dip_y = (bb.height-(bb2.height + bb2.y-bb.y))/2;
             });
 
             // Initialize our sliding controls:
@@ -143,6 +224,10 @@ define(function (require) {
                     self.waterfallView.render();
                 }
             });
+
+            this.$('#voltage-alert-level').val(voltAlertThreshold);
+            this.$('#enable-voltage-alert').prop('checked',voltAlertEnabled);
+
             return this;
         },
 
@@ -165,6 +250,8 @@ define(function (require) {
 
         events: {
             //"click" : "debugClick",
+            "change #enable-voltage-alert": "voltAlert",
+            "change #voltage-alert-level": "voltAlert",
             "click #power-direct-btn": "setpower",
             "click .store-frequency": "addfrequency",
             "click input#power-direct": "setpower",
@@ -202,36 +289,30 @@ define(function (require) {
 
         vfoAWheel: function(e) {
             // console.log('Mousewheel',e);
-            this.rotateVfoWheel(e.deltaY);
+            rotateVfoWheel(e.deltaY);
             e.preventDefault(); // Prevent the page from scrolling!
         },
 
         vfoAWheelTouchStart: function(e) {
-            this.oldPageY = e.originalEvent.touches[0].pageY;
+            oldPageY = e.originalEvent.touches[0].pageY;
         },
 
         // Split in two to speed things up
         vfoAWheelTouch: function(e) {
             var ty = e.originalEvent.touches[0].pageY;
-            var deltaY = ty - this.oldPageY;
-            this.oldPageY = ty;
-            this.rotateVfoWheel(deltaY);
+            var deltaY = ty - oldPageY;
+            oldPageY = ty;
+            rotateVfoWheel(deltaY);
             e.preventDefault(); // Prevent the page from scrolling!
-        },
-
-        rotateVfoWheel: function(deltaY) {
-            this.vfoangle = (this.vfoangle- deltaY/2) % 360;
-            var tx = this.dip_x * (Math.cos(this.vfoangle*2*Math.PI/360));
-            var ty = this.dip_y * (1+Math.sin(this.vfoangle*2*Math.PI/360));
-            this.vfodip.transform('t' + tx + ',' + ty);
-            var step = Math.floor(Math.min(Math.abs(deltaY)/50, 7));
-            var cmd = ((deltaY < 0) ? 'UP' : 'DN') + step + ';DS;';
-            linkManager.sendCommand(cmd);
         },
 
         hideOverflow: function () {
             // $("#xtrafunc-leftside").css('overflow', 'hidden');
 
+        },
+
+        voltAlert: function(e) {
+            updateVA(e);
         },
 
         debugClick: function (e) {
@@ -325,59 +406,6 @@ define(function (require) {
         },
         centerCT: function () {
             linkManager.driver.setCT(9); // Special value for centering Passband
-        },
-
-        buttonCodes: {
-            // The labels are the IDs of the areas on the KX3 front panel SVG:
-            "B_BAND_PLUS": "T08",
-            "B_RCL": "H08",
-            "B_BAND_MINUS": "T41",
-            "B_STORE": "H41",
-            "B_FREQ_ENT": "T10",
-            "B_SCAN": "H10",
-            "B_MSG": "T11",
-            "B_REC": "H11",
-            "B_ATU_TUNE": "T44",
-            "B_ANT": "H44",
-            "B_XMIT": "T16",
-            "B_TUNE": "H16",
-            "B_PRE": "T19",
-            "B_NR": "H19",
-            "B_ATTN": "T27",
-            "B_NB": "H27",
-            "B_APF": "T20",
-            "B_NTCH": "H20",
-            "B_SPOT": "T28",
-            "B_CWT": "H28",
-            "B_CMP": "T21",
-            "B_PITCH": "H21",
-            "B_DLY": "T29",
-            "B_VOX": "H29",
-            "B_MODE": "T14",
-            "B_ALT": "H14",
-            "B_DATA": "T17",
-            "B_TEXT": "H17",
-            "B_RIT": "T18",
-            "B_PF1": "H18",
-            "B_RATE": "T12",
-            "B_KHZ": "H12",
-            "B_A_SLASH_B": "T24;MD;",
-            "B_REV": "H24", // Request mode again when swapping VFO's
-            "B_A_TO_B": "T25",
-            "B_SPLIT": "H25",
-            "B_XIT": "T26",
-            "B_PF2": "H26",
-            "B_DISP": "T09",
-            "B_MENU": "H09"
-        },
-
-        handleKX3Button: function (e) {
-            console.log(e.target.id);
-            //$("#kx3 #filter-II").css("visibility", "visible");
-            var code = this.buttonCodes[e.target.id];
-            if (code != null) {
-                linkManager.sendCommand('SW' + code + ';');
-            }
         },
 
         updateStatus: function (data) {
@@ -549,6 +577,16 @@ define(function (require) {
             var cmd = data.raw.substr(0, 2);
             var val = data.raw.substr(2);
             if (cmd == "DB") {
+                if (voltAlertEnabled) {
+                    var cmd2 = data.raw.substr(2,2);
+                    if (cmd2 == 'PS' || cmd2 == 'BT') {
+                        // If Power supply voltage or battery voltage is enabled and we are monitoring voltage
+                        var v = parseFloat(data.raw.substr(5,4));
+                        if (v <= voltAlertThreshold) {
+                            voltAlertBeep.play();
+                        }
+                    }
+                }
                 // VFO B Text
                 if (this.oldVFOB == val)
                     return;

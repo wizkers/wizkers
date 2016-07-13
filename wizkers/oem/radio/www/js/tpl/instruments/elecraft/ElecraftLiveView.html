@@ -179,26 +179,13 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-3 col-xs-4">
+                        <div class="col-xs-6">
                             <div class="input-group input-group-sm input-margin" id="data-mycall-grp">
                                 <span class="input-group-addon">Me:</span>
                                 <input type="text" class="form-control" id="data-mycall">
                             </div>
                         </div>
-                        <div class="col-md-6 col-xs-8">
-                            <div class="input-group input-margin">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-xs btn-default" id="data-cq">CQ</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-ans">ANS</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-qso">QSO</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-me">Me</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-brag">Brag</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-kn">KN</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-sk">SK</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-xs-12">
+                        <div class="col-xs-6">
                             <div class="input-group input-group-sm input-margin" id="data-theircall-grp">
                                 <div class="input-group-btn">
                                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -207,7 +194,22 @@
                                         <ul class="dropdown-menu" id="calls-dropdown" role="menu">
                                         </ul>
                                 </div>
-                                <input type="text" class="form-control" id="data-theircall">
+                                <input style="margin-left:3px;" type="text" class="form-control" id="data-theircall">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="input-group input-margin">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-default" id="data-cq">CQ</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-ans">ANS</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-qso">QSO</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-me">Me</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-brag">Brag</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-kn">KN</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-sk">SK</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -228,9 +230,18 @@
                     </div>
                   </div> <!-- Data terminal -->
                   <div class="tab-pane" id="extra">
-                      <h5>Extra functions</h5>
-                      <p>Voltage alert</p>
-                      </div>
+                    <div class="row">
+                        <div class="col-xs-6">
+                             <div class="input-group input-margin">
+                                 <span class="input-group-addon">
+                                     <input type="checkbox" id="enable-voltage-alert" aria-label="...">Voltage alert:
+                                     </span>
+                                 <input id="voltage-alert-level" class="form-control" value="9" type="number" maxlength="10">
+                                 <span class="input-group-addon">V</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 <!--
                     <div class="tab-pane" id="audio-settings"><h4>Audio Settings</h4>
                       <h4>Audio controls for phone operation will go there</h4>

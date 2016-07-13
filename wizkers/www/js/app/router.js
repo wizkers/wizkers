@@ -90,7 +90,7 @@ define(function (require) {
             // within a callback, otherwise the "onClose" methods will never
             // be called.
             _.bindAll(this, "switchinstrument");
-            
+
             // Performance: cache jQuery queries we will do often through the life
             // of the application. Strong impact on memory usage (important on Cordova) and
             // overall performance
@@ -147,6 +147,7 @@ define(function (require) {
                             linkManager.requestStatus(insId);
 
                             // We need to jump to the main screen now:
+                            console.log('Navigating to home view');
                             self.navigate('/', true);
                         });
                     }

@@ -19,9 +19,9 @@
 /**
  * The App build configuration for r.js
  *
- * @author Edouard Lafargue, ed@lafargue.name
+ * @author Edouard Lafargue, ed@wizkers.io
  *
- * Still work to do, check out: http://tech.pro/blog/1639/using-rjs-to-optimize-your-requirejs-project
+ * Still work to do..
  */
 
 ({

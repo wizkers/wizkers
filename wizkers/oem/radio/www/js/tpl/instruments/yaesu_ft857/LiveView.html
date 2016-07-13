@@ -1,0 +1,104 @@
+<!-- this is added within a row-->
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-12">
+                        <svg id="ft857"  viewBox="0 0 285 90" preserveAspectRatio="xMidYMid"></svg>
+                </div>
+            </div><!-- radio -->
+
+        <!-- ******* -->
+
+        </div> <!-- radio icon -->
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="input-group input-group-sm input-margin">
+                        <span class="input-group-addon">VFO</span>
+                            <input  id="vfoa-direct" type="number" class="form-control" step="0.00001" placeholder="14.070">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" id="vfoa-direct-btn" type="button"><span class="glyphicon glyphicon-check"></span></button>
+                            </span>
+                       </div> <!-- VFOA -->
+                    <div class="input-group input-group-sm input-margin">
+                        <button class="btn btn-default" id="vfotoggle" >VFO Toggle</button>
+                    </div> <!-- VFOB -->
+<!--
+                    <div class="input-group input-group-sm input-margin">
+                        <span class="input-group-addon">Clar.</span>
+                        <div class="form-control slider-bg-info">
+                          <input type="text" id="ag-control" data-slider-value="0" data-slider-min="0" data-slider-max="60" data-slider-step="1">
+                        </div>
+                    </div>
+-->
+                    <div class="input-group input-group-sm input-margin">
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-sm btn-default mode-btn">
+                                <input type="radio" name="modes" id="mode-LSB">LSB</input>
+                            </label>
+                            <label class="btn btn-sm btn-default mode-btn">
+                                <input type="radio" name="modes" id="mode-USB">USB</input>
+                            </label>
+                            <label class="btn btn-sm btn-default mode-btn">
+                                <input type="radio" name="modes" id="mode-CW">CW</input>
+                            </label>
+                            <label class="btn btn-sm btn-default mode-btn">
+                                <input type="radio" name="modes" id="mode-CWR">CWR</input>
+                            </label>
+                            <label class="btn btn-sm btn-default mode-btn">
+                                <input type="radio" name="modes" id="mode-AM">AM</input>
+                            </label>
+                            <label class="btn btn-sm btn-default mode-btn">
+                                <input type="radio" name="modes" id="mode-FM">FM</input>
+                            </label>
+                            <label class="btn btn-sm btn-default mode-btn">
+                                <input type="radio" name="modes" id="mode-DIG">DIG</input>
+                            </label>
+                            <label class="btn btn-sm btn-default mode-btn">
+                                <input type="radio" name="modes" id="mode-PKT">PKT</input>
+                            </label>
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+            </div>
+        </div> <!-- direct input -->
+    </div> <!-- radio and direct input -->
+    <div class="row">
+        <div id="xtrafunc-leftside" style="overflow: hidden;" class="col-md-7">
+            <div id="memories">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6><span id="freq-slider-band">??m</span> frequencies</h6>
+                </div>
+                <div class="col-md-8">
+                    <!-- Controls -->
+
+                        <div class="pull-right" style="margin-top: 5px; margin-bottom: 5px;">
+                            <button role="button" class="btn btn-info store-frequency"><span class="glyphicon glyphicon-plus"></span></button>
+                            <a class="left btn btn-success" href="#frequency-selector" id="mem-left"
+                                data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
+                            <a class="right btn btn-success" href="#frequency-selector" id="mem-right"
+                                    data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
+                        </div>
+
+                </div>
+            </div> <!-- Frequency cards header -->
+            <!-- ********** -->
+            <div id="frequency-selector" class="frequency-carousel carousel slide" data-interval="false" > <!-- Note add data-ride="carousel" to autoplay it -->
+            <!-- Wrapper for slides -->
+                <div class="carousel-inner" id="frequency-selector-content">
+                </div>
+            </div>
+
+            </div> <!-- Memories -->
+        </div>
+        <div id="xtrafunc-rightside" class="col-md-5">
+            <div id="waterfall"></div>
+        </div>
+    </div>
+</div>

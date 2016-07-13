@@ -24,11 +24,11 @@ console.log ("OEM Build: " + process.env.OEM);
 if (process.env.OEM == undefined) {
     console.error('***********************');
     console.error(' Error: you need to define the OEM env variable before calling gulp');
-    console.error('for instance: OEM=safecast gulp --gulpfile gulpfile_oem.js');
+    console.error('for instance: OEM=safecast gulp XXX');
     console.error('***********************');
     process.exit(1);
-    
-}   
+
+}
 
 var oem_directory = 'oem/' + process.env.OEM;
 
@@ -56,10 +56,10 @@ var paths = {
     templates: ['www/js/tpl/**/*.html'],
     css: ['www/css/*', 'www/fonts/*', 'www/img/**/*'],
     libs: ['www/js/lib/**/*.js'],
-    jsapp: ['www/js/app/**/*.js', 'www/js/app/**/*.png', 'www/js/app/**/*.svg'],
+    jsapp: ['www/js/app/**/*.js', 'www/js/app/**/*.png', 'www/js/app/**/*.svg', 'www/js/app/**/*.ogg'],
 
     // OEM Overlays which are common to all run modes (in www)
-    oem_www_files: [ oem_directory + '/www/**/*.js', oem_directory + '/www/**/*.png', oem_directory + '/www/**/*.svg', oem_directory + '/www/css/*'],
+    oem_www_files: [ oem_directory + '/www/**/*.js', oem_directory + '/www/**/*.png', oem_directory + '/www/**/*.svg', oem_directory + '/www/css/*', oem_directory + '/www/js/app/**/*.ogg'],
     oem_www_templates: [oem_directory + '/www/js/tpl/**/*.html'],
     oem_server_files: [oem_directory + '/server/**/*'],
 

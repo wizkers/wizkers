@@ -162,6 +162,7 @@ define(function (require) {
         this.setInstrument = function (instrument, cb) {
             var self = this;
             var type = instrument.get('type');
+            console.warn('Switching to instrument', type);
             for (var ins in this.supportedInstruments) {
                 if (ins == type) {
                     current_instrument = instrument;
@@ -173,6 +174,7 @@ define(function (require) {
                         _.extend(self, new instrumentObject());
                         self.getDriver(function(driver) {
                             linkManager.setDriver(driver);
+                            console.warn('Trigger instrumentChanged');
                             self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
                             cb();
                         });

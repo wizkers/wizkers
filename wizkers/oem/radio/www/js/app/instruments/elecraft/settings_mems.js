@@ -45,64 +45,24 @@ define(function(require) {
 
     return (function() {
 
-    return Backbone.View.extend({
+        var readingAllMemsIndex = 100,
+            menulist = [],
+            menumode = '',
+            rnbs_state = false,
+            rtbs_state = false,
+            rnbs_address = 0x0100,
+            rnbs_data_string = "",
+            rnbs = [],
+            rtbs_address = 0x0200,
+            rtbs_data_string = "",
+            rtbs = [],
+            view;
 
-        initialize:function () {
-            this.menulist = [];
-            this.menumode = '';
-            this.readingAllMemsIndex = 100;
-            linkManager.on('input', this.showInput, this);
-        },
-
-        events: {
-            "click #memread": "readMemoryManual",
-            "click #readmems": "getAllMems",
-            "click .memory-channel": "tuneMem",
-            "click .save-channel": "makeMemory"
-        },
-
-        onClose: function() {
-            linkManager.off('input', this.showInput);
-        },
-
-        render:function () {
-            var self = this;
-            this.$el.html(template());
-            return this;
-        },
-
-        refresh: function() {
-            // Now, we only want to scroll the table, not the whole page.
-            // We have to do this because the offset is not computed before
-            // we show the tab for the first time.
-            var tbheight = window.innerHeight - $(this.el).offset().top - 150;
-            this.$('#tablewrapper').css('max-height', tbheight + 'px');
-
-            if (this.rnbs_state != true)
-                this.readNormalBandMemoryState(true);
-        },
-
-        /**
-         * Tune to a direct mem
-         */
-        tuneMem: function(e) {
-            var mem = $(e.target).data('channel');
-            linkManager.driver.memoryChannel(mem);
-        },
-
-        /**
-         * Read all radio memories
-         */
-        getAllMems: function() {
-            this.readingAllMemsIndex = 0;
-            this.getAllMemsLoop();
-        },
-
-        getAllMemsLoop: function() {
-            if (this.readingAllMemsIndex < 100) {
-                this.readMemoryLoc(this.readingAllMemsIndex++);
+        var getAllMemsLoop = function() {
+            if (readingAllMemsIndex < 100) {
+                readMemoryLoc(readingAllMemsIndex++);
             }
-        },
+        };
 
         /**
          * Read the configuration of the standard band memories on the KX3.
@@ -112,25 +72,25 @@ define(function(require) {
          *  address: number
          *  data: the data just read, as a hex string
          */
-        readNormalBandMemoryState: function(starting, address, data) {
+        var readNormalBandMemoryState = function(starting, address, data) {
             if (starting) {
                 console.info('readNormalBandMemoryState');
-                this.rnbs_address = 0x0100;
-                this.rnbs_data_string = "";
-                this.rnbs = [];
-                this.readMemory(this.rnbs_address, 0x40);
+                rnbs_address = 0x0100;
+                rnbs_data_string = "";
+                rnbs = [];
+                readMemory(rnbs_address, 0x40);
                 return;
             }
 
             // We are doing a very basic implementation here, the best would be to
             // have readMemory accept any block length, but this is overkill for our usage imho
             if (address == 0x0100) {
-                this.rnbs_data_string += data;
-                this.readMemory(0x0140, 0x40);
+                rnbs_data_string += data;
+                readMemory(0x0140, 0x40);
                 return;
             } else if (address == 0x0140){
-                this.rnbs_data_string += data;
-                this.readMemory(0x0180, 0x30);
+                rnbs_data_string += data;
+                readMemory(0x0180, 0x30);
                 return;
 
             }
@@ -138,38 +98,38 @@ define(function(require) {
                 console.log("Oh oh, error here, we should have address == 0x0180 at this stage");
                 return;
             }
-            this.rnbs_data_string += data;
-            var b = abu.hextoab(this.rnbs_data_string);
+            rnbs_data_string += data;
+            var b = abu.hextoab(rnbs_data_string);
             // We can now decode the 11 basic band memories:
             for (var i = 0; i < b.length/16; i++) {
                 var b1 = b.slice(i*16, (i+1)* 16);
-                var f1 = this.decodeVFO(b1.slice(0,5));
-                var f2 = this.decodeVFO(b1.slice(5,10));
+                var f1 = decodeVFO(b1.slice(0,5));
+                var f2 = decodeVFO(b1.slice(5,10));
                 var idx = b1[0x0f];
                 console.log("F1:", f1, " - F2:", f2, " - Index", idx);
             }
-            this.readTransverterBandMemoryState(true);
-        },
+            readTransverterBandMemoryState(true);
+        };
 
-        readTransverterBandMemoryState: function(starting, address, data) {
+        var readTransverterBandMemoryState = function(starting, address, data) {
             if (starting) {
                 console.info("readTransverterBandMemoryState");
-                this.rtbs_address = 0x0200;
-                this.rtbs_data_string = "";
-                this.rtbs = [];
-                this.readMemory(this.rtbs_address, 0x40);
+                rtbs_address = 0x0200;
+                rtbs_data_string = "";
+                rtbs = [];
+                readMemory(rtbs_address, 0x40);
                 return;
             }
 
             // We are doing a very basic implementation here, the best would be to
             // have readMemory accept any block length, but this is overkill for our usage imho
             if (address == 0x0200) {
-                this.rtbs_data_string += data;
-                this.readMemory(0x0240, 0x40);
+                rtbs_data_string += data;
+                readMemory(0x0240, 0x40);
                 return;
             } else if (address == 0x0240){
-                this.rtbs_data_string += data;
-                this.readMemory(0x0280, 0x10);
+                rtbs_data_string += data;
+                readMemory(0x0280, 0x10);
                 return;
 
             }
@@ -177,36 +137,30 @@ define(function(require) {
                 console.log("Oh oh, error here, we should have address == 0x0280 at this stage");
                 return;
             }
-            this.rtbs_data_string += data;
-            var b = abu.hextoab(this.rtbs_data_string);
+            rtbs_data_string += data;
+            var b = abu.hextoab(rtbs_data_string);
             // We can now decode the 11 basic band memories:
             for (var i = 0; i < b.length/16; i++) {
                 var b1 = b.slice(i*16, (i+1)* 16);
-                var f1 = this.decodeVFO(b1.slice(0,5));
-                var f2 = this.decodeVFO(b1.slice(5,10));
+                var f1 = decodeVFO(b1.slice(0,5));
+                var f2 = decodeVFO(b1.slice(5,10));
                 var idx = b1[0x0f];
                 console.log(abu.hexdump(b1));
                 console.log("F1:", f1, " - F2:", f2, " - Index", idx);
             }
-            this.rnbs_state = true;
-            this.rtbs_state = true;
-        },
+            rnbs_state = true;
+            rtbs_state = true;
+        };
 
-        readMemoryManual: function() {
-            var mem = parseInt(this.$("#memtoread").val());
-            this.readMemoryLoc(mem);
-        },
-
-        readMemoryLoc: function(mem) {
+        var readMemoryLoc = function(mem) {
           var base_address = 0x0C00 + 0x40 * mem;
-          this.readMemory(base_address, 0x40);
-        },
+          readMemory(base_address, 0x40);
+        };
 
         /**
          * Read a memory location. Block length has to be <= 0x40
          */
-        readMemory: function(base_address, block_length) {
-          var i = $('#flashdump', this.el);
+        var readMemory = function(base_address, block_length) {
           console.log("Read flash location");
           var address = ("0000" + (base_address).toString(16)).slice(-4);
           var l = ("00" + (block_length).toString(16)).slice(-2);
@@ -215,20 +169,20 @@ define(function(require) {
               return;
           }
           // Calculate the checksum:
-          var crc = this.makeCRC(address + l);
+          var crc = makeCRC(address + l);
           // Now send the mem read command
           linkManager.sendCommand("ER" + address + l + crc + ";");
-        },
+        };
 
-        makeCRC: function(str) {
+        var makeCRC = function(str) {
           var st = abu.hextoab(str);
           var sum = 0xff;
           st.forEach(function(b){sum += b;});
           var crc = ("00" + (0xff - (sum % 0x100)).toString(16).toUpperCase()).slice(-2);
           return crc;
-        },
+        };
 
-        detectBand: function(freq) {
+        var detectBand = function(freq) {
             // Need freq in Hz
             var boundaries = [
                 { min:      0, max:   3000 },
@@ -254,12 +208,13 @@ define(function(require) {
                 if (freq >= boundaries[band].min && freq < boundaries[band].max)
                     return parseInt(band);
             }
-        },
+        };
+
 
         /**
          * Creates a HTML snippet with the mode selected
          */
-        makeModeDropdown: function(mode, cl, datarev, cwrev) {
+        var makeModeDropdown = function(mode, cl, datarev, cwrev) {
             var html = '<select style="width: 100%;" class="form-control menu-dropdown ' + cl + '">';
             // Depending on datarev and cwrev, we must update the actual mode name:
             var text = basemodes[mode];
@@ -273,9 +228,9 @@ define(function(require) {
             }
             html += '</select>';
             return html;
-        },
+        };
 
-        makeModeCode: function(modea, modeb) {
+        var makeModeCode = function(modea, modeb) {
             // Return the correct hex byte for the mode code:
             if (modea.indexOf('-') != -1) {
                 modea = modea.substr(modea, modea.indexOf('-'));
@@ -286,10 +241,9 @@ define(function(require) {
             var b1 = basemodes.indexOf(modea);
             var b2 = basemodes.indexOf(modeb);
             return '' + b2 + b1;
+        };
 
-        },
-
-        makeDataModeDropdown: function (mode) {
+        var makeDataModeDropdown = function (mode) {
             var html = '<select style="width: 100%;" class="form-control menu-dropdown f-datamode">';
             for (var m in datamodes) {
                 html += '<option value="' + datamodes[m] + '" ' + (mode == m ? 'selected' : '') + ' >' + datamodes[m] + '</option>';
@@ -297,9 +251,9 @@ define(function(require) {
             html += '</select>';
             return html;
 
-        },
+        };
 
-        makeDataModeCode: function(datamode, modea, modeb) {
+        var makeDataModeCode = function(datamode, modea, modeb) {
             // Do we have data-rev or cw-rev in any of the two modes?
             var datarev = 0;
             if (modea.substr(0,4) == 'DATA' || modeb.substr(0,4) == 'DATA') {
@@ -312,23 +266,22 @@ define(function(require) {
             var res = datamodes.indexOf(datamode) << 5;
             res |= datarev;
             return ('00' + res.toString(16)).slice(-2) + cwrev;
+        };
 
-        },
-
-        makePLToneDropdown: function(tone) {
+        var makePLToneDropdown = function(tone) {
             var html = '<select style="width: 100%;" class="form-control menu-dropdown f-pltone">';
             for (var t in tones) {
                 html += '<option value="' + tones[t] + '" ' + (tone == t ? 'selected' : '') + ' >' + tones[t] + '</option>';
             }
             html += '</select>';
             return html;
-        },
+        };
 
-        makeSplit: function(spl, id) {
+        var makeSplit = function(spl, id) {
           return '<input type="checkbox" ' + (spl ? 'checked' : '') + ' class="f-split">';
-        },
+        };
 
-        makeOffsetDropdown: function (offset, id) {
+        var makeOffsetDropdown = function (offset, id) {
           var offsets = [ -5, -1.7, -1.6, -1.0, -0.6, -0.5, -0.1, 0, 0.5, 0.6, 5.0];
           var html = '<select style="width: 100%;" class="form-control menu-dropdown f-offset">';
           for (var o in offsets) {
@@ -336,9 +289,9 @@ define(function(require) {
           }
           html += '</select>';
           return html;
-        },
+        };
 
-        decodeVFO: function(buf) {
+        var decodeVFO = function(buf) {
             // Frequencies are stored in BCD-like format
             var f = buf[0] * 1e6;
             f += buf[1] * 1e4;
@@ -346,9 +299,9 @@ define(function(require) {
             f += buf[3] * 1e1;
             f += buf[4];
             return f/1e6;
-        },
+        };
 
-        makeVFO: function(vfo, xvrt) {
+        var makeVFO = function(vfo, xvrt) {
             // Return a Hex string encoding for the VFO value
             vfo *= 1e6;
             if (xvrt) {
@@ -362,10 +315,9 @@ define(function(require) {
             buf += ('00' + parseInt(vfo[6]).toString(16)).slice(-2);
             buf += ('00' + parseInt(vfo[7]).toString(16)).slice(-2);
             return buf;
-        },
+        };
 
-
-        decodeMemory: function(buf, id) {
+        var decodeMemory = function(buf, id) {
           // Detect an unused memory and bail early
           if (buf[0] == 0xff) {
             var row = '<tr id="mem-idx-' + id + '"><td><button disabled class="btn btn-default memory-channel" data-channel="' + id + '">' + id + '</button></td>';
@@ -379,17 +331,17 @@ define(function(require) {
             row += '<td></td>';
             row += '<td></td>';
             row += '<td></td></tr>';
-            this.$('#freqtable').append(row);
+            view.$('#freqtable').append(row);
             // If we are in a "read all memories loop", then call the next location
             // reader
-            if (this.readingAllMemsIndex != 100) {
-                this.getAllMemsLoop();
+            if (readingAllMemsIndex != 100) {
+                getAllMemsLoop();
             }
             return;
           }
 
-          var vfoa = this.decodeVFO(buf.slice(0,5));
-          var vfob = this.decodeVFO(buf.slice(5,10));
+          var vfoa = decodeVFO(buf.slice(0,5));
+          var vfob = decodeVFO(buf.slice(5,10));
 
           // In this code, we assume we have Xverter 1 set to 2m XV1 IF= 50MHz RF = 144MHz
           // The proper Elecraft code check the transverter actual IF and RF. This will break
@@ -428,44 +380,44 @@ define(function(require) {
           row += '<td><input class="f-label form-control" size="6" maxlength="5" value="' + label + '"></td>';
           row += '<td><input class="f-description form-control" size="17" maxlength="23" value="' + description + '"></td>';
           row += '<td><input class="f-vfoa form-control"  value="' + vfoa + '"></td>';
-          row += '<td>' + this.makeModeDropdown(modea, 'f-modea', datamoderev, cwmoderev) + '</td>';
-          row += '<td>' + this.makeDataModeDropdown(datamode) + '</td>';
+          row += '<td>' + makeModeDropdown(modea, 'f-modea', datamoderev, cwmoderev) + '</td>';
+          row += '<td>' + makeDataModeDropdown(datamode) + '</td>';
           row += '<td><input class="f-vfob form-control" value="' + vfob + '"></td>';
-          row += '<td>' + this.makeSplit(buf[13] & 0x01) + '</td>';
-          row += '<td>' + this.makeModeDropdown(modeb, 'f-modeb', datamoderev, cwmoderev) + '</td>';
-          row += '<td>' + this.makeOffsetDropdown(offset) + '</td>';
-          row += '<td>' + this.makePLToneDropdown(tone) + '</td>';
+          row += '<td>' + makeSplit(buf[13] & 0x01) + '</td>';
+          row += '<td>' + makeModeDropdown(modeb, 'f-modeb', datamoderev, cwmoderev) + '</td>';
+          row += '<td>' + makeOffsetDropdown(offset) + '</td>';
+          row += '<td>' + makePLToneDropdown(tone) + '</td>';
           row += '<td><button class="btn btn-default save-channel" data-channel="' + id + '"><span data-channel="' + id + '" class="glyphicon glyphicon-upload"></span></td>';
           row += '</tr>';
 
-          this.$('#freqtable').append(row);
+          view.$('#freqtable').append(row);
 
           // If we are in a "read all memories loop", then call the next location
           // reader
-          if (this.readingAllMemsIndex != 100) {
-              this.getAllMemsLoop();
+          if (readingAllMemsIndex != 100) {
+              getAllMemsLoop();
           }
+        };
 
-        },
 
-        makeMemory: function(e) {
+        var makeMemory = function(e) {
             var mem = $(e.target).data('channel');
             var id = '#mem-idx-' + mem;
             // check we really do have a memory to create:
-            if (this.$(id).length == 0)
+            if (view.$(id).length == 0)
                 return;
             id += ' .';
             // First step: gather all the fields:
-            var label = this.$( id + 'f-label').val();
-            var description = this.$(id + 'f-description').val();
-            var vfoa  = this.$(id + 'f-vfoa').val();
-            var modea = this.$(id + 'f-modea').val();
-            var datamode = this.$(id + 'f-datamode').val();
-            var vfob = this.$(id + 'f-vfob').val();
-            var split = this.$(id + 'f-split').is(':checked');
-            var modeb = this.$(id + 'f-modeb').val();
-            var offset = this.$(id + 'f-offset').val();
-            var pltone = this.$(id + 'f-pltone').val();
+            var label = view.$( id + 'f-label').val();
+            var description = view.$(id + 'f-description').val();
+            var vfoa  = view.$(id + 'f-vfoa').val();
+            var modea = view.$(id + 'f-modea').val();
+            var datamode = view.$(id + 'f-datamode').val();
+            var vfob = view.$(id + 'f-vfob').val();
+            var split = view.$(id + 'f-split').is(':checked');
+            var modeb = view.$(id + 'f-modeb').val();
+            var offset = view.$(id + 'f-offset').val();
+            var pltone = view.$(id + 'f-pltone').val();
 
             console.info(label,description,vfoa,modea,datamode, vfob,split,modeb,offset,pltone);
             var xvrt_enabled = vfoa > 54;
@@ -477,20 +429,20 @@ define(function(require) {
             // We cannot modify vfoa and vfob while they are doubles, because
             // javascript stores doubles with IEEE precision, leading to .99999 issues
             // Bytes 00-09 is VFOA / VFOB
-            buf += this.makeVFO(vfoa, xvrt_enabled);
-            buf += this.makeVFO(vfob, xvrt_enabled);
+            buf += makeVFO(vfoa, xvrt_enabled);
+            buf += makeVFO(vfob, xvrt_enabled);
             // Byte 10
-            buf += this.makeModeCode(modea, modeb);
+            buf += makeModeCode(modea, modeb);
             // Bytes 11 and 12
-            buf += this.makeDataModeCode(datamode, modea, modeb);
+            buf += makeDataModeCode(datamode, modea, modeb);
             // Byte 13 is the split
             buf += '0' + ((split) ? '1' : '0');
             //  Bytes 14: unknown
             buf += '00';
             // Byte 15: the band code
             // Note: both VFOA and VFOB have to be in the same band
-            var ba = this.detectBand(vfoa*1e6);
-            var bb = this.detectBand(vfob*1e6);
+            var ba = detectBand(vfoa*1e6);
+            var bb = detectBand(vfob*1e6);
             if (ba != bb) {
                 // We cannot do this - both A and B have to be in the same band.
                 // TODO:
@@ -544,14 +496,15 @@ define(function(require) {
             buf += 'ffffff';
 
             // Add the CRC:
-            buf += this.makeCRC(buf);
+            buf += makeCRC(buf);
 
             // Now build the hex packet:
             console.info(buf.toUpperCase());
-        },
 
-        showInput: function(data) {
-            if (!this.$el.is(':visible')) {
+        };
+
+        var showInput = function(data) {
+            if (!view.$el.is(':visible')) {
                 return;
             }
             var cmd = data.raw.substr(0, 2);
@@ -562,19 +515,83 @@ define(function(require) {
                 var address = parseInt(val.substr(0,4), 16);
                 // If we detect we have a frequency memory address, then decode what we can:
                 if ((address >= 0x0c00) && (address <= 0x3Dc0) && ( address % 0x40 == 0)) {
-                    this.decodeMemory(b, (address-0x0C00)/0x40);
+                    decodeMemory(b, (address-0x0C00)/0x40);
                 } else
                 if ((address >= 0x0100) && (address <= 0x0180)) {
                     // This is the band memory state configuration
-                    this.readNormalBandMemoryState(false, address, buf);
+                    readNormalBandMemoryState(false, address, buf);
                 }
                 if ((address >= 0x0200) && (address <= 0x0280)) {
                     // This is the transverter band memory state configuration
-                    this.readTransverterBandMemoryState(false, address, buf);
+                    readTransverterBandMemoryState(false, address, buf);
                 }
-
             }
         }
+
+
+    /**
+     * The actual view
+     */
+    return Backbone.View.extend({
+
+        initialize:function () {
+            linkManager.on('input', showInput, this);
+            view = this;
+        },
+
+        events: {
+            "click #memread": "readMemoryManual",
+            "click #readmems": "getAllMems",
+            "click .memory-channel": "tuneMem",
+            "click .save-channel": "mm"
+        },
+
+        onClose: function() {
+            linkManager.off('input', showInput);
+        },
+
+        render:function () {
+            var self = this;
+            this.$el.html(template());
+            return this;
+        },
+
+        refresh: function() {
+            // Now, we only want to scroll the table, not the whole page.
+            // We have to do this because the offset is not computed before
+            // we show the tab for the first time.
+            var tbheight = window.innerHeight - $(this.el).offset().top - 150;
+            this.$('#tablewrapper').css('max-height', tbheight + 'px');
+
+            if (rnbs_state != true)
+                readNormalBandMemoryState(true);
+        },
+
+        /**
+         * Tune to a direct mem
+         */
+        tuneMem: function(e) {
+            var mem = $(e.target).data('channel');
+            linkManager.driver.memoryChannel(mem);
+        },
+
+        /**
+         * Read all radio memories
+         */
+        getAllMems: function() {
+            readingAllMemsIndex = 0;
+            getAllMemsLoop();
+        },
+
+        readMemoryManual: function() {
+            var mem = parseInt(this.$("#memtoread").val());
+            readMemoryLoc(mem);
+        },
+
+        mm: function(e) {
+            makeMemory(e);
+        }
+
     });
 
     })();

@@ -94,42 +94,43 @@ define(function (require) {
             }
 
 
-    return Backbone.View.extend({
+        return Backbone.View.extend({
 
-        initialize: function () {
-            linkManager.on('input', this.showInput, this);
-            linkManager.on('status', this.updateStatus, this);
-        },
+            initialize: function () {
+                console.warn('Elecraft Init Num View');
+                linkManager.on('input', this.showInput, this);
+                linkManager.on('status', this.updateStatus, this);
+            },
 
-        render: function () {
-            this.$el.html(template());
-            addPlot(this);
-            return this;
-        },
+            render: function () {
+                this.$el.html(template());
+                addPlot(this);
+                return this;
+            },
 
-        onClose: function () {
-            console.log("Elecraft numeric view closing...");
-            linkManager.off('input', this.showInput, this);
-            linkManager.off('status', this.updateStatus, this);
-            // Remove the window resize bindings on our plots:
-            tempplot.onClose();
-            amppowerplot.onClose();
-            voltplot.onClose();
-        },
+            onClose: function () {
+                console.log("Elecraft numeric view closing...");
+                linkManager.off('input', this.showInput, this);
+                linkManager.off('status', this.updateStatus, this);
+                // Remove the window resize bindings on our plots:
+                tempplot.onClose();
+                amppowerplot.onClose();
+                voltplot.onClose();
+            },
 
-        updateStatus: function (data) {
-            //console.log("TCP Server Connect: " + data.tcpserverconnect);
-            if (typeof (data.tcpserverconnect) != 'undefined') {
-                if (data.tcpserverconnect) {
-                    $('.tcp-server', this.el).html("Client connected");
-                    $('.tcp-server').addClass('btn-success').removeClass('btn-danger');
-                } else {
-                    $('.tcp-server', this.el).html("No TCP Client");
-                    $('.tcp-server').addClass('btn-danger').removeClass('btn-success');
+            updateStatus: function (data) {
+                //console.log("TCP Server Connect: " + data.tcpserverconnect);
+                if (typeof (data.tcpserverconnect) != 'undefined') {
+                    if (data.tcpserverconnect) {
+                        $('.tcp-server', this.el).html("Client connected");
+                        $('.tcp-server').addClass('btn-success').removeClass('btn-danger');
+                    } else {
+                        $('.tcp-server', this.el).html("No TCP Client");
+                        $('.tcp-server').addClass('btn-danger').removeClass('btn-success');
 
+                    }
                 }
-            }
-        },
+            },
 
             showInput: function (data) {
                 if (data.raw == undefined)

@@ -45,6 +45,7 @@ define(function (require) {
     return Backbone.View.extend({
 
         initialize: function (options) {
+            this.rendering = 0;
 
             this.listenTo(outputManager, 'outputTriggered', this.updateOutputStatus);
             this.listenTo(instrumentManager, 'instrumentChanged', this.updateInstrument);
@@ -72,7 +73,6 @@ define(function (require) {
             this.ctrlrecord = null;
 
             this.tick = 0;
-
         },
 
         events: {
@@ -124,7 +124,12 @@ define(function (require) {
 
         render: function () {
             var self = this;
-            console.log('Main render of Home view');
+            console.log('Main render of Home view for instrument',instrumentManager.getInstrument());
+            if (this.rendering != 0) {
+                console.warn('We are already rendering!');
+                return;
+            }
+            this.rendering = 2;
             this.$el.html(template(this.model.toJSON()));
 
             this.ctrlconnect = this.$('.ctrl-connect');
@@ -165,6 +170,7 @@ define(function (require) {
                     if (view != null) {
                         self.$('#liveview').html(view.el);
                         view.render();
+                        self.rendering--;
                         if (linkManager.isConnected()) {
                             if (instrumentManager.getCaps().indexOf("WantReplay") > -1) {
                                 console.log('[Home view] Replaying previous datapoints');
@@ -187,10 +193,13 @@ define(function (require) {
                         if (view != null) {
                             self.$('#numview').html(view.el);
                             view.render();
+                            self.rendering--;
                         }
-                    }); } else {
+                    });
+                } else {
                         self.$('#numview').remove();
                         self.$('#home-left').removeClass('col-md-9').addClass('col-md-12');
+                        self.rendering--;
                     }
             }
 
