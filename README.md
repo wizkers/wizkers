@@ -17,11 +17,20 @@ Please refer to the official documentation on http://www.wizkers.io/ for all the
 Software License
 ----------------
 
-TL;DR: Wizkers is Open Source software under the terms of MIT License.
+TL;DR: Wizkers is Open Source software under the terms of MIT License for all code, and Creative Commons CC-BY-SA 4.0 for
+all original artwork.
 
 Full version:
 
- This file is part of Wizkers.io
+Artwork
+========
+
+Unless noted otherwise, all original artwork is licensed under Creative Commons CC-BY-SA 4.0.
+
+Code
+=====
+
+All third party libraries are licensed under their respective license. All original code is licensed under the MIT license:
 
  The MIT License (MIT)
   Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
