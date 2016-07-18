@@ -80,7 +80,7 @@
      inkscape:cx="127.48772"
      inkscape:cy="38.038439"
      inkscape:window-x="0"
-     inkscape:window-y="23"
+     inkscape:window-y="46"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer1" /><g
      inkscape:groupmode="layer"
@@ -1376,7 +1376,7 @@
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccc" /><text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:LCD5x8H;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;-inkscape-font-specification:'LCD5x8H, Normal';font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;"
        x="100.21121"
        y="39.721786"
        id="lcd_line1"
@@ -1386,7 +1386,7 @@
          id="tspan4988"
          x="100.21121"
          y="39.721786"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.25px;font-family:LCD5x8H;-inkscape-font-specification:LCD5x8H">VFOa  LSB</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.5px;font-family:LCD5x8H;-inkscape-font-specification:'LCD5x8H, Normal';text-anchor:start;text-align:start;writing-mode:lr;line-height:125%;">VFOa  LSB</tspan></text>
 <g
        id="g4621"
        transform="translate(0.28043144,0.35053929)"><path
@@ -1498,10 +1498,10 @@
        id="lcd_line2"
        y="51.721786"
        x="110.21121"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-weight:normal;font-size:11.25px;line-height:125%;font-family:LCD5x8H;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;-inkscape-font-specification:'LCD5x8H, Normal';font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;"
        xml:space="preserve"
        inkscape:label="#text4602"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.5px;font-family:LCD5x8H;-inkscape-font-specification:LCD5x8H"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.25px;font-family:LCD5x8H;-inkscape-font-specification:'LCD5x8H, Normal';text-anchor:start;text-align:start;writing-mode:lr;line-height:125%;"
          y="51.721786"
          x="110.21121"
          id="tspan4604"
@@ -1511,10 +1511,10 @@
        id="lcd_line3"
        y="61.721786"
        x="92.211212"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-weight:normal;font-size:6.25px;line-height:125%;font-family:LCD5x8H;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;-inkscape-font-specification:'LCD5x8H, Normal';font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;"
        xml:space="preserve"
        inkscape:label="#text4606"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.25px;font-family:LCD5x8H;-inkscape-font-specification:LCD5x8H"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.25px;font-family:LCD5x8H;-inkscape-font-specification:'LCD5x8H, Normal';text-anchor:start;text-align:start;writing-mode:lr;line-height:125%;"
          y="61.721786"
          x="92.211212"
          id="tspan4608"
