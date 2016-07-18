@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
@@ -26,7 +31,7 @@
 
 define(function(require) {
     "use strict";
-    
+
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
@@ -79,7 +84,7 @@ define(function(require) {
                 linkManager.driver.dump_settings();
             }
         },
-        
+
         setup_outputs: function(evt) {
             var checked = $(evt.target).is(':checked');
             switch (evt.target.id) {
@@ -97,7 +102,7 @@ define(function(require) {
                 break;
             }
         },
-        
+
         setup_auxport: function(evt) {
             var checked = $(evt.target).is(':checked');
             if (checked) {
@@ -109,9 +114,9 @@ define(function(require) {
                 linkManager.sendCommand("S:0");
                 $("#aux_baudrate",this.el).prop("disabled",false);
             }
-            
+
         },
-        
+
         save_windows: function(evt) {
             var i1_win1_size = parseInt($("#input1_window1_size",this.el).val());
             var i1_win1_thr = parseInt($("#input1_window1_threshold",this.el).val());
@@ -127,15 +132,15 @@ define(function(require) {
                 i2_win1_thr > i2_win2_thr) {
                 $("#windows_warn",this.el).addClass("alert-danger").html("Error: Window 1 limit must be lower than Window 2 limit");
                 return;
-            } 
+            }
             $("#windows_warn",this.el).empty();
             linkManager.sendCommand("A:" + i1_win1_size + ":" + i1_win2_size + ":" +
                                            i1_win1_thr + ":" + i1_win2_thr);
             linkManager.sendCommand("B:" + i2_win1_size + ":" + i2_win2_size + ":" +
                                            i2_win1_thr + ":" + i2_win2_thr);
-            
+
             $("#windows_warn",this.el).addClass("alert-success").html("Success: Window params saved to dongle.");
-            
+
         },
 
         sendcmd: function(event) {
@@ -143,7 +148,7 @@ define(function(require) {
             if ((event.target.id == "manualcmd" && event.keyCode==13) || (event.target.id != "manualcmd"))
                 linkManager.sendCommand($('#manualcmd',this.el).val());
         },
-        
+
         setdeadtime: function(event) {
             // We react both to button press & Enter key press
             if ((event.target.id == "deadtime1" && event.keyCode==13) || (event.target.id != "deadtime1"))
@@ -161,7 +166,7 @@ define(function(require) {
             if ((event.target.id == "output_rate" && event.keyCode==13) || (event.target.id != "output_rate"))
                 linkManager.sendCommand("R:" + $('#output_rate',this.el).val());
         },
-        
+
         setdevtag: function(event) {
             if ((event.target.id == "devname" && event.keyCode==13) || (event.target.id != "devname"))
                 linkManager.driver.setdevicetag($('#devname',this.el).val());
@@ -213,10 +218,10 @@ define(function(require) {
             } else if (data.aux_port_enable != undefined) {
                 $("#aux_enable",this.el).prop("checked",(data.aux_port_enable[0] == "1"));
                 $("#aux_baudrate",this.el).prop("disabled",(data.aux_port_enable == "1"));
-                
+
             } else if (data.aux_port_speed != undefined) {
                 $("#aux_baudrate",this.el).val(data.aux_port_speed[0]);
-            } 
+            }
         }
     });
 });

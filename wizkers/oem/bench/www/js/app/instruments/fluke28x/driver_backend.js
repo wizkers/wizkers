@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /*
@@ -165,7 +170,7 @@ define(function (require) {
             tmp.set(abu.str2ui8(data), 3); // Copy our command at the right place
             var dv = new DataView(tmp.buffer);
             dv.setUint16(0, 0x1002); // tmp.writeUInt16BE(0x1002,0);
-            dv.setUint8(2, currentStatusByte); // tmp.writeUInt8(this.currentStatusByte,2);            
+            dv.setUint8(2, currentStatusByte); // tmp.writeUInt8(this.currentStatusByte,2);
             dv.setUint16(tmp.byteLength - 2, 0x1003); // tmp.writeUInt16BE(0x1003,tmp.length-2);
 
             var crc = crcCalc.fluke_crc(tmp);
@@ -241,7 +246,7 @@ define(function (require) {
         // the serial port, saves it and as soon as a complete data packet
         // is received, forward it to the upper layer.
         //
-        // data is a buffer        
+        // data is a buffer
         var format = function (data) {
             if (data) { // we sometimes get called without data, to further process the
                 // existing buffer
@@ -509,7 +514,7 @@ define(function (require) {
             // 2. Parse the response data
             //  Response data parsing is split in two:
             //    2.1 If expected response is binary, parse it
-            //    2.2 If expected response is ASCII, parse it        
+            //    2.2 If expected response is ASCII, parse it
             var response = {};
             if (currentState == state.wait_ack) {
                 // Get the response code from the buffer: in case the response
@@ -641,7 +646,7 @@ define(function (require) {
                         response.buildrevision = fields[5];
                         response.boardid = fields[6];
                         break;
-                    case "QM": // Query Measurement: READING_VALUE, UNIT, STATE, ATTRIBUTE 
+                    case "QM": // Query Measurement: READING_VALUE, UNIT, STATE, ATTRIBUTE
                         response.value = Number(fields[0]);
                         response.unit = fields[1];
                         response.readingState = fields[2];
@@ -890,7 +895,7 @@ define(function (require) {
                     break;
                 idx++;
             }
-            idx += 2; // Now idx is at the start of our data:        
+            idx += 2; // Now idx is at the start of our data:
             return idx;
         };
 

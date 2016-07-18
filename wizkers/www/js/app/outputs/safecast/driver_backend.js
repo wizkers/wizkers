@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
@@ -31,9 +36,9 @@
  */
 
 define(function(require) {
-    
+
     "use strict";
-    
+
     var _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
@@ -45,17 +50,17 @@ define(function(require) {
     var settings = null;
     var post_options = {};
     var output_ref = null;
-    
+
     // Load the settings for this plugin
     this.setup = function(output) {
-        
+
         console.log("[Safecast Output plugin] Setup a new instance");
         output_ref = output;
         mappings = output.get('mappings');
         settings = output.get('metadata');
-        
+
         var instance = settings.instance; // can be "production" or "dev"
-        
+
         // Prepare the post options:
         post_options = {
             host: (instance == 'production') ? 'api.safecast.org' : 'dev.safecast.org',
@@ -68,9 +73,9 @@ define(function(require) {
             }
         };
         console.log(post_options);
-        
+
     };
-    
+
     // The output manager needs access to this to compute alarm conditions
     this.resolveMapping = function(key,data) {
         var m = mappings[key];
@@ -81,29 +86,29 @@ define(function(require) {
             return m.substr(2);
         return utils.JSONflatten(data)[mappings[key]];
     };
-    
-    
+
+
     this.sendData = function(data) {
         var self = this;
         console.log("[Safecast Output plugin] Send data to Safecast");
-        
+
         // Step one: prepare the structure
         var unit = this.resolveMapping("unit",data);
         var radiation =  this.resolveMapping("radiation",data);
         var lat =  this.resolveMapping("latitude",data);
         var lon =  this.resolveMapping("longitude",data);
         var devid = this.resolveMapping("device_id", data);
-        
+
         // If any of those are empty, abort:
         if (unit == undefined || radiation == undefined || lat == undefined || lon == undefined) {
             console.log("[Safecast Output]  Data error, some required fields are empty");
             output_ref.save({'lastmessage': 'Missing required fields in the data'});
             return;
         }
-        
+
         // Only keep three decimals on Radiation, more does not make sense
         radiation = parseFloat(radiation).toFixed(3);
-        
+
         var post_obj = {
             'api_key' :  settings.apikey,
             'measurement[captured_at]': new Date().toISOString(),
@@ -118,7 +123,7 @@ define(function(require) {
             post_obj['measurement[device_id]'] = devid;
 
         var post_data = httprequest.stringify(post_obj);
-        
+
         output_ref.save({'last': new Date().getTime()});
         var post_request = httprequest.request(post_options, function(res) {
             var err = true;
@@ -142,13 +147,13 @@ define(function(require) {
         });
         console.log(post_data);
         post_request.send(post_data);
-        
+
     };
-            
+
     }
-    
+
     _.extend(Output.prototype, Backbone.Events);
-    
+
     return Output;
 
 });

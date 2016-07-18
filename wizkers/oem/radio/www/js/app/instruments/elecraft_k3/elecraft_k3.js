@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
@@ -28,16 +33,16 @@
 
 define(function(require) {
     'use strict';
-    
+
     var frontend_driver = require('app/instruments/elecraft/driver_frontend');
-    
+
     return  function() {
         // Helper function: get driver capabilites.
-        // returns a simple array of capabilities    
+        // returns a simple array of capabilities
         this.getCaps = function() {
             return ['LiveDisplay', 'NumDisplay', 'DiagDisplay', 'WizkersSettings'];
         };
-        
+
         // Return the type of data reading that this instrument generates. Can be used
         // by output plugins to accept data from this instrument or not.
         this.getDataType = function() {
@@ -70,7 +75,7 @@ define(function(require) {
         this.getDriver = function() {
             return new frontend_driver();
         };
-        
+
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.
         this.getBackendDriver = function(arg, callback) {
@@ -78,7 +83,7 @@ define(function(require) {
                 callback(new driver(arg));
             });
         };
-        
+
         // The screen for the "Settings" top level menu. This covers settings
         // for the Wizkers app, not the instrument itself (those are done on the DiagDisplay
         // screen).
@@ -98,5 +103,5 @@ define(function(require) {
             return null;
         }
     };
-    
+
 });

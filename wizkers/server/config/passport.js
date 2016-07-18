@@ -1,19 +1,25 @@
-/** (c) 2015 Edouard Lafargue, ed@lafargue.name
+/**
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 // config/passport.js
@@ -103,12 +109,12 @@ module.exports = function(passport) {
                 });
             }
 
-        });    
+        });
 
         });
 
     }));
-    
+
     // =========================================================================
     // LOCAL LOGIN =============================================================
     // =========================================================================
@@ -125,14 +131,14 @@ module.exports = function(passport) {
 		// find a user whose email is the same as the forms email
 		// we are checking to see if the user trying to login already exists
         dbs.users.get(email, function(err, user) {
-            // if there are any errors, return the error before anything 
+            // if there are any errors, return the error before anything
             // if no user is found, return the message
             if (err && err.status == 404 )
                 return done(null, false, req.flash('loginMessage', 'Username or password incorrect.'));
                 // req.flash is the way to set flashdata using connect-flash
-            
+
             debug(user);
-            
+
             // if the user is found but the password is wrong
             if (!dbs.utils.users.validPassword(password, user.local.password))
                 return done(null, false, req.flash('loginMessage', 'Username or password incorrect.'));
@@ -142,7 +148,7 @@ module.exports = function(passport) {
             // complain loudly
            if (user.role == 'admin' && dbs.utils.users.validPassword('admin', user.local.password))
                 return done(null, user, req.flash('warningMessage', 'Your admin password is the default password, "admin". Please change this to something more secure! Most features will be disabled until your change your password, log out and log back in again.'));
- 
+
             // all is well, return successful user
             return done(null, user);
         });

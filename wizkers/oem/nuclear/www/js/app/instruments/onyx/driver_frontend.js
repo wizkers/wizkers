@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
@@ -45,7 +50,7 @@ define(function(require) {
         this.getBackendDriverName = function() {
             return 'onyx';
         }
-                
+
         //////
         // End of standard API
         //////
@@ -82,29 +87,29 @@ define(function(require) {
         this.guid = function() {
                 lm.sendCommand('{ "get": "guid" }');
         };
-        
+
         this.getcalibration = function() {
             lm.sendCommand('{"get":"cal"}');
         }
-        
+
         this.getqr = function() {
             lm.sendCommand('{"get":"qr"}');
         }
-        
+
         this.saveqr = function(tmpl) {
             // Simple escape of " in the template, just in case
             tmpl = tmpl.replace('"', '\\"');
             lm.sendCommand('{"set":{"qr":"' + tmpl + '"}}');
         }
-        
+
         this.get_screen_dim_delay = function() {
             lm.sendCommand('{"get":"dim"}');
         }
-        
+
         this.save_screen_dim_delay = function(del) {
             lm.sendCommand('{"set":{"dim":' + del + '}}');
         }
-        
+
         this.setcalibration = function(cal) {
             lm.sendCommand('{"set":{"cal":' + cal + '}}');
         }
@@ -116,7 +121,7 @@ define(function(require) {
         this.devicetag = function() {
                 lm.sendCommand('{ "get": "devicetag" }');
         };
-        
+
         this.debug_enable = function(en) {
                 lm.sendCommand('{ "set": { "debug":' + (en ? 1 : 0) + '}}');
         };
@@ -133,7 +138,7 @@ define(function(require) {
         this.getRTC = function() {
             lm.sendCommand('{"get":"rtc"}');
         }
-        
+
         this.settime = function() {
                 var unixTime = Math.round((new Date()).getTime() / 1000);
                 console.log('Unix time: ' + unixTime);

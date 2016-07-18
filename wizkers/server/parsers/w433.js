@@ -1,20 +1,25 @@
-/** 
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+/**
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /*
@@ -41,7 +46,7 @@ var serialport = require('serialport'),
     serialconnection = require('../connections/serial');
 
 var W433 = function() {
-    
+
     // Driver initialization
     events.EventEmitter.call(this);
 
@@ -50,17 +55,17 @@ var W433 = function() {
     /////////
 
     this.name = "w433";
-    
+
     /////////
     // Private variables
     /////////
-    
+
     var port = null;
     var isopen = false;
     var instrumentid = null;
     var port_close_requested = false;
     var self = this;
-    
+
     var instrument = null;
     var prevStamp = new Date().getTime();
     var prevRes = [];
@@ -74,7 +79,7 @@ var W433 = function() {
     var status = function(stat) {
         debug('Port status change', stat);
         isopen = stat.portopen;
-        
+
         if (isopen) {
             // Should run any "onOpen" initialization routine here if
             // necessary.
@@ -86,8 +91,8 @@ var W433 = function() {
             }
         }
     };
-    
-    // How the device is connected on the serial port            
+
+    // How the device is connected on the serial port
     var portSettings = function() {
         return  {
             baudRate: 9600,
@@ -98,14 +103,14 @@ var W433 = function() {
             parser: serialport.parsers.readline('\n'),
         }
     };
-    
+
     // format should emit a JSON structure.
     var format = function(data) {
         // Remove any carriage return
         data = data.replace('\n','');
         var res = {};
         var valid = false;
-        
+
         res.raw = data;
 
         if (data.length == 12) {
@@ -184,23 +189,23 @@ var W433 = function() {
                             print " ($type_txt) - $mmrain";
                             **/
                         break;
-                }                
+                }
             }
         }
-        
+
         if (!valid) return; // No need to waste time if our data was invalid!
-        
+
         // Sensors send data multiple times, so we are going to dedupe:
         // if we got exactly the same reading less than 1.5 second ago, then
         // discard it.
         var stamp = new Date().getTime();
-        if ( (stamp-prevStamp) < 1500 ) {            
+        if ( (stamp-prevStamp) < 1500 ) {
             // Loop in the last four measurements:
             for (var i = 0; i < prevRes.length; i++) {
                 if ((stamp - prevRes[i].stamp) < 1500 &&
                     res.sensor_address == prevRes[i].res.sensor_address &&
                     res.sensor_type == prevRes[i].res.sensor_type &&
-                    ((res.value == prevRes[i].res.value) || 
+                    ((res.value == prevRes[i].res.value) ||
                      ((typeof(res.value) == "object") && (typeof(prevRes[i].value) == "object") &&
                        (res.value.dir == prevRes[i].value.dir) && (res.value.speed == prevRes[i].value.speed)
                      ))
@@ -208,7 +213,7 @@ var W433 = function() {
                     return;
             }
         }
-        
+
         // We have some sensors that interleave their burst: temp / humidity then temp/humidity
         // therefore we are going to keep the last six stamps
         prevRes.push({ stamp: stamp, res: res});
@@ -216,7 +221,7 @@ var W433 = function() {
             prevRes = prevRes.slice(1);
 
         prevStamp = stamp;
-        
+
         // Now: sensor addresses are all nice, but what we really want, is a sensor name: look up in our current
         // instrument whether we have a name for the sensor. If no name, use the address as the name.
         var name = instrument.metadata[res.sensor_address];
@@ -237,7 +242,7 @@ var W433 = function() {
 		});
 	  });
         }
-        
+
         // Last: smart detection of battery replacement. When a sensor gets a new battery, it will
         // send its data every 10 seconds for a while, so we can detect this. In the mean time, we can
         // also track a sensor that has gone stale for more than X minutes. If we have both a new sensor
@@ -245,9 +250,9 @@ var W433 = function() {
         // that this sensor's battery got replaced, and we will rename it automatically.
         // Note: there is a chance that the new sensor gets the address of an existing
         // sensor, but there is nothing we can do about this, it is a shortcoming of the Lacross sensors.
-        
+
         // TODO :-)
-        
+
         // (careful to use 'self' because we are called as a
         // callback from the serial port object, so we need to get the
         // scope from the closure, not the 'this' that will be the serial
@@ -255,14 +260,14 @@ var W433 = function() {
         self.emit('data',res);
 
     };
-    
+
         /**
      * The following two subroutines check two things
      * 1) Checksum OK (simple sum of bytes in packet)
      * 2) Redundant information OK within packet (different in
      *    TX3 and TX19 sensors)
      **/
-    
+
     var check_ok_tx3 = function(data) {
         var sum = 0;
         var s = data.split('');
@@ -273,9 +278,9 @@ var W433 = function() {
         s.forEach(add);
         // debug(chk + " - " + sum%16);
         return (parseInt(chk,16) == sum%16) &&
-            (data.substr(6,2) == data.substr(9,2));        
+            (data.substr(6,2) == data.substr(9,2));
     };
-    
+
     var check_ok_tx19 = function(data) {
         var sum = 0;
         var s = data.split('');
@@ -295,7 +300,7 @@ var W433 = function() {
     /////////
     // Public API
     /////////
-    
+
     // Creates and opens the connection to the instrument.
     // for all practical purposes, this is really the init method of the
     // driver
@@ -312,7 +317,7 @@ var W433 = function() {
 		          instrument.metadata = {};
         });
     }
-    
+
     this.closePort = function(data) {
         // We need to remove all listeners otherwise the serial port
         // will never be GC'ed
@@ -320,7 +325,7 @@ var W433 = function() {
         port_close_requested = true;
         port.close();
     }
-    
+
     this.isOpen = function() {
         return isopen;
     }
@@ -328,7 +333,7 @@ var W433 = function() {
     this.getInstrumentId = function(format) {
         return instrumentid;
     };
-    
+
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
     // This particular device does not support this concept, so we
@@ -340,24 +345,24 @@ var W433 = function() {
     this.isStreaming = function() {
         return true;
     };
-    
+
     // period is in seconds
     // The sensor sends data by itself, so those functions are empty...
     this.startLiveStream = function(period) {
     };
-    
+
     this.stopLiveStream = function(period) {
     };
-        
-    
+
+
     // output writes the data to
     // the port. For W433, it is not used since
     // our receivers don't listen to commands.
     this.output = function(data) {
         port.write(data + '\n');
     };
-    
-    
+
+
 };
 
 W433.prototype.__proto__ = events.EventEmitter.prototype;

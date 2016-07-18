@@ -1,19 +1,25 @@
-/** (c) 2015 Edouard Lafargue, ed@lafargue.name
+/**
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /*
@@ -30,7 +36,7 @@
  *
  * Due to the nature of the Fluke protocol, a lot of commands have to be
  * explicitly defined and handled within the driver.
- * 
+ *
  * @author Edouard Lafargue, ed@lafargue.name
  *
  */
@@ -51,7 +57,7 @@ var Hexdump = require('../hexdump.js'),
 
 
 var Fluke289 = function() {
-    
+
     // Init the EventEmitter
     events.EventEmitter.call(this);
 
@@ -66,7 +72,7 @@ var Fluke289 = function() {
 
     // We have a lot of internal variables to manage
     // the link protocol:
-    
+
     // Session layer. Whenever a command is sent, the DMM
     // replies first with a response code ('ACK' below) then
     // the actual response if needed.
@@ -75,18 +81,18 @@ var Fluke289 = function() {
              wait_response: 2,   // ACK received, waiting for command response
              error: 3
            };
-    
+
     // Low level parsing of incoming binary data
     var protostate = { stx:0,         // Looking for 'STX' sequence
                   etx: 1,        // Looking for 'ETX' sequence
                 };
-    
+
     // Link layer protocol: state of the link layer
     var linkstate = {  closed:0,       // Link closed
                   wantconnect: 1, // Link open request is sent by computer
                   open: 2         // Link open
                };
-    
+
     // Tables that contain the mapping of various fields in binary structures:
     var mapReadingID = [],
         mapUnit = [],
@@ -123,21 +129,21 @@ var Fluke289 = function() {
         port_close_requested = false,
         self = this,
 
-    
+
     // Link state handling
         currentLinkstate = 0,     // see linkstate above
         currentStatusByte = 0x00, // TODO: fully clarify how this one works...
-    
+
     // Binary buffer handling:
         currentProtoState=  0,          // see protostate above
         inputBuffer = new Buffer(2048), // meter never sends more than 1024 bytes anyway
         ibIdx =0,
-    
+
     // Special handling of the bitmap download case: we get the whole
     // bitmap in several calls, so the variable below stores the parts
         tmpBitmap = [],
         tmpBitmapIndex = 0;
-    
+
     /////////
     // Private methods
     /////////
@@ -145,7 +151,7 @@ var Fluke289 = function() {
     var status = function(stat) {
         debug('Port status change', stat);
         isopen = stat.portopen;
-        
+
         if (isopen) {
             // Should run any "onOpen" initialization routine here if
             // necessary.
@@ -158,7 +164,7 @@ var Fluke289 = function() {
         }
     };
 
-// How the device is connected on the serial port            
+// How the device is connected on the serial port
     var portSettings = function() {
         return  {
             baudRate: 115200,
@@ -169,8 +175,8 @@ var Fluke289 = function() {
             parser: serialport.parsers.raw,
         }
     };
-    
-    
+
+
     var resetState = function() {
         currentLinkstate = 0;
         currentStatusByte = 0x00;
@@ -181,13 +187,13 @@ var Fluke289 = function() {
         currentState = 0;
         pendingCommand = "";
     };
-    
+
     var sendData = function(data) {
         if (data) {
             self.emit('data',data);
         }
     };
-    
+
     // Returns starting index of 0x10 0x02
      var sync = function(buffer, maxIndex) {
         for (var i= 0; i < maxIndex-1; i++) {
@@ -210,7 +216,7 @@ var Fluke289 = function() {
         }
         return -1;
     };
-    
+
     // Unescapes character 0x10:
     var unescape = function(buffer) {
         var readIdx = 0;
@@ -236,14 +242,14 @@ var Fluke289 = function() {
             self.output("QBL");
         }
     };
-    
+
     // Link layer protocol management: receives raw data from
     // the serial port, saves it and as soon as a complete data packet
     // is received, forward it to the upper layer.
     //
     // data is a buffer
     var format = function(data) {
-        
+
         if (data) { // we sometimes get called without data, to further process the
                     // existing buffer
             // First of all, append the incoming data to our input buffer:
@@ -253,7 +259,7 @@ var Fluke289 = function() {
         }
         var start=-1, stop=-1;
         if (currentProtoState == protostate.stx) {
-            start = sync(inputBuffer, ibIdx);      
+            start = sync(inputBuffer, ibIdx);
             debug("Found STX: " + start);
             if (start > -1) {
                 currentProtoState = protostate.etx;
@@ -277,7 +283,7 @@ var Fluke289 = function() {
         // for processing, and realign the input buffer:
         var controlByte = inputBuffer[2];
         debug("Control byte: " + controlByte.toString(16));
-        
+
         // Check for control byte value:
         // I was not able to fully understand the logic of this byte...
         switch(controlByte) {
@@ -360,21 +366,21 @@ var Fluke289 = function() {
 
     // processPacket is called by format once a packet is received, for actual
     // processing and sending over the socket.io pipe
-    var processPacket = function(buffer) {    
+    var processPacket = function(buffer) {
         debug('Fluke 289 - Packet received - execting it to be a response to ' + pendingCommand);
         if (timeoutTimer) { // Disarm watchdog
             clearTimeout(timeoutTimer);
             timeoutTimer = null;
         }
-        
+
         // We process in two stages:
         // 1. Check the response code
         // 2. Parse the response data
         //  Response data parsing is split in two:
         //    2.1 If expected response is binary, parse it
-        //    2.2 If expected response is ASCII, parse it        
+        //    2.2 If expected response is ASCII, parse it
         var response = {};
-        if (currentState == state.wait_ack) {            
+        if (currentState == state.wait_ack) {
             // Get the response code from the buffer: in case the response
             // is binary, data[1] as a string is not what we want, but we'll
             // address this in time
@@ -409,7 +415,7 @@ var Fluke289 = function() {
                 response = { "error": false};
             }
         }
-        
+
         if (currentState == state.wait_response) {
             var commandProcessed = false;
             //////////////////
@@ -485,7 +491,7 @@ var Fluke289 = function() {
                 // Below are ASCII replies, so it's time to
                 // do the split on CSV fields:
                 var fields = data[1].split(',');
-                switch (pendingCommand) {                
+                switch (pendingCommand) {
                         case "ID": // Short Identification of meter
                             response.model = fields[0];
                             response.version = fields[1];
@@ -500,7 +506,7 @@ var Fluke289 = function() {
                             response.buildrevision = fields[5];
                             response.boardid = fields[6];
                             break;
-                        case "QM": // Query Measurement: READING_VALUE, UNIT, STATE, ATTRIBUTE 
+                        case "QM": // Query Measurement: READING_VALUE, UNIT, STATE, ATTRIBUTE
                             response.value = Number(fields[0]);
                             response.unit = fields[1];
                             response.readingState = fields[2];
@@ -559,7 +565,7 @@ var Fluke289 = function() {
                             response = processQDDA(data[1]);
                             response.error = false;
                             break;
-                        
+
                         case "QEMAP": // Property mapping
                             response = processEmap(data[1]);
                             response.error = false;
@@ -576,7 +582,7 @@ var Fluke289 = function() {
             }
             currentState = state.idle;
         }
-        
+
         // If we have more commands in the queue, now is the time to process them
         if (commandQueue.length && currentState == state.idle) {
             var cmd = commandQueue.pop();
@@ -634,7 +640,7 @@ var Fluke289 = function() {
         }
         return { reading:res };
     };
-    
+
     var decodeReading = function(reading) {
         var res = {};
         res.readingID = reading[0];
@@ -648,7 +654,7 @@ var Fluke289 = function() {
         res.timeStamp = reading[8]*1000;
         return res;
     };
-        
+
     var waitTimeout = function() {
         debug("Timeout waiting for command response");
         sendData({error:true});
@@ -658,7 +664,7 @@ var Fluke289 = function() {
             var cmd = commandQueue.pop();
             debug("Command queue: dequeuing command " + cmd );
             self.output(cmd);
-        }        
+        }
     };
 
     // We now have a gzipped BMP contained in those two buffers
@@ -685,12 +691,12 @@ var Fluke289 = function() {
         // Flush our temp buffer
         tmpBitmap = [];
         tmpBitmapIndex = 0;
-        
+
         // Now assemble buffers & dezip:
         var bmBuffer = Buffer.concat(bmBuffers);
         debug("Compressed bitmap data is " + bmBuffer.length + " bytes long.");
         //this.debug(Hexdump.dump(bmBuffer.toString("binary")));
-        
+
         zlib.unzip(bmBuffer, function(err, buffer) {
             if (!err) {
                 // Also copy the result to a temporary file:
@@ -710,10 +716,10 @@ var Fluke289 = function() {
                 } catch (err) {
                     debug("Something went wrong during bitmap decoding, data was probably corrupted ?\n" +err);
                 }
-            }    
+            }
         });
     };
-    
+
     var syncBuffer = function(buffer) {
         var idx = 0;
 
@@ -723,9 +729,9 @@ var Fluke289 = function() {
             idx++;
         }
         idx += 2; // Now idx is at the start of our data:
-        return idx;  
+        return idx;
     };
-    
+
     var processMinMaxRecording = function(buffer) {
         // Find start of data (after #0)
         var idx = syncBuffer(buffer);
@@ -734,27 +740,27 @@ var Fluke289 = function() {
             address0:  buffer.readUInt32LE(idx),
             // We use Unix timestamps for our stamps:
             startTime: Math.floor(decodeFloat(buffer,idx +=4)*1000),
-            endTime: Math.floor(decodeFloat(buffer,idx += 8)*1000),            
+            endTime: Math.floor(decodeFloat(buffer,idx += 8)*1000),
         };
-        
+
         var ret = decodeBinaryReading(buffer, idx += 8);
         summary.reading = ret[0];
         idx = ret[1];
         summary.recordingName = buffer.toString('ascii',idx);
         return summary;
     };
-    
+
     var processMeasurementRecording = function(buffer) {
-      // To be implemented...  
+      // To be implemented...
     };
 
-    
+
     // Decode a Trendlog recording summary
     var processRecordingSummary = function(buffer) {
-        
+
         // Find start of data (after #0)
         var idx =  syncBuffer(buffer);
-        
+
         var summary = {
             address0:  buffer.readUInt32LE(idx),
             // We use Unix timestamps for our stamps:
@@ -769,19 +775,19 @@ var Fluke289 = function() {
         var ret = decodeBinaryReading(buffer, idx +=4);
         summary.reading = ret[0];
         idx = ret[1];
-        
+
         summary.recordingName = buffer.toString('ascii',idx);
-        
+
         debug(summary);
         return summary;
     };
-    
+
     // A Reading contains range info and primary/secondary functions,
     // then all the readingIDs.
     // idx needs to be the starting offset of the structure
     // returns an object containing the decoded reading + the updated index.
     var decodeBinaryReading = function(buffer, idx) {
-        
+
         var reading = {
             primaryFunction: mapPrimFunction[buffer.readUInt16LE(idx)],
             secondaryFunction: mapSecFunction[buffer.readUInt16LE(idx += 2)] ,
@@ -797,11 +803,11 @@ var Fluke289 = function() {
             measurementMode1: mapMode[buffer.readUInt16LE(idx +=8)],
             measurementMode2: buffer.readUInt16LE(idx +=2),
         };
-        
+
         var numberOfReadings = buffer.readUInt16LE( idx +=2);
         // Now decode the readings:
         idx += 2;
-        
+
         var readings = [];
         for (var i = 0; i < numberOfReadings; i++) {
             readings.push(decodeBinaryReadingId(buffer,idx));
@@ -810,8 +816,8 @@ var Fluke289 = function() {
         reading.readings = readings;
         return [reading, idx];
     };
-    
-    
+
+
     // Decode a readingId located at offset idx in the buffer
     var decodeBinaryReadingId = function(buffer,idx) {
         var reading = {
@@ -828,7 +834,7 @@ var Fluke289 = function() {
         //console.log(reading);
         return reading;
     };
-    
+
     var decodeFloat = function(buffer,idx) {
         // Unless I missed something, data is packed as 32bit little endian
         // integers, so the 64bit floats have to be reassembled as two separate
@@ -839,15 +845,15 @@ var Fluke289 = function() {
         b2.writeUInt32BE(v1,0);
         b2.writeUInt32BE(v2,4);
         //console.log(b2);
-        return b2.readDoubleBE(0);        
+        return b2.readDoubleBE(0);
     };
-    
+
     // Decode a Trendlog entry:
     var processRecordingEntry = function(buffer) {
         console.log(Hexdump.dump(buffer.toString('binary')));
         // Find start of data (after #0)
         var idx =  syncBuffer(buffer);
-        
+
         var record = {
             startTime: Math.floor(decodeFloat(buffer,idx)*1000),
             endTime: Math.floor(decodeFloat(buffer,idx +=8)*1000),
@@ -860,13 +866,13 @@ var Fluke289 = function() {
             isStableFlag: mapIsStableFlag[buffer.readUInt16LE(idx +=2)],
             otherFlag: buffer.readUInt16LE(idx +=2),
         };
-        
+
         console.log(record);
         // Now package the trendlog record
         return { record: record};
     };
-    
-    
+
+
     // Transform a comma-separated list of props into a JSON object
     // and also catches any interesting proplist for our own use.
     var processEmap = function(data) {
@@ -914,17 +920,17 @@ var Fluke289 = function() {
                     break;
         }
         return { emap : {id: pendingCommandArgument, props: emap }};
-    }   
+    }
 
-    
+
     /////////
     // Public API
     /////////
-    
+
     // Creates and opens the connection to the instrument.
     // for all practical purposes, this is really the init method of the
     // driver
-    
+
     this.openPort = function(id) {
         instrumentid = id;
         dbs.instruments.get(id, function(err,item) {
@@ -934,7 +940,7 @@ var Fluke289 = function() {
         });
     }
 
-    
+
     this.closePort = function(data) {
         // We need to remove all listeners otherwise the serial port
         // will never be GC'ed
@@ -952,7 +958,7 @@ var Fluke289 = function() {
         return instrumentid;
     };
 
-    
+
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
     // For the Fluke, the UID is the serial number, so this is
@@ -963,11 +969,11 @@ var Fluke289 = function() {
         uidrequested = true;
         this.output("QSN");
     };
-        
+
     this.isStreaming = function() {
         return streaming;
     };
-    
+
     // period is in seconds
     this.startLiveStream = function(period) {
         if (!streaming) {
@@ -977,7 +983,7 @@ var Fluke289 = function() {
             streaming = true;
         }
     };
-    
+
     this.stopLiveStream = function(period) {
         if (streaming) {
             debug("[fluke289] Stopping live data stream");
@@ -990,7 +996,7 @@ var Fluke289 = function() {
     // protocol encapsulation. For this driver, this is fairly
     // complex because we have a queue of commands, etc...
     this.output = function(data) {
-        
+
         // before being able to send commands, we need to ask to open
         // the link by sending status byte 0x03:
         if (currentLinkstate == linkstate.closed) {
@@ -1009,7 +1015,7 @@ var Fluke289 = function() {
 
         if (currentState == null)
             currentState = state.idle;
-        
+
         if (currentState != state.idle) {
             // We are working on a command, so queue this one
             commandQueue.push(data);
@@ -1038,7 +1044,7 @@ var Fluke289 = function() {
         tmp.copy(finalBuffer,0);
         finalBuffer.writeUInt16LE(crc,finalBuffer.length-2);
         debug(finalBuffer);
-        
+
         try {
             port.write(finalBuffer);
         } catch (err) {

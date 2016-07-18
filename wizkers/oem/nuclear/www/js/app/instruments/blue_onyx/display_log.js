@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /*
@@ -220,39 +225,39 @@ define(function (require) {
                 });
             }
         },
-        
+
         /**
          * Get a latitude, or longitude and convert it to a NMEA compliant string
          *   islat: true if "dec" is a latitude. Otherwise it's a longitude
          */
         toNMEALatCoord: function(dec) {
-            var ltr = (dec < 0) ? 'S' : 'N'; 
+            var ltr = (dec < 0) ? 'S' : 'N';
             if (dec<0) dec = -dec;
             var dd = Math.floor(dec);
             var mm = (dec-dd) * 60;
             var dds = ('0' + dd).slice(-2);
-            var mms = (((mm<10) ? '0' : '') + mm.toFixed(4)).slice(-7); 
+            var mms = (((mm<10) ? '0' : '') + mm.toFixed(4)).slice(-7);
             return dds + mms + ',' + ltr;
         },
-        
+
         toNMEALonCoord: function(dec) {
-            var ltr = (dec < 0) ? 'W' : 'E'; 
+            var ltr = (dec < 0) ? 'W' : 'E';
             if (dec<0) dec = -dec;
             var dd = Math.floor(dec);
             var mm = (dec-dd) * 60;
             var dds = ('00' + dd).slice(-3);
-            var mms = (((mm<10) ? '0' : '') + mm.toFixed(4)).slice(-7); 
+            var mms = (((mm<10) ? '0' : '') + mm.toFixed(4)).slice(-7);
             return dds + mms + ',' + ltr;
         },
-        
+
         nmeaChecksum: function (str) {
             var chk = 0;
             for (var i =0; i < str.length; i++) {
-                chk ^= str.charCodeAt(i);                
+                chk ^= str.charCodeAt(i);
             }
             return ((chk < 16) ? '0' : '') + chk.toString(16);
         },
-        
+
         /**
          * Transform the internal log into a NMEA (in-memory) log that is compliant with what
          * Safecast expects.
@@ -288,7 +293,7 @@ define(function (require) {
                     var ts = entries.at(i).get('timestamp');
                     // Sometimes, we get entries without a valid reading, detect this
                     if (data.cpm) {
-                        count += data.cp5s; 
+                        count += data.cp5s;
                         var line = '$BNRDD,' + sn + ',' + new Date(ts).toISOString() + ',' +
                                     data.cpm.value.toFixed(0) + ',' +
                                     data.cp5s + ',' +  // 5 second CPM

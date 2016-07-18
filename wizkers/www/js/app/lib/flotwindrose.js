@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /*
@@ -26,19 +31,19 @@
 
 define(function(require) {
     "use strict";
-    
+
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone');
-    
+
     // Load the flot library & flot time plugin:
     require('flot');
     require('flot_resize');
     require('flot_windrose');
 
     return Backbone.View.extend({
-        
-        // Here are all the options we can define, to pass as "settings" when creating the view:        
+
+        // Here are all the options we can define, to pass as "settings" when creating the view:
         settings: {
             points: 150,
             instant: true,    // Add a small pointer showing current/instant wind direction
@@ -47,7 +52,7 @@ define(function(require) {
                 return this[key];
             },
         },
-            
+
         initialize:function (options) {
             // Replace defaults by our own config for all keys
             // passed - if any
@@ -56,11 +61,11 @@ define(function(require) {
                     this.settings[prop] = options.settings[prop];
                 }
             }
-                        
+
             // livedata is an array of all readings.
             this.livedata = [];
             this.previousPoint = null;
-            
+
             this.plotOptions = {
                 series:{
                     rose:{  active:true,
@@ -70,17 +75,17 @@ define(function(require) {
                                 gridMode: "ticks",
                                 labelPos: 0.5,
                                 drawValue: true
-                            } 
+                            }
                         }
                 },
                 grid:{
                     hoverable: true,
-                    clickable: true, 
+                    clickable: true,
                     tickLabel:["N","NNE","NE","ENE","E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW" ]
                 }
             };
-            
-            
+
+
         },
 
         render: function () {
@@ -89,7 +94,7 @@ define(function(require) {
             this.addPlot();
             return this;
         },
-            
+
         addPlot: function() {
             var d1 = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
             var data = [
@@ -97,17 +102,17 @@ define(function(require) {
                 { label: "4-7", color:{colors:["yellow","orange","red"] }, data: d1, rose: {show: true } },
                 { label: "1-3", color:"green", data: d1, rose: {show: true} }
             ];
-            
+
             this.plot = $.plot($(".chart", this.el),data, this.plotOptions);
-            
+
         },
-                
+
         trimLiveData: function() {
             if (this.livedata.length >= this.settings.points) {
                     this.livedata = this.livedata.slice(1);
             }
         },
-        
+
         // Append a data point. Data should be in the form of
         // { name: "measurement_name", value: { dir: dir, speed: speed} } or
         // { name: "measurement_name", value:{ dir: dir, speed: speed}, timestamp: timestamp }
@@ -116,7 +121,7 @@ define(function(require) {
             var stamp = (data.timestamp) ? new Date(data.timestamp).getTime(): new Date().getTime();
             this.livedata.push({stamp: stamp, dir: data.value.dir, speed: data.value.speed});
         },
-        
+
         redraw: function() {
             if (this.livedata.length < 2)
                return;
@@ -146,8 +151,8 @@ define(function(require) {
                 force47[i] += force13[i];
                 force8p[i] += force47[i];
             }
-            
-            
+
+
             // Get the latest wind speed in the live data, to draw a nice pointer around it:
             if (this.settings.instant) {
                 latest = this.livedata[this.livedata.length-1].dir;
@@ -164,16 +169,16 @@ define(function(require) {
             this.plot.setupGrid();
             this.plot.draw();
         },
-        
+
         // This method forces a redraw and is slow: use fastAppendPoint for
         // loading a large number of points before redrawing
         appendPoint: function(data) {
             this.fastAppendPoint(data);
             this.redraw();
-        }    
-            
+        }
+
     });
 
 });
 
-    
+

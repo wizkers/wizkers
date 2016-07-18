@@ -1,20 +1,25 @@
 /**
- * (c) 2016 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
@@ -64,26 +69,26 @@ define(function (require) {
                 lm.sendCommand('F,' + freq + ';');
             }
         }
-        
+
         this.getSweepMem = function(mem) {
             lm.sendCommand('Q,' + mem + ';');
         }
-        
-        this.setSweep = function(start,stop,step,time,repeat) {            
+
+        this.setSweep = function(start,stop,step,time,repeat) {
             // At the moment, we just use Sweep memory 1 to do the sweeps (the UI only
             // lets up program one sweep set).
             lm.sendCommand('Q,1,' + start + ',' + stop + ',' + step + ',' + time + ',' + repeat + ';');
-            this.doSweep();            
+            this.doSweep();
         }
-        
+
         this.doSweep = function() {
             lm.sendCommand('PF,01,00;S,01;');
         }
-        
+
         this.getMems = function() {
             lm.sendCommand('M,00;M,01;M,02;M,03;M,04;M,05;M,06;M,07;M,08;M,09;M,10;M,11;');
         }
-        
+
         this.setMEM = function( band, f) {
             var freq = ("00000000000" + (parseInt(f * 1e6).toString())).slice(-11); // Nifty, eh ?
             if (freq.indexOf("N") > -1) { // detect "NaN" in the string
@@ -92,16 +97,16 @@ define(function (require) {
                 lm.sendCommand('M,' + band + ',' + freq + ';');
             }
         }
-        
+
         this.setWPM = function(wpm) {
             lm.sendCommand('WP,' + wpm + ';');
         }
-        
+
         this.sendCW = function(s) {
             if( s != '')
                 lm.sendCommand('W,' + s + ';');
         }
-        
+
         this.sendBeacon = function(s) {
             // Note: reprograms Sweep1 function
             lm.sendCommand('PF,01,01;S,01;');
@@ -113,7 +118,7 @@ define(function (require) {
         this.setBeacon = function (s) {
             lm.sendCommand('WM,' + s + ';');
         }
-        
+
         this.setWPM = function(wpm) {
             lm.sendCommand('WP,' + wpm + ';');
         }
@@ -121,17 +126,17 @@ define(function (require) {
         this.getWPM = function(wpm) {
             lm.sendCommand('WP;');
         }
-        
+
         this.outputEnable = function(enable) {
             lm.sendCommand('O,' + (enable ? '1' : '0') + ';');
         }
-        
+
         this.setBandDirect = function(num) {
             if (num > 11)
                 return;
             lm.sendCommand('C,' + ("00" + num).slice(-2) + ';');
         }
-        
+
         this.setBand = function (band) {
             // We use a band number in meters (with a "m"), this function translates into the XG3 values:
             var bands = {

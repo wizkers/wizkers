@@ -1,20 +1,25 @@
 /**
- * (c) 2016 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 /*
  * Live view for the XG3 frequency reference
@@ -52,7 +57,7 @@ define(function (require) {
             var self = this;
             console.log('Main render of XG3 main view');
             this.$el.html(template());
-            
+
             var s = Snap("#xg3-front");
             Snap.load('js/app/instruments/elecraft_xg3/XG3-path.svg', function (f) {
                 f.select("#layer1").click(function (e) {
@@ -66,7 +71,7 @@ define(function (require) {
             });
             return this;
         },
-        
+
         events: {
           'click #vfoa-direct-btn': 'setVFO',
           'keypress input#vfoa-direct': 'setVFO',
@@ -82,12 +87,12 @@ define(function (require) {
           'click #output-enable': 'toggleOutput',
           'click #do-sweep': 'doSweep'
         },
-        
+
         onClose: function () {
-            linkManager.off('status', this.updatestatus, this);            
+            linkManager.off('status', this.updatestatus, this);
             linkManager.off('input', this.showInput, this);
         },
-        
+
         updateStatus: function (data) {
             if (data.portopen && !this.deviceinitdone) {
                 linkManager.startLiveStream();
@@ -96,12 +101,12 @@ define(function (require) {
                 this.deviceinitdone = false;
             }
         },
-        
+
         toggleOutput: function() {
           var enabled = $(event.target).is(":checked");
-          linkManager.driver.outputEnable(enabled);  
+          linkManager.driver.outputEnable(enabled);
         },
-        
+
         doSweep: function() {
             if (this.sweeping) {
                 this.$('#do-sweep').html('Sweep').removeClass('btn-danger');
@@ -121,7 +126,7 @@ define(function (require) {
                 linkManager.driver.getSweepMem(1);
             }
         },
-        
+
         setVFO: function () {
             if ((event.target.id == "vfoa-direct" && event.keyCode == 13) || (event.target.id != "vfoa-direct")) {
                 var v = this.$('#vfoa-direct').val();
@@ -130,7 +135,7 @@ define(function (require) {
                     linkManager.startLiveStream();
             }
         },
-        
+
         saveMEM: function() {
             this.applyMemChange = true;
             if (!linkManager.isStreaming())
@@ -152,12 +157,12 @@ define(function (require) {
                 linkManager.driver.setBeacon(v);
             }
         },
-        
+
         sendBeacon: function() {
             // If we are not streaming, this means we are currently
             // sending a beacon
             if (!linkManager.isStreaming()) {
-                this.$('#send-beacon').html('Send Beacon').removeClass('btn-danger');                
+                this.$('#send-beacon').html('Send Beacon').removeClass('btn-danger');
                 this.$('.disable-beacon').attr('disabled',false);
                 this.$('#do-sweep').attr('disabled',false);
                 this.$('#xg3-front').css({'opacity': '1', 'pointer-events': ''});
@@ -173,21 +178,21 @@ define(function (require) {
                 linkManager.driver.sendBeacon('');
             }
         },
-        
+
         sendCW: function() {
             linkManager.stopLiveStream();
             linkManager.driver.sendCW(this.$('#beacon-direct').val());
         },
-        
+
         sendRTTY: function() {
             linkManager.stopLiveStream();
             linkManager.driver.sendRTTY(this.$('#beacon-direct').val());
         },
-        
+
         showHelp: function() {
             this.$('#BeaconHelp').modal();
         },
-        
+
         handleXG3Button: function (e) {
             console.log(e.target.id);
             var b = e.target.id.split('_');
@@ -197,9 +202,9 @@ define(function (require) {
                 linkManager.driver.setLevel(b[1]);
             } else if (b[0] == 'btn' && b[1] == 'band') {
                 if (b[2] == 'plus') {
-                    linkManager.driver.setBandDirect((this.currentBand+1) % 12);                    
+                    linkManager.driver.setBandDirect((this.currentBand+1) % 12);
                 } else {
-                    linkManager.driver.setBandDirect((this.currentBand-1) % 12);                    
+                    linkManager.driver.setBandDirect((this.currentBand-1) % 12);
                 }
             } else if (b[1] == 'onoff') {
                 this.$('#output-enable').click();
@@ -209,7 +214,7 @@ define(function (require) {
             if (!linkManager.isStreaming())
                 linkManager.startLiveStream();
         },
-        
+
         updateBandLED: function(band) {
             var ledOff = "#6c552a";
             var ledOn = "#fda317"
@@ -219,7 +224,7 @@ define(function (require) {
                 this.currentBand = band;
             }
         },
-        
+
         updateLevelLED: function(level) {
             var ledOff = "#6c552a";
             var ledOn = "#fda317"
@@ -230,11 +235,11 @@ define(function (require) {
                 this.currentLevel = level;
             }
         },
-        
+
         toFString: function(f) {
-            return ("00000000000" + (parseInt(f * 1e6).toString())).slice(-11);    
+            return ("00000000000" + (parseInt(f * 1e6).toString())).slice(-11);
         },
-        
+
         showInput: function(data) {
             console.log(data);
             var cmdarg = data.split(',');
@@ -262,7 +267,7 @@ define(function (require) {
                         step == cmdarg[4] && time == cmdarg[5] &&
                         repeat == cmdarg[6]) {
                         linkManager.driver.doSweep();
-                    } else {                
+                    } else {
                         linkManager.driver.setSweep(start,stop,step,time,repeat);
                     }
                 } else {
@@ -291,7 +296,7 @@ define(function (require) {
                     "11": "2"
                 };
                 var f = parseInt(cmdarg[2])/1e6;
-                
+
                 if (!this.applyMemChange) {
                     this.$('#vfo-' + bands[cmdarg[1]]).val(f);
                 } else {
@@ -304,13 +309,13 @@ define(function (require) {
                     }
                     if (cmdarg[1] == '11')
                         this.applyMemChange = false;
-                }         
+                }
             } else if (cmdarg[0] === 'WM') {
                 this.$('#beacon-mem').val(cmdarg[1]);
             } else if (cmdarg[0] === 'WP') {
                 this.$('#beacon-wpm').val(cmdarg[1]);
             }
         }
-        
+
     });
 });

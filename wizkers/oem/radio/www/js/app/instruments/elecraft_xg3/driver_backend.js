@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /*
@@ -111,7 +116,7 @@ define(function (require) {
         function queryRadio() {
 
             // This is queried every second
-            
+
             port.write('I;'); // Ask for frequency
 
         };
@@ -145,13 +150,13 @@ define(function (require) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
             port.off('data', format);
-            
+
             // If we are streaming, stop it!
             // The Home view does this explicitely, but if we switch
             // instrument while it is open, then it's up to the driver to do it.
             if (streaming)
                 this.stopLiveStream();
-            
+
             port_close_requested = true;
             port.close();
         }
@@ -185,7 +190,7 @@ define(function (require) {
             var self = this;
             if (!streaming) {
                 console.log("[XG3] Starting live data stream");
-                
+
                 // Ask for all memories
                 port.write('WM;WP;');
                 port.write('Q,1;');
@@ -193,7 +198,7 @@ define(function (require) {
                 // a beacon - unless we implement a full-blown flow control using ";" as our
                 // echo characted, we just have to add a couple of timeouts:
                 setTimeout( function() {
-                    port.write('M,00;M,01;M,02;M,03;M,04;M,05;M,06;M,07;M,08;M,09;M,10;M,11;');                
+                    port.write('M,00;M,01;M,02;M,03;M,04;M,05;M,06;M,07;M,08;M,09;M,10;M,11;');
                     livePoller = setInterval(queryRadio.bind(this), (period) ? period * 1000 : 1000);
                     streaming = true;
                 }, 300);

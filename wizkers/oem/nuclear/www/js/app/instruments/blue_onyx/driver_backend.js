@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 define(function (require) {
@@ -38,7 +43,7 @@ define(function (require) {
 
         var HEART_RATE_SERVICE_UUID = '180d';
         var HEART_RATE_MEASUREMENT_UUID = '2a37';
-        
+
         // Device information  uuids:
         var DEV_INFO='180a';
         var MFG_NAME = '2a24';
@@ -66,22 +71,22 @@ define(function (require) {
         /////////////
         // Private methods
         /////////////
-        
+
         /**
          * Compare two BLE UUIDs in long and short (16 bit) formats
          */
         var sameUuid = function(u1, u2) {
             if (u1 == u2)
                 return true;
-                
+
             if (u1 == u2.substr(4,4))
                 return true;
-                
+
             if (u2 == u1.substr(4,4))
                 return true;
-                
+
             return false;
-        } 
+        }
 
         var portSettings = function () {
             return {
@@ -105,7 +110,7 @@ define(function (require) {
             // The Heart Rate Measurement Characteristic does not allow 'read'
             // operations and its value can only be obtained via notifications, so the
             // |value| field might be undefined here.
-            
+
             if (sameUuid(data.service,HEART_RATE_SERVICE_UUID) && sameUuid(data.characteristic,HEART_RATE_MEASUREMENT_UUID)) {
                 var valueBytes = new Uint8Array(data.value);
                 if (valueBytes.length < 2) {
@@ -162,7 +167,7 @@ define(function (require) {
          * algorithm, which uses a fixed averaging window length, and tube
          * dead time error correction. It sets a "valid" flag that becomes true
          * once we have enough sample to do the averaging we want.
-         * 
+         *
          * @param {Number} count Count in the last 5 seconds
          */
         var updateCPM = function (count) {
@@ -329,7 +334,7 @@ define(function (require) {
         //
         // TODO: Returns the instrument GUID.
         this.sendUniqueID = function () {
-            port.read(DEV_INFO, SERIAL_NUMBER);            
+            port.read(DEV_INFO, SERIAL_NUMBER);
         };
 
         // period in seconds

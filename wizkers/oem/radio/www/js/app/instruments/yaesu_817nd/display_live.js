@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
@@ -54,7 +59,7 @@ define(function (require) {
 
             this.textOutputBuffer = [];
             this.transmittingText = false;
-            
+
             this.vfoangle = 0;
             this.locked = 0;
             this.powered = true;
@@ -100,7 +105,7 @@ define(function (require) {
                 self.faceplate.attr({
                     width: "100%",
                 });
-                
+
                 // Initialize the VFO rotating dip element:
                 /*
                 var c = self.faceplate.select('#vfoa-wheel');;
@@ -150,12 +155,12 @@ define(function (require) {
         onClose: function () {
             linkManager.off('status', this.updatestatus, this);
             linkManager.off('input', this.showInput, this);
-            
+
             // Note:  the 'onClose' method is called after we changed
             // the driver, so we don't have access to our Elecraft driver
             // anymore: TODO: refactor to first call a "closeDriver" method
             // before changing the instrument ? to be determined...
-            
+
             // linkManager.driver.stopTextStream();
 
             if (this.ElecraftFrequencyListView != null)
@@ -172,7 +177,7 @@ define(function (require) {
             "click #vfotoggle": "toggleVFO",
             "click .mode-btn": "selectMode"
         },
-        
+
         vfoAWheel: function(e) {
             // console.log('Mousewheel',e);
             this.vfoangle -= e.deltaY/2 % 360;
@@ -184,7 +189,7 @@ define(function (require) {
             //linkManager.sendCommand(cmd);
 
         },
-        
+
         toggleVFO: function () {
             linkManager.driver.toggleVFO();
         },
@@ -192,7 +197,7 @@ define(function (require) {
         addfrequency: function () {
             this.ElecraftFrequencyListView.addfrequency();
         },
-        
+
         selectMode: function(e) {
             var mode = e.target.innerText;
             linkManager.driver.setMode(mode);
@@ -214,7 +219,7 @@ define(function (require) {
                 case 'btn_pwr':
                     this.powered = !this.powered;
                     linkManager.driver.power(this.powered);
-            }            
+            }
         },
 
         updateStatus: function (data) {
@@ -227,7 +232,7 @@ define(function (require) {
         },
 
         showInput: function (data) {
-            
+
             if (data.vfoa) {
                 var f = data.vfoa;
                 var f2 = Math.floor(f/1e6);
@@ -242,21 +247,21 @@ define(function (require) {
                 line2 += f2 + '.' + f3 + '.' + f4;
                 this.$("#ft817 #lcd_line2").text(line2);
             }
-            
+
             if (data.squelch != undefined && data.ptt == false) {
                 this.$("#ft817 #busy_led").css('fill', (data.squelch) ? '#707070' : '#35e133');
             } else if (data.ptt) {
-                this.$("#ft817 #busy_led").css('fill', '#ff0000');                
+                this.$("#ft817 #busy_led").css('fill', '#ff0000');
             }
-            
+
             if (data.smeter != undefined) {
                 this.$("#ft817 #lcd_line3").text('S' + data.smeter);
             }
-            
+
             if (data.active_vfo) {
                 this.vfo = 'VFO' + data.active_vfo;
             }
-            
+
             if (data.mode) {
                 var line1 = this.vfo + '     ' + data.mode;
                 this.$("#ft817 #lcd_line1").text(line1);
@@ -264,7 +269,7 @@ define(function (require) {
                 this.$(".mode-btn").removeClass("active");
                 this.$("#mode-" + data.mode).parent().addClass("active");
             }
-            
+
             if (data.locked) {
                 console.info("Locked state:", data.locked);
             }

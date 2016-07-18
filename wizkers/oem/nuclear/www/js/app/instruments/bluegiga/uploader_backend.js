@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /*
@@ -58,7 +63,7 @@ define(function (require) {
         var total_packets;
 
         var test_fw = null;
-        
+
         var OTA_SERVICE_UUID = '1d14d6ee-fd63-4fa1-bfa4-8f47b42119f0';
         var OTA_CONTROL_UUID = 'f7bf3564-fb6d-4e53-88a4-5e37e0326063';
         var OTA_DATA_UUID    = '984227f3-34fc-4045-a5d0-2c581f81a153';
@@ -212,27 +217,27 @@ define(function (require) {
 
         /**
          * Flash the device. Steps are as follows:
-         * 
+         *
          * see: http://community.silabs.com/t5/Wireless-Knowledge-Base/REFERENCE-Updating-BLE-module-firmware-using-OTA-DFU/ta-p/147801
-         * 
+         *
          * Assuming your peripheral device has implemented the proper server-side support for receiving an OTA image as described above,
          * the client-side OTA procedure is as follows (assuming you have the .ota file already and have connected to the peripheral and
          * discovered the GATT structure):
-         * 
+         *
          * Write command (0x04) to control point characteristic to power on flash (not needed for internal flash)
          * Write command(s) (0x00 and then 0x01) to control point characteristic to erase flash
          *          (not needed for internal flash, see ERASE NOTE above)
          * Write command (0x02) to control point characteristic to reset flash write address pointer (not needed for internal flash)
          * Repeatedly write blocks of data in 16-byte or 20-byte increments to data transfer
          *          characteristic until all pages have been written
-         *          
+         *
          * PACKET SIZE NOTE: the maximum single BLE packet payload size is 20 bytes, but this not break evenly into a 2048-byte page of
          * flash. It is important to ensure that data is transferred breaks on page boundaries, since otherwise logic to handle this must
          * be added to the receiving end. However, using a packet size that is page-boundary-friendly (such as 16) for every transfer
          * results in wasted potential throughput. Therefore, the recommended solution is to keep track of the transfer position on the
          * client side, and write 20-byte packets exactly 12 times (240 bytes) followed by one 16-byte packet, for a total of 256 bytes.
          * This will divide evenly into nearly any commonly sized flash page whether you use internal or external flash.
-         * 
+         *
          * Write command (0x03) to control point characteristic to trigger DFU mode reset
          */
         var flashBoard = function () {
@@ -297,7 +302,7 @@ define(function (require) {
         var writePacket = function() {
             self.trigger('data', { writing: ((total_packets-packets.length)/total_packets)*100});
             var packet = packets.shift();
-            port.write(packet, 
+            port.write(packet,
                        {service_uuid: OTA_SERVICE_UUID, characteristic_uuid: OTA_DATA_UUID, type: 'noResponse' },
                        writeSuccess
                        );

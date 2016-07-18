@@ -1,32 +1,37 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
- * "instruments" 
+ * "instruments"
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
 define(function(require) {
-    
+
     "use strict";
-    
+
     var $   = require('jquery'),
         Backbone = require('backbone'),
         Devicelog = require('app/models/devicelog'),
@@ -48,7 +53,7 @@ define(function(require) {
         }]
     };
 
-    
+
     var Instrument = Backbone.Model.extend({
 
             type: null,
@@ -59,7 +64,7 @@ define(function(require) {
                 this.validators.name = function (value) {
                     return value.length > 0 ? {isValid: true} : {isValid: false, message: "You must enter a name"};
                 };
-                
+
                 // Create a reference to my logs and my outputs (outputs are
                 // output plugins defined to send data to other systems)
                 this.logs = new Devicelog.Logs();
@@ -82,25 +87,25 @@ define(function(require) {
                 // the "sync" event, and update the entries' URL upon it (sync is fired when the model is
                 // saved, therefore the ID is updated
                 this.listenTo(this, "sync", this.updateChildrenURL);
-                
+
                 // Make sure that whenever we add an output or a log to the Instrument, we
                 // set its instrumentid reference
                 this.listenTo(this.outputs, "add", this.setInstrumentId);
                 this.listenTo(this.logs, "add", this.setInstrumentId);
-               
+
             },
-        
+
             setInstrumentId: function(model) {
                 model.set("instrumentid", this.id);
             },
-        
+
             updateChildrenURL: function() {
                 /**
                  * Depending on runmode, we are either defining a URL or
                  * relying on backbone localstorage
                  */
                 console.log("[Instrument.js] Updating output/log references for insID " + this.id);
-                
+
                 if (vizapp.type == "cordova") {
                     this.logs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
                     this.outputs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Outputs-" + this.id);
@@ -110,7 +115,7 @@ define(function(require) {
                     this.logs.database = logs_database;
                     this.logs.storeName = "logs";
                     // Also set the instrumentid property of the logs
-                    if (this.id != undefined) 
+                    if (this.id != undefined)
                         this.logs.instrumentid = this.id;
                 } else {
                     this.logs.url = "/instruments/" + this.id + "/logs/";
@@ -139,7 +144,7 @@ define(function(require) {
                 }
 
                 return _.size(messages) > 0 ? {isValid: false, messages: messages} : {isValid: true};
-            },    
+            },
 
             defaults: {
                 name: "Friendly name",             // Used for display
@@ -162,7 +167,7 @@ define(function(require) {
         InstrumentCollection = Backbone.Collection.extend({
 
             model: Instrument,
-            
+
             initialize: function() {
                 if (vizapp.type == "cordova") {
                     this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
@@ -174,7 +179,7 @@ define(function(require) {
             }
 
         });
-    
+
     return {
         Instrument: Instrument,
         InstrumentCollection: InstrumentCollection

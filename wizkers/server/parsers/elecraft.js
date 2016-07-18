@@ -1,19 +1,25 @@
-/** (c) 2015 Edouard Lafargue, ed@lafargue.name
+/**
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /*
@@ -22,12 +28,12 @@
  * This parser implements elecraft serial commands for:
  *    - KXPA100
  *    - KX3
- * 
+ *
  * At this stage, I am not recording anything on those instruments, but I still
  * need to implement the API.
  *
  * @author Edouard Lafargue, ed@lafargue.name
- * 
+ *
  */
 var serialport = require('serialport'),
     readline = require('readline'),
@@ -39,7 +45,7 @@ var serialport = require('serialport'),
 
 
 var Elecraft = function() {
-    
+
     // Init the EventEmitter
     events.EventEmitter.call(this);
 
@@ -48,11 +54,11 @@ var Elecraft = function() {
     /////////
 
     this.name = "elecraft";
-    
+
     /////////
     // Private variables
     /////////
-    
+
     var uidrequested = false,
         port = null,
         isopen = false,
@@ -62,7 +68,7 @@ var Elecraft = function() {
         streaming = false,
         previouscmd = '',
         livePoller = null;
-    
+
     // A few driver variables: we keep track of a few things
     // here for our bare-bones rigctld implementation.
     //
@@ -72,19 +78,19 @@ var Elecraft = function() {
     var vfoa_frequency = 0,
         vfob_frequency = 0,
         vfoa_bandwidth = 0;
-    
+
     // Do we have a TCP client connected ?
     var server = null;
     var serverconnected = false;
-        
+
     /////////
     // Private methods
     /////////
-    
+
     var status = function(stat) {
         debug('[elecraft] Port status change', stat);
         isopen = stat.portopen;
-        
+
         if (isopen) {
             // Should run any "onOpen" initialization routine here if
             // necessary.
@@ -115,11 +121,11 @@ var Elecraft = function() {
         port.write('^PI;^PF;^PV;^TM;');
         port.write('^PC;^SV;'); // Query voltage & current
     };
-        
+
     // Format returns an ASCII string - or a buffer ? Radio replies with
     // non-ASCII values on some important commands (VFO A text, Icons, etc)
     var format = function(data, recording) {
-        
+
         if (uidrequested && data.substr(0,5) == "DS@@@") {
             // We have a Unique ID
             debug("Sending uniqueID message");
@@ -127,7 +133,7 @@ var Elecraft = function() {
             uidrequested = false;
             return;
         }
-        
+
         var cmd = data.substr(0,2);
         switch(cmd) {
                 case "FA":
@@ -143,7 +149,7 @@ var Elecraft = function() {
             // Additional output besides regular polling, print it
             debug("******  " + data);
         }
-        
+
         self.emit('data',data);
     };
 
@@ -165,13 +171,13 @@ var Elecraft = function() {
             parser: serialport.parsers.readline(';','binary'),
         }
     };
-    
-    
+
+
     /////////
     // Public API
     // Implemented on all instrument parsers
     /////////
-    
+
     // Creates and opens the connection to the instrument.
     // for all practical purposes, this is really the init method of the
     // driver
@@ -183,7 +189,7 @@ var Elecraft = function() {
             port.on('status', status);
         });
     }
-    
+
     this.closePort = function(data) {
         // We need to remove all listeners otherwise the serial port
         // will never be GC'ed
@@ -195,13 +201,13 @@ var Elecraft = function() {
     this.isOpen = function() {
         return isopen;
     }
-    
+
     this.setInstrumentRef = function(i) {
     };
-        
+
     // Called when the HTML app needs a unique identifier.
     // this is a standardized call across all drivers.
-    // 
+    //
     // Returns the Radio serial number.
     this.sendUniqueID = function() {
         uidrequested = true;
@@ -211,13 +217,13 @@ var Elecraft = function() {
             debug("Error on serial port while requesting Elecraft UID : " + err);
         }
     };
-    
+
     this.isStreaming = function() {
         return streaming;
     };
-    
+
     // period is in seconds
-    this.startLiveStream = function(period) {        
+    this.startLiveStream = function(period) {
         debug("[Elecraft] Starting live data stream");
         // The radio can do live streaming to an extent, so we definitely will
         // take advantage:
@@ -230,7 +236,7 @@ var Elecraft = function() {
             streaming = true;
         }
     };
-    
+
     this.stopLiveStream = function(period) {
         if (streaming) {
             debug("[Elecraft] Stopping live data stream");
@@ -240,24 +246,24 @@ var Elecraft = function() {
             streaming = false;
         }
     };
-    
-    
+
+
     // output does whatever formatting is needed on the data
     // (none for this driver) and sends it onwards to the
     // port
     this.output = function(data) {
         port.write(data);
     };
-        
+
     // Status returns an object that is concatenated with the
     // global server status
     this.status = function() {
         return { tcpserverconnect: this.serverconnected };
     };
-    
-    // We serve rigctld commands through a TCP socket too:    
+
+    // We serve rigctld commands through a TCP socket too:
     this.onOpen = function(success) {
-        
+
         var driver_ref = this;
         debug("Elecraft Driver: got a port open signal");
         if (server == null) {
@@ -266,7 +272,7 @@ var Elecraft = function() {
 //                if (self.socket)
 //                    self.socket.emit('status',{ tcpserverconnect: true });
                 serverconnected = true;
-                
+
                 c.on('end', function() {
                     debug('Server disconnected');
 //                    if (self.socket)
@@ -283,13 +289,13 @@ var Elecraft = function() {
             debug('Rigctld emulation server started');
         });
     },
-    
+
     this.onClose = function(success) {
         debug("Closing TCP rigctld emulation server");
         if (server)
             server.close();
     };
-    
+
     // RIGCTLD Emulation - super light, but does the trick for fldigi...
     var rigctl_command = function(data,c) {
         // debug(data);
@@ -301,13 +307,13 @@ var Elecraft = function() {
                 case "\\d": // "mp_state":
                     // No f**king idea what this means, but it makes hamlib happy.
                     c.write(hamlib_init);
-                    break;                
+                    break;
                 case "f":
                     c.write(vfoa_frequency + "\n");
                     break;
                 case "F": // Set Frequency (VFOA):  F 14069582.000000
                     var freq = ("00000000000" + parseFloat(data.substr(2)).toString()).slice(-11); // Nifty, eh ?
-                    
+
                     debug("Rigctld emulation: set frequency to " + freq);
                     if (port != null)
                         port.write("FA" + freq + ";");
@@ -331,7 +337,7 @@ var Elecraft = function() {
                         // The radio does not echo this command, so we do it
                         // ourselves, so that the UI reacts
                         driver_ref.emit('data','TX;');
-                     
+
                     } else {
                         if (port != null)
                             port.write("RX;");
@@ -341,11 +347,11 @@ var Elecraft = function() {
                     break;
                 default:
                     debug("Unknown command: " + data);
-                
+
         }
-        
+
     };
-    
+
     var hamlib_init =    "0\n" +
                     "2\n" +
                     "2\n" +
@@ -367,7 +373,7 @@ var Elecraft = function() {
                     "0x0\n" +
                     "0x0\n" +
                     "0\n";
-    
+
 }
 
 Elecraft.prototype.__proto__ = events.EventEmitter.prototype;

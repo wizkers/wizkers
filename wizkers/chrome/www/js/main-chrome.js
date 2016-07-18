@@ -1,21 +1,26 @@
-/** (c) 2015 Edouard Lafargue, ed@lafargue.name
+/**
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 /**
  * We now use require.js: these are the mappings of our application.
  *
@@ -70,7 +75,7 @@ require.config({
         flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
         flot_windrose: 'lib/jquery.flot.windrose',
         flot_jumlib: 'lib/jquery.flot.JUMlib',
-        
+
         dygraph: 'lib/dygraph-combined-dev'
     },
 
@@ -104,7 +109,7 @@ require.config({
         'utils': {
             exports: 'utils'
         },
-        
+
         'dygraph': {
             deps: ['jquery'],
             exports: 'Dygraph'
@@ -145,14 +150,14 @@ var vizapp = {
     // run mode of the application. Can be:
     //   - server : use a remote server for device connection & database
     //   - cordova: run as an embedded Cordova application on Android
-    //   - others to be defined 
+    //   - others to be defined
     type: "chrome",
 
     // State can be "running" or "paused". Only updated in Cordova mode.
     // Can be checked by various tasks to skip display when app paused, and
     // save battery. (see Flotplot)
     state: 'running',
-    
+
     // Used in a couple of locations, lets us change the app name easily.
     appname: 'Wizkers'
 

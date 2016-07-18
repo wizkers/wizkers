@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
@@ -30,9 +35,9 @@
  */
 
 define(function(require) {
-    
+
     "use strict";
-    
+
     function to_hex( number ) {
             var r = number.toString(16);
             if( r.length < 2 ) {
@@ -70,7 +75,7 @@ define(function(require) {
 
         return dumped;
     };
-    
+
     var decoder, encoder;
     var enc_ok = false;
     if ( typeof TextDecoder == 'function') {
@@ -80,9 +85,9 @@ define(function(require) {
     }
 
     var nullstring = String.fromCharCode(0);
-	
+
     return {
-        
+
         // Utility function (chrome serial wants array buffers for sending)
         // Convert string to ArrayBuffer.
         str2ab: function(str) {
@@ -94,7 +99,7 @@ define(function(require) {
 
             if (enc_ok)
                 return encoder.encode(str).buffer;
-            
+
             var buf=new ArrayBuffer(str.length);
             var bufView=new Uint8Array(buf);
             for (var i=0, j=str.length; i<j; i++) {
@@ -116,7 +121,7 @@ define(function(require) {
             }
             return String.fromCharCode.apply(null, new Uint8Array(buf));
         },
-        
+
 
         /// Converts a Hex string to a UInt8Array
         // For instance "010203efab23" as input
@@ -129,7 +134,7 @@ define(function(require) {
             }
             return ab;
         },
-        
+
         // Convert Uint8Array to hex string
         ui8tohex: function(ui8) {
             var str = '';
@@ -160,10 +165,10 @@ define(function(require) {
 
             return dumped;
         },
-        
+
         // Pad a buffer (a type array)
         pad: function (buf, padding) {
-            
+
             if (buf.byteLength % padding == 0)
                 return buf;
             var missing = padding - (buf.byteLength%padding);
@@ -176,7 +181,7 @@ define(function(require) {
             return b2;
         }
 
-        
+
     }
-    
+
 });

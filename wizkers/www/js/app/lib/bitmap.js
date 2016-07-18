@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
@@ -23,7 +28,7 @@
   an array of 32bit integers that map to individual pixels (32 pixels per integer).
   Adapted to be compliant with pure Javascript implementation, and not only Node.JS Buffer
   objects
-  
+
   https://github.com/nowelium/node-bitmap
 
 (The MIT License)
@@ -127,7 +132,7 @@ Bitmap.prototype.getData = function (){
     line = ((line / 4) + 1) * 4;
   }
 
-    
+
   var rgbaData = [];
   var dataPos = this.dataPos;
   for(var i = 0; i < height; ++i) {
@@ -148,14 +153,14 @@ Bitmap.prototype.getHeight = function (){
 
   return this.coreHeader.__height__;
 };
-    
+
 // Converted to work with ArrayBuffers rather than Node Buffers
 Bitmap.prototype.read = function(buf, offset, limit){
   return buf.subarray(offset,offset+limit);
 };
-    
+
 Bitmap.prototype.readFileHeader = function(){
-    
+
   this.fileHeader = {
     bfType: this.buffer.subarray(0,2) , // Should be [66,78]
     bfSize: this.dv.getUint16(2,true),
@@ -165,11 +170,11 @@ Bitmap.prototype.readFileHeader = function(){
   };
 
 };
-    
+
 Bitmap.prototype.readInfoHeader = function (){
   this.infoHeader = new DataView(this.buffer.buffer, 14, 4);
 };
-    
+
 Bitmap.prototype.readCoreHeader = function (){
   var coreType = this.infoHeader.getUint16(0,true);
   switch(coreType){
@@ -188,7 +193,7 @@ Bitmap.prototype.readCoreHeader = function (){
   }
 };
 Bitmap.prototype.readCoreHeaderWINDOWS_V3 = function (){
-  
+
   this.coreHeader = {
     __copmression__: this.dv.getUint16(0x1e,true),
     __bitCount__: this.dv.getUint8(0x1c),
@@ -208,7 +213,7 @@ Bitmap.prototype.readCoreHeaderWINDOWS_V3 = function (){
 };
 Bitmap.prototype.readCoreHeaderWINDOWS_V4 = function (){
   throw new Error('not yet impl');
-  
+
   var bV4Width = this.read(this.buffer, 0x12, 4);
   var bV4Height = this.read(this.buffer, 0x16, 4);
   var bV4Planes = this.read(this.buffer, 0x1a, 2);
@@ -617,6 +622,6 @@ Bitmap.prototype.mapColor = function(bmpBuf, bitCount){
   }
   throw new Error('unknown bitCount: ' + bitCount);
 };
-    
+
     return Bitmap;
 });

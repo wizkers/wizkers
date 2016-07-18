@@ -1,20 +1,25 @@
 /**
- * (c) 2015 Edouard Lafargue, ed@lafargue.name
+ * This file is part of Wizkers.io
  *
- * This file is part of Wizkers.
+ * The MIT License (MIT)
+ *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
- * Wizkers is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software
+ * is furnished to do so, subject to the following conditions:
  *
- * Wizkers is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with Wizkers.  If not, see <http://www.gnu.org/licenses/>.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+ * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
@@ -26,9 +31,9 @@
  */
 
 define(function(require) {
-    
+
     "use strict";
-    
+
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
@@ -38,12 +43,12 @@ define(function(require) {
         template = require('tpl/OutputDetailsView');
 
     return Backbone.View.extend({
-        
+
         id: "output-details",
         gotdata: false,
-        
+
         initialize: function() {
-            
+
             // Mapping is "outputfield" : "datafield"
             this.devicefields = this.model.get('mappings');
 
@@ -52,9 +57,9 @@ define(function(require) {
             // Some plugins can accept a variable number of fiels, named "Field1" ... "FieldN", and
             // this.outputfields will be "variable" in that case.
             this.generateOutputFields();
-            
+
         },
-        
+
         generateOutputFields: function() {
             this.outputfields = outputManager.getOutputFields(this.model.get('type'));
             if (this.outputfields == "variable") {
@@ -73,7 +78,7 @@ define(function(require) {
         render: function () {
 
             console.log("Render output details");
-            
+
             this.$el.html(template(_.extend(this.model.toJSON(), {outtypes: outputManager.getOutputsForCurrentInstrument(),
                                                                    outputfields: this.outputfields
                                                                    })));
@@ -85,32 +90,32 @@ define(function(require) {
                 $('#metadata',this.el).html(settingsView.el);
                 settingsView.render();
             }
-            
+
             // Some outputs want all the data: in that case, override the "When to Send it" tab
             if ( outputManager.pluginWantsAllData(this.model.get('type')) ) {
                 $("#what").html("<p>This plugin requests access to all data sent by the instrument, so there is nothing to setup here.</p>");
                 $("#when").html("<p>This plugin requests access to all data sent by the instrument, so there is nothing to setup here.</p>");
                 this.model.set('wantsalldata', true);
             }
-            
+
             this.renderMappingsTable();
-                        
+
             // Now, we want to listen to the instrument to display a nice table of all fields
             // that the instrument outputs, so that the user can select those he wants to send to the
             // output plugin.
-            
+
             this.wasStreaming = linkManager.isStreaming();
             linkManager.startLiveStream();
             this.listenTo(linkManager, 'input', this.showInput);
-            
+
             return this;
         },
-        
+
         renderMappingsTable: function() {
             var self = this;
             // Populate the field mappings: we are going to enrich the output plugin
             // config with the name of the data field it is mapped to
-            
+
             // Gotta refresh the default outputfields each time
             this.generateOutputFields();
             if (Object.keys(this.outputfields).length) {
@@ -124,10 +129,10 @@ define(function(require) {
             } else {
                 $("#mappings", this.el).html('<p>This plugin does not support output fields, it formats its output data by itself.</p>');
             }
-            
+
 
         },
-        
+
         onClose: function() {
             if (! this.wasStreaming )
                 linkManager.stopLiveStream();
@@ -149,7 +154,7 @@ define(function(require) {
             // Apply the change to the model
             var target = event.target;
             var change = {};
-            
+
             // A change for a field mapping is a bit more complex and needs
             // to be handled separately
             if (target.name == "fieldmapping") {
@@ -189,7 +194,7 @@ define(function(require) {
                 this.render();
                 // And switch back to the correct tab so that the user is not surprised:
                 $('#settingsTabs a[href="#props"]').tab('show')
-                
+
             } else {
 
                 // Our Spinedit control returns values as strings even
@@ -208,7 +213,7 @@ define(function(require) {
                     this.generateOutputFields();
                     this.render();
                 }
-                
+
             }
 
             // TODO: is this right ?
@@ -220,7 +225,7 @@ define(function(require) {
 
         beforeSave: function () {
             console.log('Output: before save for output ' + this.model.id);
-            
+
             this.saveOutput();
             return false;
         },
@@ -238,7 +243,7 @@ define(function(require) {
                 }
             });
         },
-        
+
         deleteOutput: function() {
             if (this.model.id == undefined) {
                 console.log("User wants to delete an output that was not created yet");
@@ -260,7 +265,7 @@ define(function(require) {
             });
             return false;
         },
-        
+
         toggleEnabled: function(event) {
             var field = event.currentTarget.name;
             var idx = this.devicefields.indexOf(field);
@@ -271,7 +276,7 @@ define(function(require) {
             }
             this.model.set('datafields', this.devicefields);
         },
-        
+
         showInput: function(data) {
             if (this.gotdata)
                 return;
@@ -293,7 +298,7 @@ define(function(require) {
                 var tbheight = window.innerHeight - this.$('#title1').height() - this.$('#topoutputinfo').height() - this.$('#outputtabsarea').height() - $('.header .container').height() - 20;
                 this.$('#tablewrapper').css('max-height',
                     tbheight + 'px'
-                ); 
+                );
             }
         },
 
