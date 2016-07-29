@@ -56,12 +56,12 @@ define(function (require) {
                 settings: 'app/instruments/elecraft/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
-//            "elecraft_k3": {
-//                name: "Elecraft K3",
-//                type: 'app/instruments/elecraft_k3/elecraft_k3',
-//                settings: 'app/instruments/elecraft/settings',
-//                connectionsettings: 'app/views/instrument/serialport'
-//            },
+            "elecraft_k3": {
+                name: "Elecraft K3",
+                type: 'app/instruments/elecraft_k3/elecraft_k3',
+                settings: 'app/instruments/elecraft/settings',
+                connectionsettings: 'app/views/instrument/serialport'
+            },
             "elecraft_kxpa100": {
                 name: "Elecraft KXPA100 Standalone",
                 type: 'app/instruments/elecraft_kxpa100/elecraft_kxpa100',

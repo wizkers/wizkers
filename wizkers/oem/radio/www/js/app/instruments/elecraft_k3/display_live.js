@@ -32,13 +32,9 @@
 define(function (require) {
     "use strict";
 
-    var $ = require('jquery'),
-        _ = require('underscore'),
-        Backbone = require('backbone'),
-        Snap = require('snap'),
+    var Snap = require('snap'),
         utils = require('app/utils'),
         template = require('js/tpl/instruments/elecraft_k3/LiveView.js');
-
 
     // Need to load these, but no related variables.
     require('bootstrap');
@@ -52,20 +48,168 @@ define(function (require) {
         });
     }
 
+    return (function() {
+        // Everything inside of here is private to each instance
+        var view; // Reference to the Backbone view, initialize when the view is instanciated
+
+        var bands = ["160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", 0, 0, 0, 0, 0, "2m"];
+        var modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
+        var vfoangle = 270;
+        var dip_x, dip_y, vfodip, oldPageY;
+        var buttonCodes = {
+            // The labels are the IDs of the areas on the KX3 front panel SVG:
+            "B_BAND_MINUS": "T09",
+            "B_VOX": "H09",
+            "B_BAND_PLUS": "T10",
+            "B_QSK": "H10",
+            "B_MODE_MINUS": "T17",
+            "B_ALT": "H17",
+            "B_MODE_PLUS": "T18",
+            "B_TEST": "H18",
+            "B_MENU": "T14",
+            "B_CONFIG": "H14",
+            "B_XMIT": "T16",
+            "B_TUNE": "H16",
+            "B_RX_ANT": "T25",
+            "B_DISP": "T08",
+            "B_METER": "H08",
+            "B_ATU_TUNE": "T19",
+            "B_ATU": "H19",
+            "B_ANT": "T26",
+            "B_A_SLASH_B": "T11;MD;",
+            "B_SET": "H11",
+            "B_REV": "T12",
+            "B_A_TO_B": "T13",
+            "B_SPLIT": "H13",
+            "B_V_TO_M": "T15",
+            "B_AF_REC": "H15",
+            "B_M_TO_V": "T23",
+            "B_AF_PLAY": "H23",
+            "B_PRE": "T24",
+            "B_ATT": "H24",
+            "B_AGC": "T27",
+            "B_OFF": "H27",
+            "B_XFIL": "T29",
+            "B_APF": "H29",
+            "B_M1": "T21",
+            "B_M2": "T31",
+            "B_M3": "T35",
+            "B_M4": "T39",
+            "B_REC": "T37",
+            "B_NB": "T33",
+            "B_LEVEL": "H33",
+            "B_NR": "T34",
+            "B_ADJ": "H34",
+            "B_NTCH": "T32",
+            "B_MAN": "H32",
+            "B_SPOT": "T42",
+            "B_PITCH": "H42",
+            "B_CWT": "T40",
+            "B_TEXT_DEC": "H40",
+            "B_AFX": "T43",
+            "B_DATA_MD": "H43",
+            "B_RIT": "T45",
+            "B_PF1": "H45",
+            "B_XIT": "T47",
+            "B_PF2": "H47",
+            "B_CLR": "T53",
+            "B_FREQ_ENT": "T41",
+            "B_SCAN": "H41",
+            "B_FINE": "T49",
+            "B_COARSE": "H49",
+            "B_RATE": "T50",
+            "B_LOCK": "H50",
+            "B_SUB": "T48",
+            "B_DIV": "H48"
+            
+
+        };
+
+        var voltAlertThreshold = 0,
+            voltAlertEnabled = false;
+
+        var voltAlertBeep =  new Audio('js/app/instruments/elecraft/600hz.ogg')
+
+        var handleKX3Button = function (e) {
+            console.log(e.target.id);
+            //$("#kx3 #filter-II").css("visibility", "visible");
+            var code = buttonCodes[e.target.id];
+            if (code != null) {
+                linkManager.sendCommand('SW' + code + ';');
+            }
+        };
+
+       var rotateVfoWheel = function(deltaY) {
+            vfoangle = (vfoangle- deltaY/2) % 360;
+            var tx = dip_x * (Math.cos(vfoangle*2*Math.PI/360));
+            var ty = dip_y * (1+Math.sin(vfoangle*2*Math.PI/360));
+            vfodip.transform('t' + tx + ',' + ty);
+            var step = Math.floor(Math.min(Math.abs(deltaY)/50, 7));
+            var cmd = ((deltaY < 0) ? 'UP' : 'DN') + step + ';DS;';
+            linkManager.sendCommand(cmd);
+        };
+
+        var updateVA = function(e) {
+            voltAlertEnabled = view.$('#enable-voltage-alert').is(':checked');
+            voltAlertThreshold = parseFloat(view.$('#voltage-alert-level').val());
+            view.model.set('device_vmon_threshold', voltAlertThreshold);
+            view.model.set('device_vmon_enabled', voltAlertEnabled);
+            view.model.save();
+        }
+
+        var validateMacros = function () {
+            var me = $("#data-mycall");
+            var you = $("#data-theircall");
+            var ok = true;
+            if (me.val() != '') {
+                $("#data-mycall-grp").removeClass("has-error");
+            } else {
+                $("#data-mycall-grp").addClass("has-error");
+                ok = false;
+            }
+            if (you.val() != '') {
+                $("#data-theircall-grp").removeClass("has-error");
+            } else {
+                $("#data-theircall-grp").addClass("has-error");
+                ok = false;
+            }
+            return ok;
+        };
+
+        var setIcon = function (name, visible) {
+            if (visible) {
+                view.$("#kx3 #icon_" + name).show();
+            } else {
+                view.$("#kx3 #icon_" + name).hide();
+            }
+        };
+
+        var setModeIcon = function (mode) {
+            // We need to update all icons when moving from one mode to another, so
+            // I added this helper function
+            view.$("#kx3 .mode_icon").hide();
+            view.$("#kx3 #icon_" + modes[mode - 1]).show();
+        };
+
+
+
     return Backbone.View.extend({
 
         initialize: function () {
+            view = this;
             this.deviceinitdone = false;
 
             this.textOutputBuffer = [];
             this.transmittingText = false;
 
-            this.vfoangle = 0;
-
             // Keep the value of the previous VFO value to avoid
             // unnecessary redraws of the front panel.
             this.oldVFOA = null;
             this.oldVFOB = null;
+
+            this.slevel = 0;
+            this.plevel = 0;
+            this.ptt = false;
 
             // Bad design: this has to be consistent with the settings in settings_wizkers.js
             // (sorry)
@@ -80,47 +224,42 @@ define(function (require) {
                     brag: 'Rig: Elecraft KX3. Controller: Wizkers.io'
                 });
             }
+            if (this.model.get('device_vmon_threshold') != undefined &&
+                this.model.get('device_vmon_enabled') != undefined ) {
+                voltAlertThreshold = parseFloat(this.model.get('device_vmon_threshold'));
+                voltAlertEnabled = this.model.get('device_vmon_enabled');
+            }
 
             linkManager.on('status', this.updateStatus, this);
             linkManager.on('input', this.showInput, this);
         },
 
         ElecraftFrequencyListView: null,
-        bands: ["160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", 0, 0, 0, 0, 0, "2m"],
 
         render: function () {
             var self = this;
+
             this.$el.html(template());
 
-            this.faceplate = Snap("#kx3");
+            var faceplate = Snap("#kx3");
             Snap.load("js/app/instruments/elecraft_k3/K3.svg", function (f) {
-                f.select("#layer1").click(function (e) {
-                    self.handleKX3Button(e);
+                f.select("#buttons").click(function (e) {
+                    handleKX3Button(e);
                 });
-                self.faceplate.add(f);
+                faceplate.add(f);
                 // Set display constraints for the radio panel:
-                self.faceplate.attr({
+                faceplate.attr({
                     width: "100%",
                 });
-                $("#kx3 .icon").css('visibility', 'hidden');
-                $("#kx3").height($("#kx3").width() * 0.42);
-
+                self.$("#kx3 .icon").hide();
                 // Initialize the VFO rotating dip element:
-                var c = self.faceplate.select('#vfoa-wheel');;
+                var c = faceplate.select('#vfoa-wheel');;
                 var bb = c.getBBox();
-                self.vfodip = self.faceplate.select('#vfoa-dip');
-                var bb2 = self.vfodip.getBBox();
-                self.dip_x = (bb.width-(bb2.width+ bb2.y-bb.y))/2;
-                self.dip_y = (bb.height-(bb2.height + bb2.y-bb.y))/2;
-
-                // I was not able to make the SVG resize gracefully, so I have to do this
-                $("#kx3").resize(function (e) {
-                    console.log("SVG container resized");
-                    $(e.target).height($(e.target).width() * 0.42);
-                });
-
+                vfodip = faceplate.select('#vfoa-dip');
+                var bb2 = vfodip.getBBox();
+                dip_x = (bb.width-(bb2.width+ bb2.y-bb.y))/2;
+                dip_y = (bb.height-(bb2.height + bb2.y-bb.y))/2;
             });
-
 
             // Initialize our sliding controls:
             $("#rf-control", this.el).slider();
@@ -139,7 +278,7 @@ define(function (require) {
                     $('#frequency-selector').html(self.ElecraftFrequencyListView.el);
                     self.ElecraftFrequencyListView.render();
                 }
-                $('#frequency-selector', self.el).carousel();
+                self.$('#frequency-selector').carousel();
             });
 
             // And last, load the waterfall sub view:
@@ -152,6 +291,10 @@ define(function (require) {
                     self.waterfallView.render();
                 }
             });
+
+            this.$('#voltage-alert-level').val(voltAlertThreshold);
+            this.$('#enable-voltage-alert').prop('checked',voltAlertEnabled);
+
             return this;
         },
 
@@ -174,6 +317,8 @@ define(function (require) {
 
         events: {
             //"click" : "debugClick",
+            "change #enable-voltage-alert": "voltAlert",
+            "change #voltage-alert-level": "voltAlert",
             "click #power-direct-btn": "setpower",
             "click .store-frequency": "addfrequency",
             "click input#power-direct": "setpower",
@@ -204,24 +349,37 @@ define(function (require) {
             "click #data-brag": "sendBRAG",
             "click #mem-left": "hideOverflow",
             "click #mem-right": "hideOverlow",
-            "mousewheel #vfoa-wheel": "vfoAWheel"
+            "mousewheel #vfoa-wheel": "vfoAWheel",
+            "touchmove #vfoa-wheel": "vfoAWheelTouch",
+            "touchstart #vfoa-wheel": "vfoAWheelTouchStart"
         },
 
         vfoAWheel: function(e) {
             // console.log('Mousewheel',e);
-            this.vfoangle -= e.deltaY/2 % 360;
-            var tx = this.dip_x * (Math.cos(this.vfoangle*Math.PI/360));
-            var ty = this.dip_y * (1+Math.sin(this.vfoangle*Math.PI/360));
-            this.vfodip.transform('t' + tx + ',' + ty);
-            var step = Math.floor(Math.min(Math.abs(e.deltaY)/50, 7));
-            var cmd = ((e.deltaY < 0) ? 'UP' : 'DN') + step + ';FA;';
-            linkManager.sendCommand(cmd);
+            rotateVfoWheel(e.deltaY);
+            e.preventDefault(); // Prevent the page from scrolling!
+        },
 
+        vfoAWheelTouchStart: function(e) {
+            oldPageY = e.originalEvent.touches[0].pageY;
+        },
+
+        // Split in two to speed things up
+        vfoAWheelTouch: function(e) {
+            var ty = e.originalEvent.touches[0].pageY;
+            var deltaY = ty - oldPageY;
+            oldPageY = ty;
+            rotateVfoWheel(deltaY);
+            e.preventDefault(); // Prevent the page from scrolling!
         },
 
         hideOverflow: function () {
             // $("#xtrafunc-leftside").css('overflow', 'hidden');
 
+        },
+
+        voltAlert: function(e) {
+            updateVA(e);
         },
 
         debugClick: function (e) {
@@ -284,13 +442,13 @@ define(function (require) {
 
         setvfoa: function () {
             if ((event.target.id == "vfoa-direct" && event.keyCode == 13) || (event.target.id != "vfoa-direct")) {
-                linkManager.driver.setVFO($("#vfoa-direct", this.el).val(), "a");
+                linkManager.driver.setVFO(parseFloat(this.$("#vfoa-direct").val()), "a");
             }
         },
 
         setvfob: function () {
             if ((event.target.id == "vfob-direct" && event.keyCode == 13) || (event.target.id != "vfob-direct")) {
-                linkManager.driver.setVFO($("#vfob-direct", this.el).val(), "b");
+                linkManager.driver.setVFO(parseFloat(this.$("#vfob-direct").val()), "b");
             }
         },
 
@@ -317,59 +475,6 @@ define(function (require) {
             linkManager.driver.setCT(9); // Special value for centering Passband
         },
 
-        buttonCodes: {
-            // The labels are the IDs of the areas on the KX3 front panel SVG:
-            "B_BAND_PLUS": "T08",
-            "B_RCL": "H08",
-            "B_BAND_MINUS": "T41",
-            "B_STORE": "H41",
-            "B_FREQ_ENT": "T10",
-            "B_SCAN": "H10",
-            "B_MSG": "T11",
-            "B_REC": "H11",
-            "B_ATU_TUNE": "T44",
-            "B_ANT": "H44",
-            "B_XMIT": "T16",
-            "B_TUNE": "H16",
-            "B_PRE": "T19",
-            "B_NR": "H19",
-            "B_ATTN": "T27",
-            "B_NB": "H27",
-            "B_APF": "T20",
-            "B_NTCH": "H20",
-            "B_SPOT": "T28",
-            "B_CWT": "H28",
-            "B_CMP": "T21",
-            "B_PITCH": "H21",
-            "B_DLY": "T29",
-            "B_VOX": "H29",
-            "B_MODE": "T14",
-            "B_ALT": "H14",
-            "B_DATA": "T17",
-            "B_TEXT": "H17",
-            "B_RIT": "T18",
-            "B_PF1": "H18",
-            "B_RATE": "T12",
-            "B_KHZ": "H12",
-            "B_A_SLASH_B": "T24;MD;",
-            "B_REV": "H24", // Request mode again when swapping VFO's
-            "B_A_TO_B": "T25",
-            "B_SPLIT": "H25",
-            "B_XIT": "T26",
-            "B_PF2": "H26",
-            "B_DISP": "T09",
-            "B_MENU": "H09"
-        },
-
-        handleKX3Button: function (e) {
-            console.log(e.target.id);
-            //$("#kx3 #filter-II").css("visibility", "visible");
-            var code = this.buttonCodes[e.target.id];
-            if (code != null) {
-                linkManager.sendCommand('SW' + code + ';');
-            }
-        },
-
         updateStatus: function (data) {
             if (data.portopen && !this.deviceinitdone) {
                 linkManager.startLiveStream();
@@ -382,38 +487,6 @@ define(function (require) {
                 this.deviceinitdone = false;
             }
         },
-
-        setIcon: function (name, visible) {
-            $("#kx3 #icon_" + name).css("visibility", (visible) ? "visible" : "hidden");
-        },
-
-        setModeIcon: function (mode) {
-            // We need to update all icons when moving from one mode to another, so
-            // I added this helper function
-            var modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
-            $("#kx3 .mode_icon").css('visibility', 'hidden');
-            $("#kx3 #icon_" + modes[mode - 1]).css('visibility', 'visible');
-        },
-
-        validateMacros: function () {
-            var me = $("#data-mycall");
-            var you = $("#data-theircall");
-            var ok = true;
-            if (me.val() != '') {
-                $("#data-mycall-grp").removeClass("has-error");
-            } else {
-                $("#data-mycall-grp").addClass("has-error");
-                ok = false;
-            }
-            if (you.val() != '') {
-                $("#data-theircall-grp").removeClass("has-error");
-            } else {
-                $("#data-theircall-grp").addClass("has-error");
-                ok = false;
-            }
-            return ok;
-        },
-
 
         sendCQ: function () {
             var mycall = $("#data-mycall").val();
@@ -429,7 +502,7 @@ define(function (require) {
         },
 
         sendANS: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             var me = $("#data-mycall").val();
@@ -441,7 +514,7 @@ define(function (require) {
         },
 
         sendKN: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             var me = $("#data-mycall").val();
@@ -453,7 +526,7 @@ define(function (require) {
         },
 
         sendQSO: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             var me = $("#data-mycall").val();
@@ -465,7 +538,7 @@ define(function (require) {
         },
 
         sendME: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             this.sendQSO();
@@ -479,7 +552,7 @@ define(function (require) {
         },
 
         sendBRAG: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             this.sendQSO();
@@ -493,7 +566,7 @@ define(function (require) {
         },
 
         sendSK: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             var me = $("#data-mycall").val();
@@ -505,17 +578,70 @@ define(function (require) {
         },
 
         showInput: function (data) {
-            if (typeof data != "string")
-                return; // data is sometimes an object when we get a serial port error
+            if (data.raw == undefined)
+                return; // Detect error messages which don't contain what we need.
             // Now update our display depending on the data we received:
-            var cmd = data.substr(0, 2);
-            var val = data.substr(2);
+
+            // If we have a pre-parsed element, use it (faster!)
+            if (data.vfoa) {
+                this.$("#vfoa-direct").val(data.vfoa/1e6);
+                return;
+            } else if (data.vfob) {
+                this.$("#vfob-direct").val(data.vfob / 1e6);
+                return;
+            }
+            if (data.ptt != undefined) {
+                if (this.ptt == data.ptt)
+                    return;
+                this.ptt = data.ptt;
+                // Adjust the Bargraph here:
+                // so that we don't do this later and waste cycles
+                for (var i = 0; i < 20; i++) {
+                    this.$('#bgs' + i).hide();
+                }
+                this.slevel = 0;
+            }
+
+            // No pre-parsed data, we are using the raw
+            // string in the packet:
+            var cmd = data.raw.substr(0, 2);
+            var val = data.raw.substr(2);
             if (cmd == "DB") {
+                if (voltAlertEnabled) {
+                    var cmd2 = data.raw.substr(2,2);
+                    if (cmd2 == 'PS' || cmd2 == 'BT') {
+                        // If Power supply voltage or battery voltage is enabled and we are monitoring voltage
+                        var v = parseFloat(data.raw.substr(5,4));
+                        if (v <= voltAlertThreshold) {
+                            voltAlertBeep.play();
+                        }
+                    }
+                }
                 // VFO B Text
                 if (this.oldVFOB == val)
                     return;
-                $("#kx3 #VFOB").text(val + "    ");
+                this.$("#kx3 #VFOB").text(val + "    ");
                 this.oldVFOB = val;
+            } else if (cmd == 'BG') {
+                // Bargraph
+                var s = parseInt(val);
+                var ofs = (this.ptt) ? 9: 0;
+                // We want to optimize drawing so we only hide/unhide the`
+                // difference between 2 readings
+
+                if (s > this.slevel) {
+                    // We have to show new bars above this.slevel
+                    for (var i = this.slevel+ofs+1; i <= s+ofs ; i++) {
+                        this.$('#bgs' + i).show();
+                    }
+                } else if (s < this.slevel) {
+                    // We have to hide bars above s
+                    for (var i = s + ofs+1 ; i <= this.slevel+ofs ; i++) {
+                        this.$('#bgs' + i).hide();
+                    }
+                } // if s == this.slevel we do nothing, of course
+                this.slevel = s;
+
             } else if (cmd == "DS") {
                 // VFO A Text, a bit more tricky.
                 // Avoid useless redraws
@@ -539,61 +665,51 @@ define(function (require) {
                 // Now, decode icon data:
                 var a = val.charCodeAt(8);
                 var f = val.charCodeAt(9);
-                this.setIcon("NB", (a & 0x40));
-                this.setIcon("ANT1", !(a & 0x20));
-                this.setIcon("ANT2", (a & 0x20));
-                this.setIcon("PRE", (a & 0x10));
-                this.setIcon("ATT", (a & 0x8));
+                setIcon("NB", (a & 0x40));
+                setIcon("ANT1", !(a & 0x20));
+                setIcon("ANT2", (a & 0x20));
+                setIcon("PRE", (a & 0x10));
+                setIcon("ATT", (a & 0x8));
                 // Comment out the two operations below to
                 // gain time: an IF packet is sent when those change
-                // this.setIcon("RIT", (a& 0x2));
-                // this.setIcon("XIT", (a& 0x1));
+                // setIcon("RIT", (a& 0x2));
+                // setIcon("XIT", (a& 0x1));
 
-                this.setIcon("ATU", (f & 0x10));
-                this.setIcon("NR", (f & 0x04));
+                setIcon("ATU", (f & 0x10));
+                setIcon("NR", (f & 0x04));
 
                 this.oldVFOA = val;
 
             } else if (cmd == "PC") {
-                $("#power-direct").val(parseInt(val));
-            } else if (cmd == "FA") {
-                var f = parseInt(val);
-                // Need to do this in this order because of IEEE float precision issues
-                var f2 = (f - Math.floor(f/1e6)*1e6)/1e3;
-                $("#vfoa-direct").val(f/1e6);
-                var st = Math.floor(f/1e6) + '.' + ((f2<100) ? '0' : '' ) + f2;
-                $("#kx3 #VFOA").text(st);
-            } else if (cmd == "FB") {
-                $("#vfob-direct").val(parseInt(val) / 1e6);
+                this.$("#power-direct").val(parseInt(val));
             } else if (cmd == "AG") {
-                $("#ag-control", this.el).slider('setValue', parseInt(val));
+                this.$("#ag-control").slider('setValue', parseInt(val));
             } else if (cmd == "RG") {
-                $("#rf-control", this.el).slider('setValue', parseInt(val - 250));
+                this.$("#rf-control").slider('setValue', parseInt(val - 250));
             } else if (cmd == "FW") {
-                $("#bpf-control", this.el).slider('setValue', parseFloat(val / 100));
+                this.$("#bpf-control").slider('setValue', parseFloat(val / 100));
                 // TODO: update filter icons
             } else if (cmd == "MG") {
-                $("#mic-control", this.el).slider('setValue', parseInt(val));
+                this.$("#mic-control").slider('setValue', parseInt(val));
             } else if (cmd == "IS") {
-                $("#ct-control", this.el).slider('setValue', parseInt(val) / 1000);
+                this.$("#ct-control").slider('setValue', parseInt(val) / 1000);
             } else if (cmd == "BN") {
-                var bnd = this.bands[parseInt(val)];
-                $("#freq-slider-band", this.el).html(bnd);
+                var bnd = bands[parseInt(val)];
                 // Update the band selection radio buttons too:
-                $(".band-btn", this.el).removeClass("active");
-                $("#band-" + bnd).parent().addClass("active");
+                this.$(".band-btn").removeClass("active");
+                this.$("#band-" + bnd).parent().addClass("active");
             } else if (cmd == "IF") {
                 // IF messages are sent in some occasions, they contain tons of info:
-                this.setModeIcon(val.substr(27, 1));
+                setModeIcon(val.substr(27, 1));
                 var rit = parseInt(val.substr(21, 1));
-                this.setIcon('RIT', rit);
+                setIcon('RIT', rit);
                 var xit = parseInt(val.substr(22, 1));
-                this.setIcon('XIT', xit);
+                setIcon('XIT', xit);
             } else if (cmd == "MD") {
-                this.setModeIcon(parseInt(val));
+                setModeIcon(parseInt(val));
             } else if (cmd == "TB") {
                 var l = parseInt(val.substr(1, 2));
-                var i = $('#data-stream', this.el);
+                var i = this.$('#data-stream');
                 if (l > 0) {
                     var txt = val.substr(3);
                     var scroll = i.val() + txt;
@@ -602,14 +718,13 @@ define(function (require) {
                     // note: without the "g", will split a single callsign into its elementary parts
                     // and we deduplicate using utils.unique
                     var callsigns = utils.unique(scroll.match(/([A-Z0-9]{1,4}\/)?(\d?[A-Z]+)(\d+)([A-Z]+)(\/[A-Z0-9]{1,4})?/g));
-                    var cdr = $("#calls-dropdown", this.el);
+                    var cdr = this.$("#calls-dropdown");
                     cdr.empty();
                     if (callsigns.length) {
                         callsigns.forEach(function (sign) {
                             cdr.append('<li><a onclick="$(\'#data-theircall\').val(\'' + sign + '\');\">' + sign + '</a></li>');
                         });
                     }
-
                 }
                 var r = parseInt(val.substr(0, 1));
                 this.transmittingText = (r) ? true : false;
@@ -623,10 +738,8 @@ define(function (require) {
                 }
                 // Autoscroll:
                 i.scrollTop(i[0].scrollHeight - i.height());
-
             }
-
         },
-
     });
+    })();
 });

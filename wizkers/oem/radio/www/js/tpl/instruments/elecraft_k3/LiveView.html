@@ -1,3 +1,4 @@
+                        
 <!-- this is added within a row-->
 <div class="col-md-12">
     <div class="row">
@@ -49,9 +50,9 @@
                                 </label>
                             </div>
                         </div>
-                </div> 
+                </div>
             </div><!-- Band Buttons -->
-        
+
         <!-- ******* -->
 
         </div> <!-- radio icon -->
@@ -97,7 +98,7 @@
                           <input type="text" id="mic-control" data-slider-value="0" data-slider-min="0" data-slider-max="80" data-slider-step="1">
                         </div>
                     </div> <!-- MG -->
-                    
+
                     <div class="input-group input-group-sm input-margin">
                         <span class="input-group-addon">BW</span>
                         <div class="form-control slider-bg-info">
@@ -108,7 +109,7 @@
                         <span class="input-group-addon">CT</span>
                         <div class="form-control">
                           <input type="text" id="ct-control" data-slider-value="0" data-slider-min="0" data-slider-max="3" data-slider-step="0.01">
-                            
+
                         </div>
                         <span class="input-group-btn">
                                 <button class="btn btn-default" id="ct-center" type="button"><span class="glyphicon glyphicon-asterisk"></span></button>
@@ -124,6 +125,7 @@
                     <ul class="nav nav-tabs">
                         <li class="active"><a href="#memories" data-toggle="tab">Memories</a></li>
                         <li><a href="#data-term" data-toggle="tab">Data</a></li>
+                        <li><a href="#extra" data-toggle="tab">Extra</a></li>
                         <!--
                         <li><a href="#audio-settings" data-toggle="tab">Audio</a></li>
                         <li><a href="#logging" data-toggle="tab">Logging</a></li>
@@ -134,11 +136,11 @@
                   <div class="tab-pane active" id="memories">
                     <div class="row">
                         <div class="col-md-4">
-                            <h6><span id="freq-slider-band">20m</span> frequencies</h6>
+                            <h6><span id="freq-slider-band">??m</span> frequencies</h6>
                         </div>
                         <div class="col-md-8">
                             <!-- Controls -->
-                            
+
                                 <div class="pull-right" style="margin-top: 5px; margin-bottom: 5px;">
                                     <button role="button" class="btn btn-info store-frequency"><span class="glyphicon glyphicon-plus"></span></button>
                                     <a class="left btn btn-success" href="#frequency-selector" id="mem-left"
@@ -146,7 +148,7 @@
                                     <a class="right btn btn-success" href="#frequency-selector" id="mem-right"
                                             data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
                                 </div>
-                            
+
                         </div>
                     </div> <!-- Frequency cards header -->
                     <!-- ********** -->
@@ -154,8 +156,8 @@
                     <!-- Wrapper for slides -->
                         <div class="carousel-inner" id="frequency-selector-content">
                         </div>
-                    </div>                    
-    
+                    </div>
+
                     </div> <!-- Memories -->
                   <div class="tab-pane" id="data-term">
                     <div class="row">
@@ -178,26 +180,13 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-3 col-xs-4">
+                        <div class="col-xs-6">
                             <div class="input-group input-group-sm input-margin" id="data-mycall-grp">
                                 <span class="input-group-addon">Me:</span>
                                 <input type="text" class="form-control" id="data-mycall">
                             </div>
                         </div>
-                        <div class="col-md-6 col-xs-8">
-                            <div class="input-group input-margin">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-xs btn-default" id="data-cq">CQ</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-ans">ANS</button>                                
-                                    <button type="button" class="btn btn-xs btn-default" id="data-qso">QSO</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-me">Me</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-brag">Brag</button>                                    
-                                    <button type="button" class="btn btn-xs btn-default" id="data-kn">KN</button>
-                                    <button type="button" class="btn btn-xs btn-default" id="data-sk">SK</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-xs-12">
+                        <div class="col-xs-6">
                             <div class="input-group input-group-sm input-margin" id="data-theircall-grp">
                                 <div class="input-group-btn">
                                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -206,7 +195,22 @@
                                         <ul class="dropdown-menu" id="calls-dropdown" role="menu">
                                         </ul>
                                 </div>
-                                <input type="text" class="form-control" id="data-theircall">
+                                <input style="margin-left:3px;" type="text" class="form-control" id="data-theircall">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="input-group input-margin">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-default" id="data-cq">CQ</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-ans">ANS</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-qso">QSO</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-me">Me</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-brag">Brag</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-kn">KN</button>
+                                    <button type="button" class="btn btn-sm btn-default" id="data-sk">SK</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -226,6 +230,19 @@
                         </div>
                     </div>
                   </div> <!-- Data terminal -->
+                  <div class="tab-pane" id="extra">
+                    <div class="row">
+                        <div class="col-md-6">
+                             <div class="input-group input-margin">
+                                 <span class="input-group-addon">
+                                     <input type="checkbox" id="enable-voltage-alert" aria-label="voltage alert">Voltage alert:
+                                     </span>
+                                 <input id="voltage-alert-level" class="form-control" value="9.5" type="number" maxlength="5">
+                                 <span class="input-group-addon">V</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 <!--
                     <div class="tab-pane" id="audio-settings"><h4>Audio Settings</h4>
                       <h4>Audio controls for phone operation will go there</h4>
@@ -237,5 +254,5 @@
                 <div id="xtrafunc-rightside" class="col-md-5">
                     <div id="waterfall"></div>
                 </div>
-            </div> 
+            </div>
 </div>

@@ -52,6 +52,8 @@ define(function (require) {
         // Everything inside of here is private to each instance
         var view; // Reference to the Backbone view, initialize when the view is instanciated
 
+        var bands = ["160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", 0, 0, 0, 0, 0, "2m"];
+        var modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
         var vfoangle = 270;
         var dip_x, dip_y, vfodip, oldPageY;
         var buttonCodes = {
@@ -130,6 +132,41 @@ define(function (require) {
             view.model.save();
         }
 
+        var validateMacros = function () {
+            var me = $("#data-mycall");
+            var you = $("#data-theircall");
+            var ok = true;
+            if (me.val() != '') {
+                $("#data-mycall-grp").removeClass("has-error");
+            } else {
+                $("#data-mycall-grp").addClass("has-error");
+                ok = false;
+            }
+            if (you.val() != '') {
+                $("#data-theircall-grp").removeClass("has-error");
+            } else {
+                $("#data-theircall-grp").addClass("has-error");
+                ok = false;
+            }
+            return ok;
+        };
+
+        var setIcon = function (name, visible) {
+            if (visible) {
+                view.$("#kx3 #icon_" + name).show();
+            } else {
+                view.$("#kx3 #icon_" + name).hide();
+            }
+        };
+
+        var setModeIcon = function (mode) {
+            // We need to update all icons when moving from one mode to another, so
+            // I added this helper function
+            view.$("#kx3 .mode_icon").hide();
+            view.$("#kx3 #icon_" + modes[mode - 1]).show();
+        };
+
+
 
     return Backbone.View.extend({
 
@@ -173,7 +210,6 @@ define(function (require) {
         },
 
         ElecraftFrequencyListView: null,
-        bands: ["160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", 0, 0, 0, 0, 0, "2m"],
 
         render: function () {
             var self = this;
@@ -427,43 +463,6 @@ define(function (require) {
             }
         },
 
-        setIcon: function (name, visible) {
-            //$("#kx3 #icon_" + name).css("visibility", (visible) ? "visible" : "hidden");
-            if (visible) {
-                this.$("#kx3 #icon_" + name).show();
-            } else {
-                this.$("#kx3 #icon_" + name).hide();
-            }
-        },
-
-        setModeIcon: function (mode) {
-            // We need to update all icons when moving from one mode to another, so
-            // I added this helper function
-            var modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
-            $("#kx3 .mode_icon").hide();
-            $("#kx3 #icon_" + modes[mode - 1]).show();
-        },
-
-        validateMacros: function () {
-            var me = $("#data-mycall");
-            var you = $("#data-theircall");
-            var ok = true;
-            if (me.val() != '') {
-                $("#data-mycall-grp").removeClass("has-error");
-            } else {
-                $("#data-mycall-grp").addClass("has-error");
-                ok = false;
-            }
-            if (you.val() != '') {
-                $("#data-theircall-grp").removeClass("has-error");
-            } else {
-                $("#data-theircall-grp").addClass("has-error");
-                ok = false;
-            }
-            return ok;
-        },
-
-
         sendCQ: function () {
             var mycall = $("#data-mycall").val();
             if (mycall != '') {
@@ -478,7 +477,7 @@ define(function (require) {
         },
 
         sendANS: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             var me = $("#data-mycall").val();
@@ -490,7 +489,7 @@ define(function (require) {
         },
 
         sendKN: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             var me = $("#data-mycall").val();
@@ -502,7 +501,7 @@ define(function (require) {
         },
 
         sendQSO: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             var me = $("#data-mycall").val();
@@ -514,7 +513,7 @@ define(function (require) {
         },
 
         sendME: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             this.sendQSO();
@@ -528,7 +527,7 @@ define(function (require) {
         },
 
         sendBRAG: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             this.sendQSO();
@@ -542,7 +541,7 @@ define(function (require) {
         },
 
         sendSK: function () {
-            var ok = this.validateMacros();
+            var ok = validateMacros();
             if (!ok)
                 return;
             var me = $("#data-mycall").val();
@@ -641,18 +640,18 @@ define(function (require) {
                 // Now, decode icon data:
                 var a = val.charCodeAt(8);
                 var f = val.charCodeAt(9);
-                this.setIcon("NB", (a & 0x40));
-                this.setIcon("ANT1", !(a & 0x20));
-                this.setIcon("ANT2", (a & 0x20));
-                this.setIcon("PRE", (a & 0x10));
-                this.setIcon("ATT", (a & 0x8));
+                setIcon("NB", (a & 0x40));
+                setIcon("ANT1", !(a & 0x20));
+                setIcon("ANT2", (a & 0x20));
+                setIcon("PRE", (a & 0x10));
+                setIcon("ATT", (a & 0x8));
                 // Comment out the two operations below to
                 // gain time: an IF packet is sent when those change
-                // this.setIcon("RIT", (a& 0x2));
-                // this.setIcon("XIT", (a& 0x1));
+                // setIcon("RIT", (a& 0x2));
+                // setIcon("XIT", (a& 0x1));
 
-                this.setIcon("ATU", (f & 0x10));
-                this.setIcon("NR", (f & 0x04));
+                setIcon("ATU", (f & 0x10));
+                setIcon("NR", (f & 0x04));
 
                 this.oldVFOA = val;
 
@@ -670,19 +669,19 @@ define(function (require) {
             } else if (cmd == "IS") {
                 this.$("#ct-control").slider('setValue', parseInt(val) / 1000);
             } else if (cmd == "BN") {
-                var bnd = this.bands[parseInt(val)];
+                var bnd = bands[parseInt(val)];
                 // Update the band selection radio buttons too:
                 this.$(".band-btn").removeClass("active");
                 this.$("#band-" + bnd).parent().addClass("active");
             } else if (cmd == "IF") {
                 // IF messages are sent in some occasions, they contain tons of info:
-                this.setModeIcon(val.substr(27, 1));
+                setModeIcon(val.substr(27, 1));
                 var rit = parseInt(val.substr(21, 1));
-                this.setIcon('RIT', rit);
+                setIcon('RIT', rit);
                 var xit = parseInt(val.substr(22, 1));
-                this.setIcon('XIT', xit);
+                setIcon('XIT', xit);
             } else if (cmd == "MD") {
-                this.setModeIcon(parseInt(val));
+                setModeIcon(parseInt(val));
             } else if (cmd == "TB") {
                 var l = parseInt(val.substr(1, 2));
                 var i = this.$('#data-stream');
@@ -701,7 +700,6 @@ define(function (require) {
                             cdr.append('<li><a onclick="$(\'#data-theircall\').val(\'' + sign + '\');\">' + sign + '</a></li>');
                         });
                     }
-
                 }
                 var r = parseInt(val.substr(0, 1));
                 this.transmittingText = (r) ? true : false;
@@ -715,11 +713,8 @@ define(function (require) {
                 }
                 // Autoscroll:
                 i.scrollTop(i[0].scrollHeight - i.height());
-
             }
-
         },
-
     });
     })();
 });

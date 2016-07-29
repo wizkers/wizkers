@@ -40,7 +40,7 @@ define(function(require) {
         // Helper function: get driver capabilites.
         // returns a simple array of capabilities
         this.getCaps = function() {
-            return ['LiveDisplay', 'NumDisplay', 'DiagDisplay', 'WizkersSettings'];
+            return ['LiveDisplay', 'NumDisplay', 'WizkersSettings'];
         };
 
         // Return the type of data reading that this instrument generates. Can be used
@@ -72,8 +72,10 @@ define(function(require) {
         };
 
         // This is the front-end driver
-        this.getDriver = function() {
-            return new frontend_driver();
+        this.getDriver = function(callback) {
+             require(['app/instruments/elecraft/driver_frontend'], function(d) {
+                callback(new d());
+             });
         };
 
         // This is a browser implementation of the backend driver, when we
