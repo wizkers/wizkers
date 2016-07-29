@@ -134,8 +134,12 @@ define(function (require) {
                 console.warn('We are already rendering!');
                 return;
             }
-            this.rendering = 2;
             this.$el.html(template(this.model.toJSON()));
+            // If we don't have an instrument yet, no need to go further
+            if (instrumentManager.getInstrument() == null )
+                return;
+
+            this.rendering = 2;
 
             this.ctrlconnect = this.$('.ctrl-connect');
             this.ctrlrecord = this.$('.ctrl-record');
