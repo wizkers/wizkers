@@ -55,6 +55,7 @@ define(function (require) {
             // Here are all the options we can define, to pass as "settings" when creating the view:
             this.flotplot_settings = {
                 // points: 150,
+                // duration: 600,  // Max age of datapoints in seconds (older will be removed)
                 // preload: 4096,  // Use this when creating a plot with a fixed number of data points
                 // (used for the Sigma-25)
                 // log: false,     // Override log display
@@ -301,6 +302,19 @@ define(function (require) {
         },
 
         /**
+         * Remove any data that is older than our max graph duration, for all
+         * graphed values
+         */
+        trimOldData: function(ts) {
+            for (var ld in this.livedata) {
+                if (this.livedata[ld].length && this.livedata[ld][0])
+                    while (this.livedata[ld][0][0] < ts - this.flotplot_settings.duration*1000) {
+                        this.livedata[ld] = this.livedata[ld].slice(1);
+                    }
+            }
+        },
+
+        /**
          * Append a data point. Data should be in the form of
          * { name: "measurement_name", value: value } or
          * { name: "measurement_name", value: value, timestamp: timestamp } or
@@ -331,6 +345,7 @@ define(function (require) {
                 this.livedata[idx].push([data.xval, data.value]);
             } else {
                 var stamp = (data.timestamp != undefined) ? new Date(data.timestamp).getTime() : new Date().getTime();
+                if (this.flotplot_settings.duration ) this.trimOldData(stamp);
                 this.livedata[idx].push([stamp, data.value]);
             }
             return this; // This lets us chain multiple operations

@@ -32,7 +32,7 @@
 
 ({
 
-    optimize: 'closure',
+    optimize: 'uglify2',
 
     //If using UglifyJS2 for script optimization, these config options can be
     //used to pass configuration values to UglifyJS2.
@@ -73,7 +73,7 @@
     //Closure compiler for more information.
     closure: {
         CompilerOptions: {
-            'languageIn': Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.ECMASCRIPT5
+            'languageIn': 'Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.ECMASCRIPT5'
         },
         CompilationLevel: 'SIMPLE_OPTIMIZATIONS',
         loggingLevel: 'WARNING',

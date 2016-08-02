@@ -130,6 +130,12 @@ define(function (require) {
         render: function () {
             var self = this;
             console.log('Main render of Home view for instrument',instrumentManager.getInstrument());
+
+            // We need to refresh our subscriptions at each render
+            console.info('Home view: subscribing to status updates from link manager');
+            this.listenTo(linkManager, 'status', this.updatestatus);
+            this.listenTo(linkManager, 'input', this.parseInput);
+            this.listenTo(linkManager, 'uniqueID', this.updateUID);
             if (this.rendering != 0) {
                 console.warn('We are already rendering!');
                 return;
@@ -209,16 +215,12 @@ define(function (require) {
                         self.$('#numview').remove();
                         self.$('#home-left').removeClass('col-md-9').addClass('col-md-12');
                         self.rendering--;
-                    }
+                }
+
+                linkManager.requestStatus();
+
             }
 
-            // Don't hook the events before this point, no need!
-            // and creates a race condition on buttons update as well.
-            this.listenTo(linkManager, 'status', this.updatestatus);
-            this.listenTo(linkManager, 'input', this.parseInput);
-            this.listenTo(linkManager, 'uniqueID', this.updateUID);
-
-            linkManager.requestStatus();
             return this;
         },
 

@@ -44,7 +44,7 @@ define(function (require) {
         // We will pass this when we create plots, this is the global
         // config for the look and feel of the plot
         var plotoptions = {
-            points: 150, // 2.5 minutes @ 1 Hz
+            duration: 240, // Maximum 240 seconds (4 minutes)
             log: false,
             vertical_stretch_parent: true,
             plot_options: {
@@ -52,7 +52,7 @@ define(function (require) {
                         mode: "time",
                         show: true,
                         timeformat: "%H:%M",
-                        ticks: 5,
+                        ticks: 4,
                         timezone: settings.get("timezone")
                     },
                 ],

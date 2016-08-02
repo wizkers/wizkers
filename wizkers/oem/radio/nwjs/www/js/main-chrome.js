@@ -31,7 +31,9 @@
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
-window.requirejs.config({
+require = window.requirejs;
+
+require.config({
 
     baseUrl: 'js',
 
@@ -41,7 +43,7 @@ window.requirejs.config({
 
         // Below we manage our versions explicitely, so that
         // we can upgrade easily
-        jquery: 'lib/jquery-2.1.4',
+        jquery: 'lib/jquery-2.2.4',
         backbone: 'lib/backbone-1.2.3',
         jquery_xmlrpc: 'lib/jquery.xmlrpc',
         jquery_mousewheel: 'lib/jquery.mousewheel',
@@ -162,8 +164,8 @@ var vizapp = {
 
 var router;
 
-require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager',
-         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'chromestorage'], function ($, Backbone, Router, Settings, InstrumentManager,
+require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager',
+         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'chromestorage'], function ($, _, Backbone, Router, Settings, InstrumentManager,
     LinkManager, OutputManager, Instrument, Analytics) {
 
     // Initialize our Analytics object to get stats on app usage

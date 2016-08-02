@@ -25,9 +25,9 @@
 /**
  * The App build configuration for r.js
  *
- * @author Edouard Lafargue, ed@lafargue.name
+ * @author Edouard Lafargue, ed@wizkers.io
  *
- * Still work to do, check out: http://tech.pro/blog/1639/using-rjs-to-optimize-your-requirejs-project
+ * Still work to do..
  */
 
 ({
@@ -49,10 +49,12 @@
         },
         compress: {
             sequences: true,
+            properties: true,
             dead_code: true,
             conditionals: true,
             booleans: true,
             unused: true,
+            loops: true,
             evaluate: true,
             if_return: true,
             join_vars: true,
@@ -63,7 +65,7 @@
             }
         },
         warnings: true,
-        mangle: true
+        mangle: true,
     },
 
     //If using Closure Compiler for script optimization, these config options
@@ -78,10 +80,10 @@
     },
 
     preserveLicenseComments: false,
-    mainConfigFile: "main-cordova.js",
+    mainConfigFile: "main-chrome.js",
     appDir: '..',
     baseUrl: 'js',
-    dir: '../../../cordova/www/',
+    dir: '../../../nwjs/www/',
     writeBuildTxt: false,
 
     // Combine everytyhing into one single file
@@ -90,7 +92,18 @@
 
     modules: [
         {
-            name: 'main-cordova'
+            name: 'main-chrome'
+        },
+        /*
+        {
+            name: 'app/instruments/elecraft/elecraft',
+            exclude: ['main-chrome']
+        },
+        {
+            name: 'app/instruments/elecraft_kx2/elecraft_kx2',
+            exclude: ['main-chrome']
         }
+        */
+
     ]
 })
