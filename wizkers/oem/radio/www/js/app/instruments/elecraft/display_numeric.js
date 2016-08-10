@@ -39,6 +39,8 @@ define(function (require) {
 
         var tempplot, amppowerplot, voltplot;
 
+        var lastStamp = 0;
+
         // vars here will be private to each instance of this module
         var palette = ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"];
         // We will pass this when we create plots, this is the global
@@ -148,44 +150,52 @@ define(function (require) {
                 if (data.raw.charAt(0) == '^') {
                     var cmd = data.raw.substr(1, 2);
                     var val = parseInt(data.raw.substr(3)) / 10;
-                    var stamp = new Date().getTime();
                     if (cmd == "PI") {
                         $("#kxpa-pi").html(val);
-                        amppowerplot.appendPoint({
+                        amppowerplot.fastAppendPoint({
                             'name': "In",
                             'value': val
                         });
                     } else if (cmd == "PF") {
                         $("#kxpa-pf").html(val);
-                        amppowerplot.appendPoint({
+                        amppowerplot.fastAppendPoint({
                             'name': "Fwd",
                             'value': val
                         });
                     } else if (cmd == "PV") {
                         $("#kxpa-pv").html(val);
-                        amppowerplot.appendPoint({
+                        amppowerplot.fastAppendPoint({
                             'name': "R",
                             'value': val
                         });
                     } else if (cmd == "TM") {
                         $("#kxpa-tm").html(val);
-                        tempplot.appendPoint({
+                        tempplot.fastAppendPoint({
                             'name': "PA.X",
                             'value': val
                         });
                     } else if (cmd == "PC") {
                         $("#kxpa-pc").html(val);
-                        voltplot.appendPoint({
+                        voltplot.fastAppendPoint({
                             'name': "A",
                             'value': val
                         });
                     } else if (cmd == "SV") {
                         var val = Math.floor(val) / 100;
                         $("#kxpa-sv").html(val);
-                        voltplot.appendPoint({
+                        voltplot.fastAppendPoint({
                             'name': "V",
                             'value': val
                         });
+                    }
+                    // Only redraw the three graphs once per second,
+                    // in order to reduce the redraws. Looks better too:
+                    var stamp = new Date().getTime();
+                    if (stamp - lastStamp > 1000) {
+                        lastStamp = stamp;
+                        tempplot.redraw();
+                        amppowerplot.redraw();
+                        voltplot.redraw();
                     }
                 } else {
                     var cmd = data.raw.substr(0, 2);
