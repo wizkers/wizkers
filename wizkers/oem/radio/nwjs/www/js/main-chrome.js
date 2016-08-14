@@ -54,6 +54,7 @@ require.config({
         underscore: 'lib/underscore-1.8.3',
         snap: 'lib/snap.svg-0.4.1',
         text: 'lib/text',
+        paper: 'lib/paperjs-v0.10.2/dist/paper-full',
 
         // Signal processing libs
         dsp: 'lib/dsp',
@@ -114,7 +115,9 @@ require.config({
         'utils': {
             exports: 'utils'
         },
-
+        'paper' : {
+            exports: 'paper'
+        },
         'jquery_xmlrpc': {
             deps: ['jquery']
         },

@@ -1,9 +1,23 @@
 <!-- this is added within a row area -->
 <div class="col-md-12">
     <div class="row">
+        <div class="col-md-12" style="padding-top:5px; padding-bottom:5px;">
+            <ul class="nav nav-tabs" id="chart-select">
+                <li role="presentation" class="active"><a href="#graph-scalar" data-toggle="tab">Scalar</a></li>
+                <li role="presentation"><a href="#graph-smith" data-toggle="tab">Polar</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-12">
-            <div class="thumbnail">
-                <div class="sweepchart chart"></div>
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="graph-scalar">
+                    <div class="scalarsweepchart chart"></div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="graph-smith">
+                    <div class="smithsweepchart chart"></div>
+                </div>
             </div>
         </div>
     </div>

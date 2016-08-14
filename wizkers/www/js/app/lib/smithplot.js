@@ -42,6 +42,28 @@ define(function (require) {
     return (function() {
 
         var view;
+        var r0 = 50;
+        var x0 = 0;
+
+        // Here are all the options we can define, to pass as "settings" when creating the view:
+        var smithplot_settings = {
+            // points: 150,
+            // duration: 600,  // Max age of datapoints in seconds (older will be removed)
+            // preload: 4096,  // Use this when creating a plot with a fixed number of data points
+            // (used for the Sigma-25)
+            // log: false,     // Override log display
+            showtips: true,
+            selectable: false,
+            vertical_stretch: true, // Stretch relative to window height
+            vertical_stretch_parent: false, // Stretch relative to parent height
+            multiple_yaxis: false,
+            plot_options: {
+            },
+
+            get: function (key) {
+                return this[key];
+            },
+        };
 
         // Utility class: normalizes the Paper surface to a
         // coordinate system of our choosing, with zero at the
@@ -148,16 +170,85 @@ define(function (require) {
 
         var nm; // Our normalizer
         var bgLayer;
-        var staticGroup;
+        var backgroundGroup;
+        var plotLayer;
+        var plotGroup;
+
+        var autoResize = function() {
+            console.info('Resize smith chart');
+            var chartheight;
+            if (smithplot_settings.vertical_stretch) {
+                chartheight = window.innerHeight - view.$el.offset().top - 20;
+                if (settings.get("showstream"))
+                    chartheight -= ($('#showstream').height() + 20);
+            } else {
+                chartheight = view.$el.parentElement.height();
+            }
+            view.$('.chart').css('height', chartheight + 'px');
+            view.$('#smithchart').css('height', chartheight + 'px');
+            view.$('#smithchart').css('width', '100%');
+            // Manually resize the chart - we reset it completely
+            paper.setup(view.$("#smithchart").get(0));
+            nm = new coordNormalizer(view.$("#smithchart").width(), view.$("#smithchart").height());
+            nm.autoSetFromHeight(2.2);
+            bgLayer = new paper.Layer();
+            backgroundGroup = new paper.Group();
+            drawGrid(bgLayer);
+
+            // Setup the layer for plotting the graphs:
+            plotLayer = new paper.Layer();
+            plotGroup = new paper.Group();
+            initPlot();
+        }
 
         var addPlot = function () {
-                paper.setup(view.$("#smithchart").get(0));
-                nm = new coordNormalizer(view.$("#smithchart").width(), view.$("#smithchart").height());
-                nm.autoSetFromHeight(2.2);
-                bgLayer = new paper.Layer();
-                staticGroup = new paper.Group();
-                drawGrid(bgLayer);
+            if (smithplot_settings.vertical_stretch ||
+                    smithplot_settings.vertical_stretch_parent) {
+                view.rsc = autoResize;
+                $(window).on('resize', view.rsc);
+                autoResize();
+            }
+            paper.setup(view.$("#smithchart").get(0));
+            nm = new coordNormalizer(view.$("#smithchart").width(), view.$("#smithchart").height());
+            nm.autoSetFromHeight(2.2);
+            bgLayer = new paper.Layer();
+            backgroundGroup = new paper.Group();
+            drawGrid(bgLayer);
+
+            // Setup the layer for plotting the graphs:
+            plotLayer = new paper.Layer();
+            plotGroup = new paper.Group();
+            initPlot();
         };
+
+        // Initialize the plot - empty the points we drew earlier,
+        // set the clip circle.
+        var initPlot = function() {
+                plotLayer.activate();
+                plotLayer.removeChildren(0);
+
+                plotGroup.removeChildren(0);
+
+                var clip = new paper.Path.Circle(new paper.Point(0, 0), 1.005);
+                plotGroup.addChild(clip);
+
+                plotGroup.clipped = true;
+                plotLayer.addChild(plotGroup);
+                plotLayer.setMatrix(nm.getMatrix());
+
+                paper.project.view.draw();
+
+        }
+
+        // Add a point on the chart
+        var drawPoint = function(point) {
+            var p = new paper.Path.Circle(new paper.Point(point.r, point.i), 0.02);
+            p.opacity = 1;
+            p.fillColor = 'red';
+            p.setMatrix(nm.getMatrix());
+            plotGroup.addChild(p);
+            paper.project.view.draw();
+        }
 
         function isWhole(num) {
             var i = Math.abs(num) % 1
@@ -189,33 +280,48 @@ define(function (require) {
             yaxis.strokeWidth = 2.5;
             yaxis.opacity = 0.6;
 
-            staticGroup.removeChildren(0);
+            backgroundGroup.removeChildren(0);
 
             // Clip to the unit circle (slightly outside)
             var clip = new paper.Path.Circle(new paper.Point(0, 0), 1.005);
-            staticGroup.addChild(clip);
+            backgroundGroup.addChild(clip);
 
             var i = 0;
             for (i = 0; i < 10.05; i += 0.2) {
                 var c = circle_constRL(i);
                 c.strokeColor = "black";
                 c.opacity = isWhole(i) ? 0.6 : 0.2;
-                staticGroup.addChild(c);
+                backgroundGroup.addChild(c);
             }
 
             for (i = -5; i < 5.05; i += 0.2) {
                 var c = circle_constXL(i);
                 c.strokeColor = "black";
                 c.opacity = isWhole(i) ? 0.6 : 0.2;
-                staticGroup.addChild(c);
+                backgroundGroup.addChild(c);
             }
 
-            staticGroup.clipped = true;
-            layer.addChild(staticGroup);
+            backgroundGroup.clipped = true;
+            layer.addChild(backgroundGroup);
 
             layer.setMatrix(nm.getMatrix());
             paper.project.view.draw();
 
+        }
+
+        var setZ0 = function(r,x) {
+            r0 = r;
+            x0 = x;
+        }
+
+        // Calculate the reflection coefficient from the real measured
+        // impedance (R / X, resistance/reactance)
+        var gamma = function(r,x) {
+            var mag = Math.pow(r+r0, 2) + Math.pow(x+x0, 2);
+            var gr = (r*r + x*x - r0*r0 + x0*x0)/mag;
+            var gi = 2 * (r*x0 + r0*x)/mag;
+
+            return { r:gr, i: gi};
         }
 
         return Backbone.View.extend({
@@ -239,19 +345,38 @@ define(function (require) {
                 this.plotData = [];
                 this.previousPoint = null;
 
-                // this.plotOptions = this.flotplot_settings.plot_options;
-
+                // Replace defaults by our own config for all keys
+                // passed - if any
+                if (options && options.settings) {
+                    for (var prop in options.settings) {
+                        if (prop != 'plot_options')
+                            smithplot_settings[prop] = options.settings[prop];
+                    }
+                    // Also copy the plot options (don't just upate the reference, otherwise
+                    // this causes random issues when using the same options objects for initializing
+                    // several plots
+                    if ('plot_options' in options.settings) {
+                        for (var prop in options.settings.plot_options) {
+                            smithplot_settings.plot_options[prop] = options.settings.plot_options[prop];
+                        }
+                    }
+                }
             },
 
             // We have to call onClose when removing this view, because otherwise
             // the window resize callback lives on as a zombie and tries to resize
             // any chart anywhere...
             onClose: function () {
+                 $(window).off('resize', this.rsc);
+            },
+
+            autoResize: function() {
+                autoResize();
             },
 
             render: function () {
                 console.log("Rendering a simple chart widget");
-                this.$el.html('<div class="chart" style="position: relative; width:100%; height: 100px;"><canvas id="smithchart" style="width:100%"></canvas></div>');
+                this.$el.html('<div class="chart" style="position: relative; width:100%; height: 100px;"><canvas id="smithchart" style="width:100%; height:100%"></canvas></div>');
                 addPlot();
                 return this;
             },
@@ -282,6 +407,9 @@ define(function (require) {
              *  Note: you can only set the options once.
              */
             fastAppendPoint: function (data) {
+                // data  {r, i}
+                var g = gamma(data.R, data.X);
+                drawPoint(g);
                 return this; // This lets us chain multiple operations
             },
 

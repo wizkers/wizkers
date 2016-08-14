@@ -36,10 +36,12 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
+        smithplot = require('app/lib/smithplot'),
         template = require('js/tpl/instruments/sark110/Sark110LiveView.js');
 
     var gamma = function (r, x) {
-        // Reflection coefficient
+        // Magnitude of the Reflection coefficient
+        // gamma = Z - Zo / Z + Zo
         return Math.sqrt(Math.pow(r - 50, 2) + Math.pow(x, 2)) / Math.sqrt(Math.pow(r + 50, 2) + Math.pow(x, 2));
     }
 
@@ -92,7 +94,17 @@ define(function (require) {
         },
 
 
-        events: {},
+        events: {
+            'shown.bs.tab a[data-toggle="tab"]': "tab_shown",
+        },
+
+        tab_shown: function (e) {
+            if (e.target.innerText == 'Polar') {
+                this.plot.autoResize();
+            }
+
+        },
+
 
         render: function () {
             var self = this;
@@ -112,12 +124,12 @@ define(function (require) {
         addPlot: function () {
             var self = this;
 
-            this.plot = new simpleplot({
+            this.plot = new smithplot({
                 model: this.model,
                 settings: this.plotoptions
             });
             if (this.plot != null) {
-                $('.sweepchart', this.el).append(this.plot.el);
+                $('.smithsweepchart', this.el).append(this.plot.el);
                 this.plot.render();
             }
         },
@@ -152,6 +164,7 @@ define(function (require) {
             }
 
             if (data.R != undefined) {
+                /**
                 var Z = Math.sqrt(Math.pow(data.R, 2) + Math.pow(data.X, 2));
                 var VSWR = (1 + gamma(data.R, data.X)) / (1 - gamma(data.R, data.X));
                 this.plot.appendPoint({
@@ -164,6 +177,8 @@ define(function (require) {
                     value: VSWR,
                     timestamp: data.F
                 });
+                */
+                this.plot.appendPoint(data);
             }
             if (data.version) {
                 this.plot.redraw();
