@@ -121,7 +121,7 @@ define(function (require) {
             "B_LOCK": "H50",
             "B_SUB": "T48",
             "B_DIV": "H48"
-            
+
 
         };
 
@@ -585,10 +585,10 @@ define(function (require) {
             // If we have a pre-parsed element, use it (faster!)
             if (data.vfoa) {
                 this.$("#vfoa-direct").val(data.vfoa/1e6);
-                return;
+                //return;
             } else if (data.vfob) {
                 this.$("#vfob-direct").val(data.vfob / 1e6);
-                return;
+                //return;
             }
             if (data.ptt != undefined) {
                 if (this.ptt == data.ptt)
