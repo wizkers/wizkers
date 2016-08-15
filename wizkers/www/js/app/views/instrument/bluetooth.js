@@ -23,6 +23,7 @@
  */
 
 /*
+ * Selector for Bluetooth low energy communications.
  * @author Edouard Lafargue, ed@lafargue.name
  */
 define(function (require) {
