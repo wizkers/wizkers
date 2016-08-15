@@ -174,6 +174,9 @@ define(function (require) {
         var plotLayer;
         var plotGroup;
 
+        // We save the original points in memory for display, redraw:
+        var plotPoints = [];
+
         var autoResize = function() {
             console.info('Resize smith chart');
             var chartheight;
@@ -191,14 +194,10 @@ define(function (require) {
             paper.setup(view.$("#smithchart").get(0));
             nm = new coordNormalizer(view.$("#smithchart").width(), view.$("#smithchart").height());
             nm.autoSetFromHeight(2.2);
-            bgLayer = new paper.Layer();
-            backgroundGroup = new paper.Group();
-            drawGrid(bgLayer);
-
-            // Setup the layer for plotting the graphs:
-            plotLayer = new paper.Layer();
-            plotGroup = new paper.Group();
-            initPlot();
+            if (bgLayer)
+                drawGrid(bgLayer);
+            if (plotLayer)
+                redraw();
         }
 
         var addPlot = function () {
@@ -213,7 +212,7 @@ define(function (require) {
             nm.autoSetFromHeight(2.2);
             bgLayer = new paper.Layer();
             backgroundGroup = new paper.Group();
-            drawGrid(bgLayer);
+            drawGrid(bgLayer); // Redraw the background
 
             // Setup the layer for plotting the graphs:
             plotLayer = new paper.Layer();
@@ -224,29 +223,43 @@ define(function (require) {
         // Initialize the plot - empty the points we drew earlier,
         // set the clip circle.
         var initPlot = function() {
-                plotLayer.activate();
-                plotLayer.removeChildren(0);
+            plotLayer.activate();
+            plotLayer.removeChildren(0);
 
-                plotGroup.removeChildren(0);
+            plotGroup.removeChildren(0);
 
-                var clip = new paper.Path.Circle(new paper.Point(0, 0), 1.005);
-                plotGroup.addChild(clip);
+            var clip = new paper.Path.Circle(new paper.Point(0, 0), 1.005);
+            plotGroup.addChild(clip);
 
-                plotGroup.clipped = true;
-                plotLayer.addChild(plotGroup);
-                plotLayer.setMatrix(nm.getMatrix());
+            plotGroup.clipped = true;
+            plotLayer.addChild(plotGroup);
+            plotLayer.setMatrix(nm.getMatrix());
 
-                paper.project.view.draw();
-
+            paper.project.view.draw();
         }
 
         // Add a point on the chart
         var drawPoint = function(point) {
-            var p = new paper.Path.Circle(new paper.Point(point.r, point.i), 0.02);
+            plotPoints.push(point); // Save the point
+            var p = new paper.Path.Circle(new paper.Point(point.r, point.i), 0.008);
             p.opacity = 1;
             p.fillColor = 'red';
             p.setMatrix(nm.getMatrix());
             plotGroup.addChild(p);
+            paper.project.view.draw();
+        }
+
+        // Redraw all the points
+        // (used after a resize)
+        var redraw = function() {
+            initPlot();
+            for (var i in plotPoints) {
+                var p = new paper.Path.Circle(new paper.Point(plotPoints[i].r, plotPoints[i].i), 0.008);
+                p.opacity = 1;
+                p.fillColor = 'red';
+                p.setMatrix(nm.getMatrix());
+                plotGroup.addChild(p);
+            }
             paper.project.view.draw();
         }
 
@@ -271,20 +284,17 @@ define(function (require) {
             layer.activate();
             layer.removeChildren(0);
 
-            var xaxis = new paper.Path.Line(new paper.Point(0, nm.getMinY()), new paper.Point(0, nm.getMaxY()));
+            var xaxis = new paper.Path.Line(new paper.Point(nm.getMinX(),0), new paper.Point(nm.getMaxX(),0));
             xaxis.strokeColor = 'black';
             xaxis.strokeWidth = 2.5;
             xaxis.opacity = 0.6;
-            var yaxis = new paper.Path.Line(new paper.Point(nm.getMinX(), 0), new paper.Point(nm.getMaxX(), 0));
-            yaxis.strokeColor = 'black';
-            yaxis.strokeWidth = 2.5;
-            yaxis.opacity = 0.6;
 
             backgroundGroup.removeChildren(0);
 
             // Clip to the unit circle (slightly outside)
             var clip = new paper.Path.Circle(new paper.Point(0, 0), 1.005);
             backgroundGroup.addChild(clip);
+            backgroundGroup.addChild(xaxis);
 
             var i = 0;
             for (i = 0; i < 10.05; i += 0.2) {
@@ -409,7 +419,7 @@ define(function (require) {
             fastAppendPoint: function (data) {
                 // data  {r, i}
                 var g = gamma(data.R, data.X);
-                drawPoint(g);
+                drawPoint(g, true);
                 return this; // This lets us chain multiple operations
             },
 
