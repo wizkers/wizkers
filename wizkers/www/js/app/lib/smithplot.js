@@ -297,19 +297,54 @@ define(function (require) {
             backgroundGroup.addChild(xaxis);
 
             var i = 0;
-            for (i = 0; i < 10.05; i += 0.2) {
-                var c = circle_constRL(i);
+            for (i = 0; i < 1005; i += 20) {
+                var c = circle_constRL(i/100);
                 c.strokeColor = "black";
-                c.opacity = isWhole(i) ? 0.6 : 0.2;
+                c.opacity = isWhole(i/100) ? 0.6 : 0.2;
+                backgroundGroup.addChild(c);
+                if (i<=100 || i%100==0) {
+                    var pt = new paper.Point(1-2/(1+i/100)-0.015,0.025);
+                    var t = new paper.PointText(pt);
+                    t.fillColor='black';
+                    t.fontSize = 1;
+                    t.leading = 0;
+                    t.content = '' + i/100;
+                    t.justification = 'center';
+                    t.rotate(-90);
+                    t.scale(0.02, -0.02);
+                    backgroundGroup.addChild(t);
+                }
+            }
+
+            for (i = -500; i < 505; i += 20) {
+                var c = circle_constXL(i/100);
+                c.strokeColor = "black";
+                c.opacity = isWhole(i/100) ? 0.6 : 0.2;
+                if (Math.abs(i)<=100 || i%100==0) {
+                    var r=100/i;
+                    // Intersection of the two circles:
+                    var y = 2*r/(r*r+1);
+                    var x = (1-r*r)/(1+r*r)- 0.015;
+                    // Move the text so that it shows up in the circle:
+                    if (r < 1) {
+                        y -= y/Math.abs(y) * 0.01;
+                    } else {
+                        y -= y/Math.abs(y) * 0.03;
+                    }
+                    var pt = new paper.Point(x,y);
+                    var t = new paper.PointText(pt);
+                    t.fillColor='black';
+                    t.fontSize = 1;
+                    t.leading = 0;
+                    t.content = '' + i/100;
+                    t.justification = 'center';
+                    t.rotate(-Math.atan(y/x)*180/Math.PI);
+                    t.scale(0.02, -0.02);
+                    backgroundGroup.addChild(t);
+                }
                 backgroundGroup.addChild(c);
             }
 
-            for (i = -5; i < 5.05; i += 0.2) {
-                var c = circle_constXL(i);
-                c.strokeColor = "black";
-                c.opacity = isWhole(i) ? 0.6 : 0.2;
-                backgroundGroup.addChild(c);
-            }
 
             backgroundGroup.clipped = true;
             layer.addChild(backgroundGroup);
