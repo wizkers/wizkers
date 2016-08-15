@@ -23,6 +23,7 @@
  */
 
 /*
+ * This covers serial port, serial over USB, TCP/IP sockets and Bluetooth 'Classic' SPP.
  * @author Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
  */
@@ -53,16 +54,17 @@ define(function (require) {
                     proto: 'btspp'
                 });
             }
+            this.listenTo(this.model, 'change:port', this.toggleTcp);
 
             this.refresh();
         },
 
         events: {
-            "click #refresh": "refresh",
-            "change #port": "toggleTcp"
+            "click #refresh": "refresh"
         },
 
         onClose: function () {
+            this.stopListening();
             console.log("Serial connection settings closing");
         },
 
@@ -71,22 +73,23 @@ define(function (require) {
                 ports: this.ports,
                 btlist: this.btlist
             })));
-            if (this.model.get('port') != 'TCP/IP')
+            var p = this.model.get('port');
+            if (p != 'TCP/IP')
                 $('.hide-tcp', this.el).hide();
-            if (this.model.get('port') != 'Bluetooth')
+            if (p != 'Bluetooth')
                 $('.hide-spp', this.el).hide();
-            else
+            if (p == 'Bluetooth')
                 this.getBluetoothDevices();
             return this;
         },
 
         toggleTcp: function (e) {
-            if (e.target.value == 'TCP/IP')
+            var p = e.get('port'); // e is the model
+            if (p == 'TCP/IP')
                 $('.hide-tcp', this.el).show();
             else
                 $('.hide-tcp', this.el).hide();
-            if (e.target.value == 'Bluetooth') {
-                this.getBluetoothDevices();
+            if (p == 'Bluetooth') {
                 this.render();
             } else
                 $('.hide-spp', this.el).hide();
