@@ -100,6 +100,8 @@ define(function (require) {
 
         tab_shown: function (e) {
             if (e.target.innerText == 'Polar') {
+                this.polarplot.autoResize();
+            } else {
                 this.plot.autoResize();
             }
 
@@ -124,12 +126,26 @@ define(function (require) {
         addPlot: function () {
             var self = this;
 
-            this.plot = new smithplot({
+            // Note: SUPER IMPORTANT: not "new smithplot()(...)" but
+            // "new (smithplot())(...)" . This is how we can have
+            // proper private variables in our view.
+            this.polarplot = new (smithplot())({
+                model: this.model,
+                settings: this.plotoptions
+            });
+            console.log(this.plot);
+            if (this.polarplot != null) {
+                $('.smithsweepchart', this.el).append(this.polarplot.el);
+                this.polarplot.render();
+            }
+
+            // Now create the scalarplot:
+            this.plot = new simpleplot({
                 model: this.model,
                 settings: this.plotoptions
             });
             if (this.plot != null) {
-                $('.smithsweepchart', this.el).append(this.plot.el);
+                $('.scalarsweepchart', this.el).append(this.plot.el);
                 this.plot.render();
             }
         },
@@ -139,7 +155,8 @@ define(function (require) {
             console.log("Sark110 live view closing...");
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
-            this.plot.onClose(); // Required to stop the plot from listening to window resize events
+            if (this.polarplot)
+                this.polarplot.onClose(); // Required to stop the plot from listening to window resize events
         },
 
         updatestatus: function (data) {
@@ -164,21 +181,25 @@ define(function (require) {
             }
 
             if (data.R != undefined) {
-                /**
+
                 var Z = Math.sqrt(Math.pow(data.R, 2) + Math.pow(data.X, 2));
                 var VSWR = (1 + gamma(data.R, data.X)) / (1 - gamma(data.R, data.X));
-                this.plot.appendPoint({
+                this.plot.fastAppendPoint({
                     name: "Z",
                     value: Z,
                     timestamp: data.F
                 });
-                this.plot.appendPoint({
+                this.plot.fastAppendPoint({
                     name: "VSWR",
                     value: VSWR,
                     timestamp: data.F
                 });
-                */
-                this.plot.appendPoint(data);
+
+                var p = { R: data.R,
+                          X: data.X,
+                          data: { F: data.F}
+                        };
+                this.polarplot.appendPoint(p);
             }
             if (data.version) {
                 this.plot.redraw();

@@ -276,6 +276,11 @@ define(function (require) {
             }
         },
 
+        autoResize: function() {
+            if (this.rsc)
+                this.rsc();
+        },
+
         // Ugly at this stage, just to make it work (from flotcharts.org examples)
         showTooltip: function (x, y, contents) {
             $("<div id='tooltip' class='well'>" + contents + "</div>").css({

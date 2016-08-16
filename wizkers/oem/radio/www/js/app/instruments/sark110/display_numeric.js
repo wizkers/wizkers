@@ -48,7 +48,8 @@ define(function (require) {
             "change #spanfreq": "change_span",
             "change #centerfreq": "change_center",
             "change #startfreq": "change_start",
-            "change #endfreq": "change_end"
+            "change #endfreq": "change_end",
+            "change #vswr_circle": "redraw_plot"
         },
 
         render: function () {
@@ -98,11 +99,16 @@ define(function (require) {
 
             // Reset the plot:
             instrumentManager.liveViewRef().plot.clearData();
+            instrumentManager.liveViewRef().polarplot.clearData();
 
             for (var i = min; i < max; i += step) {
                 linkManager.driver.rx(i);
             }
             linkManager.driver.version();
+        },
+
+        redraw_plot: function(e) {
+            instrumentManager.liveViewRef().polarplot.setSWRCircle($(e.target).val());
         },
 
         onClose: function () {

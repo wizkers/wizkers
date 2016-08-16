@@ -25,6 +25,8 @@
 /*
  * A generic Flot plot, do be used by any instrument that requires it
  *
+ *  This implementation takes a lot from https://github.com/cemulate/smith-chart/
+ *  and is used with permission, thank you!
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -40,6 +42,8 @@ define(function (require) {
 
 
     return (function() {
+
+        console.log("Creating Core Smith Chart object");
 
         var view;
         var r0 = 50;
@@ -58,6 +62,7 @@ define(function (require) {
             vertical_stretch_parent: false, // Stretch relative to parent height
             multiple_yaxis: false,
             plot_options: {
+                dot_size: 0.006
             },
 
             get: function (key) {
@@ -166,6 +171,11 @@ define(function (require) {
                 normalize();
             }
 
+            this.inverseTransform = function(point) {
+                var inv = matrix.inverted()
+                return inv.transform(point)
+            }
+
         };
 
         var nm; // Our normalizer
@@ -173,12 +183,27 @@ define(function (require) {
         var backgroundGroup;
         var plotLayer;
         var plotGroup;
+        // Now the cursor and mouse event handlers
+        var cursorLayer;
+        var cursorGroup;
+        var mouseTool;
+        var cursor;
+
+        // This layer is not clipped
+        var infoLayer;
+        var infoGroup;
+
+        // Avoid auto-resizing the canvas before paper is ready
+        var paperReady = false;
 
         // We save the original points in memory for display, redraw:
         var plotPoints = [];
+        var swrCircle = 1;
 
         var autoResize = function() {
             console.info('Resize smith chart');
+            if (!paperReady)
+                return;
             var chartheight;
             if (smithplot_settings.vertical_stretch) {
                 chartheight = window.innerHeight - view.$el.offset().top - 20;
@@ -188,12 +213,17 @@ define(function (require) {
                 chartheight = view.$el.parentElement.height();
             }
             view.$('.chart').css('height', chartheight + 'px');
-            view.$('#smithchart').css('height', chartheight + 'px');
-            view.$('#smithchart').css('width', '100%');
-            // Manually resize the chart - we reset it completely
-            paper.setup(view.$("#smithchart").get(0));
-            nm = new coordNormalizer(view.$("#smithchart").width(), view.$("#smithchart").height());
-            nm.autoSetFromHeight(2.2);
+            // This is the best way to resize the paper canvas:
+            paper.view.viewSize.width = view.$('.chart').width();
+            paper.view.viewSize.height = chartheight;
+            var w = view.$("#smithchart").width();
+            var h = view.$("#smithchart").height();
+            nm = new coordNormalizer(w, h);
+            if (w >= h) {
+                nm.autoSetFromHeight(2.2);
+            } else {
+                nm.autoSetFromWidth(2.2);
+            }
             if (bgLayer)
                 drawGrid(bgLayer);
             if (plotLayer)
@@ -207,17 +237,36 @@ define(function (require) {
                 $(window).on('resize', view.rsc);
                 autoResize();
             }
+            // Never call this one more than once:
             paper.setup(view.$("#smithchart").get(0));
-            nm = new coordNormalizer(view.$("#smithchart").width(), view.$("#smithchart").height());
-            nm.autoSetFromHeight(2.2);
+            var w = view.$("#smithchart").width();
+            var h = view.$("#smithchart").height();
+            nm = new coordNormalizer(w, h);
+            if (w >= h) {
+                nm.autoSetFromHeight(2.2);
+            } else {
+                nm.autoSetFromWidth(2.2);
+            }
             bgLayer = new paper.Layer();
             backgroundGroup = new paper.Group();
             drawGrid(bgLayer); // Redraw the background
+
+            // Setup the mouse events
+            mouseTool = new paper.Tool();
+            cursorLayer = new paper.Layer();
+            cursorGroup = new paper.Group();
+            initMouse();
 
             // Setup the layer for plotting the graphs:
             plotLayer = new paper.Layer();
             plotGroup = new paper.Group();
             initPlot();
+
+            infoLayer = new paper.Layer();
+            infoGroup = new paper.Group();
+
+            paperReady = true;
+
         };
 
         // Initialize the plot - empty the points we drew earlier,
@@ -234,33 +283,124 @@ define(function (require) {
             plotGroup.clipped = true;
             plotLayer.addChild(plotGroup);
             plotLayer.setMatrix(nm.getMatrix());
-
             paper.project.view.draw();
         }
 
-        // Add a point on the chart
+        /**
+         * Initialize the mouse events for the graph
+         */
+        var initMouse = function() {
+            mouseTool.onMouseMove = function(e) {
+                var p = nm.inverseTransform(e.point);
+                if (Math.sqrt(p.x*p.x + p.y*p.y) < 1) {
+                    // Point is the gamma value, we need to
+                    // calculate R / X from it:
+                    drawCursorLayer(imp(p.x, p.y));
+                } else {
+                    cursorLayer.removeChildren(0);
+                    cursorGroup.removeChildren(0);
+                    paper.project.view.draw();
+                }
+                return true;
+            }
+        }
+
+        /**
+         * Add a point on the chart
+         */
         var drawPoint = function(point) {
             plotPoints.push(point); // Save the point
-            var p = new paper.Path.Circle(new paper.Point(point.r, point.i), 0.008);
+            var p = new paper.Path.Circle(new paper.Point(point.r, point.i), smithplot_settings.plot_options.dot_size);
             p.opacity = 1;
             p.fillColor = 'red';
             p.setMatrix(nm.getMatrix());
+            p.onMouseEnter = showInfo;
+            p.onMouseLeave = hideInfo;
+            p.data = point.data;
             plotGroup.addChild(p);
             paper.project.view.draw();
         }
 
-        // Redraw all the points
-        // (used after a resize)
+        /**
+         * Redraw all the points
+         *  (used after a resize)
+         */
         var redraw = function() {
             initPlot();
             for (var i in plotPoints) {
-                var p = new paper.Path.Circle(new paper.Point(plotPoints[i].r, plotPoints[i].i), 0.008);
+                var p = new paper.Path.Circle(new paper.Point(plotPoints[i].r, plotPoints[i].i),
+                                                smithplot_settings.plot_options.dot_size);
                 p.opacity = 1;
                 p.fillColor = 'red';
                 p.setMatrix(nm.getMatrix());
+                p.onMouseEnter = showInfo;
+                p.onMouseLeave = hideInfo;
+                p.data = plotPoints[i].data;
                 plotGroup.addChild(p);
             }
             paper.project.view.draw();
+            plotLayer.activate();
+        }
+
+        /**
+         * Popup an info bubble. Right now, assumes data.F is the
+         * frequency in Hz.
+         *
+         */
+        var showInfo = function(e) {
+            console.info('Item detected:', e.target.data);
+            infoLayer.activate();
+            infoLayer.removeChildren(0);
+            infoGroup.removeChildren(0);
+            var st = (e.target.data.F / 1e6).toFixed(4) + ' MHz';
+            var t = new paper.PointText(e.point);
+            t.fillColor = '#ffffff';
+            t.fontSize = 18;
+            t.content = st;
+            var rc = new paper.Path.Rectangle(t.getBounds().scale(1.1), 6 );
+            rc.opacity = 0.7;
+            rc.fillColor = 'black';
+            infoGroup.addChild(rc);
+            infoGroup.addChild(t)
+            infoLayer.addChild(infoGroup);
+        }
+
+        var hideInfo = function(e) {
+
+        }
+
+
+        /**
+         * Draw the cursor on the chart, as a constant XL/RL
+         * circle intersection
+         *
+         * point  Object { r: resistance, x: reactance}
+         */
+        var drawCursorLayer = function(point) {
+            cursorLayer.activate();
+            cursorLayer.removeChildren(0);
+            cursorGroup.removeChildren(0);
+
+            var clip = new paper.Path.Circle(new paper.Point(0, 0), 1.005);
+            cursorGroup.addChild(clip);
+
+            var rl = circle_constRL(point.r);
+            rl.opacity = 1;
+            rl.strokeColor = 'blue';
+            rl.strokeWidth = 1;
+            cursorGroup.addChild(rl);
+
+            var xl = circle_constXL(point.x);
+            xl.opacity=1;
+            xl.strokeColor = 'blue';
+            xl.strokeWidth = 1;
+            cursorGroup.addChild(xl);
+
+            cursorGroup.clipped = true;
+            cursorLayer.addChild(cursorGroup);
+            cursorLayer.setMatrix(nm.getMatrix());
+            paper.project.view.draw();
+
         }
 
         function isWhole(num) {
@@ -280,6 +420,11 @@ define(function (require) {
             return paper.Path.Circle(center, radius);
         }
 
+        /**
+         * Draw the chart background. This includes both the circles, and
+         * the numbers. Note that the numbers are very small, and only really
+         * make sense on larger resolutions or screen sizes.
+         */
         var drawGrid = function(layer) {
             layer.activate();
             layer.removeChildren(0);
@@ -324,10 +469,10 @@ define(function (require) {
                     var r=100/i;
                     // Intersection of the two circles:
                     var y = 2*r/(r*r+1);
-                    var x = (1-r*r)/(1+r*r)- 0.015;
+                    var x = (1-r*r)/(1+r*r);
                     // Move the text so that it shows up in the circle:
                     if (r < 1) {
-                        y -= y/Math.abs(y) * 0.01;
+                        y -= y/Math.abs(y) * 0.02;
                     } else {
                         y -= y/Math.abs(y) * 0.03;
                     }
@@ -338,13 +483,21 @@ define(function (require) {
                     t.leading = 0;
                     t.content = '' + i/100;
                     t.justification = 'center';
-                    t.rotate(-Math.atan(y/x)*180/Math.PI);
                     t.scale(0.02, -0.02);
+                    var w = t.bounds.getWidth()/1.7;
+                    t.rotate(90+Math.atan((y-r)/(x-1))*180/Math.PI);
+                    t.setPoint((1-w)*x, (1-w)*y);
                     backgroundGroup.addChild(t);
                 }
                 backgroundGroup.addChild(c);
             }
 
+            // Add the SWR circle
+            var p = new paper.Path.Circle(new paper.Point(0,0), 1-2/(1+swrCircle));
+            p.opacity = 1;
+            p.strokeColor = 'green';
+            p.dashArray = [5,8];
+            backgroundGroup.addChild(p);
 
             backgroundGroup.clipped = true;
             layer.addChild(backgroundGroup);
@@ -359,14 +512,31 @@ define(function (require) {
             x0 = x;
         }
 
-        // Calculate the reflection coefficient from the real measured
-        // impedance (R / X, resistance/reactance)
+        /**
+         * Calculate the reflection coefficient from the real measured
+         *  impedance (R / X, resistance/reactance)
+         *  gamma = (z-z0)/(z+z0)
+         */
         var gamma = function(r,x) {
             var mag = Math.pow(r+r0, 2) + Math.pow(x+x0, 2);
             var gr = (r*r + x*x - r0*r0 + x0*x0)/mag;
             var gi = 2 * (r*x0 + r0*x)/mag;
 
             return { r:gr, i: gi};
+        }
+
+        /**
+         * Calculate resistance/reactance from Gamma
+         * (normalized to 1)
+         *  z = (1+gamma)/(1-gamma)
+         */
+        var imp = function(r,i) {
+            var c = i*i+r*r-2*r+1;
+            var a = (1 - r*r - i*i)/c;
+            var b = 2*i/c;
+            return { r: a,
+                     x: b
+                    };
         }
 
         return Backbone.View.extend({
@@ -412,6 +582,17 @@ define(function (require) {
             // the window resize callback lives on as a zombie and tries to resize
             // any chart anywhere...
             onClose: function () {
+                console.log('Closing Smith Chart');
+                // We need to make sure we destroy all the projects
+                // and tools we created on the chart, otherwise bad things
+                // will happen next time we start a Smith Chart view
+                while (paper.projects.length) {
+                    paper.projects[0].remove();
+                }
+                while (paper.tools.length) {
+                    paper.tools[0].remove();
+                }
+
                  $(window).off('resize', this.rsc);
             },
 
@@ -421,15 +602,20 @@ define(function (require) {
 
             render: function () {
                 console.log("Rendering a simple chart widget");
-                this.$el.html('<div class="chart" style="position: relative; width:100%; height: 100px;"><canvas id="smithchart" style="width:100%; height:100%"></canvas></div>');
+                this.$el.html('<div class="chart" style="position: relative; width:100%; height: 100px;"><canvas id="smithchart"></canvas></div>');
                 addPlot();
                 return this;
             },
 
             // Clears all graph data
             clearData: function () {
-                this.livedata = [];
-                this.sensors = [];
+                plotPoints = [];
+                initPlot();
+            },
+
+            setSWRCircle : function(swr) {
+                swrCircle = parseFloat(swr);
+                autoResize(); // Forces a redraw including the background
             },
 
             trimLiveData: function (idx) {
@@ -444,16 +630,13 @@ define(function (require) {
 
             /**
              * Append a data point. Data should be in the form of
-             * { name: "measurement_name", value: value } or
-             * { name: "measurement_name", value: value, timestamp: timestamp } or
-             * { name" "measurement_name", value: value, index: index }
-             * You can also add an "options" key to pass additional config for plotting:
-             * { name: "sensor_name", value: value, timestamp: timestamp, options: {lines: {show: true,fill: true},fillBetween: "vmin"}}
-             *  Note: you can only set the options once.
+             * { R: resistance, X: reactance data: { arbitrary key/values} }
              */
             fastAppendPoint: function (data) {
                 // data  {r, i}
                 var g = gamma(data.R, data.X);
+                if (data.data)
+                    g.data = data.data;
                 drawPoint(g, true);
                 return this; // This lets us chain multiple operations
             },
@@ -473,5 +656,5 @@ define(function (require) {
                 return this; // This lets us chain multiple operations
             }
         });
-        })();
+        });
 });
