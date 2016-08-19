@@ -61,8 +61,8 @@ define(function (require) {
         ///////////
 
         /**
-         * Send data to the serial port.
-         * cmd has to be either a String or an ArrayBuffer
+         * Send data to the device.
+         *
          * @param {integer} reportId the reportId to use, or 0 if none
          * @param {ArrayBuffer} data The command, already formatted for sending.
          */

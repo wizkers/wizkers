@@ -88,6 +88,12 @@ define(function (require) {
                 }
             };
 
+            this.smithplotoptions = {
+                plot_options: {
+                }
+            };
+
+
             linkManager.on('status', this.updatestatus, this);
             linkManager.on('input', this.showInput, this);
 
@@ -131,7 +137,7 @@ define(function (require) {
             // proper private variables in our view.
             this.polarplot = new (smithplot())({
                 model: this.model,
-                settings: this.plotoptions
+                settings: this.smithplotoptions
             });
             console.log(this.plot);
             if (this.polarplot != null) {
@@ -197,7 +203,10 @@ define(function (require) {
 
                 var p = { R: data.R,
                           X: data.X,
-                          data: { F: data.F}
+                          data: { F: data.F,
+                                  Z: Z,
+                                  VSWR: VSWR
+                                }
                         };
                 this.polarplot.appendPoint(p);
             }

@@ -62,12 +62,14 @@ define(function(require) {
         },
 
         refresh: function() {
+            this.$el.css({'opacity': '0.3', 'pointer-events': 'none'});
             linkManager.sendCommand('BN;');
         },
 
         setBand: function (e) {
             console.log('[settings_band] setBand');
             var band = e.target.innerText;
+            this.$el.css({'opacity': '0.3', 'pointer-events': 'none'});
             linkManager.driver.setBand(band);
             linkManager.sendCommand('BN;');
         },
@@ -105,6 +107,7 @@ define(function(require) {
                 linkManager.sendCommand(nxt[1]);
             } else {
                 this.menumode = '';
+                this.$el.css({'opacity': '1', 'pointer-events': ''});
                 console.log('[band settings] Got all menu entries we needed');
             }
         },

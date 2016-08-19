@@ -49,6 +49,7 @@ define(function (require) {
     }
 
     return (function() {
+        console.log("Creating Master KX3 display view");
         // Everything inside of here is private to each instance
         var view; // Reference to the Backbone view, initialize when the view is instanciated
 

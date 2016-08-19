@@ -98,6 +98,12 @@ define(function (require) {
                 settings: 'app/instruments/slevel_monitor/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
+            'sark110' : {
+                name: 'Sark110 Antenna Analyzer',
+                type: 'app/instruments/sark110/sark110',
+                settings: 'app/instruments/sark110/settings',
+                connectionsettings: 'app/views/instrument/usbhid'
+            },
             "simple_serial": {
                 name: "Simple serial terminal",
                 type: 'app/instruments/simple_serial/simple_serial',
@@ -108,12 +114,6 @@ define(function (require) {
 
         // The instruments below are only supported in Chrome runmode:
         if (vizapp.type == 'chrome') {
-            this.supportedInstruments['sark110'] = {
-                name: 'Sark110 Antenna Analyzer',
-                type: 'app/instruments/sark110/sark110',
-                settings: 'app/instruments/sark110/settings',
-                connectionsettings: 'app/views/instrument/usbhid'
-            };
             this.supportedInstruments['elecraft_remote'] = {
                 name: 'Remote Elecraft KX3',
                 type: 'app/instruments/elecraft_remote/elecraft_remote',

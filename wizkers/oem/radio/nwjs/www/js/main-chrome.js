@@ -54,7 +54,7 @@ require.config({
         underscore: 'lib/underscore-1.8.3',
         snap: 'lib/snap.svg-0.4.1',
         text: 'lib/text',
-        paper: 'lib/paperjs-v0.10.2/dist/paper-full',
+        paper: 'lib/paperjs-v0.10.2/dist/paper-core',
 
         // Signal processing libs
         dsp: 'lib/dsp',

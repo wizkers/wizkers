@@ -301,7 +301,10 @@ define(function (require) {
                     cursorGroup.removeChildren(0);
                     paper.project.view.draw();
                 }
-                return true;
+                return false; // Block event bubbling so that
+                              // on a mobile device, we won't start
+                              // scrolling when dragging a finger on the
+                              // chart
             }
         }
 
@@ -451,12 +454,13 @@ define(function (require) {
                     var pt = new paper.Point(1-2/(1+i/100)-0.015,0.025);
                     var t = new paper.PointText(pt);
                     t.fillColor='black';
-                    t.fontSize = 1;
+                    t.fontSize = 10; // Don't pick less than this, it creates
+                                     // issues on the Chrome runtime on Android
                     t.leading = 0;
                     t.content = '' + i/100;
                     t.justification = 'center';
                     t.rotate(-90);
-                    t.scale(0.02, -0.02);
+                    t.scale(0.003, -0.003);
                     backgroundGroup.addChild(t);
                 }
             }
@@ -479,11 +483,11 @@ define(function (require) {
                     var pt = new paper.Point(x,y);
                     var t = new paper.PointText(pt);
                     t.fillColor='black';
-                    t.fontSize = 1;
+                    t.fontSize = 10;
                     t.leading = 0;
                     t.content = '' + i/100;
                     t.justification = 'center';
-                    t.scale(0.02, -0.02);
+                    t.scale(0.003, -0.003);
                     var w = t.bounds.getWidth()/1.7;
                     t.rotate(90+Math.atan((y-r)/(x-1))*180/Math.PI);
                     t.setPoint((1-w)*x, (1-w)*y);

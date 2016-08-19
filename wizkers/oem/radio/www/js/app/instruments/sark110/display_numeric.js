@@ -97,6 +97,8 @@ define(function (require) {
             var max = parseInt($('#endfreq', this.el).val());
             var step = (max - min) / 256;
 
+            this.$('#cmd_sweep').html('Wait...').addClass('btn-warning').attr('disabled',true);
+
             // Reset the plot:
             instrumentManager.liveViewRef().plot.clearData();
             instrumentManager.liveViewRef().polarplot.clearData();
@@ -105,6 +107,7 @@ define(function (require) {
                 linkManager.driver.rx(i);
             }
             linkManager.driver.version();
+
         },
 
         redraw_plot: function(e) {
@@ -116,7 +119,11 @@ define(function (require) {
             linkManager.off('input', this.showInput, this);
         },
 
-        showInput: function (data) {},
+        showInput: function (data) {
+            if (data.version) {
+                this.$('#cmd_sweep').html('Sweep').removeClass('btn-warning').attr('disabled',false);
+            }
+        },
 
 
     });

@@ -52,6 +52,7 @@ require.config({
         underscore: 'lib/underscore-1.8.3',
         snap: 'lib/snap.svg-0.4.1',
         text: 'lib/text',
+        paper: 'lib/paperjs-v0.10.2/dist/paper-core',
 
         bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
@@ -82,7 +83,7 @@ require.config({
             'socketio': 'app/chromeSocket',
             'connections_serial': 'app/connections/cordovaSerial',
             'connections_tcp': 'app/connections/chromeTcpSerial',
-            'connections_hid': 'app/connections/usbhid',
+            'connections_hid': 'app/connections/cordovaHID',
             'connections_btle': 'app/connections/cordovaBTLE',
             'connection_btspp': 'app/connections/cordovaBTSPP',
             'connections_webrtc': 'app/connections/webrtc',

@@ -187,7 +187,7 @@ define(function(require) {
             ];
             if (this.iskx3) {
                 this.menulist.push([ 'agc-spd-fm', 'MN129;MD4;MP;']);
-                this.menulist.push([ 'agc-spd-am', 'MN129;MD5;MP;']);
+                this.menulist.push([ 'agc-spd-am', 'MN129;MD5;MP;MD' + this.initial_mode + ';']);
             }
             this.getNextMenu();
         },

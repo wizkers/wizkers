@@ -1,3 +1,17 @@
+/*===========
+ * Digital Fonts
+ *===================*/
+@font-face {
+  font-family: "KX3-top-display";
+  src: url('../fonts/KX3-top-display-Monospaced.otf');
+}
+
+@font-face {
+    font-family:"KX3-bottom-LCD-monospaced";
+    src: url('../fonts/KX3-bottom-LCD-monospaced-Regular.otf');
+}
+
+
 .navbar-inverse {
     background-color: #ffc900;
     border-color: #080808;
