@@ -77,10 +77,10 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:zoom="10.085985"
-     inkscape:cx="56.101532"
+     inkscape:cx="113.01219"
      inkscape:cy="53.902036"
-     inkscape:window-x="0"
-     inkscape:window-y="69"
+     inkscape:window-x="922"
+     inkscape:window-y="376"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer1" /><g
      inkscape:groupmode="layer"
@@ -1498,15 +1498,15 @@
        sodipodi:linespacing="125%"
        id="lcd_line2"
        y="51.721786"
-       x="110.21121"
-       style="font-style:normal;font-weight:normal;font-size:11.25px;line-height:125%;font-family:LCD5x8H;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;-inkscape-font-specification:'LCD5x8H, Normal';font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;"
+       x="96.211212"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.25px;line-height:125%;font-family:LCD5x8H;-inkscape-font-specification:'LCD5x8H, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        xml:space="preserve"
        inkscape:label="#text4602"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.25px;font-family:LCD5x8H;-inkscape-font-specification:'LCD5x8H, Normal';text-anchor:start;text-align:start;writing-mode:lr;line-height:125%;"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.25px;line-height:125%;font-family:LCD5x8H;-inkscape-font-specification:'LCD5x8H, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start"
          y="51.721786"
-         x="110.21121"
+         x="96.211212"
          id="tspan4604"
-         sodipodi:role="line">7.000.00</tspan></text>
+         sodipodi:role="line">007.000.00</tspan></text>
 <text
        sodipodi:linespacing="125%"
        id="lcd_line3"

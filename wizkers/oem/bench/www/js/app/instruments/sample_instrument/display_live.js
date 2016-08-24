@@ -29,7 +29,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
-        simpleplot = require('app/lib/flotplot'),
+        simpleplot = require('app/lib/smithplot'),
         template = require('js/tpl/instruments/sample_instrument/LiveView.js');
 
     return Backbone.View.extend({

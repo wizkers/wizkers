@@ -261,9 +261,12 @@ define(function (require) {
                         // (since all instruments support the same API, a change of instrument
                         // overrides the methods)
                         _.extend(self, new instrumentObject());
-                        linkManager.setDriver(self.getDriver());
-                        self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
-                        cb();
+                        self.getDriver(function(driver) {
+                            linkManager.setDriver(driver);
+                            console.warn('Trigger instrumentChanged');
+                            self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
+                            cb();
+                        });
                     });
                 }
             }
