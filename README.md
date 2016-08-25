@@ -18,14 +18,19 @@ Software License
 ----------------
 
 TL;DR: Wizkers is Open Source software under the terms of MIT License for all code, and Creative Commons CC-BY-SA 4.0 for
-all original artwork.
+all original artwork. You can reuse, but you have to stick to those license terms and give full attribution.
 
 Full version:
 
 Artwork
 ========
 
-Unless noted otherwise, all original artwork is licensed under Creative Commons CC-BY-SA 4.0.
+Unless noted otherwise, all original artwork is licensed under Creative Commons CC-BY-SA 4.0. This includes in particular but is
+not limted to all graphics (PNG, JPG and SVG files) located in the "oem" and "www" directories, all original fonts (KX3 monospace),
+and original icons.
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Wizkers artwork</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://www.wizkers.io/" property="cc:attributionName" rel="cc:attributionURL">The Wizkers.io team</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.<br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="http://github.com/wizkers/wizkers/" rel="dct:source">http://github.com/wizkers/wizkers/</a>.<br />Permissions beyond the scope of this license may be available at <a xmlns:cc="http://creativecommons.org/ns#" href="info@wizkers.io" rel="cc:morePermissions">info@wizkers.io</a>.
+
 
 Code
 =====
