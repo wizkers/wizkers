@@ -9,7 +9,10 @@
 @font-face {
     font-family:"KX3-bottom-LCD-monospaced";
     src: url('../fonts/KX3-bottom-LCD-monospaced-Regular.otf');
+    src: url('../fonts/kx3-bottom-lcd-monospaced-regular.eot') format('embedded-opentype'), url('../fonts/kx3-bottom-lcd-monospaced-regular.woff2') format('woff2'), url('../fonts/kx3-bottom-lcd-monospaced-regular.woff') format('woff'), url('../fonts/kx3-bottom-lcd-monospaced-regular.ttf') format('truetype'), url('../fonts/kx3-bottom-lcd-monospaced-regular.svg#KX3-bottom-LCD-monospaced-Regular') format('svg');
 }
+
+
 
 
 .navbar-inverse {
