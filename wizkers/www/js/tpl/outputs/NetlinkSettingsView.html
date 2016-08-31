@@ -1,0 +1,26 @@
+<div class="row">
+    <div class="form-group col-md-6">
+        <label for="type" class="col-md-6 control-label">IP Listening address:</label>
+        <div class="input-group col-md-6">
+            <input type="text" step="1" min="1" class="form-control" name="ipaddress" value="<%= metadata['ipaddress'] %>"/>
+        </div>
+    </div>
+    <div class="col-md-6">
+    <p>Select the IP address the server should listen on.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-6">
+        <label for="type" class="col-md-6 control-label">IP port:</label>
+        <div class="input-group col-md-6">
+            <input type="text" step="1" min="1" class="form-control" name="port" value="<%= metadata['port'] %>"/>
+        </div>
+    </div>
+    <div class="col-md-6">
+    <p>Select the TCPIP port the server should listen on.</p>
+    </div>
+</div>
+
+
+
+

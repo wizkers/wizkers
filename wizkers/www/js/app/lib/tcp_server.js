@@ -295,14 +295,16 @@ define(function(require) {
      * Sends a message down the wire to the remote side
      *
      * @see https://developer.chrome.com/apps/sockets_tcp#method-send
-     * @param {String} msg The message to send
+     * @param {String or ArrayBuffer} msg The message to send
      * @param {Function} callback The function to call once the message is sent
      */
     this.sendMessage = function(msg, callback) {
       lastMessage = msg;
       // Register sent callback.
       callbacks.sent = callback;
-      chrome.sockets.tcp.send(socketId, abu.str2ab(msg), onWriteComplete);
+      if (typeof msg == 'String')
+        msg = abu.str2ab(msg);
+      chrome.sockets.tcp.send(socketId, msg, onWriteComplete);
     };
 
      var onReceiveError = function (info) {

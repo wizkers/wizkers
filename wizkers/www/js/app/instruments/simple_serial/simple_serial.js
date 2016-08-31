@@ -31,8 +31,6 @@
 define(function (require) {
     "use strict";
 
-    var driver_frontend = require('app/instruments/simple_serial/driver_frontend');
-
     return function () {
 
         // Convenient function when views want to talk to each other: keep a central
@@ -98,13 +96,11 @@ define(function (require) {
             });
         };
 
-        // This has to be a link manager
-        this.getDriver = function () {
-            return new driver_frontend();
-        };
-
-        this.getUploader = function () {
-            return new uploader_frontend();
+        // This is the front-end driver
+        this.getDriver = function(callback) {
+             require(['app/instruments/simple_serial/driver_frontend'], function(d) {
+                callback(new d());
+             });
         };
 
         // This is a browser implementation of the backend driver, when we
@@ -116,11 +112,6 @@ define(function (require) {
             require(['app/instruments/simple_serial/driver_backend'], function (view) {
                 callback(new view(arg));
             });
-        };
-
-        // Return a Backbone view which is a mini graph
-        this.getMiniLogview = function (arg, callback) {
-            return null;
         };
 
         // Return a device log management view

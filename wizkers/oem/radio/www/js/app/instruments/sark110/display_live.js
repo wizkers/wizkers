@@ -93,8 +93,6 @@ define(function (require) {
                 }
             };
 
-
-            linkManager.on('status', this.updatestatus, this);
             linkManager.on('input', this.showInput, this);
 
         },
@@ -112,7 +110,6 @@ define(function (require) {
             }
 
         },
-
 
         render: function () {
             var self = this;
@@ -159,32 +156,14 @@ define(function (require) {
 
         onClose: function () {
             console.log("Sark110 live view closing...");
-            linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
             if (this.polarplot)
                 this.polarplot.onClose(); // Required to stop the plot from listening to window resize events
         },
 
-        updatestatus: function (data) {
-            console.log("Sark110 live display: link status update");
-        },
-
         // We get there whenever we receive something from the serial port
         showInput: function (data) {
             var self = this;
-
-            if (this.showstream) {
-                // Update our raw data monitor
-                var i = $('#input', this.el);
-                var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-                // Keep max 50 lines:
-                if (scroll.length > 50) {
-                    scroll = scroll.slice(scroll.length - 50);
-                }
-                i.val(scroll.join('\n'));
-                // Autoscroll:
-                i.scrollTop(i[0].scrollHeight - i.height());
-            }
 
             if (data.R != undefined) {
 

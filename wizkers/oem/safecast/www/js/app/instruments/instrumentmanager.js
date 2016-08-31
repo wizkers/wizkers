@@ -120,7 +120,6 @@ define(function (require) {
             var type = instrument.get('type');
             for (var ins in this.supportedInstruments) {
                 if (ins == type) {
-                    current_instrument = instrument;
                     // Dynamically load the instrument:
                     require([this.supportedInstruments[ins].type], function (instrumentObject) {
                         // Nifty: we extend our instrument manager with the methods of our instrument.
@@ -129,6 +128,9 @@ define(function (require) {
                         _.extend(self, new instrumentObject());
                         self.getDriver(function(driver) {
                             linkManager.setDriver(driver);
+                            // Don't set ref to current instrument before the rest of the
+                            // instrument manager is initialized!
+                            current_instrument = instrument;
                             self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
                             cb();
                         });

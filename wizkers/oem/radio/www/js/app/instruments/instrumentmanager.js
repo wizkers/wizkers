@@ -109,6 +109,12 @@ define(function (require) {
                 type: 'app/instruments/simple_serial/simple_serial',
                 settings: 'app/instruments/simple_serial/settings',
                 connectionsettings: 'app/views/instrument/serialport'
+            },
+            "telepost_lp100a": {
+                name: "Telepost LP100A RF Wattmeter",
+                type: 'app/instruments/telepost_lp100a/telepost_lp100a',
+                settings: 'app/instruments/telepost_lp100a/settings',
+                connectionsettings: 'app/views/instrument/serialport'
             }
         };
 
@@ -170,7 +176,6 @@ define(function (require) {
             console.warn('Switching to instrument', type);
             for (var ins in this.supportedInstruments) {
                 if (ins == type) {
-                    current_instrument = instrument;
                     // Dynamically load the instrument:
                     require([this.supportedInstruments[ins].type], function (instrumentObject) {
                         // Nifty: we extend our instrument manager with the methods of our instrument.
@@ -179,6 +184,9 @@ define(function (require) {
                         _.extend(self, new instrumentObject());
                         self.getDriver(function(driver) {
                             linkManager.setDriver(driver);
+                            // Don't set ref to current instrument before the rest of the
+                            // instrument manager is initialized!
+                            current_instrument = instrument;
                             console.warn('Trigger instrumentChanged');
                             self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
                             cb();

@@ -49,6 +49,8 @@ define(function (require) {
     var WebRTCOutputSettings = require('app/outputs/webrtc/settings');
     var TextOutput = require('app/outputs/text/text');
     var TextOutputSettings = require('app/outputs/text/settings');
+    var NetlinkOutput = require('app/outputs/netlink/netlink');
+    var NetlinkOutputSettings = require('app/outputs/netlink/settings');
 
     var OutputManager = function () {
 
@@ -169,6 +171,12 @@ define(function (require) {
                 plugin: WebRTCOutput,
                 backend: 'app/outputs/webrtc/driver_backend',
                 settings: WebRTCOutputSettings
+            },
+            "netlink": {
+                name: "Network link",
+                plugin: NetlinkOutput,
+                backend: 'app/outputs/netlink/driver_backend',
+                settings: NetlinkOutputSettings
             }
         };
 

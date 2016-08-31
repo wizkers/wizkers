@@ -41,6 +41,7 @@ define(function (require) {
 
         initialize: function (options) {
             linkManager.on('input', this.showInput, this);
+            linkManager.on('status', this.updatestatus, this);
         },
 
         events: {
@@ -117,6 +118,13 @@ define(function (require) {
         onClose: function () {
             console.log("Sark110 numeric view closing...");
             linkManager.off('input', this.showInput, this);
+            linkManager.off('status', this.updatestatus);
+        },
+
+        updateStatus: function(data) {
+            if (data.portopen) {
+              this.$('#cmd_sweep').attr('disabled',!data.portopen);
+            }
         },
 
         showInput: function (data) {
