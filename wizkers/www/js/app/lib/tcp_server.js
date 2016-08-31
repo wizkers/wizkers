@@ -201,7 +201,7 @@ define(function(require) {
 
     // Callback functions.
     var callbacks = {
-      disconnect: null, // Called when socket is disconnected.
+      disconnect: [], // Called when socket is disconnected.
       recv: null,          // Called when client receives data from server.
       sent: null           // Called when client sends data to server.
     };
@@ -271,7 +271,7 @@ define(function(require) {
     };
 
     /**
-     * Sets the callback for when a message is received
+     * Sets the callback for when a message is received - one listener maximum
      *
      * @param {Function} callback The function to call when a message has arrived
      */
@@ -282,11 +282,11 @@ define(function(require) {
       } else {
         callbacks.recv = callback;
       }
-      callbacks.disconnect = onError;
+      callbacks.disconnect.push(onError);
     };
 
     this.addSocketClosedListener = function(callback) {
-      callbacks.disconnect = callback;
+      callbacks.disconnect.push(callback);
     }
 
     var lastMessage = '';
@@ -302,9 +302,7 @@ define(function(require) {
       lastMessage = msg;
       // Register sent callback.
       callbacks.sent = callback;
-      if (typeof msg == 'String')
-        msg = abu.str2ab(msg);
-      chrome.sockets.tcp.send(socketId, msg, onWriteComplete);
+      chrome.sockets.tcp.send(socketId, abu.str2ab(msg), onWriteComplete);
     };
 
      var onReceiveError = function (info) {
@@ -343,8 +341,11 @@ define(function(require) {
         console.info("Closing socket", socketId);
         chrome.sockets.tcp.onReceive.removeListener(onReceive);
         chrome.sockets.tcp.onReceiveError.removeListener(onReceiveError);
-        if (callbacks.disconnect)
-          callbacks.disconnect(this);
+        if (callbacks.disconnect.length) {
+          for (let i=0; i < callbacks.disconnect.length; i++) {
+            callbacks.disconnect[i](this);
+          }
+        }
         chrome.sockets.tcp.close(socketId);
       }
     };

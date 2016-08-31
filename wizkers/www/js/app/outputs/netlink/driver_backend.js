@@ -65,7 +65,7 @@ define(function (require) {
             if (server) {
                 server.disconnect();
             }
-            server = new TCPServer.server(settings.ipaddress, settings.port);
+            server = new TCPServer.server(settings.ipaddress, parseInt(settings.port));
             server.start(onRequestCallback);
 
         };
@@ -92,7 +92,7 @@ define(function (require) {
             
             // Write the incoming data into all our sockets:
             for (let i=0; i < openSockets.length; i++) {
-                openSockets[i].sendMessage(data);
+                openSockets[i].sendMessage(JSON.stringify(data));
             }
         };
 
