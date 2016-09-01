@@ -41,6 +41,12 @@ define(function(require) {
             return ["LiveDisplay", "DiagDisplay"];
         };
 
+        // Return the type of data reading that this instrument generates. Can be used
+        // by output plugins to accept data from this instrument or not.
+        this.getDataType = function() {
+                    return [ ];
+        }
+
         // This is a Backbone view
         this.getLiveDisplay = function(arg, callback) {
             require(['app/instruments/elecraft_xg3/display_live'], function(view) {

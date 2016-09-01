@@ -54,6 +54,14 @@ define(function (require) {
                     proto: 'btspp'
                 });
             }
+            // Wizkers Netlink remote protocol
+            if (this.model.get('netlink') == undefined) {
+                this.model.set('netlink', {
+                    host: '127.0.0.1',
+                    port: 1432,
+                    proto: 'tcp'
+                });
+            }
             this.listenTo(this.model, 'change:port', this.toggleTcp);
 
             this.refresh();
@@ -76,6 +84,8 @@ define(function (require) {
             var p = this.model.get('port');
             if (p != 'TCP/IP')
                 $('.hide-tcp', this.el).hide();
+            if (p != 'Wizkers Netlink')
+                $('.hide-netlink', this.el).hide();
             if (p != 'Bluetooth')
                 $('.hide-spp', this.el).hide();
             if (p == 'Bluetooth')
@@ -93,6 +103,11 @@ define(function (require) {
                 this.render();
             } else
                 $('.hide-spp', this.el).hide();
+            if (p == 'Wizkers Netlink')
+                $('.hide-netlink', this.el).show();
+            else
+                $('.hide-netlink', this.el).hide();
+
         },
 
         refreshDevices: function (devices) {

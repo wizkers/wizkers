@@ -199,6 +199,8 @@ define(function(require) {
     var socketId = socketId;
     var socketInfo = null;
 
+    var raw = false; // True if we want an Arraybuffer and not a String
+
     // Callback functions.
     var callbacks = {
       disconnect: [], // Called when socket is disconnected.
@@ -265,8 +267,10 @@ define(function(require) {
 
       // Call received callback if there's data in the response.
       if (callbacks.recv) {
-        // Convert ArrayBuffer to string.
-        callbacks.recv(abu.ab2str(info.data));
+        if (raw)
+          callbacks.recv(info.data);
+        else
+          callbacks.recv(abu.ab2str(info.data)); // Convert ArrayBuffer to string.
       }
     };
 
@@ -275,7 +279,7 @@ define(function(require) {
      *
      * @param {Function} callback The function to call when a message has arrived
      */
-    this.addDataReceivedListener = function(callback, onError) {
+    this.addDataReceivedListener = function(callback, onError, wantraw) {
       // If this is the first time a callback is set, start listening for incoming data.
       if (!callbacks.recv) {
         startListening(callback);
@@ -283,7 +287,10 @@ define(function(require) {
         callbacks.recv = callback;
       }
       callbacks.disconnect.push(onError);
+      if (wantraw != undefined)
+        raw = wantraw;
     };
+
 
     this.addSocketClosedListener = function(callback) {
       callbacks.disconnect.push(callback);
@@ -304,6 +311,14 @@ define(function(require) {
       callbacks.sent = callback;
       chrome.sockets.tcp.send(socketId, abu.str2ab(msg), onWriteComplete);
     };
+
+    this.sendBinary = function(msg, callback) {
+      lastMessage = msg;
+      // Register sent callback.
+      callbacks.sent = callback;
+      chrome.sockets.tcp.send(socketId, msg, onWriteComplete);
+    };
+
 
      var onReceiveError = function (info) {
        console.log("TCP receive error", info, '(we are socket' + socketId + ')');

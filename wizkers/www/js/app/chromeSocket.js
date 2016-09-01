@@ -453,6 +453,7 @@ define(function (require) {
                 portlist.push(ports[i].path);
             }
             portlist.push('TCP/IP');
+            portlist.push('Wizkers Netlink');
             self.trigger('ports', portlist);
         }
 

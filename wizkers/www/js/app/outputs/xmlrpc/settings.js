@@ -24,7 +24,7 @@
 
 /**
  *
- * Send data to another system through a RESTful call
+ * Send data to another system through XMLRPC - specific to Ham radio
  *
  * This file manages the settings view for settings that are
  * specific to this output, and that are stored in the output's
@@ -65,7 +65,7 @@ define(function(require) {
             },
 
             change: function(event) {
-                console.log("Rest output bespoke settings change");
+                console.log("XMLRPC output bespoke settings change");
 
                 // Apply the change to the metadata
                 var target = event.target;

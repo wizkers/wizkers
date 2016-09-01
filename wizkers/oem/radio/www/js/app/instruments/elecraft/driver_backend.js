@@ -28,6 +28,8 @@
  * This parser implements elecraft serial commands for:
  *    - KXPA100
  *    - KX3
+ *    - KX2
+ *    - K3 / K3S
  *
  * The Browser-side parser is used when running as a Chrome or Cordova app.
  *
@@ -45,6 +47,7 @@ define(function (require) {
         serialConnection = require('connections_serial'),
         tcpConnection = require('connections_tcp'),
         btConnection = require('connection_btspp'),
+        Protocol = require('app/lib/jsonbin'),
         Bitmap = require('app/lib/bitmap');
 
 
@@ -57,6 +60,7 @@ define(function (require) {
         var streaming = false,
             pollCounter = 0,
             port = null,
+            proto = 0,
             port_close_requested = false,
             port_open_requested = true,
             isopen = false;
@@ -118,6 +122,12 @@ define(function (require) {
         // json objects, so that we don't do parsing everywhere later on.
         var format = function (data) {
 
+            if (proto) {
+                // We are using the Wizkers Netlink protocol, so incoming data has to be forwarded
+                // to our protocol handler
+                proto.read(data);
+            }
+
             if (!waiting_for_bmp) {
                 second_parser(self, data); // Careful not to use 'this' since 'this' in this context
                 // is chromeSerial !!
@@ -141,8 +151,14 @@ define(function (require) {
                 console.log('[elecraft driver] Got the bitmap!');
                 sendBitmap();
             }
-
         };
+
+        /**
+         * When the protocol parser gets data, this callback gets called
+         */
+        var onProtoData = function(data) {
+            self.trigger('data', data);
+        }
 
         var status = function (stat) {
             port_open_requested = false;
@@ -211,6 +227,10 @@ define(function (require) {
             if (p == 'TCP/IP') {
                 // Note: we just use the parser info from portSettings()
                 port = new tcpConnection(ins.get('tcpip'), portSettings().parser);
+            } else if (p == 'Wizkers Netlink') {
+                port = new tcpConnection(ins.get('netlink'), portSettings().parser);
+                proto = new Protocol();
+                proto.on('data', onProtoData);
             } else if (p == 'Bluetooth') {
                 port = new btConnection(ins.get('btspp'), portSettings().parser);
             } else {
@@ -225,6 +245,8 @@ define(function (require) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
             port.off('data', format);
+            if (proto)
+                proto.off('data', onProtoData);
 
             // If we are streaming, stop it!
             // The Home view does this explicitely, but if we switch
@@ -266,6 +288,15 @@ define(function (require) {
         // period in seconds
         this.startLiveStream = function (period) {
             var self = this;
+            if (proto) {
+                // We are connected to a remote Wizkers instance using Netlink,
+                // and that remote instance is in charge of doing the Live Streaming
+
+                // TODO: we should implement a mechanism to remotely stop live
+                // streaming if we want the instrument to work fine.
+                streaming = true;
+                return;
+            }
             if (!streaming) {
                 console.log("[Elecraft] Starting live data stream");
                 // The radio can do live streaming to an extent, so we definitely will
@@ -285,6 +316,10 @@ define(function (require) {
         };
 
         this.stopLiveStream = function (args) {
+            if (proto) {
+                streaming = false;
+                return;
+            }
             if (streaming) {
                 console.log("[Elecraft] Stopping live data stream");
                 // Stop live streaming from the radio:

@@ -29,7 +29,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
-        simpleplot = require('app/lib/smithplot'),
+        simpleplot = require('app/lib/flotplot'),
         template = require('js/tpl/instruments/sample_instrument/LiveView.js');
 
     return Backbone.View.extend({
@@ -83,6 +83,7 @@ define(function (require) {
 
         addPlot: function () {
             var self = this;
+            
             this.plot = new simpleplot({
                 model: this.model,
                 settings: this.plotoptions

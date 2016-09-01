@@ -80,7 +80,7 @@ define(function (require) {
 
         // Has to be called by the backend_driver to actually open the port.
         this.open = function () {
-            timer = setInterval(output_random_data, 100);
+            timer = setInterval(output_random_data, 800);
             this.trigger('status', {
                     portopen: true
                 });

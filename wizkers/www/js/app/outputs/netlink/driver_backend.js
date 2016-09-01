@@ -42,7 +42,8 @@ define(function (require) {
 
     var _ = require('underscore'),
         Backbone = require('backbone'),
-        utils = require('app/utils'),
+        abu = require('app/lib/abutils'),
+        Protocol = require('app/lib/jsonbin'),
         TCPServer = require('app/lib/tcp_server');
 
     var Output = function () {
@@ -52,6 +53,8 @@ define(function (require) {
         var output_ref = null;
         var server = null;
         var openSockets = [];
+
+        var proto = new Protocol();
 
         // Load the settings for this plugin
         this.setup = function (output) {
@@ -71,7 +74,7 @@ define(function (require) {
         };
 
         this.onClose = function () {
-            if (rigserver) {
+            if (server) {
                 console.log('[netlink] Closing existing server');
                 server.disconnect();
             }
@@ -92,7 +95,7 @@ define(function (require) {
             
             // Write the incoming data into all our sockets:
             for (let i=0; i < openSockets.length; i++) {
-                openSockets[i].sendMessage(JSON.stringify(data));
+                openSockets[i].sendBinary(proto.write(data));
             }
         };
 
@@ -115,7 +118,7 @@ define(function (require) {
             openSockets.push(tcpConnection);
 
             /**
-             * This receives data from the remote end: forward to our instrument
+             * This receives data from the remote end: forward to our local instrument
              * driver
              */
             var rawParser = function(buffer, c) {
@@ -127,7 +130,7 @@ define(function (require) {
             tcpConnection.addDataReceivedListener(function (data) {
                 // The raw parser will forward incoming data to the local instrument
                 rawParser(data, tcpConnection);
-            }, onError);
+            }, onError, true);
         };
 
 
