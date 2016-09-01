@@ -63,7 +63,7 @@ define(function (require) {
                 var msg = abu.str2ab(JSON.stringify(obj));
                 var len = msg.byteLength;
 
-                var buf = new ArrayBuffer(len + 8);
+                var buf = new ArrayBuffer(len + 6);
                 var dv = new DataView(buf);
                 // Add the Magic + message length
                 dv.setUint16(0,magic);
@@ -134,8 +134,10 @@ define(function (require) {
             if (state == DECODE) {
                 // Now fill our decode buffer until we have all the data
                 
-                // For the sake of convenience, we can realign our data buffer:
-                d8 = new Uint8Array(data,ibIdx);
+                // For the sake of convenience, we can realign our data buffer.
+                // Careful not to use 'data' but d8, because data is sometimes a
+                // Uint8Array, in which case the constructor below disregards the offset.
+                d8 = new Uint8Array(d8.buffer,ibIdx);
                 if (decodeBuffer.byteLength - decodeBufferIdx > d8.byteLength) {
                     // Not enough data in our data buffer to decode everything, but
                     // let's decode what we can:
@@ -157,9 +159,7 @@ define(function (require) {
                 // If so, then we need to call ourselves recursively
                 if (d8.byteLength > decodeBuffer.byteLength - decodeBufferIdx) {
                     // Realign our data buffer:
-                    // TODO: careful about those, we might have issues between
-                    // actual bufferas and views, to be debugged thoroughly:
-                    var b = new Uint8Array(decodeBuffer.byteLength - decodeBufferIdx);
+                    var b = new Uint8Array(d8.buffer, decodeBuffer.byteLength - decodeBufferIdx+6);
                     this.read(b);
                 }
 
