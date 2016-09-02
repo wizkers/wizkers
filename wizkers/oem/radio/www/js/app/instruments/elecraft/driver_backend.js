@@ -73,7 +73,7 @@ define(function (require) {
 
         // Flag to indicate we are receiving a bitmap
         var waiting_for_bmp = false;
-        var bitmap = new Uint8Array(131768);
+        var bitmap;
         var bitmap_index = 0;
         var oldpercent = 0;
 
@@ -90,7 +90,7 @@ define(function (require) {
             var bm = new Bitmap(bitmap);
             bm.init();
             var data = bm.getData();
-            socket.trigger('serialEvent', {
+            self.trigger('data', {
                 screenshot: data,
                 width: bm.getWidth(),
                 height: bm.getHeight()
@@ -124,8 +124,10 @@ define(function (require) {
 
             if (proto) {
                 // We are using the Wizkers Netlink protocol, so incoming data has to be forwarded
-                // to our protocol handler
+                // to our protocol handler and we stop processing there, the actual data will come in
+                // throuth the onProtoData callback (see below)
                 proto.read(data);
+                return;
             }
 
             if (!waiting_for_bmp) {
@@ -291,10 +293,11 @@ define(function (require) {
             if (proto) {
                 // We are connected to a remote Wizkers instance using Netlink,
                 // and that remote instance is in charge of doing the Live Streaming
-
-                // TODO: we should implement a mechanism to remotely stop live
-                // streaming if we want the instrument to work fine.
                 streaming = true;
+                // We push this as a data message so that our output plugins (Netlink in particular)
+                // can forward this message to the remote side. In the case of Netlink (remote control),
+                // this enables the remote end to start streaming since it's their job, not ours.
+                port.write("@N3TL1NK,start_stream;");
                 return;
             }
             if (!streaming) {
@@ -318,6 +321,7 @@ define(function (require) {
         this.stopLiveStream = function (args) {
             if (proto) {
                 streaming = false;
+                port.write("@N3TL1NK,stop_stream;");
                 return;
             }
             if (streaming) {
@@ -379,14 +383,22 @@ define(function (require) {
         // HTML interface.
         this.output = function (data) {
 
+            if (data.indexOf("@N3TL1NK,start_stream;") > -1) {
+                this.startLiveStream(500);
+                return;
+            } else if (data.indexOf("@N3TL1NK,stop_stream;") > -1) {
+                this.stopLiveStream();
+                return;
+            }
+
             // We want to catch the '#BMP' command to the P3/PX3, because
             // the data returned if not semicolon-terminated at all..
             if (data.indexOf('#BMP') != -1) {
                 waiting_for_bmp = true;
+                bitmap = new Uint8Array(131768); // No need to use 131k before we need it.
                 bitmap_index = 0;
                 console.log('Got a bitmap request, need to switch parsers for a while!');
             }
-
             port.write(data);
         };
 

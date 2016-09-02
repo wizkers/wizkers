@@ -54,9 +54,7 @@ define(function (require) {
         /**
          * Pack a JSON object and return an ArrayBuffer that can be
          * sent over the wire.
-         * TODO: create a concept of channels so that we can talk to
-         *       different aspects of the backend: driver commands,
-         *       instrument commands, open/close instrument, raw data, etc.
+         * obj {Object} The javascript object to send over the line (JSON serialized)
          */
         this.write = function(obj) {
             try { // JSON stringify can fail
@@ -143,6 +141,8 @@ define(function (require) {
                     // let's decode what we can:
                     decodeBuffer.set(d8,decodeBufferIdx);
                     decodeBufferIdx += d8.byteLength;
+                    //console.info("Still waiting for data, need", decodeBuffer.byteLength, "have", decodeBufferIdx );
+                    ibIdx = 0; // Don't forget! If we don't reset this index for next time, we will lose data.
                     return;
                 }
                 // We have enough data by now (but we might have too much)

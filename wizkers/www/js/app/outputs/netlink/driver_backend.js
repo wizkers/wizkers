@@ -95,6 +95,7 @@ define(function (require) {
             
             // Write the incoming data into all our sockets:
             for (let i=0; i < openSockets.length; i++) {
+                // Write to channel zero for now.
                 openSockets[i].sendBinary(proto.write(data));
             }
         };
