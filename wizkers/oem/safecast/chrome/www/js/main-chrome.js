@@ -41,15 +41,20 @@ require.config({
 
         // Below we manage our versions explicitely, so that
         // we can upgrade easily
-        jquery: 'lib/jquery-2.1.4',
+        // Below we manage our versions explicitely, so that
+        // we can upgrade easily
+        jquery: 'lib/jquery-2.2.4',
         backbone: 'lib/backbone-1.2.3',
+        jquery_xmlrpc: 'lib/jquery.xmlrpc',
+        jquery_mousewheel: 'lib/jquery.mousewheel',
         chromestorage: 'lib/backbone.chromestorage',
         bbindexeddb: 'lib/backbone-indexeddb',
         pouchdb: 'lib/pouchdb-5.0.0',
         backbonepouch: 'lib/backbone-pouch',
         underscore: 'lib/underscore-1.8.3',
-        snap: 'lib/snap.svg-0.2.0',
+        snap: 'lib/snap.svg-0.4.1',
         text: 'lib/text',
+        paper: 'lib/paperjs-v0.10.2/dist/paper-core',
 
         // Signal processing libs
         dsp: 'lib/dsp',

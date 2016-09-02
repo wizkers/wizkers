@@ -95,10 +95,8 @@ define(function (require) {
 
         doDeleteLog: function (event) {
             var self = this;
-            var logToDelete = this.deviceLogs.where({
-                _id: $(event.currentTarget).data('id')
-            });
-            var points = logToDelete[0].entries.size();
+            var logToDelete = this.deviceLogs.get($(event.currentTarget).data('id'));
+            var points = logToDelete.entries.size();
             var log_destroyed = false;
             var entries_destroyed = false;
 
@@ -122,18 +120,29 @@ define(function (require) {
                 }
             });
 
+            // Delete all entries (tested on Cordova)
+            _.invoke(logToDelete.entries.toArray(), 'destroy');
+            // Note: this makes the app work fine on Cordova, need to do tests
+            // on NWJS and in server mode (more tricky on the latter)
+            entries_destroyed = true;
+
+            // Tested in real life on Cordova w/ PouchDB adapter: the logToDelete
+            // is not yet removed from this.deviceLogs when the success callback is called
+            // (probably bubbles up after the success callback?)
+            // For this reason, the collection needs to listen for the removal of the log
+            // before rendering
+            this.listenToOnce(this.deviceLogs, "remove", function() {
+                console.log("Log purged form list of instrument logs");
+                self.$('#deleteConfirm').modal('hide');
+                self.render();
+            })
+
             // the backend will take care of deleting all the log entries associated with
             // the log.
-            logToDelete[0].destroy({
+            logToDelete.destroy({
                 success: function (model, response) {
                     log_destroyed = true;
-                    // Depending on the situation, we might get there before
-                    // actual log entries destroy success (see above)
-                    if (entries_destroyed) {
-                        $('#deleteConfirm', self.el).modal('hide');
-                        self.render();
-                    }
-                    console.log("Log destroy finished");
+                    console.log("Log destroyed");
                 },
                 error: function (model, response) {
                     console.log("Log delete error" + response);
