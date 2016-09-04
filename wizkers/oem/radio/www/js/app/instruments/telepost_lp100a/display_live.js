@@ -56,6 +56,8 @@ define(function (require) {
             this.peak_hold_modes = ['w', 'W', 'T'];
             this.pwr_l = 'W';
             this.swr_alrms = ['Off', '1.5', '2.0', '2.5', '3.0', 'User'];
+            this.swr_alrms_val = [ 99, 1.5, 2.0, 2.5, 3.0, 99];
+            this.AlertBeep =  new Audio('js/app/instruments/elecraft/600hz.ogg');
 
             linkManager.on('input', this.showInput, this);
             linkManager.on('status', this.updateStatus, this);
@@ -142,9 +144,17 @@ define(function (require) {
                 this.eFind("#vfd1").html(("    " + data.pwr.toFixed(2) + this.pwr_l).slice(-8));
             }
             if (data.pwr != this.pwr) {
-
                 this.eFind("#vfd1").html(("    " + data.pwr.toFixed(2) + this.pwr_l).slice(-8));
                 // Adjust the bargraph
+                // Autoscale: we want 15W, 100W, 1500W as the autoscales:
+                var bg_max = 16.5; // 15W
+                if (data.pwr > 15)
+                    bg_max = 110;
+                else if (data.pwr > 100)
+                    bg_max = 1500;
+
+                // We have 61 bars, normalize according to max range:
+                data.pwr = Math.floor(data.pwr*61/bg_max);
 
                 if (data.pwr > this.pwr) {
                     // We have to show new bars above this.pwr
@@ -168,6 +178,13 @@ define(function (require) {
             }
             if (data.swr != this.swr) {
                 this.eFind("#vfd2").html('SWR ' + ( (data.pwr == 0 ) ? "-.--" : data.swr.toFixed(2)));
+                // Important feature: audio feedback on SWR alert
+                if (data.swr >= this.swr_alrms_val[this.swr_alrm]) {
+                     this.eFind('#alarm_led').css('fill','#f00000');
+                     this.AlertBeep.play();
+                } else {
+                    this.eFind('#alarm_led').css('fill','#444444');
+                }
                 // Adjust the bargraph
                 data.swr = (data.pwr == 0)  ? 0 : Math.floor(data.swr*6);
                 if (data.swr > this.swr) {
