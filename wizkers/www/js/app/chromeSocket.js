@@ -246,7 +246,7 @@ define(function (require) {
                     chrome.serial.getDevices(onGetDevices);
                     break;
                 case 'cordova':
-                    self.trigger('ports', ['OTG Serial', 'TCP/IP', 'Bluetooth']);
+                    self.trigger('ports', ['OTG Serial', 'TCP/IP', 'Bluetooth', 'Wizkers Netlink']);
                     break;
                 }
             } else if (ct == 'app/views/instrument/bluetooth') {
