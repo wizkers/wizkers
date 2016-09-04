@@ -40,6 +40,7 @@ define(function (require) {
     var Serialport = require('serialport'),
         serialConnection = require('connections_serial'),
         btConnection = require('connection_btspp'),
+        Protocol = require('app/lib/jsonbin'),
         tcpConnection = require('connections_tcp'),
         abu = require('app/lib/abutils');
 
@@ -51,6 +52,7 @@ define(function (require) {
         var livePoller = null; // Reference to the live streaming poller
         var streaming = false,
         port = null,
+        proto = 0,
         port_close_requested = false,
         port_open_requested = true,
         isopen = false;
@@ -96,6 +98,14 @@ define(function (require) {
         //
         // data is an ArrayBuffer;
         var format = function (data) {
+            if (proto) {
+                // We are using the Wizkers Netlink protocol, so incoming data has to be forwarded
+                // to our protocol handler and we stop processing there, the actual data will come in
+                // throuth the onProtoData callback (see below)
+                proto.read(data);
+                return;
+            }
+
             // The LP100A does not have line terminations, but the poll line
             // starts with a ";" and continues with 42 characters (?)
             if (data) {
@@ -203,6 +213,13 @@ define(function (require) {
             }
         };
 
+        /**
+         * When the protocol parser gets data, this callback gets called
+         */
+        var onProtoData = function(data) {
+            self.trigger('data', data);
+        }
+
         function queryRadio() {
 
             // This is queried every second
@@ -225,6 +242,10 @@ define(function (require) {
             if (p == 'TCP/IP') {
                 // Note: we just use the parser info from portSettings()
                 port = new tcpConnection(ins.get('tcpip'), portSettings().parser);
+            }  else if (p == 'Wizkers Netlink') {
+                port = new tcpConnection(ins.get('netlink'), portSettings().parser);
+                proto = new Protocol();
+                proto.on('data', onProtoData);
             } else if (p == 'Bluetooth') {
                 port = new btConnection(ins.get('btspp'), portSettings().parser);
             } else {
@@ -240,6 +261,8 @@ define(function (require) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
             port.off('data', format);
+            if (proto)
+                proto.off('data', onProtoData);
 
             // If we are streaming, stop it!
             // The Home view does this explicitely, but if we switch
@@ -278,6 +301,16 @@ define(function (require) {
         // period in seconds (not used)
         this.startLiveStream = function (period) {
             var self = this;
+            if (proto) {
+                // We are connected to a remote Wizkers instance using Netlink,
+                // and that remote instance is in charge of doing the Live Streaming
+                streaming = true;
+                // We push this as a data message so that our output plugins (Netlink in particular)
+                // can forward this message to the remote side. In the case of Netlink (remote control),
+                // this enables the remote end to start streaming since it's their job, not ours.
+                port.write("@N3TL1NK,start_stream;");
+                return;
+            }
             if (!streaming) {
                 console.log("[LP100A] Starting live data stream");
                 // Fast polling (every 100 ms)
@@ -287,6 +320,11 @@ define(function (require) {
         };
 
         this.stopLiveStream = function (args) {
+            if (proto) {
+                streaming = false;
+                port.write("@N3TL1NK,stop_stream;");
+                return;
+            }
             if (streaming) {
                 console.log("[LP100A] Stopping live data stream");
                 // Stop live streaming from the radio:
@@ -299,6 +337,13 @@ define(function (require) {
         // the data that is sent on the serial port, coming from the
         // HTML interface.
         this.output = function (data) {
+            if (data.indexOf("@N3TL1NK,start_stream;") > -1) {
+                this.startLiveStream(500);
+                return;
+            } else if (data.indexOf("@N3TL1NK,stop_stream;") > -1) {
+                this.stopLiveStream();
+                return;
+            }
             port.write(data);
         };
 
