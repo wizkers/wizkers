@@ -42,7 +42,7 @@ require.config({
         // Below we manage our versions explicitely, so that
         // we can upgrade easily
         jquery: 'lib/jquery-2.2.4',
-        backbone: 'lib/backbone-1.2.3',
+        backbone: 'lib/backbone-1.3.3',
         jquery_xmlrpc: 'lib/jquery.xmlrpc',
         jquery_mousewheel: 'lib/jquery.mousewheel',
         chromestorage: 'lib/backbone.chromestorage',
