@@ -120,8 +120,8 @@ define(function (require) {
             console.log("[Cordova USB HID] Close USB Peripheral");
             if (!portOpen)
                 return;
-            cordova.usb.releaseInterface(connectionId, interfaceId, function () {
-                cordova.usb.closeDevice(connectionId, function() {
+            chrome.usb.releaseInterface(connectionId, interfaceId, function () {
+                chrome.usb.closeDevice(connectionId, function() {
                     portOpen = false;
                     self.trigger('status', {
                         portopen: portOpen

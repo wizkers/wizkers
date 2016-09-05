@@ -41,7 +41,7 @@ define(function (require) {
 
         initialize: function (options) {
             linkManager.on('input', this.showInput, this);
-            linkManager.on('status', this.updatestatus, this);
+            linkManager.on('status', this.updateStatus, this);
         },
 
         events: {
@@ -122,9 +122,8 @@ define(function (require) {
         },
 
         updateStatus: function(data) {
-            if (data.portopen) {
-              this.$('#cmd_sweep').attr('disabled',!data.portopen);
-            }
+            this.$('#cmd_sweep').attr('disabled',!data.portopen);
+
         },
 
         showInput: function (data) {
