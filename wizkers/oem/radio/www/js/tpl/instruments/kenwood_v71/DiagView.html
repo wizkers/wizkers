@@ -1,0 +1,79 @@
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs" id="settingsTabs" role="tablist" style="margin-bottom: 5px;">
+                <li class="active" role="presentation"><a href="#general" data-toggle="tab">General</a>
+                </li>
+                <li role="presentation"><a href="#menus" data-toggle="tab">Radio Settings</a>
+                </li>
+                <li role="presentation"><a href="#memories" data-toggle="tab">Memories</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div class="tab-pane active" id="general">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p>Radio Serial number: <span id="radio-sn"></span>
+                            </p>
+                            <p>Firmware versions: <span id="radio-fw-mcu"></span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">Manual Command</span>
+                                <input id="manualcmd" class="form-control" value="" type="text" maxlength="32">
+                                <span class="input-group-btn"><button type="button" class="btn" id="cmdsend"><span class="glyphicon glyphicon-check"></span>
+                                </button>
+                                </span>
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <h6>Raw data stream</h6>
+                                <textarea id="input" style="height:200px; width:98%;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="menus">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="nav nav-tabs" id="radioSettings" role="tablist" style="margin-bottom: 5px;">
+                                <li class="active" role="presentation"><a href="#kx3-audio" data-toggle="tab">Audio</a>
+                                </li>
+                                <li role="presentation"><a href="#kx3-flashx" data-toggle="tab">Flash Explorer</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="kx3-audio">
+                                    <div id="settings-audio"></div>
+                                </div>
+                                <div class="tab-pane" id="kx3-flashx">
+                                    <div id="settings-flashx"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="memories">
+                    <div id="settings-mems"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
