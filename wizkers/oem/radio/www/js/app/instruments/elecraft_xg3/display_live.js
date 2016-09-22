@@ -202,9 +202,9 @@ define(function (require) {
                 linkManager.driver.setLevel(b[1]);
             } else if (b[0] == 'btn' && b[1] == 'band') {
                 if (b[2] == 'plus') {
-                    linkManager.driver.setBandDirect((this.currentBand+1) % 12);
-                } else {
                     linkManager.driver.setBandDirect((this.currentBand-1) % 12);
+                } else {
+                    linkManager.driver.setBandDirect((this.currentBand+1) % 12);
                 }
             } else if (b[1] == 'onoff') {
                 this.$('#output-enable').click();
@@ -242,6 +242,8 @@ define(function (require) {
 
         showInput: function(data) {
             console.log(data);
+            if (typeof data != 'string')
+                return;
             var cmdarg = data.split(',');
             if( cmdarg[0] === 'I') {
                 var f = parseInt(cmdarg[1])/1e6;

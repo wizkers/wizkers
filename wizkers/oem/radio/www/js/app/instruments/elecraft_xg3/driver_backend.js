@@ -114,9 +114,7 @@ define(function (require) {
         };
 
         function queryRadio() {
-
             // This is queried every second
-
             port.write('I;'); // Ask for frequency
 
         };
@@ -139,7 +137,7 @@ define(function (require) {
                 port = new btConnection(ins.get('btspp'), portSettings().parser);
             } else {
                 port = new serialConnection(ins.get('port'), portSettings());
-            }            port.open();
+            }
             port.open();
             port.on('data', format);
             port.on('status', status);

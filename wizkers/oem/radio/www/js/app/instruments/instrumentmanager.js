@@ -197,7 +197,8 @@ define(function (require) {
                             console.warn('Trigger instrumentChanged');
                             self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
                             cb();
-                        });
+                        }, instrument); // this second argurment is only used by the s_level monitor
+                                        // because the instrument ref is not updated yet at that point.
                     });
                 }
             }

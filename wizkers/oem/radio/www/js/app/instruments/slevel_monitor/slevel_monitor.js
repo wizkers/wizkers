@@ -78,10 +78,10 @@ define(function(require) {
         };
 
         // This is the front-end driver
-        this.getDriver = function(callback) {
+        this.getDriver = function(callback, ins) {
             // This is a meta instrument: depending on the settings, we will create
             // different kinds of drivers;
-            var it = instrumentManager.getInstrument().get('radio_type');
+            var it = ins.get('radio_type');
             // CAREFUL: we are relying on the consistent naming conventions
             // in our drivers, in particular 'driver_frontend' and 'driver_backend'
              require(['app/instruments/' + it + '/driver_frontend'], function(d) {
