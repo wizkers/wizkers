@@ -237,7 +237,8 @@ define(function (require) {
                 port = new btConnection(ins.get('btspp'), portSettings().parser);
             } else {
                 port = new serialConnection(ins.get('port'), portSettings());
-            }            port.open();
+            }
+            port.open();
             port.on('data', format);
             port.on('status', status);
 

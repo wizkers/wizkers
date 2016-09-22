@@ -56,7 +56,10 @@ define(function (require) {
         var bands = ["160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", 0, 0, 0, 0, 0, "2m"];
         var modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
         var vfoangle = 270;
-        var dip_x, dip_y, vfodip, oldPageY;
+        var vfobangle = 0;
+        var dip_x, dip_y, vfodip, oldPageY, vfobwheel;
+        var menu_displayed = false;
+        var vfob_thr = 0;
         var buttonCodes = {
             // The labels are the IDs of the areas on the KX3 front panel SVG:
             "B_BAND_PLUS": "T08",
@@ -98,7 +101,7 @@ define(function (require) {
             "B_XIT": "T26",
             "B_PF2": "H26",
             "B_DISP": "T09",
-            "B_MENU": "H09"
+            "B_MENU": "H09;MN;"
         };
 
         var voltAlertThreshold = 0,
@@ -116,6 +119,14 @@ define(function (require) {
         };
 
        var rotateVfoWheel = function(deltaY) {
+           var d = new Date().getTime();
+           // Throttle VFOB action when the menu is displayed,
+           // otherwise it is way too fast:
+           if (menu_displayed) {
+              if ( (d - vfob_thr) < 300)
+                return;
+           }
+           vfob_thr = d;
             vfoangle = (vfoangle- deltaY/2) % 360;
             var tx = dip_x * (Math.cos(vfoangle*2*Math.PI/360));
             var ty = dip_y * (1+Math.sin(vfoangle*2*Math.PI/360));
@@ -123,6 +134,23 @@ define(function (require) {
             var step = Math.floor(Math.min(Math.abs(deltaY)/50, 7));
             var cmd = ((deltaY < 0) ? 'UP' : 'DN') + step + ';DS;';
             linkManager.sendCommand(cmd);
+        };
+
+       var rotateVfoBWheel = function(deltaY) {
+           var d = new Date().getTime();
+           // Throttle VFOB action when the menu is displayed,
+           // otherwise it is way too fast:
+           if (menu_displayed) {
+              if ( (d - vfob_thr) < 300)
+                return;
+              deltaY = 30 * (deltaY/Math.abs(deltaY));
+           }
+           vfob_thr = d;
+           vfobangle = (vfobangle - deltaY/2) % 360;
+           vfobwheel.transform('r' + vfobangle );
+           var step = Math.floor(Math.min(Math.abs(deltaY)/50, 7));
+           var cmd = ((deltaY < 0) ? 'UPB' : 'DNB') + step + ';DB;';
+           linkManager.sendCommand(cmd);
         };
 
         var updateVA = function(e) {
@@ -232,6 +260,7 @@ define(function (require) {
                 var c = faceplate.select('#vfoa-wheel');;
                 var bb = c.getBBox();
                 vfodip = faceplate.select('#vfoa-dip');
+                vfobwheel = faceplate.select('#vfob-wheel');
                 var bb2 = vfodip.getBBox();
                 dip_x = (bb.width-(bb2.width+ bb2.y-bb.y))/2;
                 dip_y = (bb.height-(bb2.height + bb2.y-bb.y))/2;
@@ -327,7 +356,10 @@ define(function (require) {
             "click #mem-right": "hideOverlow",
             "mousewheel #vfoa-wheel": "vfoAWheel",
             "touchmove #vfoa-wheel": "vfoAWheelTouch",
-            "touchstart #vfoa-wheel": "vfoAWheelTouchStart"
+            "touchstart #vfoa-wheel": "vfoAWheelTouchStart",
+            "mousewheel #vfob-wheel": "vfoBWheel",
+            "touchmove #vfob-wheel": "vfoBWheelTouch",
+            "touchstart #vfob-wheel": "vfoBWheelTouchStart"
         },
 
         vfoAWheel: function(e) {
@@ -346,6 +378,25 @@ define(function (require) {
             var deltaY = ty - oldPageY;
             oldPageY = ty;
             rotateVfoWheel(deltaY);
+            e.preventDefault(); // Prevent the page from scrolling!
+        },
+
+        vfoBWheel: function(e) {
+            // console.log('Mousewheel',e);
+            rotateVfoBWheel(e.deltaY);
+            e.preventDefault(); // Prevent the page from scrolling!
+        },
+
+        vfoBWheelTouchStart: function(e) {
+            oldPageY = e.originalEvent.touches[0].pageY;
+        },
+
+        // Split in two to speed things up
+        vfoBWheelTouch: function(e) {
+            var ty = e.originalEvent.touches[0].pageY;
+            var deltaY = ty - oldPageY;
+            oldPageY = ty;
+            rotateVfoBWheel(deltaY);
             e.preventDefault(); // Prevent the page from scrolling!
         },
 
@@ -653,6 +704,7 @@ define(function (require) {
 
                 setIcon("ATU", (f & 0x10));
                 setIcon("NR", (f & 0x04));
+                setIcon("SUB", (f & 0x40))
 
                 this.oldVFOA = val;
 
@@ -681,8 +733,14 @@ define(function (require) {
                 setIcon('RIT', rit);
                 var xit = parseInt(val.substr(22, 1));
                 setIcon('XIT', xit);
+                var split = parseInt(val.substr(30,1));
+                setIcon('SPLT', split);
+            } else if (cmd == 'FT') {
+                setIcon('SPLT', parseInt(val));
             } else if (cmd == "MD") {
                 setModeIcon(parseInt(val));
+            } else if (cmd == 'MN') {
+                menu_displayed =  !(val == "255");
             } else if (cmd == "TB") {
                 var l = parseInt(val.substr(1, 2));
                 var i = this.$('#data-stream');
