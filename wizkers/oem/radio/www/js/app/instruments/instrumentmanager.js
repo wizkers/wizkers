@@ -115,7 +115,14 @@ define(function (require) {
                 type: 'app/instruments/telepost_lp100a/telepost_lp100a',
                 settings: 'app/instruments/telepost_lp100a/settings',
                 connectionsettings: 'app/views/instrument/serialport'
+            },
+            "kenwood_v71": {
+                name: "Kenwood TM-V71A",
+                type: 'app/instruments/kenwood_v71/kenwood_v71',
+                settings: 'app/instruments/kenwood_v71/settings',
+                connectionsettings: 'app/views/instrument/serialport'
             }
+
         };
 
         // The instruments below are only supported in Chrome runmode:
