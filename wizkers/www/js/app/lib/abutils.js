@@ -78,17 +78,26 @@ define(function(require) {
 
     var decoder, encoder;
     var enc_ok = false;
+    /** Note, 2016.09.23: we are deactivating the use of TextDecoder for now,
+     * because some browsers (IOS Webview) don't support it and this creates
+     * UTF-8 to/from conversion issues.
+     */
+    /*
     if ( typeof TextDecoder == 'function') {
         decoder = new TextDecoder("utf-8");
         encoder = new TextEncoder("utf-8");
         enc_ok = true;
     }
+    */
 
     var nullstring = String.fromCharCode(0);
 
     return {
 
         // Utility function (chrome serial wants array buffers for sending)
+
+        // Note: we assume ISO-8859 encoding here, not UTF-8 (see previous note above)
+
         // Convert string to ArrayBuffer.
         str2ab: function(str) {
         //  some drivers already give us an Uint8Buffer, because they
@@ -119,7 +128,10 @@ define(function(require) {
                 var i = str.indexOf(nullstring);
                 return str.substr(0, (i != -1) ? i :  str.length);
             }
-            return String.fromCharCode.apply(null, new Uint8Array(buf));
+            // The below will fail on very large buffers by blowing the stack size:
+            //return String.fromCharCode.apply(null, new Uint8Array(buf));
+            // This will work with any buffer size:
+            return [].reduce.call(new Uint8Array(buf),function(p,c){return p+String.fromCharCode(c)},'');
         },
 
 
