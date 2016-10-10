@@ -177,8 +177,7 @@ define(function (require) {
         }
 
         this.memoryChannel = function(mem) {
-            var s = ("000" + mem).slice(-3);
-            lm.sendCommand('MC' + s + ';');
+            lm.sendCommand({ command: 'set_mem_channel', arg: mem});
         }
 
 

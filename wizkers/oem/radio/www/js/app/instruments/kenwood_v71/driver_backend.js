@@ -68,18 +68,18 @@ define(function (require) {
 
 
         var modes = ['FM', 'NFM', 'AM'];
-        var tones = ['67.0', '69.3', '71.9','74.4', '77.0', '79.7', '82.5', '85.4', '88.5', '91.5', '94.8', '97.4', '100.0',
-                            '103.5', '107.2', '110.9', '114.8', '118.8', '123.0', '127.3', '131.8', '136.5', '141.3', '146.2',
-                            '151.4', '156.7', '159.8', '162.2', '165.5', '167.9', '171.3', '173.8', '177.3', '179.9', '183.5',
-                            '186.2', '189.9', '192.8', '196.6', '199.5', '203.5', '206.5', '210.7', '218.1', '225.7', '229.1',
-                            '233.6', '241.8', '250.3', '254.1', '1750.0'];
+        var tones = [ 67, 69.3 ,71.9 ,74.4, 77, 79.7, 82.5, 85.4, 88.5, 91.5, 94.8, 97.4, 100, 103.5, 107.2, 110.9, 114.8 ,118.8,
+                    123, 127.3, 131.8, 136.5, 141.3, 146.2, 151.4, 156.7, 162.2, 167.9, 173.8, 179.9, 186.2, 192.8, 203.5, 206.5,
+                    210.7, 218.1, 225.7, 229.1, 233.6, 241.8, 250.3, 254.1];
         var dcs_codes = [ 23,25,26,31,32,36,43,47,51,53,54,65,71,72,73,74,114,115,116,122,125,131,132,
                         134,143,145,152,155,156,162,165,172,174,205,212,223,225,226,243,244,245,246,251,252,255,261,
                         263,265,266,271,274,306,311,315,325,331,332,343,346,351,356,364,365,371,411,412,413,423,431,
                         432,445,446,452,454,455,462,464,465,466,503,506,516,523,565,532,546,565,606,612,624,627,631,
                         632,654,662,664,703,712,723,731,732,734,743,754
                         ];
+        var duplex_options = [ 'Off', '+', '-', 'Split'];
         var sql_modes = [ 'None', 'Tone', 'CTCSS', 'DCS'];
+        var tune_steps = [ '5.0', '6.25', '8.33', '10.0', '12.5', '15.0', '20.0', '25.0', '30.0', '50.0', '100.0'];
 
 
         // We want to keep track of radio operating values and only send them to the
@@ -98,6 +98,7 @@ define(function (require) {
         // Keep track of TX/RX state so that we can adjust the
         // status command
         var tx_status = false;
+        var qc = 0; // Query counter
 
         /////////////
         // Private methods
@@ -111,7 +112,7 @@ define(function (require) {
                 parity: 'none',
                 stopBits: 1,
                 dtr: false,
-                flowControl: false,
+                flowControl: true,
                 // We get non-printable characters on some outputs, so
                 // we have to make sure we use "binary" encoding below,
                 // otherwise the parser will assume Unicode and mess up the
@@ -190,9 +191,21 @@ define(function (require) {
                     break;
                 case 'set_memory':
                     resp = { op: 'set_memory', index: cmd.arg.index, error: is_error};
+                    console.info(resp);
                     break;
                 case 'set_memory_name':
                     resp = { op: 'set_memory', index: cmd.arg.index, error: is_error};
+                    break;
+                case 'get_mem_channel':
+                    if (!is_error) {
+                        resp = { vfo :  parseInt(ibstr.substr(0,1)),
+                                channel: parseInt(ibstr.substr(2,3))
+                        };
+                    } else {
+                        resp = { channel: -1,
+                            vfo: (cmd.arg == 'a' ? 0 : 1 )
+                            };
+                    }
                     break;
                 case 'raw':
                     resp = {raw: data};
@@ -204,36 +217,36 @@ define(function (require) {
             processQueue();
         };
 
+        /**
+         * Parse a MEM packet, and send it to the front-end.
+         * Rule: we convert all manufacturer-specific codes into readable standard values
+         * so that the front-end does not depend on a particular device brand/model as much as
+         * possible.
+         */
         var parse_MEM = function(str) {
             if (temp_mem.length == 0) {
                 console.error('No memory reading ready!');
                 return {};
             }
             var fields = temp_mem.split(',').map(function(v){return parseInt(v);});
-            // Merge shift and offset:
-            switch (fields[3]) {
-                case 0:
-                    fields[11] = 0;
-                    break;
-                case 2:
-                    fields[11] = -fields[11];
-                    break;
-            }
             var mem = {
                 index: fields[0],
                 empty: false,
                 name: str.substr(4),
                 freq: fields[1],
-                step: fields[2],
+                step: tune_steps[fields[2]],
+                duplex: duplex_options[fields[3]],
                 reverse: fields[4],
                 tone_on: fields[5]==1,
                 ct_on: fields[6]==1,
                 dcs_on: fields[7]==1,
-                tone_freq: fields[8],
-                ct_freq: fields[9],
-                dcs_code: fields[10],
+                tone_freq: tones[fields[8]],
+                ct_freq: tones[fields[9]],
+                dcs_code: dcs_codes[fields[10]],
                 offset_freq: fields[11],
-                mode: fields[12]
+                mode: modes[fields[12]],
+                split_freq: fields[13],
+                skip: fields[15]==1
             };
 
             return { memory: mem };
@@ -341,12 +354,12 @@ define(function (require) {
                 step: fields[2],
                 shift: fields[3],
                 reverse: fields[4],
-                tone: fields[5],
+                tone: fields[5] ==1,
                 ct: fields[6] ==1,
-                dsc: fields[7] ==1,
+                dcs: fields[7] ==1,
                 tone_freq: fields[8],
                 ct_freq: fields[9],
-                dsc_code: fields[10],
+                dcs_code: fields[10],
                 offset_freq: fields[11],
                 mode: fields[12]
             };
@@ -407,9 +420,19 @@ define(function (require) {
             // to avoid overloading the radio, not sure that is totally necessary, but
             // it won't hurt
 
-            this.output({command:'get_control'});
-            this.output({ command: 'poll_frequency', arg: 'a' });
-            this.output({ command: 'poll_frequency', arg: 'b' });
+            if (qc++ % 3 == 0) {
+                this.output({ command: 'poll_frequency', arg: 'a' });
+                this.output({command:'get_mem_channel', arg: 'a'});
+                this.output({ command: 'poll_frequency', arg: 'b' });
+                this.output({command:'get_mem_channel', arg: 'b'});
+            }
+
+            if (qc % 4 == 0) {
+                this.output({command:'get_control'});
+                this.output({command:'get_power', arg: 'a'});
+                this.output({command:'get_power', arg: 'b'});
+            }
+
             this.output({ command: 'get_sql', arg:'a'});
             this.output({ command: 'get_sql', arg:'b'});
 
@@ -461,12 +484,18 @@ define(function (require) {
                     if (cmd_string == undefined) {
                         console.error('Bad argument format for memory set');
                         commandQueue.shift();
-                        queue_busy = 0;
+                        queue_busy = false;
                         return;
                     }
                     break;
                 case 'set_memory_name':
                     cmd_string = 'MN ' + ('000' + cmd.arg.index).slice(-3) + ',' + cmd.arg.name;
+                    break;
+                case 'set_mem_channel':
+                    cmd_string = 'MR ' + ((cmd.arg.vfo == 'a') ? '0' : '1') + ',' +  ('000' + cmd.arg.channel).slice(-3);
+                    break;
+                case 'get_mem_channel':
+                    cmd_string = 'MR ' + ((cmd.arg == 'a') ? '0' : '1');
                     break;
                 case 'raw':
                     cmd_string = cmd.arg;
@@ -475,13 +504,15 @@ define(function (require) {
 
             watchDog = setTimeout( function() {
                 commandQueue.shift();
-                queue_busy = 0;
+                queue_busy = false;
             }, 500);
             port.write(cmd_string + '\r');
         }
 
         /**
-         * Build a memory set string. Error checking built-in
+         * Build a memory set string. Error checking built-in.
+         * Note: we are getting instrument-agnostic values there, which we convert into
+         * our own Kenwood values.
          */
         var make_Memory = function(mem) {
             var r = 'ME ';
@@ -492,37 +523,40 @@ define(function (require) {
                 return;
             r += ('000' + idx).slice(-3) + ',';
 
-            // Mem freq
-            var f = parseFloat(mem.freq) * 1e6;
+            // Mem freq (in Hertz)
+            var f = mem.freq;
             if (isNaN(f))
                 return;
             r += ('0000000000' + f).slice(-10) + ',';
 
-            // Mem Step
-            // Depending on the frequency, we need to adjust
-            // the step there, kind of strange. We might have to
-            // do some of the logic in the front-end, so that we
-            // can manually choose the frequency step
-            if (f % 5000 == 0) {
-                r += '0,';
-            } else if (f % 6250 == 0) {
-                r += '1,';
-            } else if (f % 8330 == 0) {
-                r += '2,';
+            // Mem Step. We are trying to be a bit smart here, and
+            // depending on the frequency, we are adjusting
+            // the step there so that the radio accepts the frequency.
+            // Otherwise, we just pick the step the user wants
+            if (f % (mem.step*1000) != 0) {
+                if (f % 6250 == 0) {
+                    r += '1,';
+                } else if (f % 8330 == 0) {
+                    r += '2,';
+                } else if (f % 12500 == 0) {
+                    r += '4';
+                }
             } else {
-                r += '0,';
+                r += tune_steps.indexOf(mem.step) + ',';
             }
 
             // Mem Shift direction
-            var offset = parseFloat(mem.offset) * 1e6;
-            if (isNaN(offset))
-                return;
-            if (offset == 0) {
-                r += '0,';
-            } else if (offset > 0) {
-                r += '1,';
-            } else {
-                r += '2,';
+            switch (mem.duplex) {
+                case 'Off':
+                case 'Split':
+                    r += '0,';
+                    break;
+                case '+':
+                    r += '1,';
+                    break;
+                case '-':
+                    r += '2,';
+                    break;
             }
 
             // Mem reverse (???)
@@ -561,7 +595,10 @@ define(function (require) {
             r += ('000' + i).slice(-3) + ',';
 
             // Offset freq (MHz)
-            r += ('00000000' + Math.abs(offset)).slice(-8) + ',';
+            var offset = Math.abs(parseFloat(mem.offset_freq));
+            if (isNaN(offset))
+                return;
+            r += ('00000000' + offset).slice(-8) + ',';
 
             // Mode
             i = modes.indexOf(mem.mode);
@@ -571,14 +608,17 @@ define(function (require) {
             }
             r += i + ',';
 
-
             // 0 (10 digits)
+            // Used when we are doing "split" or "odd frequency repeaters"
             r += '0000000000,';
 
-            // 0000 (????)
+            // 0 (Unknown)
             r += '0,';
             // Memory lockout (0)
+            // (Memory skip during scan)
             r += '0';
+
+            console.info('Memory string:', r);
 
             return r;
         };
@@ -655,6 +695,11 @@ define(function (require) {
         // period in seconds
         this.startLiveStream = function (period) {
             var self = this;
+            vfoa_sql = -1;
+            vfob_sql = -1;
+            vfoa_freq = '';
+            vfob_freq = '';
+
             if (proto) {
                 // We are connected to a remote Wizkers instance using Netlink,
                 // and that remote instance is in charge of doing the Live Streaming
@@ -665,13 +710,14 @@ define(function (require) {
                 port.write("@N3TL1NK,start_stream;");
                 return;
             }
+
+            this.output({command:'get_menu'});
+            this.output({command:'get_control'});
+            this.output({command:'get_power', arg: 'a'});
+            this.output({command:'get_power', arg: 'b'});
+
             if (!streaming) {
                 console.log("[TM-V71A] Starting live data stream");
-                vfoa_freq = '';
-                vfob_freq = '';
-                this.output({command:'get_menu'});
-                this.output({command:'get_power', arg: 'a'});
-                this.output({command:'get_power', arg: 'b'});
                 livePoller = setInterval(queryRadio.bind(this), 500);
                 streaming = true;
             }
@@ -706,6 +752,9 @@ define(function (require) {
         //  get_memory      : get a memory, arg is the memory number (0 to 999)
         //                    this command also queries the name
         //  set_memory      : Saves a memory, arg is a json with memory description
+        //  get_tones       : returns array of all supported tones
+        //  set_mem_channel : tune to memory channel in arg
+        //  get_mem_channel : ask radio about channel displayed on vfo in arg ('a' or 'b')
         this.output = function (data) {
 
             if (typeof data != 'object') {
@@ -720,6 +769,11 @@ define(function (require) {
             }
             if (data.command == undefined) {
                 console.error('[tm-v71a output] Missing command key in output command');
+                return;
+            }
+            // Take care of driver commands (those don't speak to the radio)
+            if (data.command == 'get_tones') {
+                this.trigger('data', {tones: tones});
                 return;
             }
             commandQueue.push(data);

@@ -126,7 +126,8 @@ define(function (require) {
             // translate some of the arguments:
             var chromeSerialSettings = {
                 bitrate: mySettings.baudRate,
-                dataBits: 'eight'
+                dataBits: 'eight',
+                ctsFlowControl: mySettings.flowControl || false
             };
 
             if (mySettings.parity) {

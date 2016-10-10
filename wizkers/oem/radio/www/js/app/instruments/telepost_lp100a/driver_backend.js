@@ -139,45 +139,52 @@ define(function (require) {
                     return;
                 let st = abu.ab2str(inputBuffer.subarray(1,ibIdx));
                 let fields = st.split(',');
-                if (fields.length == 9) {
-                    ibIdx = 0;
-                    protoState = P_SYNC;
-                    // We have enough fields, now decode them:
-                    let r = {
-                        pwr: parseFloat(fields[0]),
-                        z: parseFloat(fields[1]),
-                        ph: parseFloat(fields[2]),
-                        dbm: parseFloat(fields[7]),
-                        swr: parseFloat(fields[8])
-                    }
-                    // Caching:
-                    if (fields[3] != swr_alrm) {
-                        r.swr_alrm = fields[3];
-                        swr_alrm = fields[3];
-                    }
-                    if (fields[4] != callsign) {
-                        r.callsign = fields[4];
-                        callsign = fields[4];
-                    }
-                    if (fields[5] != pwr_range) {
-                        r.pwr_range = fields[5];
-                        pwr_range = fields[5];
-                    }
-                    if (fields[6] != pk_hold_mode) {
-                        r.pk_hold_mode = fields[6];
-                        pk_hold_mode = fields[6];
-                    }
-                    if (! (ro++ % 50) ) {
-                        r.swr_alrm = parseInt(fields[3]);
-                        r.callsign = fields[4];
-                        r.pwr_range = parseInt(fields[5]);
-                        r.pk_hold_mode = parseInt(fields[6]);
-                    }
-
-                    self.trigger('data', r);
-                } else {
-                    console.info('Not enough fields yet');
+                if (fields.length < 9) {
+                    console.info('Not enough fields yet', fields.length);
+                    return;
                 }
+                if (fields.length > 9) {
+                    console.warn('Too many data fields! Slow machine?', fields.length);
+                    protoState = P_SYNC;
+                    return; // We missed it. Machine too slow?
+                }
+                // Realign the buffer
+                inputBuffer.set(inputBuffer.subarray(ibIdx));
+                ibIdx = 0;
+                protoState = P_SYNC;
+                // We have enough fields, now decode them:
+                let r = {
+                    pwr: parseFloat(fields[0]),
+                    z: parseFloat(fields[1]),
+                    ph: parseFloat(fields[2]),
+                    dbm: parseFloat(fields[7]),
+                    swr: parseFloat(fields[8])
+                }
+                // Caching:
+                if (fields[3] != swr_alrm) {
+                    r.swr_alrm = fields[3];
+                    swr_alrm = fields[3];
+                }
+                if (fields[4] != callsign) {
+                    r.callsign = fields[4];
+                    callsign = fields[4];
+                }
+                if (fields[5] != pwr_range) {
+                    r.pwr_range = fields[5];
+                    pwr_range = fields[5];
+                }
+                if (fields[6] != pk_hold_mode) {
+                    r.pk_hold_mode = fields[6];
+                    pk_hold_mode = fields[6];
+                }
+                if (! (ro++ % 50) ) {
+                    r.swr_alrm = parseInt(fields[3]);
+                    r.callsign = fields[4];
+                    r.pwr_range = parseInt(fields[5]);
+                    r.pk_hold_mode = parseInt(fields[6]);
+                }
+
+                self.trigger('data', r);
                 return;
             }
         };

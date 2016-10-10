@@ -123,13 +123,13 @@ define(function (require) {
 
 
             // Load the frequencies sub view:
-            require(['app/instruments/elecraft/frequency_list'], function (view) {
-                self.ElecraftFrequencyListView = new view({
+            require(['app/instruments/kenwood_v71/frequency_list'], function (view) {
+                self.FrequencyListView = new view({
                     model: self.model
                 });
-                if (self.ElecraftFrequencyListView != null) {
-                    $('#frequency-selector').html(self.ElecraftFrequencyListView.el);
-                    self.ElecraftFrequencyListView.render();
+                if (self.FrequencyListView != null) {
+                    $('#frequencies-placeholder').html(self.FrequencyListView.el);
+                    self.FrequencyListView.render();
                 }
                 $('#frequency-selector', self.el).carousel();
             });
@@ -142,16 +142,16 @@ define(function (require) {
             linkManager.off('input', this.showInput, this);
 
             // Note:  the 'onClose' method is called after we changed
-            // the driver, so we don't have access to our Elecraft driver
+            // the driver, so we don't have access to our Kenwood driver
             // anymore: TODO: refactor to first call a "closeDriver" method
             // before changing the instrument ? to be determined...
 
             // linkManager.driver.stopTextStream();
 
-            if (this.ElecraftFrequencyListView != null)
-                this.ElecraftFrequencyListView.onClose();
+            if (this.FrequencyListView != null)
+                this.FrequencyListView.onClose();
 
-            console.log("Elecraft live view closing...");
+            console.log("Radio live view closing...");
         },
 
         events: {
@@ -295,11 +295,11 @@ define(function (require) {
                         this.$(vfoX + 'plus').hide();
                         break;
                 }
-                if (o.tone) {
-                    this.$(vfoX + 'T').show();
-                } else {
-                    this.$(vfoX + 'T').hide();
-                }
+
+                this.$(vfoX + 'T').toggle(o.tone);
+                this.$(vfoX + 'CT').toggle(o.ct);
+                this.$(vfoX + 'DCS').toggle(o.dcs)
+
                 switch (o.mode) {
                     case 0:
                         this.$(vfoX + 'N').hide();
@@ -384,6 +384,10 @@ define(function (require) {
                     this.$('#vfob-PTT').hide();
                     this.$('#vfoa-PTT').show();
                 }
+            }
+
+            if (data.channel != undefined) {
+                this.$('#band' + (data.vfo ? 'B' : 'A') + '-channel').html((data.channel == -1 ? '' : ('000' + data.channel).slice(-3)));
             }
 
 

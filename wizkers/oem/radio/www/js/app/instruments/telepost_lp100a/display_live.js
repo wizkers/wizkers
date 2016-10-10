@@ -169,7 +169,7 @@ define(function (require) {
                 }
                 this.pwr = data.pwr;
                 // pwr goes back to zero, put all R/PH/X/Z back to zero too:
-                if (this.pwr ==0) {
+                if (this.pwr ==0 && data.swr == 1) {
                     this.eFind('#z-val').html(" 0.0");
                     this.eFind('#ph-val').html(" 0.0");
                     this.eFind('#r-val').html(" 0.0");
@@ -177,7 +177,7 @@ define(function (require) {
                 }
             }
             if (data.swr != this.swr) {
-                this.eFind("#vfd2").html('SWR ' + ( (data.pwr == 0 ) ? "-.--" : data.swr.toFixed(2)));
+                this.eFind("#vfd2").html('SWR ' + ( (data.swr == 1 && this.pwr == 0 ) ? "-.--" : data.swr.toFixed(2)));
                 // Important feature: audio feedback on SWR alert
                 if (data.swr >= this.swr_alrms_val[this.swr_alrm]) {
                      this.eFind('#alarm_led').css('fill','#f00000');
