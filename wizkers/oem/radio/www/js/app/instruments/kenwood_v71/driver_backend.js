@@ -89,6 +89,10 @@ define(function (require) {
         var vfoa_freq = '';
         var vfob_freq = '';
 
+        // We need the model ID to accomodate for the various radio model
+        /// variants. The ID is requested upon driver open.
+        var model_id = 'Unknown';
+
         // We need to manage a command queue, because we
         // cannot tell what the data in means if we don't know
         // the command that was sent. The joys of async programming.
@@ -207,6 +211,15 @@ define(function (require) {
                             };
                     }
                     break;
+                case 'id':
+                    model_id = ibstr;
+                    if (model_id == '') {
+                        self.output({command:id});
+                    } else {
+                        resp = { id: model_id};
+                        console.info('Identified radio model:', model_id);
+                    }
+                    break;
                 case 'raw':
                     resp = {raw: data};
                     break;
@@ -239,15 +252,31 @@ define(function (require) {
                 reverse: fields[4],
                 tone_on: fields[5]==1,
                 ct_on: fields[6]==1,
-                dcs_on: fields[7]==1,
-                tone_freq: tones[fields[8]],
-                ct_freq: tones[fields[9]],
-                dcs_code: dcs_codes[fields[10]],
-                offset_freq: fields[11],
-                mode: modes[fields[12]],
-                split_freq: fields[13],
-                skip: fields[15]==1
+                dcs_on: fields[7]==1
             };
+
+            // Depending on model, the fields are different:
+            switch (model_id) {
+                case 'TH-D72':
+                    mem.tone_freq = tones[fields[9]];
+                    mem.ct_freq = tones[fields[10]];
+                    mem.dcs_code = dcs_codes[fields[11]];
+                    mem.offset_freq = fields[13];
+                    mem.mode = modes[fields[14]];
+                    mem.split_freq = fields[15];
+                    mem.skip = fields[17]==1;
+                    break;
+                case 'TM-V71':
+                default:
+                    mem.tone_freq = tones[fields[8]];
+                    mem.ct_freq = tones[fields[9]];
+                    mem.dcs_code = dcs_codes[fields[10]];
+                    mem.offset_freq = fields[11];
+                    mem.mode = modes[fields[12]];
+                    mem.split_freq = fields[13];
+                    mem.skip = fields[15]==1;
+            }
+
 
             return { memory: mem };
         }
@@ -402,6 +431,10 @@ define(function (require) {
             if (isopen) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
+                // This driver auto-detects the radio model to adapt to the small
+                // differences from one model to the next, so we need to send the "ID"
+                // command after open.
+                self.output({command: 'id'});
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
@@ -497,6 +530,9 @@ define(function (require) {
                 case 'get_mem_channel':
                     cmd_string = 'MR ' + ((cmd.arg == 'a') ? '0' : '1');
                     break;
+                case 'id':
+                    cmd_string = 'ID';
+                    break;
                 case 'raw':
                     cmd_string = cmd.arg;
                     break;
@@ -510,9 +546,11 @@ define(function (require) {
         }
 
         /**
-         * Build a memory set string. Error checking built-in.
+         * Build a memory set string. Error checking is built-in.
          * Note: we are getting instrument-agnostic values there, which we convert into
          * our own Kenwood values.
+         *
+         * Note: each Kenwood model requires slightly different syntax here
          */
         var make_Memory = function(mem) {
             var r = 'ME ';
@@ -570,6 +608,9 @@ define(function (require) {
             // DCS on/off
             r += (mem.dcs_on ? '1' : '0') + ',';
 
+            if (model_id == 'TH-D72')
+                r += '0,';  // Unknown
+
             // Tone freq
             var i = tones.indexOf(mem.tone_freq);
             if (i == -1) {
@@ -594,11 +635,18 @@ define(function (require) {
             }
             r += ('000' + i).slice(-3) + ',';
 
+            if (model_id == 'TH-D72')
+                r += '0,';  // Unknown
+
             // Offset freq (MHz)
             var offset = Math.abs(parseFloat(mem.offset_freq));
             if (isNaN(offset))
                 return;
-            r += ('00000000' + offset).slice(-8) + ',';
+            if (mem.mode == "split") {
+                r += '00000000';
+            } else {
+                r += ('00000000' + offset).slice(-8) + ',';
+            }
 
             // Mode
             i = modes.indexOf(mem.mode);
@@ -610,7 +658,11 @@ define(function (require) {
 
             // 0 (10 digits)
             // Used when we are doing "split" or "odd frequency repeaters"
-            r += '0000000000,';
+            if (mem.mode == "split") {
+                r += ('0000000000' + offset).slice(-10) + ',';
+            } else {
+                r += '0000000000,';
+            }
 
             // 0 (Unknown)
             r += '0,';
@@ -742,6 +794,7 @@ define(function (require) {
         // Data should be a JSON object:
         // { command: String, args: any};
         // Command can be:
+        //  id              : identify the rig type
         //  get_frequency   : 'a' or 'b'
         //  poll_frequency  : same as get, except that if frequency
         //                    didn't change, won't send an update

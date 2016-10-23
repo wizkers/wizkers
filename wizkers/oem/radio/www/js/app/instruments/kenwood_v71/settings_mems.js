@@ -304,7 +304,7 @@ define(function(require) {
             this.$el.html(template());
             linkManager.sendCommand({command: 'get_tones'});
             if (memories.length > 0) {
-                this.$('#freqtable0').append('<tr><th>Tune</th><th>#</th><th>Name</th><th>Freq</th><th>Mode</th><th>SQL Mode</th><th>Tone</th><th>CTCSS</th><th>DCS</th><th>Duplex</th><th>Offset</th></tr>');
+                this.$('#freqtable0').append('<tr><th>ID</th><th>Name</th><th>Freq</th><th>Mode</th><th>SQL Mode</th><th>Tone</th><th>CTCSS</th><th>DCS</th><th>Duplex</th><th>Offset</th><th>Tune Step</th><th>Skip</th></tr>');
                 makeFrequencyGroup(0, 100);
             } else {
                 this.$('#freqtable0').append('<tr><th>Not synchronized with your radio yet: click on "Read from radio" to get your radio memories</th></tr>');

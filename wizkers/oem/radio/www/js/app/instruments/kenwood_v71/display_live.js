@@ -387,7 +387,7 @@ define(function (require) {
             }
 
             if (data.channel != undefined) {
-                this.$('#band' + (data.vfo ? 'B' : 'A') + '-channel').html((data.channel == -1 ? '' : ('000' + data.channel).slice(-3)));
+                this.$('#band' + (data.vfo ? 'B' : 'A') + '-channel').html((data.channel == -1 ? '' : ('   ' + data.channel).slice(-3)));
             }
 
 
