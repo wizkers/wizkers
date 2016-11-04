@@ -248,6 +248,9 @@ define(function (require) {
         var openPort_server = function(insid) {
             dbs.instruments.get(insid, function(err,item) {
                 port = new serialConnection(item.port, portSettings());
+                port.on('data', format);
+                port.on('status', status);
+                port.open();
             });
         };
 
@@ -269,6 +272,8 @@ define(function (require) {
             } else {
                 port = new serialConnection(ins.get('port'), portSettings());
             }
+            port.on('data', format);
+            port.on('status', status);
             port.open();
         }
 
@@ -283,8 +288,6 @@ define(function (require) {
             } else {
                 openPort_app(insid);
             }
-            port.on('data', format);
-            port.on('status', status);
         };
 
         this.closePort = function (data) {

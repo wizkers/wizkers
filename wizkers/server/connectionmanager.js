@@ -46,7 +46,8 @@ var Onyx = require('./parsers/safecast_onyx.js');
 var FCOled = require('./parsers/fried_usb_tester.js');
 var W433 = require('./parsers/w433.js');
 var Elecraft = require('./www/js/app/instruments/elecraft/driver_backend.js');
-var Kenwood  = require('./www/js/app/instruments/kenwood_v71/driver_backend.js')
+var Kenwood  = require('./www/js/app/instruments/kenwood_v71/driver_backend.js');
+var LP100 = require('./www/js/app/instruments/telepost_lp100a/driver_backend.js');
 var USBGeiger = require('./parsers/usb_geiger.js');
 //var HeliumGeiger = require('./parsers/helium_geiger.js');
 var HawkNest = require('./parsers/hawknest.js');
@@ -76,6 +77,8 @@ var ConnectionManager = function () {
             driver = new Elecraft();
         } else if (type == 'kenwood_v71') {
             driver = new Kenwood();
+        } else if (type == 'telepost_lp100a') {
+            driver = new LP100();
         } else if (type == 'usbgeiger') {
             driver = new USBGeiger();
             //        } else if (type == 'heliumgeiger') {

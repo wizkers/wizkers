@@ -692,6 +692,7 @@ define(function (require) {
                 port = new serialConnection(item.port, portSettings());
                 port.on('data', format);
                 port.on('status', status);
+                port.open();
             });
         };
 
@@ -713,10 +714,9 @@ define(function (require) {
             } else {
                 port = new serialConnection(ins.get('port'), portSettings());
             }
-            port.open();
             port.on('data', format);
             port.on('status', status);
-
+            port.open();
         }
 
 

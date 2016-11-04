@@ -56,17 +56,53 @@ var SerialConnection = function(path, settings) {
     EventEmitter.call(this);
     var portOpen = false;
     var self = this;
+    var myPort;
 
-    debug("Opening serial device at " + path);
-    var myPort = new SerialPort(path,
-                            settings,
-                            true,
-                            function(err, result) {
-                                if (err) {
-                                    debug("Open attempt error: " + err);
-                                    self.emit('status', {portopen: portOpen});
-                                }
-                            });
+
+    this.open = function() {
+        debug("Opening serial device at " + path);
+        myPort = new SerialPort(path,
+                                settings,
+                                true,
+                                function(err, result) {
+                                    if (err) {
+                                        debug("Open attempt error: " + err);
+                                        self.emit('status', {
+                                            portopen: false,
+                                            openerror: true,
+                                            reason: 'Port open error',
+                                            description: '' + err
+                                        });
+                                    }
+                                });
+        // Callback once the port is actually open:
+    myPort.on('open', function () {
+        myPort.flush(function(err,result){ debug(err + " - " + result); });
+        myPort.resume();
+        portOpen = true;
+        debug('Port open');
+        self.emit('status', {portopen: portOpen});
+    });
+
+        // listen for new serial data:
+    myPort.on('data', function (data) {
+            self.emit('data',data);
+    });
+
+        myPort.on('error', function(err) {
+            debug("Serial port error: "  + err);
+            portOpen = false;
+            self.emit('status', {portopen: portOpen, error: true});
+        });
+
+        myPort.on('close', function() {
+            debug('Port closing');
+            debug(myPort);
+            portOpen = false;
+            self.emit('status', {portopen: portOpen});
+        });
+
+    };
 
     this.write = function(data) {
         try {
@@ -79,33 +115,6 @@ var SerialConnection = function(path, settings) {
     this.close = function() {
         myPort.close();
     }
-
-    // Callback once the port is actually open:
-   myPort.on('open', function () {
-       myPort.flush(function(err,result){ debug(err + " - " + result); });
-       myPort.resume();
-       portOpen = true;
-       debug('Port open');
-       self.emit('status', {portopen: portOpen});
-   });
-
-    // listen for new serial data:
-   myPort.on('data', function (data) {
-        self.emit('data',data);
-   });
-
-    myPort.on('error', function(err) {
-        debug("Serial port error: "  + err);
-        portOpen = false;
-        self.emit('status', {portopen: portOpen, error: true});
-    });
-
-    myPort.on('close', function() {
-        debug('Port closing');
-        debug(myPort);
-        portOpen = false;
-        self.emit('status', {portopen: portOpen});
-    });
 
     return this;
 }
