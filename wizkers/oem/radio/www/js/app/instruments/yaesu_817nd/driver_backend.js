@@ -26,14 +26,18 @@
  * Browser-side Parser for Yaesu 817/857 radios.
  *
  *
- * The Browser-side parser is used when running as a Chrome or Cordova app.
- *
- * Differences with server-side parser:
- *
- *   - 'socket' uses "trigger" to emit events, not "emit"
+ * TThis code is also used by NodeJS when running
+ * in server mode
  *
  *  @author Edouard Lafargue, ed@lafargue.name
  */
+
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+    var vizapp = { type: 'server'},
+    events = require('events'),
+    dbs = require('pouch-config');
+}
 
 define(function (require) {
     "use strict";
@@ -44,6 +48,10 @@ define(function (require) {
         btConnection = require('connections/btspp'),
         abu = require('app/lib/abutils');
 
+    // Server mode does not support remote protocol (not really needed)
+    if (vizapp.type != 'server')
+        var Protocol = require('app/lib/jsonbin');
+
 
     var parser = function (socket) {
 
@@ -53,6 +61,7 @@ define(function (require) {
         var livePoller = null; // Reference to the live streaming poller
         var streaming = false,
             port = null,
+            proto = 0,
             port_close_requested = false,
             port_open_requested = true,
             isopen = false;
@@ -102,6 +111,15 @@ define(function (require) {
         //
         // data is an ArrayBuffer;
         var format = function (data) {
+
+            if (proto) {
+                // We are using the Wizkers Netlink protocol, so incoming data has to be forwarded
+                // to our protocol handler and we stop processing there, the actual data will come in
+                // throuth the onProtoData callback (see below)
+                proto.read(data);
+                return;
+            }
+
             if (commandQueue.length == 0) {
                 console.warn('Received data but we didn\'t expect anything', new Uint8Array(data));
                 queue_busy = false;
@@ -242,7 +260,10 @@ define(function (require) {
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
-                    port.off('status', stat);
+                    if (port.off)
+                        port.off('status', stat);
+                    else
+                        port.removeListener('status', status);
                     port_close_requested = false;
                 }
             }
@@ -370,12 +391,16 @@ define(function (require) {
             port.write(bytes);
         }
 
-        /////////////
-        // Public methods
-        /////////////
+        var openPort_server = function(insid) {
+            dbs.instruments.get(insid, function(err,item) {
+                port = new serialConnection(item.port, portSettings());
+                port.on('data', format);
+                port.on('status', status);
+                port.open();
+            });
+        };
 
-        this.openPort = function (insid) {
-            port_open_requested = true;
+        var openPort_app = function(insid) {
             var ins = instrumentManager.getInstrument();
             // We now support serial over TCP/IP sockets: if we detect
             // that the port is "TCP/IP", then create the right type of
@@ -384,20 +409,40 @@ define(function (require) {
             if (p == 'TCP/IP') {
                 // Note: we just use the parser info from portSettings()
                 port = new tcpConnection(ins.get('tcpip'), portSettings().parser);
+            } else if (p == 'Wizkers Netlink') {
+                port = new tcpConnection(ins.get('netlink'), portSettings().parser);
+                proto = new Protocol();
+                proto.on('data', onProtoData);
             } else if (p == 'Bluetooth') {
                 port = new btConnection(ins.get('btspp'), portSettings().parser);
             } else {
                 port = new serialConnection(ins.get('port'), portSettings());
-            }            port.open();
+            }
             port.on('data', format);
             port.on('status', status);
+            port.open();
+        }
 
+        /////////////
+        // Public methods
+        /////////////
+
+        this.openPort = function (insid) {
+            port_open_requested = true;
+            if (vizapp.type == 'server') {
+                openPort_server(insid);
+            } else {
+                openPort_app(insid);
+            }
         };
 
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
-            port.off('data', format);
+            if (port.off)
+                port.off('data', format);
+            else
+                port.removeListener('data', format);
 
             // If we are streaming, stop it!
             // The Home view does this explicitely, but if we switch
@@ -439,6 +484,16 @@ define(function (require) {
         // period in seconds
         this.startLiveStream = function (period) {
             var self = this;
+            if (proto) {
+                // We are connected to a remote Wizkers instance using Netlink,
+                // and that remote instance is in charge of doing the Live Streaming
+                streaming = true;
+                // We push this as a data message so that our output plugins (Netlink in particular)
+                // can forward this message to the remote side. In the case of Netlink (remote control),
+                // this enables the remote end to start streaming since it's their job, not ours.
+                port.write("@N3TL1NK,start_stream;");
+                return;
+            }
             if (!streaming) {
                 console.log("[FT817-ND] Starting live data stream");
                 livePoller = setInterval(queryRadio.bind(this), (period) ? period * 1000 : 1000);
@@ -447,6 +502,11 @@ define(function (require) {
         };
 
         this.stopLiveStream = function (args) {
+            if (proto) {
+                streaming = false;
+                port.write("@N3TL1NK,stop_stream;");
+                return;
+            }
             if (streaming) {
                 console.log("[FT817-ND] Stopping live data stream");
                 // Stop live streaming from the radio:
@@ -481,7 +541,13 @@ define(function (require) {
         //  power           : boolean (on/off)
         this.output = function (data) {
             if (typeof data != 'object') {
-                console.error('[ft817 output] Comand is in wrong format (' + typeof data + ')');
+                if (data.indexOf("@N3TL1NK,start_stream;") > -1) {
+                    this.startLiveStream();
+                    return;
+                } else if (data.indexOf("@N3TL1NK,stop_stream;") > -1) {
+                    this.stopLiveStream();
+                    return;
+                }
                 return;
             }
             if (data.command == undefined) {
@@ -498,8 +564,15 @@ define(function (require) {
 
     }
 
-    // Add event management to our parser, from the Backbone.Events class:
-    _.extend(parser.prototype, Backbone.Events);
+    // On server side, we use the Node eventing system, whereas on the
+    // browser/app side, we use Bacbone's API:
+    if (vizapp.type != 'server') {
+        // Add event management to our parser, from the Backbone.Events class:
+        _.extend(parser.prototype, Backbone.Events);
+    } else {
+        parser.prototype.__proto__ = events.EventEmitter.prototype;
+        parser.prototype.trigger = parser.prototype.emit;
+    }
 
     return parser;
 });
