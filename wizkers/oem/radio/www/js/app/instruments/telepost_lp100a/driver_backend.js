@@ -38,10 +38,10 @@ define(function (require) {
     "use strict";
 
     var Serialport = require('serialport'),
-        serialConnection = require('connections_serial'),
-        btConnection = require('connection_btspp'),
+        serialConnection = require('connections/serial'),
+        btConnection = require('connections/btspp'),
         Protocol = require('app/lib/jsonbin'),
-        tcpConnection = require('connections_tcp'),
+        tcpConnection = require('connections/tcp'),
         abu = require('app/lib/abutils');
 
     var parser = function (socket) {

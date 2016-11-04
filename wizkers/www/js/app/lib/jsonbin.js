@@ -25,7 +25,7 @@
 
 /**
  * A simple JSON over serial link protocol - mostly used for TCP or UDP sockets
- * 
+ *
  * @author Ed Lafargue, ed@wizkers.io
  */
 
@@ -131,7 +131,7 @@ define(function (require) {
 
             if (state == DECODE) {
                 // Now fill our decode buffer until we have all the data
-                
+
                 // For the sake of convenience, we can realign our data buffer.
                 // Careful not to use 'data' but d8, because data is sometimes a
                 // Uint8Array, in which case the constructor below disregards the offset.
@@ -170,7 +170,7 @@ define(function (require) {
     };
 
     _.extend(Protocol.prototype, Backbone.Events);
-    
+
     return Protocol;
 
 

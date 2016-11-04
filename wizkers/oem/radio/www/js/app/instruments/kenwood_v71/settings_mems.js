@@ -30,6 +30,12 @@
  *
  */
 
+/**
+ * Note on export. We want to be able to import/export CSV files that are compatible
+ * with the Chirp format, without the D-Star bits for now:
+ * Location,Name,Frequency,Duplex,Offset,Tone,rToneFreq,cToneFreq,DtcsCode,DtcsPolarity,Mode,TStep,Skip,Comment,URCALL,RPT1CALL,RPT2CALL
+ */
+
 define(function(require) {
     "use strict";
 

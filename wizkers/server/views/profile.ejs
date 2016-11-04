@@ -9,10 +9,10 @@
 	<style>
 		body { padding-top:80px; }
 	</style>
-    
-    <script src="js/lib/jquery-1.11.0.js"></script>
+
+    <script src="js/lib/jquery-2.2.4.js"></script>
     <script src="js/lib/validator.js"></script>
-    
+
 </head>
 <body>
 
@@ -27,17 +27,17 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="/">Wizkers</a>
-            </div>        
+            </div>
             <nav class="collapse navbar-collapse" id="vizapp-nav-collapse" role="navigation">
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="about-menu"><a href="/#about">About</a></li>      
+                    <li class="about-menu"><a href="/#about">About</a></li>
                 </ul>
             </nav><!--/.nav-collapse -->
 
         </div>
     </header></div>
 </div>
-    
+
 <div class="container">
     <div class="page-header text-center">
 		<h1><span class="fa fa-anchor"></span> Your Profile</h1>
@@ -66,7 +66,7 @@
         <div class="col-sm-6">
 			<div class="well">
 				<h3><span class="fa fa-user"></span>Change password</h3>
-                
+
                 <form data-toggle="validator" role="form" action="/profile" method="post">
                     <div class="row">
                         <div class="form-group col-sm-6">
@@ -85,7 +85,7 @@
                         </div>
                     </div>
                 </form>
-                
+
 
 
 
@@ -93,15 +93,15 @@
 		</div>
 
 	</div>
-    
+
     <% if (user.role === 'admin') { %>
-    <div class="row">  
+    <div class="row">
         <div class="col-sm-4">
 			<div class="well">
                 <a href="/admin" class="btn btn-default btn-sm">Server Administration</a>
 			</div>
 		</div>
-        
+
         <div class="col-sm-4">
 			<div class="well">
                 <p>Backup all settings and data in a backup file (.tbz): <a href="/backup" role="button" class="do-backup btn btn-default">Backup</a>
@@ -118,8 +118,8 @@
         </div>
     </div>
     <% } %>
-    
-    
+
+
     <div class="row status-bar">
     <div class="col-md-12">
         <div class="alert alert-success" style="display: none">
@@ -127,11 +127,11 @@
         </div>
     </div>
 </div>
-    
+
 </div>
-    
+
 <script>
-    
+
         var uploadFile = function(path, file, callbackSuccess) {
             var self = this;
             var data = new FormData();
@@ -152,7 +152,7 @@
                 showAlert('Error!', 'An error occurred while uploading ' + file.name, 'alert-error');
             });
         };
-    
+
         var showAlert = function(title, text, klass) {
             $('.alert').removeClass("alert-error alert-warning alert-success alert-info");
             $('.alert').addClass(klass);
@@ -160,21 +160,21 @@
             $('.alert').show();
         };
 
-    
+
     window.onload = function() {
-        
+
         $("#restore-area").on('dragover', function(event) {
             $("#restore-area").addClass("hover");
             event.preventDefault();
             event.stopPropagation();
         });
-    
+
         $("#restore-area").on('dragleave', function(event) {
             $("#restore-area").removeClass("hover");
             return false;
         });
 
-        
+
         $("#restore-area").on('drop', function (event) {
             event.stopPropagation();
             event.preventDefault();
@@ -201,9 +201,9 @@
         });
     };
 
-    
+
     </script>
 
-    
+
 </body>
 </html>

@@ -41,15 +41,18 @@ require.config({
 
         // Below we manage our versions explicitely, so that
         // we can upgrade easily
-        jquery: 'lib/jquery-2.1.4',
-        backbone: 'lib/backbone-1.2.3',
-        localstorage: 'lib/backbone.localStorage-1.1.16',
+        jquery: 'lib/jquery-2.2.4',
+        backbone: 'lib/backbone-1.3.3',
+        jquery_xmlrpc: 'lib/jquery.xmlrpc',
+        jquery_mousewheel: 'lib/jquery.mousewheel',
+        chromestorage: 'lib/backbone.chromestorage',
+        bbindexeddb: 'lib/backbone-indexeddb',
         pouchdb: 'lib/pouchdb-5.0.0',
         backbonepouch: 'lib/backbone-pouch',
-
         underscore: 'lib/underscore-1.8.3',
-        snap: 'lib/snap.svg-0.2.0',
+        snap: 'lib/snap.svg-0.4.1',
         text: 'lib/text',
+        paper: 'lib/paperjs-v0.10.2/dist/paper-core',
 
         // Signal processing libs
         dsp: 'lib/dsp',
@@ -62,6 +65,7 @@ require.config({
 
         // WebRTC adapter shim to abstract from
         // navigator implementations
+        peerjs: 'lib/peer-0.3.14',
         webrtc_adapter: 'lib/webrtc_adapter',
 
         bootstrap: 'lib/bootstrap',
@@ -75,6 +79,8 @@ require.config({
         flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
         flot_windrose: 'lib/jquery.flot.windrose',
         flot_jumlib: 'lib/jquery.flot.JUMlib',
+
+        xmlrpc: 'lib/xmlrpc/xmlrpc'
     },
 
     /*
@@ -144,7 +150,7 @@ var vizapp = {
     //   - server : use a remote server for device connection & database
     //   - cordova: run as an embedded Cordova application on Android
     //   - others to be defined
-    type: "server",
+    type: 'server',
 
     // State can be "running" or "paused". Only updated in Cordova mode.
     // Can be checked by various tasks to skip display when app paused, and

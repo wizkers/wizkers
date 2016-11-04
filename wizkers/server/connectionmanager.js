@@ -34,8 +34,7 @@
  *
  */
 
-var Serial = require('./connections/serial'),
-    dbs = require('./pouch-config'),
+var dbs = require('./pouch-config'),
     outputmanager = require('./outputs/outputmanager'),
     recorder = require('./recorder'),
     debug = require('debug')('wizkers:connectionmanager');
@@ -46,7 +45,8 @@ var Fluke289 = require('./parsers/fluke289.js');
 var Onyx = require('./parsers/safecast_onyx.js');
 var FCOled = require('./parsers/fried_usb_tester.js');
 var W433 = require('./parsers/w433.js');
-var Elecraft = require('./parsers/elecraft.js');
+var Elecraft = require('./www/js/app/instruments/elecraft/driver_backend.js');
+var Kenwood  = require('./www/js/app/instruments/kenwood_v71/driver_backend.js')
 var USBGeiger = require('./parsers/usb_geiger.js');
 //var HeliumGeiger = require('./parsers/helium_geiger.js');
 var HawkNest = require('./parsers/hawknest.js');
@@ -69,8 +69,13 @@ var ConnectionManager = function () {
             driver = new Fluke289();
         } else if (type == 'w433') {
             driver = new W433();
-        } else if (type == 'elecraft') {
+        } else if (type == 'elecraft' ||
+                   type == 'elecraft_kxpa100' ||
+                   type == 'elecraft_k3' ||
+                   type == 'elecraft_kx2') {
             driver = new Elecraft();
+        } else if (type == 'kenwood_v71') {
+            driver = new Kenwood();
         } else if (type == 'usbgeiger') {
             driver = new USBGeiger();
             //        } else if (type == 'heliumgeiger') {
@@ -183,7 +188,7 @@ var ConnectionManager = function () {
                 var driver = getDriver(item.type);
                 if (driver == undefined) {
                     // Something is very wrong here!
-                    debug('Was asked to open an instrument with unknown driver');
+                    debug('Was asked to open an instrument with unknown driver:', item.type);
                     return;
                 }
                 openinstruments[instrumentid] = driver;

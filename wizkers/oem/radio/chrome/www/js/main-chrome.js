@@ -89,12 +89,12 @@ require.config({
     map: {
         '*': {
             'socketio': 'app/chromeSocket',
-            'connections_serial': 'app/connections/chromeSerial',
-            'connections_tcp': 'app/connections/chromeTcpSerial',
-            'connections_hid': 'app/connections/usbhid',
-            'connections_btle': 'app/connections/btle',
-            'connection_btspp': 'app/connections/cordovaBTSPP',
-            'connections_webrtc': 'app/connections/webrtc',
+            'connections/serial': 'app/connections/chromeSerial',
+            'connections/tcp': 'app/connections/chromeTcpSerial',
+            'connections/hid': 'app/connections/usbhid',
+            'connections/btle': 'app/connections/btle',
+            'connections/btspp': 'app/connections/cordovaBTSPP',
+            'connections/webrtc': 'app/connections/webrtc',
             'serialport': 'app/lib/serialport',
         }
     },

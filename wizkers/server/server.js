@@ -35,16 +35,32 @@
  * @author Edouard Lafargue
  */
 
+var  debug = require('debug')('wizkers:server');
+
+
+// We are going to manage a single global variable for VizApp that contains the few things that have to
+// be defined application-wise:
+var vizapp = {
+
+    // type is a helper to avoid code duplication depending on the
+    // run mode of the application. Can be:
+    //   - server : use a remote server for device connection & database
+    //   - cordova: run as an embedded Cordova application on Android
+    //   - others to be defined
+    type: "server",
+};
+
 
 /**
  *   Setup access to serial ports
  */
-var serialport = require('serialport'),
-    SerialPort = serialport.SerialPort,
+var serialport = require('serialport');
+
+
+var    SerialPort = serialport.SerialPort,
     PouchDB = require('pouchdb'),
     ConnectionManager = require('./connectionmanager'),
     flash = require('connect-flash'),
-    debug = require('debug')('wizkers:server'),
     socket_debug = require('debug')('wizkers:server:socket');
 
 
@@ -661,8 +677,9 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('controllerCommand', function (data) {
-        if (Debug) socket_debug('Controller command: ' + data);
-        driver.output(data);
+        socket_debug('Controller command: ' + data);
+        if (driver)
+            driver.output(data);
     });
 
     socket.on('startrecording', function (logid) {

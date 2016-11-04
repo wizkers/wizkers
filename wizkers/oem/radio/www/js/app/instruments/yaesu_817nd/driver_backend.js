@@ -39,9 +39,9 @@ define(function (require) {
     "use strict";
 
     var Serialport = require('serialport'),
-        serialConnection = require('connections_serial'),
-        tcpConnection = require('connections_tcp'),
-        btConnection = require('connection_btspp'),
+        serialConnection = require('connections/serial'),
+        tcpConnection = require('connections/tcp'),
+        btConnection = require('connections/btspp'),
         abu = require('app/lib/abutils');
 
 

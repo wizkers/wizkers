@@ -38,8 +38,8 @@ define(function (require) {
 
     var Backbone = require('backbone'),
         Serialport = require('serialport'),
-        serialConnection = require('connections_serial'),
-        tcpConnection = require('connections_tcp'),
+        serialConnection = require('connections/serial'),
+        tcpConnection = require('connections/tcp'),
         abutils = require('app/lib/abutils');
 
     var parser = function (socket) {

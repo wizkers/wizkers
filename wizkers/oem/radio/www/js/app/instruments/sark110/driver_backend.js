@@ -35,7 +35,7 @@ define(function (require) {
 
     var Backbone = require('backbone'),
         abutils = require('app/lib/abutils'),
-        hidConnection = require('connections_hid');
+        hidConnection = require('connections/hid');
 
     var parser = function (socket) {
 

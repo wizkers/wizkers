@@ -41,7 +41,7 @@
 define(function (require) {
     "use strict";
 
-    var webrtcConnection = require('connections_webrtc'),
+    var webrtcConnection = require('connections/webrtc'),
         Bitmap = require('app/lib/bitmap');
 
 

@@ -81,12 +81,12 @@ require.config({
     map: {
         '*': {
             'socketio': 'app/chromeSocket',
-            'connections_serial': 'app/connections/cordovaSerial',
-            'connections_tcp': 'app/connections/chromeTcpSerial',
-            'connections_hid': 'app/connections/cordovaHID',
-            'connections_btle': 'app/connections/cordovaBTLE',
-            'connection_btspp': 'app/connections/cordovaBTSPP',
-            'connections_webrtc': 'app/connections/webrtc',
+            'connections/serial': 'app/connections/cordovaSerial',
+            'connections/tcp': 'app/connections/chromeTcpSerial',
+            'connections/hid': 'app/connections/cordovaHID',
+            'connections/btle': 'app/connections/cordovaBTLE',
+            'connection/btspp': 'app/connections/cordovaBTSPP',
+            'connections/webrtc': 'app/connections/webrtc',
             'serialport': 'app/lib/serialport',
 
         }

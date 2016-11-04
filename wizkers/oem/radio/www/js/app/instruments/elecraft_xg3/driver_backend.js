@@ -38,9 +38,9 @@ define(function (require) {
     "use strict";
 
     var Serialport = require('serialport'),
-        serialConnection = require('connections_serial'),
-        btConnection = require('connection_btspp'),
-        tcpConnection = require('connections_tcp');
+        serialConnection = require('connections/serial'),
+        btConnection = require('connections/btspp'),
+        tcpConnection = require('connections/tcp');
 
     var parser = function (socket) {
 
