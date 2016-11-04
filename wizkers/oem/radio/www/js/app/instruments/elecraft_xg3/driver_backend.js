@@ -34,6 +34,14 @@
  *  @author Edouard Lafargue, ed@lafargue.name
  */
 
+// This detects whether we are in a server situation and act accordingly:
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+    var vizapp = { type: 'server'},
+    events = require('events'),
+    dbs = require('pouch-config');
+}
+
 define(function (require) {
     "use strict";
 
@@ -41,6 +49,10 @@ define(function (require) {
         serialConnection = require('connections/serial'),
         btConnection = require('connections/btspp'),
         tcpConnection = require('connections/tcp');
+
+    // Server mode does not support remote protocol (not really needed)
+    if (vizapp.type != 'server')
+        var Protocol = require('app/lib/jsonbin');
 
     var parser = function (socket) {
 
@@ -50,6 +62,7 @@ define(function (require) {
         var livePoller = null; // Reference to the live streaming poller
         var streaming = false,
         port = null,
+        proto = 0,
         port_close_requested = false,
         port_open_requested = true,
         isopen = false;
@@ -74,13 +87,28 @@ define(function (require) {
             }
         };
 
-        // Format can act on incoming data from the radio, and then
+        // Format can act on incoming data from the XG3, and then
         // forwards the data to the app through a 'data' event.
         //
         // data is an ArrayBuffer;
         var format = function (data) {
+            if (proto) {
+                // We are using the Wizkers Netlink protocol, so incoming data has to be forwarded
+                // to our protocol handler and we stop processing there, the actual data will come in
+                // throuth the onProtoData callback (see below)
+                proto.read(data);
+                return;
+            }
+
             self.trigger('data', data);
         };
+
+        /**
+         * When the protocol parser gets data, this callback gets called
+         */
+        var onProtoData = function(data) {
+            self.trigger('data', data);
+        }
 
         var status = function (stat) {
             port_open_requested = false;
@@ -107,7 +135,8 @@ define(function (require) {
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
-                    port.off('status', stat);
+                    if (port.off)
+                        port.off('status', stat);
                     port_close_requested = false;
                 }
             }
@@ -119,12 +148,16 @@ define(function (require) {
 
         };
 
-        /////////////
-        // Public methods
-        /////////////
+        var openPort_server = function(insid) {
+            dbs.instruments.get(insid, function(err,item) {
+                port = new serialConnection(item.port, portSettings());
+                port.on('data', format);
+                port.on('status', status);
+                port.open();
+            });
+        };
 
-        this.openPort = function (insid) {
-            port_open_requested = true;
+        var openPort_app = function(insid) {
             var ins = instrumentManager.getInstrument();
             // We now support serial over TCP/IP sockets: if we detect
             // that the port is "TCP/IP", then create the right type of
@@ -133,21 +166,41 @@ define(function (require) {
             if (p == 'TCP/IP') {
                 // Note: we just use the parser info from portSettings()
                 port = new tcpConnection(ins.get('tcpip'), portSettings().parser);
+            } else if (p == 'Wizkers Netlink') {
+                port = new tcpConnection(ins.get('netlink'), portSettings().parser);
+                proto = new Protocol();
+                proto.on('data', onProtoData);
             } else if (p == 'Bluetooth') {
                 port = new btConnection(ins.get('btspp'), portSettings().parser);
             } else {
                 port = new serialConnection(ins.get('port'), portSettings());
             }
-            port.open();
             port.on('data', format);
             port.on('status', status);
+            port.open();
+        }
 
+        /////////////
+        // Public methods
+        /////////////
+
+        this.openPort = function (insid) {
+            port_open_requested = true;
+            if (vizapp.type == 'server') {
+                openPort_server(insid);
+            } else {
+                openPort_app(insid);
+            }
         };
 
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
-            port.off('data', format);
+            if (port.off)
+                port.off('data', format);
+
+            if (proto)
+                proto.off('data', onProtoData);
 
             // If we are streaming, stop it!
             // The Home view does this explicitely, but if we switch
@@ -189,6 +242,17 @@ define(function (require) {
             if (!streaming) {
                 console.log("[XG3] Starting live data stream");
 
+            if (proto) {
+                // We are connected to a remote Wizkers instance using Netlink,
+                // and that remote instance is in charge of doing the Live Streaming
+                streaming = true;
+                // We push this as a data message so that our output plugins (Netlink in particular)
+                // can forward this message to the remote side. In the case of Netlink (remote control),
+                // this enables the remote end to start streaming since it's their job, not ours.
+                port.write("@N3TL1NK,start_stream;");
+                return;
+            }
+
                 // Ask for all memories
                 port.write('WM;WP;');
                 port.write('Q,1;');
@@ -204,6 +268,11 @@ define(function (require) {
         };
 
         this.stopLiveStream = function (args) {
+            if (proto) {
+                streaming = false;
+                port.write("@N3TL1NK,stop_stream;");
+                return;
+            }
             if (streaming) {
                 console.log("[XG3] Stopping live data stream");
                 // Stop live streaming from the radio:
@@ -216,13 +285,29 @@ define(function (require) {
         // the data that is sent on the serial port, coming from the
         // HTML interface.
         this.output = function (data) {
+            // Netlink protocol commands come in through
+            // this method:
+            if (data.indexOf("@N3TL1NK,start_stream;") > -1) {
+                this.startLiveStream();
+                return;
+            } else if (data.indexOf("@N3TL1NK,stop_stream;") > -1) {
+                this.stopLiveStream();
+                return;
+            }
             port.write(data);
         };
 
     }
 
-    // Add event management to our parser, from the Backbone.Events class:
-    _.extend(parser.prototype, Backbone.Events);
+    // On server side, we use the Node eventing system, whereas on the
+    // browser/app side, we use Bacbone's API:
+    if (vizapp.type != 'server') {
+        // Add event management to our parser, from the Backbone.Events class:
+        _.extend(parser.prototype, Backbone.Events);
+    } else {
+        parser.prototype.__proto__ = events.EventEmitter.prototype;
+        parser.prototype.trigger = parser.prototype.emit;
+    }
 
     return parser;
 });
