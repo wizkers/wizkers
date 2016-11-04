@@ -188,6 +188,7 @@ var USBGeiger = function () {
             port = new serialconnection(item.port, portSettings());
             port.on('data', format);
             port.on('status', status);
+            port.open();
         });
     }
 

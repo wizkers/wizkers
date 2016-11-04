@@ -207,7 +207,9 @@ define(function (require) {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
                     if (port.off)
-                        port.off('status', stat);
+                        port.off('status', status);
+                    else
+                        port.removeListener('status', status);
                     port_close_requested = false;
                 }
             }
@@ -286,6 +288,8 @@ define(function (require) {
             // The Node version of serialport does not have 'off' events
             if (port.off)
                 port.off('data', format);
+            else
+                port.removeListener('data', format);
             if (proto)
                 proto.off('data', onProtoData);
 

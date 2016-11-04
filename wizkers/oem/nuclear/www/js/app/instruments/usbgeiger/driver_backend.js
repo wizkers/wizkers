@@ -30,12 +30,19 @@
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
+// This detects whether we are in a server situation and act accordingly:
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+    var vizapp = { type: 'server'},
+    events = require('events'),
+    dbs = require('pouch-config');
+}
+
 define(function (require) {
     "use strict";
 
-    var Backbone = require('backbone'),
-        Serialport = require('serialport'),
-        serialConnection = require('connections_serial');
+    var Serialport = require('serialport'),
+        serialConnection = require('connections/serial');
 
     var parser = function (socket) {
 
@@ -192,7 +199,10 @@ define(function (require) {
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
-                    port.off('status', stat);
+                    if (port.off)
+                        port.off('status', stat);
+                    else
+                        port.removeListener('status', status);
                     port_close_requested = false;
                     if (watchid != null)
                         navigator.geolocation.clearWatch(watchid);
@@ -223,24 +233,58 @@ define(function (require) {
                 location_status = err.message;
         }
 
+        var openPort_server = function(insid) {
+            dbs.instruments.get(insid, function(err,item) {
+                port = new serialConnection(item.port, portSettings());
+                port.on('data', format);
+                port.on('status', status);
+                port.open();
+            });
+        };
+
+        var openPort_app = function(insid) {
+            var ins = instrumentManager.getInstrument();
+            // We now support serial over TCP/IP sockets: if we detect
+            // that the port is "TCP/IP", then create the right type of
+            // tcp port:
+            var p = ins.get('port');
+            if (p == 'TCP/IP') {
+                // Note: we just use the parser info from portSettings()
+                port = new tcpConnection(ins.get('tcpip'), portSettings().parser);
+            } else if (p == 'Wizkers Netlink') {
+                port = new tcpConnection(ins.get('netlink'), portSettings().parser);
+                proto = new Protocol();
+                proto.on('data', onProtoData);
+            } else if (p == 'Bluetooth') {
+                port = new btConnection(ins.get('btspp'), portSettings().parser);
+            } else {
+                port = new serialConnection(ins.get('port'), portSettings());
+            }
+            port.on('data', format);
+            port.on('status', status);
+            port.open();
+        }
+
         /////////////
         // Public methods
         /////////////
 
         this.openPort = function (insid) {
             port_open_requested = true;
-            var ins = instrumentManager.getInstrument();
-            port = new serialConnection(ins.get('port'), portSettings());
-            port.open();
-            port.on('data', format);
-            port.on('status', status);
-
+            if (vizapp.type == 'server') {
+                openPort_server(insid);
+            } else {
+                openPort_app(insid);
+            }
         };
 
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
-            port.off('data', format);
+            if (port.off)
+                port.off('data', format);
+            else
+                port.removeListener('data', format);
             port_close_requested = true;
             port.close();
         }
@@ -289,6 +333,15 @@ define(function (require) {
 
     }
 
-    _.extend(parser.prototype, Backbone.Events);
+    // On server side, we use the Node eventing system, whereas on the
+    // browser/app side, we use Bacbone's API:
+    if (vizapp.type != 'server') {
+        // Add event management to our parser, from the Backbone.Events class:
+        _.extend(parser.prototype, Backbone.Events);
+    } else {
+        parser.prototype.__proto__ = events.EventEmitter.prototype;
+        parser.prototype.trigger = parser.prototype.emit;
+    }
+
     return parser;
 });
