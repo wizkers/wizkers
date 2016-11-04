@@ -238,8 +238,6 @@ define(function (require) {
         var openPort_server = function(insid) {
             dbs.instruments.get(insid, function(err,item) {
                 port = new serialConnection(item.port, portSettings());
-                port.on('data', format);
-                port.on('status', status);
             });
         };
 
@@ -262,9 +260,6 @@ define(function (require) {
                 port = new serialConnection(ins.get('port'), portSettings());
             }
             port.open();
-            port.on('data', format);
-            port.on('status', status);
-
         }
 
         /////////////
@@ -278,8 +273,9 @@ define(function (require) {
             } else {
                 openPort_app(insid);
             }
+            port.on('data', format);
+            port.on('status', status);
         };
-
 
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port

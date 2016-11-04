@@ -98,12 +98,6 @@ define(function (require) {
                 settings: 'app/instruments/slevel_monitor/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
-            'sark110' : {
-                name: 'Sark110 Antenna Analyzer',
-                type: 'app/instruments/sark110/sark110',
-                settings: 'app/instruments/sark110/settings',
-                connectionsettings: 'app/views/instrument/usbhid'
-            },
             "simple_serial": {
                 name: "Simple serial terminal",
                 type: 'app/instruments/simple_serial/simple_serial',
@@ -122,8 +116,18 @@ define(function (require) {
                 settings: 'app/instruments/kenwood_v71/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             }
-
         };
+
+        // Sark110 support in all modes _but_ server
+        if (vizapp.type != 'server') {
+            this.supportedInstruments['sark110'] = {
+                name: 'Sark110 Antenna Analyzer',
+                type: 'app/instruments/sark110/sark110',
+                settings: 'app/instruments/sark110/settings',
+                connectionsettings: 'app/views/instrument/usbhid'
+            };
+
+        }
 
         // The instruments below are only supported in Chrome runmode:
         if (vizapp.type == 'chrome') {

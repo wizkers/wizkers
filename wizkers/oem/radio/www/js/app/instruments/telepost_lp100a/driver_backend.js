@@ -25,14 +25,19 @@
 /*
  * Back-end driver for the LP100A.
  *
- * This back-end driver is used when running as a Chrome or Cordova app.
- *
- * Differences with server-side parser:
- *
- *   - 'socket' uses "trigger" to emit events, not "emit"
+ * This back-end driver is used when running as a Chrome or Cordova app,
+ * as well as in server mode (NodeJS)
  *
  *  @author Edouard Lafargue, ed@lafargue.name
  */
+
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+    var vizapp = { type: 'server'},
+    events = require('events'),
+    dbs = require('pouch-config');
+}
+
 
 define(function (require) {
     "use strict";
@@ -40,9 +45,13 @@ define(function (require) {
     var Serialport = require('serialport'),
         serialConnection = require('connections/serial'),
         btConnection = require('connections/btspp'),
-        Protocol = require('app/lib/jsonbin'),
         tcpConnection = require('connections/tcp'),
         abu = require('app/lib/abutils');
+
+    // Server mode does not support remote protocol (not really needed)
+    if (vizapp.type != 'server')
+        var Protocol = require('app/lib/jsonbin');
+
 
     var parser = function (socket) {
 
@@ -214,7 +223,8 @@ define(function (require) {
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
-                    port.off('status', stat);
+                    if (port.off)
+                        port.off('status', stat);
                     port_close_requested = false;
                 }
             }
@@ -235,12 +245,13 @@ define(function (require) {
 
         };
 
-        /////////////
-        // Public methods
-        /////////////
+        var openPort_server = function(insid) {
+            dbs.instruments.get(insid, function(err,item) {
+                port = new serialConnection(item.port, portSettings());
+            });
+        };
 
-        this.openPort = function (insid) {
-            port_open_requested = true;
+        var openPort_app = function(insid) {
             var ins = instrumentManager.getInstrument();
             // We now support serial over TCP/IP sockets: if we detect
             // that the port is "TCP/IP", then create the right type of
@@ -249,7 +260,7 @@ define(function (require) {
             if (p == 'TCP/IP') {
                 // Note: we just use the parser info from portSettings()
                 port = new tcpConnection(ins.get('tcpip'), portSettings().parser);
-            }  else if (p == 'Wizkers Netlink') {
+            } else if (p == 'Wizkers Netlink') {
                 port = new tcpConnection(ins.get('netlink'), portSettings().parser);
                 proto = new Protocol();
                 proto.on('data', onProtoData);
@@ -259,15 +270,28 @@ define(function (require) {
                 port = new serialConnection(ins.get('port'), portSettings());
             }
             port.open();
+        }
+
+        /////////////
+        // Public methods
+        /////////////
+
+        this.openPort = function (insid) {
+            port_open_requested = true;
+            if (vizapp.type == 'server') {
+                openPort_server(insid);
+            } else {
+                openPort_app(insid);
+            }
             port.on('data', format);
             port.on('status', status);
-
         };
 
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
-            port.off('data', format);
+            if (port.off)
+                port.off('data', format);
             if (proto)
                 proto.off('data', onProtoData);
 
@@ -356,8 +380,15 @@ define(function (require) {
 
     }
 
-    // Add event management to our parser, from the Backbone.Events class:
-    _.extend(parser.prototype, Backbone.Events);
+    // On server side, we use the Node eventing system, whereas on the
+    // browser/app side, we use Bacbone's API:
+    if (vizapp.type != 'server') {
+        // Add event management to our parser, from the Backbone.Events class:
+        _.extend(parser.prototype, Backbone.Events);
+    } else {
+        parser.prototype.__proto__ = events.EventEmitter.prototype;
+        parser.prototype.trigger = parser.prototype.emit;
+    }
 
     return parser;
 });
