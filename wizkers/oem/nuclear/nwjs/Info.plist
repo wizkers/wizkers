@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BuildMachineOSBuild</key>
+	<string>14D136</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Wizkers Radio</string>
+	<key>CFBundleExecutable</key>
+	<string>nwjs</string>
+	<key>CFBundleIconFile</key>
+	<string>app.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.wizkers.nwjs.radio</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Wizkers Radio</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>m0.2.6</string>
+	<key>CFBundleSignature</key>
+	<string>Cr24</string>
+	<key>CFBundleVersion</key>
+	<string>m0.2.6</string>
+	<key>DTCompiler</key>
+	<string>com.apple.compilers.llvm.clang.1_0</string>
+	<key>DTSDKBuild</key>
+	<string>10.10</string>
+	<key>DTSDKName</key>
+	<string>macosx10.1010.10</string>
+	<key>DTXcode</key>
+	<string>0631</string>
+	<key>DTXcodeBuild</key>
+	<string>6D1002</string>
+	<key>LSFileQuarantineEnabled</key>
+	<true/>
+	<key>LSHasLocalizedDisplayName</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.6.0</string>
+	<key>NSAppleScriptEnabled</key>
+	<true/>
+	<key>NSPrincipalClass</key>
+	<string>BrowserCrApplication</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>NSUserActivityTypeBrowsingWeb</string>
+	</array>
+	<key>NSUserNotificationAlertStyle</key>
+	<string>banner</string>
+	<key>OSAScriptingDefinition</key>
+	<string>scripting.sdef</string>
+	<key>SCMRevision</key>
+	<string>723666bb0fb9a2690ed5a294a45a63aee62726c9</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>NWJS Extra</string>
+			<key>UTTypeIdentifier</key>
+			<string>io.nwjs.nw.package</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>nw</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>

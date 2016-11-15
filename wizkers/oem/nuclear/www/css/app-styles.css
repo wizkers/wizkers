@@ -1,0 +1,28 @@
+
+.navbar-inverse {
+    background-color: #f57f20;
+    border-color: #080808;
+}
+
+.navbar-inverse .navbar-collapse,
+.navbar-inverse .navbar-form {
+    border-color: #f57f20;
+}
+
+.navbar-inverse .navbar-nav>li>a {
+    color: #000000;
+}
+
+.navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:focus, .navbar-inverse .navbar-nav>.active>a:hover {
+    color: #000000;
+    background-color: #f57f20;
+}
+
+.navbar-inverse .navbar-brand,
+.navbar-inverse .navbar-brand:focus, .navbar-inverse .navbar-brand:hover {
+    color: #000000;
+}
+
+.navbar-inverse .navbar-toggle .icon-bar {
+    background-color: rgba(0, 0, 0, 0.8);
+}
