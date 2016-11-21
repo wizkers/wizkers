@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Wizkers:Nuclear</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="E. Lafargue, edouard@lafargue.name">
+
+    <!-- Enable all requests  and inline-styles-->
+    <!-- All the Google URLs are required for making the Google Maps API work
+         on Phonegap javascript apps -->
+
+   <meta http-equiv="Content-Security-Policy" content="default-src * gap://ready file:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src * 'unsafe-inline' 'unsafe-eval'">
+
+
+    <link href="css/bootstrap-material.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+        body {
+            padding-top: 55px;
+        }
+        /* Required for fixed navbar */
+    </style>
+    <link href="css/bootstrap-lightbox.min.css" rel="stylesheet" />
+    <link href="css/bootstrap-editable.css" rel="stylesheet" />
+    <link href="css/cards-carousel.css" rel="stylesheet" />
+    <link href="css/slider.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
+    <link href="css/app-styles.css" rel="stylesheet" />
+    <!-- Apply my own styles last ! -->
+
+    <!-- Fav and touch icons -->
+    <link rel="shortcut icon" href="img/ico/favicon.png">
+
+</head>
+
+<body>
+
+    <!-- Header contents loaded by the application (menubar) -->
+    <div class="header"></div>
+
+    <!-- <div style="padding: 0 15px; margin: 5px;"> <!-- Make the main content full screen -->
+    <div class="container-fluid">
+        <div class="row" id="content">
+            <!-- The div below is where the application runs -->
+            <p style="text-align:center;">Wizkers:Nuclear &beta; version</p>
+            <p>&nbsp;</p>
+            <img style="display: block; width: 30%; margin-left: auto; margin-right: auto;" src="img/tiger.png">
+            <p style="text-align:center;">Loading...</p>
+        </div>
+    </div>
+    <script src="cordova.js"></script>
+    <script data-main="js/main-cordova" src="js/lib/require.js"></script>
+        <div class="screen-xs visible-xs"></div>
+        <div class="screen-sm visible-sm"></div>
+        <div class="screen-md visible-md"></div>
+        <div class="screen-lg visible-lg"></div>
+
+</body>
+
+</html>

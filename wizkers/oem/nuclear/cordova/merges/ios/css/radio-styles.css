@@ -1,0 +1,83 @@
+/*===========
+ * Digital Fonts
+ *===================*/
+@font-face {
+  font-family: "KX3-top-display";
+  src: url('../fonts/KX3-top-display-Monospaced.otf');
+}
+
+@font-face {
+    font-family:"KX3-bottom-LCD-monospaced";
+    src: url('../fonts/KX3-bottom-LCD-monospaced-Regular.otf');
+    src: url('../fonts/kx3-bottom-lcd-monospaced-regular.eot') format('embedded-opentype'), url('../fonts/kx3-bottom-lcd-monospaced-regular.woff2') format('woff2'), url('../fonts/kx3-bottom-lcd-monospaced-regular.woff') format('woff'), url('../fonts/kx3-bottom-lcd-monospaced-regular.ttf') format('truetype'), url('../fonts/kx3-bottom-lcd-monospaced-regular.svg#KX3-bottom-LCD-monospaced-Regular') format('svg');
+}
+
+@font-face {
+    font-family: "DotMatrix Two";
+    src: url('../fonts/dotmatrix-tworegular-opentype.otf');
+}
+
+*:not(input):not(textarea) {
+  -webkit-touch-callout: none;    /* prevent callout to copy image, etc when tap to hold */
+  -webkit-text-size-adjust: none; /* prevent webkit from resizing text to fit */
+  -webkit-user-select: none;      /* prevent copy paste, to allow, change 'none' to 'text' */
+}
+
+
+/*
+ * Override a couple of minor navbar-related classes for IOS
+ */
+.navbar {
+  padding-top: 15px;
+}
+
+.navbar-toggle {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.navbar-brand {
+    height: 30px;
+    padding: 5px;
+}
+
+@media (min-width: 768px) {
+  .navbar-nav > li > a {
+    padding-top: 5px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+  }
+}
+
+/**
+ * Color scheme
+ */
+
+.navbar-inverse {
+    background-color: #ffc900;
+    border-color: #080808;
+}
+
+.navbar-inverse .navbar-collapse,
+.navbar-inverse .navbar-form {
+    border-color: #ffc900;
+}
+
+.navbar-inverse .navbar-nav>li>a {
+    color: #000000;
+}
+
+.navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:focus, .navbar-inverse .navbar-nav>.active>a:hover {
+    color: #000000;
+    background-color: #ffc900;
+}
+
+.navbar-inverse .navbar-brand,
+.navbar-inverse .navbar-brand:focus, .navbar-inverse .navbar-brand:hover {
+    color: #000000;
+}
+
+.navbar-inverse .navbar-toggle .icon-bar {
+    background-color: rgba(0, 0, 0, 0.8);
+}

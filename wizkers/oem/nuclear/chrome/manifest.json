@@ -1,0 +1,49 @@
+{
+    "manifest_version": 2,
+    "name": "Wizkers",
+    "description": "A framework for Measurement instruments",
+    "version": "0.10.7",
+    "offline_enabled": true,
+    "app": {
+        "background": {
+            "scripts": ["background.js"]
+        }
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "permissions": [
+    "serial",
+    "storage",
+    "unlimitedStorage",
+    "audioCapture",
+    "fileSystem",
+    "http://*/*",
+    "https://*/*",
+    "geolocation",
+    "hid",
+        {
+            "usbDevices": [
+                {
+                    "vendorId": 1155,
+                    "productId": 22352
+                }
+            ]
+        }
+    ],
+    "bluetooth": {
+        "uuids": ["180d", "ffe0", "ef080d8c-c3be-41ff-bd3f-05a5f4795d7f", 
+                 "A1E8F5B1-696B-4E4C-87C6-69DFE0B0093B", "39b31fec-b63a-4ef7-b163-a7317872007f" ], 
+        "low_energy": true
+    },
+    "sockets": {
+        "tcpServer": {
+            "listen": ":4532"
+        },
+        "tcp": {
+            "connect": ""
+        }
+    }
+}

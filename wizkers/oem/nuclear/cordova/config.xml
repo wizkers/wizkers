@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.wizkers.radio" version="a0.3.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Wizkers:Radio</name>
+<widget id="io.wizkers.nuclear" version="a0.1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Wizkers:Nuclear</name>
     <description>
-        Connect and manage your Ham radio equipment from your tablet or phone.
+        Connect and manage your radiation monitoring equipment.
     </description>
     <author email="ed@wizkers.io" href="http://wizkers.io">
         Edouard Lafargue
@@ -10,12 +10,9 @@
 
     <content src="cordova.html" />
     <access origin="*" />
-    <platform name="android">
         <icon src="icon.png" />
-        <plugin name="fr.drangies.cordova.serial" spec="https://github.com/elafargue/cordovarduino.git" />
-        <plugin name="cordova-plugin-chrome-apps-usb" spec="~1.2.0" />
-        <plugin name="cordova-plugin-bluetooth-serial" spec="~0.4.5" />
-    </platform>
+    <plugin name="fr.drangies.cordova.serial" spec="https://github.com/elafargue/cordovarduino.git" />
+    <plugin name="cordova-plugin-chrome-apps-usb" spec="~1.2.0" />
     <plugin name="com.mediamatrixdoo.keepscreenon" spec="https://github.com/zoxxx/PhoneGap-KeepScreenOn-plugin.git" />
     <plugin name="cordova-plugin-bluetoothle" spec="^4.0.0" />
     <plugin name="cordova-plugin-file" spec="^4.1.1" />
