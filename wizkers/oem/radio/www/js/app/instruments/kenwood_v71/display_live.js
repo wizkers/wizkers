@@ -65,6 +65,9 @@ define(function (require) {
             this.powered = true;
             this.vfo = 'VFOx';
 
+            this.tones = [];
+            this.dcs_codes = [];
+
             // Keep the value of the previous VFO value to avoid
             // unnecessary redraws of the front panel.
             this.oldVFOA = null;
@@ -113,15 +116,6 @@ define(function (require) {
                 self.$('#rigpic .vfob-smeter-icon').css('opacity', '0.3');
             });
 
-
-            // Initialize our sliding controls:
-            $("#rf-control", this.el).slider();
-            $("#ag-control", this.el).slider();
-            $("#bpf-control", this.el).slider();
-            $("#ct-control", this.el).slider();
-            $("#mic-control", this.el).slider();
-
-
             // Load the frequencies sub view:
             require(['app/instruments/kenwood_v71/frequency_list'], function (view) {
                 self.FrequencyListView = new view({
@@ -131,7 +125,6 @@ define(function (require) {
                     $('#frequencies-placeholder').html(self.FrequencyListView.el);
                     self.FrequencyListView.render();
                 }
-                $('#frequency-selector', self.el).carousel();
             });
 
             return this;
@@ -155,12 +148,44 @@ define(function (require) {
         },
 
         events: {
-            "click .store-frequency": "addfrequency",
-            "keypress input#vfoa-direct": "setvfoa",
-            "click #vfoa-direct-btn": "setvfoa",
+            "keypress input.f-vfoa": "setvfo",
+            "click #vfoa-tune": "setvfo",
+            "keypress input.f-vfob": "setvfo",
+            "click #vfob-tune": "setvfo",
             "mousewheel #vfoa-wheel": "vfoAWheel",
             "click #vfotoggle": "toggleVFO",
-            "click .mode-btn": "selectMode"
+            "click .mode-btn": "selectMode",
+            "change .vfoa-sql": "vfoSQLChange",
+            "change .vfob-sql": "vfoSQLChange",
+        },
+
+        vfoSQLChange: function (e) {
+            var v = $(e.target).val();
+            var cl = $(e.target).hasClass('vfoa-sql') ? '.vfoa-tone' : '.vfob-tone';
+            this.doVfoSQLChange(v,cl);
+        },
+
+        doVfoSQLChange: function(v, cl) {
+            this.$(cl).empty();
+
+            var mkval = function(options) {
+                var html = '';
+                for (var t in options) {
+                    html += '<option value="' + options[t] + '">' + options[t] + '</option>';
+                }
+                return html;
+            }
+
+            switch (v) {
+                case 'Tone':
+                case 'CTCSS':
+                    this.$(cl).append(mkval(this.tones));
+                    break;
+                case 'DCS':
+                    this.$(cl).append(mkval(this.dcs_codes));
+                    break;
+            }
+
         },
 
         vfoAWheel: function(e) {
@@ -188,10 +213,33 @@ define(function (require) {
             linkManager.driver.setMode(mode);
         },
 
-        setvfoa: function () {
+        setvfo: function () {
+            console.log(event.target);
+            var id;
             if ((event.target.id == "vfoa-direct" && event.keyCode == 13) || (event.target.id != "vfoa-direct")) {
-                linkManager.driver.setVFO(parseFloat(this.$("#vfoa-direct").val()), 'a');
+                id = '.vfoa-';
+            } else if ((event.target.id == "vfob-direct" && event.keyCode == 13) || (event.target.id != "vfob-direct")) {
+                id = '.vfob-';
             }
+            var sqlmode = this.$(id + 'sql').val() || 'None';
+            var tval = parseFloat(this.$(id + 'tone').val());
+            var vfo = {
+                band: (id == '.vfoa-') ? 'a':'b',
+                freq: parseFloat(this.$(id + 'f').val()) * 1e6,
+                mode: this.$(id + 'mode').val(),
+                offset_freq: parseFloat(this.$(id + 'offset').val()) * 1e6,
+                duplex: this.$(id + 'duplex').val(),
+                tone_on: sqlmode == 'Tone',
+                ct_on: sqlmode == 'CTCSS',
+                dcs_on: sqlmode == 'DCS',
+                tone_freq: tval,
+                ct_freq: tval,
+                dcs_code: tval
+            };
+
+            linkManager.sendCommand({ command: 'set_frequency', arg: vfo});
+            linkManager.sendCommand({ command: 'get_frequency', arg: vfo});
+
         },
 
         handleButton: function (e) {
@@ -209,6 +257,10 @@ define(function (require) {
 
         updateStatus: function (data) {
             if (data.portopen && !this.deviceinitdone) {
+                // Load the list of tones from the backend driver,
+                // for use by the direct VFO controls
+                linkManager.sendCommand({command: 'get_tones'});
+                linkManager.sendCommand({command: 'get_dcs_codes'});
                 linkManager.startLiveStream();
                 this.deviceinitdone = true;
             } else if (!data.portopen) {
@@ -216,16 +268,49 @@ define(function (require) {
             }
         },
 
+        makeDropdown: function(val,cl, options) {
+            var html = '<select style="width: 100%;" class="form-control menu-dropdown ' + cl + '">';
+            for (var t in options) {
+                html += '<option value="' + options[t] + '" ' + (val == options[t] ? 'selected' : '') + ' >' + options[t] + '</option>';
+            }
+            html += '</select>';
+            return html;
+        },
+        makeDirectVFO: function() {
+            this.$('#directvfo').empty();
+            var row = '<tr><th>VFO</th><th>Freq</th><th>Mode</th><th>SQL Mode</th><th>Tone/Code</th><th>Duplex</th><th>Offset</th></tr>';
+            // Called once we have both tones and dcs_codes
+            row += '<tr><td><button id="vfoa-tune" class="btn btn-default">A</button></td>';
+            row += '<td><input class="vfoa-f form-control"  size="9" maxlength="9" value="0"></td>';
+            row += '<td>' + this.makeDropdown('FM', 'vfoa-mode', ['FM', 'NFM', 'AM']) + '</td>';
+            row += '<td>' + this.makeDropdown( 'Tone', 'vfoa-sql', ['Tone', 'CTCSS', 'DCS', 'None']) + '</td>';
+            row += '<td>' + this.makeDropdown( 0, 'vfoa-tone', this.tones) + '</td>';
+            row += '<td>' + this.makeDropdown('-', 'vfoa-duplex', ['+', '-', 'Off']) + '</td>';
+            row += '<td><input class="vfoa-offset form-control" size="9" maxlength="9"  value="' + 0 + '"></td>';
+            row += '</tr>';
+            this.$('#directvfo').append(row);
+
+            row = '<tr><td><button id="vfob-tune" class="btn btn-default">B</button></td>';
+            row += '<td><input class="vfob-f form-control"  size="9" maxlength="9" value="0"></td>';
+            row += '<td>' + this.makeDropdown('FM', 'vfob-mode', ['FM', 'NFM', 'AM']) + '</td>';
+            row += '<td>' + this.makeDropdown( 'Tone', 'vfob-sql', ['Tone', 'CTCSS', 'DCS', 'None']) + '</td>';
+            row += '<td>' + this.makeDropdown( 0, 'vfob-tone', this.tones) + '</td>';
+            row += '<td>' + this.makeDropdown('-', 'vfob-duplex', ['+', '-', 'Off']) + '</td>';
+            row += '<td><input class="vfob-offset form-control" size="9" maxlength="9"  value="' + 0 + '"></td>';
+            row += '</tr>';
+            this.$('#directvfo').append(row);
+        },
+
         showInput: function (data) {
 
             let vfoX = false;
             if (data.vfoa) {
-                var f1 = ('' + (data.vfoa/1e6)).substr(0,7); // Convert to a string
+                var f1 = ('' + (data.vfoa/1e6).toFixed(3)).substr(0,7); // Convert to a string
                 if (data.vfoa < 1e9)
                     f1 = ' ' + f1;
                 // Make sure we have 8 characters:
                 f1 = (f1 + '000').substr(0,8);
-                this.$("#vfoa-direct").val(data.vfoa/1e6);
+                this.$(".vfoa-f").val(data.vfoa/1e6);
                 this.$("#rigpic #vfoa").text(f1);
                 // Toggle the right icons for freq (last three digits)
                 this.$('#vfoa-5').hide();
@@ -251,15 +336,15 @@ define(function (require) {
                         this.$('#vfoa-67').show();
                         break;
                 }
-                vfoX = '#vfoa-';
+                vfoX = 'vfoa-';
             }
             if (data.vfob) {
-                var f1 = ('' + (data.vfob/1e6)).substr(0,7); // Convert to a string
+                var f1 = ('' + (data.vfob/1e6).toFixed(3)).substr(0,7); // Convert to a string
                 if (data.vfob < 1e9)
                     f1 = ' ' + f1;
                 // Make sure we have 8 characters:
                 f1 = (f1 + '000').substr(0,8);
-                this.$("#vfob-direct").val(data.vfob/1e6);
+                this.$(".vfob-f").val(data.vfob/1e6);
                 this.$("#rigpic #vfob").text(f1);
                 this.$('#vfob-5').hide();
                 this.$('#vfob-75').hide();
@@ -276,44 +361,69 @@ define(function (require) {
                         this.$('#vfob-75').show();
                         break;
                 }
-                vfoX = '#vfob-';
+                vfoX = 'vfob-';
             }
             if (vfoX) {
                 // Adjust the VFO icons:
                 let o = data.vfo_options;
                 switch (o.shift) {
                     case 0:
-                        this.$(vfoX + 'minus').hide();
-                        this.$(vfoX + 'plus').hide();
+                        this.$('#' + vfoX + 'minus').hide();
+                        this.$('#' + vfoX + 'plus').hide();
+                        this.$('.' + vfoX + 'duplex').val('Off');
                         break;
                     case 1:
-                        this.$(vfoX + 'minus').hide();
-                        this.$(vfoX + 'plus').show();
+                        this.$('#' + vfoX + 'minus').hide();
+                        this.$('#' + vfoX + 'plus').show();
+                        this.$('.' + vfoX + 'duplex').val('+');
                         break;
                     case 2:
-                        this.$(vfoX + 'minus').show();
-                        this.$(vfoX + 'plus').hide();
+                        this.$('#' + vfoX + 'minus').show();
+                        this.$('#' + vfoX + 'plus').hide();
+                        this.$('.' + vfoX + 'duplex').val('-');
                         break;
                 }
 
-                this.$(vfoX + 'T').toggle(o.tone);
-                this.$(vfoX + 'CT').toggle(o.ct);
-                this.$(vfoX + 'DCS').toggle(o.dcs)
+                this.$('#' + vfoX + 'T').toggle(o.tone);
+                this.$('#' + vfoX + 'CT').toggle(o.ct);
+                this.$('#' + vfoX + 'DCS').toggle(o.dcs);
+                var sql_mode = (o.tone) ? 'Tone' : (o.ct) ? 'CTCSS' : (o.dcs) ? 'DCS' : 'None';
+                this.$('.' + vfoX + 'sql').val(sql_mode);
+                this.doVfoSQLChange(sql_mode, '.' + vfoX + 'tone');
+                switch (sql_mode) {
+                    case 'Tone':
+                        this.$('.' + vfoX + 'tone').val(o.tone_freq);
+                        break;
+                    case 'CTCSS':
+                        this.$('.' + vfoX + 'tone').val(o.ct_freq);
+                        break;
+                    case 'DCS':
+                        this.$('.' + vfoX + 'tone').val(o.dcs_code);
+                        break;
+                }
 
                 switch (o.mode) {
-                    case 0:
-                        this.$(vfoX + 'N').hide();
-                        this.$('icon-AM').hide();
+                    case 'FM':
+                        this.$('#' + vfoX + 'N').hide();
+                        if (vfoX == 'vfoa-')
+                            this.$('#icon-AM').hide();
+                        this.$('.' + vfoX + 'mode').val('FM');
                         break;
-                    case 1:
-                        this.$(vfoX + 'N').show();
-                        this.$('icon-AM').hide();
+                    case 'NFM':
+                        this.$('#' + vfoX + 'N').show();
+                        if (vfoX == 'vfoa-')
+                            this.$('#icon-AM').hide();
+                        this.$('.' + vfoX + 'mode').val('NFM');
                         break;
-                    case 2:
-                        this.$(vfoX + 'N').hide();
-                        this.$('icon-AM').show();
+                    case 'AM':
+                        this.$('#' + vfoX + 'N').hide();
+                        if (vfoX == 'vfoa-')
+                            this.$('#icon-AM').show();
+                        this.$('.' + vfoX + 'mode').val('AM');
                         break;
                 }
+
+                this.$('.' + vfoX + 'offset').val(o.offset_freq/1e6);
             }
 
             if (data.vfoa_sql != undefined) {
@@ -390,7 +500,6 @@ define(function (require) {
                 this.$('#band' + (data.vfo ? 'B' : 'A') + '-channel').html((data.channel == -1 ? '' : ('   ' + data.channel).slice(-3)));
             }
 
-
             if (data.menu_settings) {
                 // We can adjust lots of icons on the display based on the
                 // menu settings. These are queried when we start live streaming
@@ -412,6 +521,14 @@ define(function (require) {
                 } else {
                     this.$('#icon-96').hide();
                 }
+            }
+
+            if (data.tones) {
+                this.tones = data.tones;
+            }
+            if (data.dcs_codes) {
+                this.dcs_codes = data.dcs_codes;
+                this.makeDirectVFO();
             }
 
         },

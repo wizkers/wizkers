@@ -138,23 +138,11 @@ define(function(require) {
             var html = '<select style="width: 100%;" class="form-control menu-dropdown sql-mode">';
             var n = tone_on || ct_on || dcs_on;
             html += '<option value="none" ' + ( n == 0 ? 'selected' : '') + '>None</option>';
-            html += '<option value="tone" ' + (tone_on ? 'selected' : '') + '>Tone</option>';
-            html += '<option value="ctcss" ' + (ct_on ? 'selected': '') + '>CTCSS</option>';
-            html += '<option value="dcs" ' + (dcs_on ? 'selected' : '') + '>DCS</option>';
+            html += '<option value="Tone" ' + (tone_on ? 'selected' : '') + '>Tone</option>';
+            html += '<option value="CTCSS" ' + (ct_on ? 'selected': '') + '>CTCSS</option>';
+            html += '<option value="DCS" ' + (dcs_on ? 'selected' : '') + '>DCS</option>';
             html += '</select>';
             return html;
-        };
-
-        var makeVFO = function(vfo, xvrt) {
-            // Return a Hex string encoding for the VFO value
-            vfo = ('00000000' + vfo.toString()).slice(-8);
-            var buf = '';
-            for (var i = 0; i < 3; i++) {
-                buf += ('00' + parseInt(vfo.substr(i*2, 2)).toString(16)).slice(-2);
-            }
-            buf += ('00' + parseInt(vfo[6]).toString(16)).slice(-2);
-            buf += ('00' + parseInt(vfo[7]).toString(16)).slice(-2);
-            return buf;
         };
 
         /**
@@ -224,9 +212,9 @@ define(function(require) {
                 duplex: view.$(id + 'vfo-duplex').val(),
                 step: view.$(id + 'vfo-step').val(),
                 skip: view.$(id + 'vfo-skip').is(':checked'),
-                tone_on: sqlmode == 'tone',
-                ct_on: sqlmode == 'ctcss',
-                dcs_on: sqlmode == 'dc s',
+                tone_on: sqlmode == 'Tone',
+                ct_on: sqlmode == 'CTCSS',
+                dcs_on: sqlmode == 'DCS',
                 tone_freq: parseFloat(view.$(id + 'vfo-tone').val()),
                 ct_freq: parseFloat(view.$(id + 'vfo-ctcss').val()),
                 dcs_code: parseInt(view.$(id + 'dcs-code').val())

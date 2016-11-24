@@ -397,12 +397,27 @@ define(function (require) {
                 tone: fields[5] ==1,
                 ct: fields[6] ==1,
                 dcs: fields[7] ==1,
-                tone_freq: fields[8],
-                ct_freq: fields[9],
-                dcs_code: fields[10],
-                offset_freq: fields[11],
-                mode: fields[12]
             };
+
+            // Depending on model, the fields are different:
+            switch (model_id) {
+                case 'TH-D72':
+                    vfo_options.tone_freq = tones[fields[9]];
+                    vfo_options.ct_freq = tones[fields[10]];
+                    vfo_options.dcs_code = dcs_codes[fields[11]];
+                    vfo_options.offset_freq = fields[13];
+                    vfo_options.mode = modes[fields[14]];
+                    break;
+                case 'TM-V71':
+                default:
+                    vfo_options.tone_freq = tones[fields[8]];
+                    vfo_options.ct_freq = tones[fields[9]];
+                    vfo_options.dcs_code = dcs_codes[fields[10]];
+                    vfo_options.offset_freq = fields[11];
+                    vfo_options.mode = modes[fields[12]];
+            }
+
+
             if (fields[0]) {
                 // VFOB
                 resp.vfob = fields[1];
@@ -496,6 +511,18 @@ define(function (require) {
             var cmd_string = "";
             switch(cmd.command) {
                 case 'set_frequency':
+                    cmd_string = make_VFO(cmd.arg, true);
+                    if (cmd_string == undefined) {
+                        console.error('Bad argument format for set_frequency');
+                        commandQueue.shift();
+                        queue_busy = false;
+                        return;
+                    }
+                    break;
+                case 'set_vfo_mode':
+                    cmd_string = 'VM ';
+                    cmd_string += ((cmd.arg.vfo == 'a') ? '0' : '1' ) + ',';
+                    cmd_string += (cmd.arg.mode == 'vfo') ? '0' : (cmd.arg.mode == 'mem') ? '1' : '2';
                     break;
                 case 'get_frequency':
                     if (cmd.arg == 'a')
@@ -557,6 +584,119 @@ define(function (require) {
                 queue_busy = false;
             }, 500);
             port.write(cmd_string + '\r');
+        }
+
+        /**
+         * Build a VFO set string - simpler than a memory definition
+         *  vfo is a JSON object describing the VFO structure
+         *  isCall is a Bool that indicates we want a "CC" and not "FO" comand
+         */
+        var make_VFO = function(vfo, isCall) {
+
+            if (vfo.band != 'a' && vfo.band != 'b')
+                return;
+            var r = (isCall) ? 'CC ' : 'FO ';
+            r += ((vfo.band == 'a') ? '0' : '1' ) + ',';
+            // Mem freq (in Hertz)
+            var f = vfo.freq;
+            if (isNaN(f))
+                return;
+            r += ('0000000000' + f).slice(-10) + ',';
+
+            // Mem Step. We pick it automatically
+            if (f % 5000 != 0) {
+                if (f % 6250 == 0) {
+                    r += '1,';
+                } else if (f % 8330 == 0) {
+                    r += '2,';
+                } else if (f % 12500 == 0) {
+                    r += '4';
+                }
+            } else {
+                r += '0,';
+            }
+
+            // Mem Shift direction
+            switch (vfo.duplex) {
+                case 'Off':
+                case 'Split':
+                    r += '0,';
+                    break;
+                case '+':
+                    r += '1,';
+                    break;
+                case '-':
+                    r += '2,';
+                    break;
+            }
+
+            // Mem reverse (???)
+            r += '0,';
+
+            // Tone on/off
+            r += (vfo.tone_on ? '1' : '0') + ',';
+
+            // CT on/off
+            r += (vfo.ct_on ? '1' : '0') + ',';
+
+            // DCS on/off
+            r += (vfo.dcs_on ? '1' : '0') + ',';
+
+            if (vfo.tone_on) {
+                // Tone freq
+                var i = tones.indexOf(vfo.tone_freq);
+                if (i == -1) {
+                    console.error("Wrong tone code");
+                    return;
+                }
+                r += ('00' + i).slice(-2) + ',';
+            } else {
+                r += '00,';
+            }
+
+            if (vfo.ct_on) {
+                // CT freq
+                i = tones.indexOf(vfo.ct_freq);
+                if (i == -1) {
+                    console.error("Wrong CTCSS code");
+                    return;
+                }
+                r += ('00' + i).slice(-2) + ',';
+            } else {
+                r += '00,';
+            }
+
+            if (vfo.dcs_on) {
+                // DCS code
+                i = dcs_codes.indexOf(parseInt(vfo.dcs_code));
+                if (i == -1) {
+                    console.error("Wrong DCS code");
+                    return;
+                }
+                r += ('000' + i).slice(-3) + ',';
+            } else {
+                r += '000,';
+            }
+
+            // Offset freq (MHz)
+            var offset = Math.abs(parseFloat(vfo.offset_freq));
+            if (isNaN(offset))
+                return;
+            r += ('00000000' + offset).slice(-8) + ',';
+
+            // Mode
+            i = modes.indexOf(vfo.mode);
+            if (i == -1) {
+                console.error("Wrong Mode code");
+                return;
+            }
+            r += i;
+
+            if (isCall) {
+                r += ',0000000000,0';
+            }
+
+            return r;
         }
 
         /**
@@ -832,7 +972,7 @@ define(function (require) {
         //  get_frequency   : 'a' or 'b'
         //  poll_frequency  : same as get, except that if frequency
         //                    didn't change, won't send an update
-        //  set_frequency   : number in MHz or number string in Hz, 'a' or 'b' as second arg.
+        //  set_frequency   : sets VFOA or VFOB, arg is a json with VFO description
         //  get_uid         : Get the serial number of the rig
         //  get_menu        : get the V71A menu settings (one command)
         //  raw             : send a raw string to V71. arg is the actual string
@@ -863,6 +1003,21 @@ define(function (require) {
                 this.trigger('data', {tones: tones});
                 return;
             }
+            if (data.command == 'get_dcs_codes') {
+                this.trigger('data', {dcs_codes: dcs_codes});
+                return;
+            }
+            if (data.command == 'set_frequency') {
+                // Special case: we need to make sure the radio
+                // is in CALL mode first, the only mode than allows complete
+                // control on the frequency
+                commandQueue.push({command:'set_vfo_mode', arg: { vfo: data.arg.band, mode: 'call'}});
+            }
+            if (data.command == 'set_mem_channel') {
+                // Make sure we are in channel mode first:
+                commandQueue.push({command:'set_vfo_mode', arg: { vfo: data.arg.vfo, mode: 'mem'}});
+            }
+
             commandQueue.push(data);
             // Special case for get_memory:
             if (data.command == 'get_memory') {
@@ -871,6 +1026,8 @@ define(function (require) {
             if (data.command == 'set_memory') {
                 commandQueue.push({command: 'set_memory_name', arg: data.arg});
             }
+
+
             processQueue();
         };
 
