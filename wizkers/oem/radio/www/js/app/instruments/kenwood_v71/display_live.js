@@ -148,9 +148,9 @@ define(function (require) {
         },
 
         events: {
-            "keypress input.f-vfoa": "setvfo",
+            // "keypress input.f-vfoa": "setvfo",
             "click #vfoa-tune": "setvfo",
-            "keypress input.f-vfob": "setvfo",
+            // "keypress input.f-vfob": "setvfo",
             "click #vfob-tune": "setvfo",
             "mousewheel #vfoa-wheel": "vfoAWheel",
             "click #vfotoggle": "toggleVFO",
@@ -269,7 +269,7 @@ define(function (require) {
         },
 
         makeDropdown: function(val,cl, options) {
-            var html = '<select style="width: 100%;" class="form-control menu-dropdown ' + cl + '">';
+            var html = '<select disabled style="width: 100%;" class="form-control menu-dropdown ' + cl + '">';
             for (var t in options) {
                 html += '<option value="' + options[t] + '" ' + (val == options[t] ? 'selected' : '') + ' >' + options[t] + '</option>';
             }
@@ -280,23 +280,25 @@ define(function (require) {
             this.$('#directvfo').empty();
             var row = '<tr><th>VFO</th><th>Freq</th><th>Mode</th><th>SQL Mode</th><th>Tone/Code</th><th>Duplex</th><th>Offset</th></tr>';
             // Called once we have both tones and dcs_codes
-            row += '<tr><td><button id="vfoa-tune" class="btn btn-default">A</button></td>';
-            row += '<td><input class="vfoa-f form-control"  size="9" maxlength="9" value="0"></td>';
+            // row += '<tr><td><button id="vfoa-tune" class="btn btn-default">A</button></td>';
+            row += '<tr><td>A</td>';
+            row += '<td><input disabled class="vfoa-f form-control"  size="9" maxlength="9" value="0"></td>';
             row += '<td>' + this.makeDropdown('FM', 'vfoa-mode', ['FM', 'NFM', 'AM']) + '</td>';
             row += '<td>' + this.makeDropdown( 'Tone', 'vfoa-sql', ['Tone', 'CTCSS', 'DCS', 'None']) + '</td>';
             row += '<td>' + this.makeDropdown( 0, 'vfoa-tone', this.tones) + '</td>';
             row += '<td>' + this.makeDropdown('-', 'vfoa-duplex', ['+', '-', 'Off']) + '</td>';
-            row += '<td><input class="vfoa-offset form-control" size="9" maxlength="9"  value="' + 0 + '"></td>';
+            row += '<td><input disabled class="vfoa-offset form-control" size="9" maxlength="9"  value="' + 0 + '"></td>';
             row += '</tr>';
             this.$('#directvfo').append(row);
 
-            row = '<tr><td><button id="vfob-tune" class="btn btn-default">B</button></td>';
-            row += '<td><input class="vfob-f form-control"  size="9" maxlength="9" value="0"></td>';
+            //row = '<tr><td><button id="vfob-tune" class="btn btn-default">B</button></td>';
+            row = '<tr><td>B</td>';
+            row += '<td><input disabled class="vfob-f form-control"  size="9" maxlength="9" value="0"></td>';
             row += '<td>' + this.makeDropdown('FM', 'vfob-mode', ['FM', 'NFM', 'AM']) + '</td>';
             row += '<td>' + this.makeDropdown( 'Tone', 'vfob-sql', ['Tone', 'CTCSS', 'DCS', 'None']) + '</td>';
             row += '<td>' + this.makeDropdown( 0, 'vfob-tone', this.tones) + '</td>';
             row += '<td>' + this.makeDropdown('-', 'vfob-duplex', ['+', '-', 'Off']) + '</td>';
-            row += '<td><input class="vfob-offset form-control" size="9" maxlength="9"  value="' + 0 + '"></td>';
+            row += '<td><input disabled class="vfob-offset form-control" size="9" maxlength="9"  value="' + 0 + '"></td>';
             row += '</tr>';
             this.$('#directvfo').append(row);
         },
