@@ -35,6 +35,9 @@ var path = require('path');
 var _ = require("underscore")._;
 var _s = require('underscore.string');
 
+var NwBuilder = require('nw-builder');
+var exec = require('child_process').exec;
+
 
 gulp.task('default', function () {
     console.log("*******************");
@@ -261,7 +264,20 @@ gulp.task('nwjs_copy_build', ['build'], function () {
 });
 
 /**
- * Build the NWJS app
+ * Optimize the files for production
+ */
+gulp.task('nwjs_optimize', ['nwjs'], function(cb) {
+    exec('./build-tools/build-nwjs.sh', function (err, stdout, stderr) {
+        console.log(stdout);
+        console.log(stderr);
+        cb(err);
+    });
+});
+
+/**
+ * Build the NWJS app:
+ *  - Makes sure the javascript is built
+ *  - copy the additional files from the OEM directory into dist and debug
  */
 gulp.task('nwjs', ['build', 'nwjs_copy_build'], function () {
     return gulp.src(paths.nwjs_files, {
@@ -269,7 +285,24 @@ gulp.task('nwjs', ['build', 'nwjs_copy_build'], function () {
         })
         .pipe(gulp.dest(paths.nwjs_dist))
         .pipe(gulp.dest(paths.nwjs_debug));
+
 });
+
+/**
+ * Assemble a NWJS binary
+ */
+gulp.task('nwjs_bin', ['nwjs_optimize'], function () {
+    var nw = new NwBuilder({
+        files: paths.nwjs_dist + '**/**', // use the glob format
+        platforms: ['osx64'],
+        flavor: 'normal',
+        buildDir: 'dist',
+        cacheDir: 'build/cache',
+        macIcns: paths.nwjs_dist + 'app.icns'
+    });
+    nw.on('log',  console.log);
+    return nw.build();
+})
 
 /*
  * Copy the build files to the Electron directory

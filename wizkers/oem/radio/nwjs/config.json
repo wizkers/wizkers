@@ -1,0 +1,34 @@
+{
+
+    "nwjs_path": "/Users/lafargue/Documents/Electronics/Toolbox/Viewer/nwjs/nwjs-v0.18.8-osx-x64/nwjs.app",
+    "source_path": "/Users/lafargue/Documents/Electronics/Toolbox/Viewer/Vizapp/wizkers/dist/nwjs-debug",
+    "build_path": "/Users/lafargue/Desktop",
+
+    "name": "WizkersRadio",
+    "bundle_id": "io.wizkers.nwjs.radio",
+    "version": "0.3.2",
+    "bundle_version": "3002",
+    "copyright": "© Edouard Lafargue 2017",
+    "icon_path": "/Users/lafargue/Documents/Electronics/Toolbox/Viewer/Vizapp/wizkers/dist/nwjs-debug/app.icns",
+
+
+    "identity": "LK12345678",
+    "identity_installer": "LK12345679",
+    "entitlements": [
+      "com.apple.security.network.client",
+      "com.apple.security.assets.movies.read-only"
+    ],
+
+
+    "app_category": "public.app-category.utilities",
+    "app_sec_category": "public.app-category.productivity",
+
+    "plist": {
+        "NSSampleProperty1": "Property value 1",
+        "NSSampleProperty2": {
+            "NSSub1": "Sub-property value 1",
+            "NSSub2": "Sub-property value 1"
+        }
+    },
+    "uglify_js": "false"
+}
