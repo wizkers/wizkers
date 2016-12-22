@@ -172,11 +172,16 @@ require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings'
          'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'chromestorage'], function ($, _, Backbone, Router, Settings, InstrumentManager,
     LinkManager, OutputManager, Instrument, Analytics) {
 
+    // Populate the standard MacOS menus:
+    var m = new nw.Menu({type:"menubar"});
+    m.createMacBuiltin("Wizkers:Radio");
+    nw.Window.get().menu = m;
+
     // Initialize our Analytics object to get stats on app usage
     stats = new Analytics();
 
     // Stats for the Chrome app
-    //stats.init('UA-66729721-6');
+    stats.init('UA-66729721-6');
 
     // Get our settings here, and
     // share them afterwards, rather than requesting it

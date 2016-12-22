@@ -3,7 +3,7 @@
   "main": "www/chrome.html",
   "icon": "icon.png",
   "version": "m0.3.2",
-  "nodejs": false,
+  "nodejs": true,
   "window": {
     "width": 1280,
     "height": 800
