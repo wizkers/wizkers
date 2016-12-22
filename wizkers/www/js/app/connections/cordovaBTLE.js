@@ -130,13 +130,18 @@ define(function (require) {
                 isNotification: true
             };
             bluetoothle.subscribe(subscribeSuccess, function (err) {
+                // We get a callback here both when subscribe fails and when the
+                // device disconnects - only take action when we have a subscribe
+                // fail, that's it.
+                if (err.error == 'isDisconnected')
+                    return; // don't take action, the disconnected message
                 // We didn't find the service we were looking for, this means
                 // this is probably not the right device. Tell the user!
                 stats.fullEvent('Cordova BLE', 'subscribe_error', err.message);
                 self.trigger('status', {
                     openerror: true,
                     reason: 'Could not connect to the BLE service',
-                    description: + err.message
+                    description: err.message
                 });
                 // Do a disconnect to make sure we end up in a sane state:
                 self.close();
