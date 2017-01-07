@@ -677,6 +677,7 @@ define(function (require) {
 
                 setIcon("ATU", (f & 0x10));
                 setIcon("NR", (f & 0x04));
+                setIcon("SUB", (f & 0x40));
 
                 this.oldVFOA = val;
 
@@ -705,6 +706,10 @@ define(function (require) {
                 setIcon('RIT', rit);
                 var xit = parseInt(val.substr(22, 1));
                 setIcon('XIT', xit);
+                var split = parseInt(val.substr(30,1));
+                setIcon('SPLT', split);
+            } else if (cmd == 'FT') {
+                setIcon('SPLT', parseInt(val));
             } else if (cmd == "MD") {
                 setModeIcon(parseInt(val));
             } else if (cmd == "TB") {

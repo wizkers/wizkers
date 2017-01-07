@@ -174,8 +174,20 @@ define(function (require) {
         },
 
         save_screenshot: function () {
-            var cnv = $('#screenshot')[0];
-            window.open(cnv.toDataURL(), "screenshot.png");
+            chrome.fileSystem.chooseEntry({type: 'saveFile',
+                                          suggestedName: 'PX3-screenshot.png',
+                                          accepts: [ { extensions: ["png"]}]}, function(writableFileEntry) {
+                writableFileEntry.createWriter(function(writer) {
+                writer.onerror = function(){};
+                writer.onwriteend = function(e) {
+                    console.info('write complete');
+                };
+                var cnv = $('#screenshot')[0];
+                cnv.toBlob(function(blob){
+                    writer.write(blob, {type: 'image/png'});
+                });
+                }, function(){ console.error('Cannot save');});
+            });
         },
 
         queryKX3: function () {

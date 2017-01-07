@@ -50,7 +50,7 @@ define(function(require) {
                 // {  'address': 'name', 'address2': 'name2', etc... }
                 this.metadata = this.model.get('metadata');
                 if (Object.keys(this.metadata).length == 0) {
-                    this.metadata = {ipaddress: "127.0.0.1", port: "1432"};
+                    this.metadata = {ipaddress: "0.0.0.0", port: "1432"};
                     this.model.set('metadata', this.metadata);
                 }
             },

@@ -2,7 +2,7 @@
   "name": "Wizkers Radio",
   "main": "www/chrome.html",
   "icon": "icon.png",
-  "version": "m0.3.2",
+  "version": "m0.3.3",
   "nodejs": true,
   "window": {
     "width": 1280,

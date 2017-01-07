@@ -107,15 +107,15 @@ define(function (require) {
                 name: 'Medcom Inspector BLE',
                 type: 'app/instruments/inspector_ble/inspector_ble',
                 settings: null,
-                connectionsettings: 'app/views/instrument/bluetooth'
+                connectionsettings: 'app/views/instrument/bluetooth',
+//                connectionfilter: [ '39b31fec-b63a-4ef7-b163-a7317872007f']
             };
             this.supportedInstruments['bgeigie'] = {
                 name: 'Safecast bGeigie',
                 type: 'app/instruments/bgeigie/bgeigie',
                 settings: 'app/instruments/bgeigie/settings',
                 connectionsettings: 'app/views/instrument/bluetooth',
-                connectionfilter: 'ef080d8c-c3be-41ff-bd3f-05a5f4795d7f'
-            };
+                connectionfilter: ['ef080d8c-c3be-41ff-bd3f-05a5f4795d7f', '067978ac-b59f-4ec9-9c09-2ab6e5bdad0b']            };
         }
 
         /**
@@ -170,18 +170,25 @@ define(function (require) {
         this.setInstrument = function (instrument, cb) {
             var self = this;
             var type = instrument.get('type');
+            console.warn('Switching to instrument', type);
             for (var ins in this.supportedInstruments) {
                 if (ins == type) {
-                    current_instrument = instrument;
                     // Dynamically load the instrument:
                     require([this.supportedInstruments[ins].type], function (instrumentObject) {
                         // Nifty: we extend our instrument manager with the methods of our instrument.
                         // (since all instruments support the same API, a change of instrument
                         // overrides the methods)
                         _.extend(self, new instrumentObject());
-                        linkManager.setDriver(self.getDriver());
-                        self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
-                        cb();
+                        self.getDriver(function(driver) {
+                            linkManager.setDriver(driver);
+                            // Don't set ref to current instrument before the rest of the
+                            // instrument manager is initialized!
+                            current_instrument = instrument;
+                            console.warn('Trigger instrumentChanged');
+                            self.trigger('instrumentChanged'); // Tell views who rely on the instrument manager...
+                            cb();
+                        }, instrument); // this second argurment is only used by the s_level monitor
+                                        // because the instrument ref is not updated yet at that point.
                     });
                 }
             }

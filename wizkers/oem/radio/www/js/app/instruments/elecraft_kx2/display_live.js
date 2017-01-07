@@ -635,6 +635,7 @@ define(function (require) {
 
                     this.setIcon("ATU", (f & 0x10));
                     this.setIcon("NR", (f & 0x04));
+                    this.setIcon("SUB", (f & 0x40));
 
                     this.oldVFOA = val;
 
@@ -663,6 +664,10 @@ define(function (require) {
                     this.setIcon('RIT', rit);
                     var xit = parseInt(val.substr(22, 1));
                     this.setIcon('XIT', xit);
+                    var split = parseInt(val.substr(30,1));
+                    this.setIcon('SPLT', split);
+                } else if (cmd == 'FT') {
+                    this.setIcon('SPLT', parseInt(val));
                 } else if (cmd == "MD") {
                     this.setModeIcon(parseInt(val));
                 } else if (cmd == "TB") {

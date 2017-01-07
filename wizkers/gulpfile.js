@@ -295,9 +295,12 @@ gulp.task('nwjs_bin', ['nwjs_optimize'], function () {
     var nw = new NwBuilder({
         files: paths.nwjs_dist + '**/**', // use the glob format
         platforms: ['osx64'],
+        // version: '0.18.1-mas',
+        downloadUrl: 'https://dl.nwjs.io/',
         flavor: 'normal',
         buildDir: 'dist',
         cacheDir: 'build/cache',
+        macPlist: oem_directory + '/nwjs/Info.plist',
         macIcns: paths.nwjs_dist + 'app.icns'
     });
     nw.on('log',  console.log);

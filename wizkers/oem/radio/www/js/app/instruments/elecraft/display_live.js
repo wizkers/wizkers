@@ -704,7 +704,7 @@ define(function (require) {
 
                 setIcon("ATU", (f & 0x10));
                 setIcon("NR", (f & 0x04));
-                setIcon("SUB", (f & 0x40))
+                setIcon("SUB", (f & 0x40));
 
                 this.oldVFOA = val;
 

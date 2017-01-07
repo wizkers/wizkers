@@ -135,8 +135,18 @@ define(function (require) {
                 comment: this.model.get('comment'),
                 metadata: this.model.get('metadata')
             };
-            var uri = encodeURI(header + JSON.stringify(xports));
-            window.open(uri, this.model.get('type') + ".json");
+            var settings = JSON.stringify(xports);
+            chrome.fileSystem.chooseEntry({type: 'saveFile',
+                                          suggestedName: 'Wizkers-settings.json',
+                                          accepts: [ { extensions: ["json"]}]}, function(writableFileEntry) {
+                writableFileEntry.createWriter(function(writer) {
+                writer.onerror = function(){};
+                writer.onwriteend = function(e) {
+                    console.info('write complete');
+                };
+                    writer.write(new Blob([settings]), {type: 'text/json'});
+                }, function(){ console.error('Cannot save');});
+            });
         },
 
         change: function (event) {
