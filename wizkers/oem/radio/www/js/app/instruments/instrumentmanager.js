@@ -92,6 +92,12 @@ define(function (require) {
                 settings: 'app/instruments/yaesu_817nd/settings',
                 connectionsettings: 'app/views/instrument/serialport'
             },
+            "yaesu_ft450d": {
+                name: "Yaesu FT-450D",
+                type: 'app/instruments/yaesu_ft450d/yaesu_ft450d',
+                settings: 'app/instruments/yaesu_ft450d/settings',
+                connectionsettings: 'app/views/instrument/serialport'
+            },
             "slevel_monitor": {
                 name: "S-Level monitor",
                 type: 'app/instruments/slevel_monitor/slevel_monitor',
@@ -115,7 +121,13 @@ define(function (require) {
                 type: 'app/instruments/kenwood_v71/kenwood_v71',
                 settings: 'app/instruments/kenwood_v71/settings',
                 connectionsettings: 'app/views/instrument/serialport'
-            }
+            },
+            "fdm_duo": {
+                name: "ELAD FDM-DUO",
+                type: 'app/instruments/fdm_duo/fdm_duo',
+                settings: 'app/instruments/fdm_duo/settings',
+                connectionsettings: 'app/views/instrument/serialport'
+            },
         };
 
         // Sark110 support in all modes _but_ server
