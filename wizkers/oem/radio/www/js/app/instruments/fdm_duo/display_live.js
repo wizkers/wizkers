@@ -213,7 +213,8 @@ define(function (require) {
 
             this.slevel = 0;
             this.plevel = 0;
-            this.ptt = false;
+            this.dispvfo = '';
+            this.ptt = 42; // Don't initialize to true or false !
 
             // Bad design: this has to be consistent with the settings in settings_wizkers.js
             // (sorry)
@@ -523,33 +524,32 @@ define(function (require) {
             // If we have a pre-parsed element, use it (faster!)
             if (data.vfoa) {
                 this.$("#vfoa-direct").val(data.vfoa/1e6);
-                // Format the VFO as 000 000.000
-                var vfostr = ('          ' + (data.vfoa/1000).toFixed(3)).slice(-10);
-                this.$('#kx3 #vfo_text').html(vfostr);
-                // return;
             } else if (data.vfob) {
                 this.$("#vfob-direct").val(data.vfob / 1e6);
-                // return;
+            }
+
+            if (data.disp_freq) {
+                // Format the VFO as 000 000.000
+                var vfostr = ('          ' + (data.disp_freq/1000).toFixed(3)).slice(-10);
+                this.$('#kx3 #vfo_text').html(vfostr);
             }
 
             if (data.rssi) {
                 this.$('#rssi_text').html(('   ' + data.rssi).slice(-3));
             }
 
-
-            if (data.ptt != undefined) {
-                if (this.ptt == data.ptt)
-                    return;
+            if (data.ptt != undefined && this.ptt != data.ptt) {
                 this.ptt = data.ptt;
-                // Adjust the Bargraph here:
-                // so that we don't do this later and waste cycles
-                for (var i = 0; i < 20; i++) {
-                    this.$('#bgs' + i).hide();
+                if (this.ptt) {
+                    setIcon('TX', true);
+                    setIcon('RX', false);
+                } else {
+                    setIcon('TX', false);
+                    setIcon('RX', true);
                 }
-                this.slevel = 0;
             }
 
-            if (data.slevel) {
+            if (data.slevel != undefined) {
 
                 // We want to optimize drawing so we only hide/unhide the`
                 // difference between 2 readings
@@ -566,6 +566,13 @@ define(function (require) {
                     }
                 } // if s == this.slevel we do nothing, of course
                 this.slevel = data.slevel;
+            }
+
+            if (data.dispvfo != undefined) {
+                // We only get updates when this changes
+                setIcon(this.dispvfo, false);
+                setIcon(data.dispvfo,true);
+                this.dispvfo = data.dispvfo;
             }
 
             // No pre-parsed data, we are using the raw

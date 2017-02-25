@@ -80,10 +80,7 @@ define(function (require) {
 
         // We want to keep track of radio operating values and only send them to the
         // front-end if they change
-        var radio_vals = {
-            'FA': '',
-            'FB': ''
-        };
+        var radio_vals = {};
 
         // We need the model ID to accomodate for the various radio model
         /// variants. The ID is requested upon driver open.
@@ -128,6 +125,8 @@ define(function (require) {
         var resetRadioVals = function() {
             radio_vals.FA = '';
             radio_vals.FB = '';
+            radio_vals.FR = '';
+            radio_vals.IF = '';
         }
 
         // Format can act on incoming data from the radio, and then
@@ -170,6 +169,9 @@ define(function (require) {
                 case 'FB':
                     resp = parseFreq(data);
                     break;
+                case 'IF':
+                    resp = parseIF(data);
+                    break;
                 case 'RI': // RSSI
                     resp.rssi = parseInt(data.substr(3)); // Note: we remove the negative sign
                     break;
@@ -179,6 +181,10 @@ define(function (require) {
                     var slevels = [ 0,0,1,2,3,4,5,5,6,7,8,9,10,10,20,20,30,30,40,40,50,50,60];
                     resp.slevel = slevels[rawval];
                     resp.slevel_raw = rawval;
+                    break;
+                case 'FR': // What's the frequency that's displayed on the screen
+                    var displayed_freq = [ 'A', 'B', 'MEM'];
+                    resp.dispvfo = displayed_freq[parseInt(data[2])];
                     break;
             }
             resp.raw = data;
@@ -199,6 +205,25 @@ define(function (require) {
             } else {
                 return { vfob: f};
             }
+        }
+
+        var parseIF = function(data) {
+            var dvfo = [ 'A', 'B', 'MEM'];
+            var resp = {
+                  dispvfo: dvfo[parseInt(data[30])],
+                 disp_freq: parseInt(data.substr(2,11)),
+                 rit_state: parseInt(data[23]),
+                 ptt: parseInt(data[28])
+            };
+            switch (resp.dispvfo) {
+                case 'A':
+                    resp.vfoa = resp.disp_freq;
+                    break;
+                case 'B':
+                    resp.vfob = resp.disp_freq;
+                    break;
+            }
+            return resp;
         }
 
 
@@ -255,7 +280,7 @@ define(function (require) {
 
             // In my experience the FDM-DUO cannot get CAT commands very fast, which is
             // weird... but we can ask for many commands in one go
-            this.output({command: 'raw', arg: 'FA;FB;FR;FT;MD;SM0;RI;RP;'});
+            this.output({command: 'raw', arg: 'IF;FT;MD;SM0;RI;RP;'});
 
         };
 
