@@ -549,6 +549,25 @@ define(function (require) {
                 this.slevel = 0;
             }
 
+            if (data.slevel) {
+
+                // We want to optimize drawing so we only hide/unhide the`
+                // difference between 2 readings
+                var ofs = 0;
+                if (data.slevel > this.slevel) {
+                    // We have to show new bars above this.slevel
+                    for (var i = this.slevel+ofs+1; i <= data.slevel+ofs ; i++) {
+                        this.$('#smeter-' + i).show();
+                    }
+                } else if (data.slevel < this.slevel) {
+                    // We have to hide bars above data.slevel
+                    for (var i = data.slevel + ofs+1 ; i <= this.slevel+ofs ; i++) {
+                        this.$('#smeter-' + i).hide();
+                    }
+                } // if s == this.slevel we do nothing, of course
+                this.slevel = data.slevel;
+            }
+
             // No pre-parsed data, we are using the raw
             // string in the packet:
             var cmd = data.raw.substr(0, 2);

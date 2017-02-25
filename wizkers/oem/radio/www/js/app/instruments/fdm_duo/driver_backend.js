@@ -80,10 +80,10 @@ define(function (require) {
 
         // We want to keep track of radio operating values and only send them to the
         // front-end if they change
-        var vfoa_sql = -1;
-        var vfob_sql = -1;
-        var vfoa_freq = '';
-        var vfob_freq = '';
+        var radio_vals = {
+            'FA': '',
+            'FB': ''
+        };
 
         // We need the model ID to accomodate for the various radio model
         /// variants. The ID is requested upon driver open.
@@ -121,6 +121,15 @@ define(function (require) {
             }
         };
 
+
+        /**
+         *
+         */
+        var resetRadioVals = function() {
+            radio_vals.FA = '';
+            radio_vals.FB = '';
+        }
+
         // Format can act on incoming data from the radio, and then
         // forwards the data to the app through a 'data' event.
         //
@@ -135,25 +144,26 @@ define(function (require) {
                 return;
             }
 
-            // if (commandQueue.length == 0) {
-            //     console.warn('Received data but we didn\'t expect anything', data);
-            // }
-
             clearTimeout(watchDog);
-
-            // if (!queue_busy) {
-            //     console.info('We received a complete data packet but we don\'t have the queue_busy flag set');
-            // }
 
             // At this stage, we know we're expecting a value
             var cmd = '';
-            //if (commandQueue.length)
-            //    cmd = commandQueue.shift();
             queue_busy = false;
 
             //console.log(data);
             var resp = {};
             var cmd = data.substr(0,2);
+
+            // Bail early if we have already sent this
+            // value, so that we don't waste network/CPU
+            // cycles
+            if (radio_vals[cmd] != undefined) {
+                if (radio_vals[cmd] == data) {
+                        scheduleProcessQueue();
+                        return;
+                }
+                radio_vals[cmd] = data;
+            }
 
             switch (cmd) {
                 case 'FA':
@@ -163,37 +173,12 @@ define(function (require) {
                 case 'RI': // RSSI
                     resp.rssi = parseInt(data.substr(3)); // Note: we remove the negative sign
                     break;
-                case 'get_menu':
-
-                    break;
-                case 'get_power':
-
-                    break;
-                case 'get_uid':
-                    resp = { uid: ibstr };
-                    break;
-                case 'get_control':
-
-                    break;
-                case 'get_memory':
-
-                    break;
-                case 'get_memory_name':
-
-                    break;
-                case 'set_memory':
-
-                    break;
-                case 'set_memory_name':
-
-                    break;
-                case 'get_mem_channel':
-
-                    break;
-                case 'id':
-
-                    break;
-                case 'raw':
+                case 'SM': //S-Meter
+                    var rawval = parseInt(data.substr(2));
+                    // Normalize to S values: S0 to S9+60
+                    var slevels = [ 0,0,1,2,3,4,5,5,6,7,8,9,10,10,20,20,30,30,40,40,50,50,60];
+                    resp.slevel = slevels[rawval];
+                    resp.slevel_raw = rawval;
                     break;
             }
             resp.raw = data;
@@ -208,14 +193,10 @@ define(function (require) {
 
         var parseFreq = function(str) {
             var vfo = str[1].toLowerCase();
-            if ((vfo == 'a' && str == vfoa_freq) || (vfo == 'b' && str == vfob_freq))
-                return {};
             var f = parseInt(str.substr(2));
             if (vfo =='a') {
-                vfoa_freq = str;
                 return { vfoa: f};
             } else {
-                vfob_freq = str;
                 return { vfob: f};
             }
         }
@@ -253,8 +234,7 @@ define(function (require) {
                 // This driver auto-detects the radio model to adapt to the small
                 // differences from one model to the next, so we need to send the "ID"
                 // command after open.
-                vfoa_freq = '';
-                vfob_freq = '';
+                resetRadioVals();
                 self.output({command: 'id'});
             } else {
                 // We remove the listener so that the serial port can be GC'ed
@@ -274,8 +254,8 @@ define(function (require) {
             // when the radio transmits, makes much more sense
 
             // In my experience the FDM-DUO cannot get CAT commands very fast, which is
-            // weird... but we can ask for many commands on one line`
-            this.output({command: 'raw', arg: 'FA;FB;FR;FT;MA;MB;MD;SM0;RI;RP;'});
+            // weird... but we can ask for many commands in one go
+            this.output({command: 'raw', arg: 'FA;FB;FR;FT;MD;SM0;RI;RP;'});
 
         };
 
@@ -464,11 +444,8 @@ define(function (require) {
         // period in seconds
         this.startLiveStream = function (period) {
             var self = this;
-            vfoa_sql = -1;
-            vfob_sql = -1;
-            vfoa_freq = '';
-            vfob_freq = '';
-
+            // Reset our saved values:
+            resetRadioVals();
             if (proto) {
                 // We are connected to a remote Wizkers instance using Netlink,
                 // and that remote instance is in charge of doing the Live Streaming
