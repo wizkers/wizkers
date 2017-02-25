@@ -322,21 +322,19 @@ define(function (require) {
                         cmd_string = prefix + freq + ';' + prefix;
                     }
                     break;
-                case 'set_vfo_mode':
-                    break;
                 case 'get_frequency':
                     if (cmd.arg == 'a')
-                        vfoa_freq = '';
+                        radio_vals.FA = '';
                     else
-                        vfob_freq = '';
+                        radio_vals.FB = '';
+                    // NO BREAK HERE !
                 case 'poll_frequency':
                     cmd_string = 'F' + ((cmd.arg == 'a') ? 'A' : 'B');
                     break;
-                case 'get_sql':
-                    break;
-                case 'get_uid':
-                    break;
-                case 'get_menu':
+                case 'ptt':
+                    // Ask for IF afterwards to trigger an update of the
+                    // display
+                    cmd_string = (cmd.arg ? 'TX' : 'RX') + ';IF';
                     break;
                 case 'get_power':
                     break;

@@ -66,23 +66,8 @@ define(function (require) {
          * We accept either a preformatted string of 11 characters, or a number in MHz, both are OK
          */
         this.setVFO = function (f, vfo) {
-
             lm.sendCommand({command: 'set_frequency', arg: { freq: f, vfo: vfo}});
             return;
-            var freq;
-            if (typeof f == 'string') {
-                freq = f;
-            } else {
-                freq = ("00000000000" + (parseInt(f*1e6 ).toString())).slice(-11); // Nifty, eh ?
-            }
-            if (freq.indexOf("N") > -1) { // detect "NaN" in the string
-                console.warn("Invalid VFO spec");
-                lm.sendCommand((vfo == 'A' ||  vfo == 'a') ? 'FA;' : 'FB;');
-            } else {
-                //console.log("VFO" + vfo + ": " + freq);
-                lm.sendCommand(((vfo == 'A' ||  vfo == 'a') ? 'FA' : 'FB') + freq + ';');
-            }
-            lm.sendCommand('BN;'); // Refresh band number (radio does not send it automatically)
         };
 
         this.getVFO = function(vfo) {
@@ -112,8 +97,7 @@ define(function (require) {
          * if key = true, they transmit
          */
         this.ptt = function(key) {
-            var cmd = (key) ? 'TX;' : 'RX;';
-            lm.sendCommand(cmd);
+            lm.sendCommand({command: 'ptt', arg: key});
         }
 
         /**

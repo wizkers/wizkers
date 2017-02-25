@@ -200,7 +200,7 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:zoom="0.67425131"
-     inkscape:cx="577.38355"
+     inkscape:cx="457.2503"
      inkscape:cy="249.23465"
      inkscape:window-x="1159"
      inkscape:window-y="2182"
@@ -577,13 +577,14 @@
      inkscape:label="LCD Screen"
      style="display:inline;opacity:1"
      transform="translate(88.395766,135.91569)"><rect
-       style="opacity:1;fill:#08ffe7;fill-opacity:0.85350318;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="rect4318"
+       style="opacity:1;fill:#08ffe7;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="screen_bg"
        width="584.9375"
        height="204.175"
        x="0"
        y="-5.6843419e-14"
-       ry="9.2330151" /><path
+       ry="9.2330151"
+       inkscape:label="#rect4318" /><path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:4.80000019;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 47.460048,67.727364 370.040062,0"
        id="path4643"

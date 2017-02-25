@@ -541,9 +541,11 @@ define(function (require) {
             if (data.ptt != undefined && this.ptt != data.ptt) {
                 this.ptt = data.ptt;
                 if (this.ptt) {
+                    this.$('#kx3 #screen_bg').css('fill', '#ff0854');
                     setIcon('TX', true);
                     setIcon('RX', false);
                 } else {
+                    this.$('#kx3 #screen_bg').css('fill', '#08ffe7');
                     setIcon('TX', false);
                     setIcon('RX', true);
                 }
