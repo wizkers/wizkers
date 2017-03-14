@@ -80,7 +80,7 @@ define(function(require) {
                 else {
                     // If we have several devices detected, then we need
                     // to warn the user !
-                    if (this.$('#port option').length > 1) {
+                    if (this.$('#port option').length > 2) {
                         this.$('#scan-comment').html('<b>Warning:</b> several bGeigies detected, the closest one has been selected for you.');
                     }
                     this.$('#create-instrument').prop('disabled', false).html('Finish setup');

@@ -275,6 +275,9 @@ define(function (require) {
         var cordovaDiscoverBluetooth = function (filter) {
 
             var device_names = {};
+            // We can do autoconnect on devices that have a discovery filter
+            if (filter)
+                device_names = { 'auto': { name: 'Autoconnect', address: filter, rssi: 100 }};
             // OK, we have Bluetooth, let's do the discovery now
             function startScanSuccess(status) {
                 // Stop discovery after 15 seconds.
@@ -291,7 +294,7 @@ define(function (require) {
                     // because the BTLE subsystem triggers events several times
                     // per second for each devices it sees as long as it sees them
                     if (device_names[status.address] == undefined ||
-                        (device_names[status.address] == undefined && device_names[status.address].name == status.address && status.name != undefined)) {
+                        (device_names[status.address].name == status.address && status.name != undefined)) {
                         device_names[status.address] = {
                             name: status.name || status.address,
                             address: status.address,

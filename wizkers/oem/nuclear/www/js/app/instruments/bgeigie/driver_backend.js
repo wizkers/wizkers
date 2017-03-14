@@ -43,7 +43,7 @@ define(function (require) {
             parser = Serialport.parsers.readline('\n');
 
         var CUSTOM_SERVICE_UUID  = 'ef080d8c-c3be-41ff-bd3f-05a5f4795d7f';
-        var SERIAL_PORT_UUID     = 'A1E8F5B1-696B-4E4C-87C6-69DFE0B0093B';
+        var SERIAL_PORT_UUID     = 'a1e8f5b1-696b-4e4c-87c6-69dfe0b0093b';
 
         var v200_service_uuid     = '067978ac-b59f-4ec9-9c09-2ab6e5bdad0b';
         var v200_serial_port_uuid = '067978ac-b99f-4ec9-9c09-2ab6e5bdad0b';
@@ -120,13 +120,15 @@ define(function (require) {
                 var s_uuid = '';
                 var c_uuid = '';
                 for (var i in stat.services) {
-                    if (stat.services[i].uuid == CUSTOM_SERVICE_UUID) {
+                    // Note: some api calls return upper case UUIDs, some lowercase, there is
+                    // apparently no consistency...
+                    if (stat.services[i].uuid.toLowerCase() == CUSTOM_SERVICE_UUID) {
                         s_uuid = CUSTOM_SERVICE_UUID;
                         c_uuid = SERIAL_PORT_UUID;
                         stats.instrumentEvent('blebee_version', 'v2.0.1');
                         self.trigger('data', { blebee_version: 'v2.0.1'});
                         break;
-                    } else if (stat.services[i].uuid == v200_service_uuid) {
+                    } else if (stat.services[i].uuid.toLowerCase() == v200_service_uuid) {
                         s_uuid = v200_service_uuid;
                         c_uuid = v200_serial_port_uuid;
                         stats.instrumentEvent('blebee_version', 'v2.0.0');

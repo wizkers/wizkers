@@ -192,9 +192,15 @@ define(function (require) {
             function doConnect(status) {
                 if (status.status != 'enabled')
                     return;
-                bluetoothle.connect(trackConnect, trackError, {
-                    address: devAddress
-                });
+
+                // Special case: if devAddress is a device filter,
+                // then do an Autoconnect
+                if (devAddress.length > 18)
+                    autoConnect(devAddress.split(','));
+                else
+                    bluetoothle.connect(trackConnect, trackError, {
+                        address: devAddress
+                    });
 
             }
 
@@ -212,6 +218,80 @@ define(function (require) {
         // Private methods
         /////////////
 
+        /**
+         * This implements BLE Autoconnect using a device filter.
+         * Connection will be attempted with the first returned device that
+         * is discovered and matches the filter.
+         */
+        var autoConnect = function (filter) {
+
+            var device_names = {};
+            var timeoutTimer;
+            // OK, we have Bluetooth, let's do the discovery now
+            function startScanSuccess(status) {
+                // Stop discovery after 15 seconds.
+                if (status.status == 'scanStarted') {
+                    timeoutTimer = setTimeout(function () {
+                        bluetoothle.stopScan(function () {
+                            console.log('Stopped scan');
+                            self.trigger('status', {
+                                                openerror: true,
+                                                reason: 'No device found',
+                                                description: 'Could not find a BLE device matching what we are looking for.'
+                                            });
+                        }, function () {});
+                    }, 15000);
+                }
+                if (status.address) {
+                        console.log('New BT Device', status);
+                        clearTimeout(timeoutTimer);
+                        bluetoothle.stopScan(function() {
+                            // We will now connect using this device
+                            devAddress = status.address;
+                            self.open();
+                        }, function() {});
+                }
+            }
+
+            function startScanError(status) {
+                console.log(status);
+            }
+
+            function startScan() {
+                bluetoothle.startScan(startScanSuccess, startScanError, {
+                    "services": filter,
+                    allowDuplicates: true
+                });
+            };
+
+            function success(status) {
+                if (status.status == 'enabled') {
+                    // Before anything else, make sure we have the right permissions (Android 6 and above, not
+                    // tested on iOS, probably not compatible
+                    bluetoothle.hasPermission(function (status) {
+                        if (!status.hasPermission) {
+                            bluetoothle.requestPermission(function (status) {
+                                if (status.requestPermission) {
+                                    self.trigger('status', {scanning: true});
+                                    startScan();
+                                }
+                            });
+                        } else {
+                            startScan();
+                        }
+                    });
+                } else {
+                    // The user didn't enable BT... error ?
+                }
+            };
+
+            function error(err) {};
+
+            bluetoothle.initialize(success, error, {
+                request: true,
+                statusReceiver: false
+            });
+        }
 
         /////////////
         //   Callbacks
