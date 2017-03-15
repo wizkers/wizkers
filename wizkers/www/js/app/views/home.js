@@ -279,6 +279,16 @@ define(function (require) {
 
         // Callback every 2/3 seconds from the instrument:
         updatestatus: function (data) {
+            // Sent as a status if coming from BT discovery
+            if (data.openerror) {
+                // Give feedback to the user on why we could not open the device
+                if (data.reason)
+                    this.$('#errorreason').html(data.reason);
+                if (data.description)
+                    this.$('#errordetail').html(data.description);
+
+                $('#ErrorModal').modal();
+            }
             // First of all, if we don't have an instrument, no need to update our status:
             if (this.instrument == null)
                 return;

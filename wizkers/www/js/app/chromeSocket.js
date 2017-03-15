@@ -276,8 +276,10 @@ define(function (require) {
 
             var device_names = {};
             // We can do autoconnect on devices that have a discovery filter
-            if (filter)
+            if (filter) {
                 device_names = { 'auto': { name: 'Autoconnect', address: filter, rssi: 100 }};
+                self.trigger('ports', device_names);
+            }
             // OK, we have Bluetooth, let's do the discovery now
             function startScanSuccess(status) {
                 // Stop discovery after 15 seconds.
@@ -333,8 +335,14 @@ define(function (require) {
                             startScan();
                         }
                     });
-                } else {
-                    // The user didn't enable BT... error ?
+                } else if (status.status == 'disabled') {
+                    // The user didn't enable BT... error!
+                    // The user didn't enable BT...
+                    self.trigger('status', {
+                        openerror: true,
+                        reason: 'Bluetooth is disabled',
+                        description: 'Please turn on Bluetooth in your device settings.'
+                    });
                 }
             };
 

@@ -135,7 +135,6 @@ define(function (require) {
                     $("#login").html("Login");
                     $("#login").attr('disabled', false);
                     return;
-                    break;
                 case 200: // success
                     console.log(this.statusText);
                     err = false;
@@ -355,6 +354,19 @@ define(function (require) {
 
         // Callback every 2/3 seconds from the instrument:
         updatestatus: function (data) {
+            // Sent as status message if coming from the BT discovery phase
+            if (data.openerror) {
+                // Reset the currentStatus to make sure our buttons get back to the
+                // correct state
+                this.currentState = 'error';
+                // Give feedback to the user on why we could not open the device
+                if (data.reason)
+                    this.$('#errorreason').html(data.reason);
+                if (data.description)
+                    this.$('#errordetail').html(data.description);
+
+                $('#ErrorModal').modal();
+            }
             // First of all, if we don't have an instrument, no need to update our status:
             if (this.instrument == null)
                 return;

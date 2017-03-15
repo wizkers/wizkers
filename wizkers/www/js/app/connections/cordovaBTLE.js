@@ -190,6 +190,15 @@ define(function (require) {
 
             // Callback once we know Bluetooth is enabled
             function doConnect(status) {
+                if (status.status == 'disabled') {
+                    // The user didn't enable BT...
+                    self.trigger('status', {
+                        openerror: true,
+                        reason: 'Bluetooth is disabled',
+                        description: 'Please turn on Bluetooth in your device settings.'
+                    });
+                    return;
+                }
                 if (status.status != 'enabled')
                     return;
 
@@ -280,8 +289,13 @@ define(function (require) {
                             startScan();
                         }
                     });
-                } else {
-                    // The user didn't enable BT... error ?
+                } else if (status.status == 'disabled') {
+                    // The user didn't enable BT...
+                    self.trigger('status', {
+                        openerror: true,
+                        reason: 'Bluetooth is disabled',
+                        description: 'Please turn on Bluetooth in your device settings.'
+                    });
                 }
             };
 
