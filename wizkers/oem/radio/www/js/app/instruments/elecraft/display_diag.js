@@ -95,6 +95,13 @@ define(function (require) {
                self.MemSettings.render();
             });
 
+            require(['app/instruments/elecraft/settings_atudiag'], function(view) {
+               self.ATUDiag = new view();
+               $('#settings-atudiag', self.el).append(self.ATUDiag.el);
+               self.ATUDiag.render();
+            });
+
+
             if (this.iskx3) {
                 this.$('.hide-kx3').hide();
                 this.queryKX3();
@@ -124,6 +131,8 @@ define(function (require) {
                 this.FlashSettings.onClose();
             if (this.MemSettings)
                 this.MemSettings.onClose();
+            if (this.ATUDiag)
+                this.ATUDiag.onClose();
         },
 
         events: {
@@ -155,6 +164,10 @@ define(function (require) {
 
             if (e.target.innerText == 'Memories') {
                 this.MemSettings.refresh();
+            }
+
+            if (e.target.innerText == 'ATU Diagnostics') {
+                this.ATUDiag.refresh();
             }
 
         },

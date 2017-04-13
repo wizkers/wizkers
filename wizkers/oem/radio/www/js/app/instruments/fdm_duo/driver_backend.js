@@ -307,7 +307,7 @@ define(function (require) {
                 case 'set_frequency':
                     var freq = 0;
                     if (typeof cmd.arg.freq == 'string') {
-                        freq = f;
+                        freq = cmd.arg.freq;
                     } else {
                         freq = ("00000000000" + (parseInt(cmd.arg.freq*1e6 ).toString())).slice(-11); // Nifty, eh ?
                     }

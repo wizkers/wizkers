@@ -211,7 +211,7 @@ define(function (require) {
             case "F": // Set Frequency (VFOA):  F 14069582.000000
                 var freq = ("00000000000" + parseFloat(data.substr(2)).toString()).slice(-11); // Nifty, eh ?
                 console.log("Rigctld emulation: set frequency to " + freq);
-                linkManager.driver.setVFO(freq);
+                linkManager.driver.setVFO(freq, 'a');
                 c.sendMessage("RPRT 0\n");
                 break;
             case "m":

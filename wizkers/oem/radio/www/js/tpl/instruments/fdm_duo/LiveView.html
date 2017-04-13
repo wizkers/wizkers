@@ -7,6 +7,7 @@
                         <svg id="kx3"  viewBox="0 0 1718 529" preserveAspectRatio="xMidYMid"></svg>
                 </div>
             </div><!-- radio -->
+<!-- Disabled for now
             <div class="row" >
                 <div class="col-md-12" style="z-index: 0;">
                     <div style="text-align:center; padding-bottom: 5px;">
@@ -50,8 +51,8 @@
                             </div>
                         </div>
                 </div>
-            </div><!-- Band Buttons -->
-
+            </div>
+-->
         <!-- ******* -->
 
         </div> <!-- radio icon -->
@@ -123,12 +124,6 @@
                 <div id="xtrafunc-leftside" style="overflow: hidden; margin-top: -15px;" class="col-md-7">
                     <ul class="nav nav-tabs">
                         <li class="active"><a href="#memories" data-toggle="tab">Memories</a></li>
-                        <li><a href="#data-term" data-toggle="tab">Data</a></li>
-                        <li><a href="#extra" data-toggle="tab">Extra</a></li>
-                        <!--
-                        <li><a href="#audio-settings" data-toggle="tab">Audio</a></li>
-                        <li><a href="#logging" data-toggle="tab">Logging</a></li>
-                        -->
                     </ul>
                 <!-- Tab panes -->
                 <div class="tab-content">
@@ -158,100 +153,9 @@
                     </div>
 
                     </div> <!-- Memories -->
-                  <div class="tab-pane" id="data-term">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="input-group input-margin">
-                                <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-sm btn-primary submode-btn">
-                                        <input type="radio" name="data-submodes" id="data-submode-pskd">PSK D
-                                    </label>
-                                    <label class="btn btn-sm  btn-primary submode-btn">
-                                        <input type="radio" name="data-submodes" id="data-submode-fskd">FSK D
-                                    </label>
-                                    <label class="btn btn-sm  btn-primary submode-btn">
-                                        <input type="radio" name="data-submodes" id="data-submode-dataa">DATA A
-                                    </label>
 
-                                </div>&nbsp; &nbsp;
-                                <button type="button" class="btn btn-sm btn-default" id="data-stream-clear">Clear</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-6">
-                            <div class="input-group input-group-sm input-margin" id="data-mycall-grp">
-                                <span class="input-group-addon">Me:</span>
-                                <input type="text" class="form-control" id="data-mycall">
-                            </div>
-                        </div>
-                        <div class="col-xs-6">
-                            <div class="input-group input-group-sm input-margin" id="data-theircall-grp">
-                                <div class="input-group-btn">
-                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                            You: <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu" id="calls-dropdown" role="menu">
-                                        </ul>
-                                </div>
-                                <input style="margin-left:3px;" type="text" class="form-control" id="data-theircall">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <div class="input-group input-margin">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-default" id="data-cq">CQ</button>
-                                    <button type="button" class="btn btn-sm btn-default" id="data-ans">ANS</button>
-                                    <button type="button" class="btn btn-sm btn-default" id="data-qso">QSO</button>
-                                    <button type="button" class="btn btn-sm btn-default" id="data-me">Me</button>
-                                    <button type="button" class="btn btn-sm btn-default" id="data-brag">Brag</button>
-                                    <button type="button" class="btn btn-sm btn-default" id="data-kn">KN</button>
-                                    <button type="button" class="btn btn-sm btn-default" id="data-sk">SK</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                             <div class="input-group input-group-sm input-margin">
-                                 <span class="input-group-addon">Text:</span>
-                                 <input id="data-text-input" class="form-control" value="" type="text" maxlength="80">
-                                 <span class="input-group-btn"><button type="button" class="btn" id="data-text-send"><span class="glyphicon glyphicon-check"></span></button>
-                                 </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                                <textarea readonly id="data-stream" style="height:120px; width:98%;"></textarea>
-                        </div>
-                    </div>
-                  </div> <!-- Data terminal -->
-                  <div class="tab-pane" id="extra">
-                    <div class="row">
-                        <div class="col-md-6">
-                             <div class="input-group input-margin">
-                                 <span class="input-group-addon">
-                                     <input type="checkbox" id="enable-voltage-alert" aria-label="voltage alert">Voltage alert:
-                                     </span>
-                                 <input id="voltage-alert-level" class="form-control" value="9.5" type="number" maxlength="5">
-                                 <span class="input-group-addon">V</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-<!--
-                    <div class="tab-pane" id="audio-settings"><h4>Audio Settings</h4>
-                      <h4>Audio controls for phone operation will go there</h4>
-                    </div> --><!-- Audio Settings -->
-<!--                  <div class="tab-pane" id="logging"><h4>QSO Log controls will go here</h4>
-                  </div>--><!-- Logging -->
-                </div>
-                </div><!-- Extra functions -->
-                <div id="xtrafunc-rightside" class="col-md-5" style="z-index: 0;">
-                    <div id="waterfall"></div>
-                </div>
+
+            </div><!-- Extra functions -->
             </div>
 </div>
