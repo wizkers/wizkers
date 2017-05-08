@@ -118,6 +118,9 @@ define(function (require) {
             // The LP100A does not have line terminations, but the poll line
             // starts with a ";" and continues with 42 characters (?)
             if (data) {
+                // Safeguard - required on Android in particular
+                if (isNaN(ibIdx))
+                    ibIdx = 0;
                 // we sometimes get called without data, to further process the
                 // existing buffer
                 // First of all, append the incoming data to our input buffer:
