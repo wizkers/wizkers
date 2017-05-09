@@ -173,7 +173,7 @@ define(function (require) {
                         if (utils.checkBreakpoint('xs') || utils.checkBreakpoint('sm'))
                             numviewheight = $('#numview').outerHeight();
                         var mapheight = window.innerHeight - self.$el.offset().top - chartheight - numviewheight - 20;
-                        if (mapheight < 50) {
+                        if (mapheight < 100) {
                             self.$('#map_row').hide();
                             // Readjust the graph to take the rest of the space:
                             var chartheight = window.innerHeight - self.$el.offset().top - numviewheight - 20;

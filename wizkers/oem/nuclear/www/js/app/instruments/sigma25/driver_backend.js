@@ -35,7 +35,7 @@ define(function (require) {
 
     var Backbone = require('backbone'),
         Serialport = require('serialport'),
-        serialConnection = require('connections_serial');
+        serialConnection = require('connections/serial');
 
     var parser = function (socket) {
 

@@ -28,7 +28,7 @@ define(function (require) {
     var Backbone = require('backbone'),
         Serialport = require('serialport'), // Used for parsing only
         abutils = require('app/lib/abutils'),
-        btleConnection = require('connections_btle');
+        btleConnection = require('connections/btle');
 
 
     var parser = function (socket) {

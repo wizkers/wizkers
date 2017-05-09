@@ -168,11 +168,11 @@ define(function (require) {
                         // We want to take the numview height into account if screen is xs or sm
                         if (utils.checkBreakpoint('xs') || utils.checkBreakpoint('sm'))
                             numviewheight = $('#numview').outerHeight();
-                        var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 50;
+                        var mapheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 20;
                         if (mapheight < 50) {
                             self.$('#map_row').hide();
                             // Readjust the graph to take the rest of the space:
-                            var chartheight = window.innerHeight - $(self.el).offset().top - numviewheight - 50;
+                            var chartheight = window.innerHeight - $(self.el).offset().top - numviewheight - 20;
                             self.$('.geigerchart').height(chartheight);
                             // Then tell the chart to resize itself
                             if (self.plot && self.plot.rsc)

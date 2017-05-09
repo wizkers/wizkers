@@ -35,7 +35,7 @@ define(function (require) {
     "use strict";
 
     var Backbone = require('backbone'),
-        btleConnection = require('connections_btle'),
+        btleConnection = require('connections/btle'),
         abu = require('app/lib/abutils');
 
     var parser = function (socket) {

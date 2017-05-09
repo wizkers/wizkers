@@ -27,7 +27,7 @@ define(function (require) {
 
     var Backbone = require('backbone'),
         abutils = require('app/lib/abutils'),
-        btleConnection = require('connections_btle');
+        btleConnection = require('connections/btle');
 
 
     var parser = function (socket) {
@@ -76,6 +76,8 @@ define(function (require) {
          * Compare two BLE UUIDs in long and short (16 bit) formats
          */
         var sameUuid = function(u1, u2) {
+            u1 = u1.toLowerCase();
+            u2 = u2.toLowerCase();
             if (u1 == u2)
                 return true;
 
