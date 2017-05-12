@@ -104,7 +104,7 @@ define(function (require) {
 
             var post_options = {
                 host: 'api.safecast.org',
-                port: 443,
+                proto: 'https',
                 method: 'POST',
                 path: '/users/sign_in',
                 headers: {

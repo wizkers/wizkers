@@ -275,8 +275,10 @@ define(function (require) {
         var cordovaDiscoverBluetooth = function (filter) {
 
             var device_names = {};
-            // We can do autoconnect on devices that have a discovery filter
-            if (filter) {
+            // We can do autoconnect on devices that have a discovery filter,
+           // but this only works on Android 5.X and higher (API level 21 and later)
+           var filter_supported = (parseInt(device.version[0]) > 5);
+            if (filter_supported && filter) {
                 device_names = { 'auto': { name: 'Autoconnect', address: filter, rssi: 100 }};
                 self.trigger('ports', device_names);
             }
@@ -314,44 +316,47 @@ define(function (require) {
 
             function startScan() {
                 bluetoothle.startScan(startScanSuccess, startScanError, {
-                    "services": filter,
+                    services: (filter_supported) ? filter : '',
                     allowDuplicates: true
                 });
             };
 
             function success(status) {
-                if (status.status == 'enabled') {
-                    // Before anything else, make sure we have the right permissions (Android 6 and above, not
-                    // tested on iOS, probably not compatible
-                    bluetoothle.hasPermission(function (status) {
-                        if (!status.hasPermission) {
-                            bluetoothle.requestPermission(function (status) {
-                                if (status.requestPermission) {
-                                    self.trigger('status', {scanning: true});
-                                    startScan();
-                                }
-                            });
-                        } else {
-                            startScan();
-                        }
-                    });
-                } else if (status.status == 'disabled') {
-                    // The user didn't enable BT... error!
+                if (status.status == 'disabled') {
                     // The user didn't enable BT...
-                    self.trigger('status', {
-                        openerror: true,
-                        reason: 'Bluetooth is disabled',
-                        description: 'Please turn on Bluetooth in your device settings.'
-                    });
+                    bluetoothle.enable();
+                    setTimeout(function() {
+                        self.trigger('status', {scanning: true});
+                        startScan();
+                    }, 10000);
+                } else {
+                    self.trigger('status', {scanning: true});
+                    startScan();
                 }
             };
 
-            function error(err) {};
+            function btinit() {
+                bluetoothle.initialize(success, {
+                    request: false,
+                    statusReceiver: false
+                });
+            }
 
-            bluetoothle.initialize(success, error, {
-                request: true,
-                statusReceiver: false
+            // Before anything else, make sure we have the right permissions (Android 6 and above, not
+            // tested on iOS, probably not compatible
+            bluetoothle.hasPermission(function (status) {
+                if (!status.hasPermission) {
+                    bluetoothle.requestPermission(function (status) {
+                        if (status.requestPermission) {
+                            btinit();
+                        }
+                    });
+                } else {
+                    btinit();
+                }
             });
+
+
         }
 
         var discoverBluetooth = function (filter) {

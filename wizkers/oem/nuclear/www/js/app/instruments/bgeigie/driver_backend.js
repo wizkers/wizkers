@@ -221,6 +221,7 @@ define(function (require) {
             var fields = data.split(',');
             if (fields[0] != '$BNRDD') {
                 console.log('Unknown bGeigie sentence');
+                self.trigger('data', { error: "Err. Data" });
                 return;
             }
 
@@ -230,8 +231,10 @@ define(function (require) {
                 chk = chk ^ data.charCodeAt(i);
             }
             var sum = parseInt(data.substr(data.indexOf('*')+1), 16);
-            if ( chk != sum)
+            if ( chk != sum) {
+                self.trigger('data', { error: "Err. Checksum" });
                 return;
+            }
 
 
             var cpm = parseInt(fields[3]);

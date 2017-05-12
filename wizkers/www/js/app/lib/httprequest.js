@@ -165,9 +165,10 @@ define(function(require) {
                 throw "Invalid Method";
             if (options.host == undefined || options.host == "")
                 throw "Invalid Host";
-            options.path == options.path || "";
+            options.path = options.path || "";
+            options.proto = (options.proto || "http") + "://"
 
-            xhr.open(options.method, "http://" + options.host + options.path);
+            xhr.open(options.method, options.proto + options.host + options.path);
             if (options.headers != undefined) {
                 for (var i in options.headers) {
                     xhr.setRequestHeader(i, options.headers[i]);

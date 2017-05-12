@@ -64,6 +64,7 @@ define(function (require) {
                     this.$('#refresh').html('<img src="img/loading.gif">');
                 } else {
                     this.$('#refresh').html('<span class="glyphicon glyphicon-refresh"></span>');
+                    linkManager.off('ports', this.refreshDevices, this);
                 }
             }
         },
@@ -103,10 +104,10 @@ define(function (require) {
             var insType = this.model.get('type');
             linkManager.on('ports', this.refreshDevices, this);
             linkManager.getPorts(insType);
-            // Remove the callback after 15 seconds
+            // Remove the callback after one minute as a safeguard
             setTimeout(function () {
                 linkManager.off('ports', self.refreshDevices, self);
-            }, 15000);
+            }, 60000);
         }
 
     });

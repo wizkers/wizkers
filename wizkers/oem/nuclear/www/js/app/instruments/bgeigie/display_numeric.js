@@ -73,8 +73,19 @@ define(function (require) {
             if (data.replay_ts != undefined)
                 return;
 
-            if (data.reconnecting != 'undefined') {
+            if (data.reconnecting != undefined ) {
                 $('#numview_in', this.el).css('color', data.reconnecting ? '#a1a1a1' : '#000000');
+            }
+
+            if (data.error != undefined) {
+                // Provide visual feedback if we are receiving invalid data
+                // from the bGeigie - mostly a debug & diagnostic help
+                $('#readingvalid', this.el).addClass('label-info').removeClass('label-danger').removeClass('label-success');
+                setTimeout(function () {
+                    $('#readingvalid', this.el).removeClass('label-info');
+                    $('#readingvalid', this.el).removeClass('label-success').addClass('label-danger').html(data.error);
+                }, 250);
+                return;
             }
 
             if (typeof (data.cpm) == 'undefined')

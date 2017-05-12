@@ -78,11 +78,11 @@ require.config({
     map: {
         '*': {
             'socketio': 'app/chromeSocket',
-            'connections_serial': 'app/connections/cordovaSerial',
-            'connections_tcp': 'app/connections/chromeTcpSerial',
-            'connections_hid': 'app/connections/usbhid',
-            'connections_btle': 'app/connections/cordovaBTLE',
-            'connections_webrtc': 'app/connections/webrtc',
+            'connections/serial': 'app/connections/cordovaSerial',
+            'connections/tcp': 'app/connections/chromeTcpSerial',
+            'connections/hid': 'app/connections/usbhid',
+            'connections/btle': 'app/connections/cordovaBTLE',
+            'connections/webrtc': 'app/connections/webrtc',
             'serialport': 'app/lib/serialport',
 
         }
@@ -182,9 +182,9 @@ function go() {
             // If we are at the home menu level, 'back' will pause the app and attempt
             // to go to the previous Android screen before we started Wizkers
             if (window.location.hash == '') {
-                navigator.Backbutton.goBack();
+                cordova.plugins.backgroundMode.moveToBackground();
             } else {
-            window.history.back();
+                window.history.back();
             }
         }, true)
 

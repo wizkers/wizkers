@@ -194,9 +194,10 @@ define(function (require) {
                     // The user didn't enable BT...
                     self.trigger('status', {
                         openerror: true,
-                        reason: 'Bluetooth is disabled',
-                        description: 'Please turn on Bluetooth in your device settings.'
+                        reason: 'Bluetooth was disabled',
+                        description: 'Bluetooth is now enabled, wait 15 seconds then try to connect again.'
                     });
+                    bluetoothle.enable();
                     return;
                 }
                 if (status.status != 'enabled')
@@ -215,9 +216,7 @@ define(function (require) {
 
             // The Cordova BTLE plugin requires calling initialize at least once.
             // Note that it can be called multiple times, this is not an issue.
-            bluetoothle.initialize(doConnect, function (err) {
-                console.log(err);
-            }, {
+            bluetoothle.initialize(doConnect, {
                 request: true,
                 statusReceiver: false
             });
@@ -236,6 +235,7 @@ define(function (require) {
 
             var device_names = {};
             var timeoutTimer;
+
             // OK, we have Bluetooth, let's do the discovery now
             function startScanSuccess(status) {
                 // Stop discovery after 15 seconds.
@@ -294,14 +294,13 @@ define(function (require) {
                     self.trigger('status', {
                         openerror: true,
                         reason: 'Bluetooth is disabled',
-                        description: 'Please turn on Bluetooth in your device settings.'
+                        description: 'Automatically enabled bluetooth. Please wait 15 seconds and try connecting again.'
                     });
+                    bluetoothle.enable();
                 }
             };
 
-            function error(err) {};
-
-            bluetoothle.initialize(success, error, {
+            bluetoothle.initialize(success, {
                 request: true,
                 statusReceiver: false
             });
@@ -414,7 +413,7 @@ define(function (require) {
                 self.trigger('status', {
                     openerror: true,
                     reason: 'Device connection error',
-                    description: 'Could not connect to device.'
+                    description: 'Could not connect to device. In you just enabled bluetooth, you might have to wait up to 15 seconds before you can connect.'
                 });
             }
         }
