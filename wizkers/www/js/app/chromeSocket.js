@@ -359,6 +359,40 @@ define(function (require) {
 
         }
 
+        var discoverBluetoothWebAPI = function(filter) {
+            var device_names = {};
+
+            var updateDeviceName = function (device) {
+                if (filter != undefined) {
+                    if (device.uuids.indexOf(filter) == -1)
+                        return;
+                }
+                device_names[device.address] = {
+                    name: device.name,
+                    address: device.address
+                };
+                console.log('New BT Device', device);
+                self.trigger('ports', device_names);
+            };
+            var removeDeviceName = function (device) {
+                delete device_names[device.address];
+                self.trigger('ports', device_names);
+            };
+
+
+            $('#BTModal').modal('show');
+            $('#btscan').on('click', function() {
+                navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: ['battery_service']
+                })
+                .then(device => { updateDeviceName(device) })
+                .catch(error => { console.log(error); });
+            });
+
+
+        }
+
         var discoverBluetooth = function (filter) {
             var device_names = {};
 
