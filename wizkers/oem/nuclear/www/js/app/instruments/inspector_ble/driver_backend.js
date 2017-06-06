@@ -40,7 +40,7 @@ define(function (require) {
             port_close_requested = false,
             port_open_requested = false,
             isopen = false,
-            parser = Serialport.parsers.readline(' '); // Parse line on "space" character
+            parser = Serialport.parsers.readline(','); // Parse line on "comma" character
 
         var CUSTOM_SERVICE_UUID = '39b31fec-b63a-4ef7-b163-a7317872007f';
         var SERIAL_PORT_UUID = 'd68236af-266f-4486-b42d-80356ed5afb7';
@@ -116,6 +116,7 @@ define(function (require) {
 
                 // Now regularly ask the navigator for current position and refresh map
                 if (watchid == null) {
+                    current_loc = null;
                     watchid = navigator.geolocation.watchPosition(newLocation, geolocationError, {
                         maximumAge: 10000,
                         timeout: 20000,
@@ -152,7 +153,13 @@ define(function (require) {
         var geolocationError = function (err) {
             console.log('Location error', err);
             if (err.code == 3) {
-                location_status = 'no fix (timeout)';
+                // It seems that iOS ends up throwing a code 3 when the phone
+                // is not moving. This indicates our position has not changed, so this is
+                // not really an error as long as current_loc is not empty
+                if (current_loc != null)
+                    return;
+                else
+                   location_status = 'no fix (timeout)';
             } else
                 location_status = err.message;
         }

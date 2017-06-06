@@ -205,7 +205,7 @@ define(function (require) {
 
                 // Special case: if devAddress is a device filter,
                 // then do an Autoconnect
-                if (devAddress.length > 18)
+                if (devAddress.length > 99)
                     autoConnect(devAddress.split(','));
                 else
                     bluetoothle.connect(trackConnect, trackError, {
@@ -218,7 +218,7 @@ define(function (require) {
             // Note that it can be called multiple times, this is not an issue.
             bluetoothle.initialize(doConnect, {
                 request: true,
-                statusReceiver: false
+                statusReceiver: true
             });
         }
 

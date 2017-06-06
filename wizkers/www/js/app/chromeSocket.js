@@ -298,7 +298,7 @@ define(function (require) {
                     // because the BTLE subsystem triggers events several times
                     // per second for each devices it sees as long as it sees them
                     if (device_names[status.address] == undefined ||
-                        (device_names[status.address].name == status.address && status.name != undefined)) {
+                        (device_names[status.address].name != status.name)) {
                         device_names[status.address] = {
                             name: status.name || status.address,
                             address: status.address,
@@ -338,25 +338,26 @@ define(function (require) {
             function btinit() {
                 bluetoothle.initialize(success, {
                     request: false,
-                    statusReceiver: false
+                    statusReceiver: true
                 });
             }
 
-            // Before anything else, make sure we have the right permissions (Android 6 and above, not
-            // tested on iOS, probably not compatible
-            bluetoothle.hasPermission(function (status) {
-                if (!status.hasPermission) {
-                    bluetoothle.requestPermission(function (status) {
-                        if (status.requestPermission) {
-                            btinit();
-                        }
-                    });
-                } else {
-                    btinit();
-                }
-            });
-
-
+            if (device.platform == 'iOS') {
+                btinit();
+            } else {
+                // Before anything else, make sure we have the right permissions (Android 6 and above only)
+                bluetoothle.hasPermission(function (status) {
+                    if (!status.hasPermission) {
+                        bluetoothle.requestPermission(function (status) {
+                            if (status.requestPermission) {
+                                btinit();
+                            }
+                        });
+                    } else {
+                        btinit();
+                    }
+                });
+            }
         }
 
         var discoverBluetoothWebAPI = function(filter) {

@@ -75,6 +75,7 @@ define(function (require) {
             // Performance improvement: we keep a cache of the jQuery queries
             // we do most often:
             this.ctrlconnect = null;
+            this.ctrlconnectSm = null;
             this.ctrlrecord = null;
 
             this.tick = 0;
@@ -82,6 +83,7 @@ define(function (require) {
 
         events: {
             "click .ctrl-connect": "ctrlConnect",
+            "click .ctrl-connect-sm": "ctrlConnect",
             "click .ctrl-diag": "ctrlDiag",
             "click .ctrl-record": "ctrlRecord",
             "click .start-record": "startRecord",
@@ -148,6 +150,7 @@ define(function (require) {
             this.rendering = 2;
 
             this.ctrlconnect = this.$('.ctrl-connect');
+            this.ctrlconnectSm = this.$('.ctrl-connect-sm');
             this.ctrlrecord = this.$('.ctrl-record');
 
             // Depending on device capabilities, enable/disable "Diag view" button
@@ -157,7 +160,7 @@ define(function (require) {
                 this.$('.ctrl-diag').hide();
             }
             if (instrumentManager.getCaps && instrumentManager.getCaps().indexOf("Recording") == -1) {
-                this.$('.ctrl-record').hide();
+                this.ctrlrecord.hide();
             }
 
             if (vizapp.type == 'server') {
@@ -313,10 +316,16 @@ define(function (require) {
                     this.ctrlconnect.html('<span class="glyphicon glyphicon-stop"></span>&nbsp;' +
                             this.instrument.get('name') + ' connected')
                         .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning');
+                    this.ctrlconnectSm.html('<span class="glyphicon glyphicon-stop"></span>&nbsp;' +
+                            this.instrument.get('name') + ' connected')
+                        .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning');
                     this.currentState = 'connected';
                 } else if (this.currentState != 'idle') {
                     this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>' +
                             this.instrument.get('name') + ' not connected')
+                        .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning');
+                    this.ctrlconnectSm.html('<span class="glyphicon glyphicon-play"></span>' +
+                            ' not connected')
                         .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning');
                     this.currentState = 'idle';
                 }
@@ -327,6 +336,8 @@ define(function (require) {
             // connect button:
             if (data.portopen && this.currentState != 'connected') {
                 this.ctrlconnect.html('<span class="glyphicon glyphicon-stop"></span>&nbsp;Disconnect ' + this.instrument.get('name'))
+                    .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
+                this.ctrlconnectSm.html('<span class="glyphicon glyphicon-stop"></span>&nbsp;Disconnect')
                     .removeClass('btn-danger').addClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 this.$('.btn-enable-connected').removeAttr('disabled');
                 if (vizapp.type == 'cordova')
@@ -339,6 +350,8 @@ define(function (require) {
                 this.currentState = 'connected';
             } else if (!data.portopen && this.currentState != 'idle') {
                 this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Connect to ' + this.instrument.get('name'))
+                    .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
+                this.ctrlconnectSm.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Connect')
                     .addClass('btn-danger').removeClass('btn-success').removeClass('btn-warning').removeAttr('disabled');
                 this.$('.btn-enable-connected').attr('disabled', true);
                 if (vizapp.type == 'cordova')
@@ -361,19 +374,23 @@ define(function (require) {
 
         ctrlConnect: function (event) {
             var self = this;
-            if (this.ctrlconnect.attr('disabled'))
+            if (this.ctrlconnect.attr('disabled') && this.ctrlconnectSm.attr('disabled'))
                 return;
             this.ctrlconnect.addClass('btn-warning')
+                .removeClass('btn-success').removeClass('btn-danger').attr('disabled', true);
+            this.ctrlconnectSm.addClass('btn-warning')
                 .removeClass('btn-success').removeClass('btn-danger').attr('disabled', true);
 
             var id = instrumentManager.getInstrument().id;
             if (id != null) {
                 if (!linkManager.isConnected()) {
-                    this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Opening...')
+                    this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Opening...');
+                    this.ctrlconnectSm.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Opening...');
                     self.instrumentUniqueID = null; // Just in case we change the instrument
                     linkManager.openInstrument(id);
                 } else {
-                    this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Closing...')
+                    this.ctrlconnect.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Closing...');
+                    this.ctrlconnectSm.html('<span class="glyphicon glyphicon-play"></span>&nbsp;Closing...');
                     if (linkManager.isStreaming())
                         linkManager.stopLiveStream();
                     linkManager.closeInstrument(id);
