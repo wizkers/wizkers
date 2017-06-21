@@ -74,7 +74,7 @@ define(function (require) {
                 settingsView.render();
             });
 
-            // Last, load the port settings view: Wizkers now supports various kinds of connections, now
+            // Last, load the port settings view: Wizkers now supports various kinds of connections, not
             // only serial ports. This means that instruments plugins are in charge of telling Wizkers
             // what sort of connection selector they want to use.
             if (this.connectionView != null && this.connectionView.onClose != undefined)

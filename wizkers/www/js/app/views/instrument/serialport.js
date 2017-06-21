@@ -40,6 +40,7 @@ define(function (require) {
         initialize: function (options) {
             console.log(options);
             this.ports = options.ports;
+            this.portname = options.portname || 'port';
             this.btlist = {};
             if (this.model.get('tcpip') == undefined) {
                 this.model.set('tcpip', {
@@ -79,6 +80,8 @@ define(function (require) {
         render: function () {
             this.$el.html(template(_.extend(this.model.toJSON(), {
                 ports: this.ports,
+                portname: this.portname,
+                portvar: this.model.get(this.portname),
                 btlist: this.btlist
             })));
             var p = this.model.get('port');

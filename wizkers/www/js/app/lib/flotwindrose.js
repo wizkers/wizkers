@@ -88,6 +88,18 @@ define(function(require) {
 
         },
 
+        onClose: function () {
+            try {
+                // Explicitely destroy the plot, otherwise we will leak DOM references and
+                // memory (https://github.com/flot/flot/issues/1129)
+                if (this.plot)
+                    this.plot.destroy();
+            } catch (err) {
+                console.log('Plot destroy error', err);
+            }
+        },
+
+
         render: function () {
             console.log("Rendering a flow wind rose widget");
             this.$el.html('<div class="chart" style="position: relative; min-height: 350px;"></div>');

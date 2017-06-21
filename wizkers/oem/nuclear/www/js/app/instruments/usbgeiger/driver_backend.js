@@ -188,6 +188,8 @@ define(function (require) {
                 // necessary.
                 //
                 // Regularly ask the navigator for current position and refresh map
+                if (typeof navigator == 'undefined') // Note: Node.js requires using typeof
+                    return;
                 if (watchid == null) {
                     watchid = navigator.geolocation.watchPosition(newLocation, geolocationError, {
                         maximumAge: 10000,
@@ -204,6 +206,8 @@ define(function (require) {
                     else
                         port.removeListener('status', status);
                     port_close_requested = false;
+                    if (typeof navigator == 'undefined')
+                        return;
                     if (watchid != null)
                         navigator.geolocation.clearWatch(watchid);
                 }

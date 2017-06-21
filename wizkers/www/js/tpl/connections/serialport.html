@@ -2,15 +2,15 @@
 <div class="col-md-9 col-xs-12">
     <div class="row">
         <div class="col-md-10 col-xs-10">
-            <select id="port" name="port" class="form-control">
+            <select id="<%= portname %>" name="<%= portname %>" class="form-control">
                 <%
-                if (ports.indexOf(port) == -1) { %>
-                    <option disabled selected value="<%= port %>"><%= port %></option>
+                if (ports.indexOf(portvar) == -1) { %>
+                    <option disabled selected value="<%= portvar %>"><%= portvar %></option>
                 <% }
                 %>
                 <% for(var i=0; i < ports.length; i++) { %>
                 <option
-                    <%= port == ports[i] ? 'selected':'' %>
+                    <%= portvar == ports[i] ? 'selected':'' %>
                     value="<%= ports[i] %>"><%= ports[i] %></option>
                 <% } %>
             </select>
