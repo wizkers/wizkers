@@ -39,7 +39,7 @@ define(function (require) {
 
     var Backbone = require('backbone'),
         Serialport = require('serialport'),
-        serialConnection = require('connections_serial'),
+        serialConnection = require('connections/serial'),
         abu = require('app/lib/abutils'),
         intelhex = require('app/lib/intelhex');
 
@@ -56,6 +56,7 @@ define(function (require) {
         var self = this,
             port = null,
             port_close_requested = false,
+            port_open_requested = false,
             isopen = false;
 
         var AVR109 = {
@@ -96,14 +97,20 @@ define(function (require) {
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
-            port.off('data', format);
-            port_close_requested = true;
-            port.close();
+            if (port) {
+                port.off('data', format);
+                port_close_requested = true;
+                port.close();
+            }
         }
 
 
         this.isOpen = function () {
             return isopen;
+        }
+
+        this.isOpenPending = function () {
+            return port_open_requested;
         }
 
         this.getInstrumentId = function (arg) {};
@@ -139,6 +146,16 @@ define(function (require) {
          * Gets called once we open the port at 1200 Baud
          */
         var onOpenPort = function (openInfo) {
+            var self = this;
+            port_open_requested = true;
+            if (chrome && chrome.runtime) {
+                var lastError = chrome.runtime.lastError;
+                if (lastError) {
+                    self.trigger('data', {
+                        'status': 'Error: ' + lastError.messsage
+                    });
+                }
+            }
             if (!openInfo) {
                 console.log("[AVR109 uploader] Open Failed");
                 return;
@@ -157,7 +174,7 @@ define(function (require) {
                         port.open();
                         port.on('data', format);
                         port.on('status', status);
-                    }, 800);
+                    }, 2000);
                 });
             }, 500);
         };
@@ -206,6 +223,7 @@ define(function (require) {
         // Status returns an object that is concatenated with the
         // global server status
         var status = function (stat) {
+            port_open_requested = false;
             console.log('Port status change', stat);
             isopen = stat.portopen;
 

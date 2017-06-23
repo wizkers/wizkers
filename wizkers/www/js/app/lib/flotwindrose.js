@@ -145,7 +145,7 @@ define(function(require) {
             for (var i = 1; i < this.livedata.length; i++) {
                 var data = this.livedata[i-1];
                 var duration = this.livedata[i].stamp - data.stamp;
-                var dir = data.dir/22.5;
+                var dir = Math.floor(data.dir/22.5); // Make sure we bucket by 22.5deg slices
                 if (data.speed < 10) {
                     force13[dir] += duration;
                 } else if (data.speed < 33) {
@@ -163,7 +163,6 @@ define(function(require) {
                 force47[i] += force13[i];
                 force8p[i] += force47[i];
             }
-
 
             // Get the latest wind speed in the live data, to draw a nice pointer around it:
             if (this.settings.instant) {

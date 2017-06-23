@@ -112,23 +112,24 @@ define(function (require) {
             try {
                 intelhex.parse(this.firmware).data;
                 utils.showAlert('Success', 'Firmware seems valid, click on "Upgrade Firmware" to start the upgrade.',
-                    'bg-success');
+                    'alert-success');
                 $("#device_upgrade", this.el).attr('disabled', false).removeClass('btn-danger').addClass('btn-success');
 
             } catch (e) {
                 utils.showAlert('Error', 'Invalid firmware file, are you sure you picked the right ".hex" firmware file?',
-                    'bg-danger');
+                    'alert-danger');
             }
         },
 
 
         go: function () {
+            linkManager.closeInstrument(); // Important!
             if (this.firmware.length == 0) {
-                utils.showAlert('Error', 'No file selected', 'bg-danger');
+                utils.showAlert('Error', 'No file selected', 'alert-danger');
                 return;
             }
             utils.hideAlert();
-            utils.showAlert('Info', "Starting upgrade, please wait", 'bg-info');
+            utils.showAlert('Info', "Starting upgrade, please wait", 'alert-info');
             // Switch to our uploader driver
             instrumentManager.startUploader();
             // Wait until we get a confirmation of driver change and
@@ -167,9 +168,10 @@ define(function (require) {
                 $("#prog-flash", this.el).width(data.verifying + "%");
             } else if (data.run_mode) {
                 if (data.run_mode == 'firmware')
-                    utils.showAlert('Success', 'Firmware Upgrade was successful, device is restarting', 'bg-success');
+                    utils.showAlert('Success', 'Firmware Upgrade was successful, device is restarting', 'alert-success');
+                    linkManager.closeInstrument(); // Important!
             } else if (data.status) {
-                utils.showAlert('Info', data.status, 'bg-info');
+                utils.showAlert('Info', data.status, 'alert-info');
             }
         }
     });

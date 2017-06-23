@@ -30,6 +30,11 @@
  * Some parts of this code come from Christophe Coenraets.
  */
 
+// This detects whether we are in a server situation and act accordingly:
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+}
+
 define(function (require) {
 
     "use strict";
@@ -159,6 +164,17 @@ define(function (require) {
                 deg + '&deg;&nbsp;' + Math.floor(min) + '\'&nbsp;' + (sec * 60).toFixed(3) + '"&nbsp;' + ((deg >= 0) ? 'E' : 'W');
 
             return ret;
+        },
+
+        /**
+         * Round a float number to a certain number of decimals with
+         * correct precision - this is a workaround for usual precision
+         * issues with Javascript's internal floating number representation.
+         * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+         *    this is a simplified version of the complex code on that page.
+         */
+        round: function(val, decimals) {
+            return Number(Math.round(val + 'e' + decimals) + 'e-' + decimals);
         },
 
         /**
@@ -298,9 +314,6 @@ define(function (require) {
                 }
             }
             return ret;
-
         }
-
-
     };
 });
