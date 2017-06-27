@@ -133,6 +133,7 @@ var defaults = function (role) {
     switch (role) {
     case 'settings':
         return {
+            _id: 'coresettings',
             serialPort: '',
             timezone: '',
             cpmcolor: 0,
@@ -143,7 +144,6 @@ var defaults = function (role) {
             token: '', // The current authorization token for socket.io
             showstream: false, // Show debug output
         }
-        break;
     case 'user':
         return {
             local: {

@@ -130,7 +130,7 @@ app.use(flash()); // Flash messages upon login, stored in session
 
 // Before starting our server, make sure we reset any stale authentication token:
 dbs.settings.get('coresettings', function (err, item) {
-    debug("Getting settings: " + item);
+    debug("Getting settings: ", item);
     if (err) {
         debug('Issue finding my own settings ' + err);
     }
@@ -139,7 +139,7 @@ dbs.settings.get('coresettings', function (err, item) {
     }
 
     item.token = "_invalid_";
-    dbs.settings.put(item, 'coresettings', function (err, response) {
+    dbs.settings.put(item, function (err, response) {
         if (err) {
             console.log('***** WARNING ****** Could not reset socket.io session token at server startup');
             console.log(err);
@@ -274,7 +274,8 @@ app.post('/login', passport.authenticate('local-login', {
             item = dbs.defaults('settings');
         }
         item.token = token;
-        dbs.settings.put(item, req.user.local.email, function (err) {
+        debug(item);
+        dbs.settings.put(item, function (err) {
             if (err)
                 res.redirect('/login');
             res.redirect('/');
