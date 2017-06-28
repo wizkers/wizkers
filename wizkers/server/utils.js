@@ -47,5 +47,7 @@ module.exports = {
                 recurse(data, "");
                 return result;
             },
-
+    round: function(val, decimals) {
+        return Number(Math.round(val + 'e' + decimals) + 'e-' + decimals);
+    }
 };
