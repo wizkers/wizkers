@@ -152,6 +152,14 @@ define(function (require) {
                             // but in server mode, the instrument might be open already
                             linkManager.requestStatus(insId);
 
+                            // Show/hide menu entries depending on instrument capabilities
+                            // such as recording / log management
+                            if (instrumentManager.getCaps().indexOf('LogView') == -1) {
+                                self.headerView.$('.management-menu').hide();
+                            } else {
+                                self.headerView.$('.management-menu').show();
+                            }
+
                             // We need to jump to the main screen now:
                             console.log('Navigating to home view');
                             self.navigate('/', true);
