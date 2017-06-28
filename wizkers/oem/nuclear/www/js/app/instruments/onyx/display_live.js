@@ -23,7 +23,8 @@
  */
 
 /*
- * Live view display of the output of the Onyx
+ * Live view display of the output of the Onyx. This live view is used
+ * by most Geiger instruments and is very configurable.
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -288,14 +289,14 @@ define(function (require) {
                 var cpm = parseFloat(data.cpm.value);
 
                 var dp = {
-                    'name': "CPM",
+                    'name': data.cpm.name ? (data.cpm.name + ' (' + data.cpm.unit + ')')  : "CPM",
                     'value': cpm,
                     'timestamp': ts
                 };
 
                 (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp): this.plot.appendPoint(dp);
                 dp = {
-                    'name': "AVG",
+                    'name': (data.cpm.name || "CPM") + " (average)",
                     'value': this.movingAverager(cpm, this.movingAvgData),
                     'timestamp': ts
                 };
@@ -304,13 +305,13 @@ define(function (require) {
             if (data.cpm2 != undefined) {
                 var cpm2 = parseFloat(data.cpm2.value);
                 var dp = {
-                    'name': "CPM2",
+                    'name': data.cpm2.name ? (data.cpm2.name + ' (' + data.cpm2.unit + ')')  : "CPM2",
                     'value': cpm2,
                     'timestamp': ts
                 };
                 (typeof ts != 'undefined') ? this.plot.fastAppendPoint(dp): this.plot.appendPoint(dp);
                 dp = {
-                    'name': "AVG2",
+                    'name': (data.cpm2.name || "CPM") + " (average)",
                     'value': this.movingAverager(cpm2, this.movingAvgData2),
                     'timestamp': ts
                 };
