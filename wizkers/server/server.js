@@ -130,16 +130,17 @@ app.use(flash()); // Flash messages upon login, stored in session
 
 // Before starting our server, make sure we reset any stale authentication token:
 dbs.settings.get('coresettings', function (err, item) {
-    debug("Getting settings: " + item);
+    debug("Getting settings: ", item);
     if (err) {
         debug('Issue finding my own settings ' + err);
     }
     if (item == null) {
         item = dbs.defaults('settings');
+	item._id = 'coresettings';
     }
 
     item.token = "_invalid_";
-    dbs.settings.put(item, 'coresettings', function (err, response) {
+    dbs.settings.put(item, function (err, response) {
         if (err) {
             console.log('***** WARNING ****** Could not reset socket.io session token at server startup');
             console.log(err);
@@ -165,6 +166,7 @@ function isLoggedIn(req, res, next) {
     // if user is authenticated in the session, carry on
     if (req.isAuthenticated()) {
         if (req.user.role === 'pending') {
+            debug('Pending user tried to authenticate');
             res.render('profile.ejs', {
                 user: req.user,
                 message: 'Your account is created, access approval is pending.'
@@ -243,6 +245,7 @@ app.post('/login', passport.authenticate('local-login', {
     failureFlash: true // allow flash messages
 }), function (req, res) {
 
+    debug('Processing login request');
     // If the login process generated a flash message, go to the warning page
     // first
     var w = req.flash('warningMessage');
@@ -272,11 +275,15 @@ app.post('/login', passport.authenticate('local-login', {
         }
         if (item == null) {
             item = dbs.defaults('settings');
+            item._id = req.user.local.email;
         }
         item.token = token;
-        dbs.settings.put(item, req.user.local.email, function (err) {
-            if (err)
+        debug(item);
+        dbs.settings.put(item, function (err) {
+            if (err) {
+		debug("Error updating our user settings:", err);
                 res.redirect('/login');
+            }
             res.redirect('/');
         });
     });
@@ -745,3 +752,4 @@ io.sockets.on('connection', function (socket) {
     });
 
 });
+
