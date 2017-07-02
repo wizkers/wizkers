@@ -138,6 +138,7 @@ dbs.settings.get('coresettings', function (err, item) {
     }
     if (item == null) {
         item = dbs.defaults('settings');
+	item._id = 'coresettings';
     }
 
     item.token = "_invalid_";
@@ -167,6 +168,7 @@ function isLoggedIn(req, res, next) {
     // if user is authenticated in the session, carry on
     if (req.isAuthenticated()) {
         if (req.user.role === 'pending') {
+            debug('Pending user tried to authenticate');
             res.render('profile.ejs', {
                 user: req.user,
                 message: 'Your account is created, access approval is pending.'
@@ -245,6 +247,7 @@ app.post('/login', passport.authenticate('local-login', {
     failureFlash: true // allow flash messages
 }), function (req, res) {
 
+    debug('Processing login request');
     // If the login process generated a flash message, go to the warning page
     // first
     var w = req.flash('warningMessage');
@@ -274,12 +277,15 @@ app.post('/login', passport.authenticate('local-login', {
         }
         if (item == null) {
             item = dbs.defaults('settings');
+            item._id = req.user.local.email;
         }
         item.token = token;
         debug(item);
         dbs.settings.put(item, function (err) {
-            if (err)
+            if (err) {
+		debug("Error updating our user settings:", err);
                 res.redirect('/login');
+            }
             res.redirect('/');
         });
     });
