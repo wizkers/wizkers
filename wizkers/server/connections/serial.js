@@ -89,18 +89,18 @@ var SerialConnection = function(path, settings) {
             self.emit('data',data);
     });
 
-        myPort.on('error', function(err) {
-            debug("Serial port error: "  + err);
-            portOpen = false;
-            self.emit('status', {portopen: portOpen, error: true});
-        });
+    myPort.on('error', function(err) {
+        debug("Serial port error: "  + err);
+        portOpen = false;
+        self.emit('status', {portopen: portOpen, error: true});
+    });
 
-        myPort.on('close', function() {
-            debug('Port closing');
-            debug(myPort);
-            portOpen = false;
-            self.emit('status', {portopen: portOpen});
-        });
+    myPort.on('close', function() {
+        debug('Port closing');
+        debug(myPort);
+        portOpen = false;
+        self.emit('status', {portopen: portOpen});
+    });
 
     };
 

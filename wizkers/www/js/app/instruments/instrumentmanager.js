@@ -29,6 +29,14 @@
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
+// This detects whether we are in a server situation and act accordingly:
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+    var vizapp = { type: 'server'},
+    events = require('events'),
+    dbs = require('pouch-config');
+}
+
 define(function (require) {
 
     "use strict";

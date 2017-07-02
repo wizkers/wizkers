@@ -60,7 +60,9 @@ var serialport = require('serialport');
 var    SerialPort = serialport.SerialPort,
     PouchDB = require('pouchdb'),
     ConnectionManager = require('./connectionmanager'),
+    InstrumentManager = require('app/instruments/instrumentmanager'),
     flash = require('connect-flash'),
+    noble = require('noble'),
     socket_debug = require('debug')('wizkers:server:socket');
 
 
@@ -476,10 +478,13 @@ var recorder = require('./recorder.js');
 
 // And last, the Connection manager, which keeps track of what device is open/closed
 var connectionmanager = new ConnectionManager();
+// ... and the instrument manager, which is a helper to manage instrument properties
+var instrumentManager = new InstrumentManager();
 
 // Automatically connect all the instruments that have that option
 // turned on
 connectionmanager.autoConnect();
+
 
 //////////////////
 // Socket management: supporting multiple clients at a time now!
@@ -712,17 +717,70 @@ io.sockets.on('connection', function (socket) {
             driver.sendUniqueID();
     });
 
+    //////
+    // Utility for Bluetooth scanning - right now this is in the server code,
+    // though it might make sense eventually to move it to its own library
+    var discoverBluetooth = function (filter) {
+
+        var device_names = {};
+        if (filter) {
+            device_names = { 'auto': { name: 'Autoconnect', address: filter, rssi: 100 }};
+            socket.emit('ports', device_names);
+        }
+
+        noble.removeListener('discover', onDiscovered);
+        noble.startScanning();
+        setTimeout(function () {
+            noble.stopScanning();
+            debug('Stopped scan');
+            noble.removeListener('discover', onDiscovered);
+            socket.emit('status', {scanning: false});
+        }, 15000);
+
+        function onDiscovered(peripheral) {
+            debug('peripheral with ID ' + peripheral.id + ', address ' + peripheral.address + ' found');
+            debug(peripheral.advertisement);
+            if (peripheral.id) {
+                // Don't issue 'ports' messages repeatedly when scanning,
+                // because the BTLE subsystem triggers events several times
+                // per second for each devices it sees as long as it sees them
+                if (device_names[peripheral.id] == undefined ||
+                    (device_names[peripheral.id].name != peripheral.advertisement.localName)) {
+                    device_names[peripheral.id] = {
+                        name: peripheral.advertisement.localName || peripheral.id,
+                        address: peripheral.id,
+                        rssi: peripheral.rssi
+                    };
+                    socket.emit('ports', device_names);
+                }
+            }
+        }
+
+        noble.on('discover', onDiscovered);
+    }
+
+
     // Return a list of serial ports available on the
     // server
-    socket.on('ports', function () {
-        socket_debug('Request for a list of serial ports');
-        serialport.list(function (err, ports) {
-            var portlist = [];
-            for (var i = 0; i < ports.length; i++) {
-                portlist.push(ports[i].comName);
+    // TODO: refactor to ask driver to give us the list of
+    // ports rather than hardcode on serial port. This will
+    // let us support BLE or TCP and others.
+    socket.on('ports', function (insType) {
+        socket_debug('Request for a list of ports for', insType);
+        var ct = instrumentManager.getConnectionTypeFor(insType);
+            if (ct == 'app/views/instrument/serialport') {
+                serialport.list(function (err, ports) {
+                    var portlist = [];
+                    for (var i = 0; i < ports.length; i++) {
+                        portlist.push(ports[i].comName);
+                    }
+                    socket.emit('ports', portlist);
+                });
+            } else if (ct == 'app/views/instrument/bluetooth') {
+                var filter = instrumentManager.getConnectionFilterFor(insType);
+                debug('Bluetooth LE scan not implemented!',filter);
+                discoverBluetooth(filter);
             }
-            socket.emit('ports', portlist);
-        });
     });
 
     // This call is required, because the user can change the outputs

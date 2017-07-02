@@ -43,10 +43,11 @@ var dbs = require('./pouch-config'),
 // Preload the parsers we know about:
 var Onyx = require('./parsers/safecast_onyx.js');
 var USBGeiger = require('./www/js/app/instruments/usbgeiger/driver_backend.js');
-//var HeliumGeiger = require('./parsers/helium_geiger.js');
 var HawkNest = require('./parsers/hawknest.js');
 var SimpleSerial = require('./parsers/simple_serial.js');
 var Dummy = require('./parsers/dummy.js');
+var RMYoung = require('./www/js/app/instruments/rmyoung/driver_backend.js');
+var Kestrel5 = require('./www/js/app/instruments/kestrel5/driver_backend.js');
 
 var ConnectionManager = function () {
 
@@ -65,14 +66,16 @@ var ConnectionManager = function () {
             driver = new W433();
         } else if (type == 'usbgeiger') {
             driver = new USBGeiger();
-            //        } else if (type == 'heliumgeiger') {
-            //            driver = new HeliumGeiger();
         } else if (type == 'hawknest') {
             driver = new HawkNest();
         } else if (type == 'simple_serial') {
             driver = new SimpleSerial();
         } else if (type == 'powerlog_1') {
             driver = new Powerlog();
+        } else if (type == 'rmyoung') {
+            driver = new RMYoung();
+        } else if (type == 'kestrel5') {
+            driver = new Kestrel5();
         } else if (type == 'sample_instrument') {
             driver = new Dummy();
         }

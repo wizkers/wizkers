@@ -26,16 +26,33 @@
  *
  * The Instrument manager handles all interactions with the various instruments.
  *
+ * The same file is used client-side and server-side, but some of the API only
+ * makes sense client-side. This is a bit of a juggling act to avoid using two 90% similar
+ * files in client and server sides (see at bottom in particular)
+ *
  * @author Edouard Lafargue, ed@lafargue.name
  */
+
+// This detects whether we are in a server situation and act accordingly:
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+    var vizapp = { type: 'server'},
+    events = require('events'),
+    dbs = require('pouch-config');
+}
+
 
 define(function (require) {
 
     "use strict";
 
-    var _ = require('underscore'),
-        Backbone = require('backbone'),
-        Instrument = require(['app/models/instrument']);
+    var _ = require('underscore');
+
+    // This works because of the way node and commonJS use 'require'
+    // differently...
+    if (typeof events == 'undefined') {
+        var Backbone = require('backbone');
+    }
 
     var InstrumentManager = function () {
 
@@ -67,6 +84,12 @@ define(function (require) {
                 type: 'app/instruments/gammarae/gammarae',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
+            },
+            "rmyoung": {
+                name: "RM Young wind sensor",
+                type: 'app/instruments/rmyoung/rmyoung',
+                settings: null,
+                connectionsettings: 'app/views/instrument/serialport'
             }
         };
 
@@ -93,6 +116,13 @@ define(function (require) {
                 settings: null,
                 connectionsettings: 'app/views/instrument/pinoccio'
             };
+            this.supportedInstruments['kestrel5'] = {
+                name: 'Kestrel 5 series',
+                type: 'app/instruments/kestrel5/kestrel5',
+                settings: 'app/instruments/kestrel5/settings',
+                connectionsettings: 'app/views/instrument/bluetooth',
+                connectionfilter: ['25f53393-63a1-472e-896a-3a73b4f80a22']
+            };
         }
 
         // The instruments below are supported in both Chrome and Cordova mode
@@ -115,7 +145,8 @@ define(function (require) {
                 type: 'app/instruments/bgeigie/bgeigie',
                 settings: 'app/instruments/bgeigie/settings',
                 connectionsettings: 'app/views/instrument/bluetooth',
-                connectionfilter: ['ef080d8c-c3be-41ff-bd3f-05a5f4795d7f', '067978ac-b59f-4ec9-9c09-2ab6e5bdad0b']            };
+                connectionfilter: ['ef080d8c-c3be-41ff-bd3f-05a5f4795d7f', '067978ac-b59f-4ec9-9c09-2ab6e5bdad0b']
+            };
         }
 
         /**
@@ -213,7 +244,18 @@ define(function (require) {
 
     };
 
-    _.extend(InstrumentManager.prototype, Backbone.Events);
+    // On server side, we use the Node eventing system, whereas on the
+    // browser/app side, we use Bacbone's API:
+    // We cannot use vizapp.type here because we can be in a case
+    // where vizapp.type == 'server' and still use this file on
+    // client side!
+    if (typeof events == 'undefined') {
+        // Add event management to our parser, from the Backbone.Events class:
+        _.extend(InstrumentManager.prototype, Backbone.Events);
+    } else {
+        InstrumentManager.prototype.__proto__ = events.EventEmitter.prototype;
+        InstrumentManager.prototype.trigger = InstrumentManager.prototype.emit;
+    }
 
     return InstrumentManager;
 

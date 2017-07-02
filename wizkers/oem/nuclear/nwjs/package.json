@@ -1,7 +1,9 @@
 {
   "name": "Wizkers:Nuclear",
   "main": "www/chrome.html",
-  "nodejs": false,
+  "icon": "icon.png",
+  "version": "m0.1.0",
+  "nodejs": true,
   "window": {
     "width": 1280,
     "height": 800

@@ -94,7 +94,7 @@ require.config({
             'connections/serial': 'app/connections/chromeSerial',
             'connections/tcp': 'app/connections/chromeTcpSerial',
             'connections/hid': 'app/connections/usbhid',
-            'connections/btle': 'app/connections/btle',
+            'connections/btle': 'app/connections/nodeBTLE',
             'connections/btspp': 'app/connections/cordovaBTSPP',
             'connections/webrtc': 'app/connections/webrtc',
             'connections/dummy': 'app/connections/dummy',
