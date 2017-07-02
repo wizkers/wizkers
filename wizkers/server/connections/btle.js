@@ -28,6 +28,7 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     var vizapp = { type: 'server'},
     events = require('events'),
+    debug = require('debug')('wizkers:connections:ble');
     dbs = require('pouch-config');
 }
 
@@ -57,6 +58,9 @@ define(function (require) {
      */
     var nodeBTLE = function (path, settings) {
 
+
+        EventEmitter.call(this);
+
         /////////
         // Initialization
         /////////
@@ -68,6 +72,13 @@ define(function (require) {
             self = this,
             devAddress = path,
             timeoutCheckTimer = 0;
+
+        // We want to keep a reference to the peripheral, services and characteristics
+        var activePeripheral = null,
+            activeServices = null,       // All found services
+            activeCharacteristics = null;
+
+        var subscribedCharacteristics = [];
 
         ///////////
         // Public methods
@@ -112,7 +123,7 @@ define(function (require) {
                 // Our drivers don't want this base64 stuff, sorry
                 s.value = bluetoothle.encodedStringToBytes(s.value)
                     // Pass it on to the driver
-                self.trigger('data', s);
+                self.emit('data', s);
             };
 
             bluetoothle.read(readSuccess,readError,{
@@ -134,61 +145,59 @@ define(function (require) {
             // the driver asked for and subscribe to the characteristics
             // the driver wants.
 
-            var params = {
-                address: devAddress,
-                service: subscribeInfo.service_uuid,
-                characteristic: subscribeInfo.characteristic_uuid,
-                isNotification: true
-            };
-            bluetoothle.subscribe(subscribeSuccess, function (err) {
-                // We get a callback here both when subscribe fails and when the
-                // device disconnects - only take action when we have a subscribe
-                // fail, that's it.
-                if (err.error == 'isDisconnected')
-                    return; // don't take action, the disconnected message
-                // We didn't find the service we were looking for, this means
-                // this is probably not the right device. Tell the user!
-                stats.fullEvent('Cordova BLE', 'subscribe_error', err.message);
-                self.trigger('status', {
-                    openerror: true,
-                    reason: 'Could not connect to the BLE service',
-                    description: err.message
-                });
-                // Do a disconnect to make sure we end up in a sane state:
-                self.close();
-            }, params);
+            // It seems that Noble uses uuids without dashed
+            subscribeInfo.service_uuid = subscribeInfo.service_uuid.replace(/-/gi,'');
+            subscribeInfo.characteristic_uuid = subscribeInfo.characteristic_uuid.replace(/-/gi,'');
+            debug(subscribeInfo);
+
+            // With the way the Noble API works, we now need to discover
+            // characteristics for the service we're looking for before
+            // going further
+            var s = null;
+            for (var i in activeServices) {
+                if (activeServices[i].uuid == subscribeInfo.service_uuid) {
+                    s = activeServices[i];
+                    break;
+                }
+            }
+            if (s == null) {
+                this.close();
+                return;
+            }
+            debug('Found my service');
+            s.discoverCharacteristics([ subscribeInfo.characteristic_uuid ], function(err, c) {
+                debug('Found characteristics', c);
+                if (typeof c != 'undefined' ) {
+                    c[0].subscribe(trackError);
+                    c[0].on('data', onData);
+                    subscribedCharacteristics.push(c[0]);
+                } else {
+                    debug('Error: could not find a matching characteristic');
+                    self.emit('status', {
+                        openerror: true,
+                        reason: 'Could not connect to the BLE service',
+                        description: 'Did not find characteristic.'
+                    });
+                    self.close();
+                }
+            });
+
+            return;
         }
 
         this.close = function () {
-            console.log("[cordovaBTLE] Close BTLE connection");
-            // We need to disconnect before closing, as per the doc
-            bluetoothle.disconnect(function (result) {
+            debug("[nodeBTLE] Close BTLE connection");
+            if (activePeripheral == null) {
+                debug('Error: no active peripheral and asked to close?');
+                return;
+            }
+            activePeripheral.disconnect(function (result) {
                 // OK, we can now close the device:
-                bluetoothle.close(function (result) {
-                    console.log(result);
-                    portOpen = false;
-                    self.trigger('status', {
-                        portopen: portOpen
-                    });
-                }, function (error) {}, {
-                    address: devAddress
+                console.log(result);
+                portOpen = false;
+                self.emit('status', {
+                    portopen: portOpen
                 });
-            }, function (error) {
-                console.log('Disconnect error', error);
-                if (error.error == 'isDisconnected') {
-                    // Already disconnected, so we can close
-                    bluetoothle.close(function (result) {
-                        console.log(result);
-                        portOpen = false;
-                        self.trigger('status', {
-                            portopen: portOpen
-                        });
-                    }, function (error) {}, {
-                        address: devAddress
-                    });
-                }
-            }, {
-                address: devAddress
             });
         };
 
@@ -196,41 +205,28 @@ define(function (require) {
         // This just connects to the device
         this.open = function () {
 
+            // noble, the NodeJS we use, seems to require a scan to find
+            // the device, then do the actual connect
+            noble.startScanning();
+
             // Setup a callback in case we time out
-            timeoutCheckTimer = setTimeout(checkConnectDelay, 15000);
+            timeoutCheckTimer = setTimeout(checkConnectDelay, 30000);
+
+            noble.on('discover', doConnect);
 
             // Callback once we know Bluetooth is enabled
-            function doConnect(status) {
-                if (status.status == 'disabled') {
-                    // The user didn't enable BT...
-                    self.trigger('status', {
-                        openerror: true,
-                        reason: 'Bluetooth was disabled',
-                        description: 'Bluetooth is now enabled, wait 15 seconds then try to connect again.'
-                    });
-                    bluetoothle.enable();
+            function doConnect(peripheral) {
+                if (peripheral.id != devAddress) {
+                    debug('Peripheral found (' + peripheral.id + ') but not the one we want');
                     return;
                 }
-                if (status.status != 'enabled')
-                    return;
-
-                // Special case: if devAddress is a device filter,
-                // then do an Autoconnect
-                if (devAddress.length > 99)
-                    autoConnect(devAddress.split(','));
-                else
-                    bluetoothle.connect(trackConnect, trackError, {
-                        address: devAddress
-                    });
-
+                noble.removeListener('discover', doConnect);
+                noble.stopScanning();
+                debug('Found our peripheral, now connecting (' + peripheral.id + ')');
+                activePeripheral = peripheral;
+                peripheral.connect(trackConnect);
+                peripheral.on('disconnect', trackError); // Track disconnects
             }
-
-            // The Cordova BTLE plugin requires calling initialize at least once.
-            // Note that it can be called multiple times, this is not an issue.
-            bluetoothle.initialize(doConnect, {
-                request: true,
-                statusReceiver: true
-            });
         }
 
         /////////////
@@ -243,78 +239,7 @@ define(function (require) {
          * is discovered and matches the filter.
          */
         var autoConnect = function (filter) {
-
-            var device_names = {};
-            var timeoutTimer;
-
-            // OK, we have Bluetooth, let's do the discovery now
-            function startScanSuccess(status) {
-                // Stop discovery after 15 seconds.
-                if (status.status == 'scanStarted') {
-                    timeoutTimer = setTimeout(function () {
-                        bluetoothle.stopScan(function () {
-                            console.log('Stopped scan');
-                            self.trigger('status', {
-                                                openerror: true,
-                                                reason: 'No device found',
-                                                description: 'Could not find a BLE device matching what we are looking for.'
-                                            });
-                        }, function () {});
-                    }, 15000);
-                }
-                if (status.address) {
-                        console.log('New BT Device', status);
-                        clearTimeout(timeoutTimer);
-                        bluetoothle.stopScan(function() {
-                            // We will now connect using this device
-                            devAddress = status.address;
-                            self.open();
-                        }, function() {});
-                }
-            }
-
-            function startScanError(status) {
-                console.log(status);
-            }
-
-            function startScan() {
-                bluetoothle.startScan(startScanSuccess, startScanError, {
-                    "services": filter,
-                    allowDuplicates: true
-                });
-            };
-
-            function success(status) {
-                if (status.status == 'enabled') {
-                    // Before anything else, make sure we have the right permissions (Android 6 and above, not
-                    // tested on iOS, probably not compatible
-                    bluetoothle.hasPermission(function (status) {
-                        if (!status.hasPermission) {
-                            bluetoothle.requestPermission(function (status) {
-                                if (status.requestPermission) {
-                                    self.trigger('status', {scanning: true});
-                                    startScan();
-                                }
-                            });
-                        } else {
-                            startScan();
-                        }
-                    });
-                } else if (status.status == 'disabled') {
-                    // The user didn't enable BT...
-                    self.trigger('status', {
-                        openerror: true,
-                        reason: 'Bluetooth is disabled',
-                        description: 'Automatically enabled bluetooth. Please wait 15 seconds and try connecting again.'
-                    });
-                    bluetoothle.enable();
-                }
-            };
-
-            bluetoothle.initialize(success, {
-                request: true,
-                statusReceiver: false
-            });
+            debug('Autoconnect not implemented');
         }
 
         /////////////
@@ -322,59 +247,41 @@ define(function (require) {
         /////////////
 
         // Track connection status
-        function trackConnect(result) {
-            if (result.status == 'connecting') {
-                console.log(result);
-                return;
-            }
-            if (result.status == 'connected') {
-                // Right after we connect, we do a service
-                // discovery, so that we can then connect to the various
-                // services & characteristics. This is the Android call, the
-                // iPhone call will be different:
-                bluetoothle.discover(function (r) {
-                    if (r.status != 'discovered')
-                        return;
-                    portOpen = true;
-                    if (timeoutCheckTimer) {
-                        clearTimeout(timeoutCheckTimer);
-                        timeoutCheckTimer = 0;
-                    }
-                    self.trigger('status', {
-                        portopen: portOpen,
-                        services: r.services
-                    });
-                    stats.fullEvent('Cordova BLE', 'open_success', '');
-                    // Need to send this to tell the front-end we're done reconnecting
-                    // and back to normal
-                    self.trigger('status', {
-                        reconnecting: false
-                    });
+        function trackConnect(error) {
 
-                }, function (err) {
-                    console.log(err);
-                    stats.fullEvent('Cordova BLE', 'open_error', err.message);
-                }, {
-                    address: devAddress
+            debug('We are now connected, discovering services/characteristics');
+
+            // Right after we connect, we do a service
+            // discovery, so that we can then connect to the various
+            // services & characteristics. This is the Android call, the
+            // iPhone call will be different:
+            activePeripheral.discoverServices( [], function (err, services) {
+                portOpen = true;
+                if (timeoutCheckTimer) {
+                    clearTimeout(timeoutCheckTimer);
+                    timeoutCheckTimer = 0;
+                }
+
+                activeServices = services;
+
+                // Create a list of service UUIDs
+                var suuids = [];
+                for (var service in services) {
+                    // Todo: reformat UUID to include dashes ?
+                    suuids.push(services[service].uuid);
+                }
+
+                self.emit('status', {
+                    portopen: portOpen,
+                    services: suuids
                 });
-                return;
-            }
-            if (result.status == 'disconnected') {
-                console.log(result);
-                // OK, the device disappeared: we will try to
-                // reconnect as long as the user does not explicitely
-                // ask to close
-                portOpen = false;
-                // Just keep reconnecting forever...
-                //timeoutCheckTimer = setTimeout(checkConnectDelay, 60000);
-                // We lost the connection, try to get it back
-                bluetoothle.reconnect(trackConnect, trackError, {
-                    address: devAddress
+
+                // Need to send this to tell the front-end we're done reconnecting
+                // and back to normal
+                self.emit('status', {
+                    reconnecting: false
                 });
-                self.trigger('status', {
-                    reconnecting: true
-                });
-            }
+            });
         }
 
         function trackError(err) {
@@ -383,45 +290,39 @@ define(function (require) {
             if (!portOpen) {
                 // if the port was not open and we got an error callback, this means
                 // we were not able to connect in the first place...
-                self.trigger('status', {
+                self.emit('status', {
                     openerror: true,
                     reason: 'Device connection error',
-                    description: 'Android error: ' + err.message
+                    description: 'Device got disconnected'
                 });
                 // Do a disconnect to make sure we end up in a sane state:
                 self.close();
             } else {
-                portOpen = false;
+                // portOpen = false;
                 // Just keep reconnecting forever...
-                //timeoutCheckTimer = setTimeout(checkConnectDelay, 60000);
-                // We lost the connection, try to get it back
-                bluetoothle.reconnect(trackConnect, trackError, {
-                    address: devAddress
-                });
-                self.trigger('status', {
-                    reconnecting: true
-                });
+                debug('Error while we were connected ???');
+                //self.emit('status', {
+                //    reconnecting: true
+                //});
             }
             return;
         }
 
         // This is where we get notifications
-        function subscribeSuccess(chrc) {
-            if (chrc.status == 'subscribedResult') {
-                // Our drivers don't want this base64 stuff, sorry
-                chrc.value = bluetoothle.encodedStringToBytes(chrc.value)
-                    // Pass it on to the driver
-                self.trigger('data', chrc);
-            }
+        function onData(data, isNotification) {
+            debug('Received data from BLE device', data, isNotification);
+            self.emit('data', { value: data });
         }
 
         // Make sure that if after X seconds we have no connection, we cancel
         // the attempt
         function checkConnectDelay() {
-            console.log('Check connect delay timeout');
+            debug('Check connect delay timeout');
+            noble.stopScanning();
+            noble.removeAllListeners('discover');
             if (!portOpen) {
                 self.close();
-                self.trigger('status', {
+                self.emit('status', {
                     openerror: true,
                     reason: 'Device connection error',
                     description: 'Could not connect to device. In you just enabled bluetooth, you might have to wait up to 15 seconds before you can connect.'
@@ -429,7 +330,7 @@ define(function (require) {
             }
         }
 
-        console.log("[cordovaBTLE] Cordova BTLE Library loaded");
+        debug("[nodeBTLE] Node BTLE Library loaded");
 
     };
 

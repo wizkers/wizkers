@@ -730,8 +730,9 @@ io.sockets.on('connection', function (socket) {
 
         var device_names = {};
         if (filter) {
-            device_names = { 'auto': { name: 'Autoconnect', address: filter, rssi: 100 }};
-            socket.emit('ports', device_names);
+            // Not implemented yet
+            // device_names = { 'auto': { name: 'Autoconnect', address: filter, rssi: 100 }};
+            // socket.emit('ports', device_names);
         }
 
         noble.removeListener('discover', onDiscovered);

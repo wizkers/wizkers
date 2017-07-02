@@ -27,6 +27,7 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     var vizapp = { type: 'server'},
+    DataView = require('buffer-dataview'), // Important for compatibility
     events = require('events'),
     dbs = require('pouch-config');
 }
@@ -50,7 +51,7 @@ define(function (require) {
             isopen = false;
 
         // We have to have those in lowercase
-        var KESTREL_SERVICE_UUID  = '25f53393-63a1-472e-896a-3a73b4f80a22';
+        var KESTREL_SERVICE_UUID  = '03290000-eab4-dea1-b24e-44ec023874db';
         var WX1_UUID     = '03290310-eab4-dea1-b24e-44ec023874db';
         var WX2_UUID     = '03290320-eab4-dea1-b24e-44ec023874db';
 
@@ -81,10 +82,12 @@ define(function (require) {
         // forwards the data to the app through a 'data' event.
         var format = function (data) {
             if (!data.value) {
-                console.log('No value received');
+                debug('No value received');
                 return;
             }
             var dv = new DataView(data.value);
+            var temp = dv.getUint16(2, true);
+            debug('Temperature:',temp);
 
 
         };
@@ -120,8 +123,8 @@ define(function (require) {
                 // ToDo: depending on the services we found, we can subscribe
                 // to different service/characteristic UUIDs so that we can support
                 // multiple versions of the Bluetooth module.
-                s_uuid = KESTREL_SERVICE_UUID;
-                c_uuid = WX1_UUID;
+                var s_uuid = KESTREL_SERVICE_UUID,
+                    c_uuid = WX1_UUID;
                 port.subscribe({
                     service_uuid: s_uuid,
                     characteristic_uuid: c_uuid
@@ -170,7 +173,10 @@ define(function (require) {
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
-            port.off('data', format);
+            if (port.off)
+                port.off('data', format);
+            else
+                port.removeListener('data', format);
             port_close_requested = true;
             port.close();
         }
