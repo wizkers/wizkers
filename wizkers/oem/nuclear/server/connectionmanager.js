@@ -48,6 +48,7 @@ var SimpleSerial = require('./parsers/simple_serial.js');
 var Dummy = require('./parsers/dummy.js');
 var RMYoung = require('./www/js/app/instruments/rmyoung/driver_backend.js');
 var Kestrel5 = require('./www/js/app/instruments/kestrel5/driver_backend.js');
+var InspectorBLE = require('./www/js/app/instruments/inspector_ble/driver_backend.js');
 
 var ConnectionManager = function () {
 
@@ -76,6 +77,8 @@ var ConnectionManager = function () {
             driver = new RMYoung();
         } else if (type == 'kestrel5') {
             driver = new Kestrel5();
+        } else if (type == 'inspector_ble') {
+            driver = new InspectorBLE();
         } else if (type == 'sample_instrument') {
             driver = new Dummy();
         }

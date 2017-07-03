@@ -22,11 +22,19 @@
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+
+// This detects whether we are in a server situation and act accordingly:
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+    var vizapp = { type: 'server'},
+    events = require('events'),
+    dbs = require('pouch-config');
+}
+
 define(function (require) {
     "use strict";
 
-    var Backbone = require('backbone'),
-        Serialport = require('serialport'), // Used for parsing only
+    var Serialport = require('serialport'), // Used for parsing only
         abutils = require('app/lib/abutils'),
         btleConnection = require('connections/btle');
 
@@ -39,8 +47,32 @@ define(function (require) {
             port = null,
             port_close_requested = false,
             port_open_requested = false,
-            isopen = false,
-            parser = Serialport.parsers.readline(','); // Parse line on "comma" character
+            isopen = false;
+
+        /**
+         *   We are redefining the parser here because we need it to work
+         * in both client mode and server mode (browser + cordova + node)
+         * @param {*} delimiter
+         * @param {*} encoding
+         */
+        var readline = function (delimiter, encoding) {
+            if (typeof delimiter === "undefined" || delimiter === null) { delimiter = "\r"; }
+            if (typeof encoding  === "undefined" || encoding  === null) { encoding  = "utf8"; }
+            // Delimiter buffer saved in closure
+            var data = "";
+            return function (emitter, buffer) {
+              // Collect data
+              data += abutils.ab2str(buffer);
+              // Split collected data by delimiter
+              var parts = data.split(delimiter);
+              data = parts.pop();
+              parts.forEach(function (part, i, array) {
+                emitter.onDataReady(part);
+              });
+            };
+        }
+
+        var parser = readline(','); // Parse line on "comma" character
 
         var CUSTOM_SERVICE_UUID = '39b31fec-b63a-4ef7-b163-a7317872007f';
         var SERIAL_PORT_UUID = 'd68236af-266f-4486-b42d-80356ed5afb7';
@@ -117,6 +149,8 @@ define(function (require) {
                 // Now regularly ask the navigator for current position and refresh map
                 if (watchid == null) {
                     current_loc = null;
+                    if (typeof navigator == 'undefined') // Note: Node.js requires using typeof
+                        return;
                     watchid = navigator.geolocation.watchPosition(newLocation, geolocationError, {
                         maximumAge: 10000,
                         timeout: 20000,
@@ -127,8 +161,13 @@ define(function (require) {
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
-                    port.off('status', stat);
+                    if (port.off)
+                        port.off('status', status);
+                    else
+                        port.removeListener('status', status);
                     port_close_requested = false;
+                    if (typeof navigator == 'undefined') // Note: Node.js requires using typeof
+                        return;
                     if (watchid != null)
                         navigator.geolocation.clearWatch(watchid);
                 }
@@ -164,6 +203,22 @@ define(function (require) {
                 location_status = err.message;
         }
 
+        var openPort_app = function (insid) {
+            var ins = instrumentManager.getInstrument();
+            port = new btleConnection(ins.get('port'), portSettings());
+            port.open();
+            port.on('data', format);
+            port.on('status', status);
+        };
+
+        var openPort_server = function(insid) {
+            dbs.instruments.get(insid, function(err,item) {
+                port = new btleConnection(item.port, portSettings());
+                port.on('data', format);
+                port.on('status', status);
+                port.open();
+            });
+        };
 
 
         /////////////
@@ -172,18 +227,21 @@ define(function (require) {
 
         this.openPort = function (insid) {
             port_open_requested = true;
-            var ins = instrumentManager.getInstrument();
-            port = new btleConnection(ins.get('port'), portSettings());
-            port.open();
-            port.on('data', format);
-            port.on('status', status);
+            if (vizapp.type == 'server') {
+                openPort_server(insid);
+            } else {
+                openPort_app(insid);
+            }
 
         };
 
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
-            port.off('data', format);
+            if (port.off)
+                port.off('data', format);
+            else
+                port.removeListener('data', format);
             port_close_requested = true;
             port.close();
         }
@@ -244,8 +302,17 @@ define(function (require) {
                 self.trigger('data', response);
             }
         };
+
     }
 
-    _.extend(parser.prototype, Backbone.Events);
+    // On server side, we use the Node eventing system, whereas on the
+    // browser/app side, we use Bacbone's API:
+    if (vizapp.type != 'server') {
+        // Add event management to our parser, from the Backbone.Events class:
+        _.extend(parser.prototype, Backbone.Events);
+    } else {
+        parser.prototype.__proto__ = events.EventEmitter.prototype;
+        parser.prototype.trigger = parser.prototype.emit;
+    }
     return parser;
 });

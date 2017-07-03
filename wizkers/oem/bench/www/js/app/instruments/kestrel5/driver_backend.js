@@ -86,8 +86,17 @@ define(function (require) {
                 return;
             }
             var dv = new DataView(data.value);
-            var temp = dv.getUint16(2, true);
-            debug('Temperature:',temp);
+            var temp = dv.getInt16(2, true);
+
+            var jsresp = {
+                temperature: temp/100,
+                unit: {
+                    temperature: 'celsius',
+                }
+            };
+
+            debug(jsresp);
+            self.trigger('data', jsresp);
 
 
         };
@@ -132,7 +141,11 @@ define(function (require) {
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
-                    port.off('status', stat);
+                    if (port.off)
+                        port.off('status', status);
+                    else
+                        port.removeListener('status', status);
+
                     port_close_requested = false;
                 }
             }

@@ -220,7 +220,7 @@ define(function (require) {
                     debug('Peripheral found (' + peripheral.id + ') but not the one we want');
                     return;
                 }
-                noble.removeListener('discover', doConnect);
+                noble.removeAllListeners('discover');
                 noble.stopScanning();
                 debug('Found our peripheral, now connecting (' + peripheral.id + ')');
                 activePeripheral = peripheral;

@@ -90,6 +90,33 @@ define(function (require) {
                 type: 'app/instruments/rmyoung/rmyoung',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
+            },
+            'kestrel5': {
+                name: 'Kestrel 5 series',
+                type: 'app/instruments/kestrel5/kestrel5',
+                settings: 'app/instruments/kestrel5/settings',
+                connectionsettings: 'app/views/instrument/bluetooth',
+                connectionfilter: ['25f53393-63a1-472e-896a-3a73b4f80a22']
+            },
+            'blue_onyx': {
+                name: 'Medcom Blue Onyx',
+                type: 'app/instruments/blue_onyx/blue_onyx',
+                settings: 'app/instruments/blue_onyx/settings',
+                connectionsettings: 'app/views/instrument/bluetooth'
+            },
+            'inspector_ble': {
+                name: 'Medcom Inspector BLE',
+                type: 'app/instruments/inspector_ble/inspector_ble',
+                settings: null,
+                connectionsettings: 'app/views/instrument/bluetooth',
+                connectionfilter: [ '39b31fec-b63a-4ef7-b163-a7317872007f']
+            },
+            'bgeigie': {
+                name: 'Safecast bGeigie',
+                type: 'app/instruments/bgeigie/bgeigie',
+                settings: 'app/instruments/bgeigie/settings',
+                connectionsettings: 'app/views/instrument/bluetooth',
+                connectionfilter: ['ef080d8c-c3be-41ff-bd3f-05a5f4795d7f', '067978ac-b59f-4ec9-9c09-2ab6e5bdad0b']
             }
         };
 
@@ -116,37 +143,10 @@ define(function (require) {
                 settings: null,
                 connectionsettings: 'app/views/instrument/pinoccio'
             };
-            this.supportedInstruments['kestrel5'] = {
-                name: 'Kestrel 5 series',
-                type: 'app/instruments/kestrel5/kestrel5',
-                settings: 'app/instruments/kestrel5/settings',
-                connectionsettings: 'app/views/instrument/bluetooth',
-                connectionfilter: ['25f53393-63a1-472e-896a-3a73b4f80a22']
-            };
         }
 
         // The instruments below are supported in both Chrome and Cordova mode
         if (vizapp.type == 'chrome' || vizapp.type == 'cordova') {
-            this.supportedInstruments['blue_onyx'] = {
-                name: 'Medcom Blue Onyx',
-                type: 'app/instruments/blue_onyx/blue_onyx',
-                settings: 'app/instruments/blue_onyx/settings',
-                connectionsettings: 'app/views/instrument/bluetooth'
-            };
-            this.supportedInstruments['inspector_ble'] = {
-                name: 'Medcom Inspector BLE',
-                type: 'app/instruments/inspector_ble/inspector_ble',
-                settings: null,
-                connectionsettings: 'app/views/instrument/bluetooth',
-//                connectionfilter: [ '39b31fec-b63a-4ef7-b163-a7317872007f']
-            };
-            this.supportedInstruments['bgeigie'] = {
-                name: 'Safecast bGeigie',
-                type: 'app/instruments/bgeigie/bgeigie',
-                settings: 'app/instruments/bgeigie/settings',
-                connectionsettings: 'app/views/instrument/bluetooth',
-                connectionfilter: ['ef080d8c-c3be-41ff-bd3f-05a5f4795d7f', '067978ac-b59f-4ec9-9c09-2ab6e5bdad0b']
-            };
         }
 
         /**
