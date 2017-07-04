@@ -87,11 +87,20 @@ define(function (require) {
             }
             var dv = new DataView(data.value);
             var temp = dv.getInt16(2, true);
+            var rh = dv.getInt16(6, true);
+            var baro = dv.getInt16(8,true);
+            var compass = dv.getInt16(10,true);
 
             var jsresp = {
                 temperature: temp/100,
+                rel_humidity: rh/100,
+                barometer: baro/10,
+                compass: compass,
                 unit: {
                     temperature: 'celsius',
+                    rel_humidity: '%',
+                    barometer: 'mb',
+                    compass: 'degree'
                 }
             };
 

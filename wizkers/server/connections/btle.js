@@ -168,6 +168,10 @@ define(function (require) {
             s.discoverCharacteristics([ subscribeInfo.characteristic_uuid ], function(err, c) {
                 debug('Found characteristics', c);
                 if (typeof c != 'undefined' ) {
+                    // If we were already subscribed to this characteristic in the past,
+                    // we need to remove the previous listener first, otherwise we'll get
+                    // every even in double
+                    cleanDataListeners(c[0]);
                     c[0].subscribe(trackError);
                     c[0].on('data', onData);
                     subscribedCharacteristics.push(c[0]);
@@ -192,7 +196,11 @@ define(function (require) {
                 return;
             }
             activePeripheral.disconnect(function (result) {
-                // OK, we can now close the device:
+                // We also need to clean up the listeners
+                for (var i in subscribedCharacteristics) {
+                    subscribedCharacteristics[i].removeAllListeners('data');
+                }
+                subscribedCharacteristics = [];
                 console.log(result);
                 portOpen = false;
                 self.emit('status', {
@@ -242,6 +250,19 @@ define(function (require) {
             debug('Autoconnect not implemented');
         }
 
+        /**
+         * Delete any existing listener for data messages from
+         * a given characteristic
+         * @param {*} c Characteristic to look for
+         */
+        var cleanDataListeners = function(c) {
+            for (var i in subscribedCharacteristics) {
+                if (c.uuid == subscribedCharacteristics[i].uuid) {
+                    subscribedCharacteristics[i].removeListener('data', onData);
+                    subscribedCharacteristics.splice(i,1); // Remove old characteristic
+                }
+            }
+        }
         /////////////
         //   Callbacks
         /////////////
