@@ -158,7 +158,7 @@ define(function (require) {
                     dew_point: dew_point/100,
                     heat_index: heat_index/100,
                     wetbulb: wetbulb/100,
-                    wind_chill: chill,
+                    wind_chill: chill/100,
                     unit: {
                         dew_point: 'celsius',
                         heat_index: 'celsius',
