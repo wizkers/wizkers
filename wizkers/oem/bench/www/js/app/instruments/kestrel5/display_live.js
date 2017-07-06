@@ -36,8 +36,7 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
-        roseplot = require('app/lib/flotwindrose'),
-        template = require('js/tpl/instruments/rmyoung/LiveView.js');
+        template = require('js/tpl/instruments/kestrel5/LiveView.js');
 
     return Backbone.View.extend({
 
@@ -64,16 +63,8 @@ define(function (require) {
                 }
             }
 
-            // The D3S has got 4096 channels, we keep those in an array
-            this.channels = [];
-            // We need to initialize it to zeroes so that we can
-            // easily add to each channel later:
-            for (var i=0; i < 4096; i++)
-                this.channels[i] = 0;
-
             // Here are all the options we can define, to pass as "settings" when creating the view:
             this.plotoptions = {
-                preload: 4096,
                 log: false,
                 showtips: true,
                 selectable: false,
@@ -81,8 +72,10 @@ define(function (require) {
                 multiple_yaxis: false,
                 plot_options: {
                     xaxis: {
+                        mode: "time",
                         show: true,
-                        tickDecimals: 0
+                        timeformat: "%H:%M",
+                        timezone: settings.get("timezone")
                     },
                     grid: {
                         hoverable: true,
@@ -100,25 +93,6 @@ define(function (require) {
                 },
             };
 
-            this.neutronplotoption = {
-                points: 200,
-                vertical_stretch_parent: true,
-                plot_options: {
-                    xaxis: {
-                        mode: "time",
-                        show: true,
-                        timeformat: "%H:%M",
-                        timezone: settings.get("timezone")
-                    },
-                    grid: {
-                        hoverable: true
-                    },
-                    legend: {
-                        position: "ne"
-                    }
-                }
-            };
-
             linkManager.on('status', this.updatestatus, this);
             linkManager.on('input', this.showInput, this);
 
@@ -129,7 +103,7 @@ define(function (require) {
 
         render: function () {
             var self = this;
-            console.log('Main render of RM Young view');
+            console.log('Main render of Kestrel 5 view');
             this.$el.html(template());
 
             // Hide the raw data stream if we don't want it
@@ -145,17 +119,28 @@ define(function (require) {
         addPlot: function () {
             var self = this;
 
-            this.plot = new roseplot({
+            this.tempRHplot = new simpleplot({
                 model:this.model,
                 settings:this.plotoptions
             });
 
-            if (this.plot != null) {
-                this.$('.roseplot').append(this.plot.el);
-                this.plot.render();
+            if (this.tempRHplot != null) {
+                this.$('#tempRHchart').append(this.tempRHplot.el);
+                this.tempRHplot.render();
             }
 
-            // Didn't find a better way yet:
+            this.baroplot = new simpleplot({
+                model:this.model,
+                settings:this.plotoptions
+            });
+
+            if (this.baroplot != null) {
+                this.$('#barochart').append(this.baroplot.el);
+                this.baroplot.render();
+            }
+
+
+            // Haven't found a better way so far:
             var self = this;
             var rsc = function () {
                 // We want the chart to be 16% of the screen
@@ -182,7 +167,6 @@ define(function (require) {
             $(window).on('resize', this.rsc);
             rsc();
         },
-
 
         onClose: function () {
             console.log("Kromek D3S live view closing...");
@@ -222,9 +206,18 @@ define(function (require) {
                 i.scrollTop(i[0].scrollHeight - i.height());
             }
 
-            if (data.wind != undefined) {
-                this.plot.appendPoint({'name': 'Wind', 'value': data.wind});
+            if (data.temperature != undefined) {
+                this.tempRHplot.appendPoint({'name': 'T (' + data.unit.temperature + ')', 'value': data.temperature});
             }
+
+            if (data.rel_humidity != undefined) {
+                this.tempRHplot.appendPoint({'name': 'RH (' + data.unit.rel_humidity + ')', 'value': data.rel_humidity});
+            }
+
+            if (data.barometer != undefined) {
+                this.baroplot.appendPoint({'name': 'Baro (' + data.unit.barometer + ')', 'value': data.barometer});
+            }
+
 
         },
     });

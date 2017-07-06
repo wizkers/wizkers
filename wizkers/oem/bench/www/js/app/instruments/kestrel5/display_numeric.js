@@ -21,10 +21,14 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 /*
- * Our model is the settings object.
+ * Display output of Geiger counter in numeric format
+ * Geiger Link provides slightly different outputs from the Onyx, so
+ * we are using a different display for it:
  *
  * @author Edouard Lafargue, ed@lafargue.name
+ * All rights reserved.
  */
 
 define(function(require) {
@@ -33,70 +37,113 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
+        utils    = require('app/utils'),
+        simpleplot = require('app/lib/flotplot'),
+        roseplot = require('app/lib/flotwindrose'),
         template = require('js/tpl/instruments/kestrel5/NumView.js');
+
 
     return Backbone.View.extend({
 
         initialize:function (options) {
+            this.sessionStartStamp = new Date().getTime();
+            this.maxreading = 0;
+            this.minreading = -1;
+            this.maxreading_2 = 0;
+            this.minreading_2 = -1;
+            this.valid = false;
+            this.validinit = false;
+
+
+            // Get frequency and span if specified:
+            var span = this.model.get('liveviewspan'); // In seconds
+            var period = this.model.get('liveviewperiod'); // Polling frequency
+
+            var livepoints = 300; // 5 minutes @ 1 Hz
+            if (span && period) {
+                livepoints = span / period;
+            }
+
+            // We will pass this when we create plots, this is the global
+            // config for the look and feel of the plot
+            this.plotoptions = {
+                points: livepoints,
+                vertical_stretch_parent: true,
+                plot_options: {
+                    xaxis: {
+                        mode: "time",
+                        show: true,
+                        timeformat: "%H:%M",
+                        timezone: settings.get("timezone")
+                    },
+                    grid: {
+                        hoverable: true
+                    },
+                    legend: {
+                        position: "ne"
+                    }
+                }
+            };
+
+
+
             linkManager.on('input', this.showInput, this);
-            this.sensors = {};
+        },
 
-            // Start a watchdog every minute to go over the sensors and find out
-            // which ones are stale/lost:
-            _.bindAll(this,"refreshSensors");
-            this.watchdog = setInterval(this.refreshSensors, 60000);
-
+        events: {
         },
 
         render:function () {
             var self = this;
             console.log('Main render of Kestrel5 numeric view');
             this.$el.html(template());
+            // We need to force the Live view to resize the map at this
+            // stage, becaure we just changed the size of the numview
+            if (instrumentManager.liveViewRef() && instrumentManager.liveViewRef().rsc) {
+                instrumentManager.liveViewRef().rsc();
+            };
+            this.addPlot();
             return this;
         },
 
         onClose: function() {
             console.log("Kestrel5 numeric view closing...");
+            if (this.plot)
+                this.plot.onClose();
             linkManager.off('input', this.showInput, this);
-            clearInterval(this.watchdog);
-
         },
+
+        addPlot: function () {
+            this.plot = new roseplot({
+                model:this.model,
+                settings:this.plotoptions
+            });
+
+            if (this.plot != null) {
+                this.$('.roseplot').append(this.plot.el);
+                this.plot.render();
+            }
+
+            this.windplot = new simpleplot({
+                model: this.model,
+                settings: this.plotoptions
+            });
+            if (this.windplot != null) {
+                this.$('#windspeedchart').append(this.windplot.el);
+                this.windplot.render();
+            }
+        },
+
 
         showInput: function(data) {
-            var stamp = new Date().getTime();
-            // Get sensor info: if we know it, update the value & label
-            // if we don't, add it
-            var sensor = data.sensor_name + " - " + data.reading_type;
-            var sensordata = this.sensors[sensor];
-            if (sensordata == undefined) {
-                $('#sensorlist',this.el).append('<li id="' + sensor.replace(/ /g, '_') + '">' +
-                                                '<span class="label label-success">&nbsp;</span>&nbsp;' +
-                                                sensor + ':&nbsp;' +
-                                                ((data.reading_type == 'wind' ||
-                                                  data.reading_type == 'wind-gust') ? data.value.dir + '° - ' + data.value.speed + 'knt' : data.value) + '</li>');
-            } else {
-                $('#' + sensor.replace(/ /g, '_'), this.el).html('<span class="label label-success">&nbsp;</span>&nbsp;' +
-                                                sensor + ':&nbsp;' + ((data.reading_type == 'wind' ||
-                                                  data.reading_type == 'wind-gust') ? data.value.dir + '° - ' + data.value.speed + 'knt' : data.value) + '</li>');
-            }
-            this.sensors[sensor] = { stamp: stamp};
 
+            if (data.wind != undefined) {
+                this.plot.appendPoint({'name': 'Wind', 'value': data.wind});
+                this.$('#windspeed').html((data.wind.speed * 1.15078).toFixed(1)); // Knots to mph
+            }
 
         },
 
-        refreshSensors: function() {
-            var self = this;
-            console.log("Refresh Sensor labels in num view");
-            var stamp = Date.now();
-            _.each(this.sensors,function(value,key) {
-                if (stamp - value.stamp > 300000) { // 5 minutes, lost
-                    $('#' + key.replace(/ /g, '_'), self.el).find('.label').removeClass('label-warning').addClass('label-danger');
-
-                } else if (stamp - value.stamp > 180000) { // 3 minutes, stale
-                    $('#' + key.replace(/ /g, '_'), self.el).find('.label').removeClass('label-success').addClass('label-warning');
-                }
-            });
-        }
 
     });
 });
