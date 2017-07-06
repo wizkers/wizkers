@@ -96,6 +96,7 @@ define(function (require) {
                 rel_humidity: rh/100,
                 barometer: baro/10,
                 compass: compass,
+                wind: { dir: compass, speed: 0},
                 unit: {
                     temperature: 'celsius',
                     rel_humidity: '%',

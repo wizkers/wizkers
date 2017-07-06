@@ -33,7 +33,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        template = require('js/tpl/instruments/rmyoung/NumView.js');
+        template = require('js/tpl/instruments/kestrel5/NumView.js');
 
     return Backbone.View.extend({
 
@@ -50,13 +50,13 @@ define(function(require) {
 
         render:function () {
             var self = this;
-            console.log('Main render of RM Young numeric view');
+            console.log('Main render of Kestrel5 numeric view');
             this.$el.html(template());
             return this;
         },
 
         onClose: function() {
-            console.log("RM Young numeric view closing...");
+            console.log("Kestrel5 numeric view closing...");
             linkManager.off('input', this.showInput, this);
             clearInterval(this.watchdog);
 
