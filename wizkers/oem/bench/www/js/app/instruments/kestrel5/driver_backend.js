@@ -54,6 +54,7 @@ define(function (require) {
         var KESTREL_SERVICE_UUID  = '03290000-eab4-dea1-b24e-44ec023874db';
         var WX1_UUID     = '03290310-eab4-dea1-b24e-44ec023874db';
         var WX2_UUID     = '03290320-eab4-dea1-b24e-44ec023874db';
+        var WX3_UUID     = '03290330-eab4-dea1-b24e-44ec023874db';
 
         // small utility to convert DDMM.MMM or DDDMM.MMM to decimal
         var parseDecDeg = function (c, hemi) {
@@ -81,34 +82,94 @@ define(function (require) {
         // Format can act on incoming data from the device, and then
         // forwards the data to the app through a 'data' event.
         var format = function (data) {
-            if (!data.value) {
-                debug('No value received');
+            if (!data.value || !data.uuid) {
+                debug('No value or uuid received');
                 return;
             }
+            console.log(data);
             var dv = new DataView(data.value);
-            var temp = dv.getInt16(2, true);
-            var rh = dv.getInt16(6, true);
-            var baro = dv.getInt16(8,true);
-            var compass = dv.getInt16(10,true);
+            if (data.uuid ==  WX1_UUID.replace(/-/gi,'')) {
+                var windspeed = dv.getInt16(0, true);
+                var temp = dv.getInt16(2, true);
+                var rh = dv.getInt16(6, true);
+                var pressure = dv.getInt16(8,true);
+                var compass = dv.getInt16(10,true);
 
-            var jsresp = {
-                temperature: temp/100,
-                rel_humidity: rh/100,
-                barometer: baro/10,
-                compass: compass,
-                wind: { dir: compass, speed: 0},
-                unit: {
-                    temperature: 'celsius',
-                    rel_humidity: '%',
-                    barometer: 'mb',
-                    compass: 'degree'
-                }
-            };
+                var jsresp = {
+                    temperature: temp/100,
+                    rel_humidity: rh/100,
+                    pressure: pressure/10,
+                    compass_mag: compass,
+                    wind: { dir: compass, speed: windspeed/1000},
+                    unit: {
+                        temperature: 'celsius',
+                        rel_humidity: '%',
+                        barometer: 'mb',
+                        compass_mag: 'degree',
+                        wind: { dir: 'degree', speed: 'm/s'}
+                    }
+                };
 
-            debug(jsresp);
-            self.trigger('data', jsresp);
+                // debug(jsresp);
+                self.trigger('data', jsresp);
+                return;
+            }
 
+            if (data.uuid ==  WX2_UUID.replace(/-/gi,'')) {
+                var compass2 = dv.getInt16(0, true);
+                // Todo: byte 6 is probably part of altitude
+                var altitude = dv.getInt16(4, true);
+                var barometer = dv.getInt16(7, true);
+                var dens_altitude = dv.getInt16(14, true);
+                var xwind = dv.getInt16(9, true);
+                var hwind = dv.getInt16(11, true);
 
+                var jsresp = {
+                    compass_true: compass2,
+                    altitude: altitude/10,
+                    dens_altitude: dens_altitude/10,
+                    barometer: barometer /10,
+                    crosswind: xwind/1000,
+                    headwind: hwind/1000,
+
+                    unit: {
+                        compass2: 'degree',
+                        altitude: 'm',
+                        dens_altitude: 'm',
+                        barometer: 'mb',
+                        crosswind: 'm/s',
+                        headwind: 'm/s'
+
+                    }
+                };
+
+                // debug(jsresp);
+                self.trigger('data', jsresp);
+                return;
+            }
+
+            if (data.uuid ==  WX3_UUID.replace(/-/gi,'')) {
+                var dew_point = dv.getInt16(0, true);
+                var heat_index = dv.getInt16(2, true);
+                var wetbulb = dv.getInt16(16, true);
+                var chill = dv.getInt16(18, true);
+
+                var jsresp = {
+                    dew_point: dew_point/100,
+                    heat_index: heat_index/100,
+                    wetbulb: wetbulb/100,
+                    wind_chill: chill,
+                    unit: {
+                        dew_point: 'celsius',
+                        heat_index: 'celsius',
+                        wetbulb: 'celsius',
+                        wind_chill: 'celsius'
+
+                    }
+                };
+                self.trigger('data', jsresp);
+                return;
+            }
         };
 
         // Status returns an object that is concatenated with the
@@ -142,13 +203,10 @@ define(function (require) {
                 // ToDo: depending on the services we found, we can subscribe
                 // to different service/characteristic UUIDs so that we can support
                 // multiple versions of the Bluetooth module.
-                var s_uuid = KESTREL_SERVICE_UUID,
-                    c_uuid = WX1_UUID;
                 port.subscribe({
-                    service_uuid: s_uuid,
-                    characteristic_uuid: c_uuid
+                    service_uuid: KESTREL_SERVICE_UUID,
+                    characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
                 });
-            } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
                     if (port.off)

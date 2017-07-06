@@ -135,7 +135,9 @@ define(function (require) {
         }
 
         /**
-         * Subscribe to a service/characteristic
+         * Subscribe to a service/characteristic.
+         * You can subscribe to multiple characteristings within a service,
+         * but not across services
          * @param {[[Type]]} subscribeInfo [[Description]]
          */
         this.subscribe = function (subscribeInfo) {
@@ -147,7 +149,6 @@ define(function (require) {
 
             // It seems that Noble uses uuids without dashed
             subscribeInfo.service_uuid = subscribeInfo.service_uuid.replace(/-/gi,'');
-            subscribeInfo.characteristic_uuid = subscribeInfo.characteristic_uuid.replace(/-/gi,'');
             debug(subscribeInfo);
 
             // With the way the Noble API works, we now need to discover
@@ -165,17 +166,17 @@ define(function (require) {
                 return;
             }
             debug('Found my service');
-            s.discoverCharacteristics([ subscribeInfo.characteristic_uuid ], function(err, c) {
+            if (typeof subscribeInfo.characteristic_uuid == 'object') { // Arrays are objects in Node
+                var cuid = [];
+                for (var i in subscribeInfo.characteristic_uuid ) {
+                    cuid.push(subscribeInfo.characteristic_uuid[i].replace(/-/gi,''));
+                }
+            } else {
+                var cuid = [ subscribeInfo.characteristic_uuid.replace(/-/gi,'') ]
+            }
+            s.discoverCharacteristics(cuid , function(err, c) {
                 debug('Found characteristics', c);
-                if (typeof c != 'undefined' ) {
-                    // If we were already subscribed to this characteristic in the past,
-                    // we need to remove the previous listener first, otherwise we'll get
-                    // every even in double
-                    cleanDataListeners(c[0]);
-                    c[0].subscribe(trackError);
-                    c[0].on('data', onData);
-                    subscribedCharacteristics.push(c[0]);
-                } else {
+                if (typeof c == 'undefined' ) {
                     debug('Error: could not find a matching characteristic');
                     self.emit('status', {
                         openerror: true,
@@ -183,6 +184,23 @@ define(function (require) {
                         description: 'Did not find characteristic.'
                     });
                     self.close();
+                    return;
+                }
+
+                for (var i in c ) {
+                    // If we were already subscribed to this characteristic in the past,
+                    // we need to remove the previous listener first, otherwise we'll get
+                    // every even in double
+                    cleanDataListeners(c[i]);
+                    c[i].subscribe(trackError);
+                    var makeOnData = function(uuid) {
+                        return function(data, isNotification) {
+                            debug('Received data from BLE device', data, isNotification);
+                            self.emit('data', { value: data, uuid: uuid });
+                        }
+                    }
+                    c[i].on('data', makeOnData(c[i].uuid));
+                    subscribedCharacteristics.push(c[i]);
                 }
             });
 
@@ -222,24 +240,28 @@ define(function (require) {
 
             noble.on('discover', doConnect);
 
-            // Callback once we know Bluetooth is enabled
-            function doConnect(peripheral) {
-                if (peripheral.id != devAddress) {
-                    debug('Peripheral found (' + peripheral.id + ') but not the one we want');
-                    return;
-                }
-                noble.removeAllListeners('discover');
-                noble.stopScanning();
-                debug('Found our peripheral, now connecting (' + peripheral.id + ')');
-                activePeripheral = peripheral;
-                peripheral.connect(trackConnect);
-                peripheral.on('disconnect', trackError); // Track disconnects
-            }
         }
 
         /////////////
         // Private methods
         /////////////
+
+
+        // Callback once we have found a BLE peripheral
+        function doConnect(peripheral) {
+            if (peripheral.id != devAddress) {
+                debug('Peripheral found (' + peripheral.id + ') but not the one we want');
+                return;
+            }
+            noble.removeAllListeners('discover');
+            noble.stopScanning();
+            debug('Found our peripheral, now connecting (' + peripheral.id + ')');
+            activePeripheral = peripheral;
+            peripheral.connect(trackConnect);
+            peripheral.on('disconnect', trackError); // Track disconnects
+        }
+
+
 
         /**
          * This implements BLE Autoconnect using a device filter.
@@ -258,7 +280,7 @@ define(function (require) {
         var cleanDataListeners = function(c) {
             for (var i in subscribedCharacteristics) {
                 if (c.uuid == subscribedCharacteristics[i].uuid) {
-                    subscribedCharacteristics[i].removeListener('data', onData);
+                    subscribedCharacteristics[i].removeAllListeners('data');
                     subscribedCharacteristics.splice(i,1); // Remove old characteristic
                 }
             }

@@ -42,12 +42,17 @@ define(function (require) {
 
         initialize: function (options) {
 
-            this.currentDevice = null;
             this.showstream = settings.get('showstream');
 
-            this.deviceinitdone = false;
-
             this.update_count = 0;
+            // Get frequency and span if specified:
+            var span = this.model.get('liveviewspan'); // In seconds
+            var period = this.model.get('liveviewperiod'); // Polling frequency
+
+            var livepoints = 300; // 5 minutes @ 1 Hz
+            if (span && period) {
+                livepoints = span / period;
+            }
 
             if (vizapp.type == 'cordova') {
                 var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
@@ -64,12 +69,11 @@ define(function (require) {
             }
 
             // Here are all the options we can define, to pass as "settings" when creating the view:
+            // We will pass this when we create plots, this is the global
+            // config for the look and feel of the plot
             this.plotoptions = {
-                log: false,
-                showtips: true,
-                selectable: false,
+                points: livepoints,
                 vertical_stretch_parent: true,
-                multiple_yaxis: false,
                 plot_options: {
                     xaxis: {
                         mode: "time",
@@ -78,19 +82,12 @@ define(function (require) {
                         timezone: settings.get("timezone")
                     },
                     grid: {
-                        hoverable: true,
-                        clickable: true
+                        hoverable: true
                     },
                     legend: {
-                        position: "ne",
-                        // container: $('#legend')
-                    },
-                    colors: ["#e27c48", "#5a3037", "#f1ca4f", "#acbe80", "#77b1a7", "#858485", "#d9c7ad"],
-                },
-
-                get: function (key) {
-                    return this[key];
-                },
+                        position: "ne"
+                    }
+                }
             };
 
             linkManager.on('status', this.updatestatus, this);
