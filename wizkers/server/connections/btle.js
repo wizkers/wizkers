@@ -233,7 +233,7 @@ define(function (require) {
 
             // noble, the NodeJS we use, seems to require a scan to find
             // the device, then do the actual connect
-            noble.startScanning();
+            noble.startScanning([], true);
 
             // Setup a callback in case we time out
             timeoutCheckTimer = setTimeout(checkConnectDelay, 30000);
