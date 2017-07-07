@@ -140,23 +140,23 @@ define(function (require) {
             // Haven't found a better way so far:
             var self = this;
             var rsc = function () {
-                // We want the chart to be 16% of the screen
-                self.$('.neutronplot').height(window.innerHeight * 0.16);
-                if (self.neutronplot && self.neutronplot.rsc)
-                    self.neutronplot.rsc();
-                var chartheight = self.$('#neutronchart_row').outerHeight();
+                // We want the chart to be 30% of the screen
+                self.$('#tempRHchart').height(window.innerHeight * 0.3);
+                if (self.tempRHplot && self.tempRHplot.rsc)
+                    self.tempRHplot.rsc();
+                var chartheight = self.$('#tempchart_row').outerHeight();
                 var numviewheight = 0;
                 // We want to take the numview height into account if screen is xs or sm
                 if (utils.checkBreakpoint('xs') || utils.checkBreakpoint('sm'))
                     numviewheight = $('#numview').outerHeight();
-                var spectrumheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 50;
-                self.$('#spectrum_row').show();
-                if (spectrumheight < 100)
-                    spectrumheight = 100; // If we dont' have space, just let the screen scroll, better
+                var baroheight = window.innerHeight - $(self.el).offset().top - chartheight - numviewheight - 50;
+                self.$('#barochat_row').show();
+                if (baroheight < 100)
+                    baroheight = 100; // If we dont' have space, just let the screen scroll, better
                                           // than a completely broken layout.
-                self.$('.spectrumchart').height(spectrumheight);
-                if (self.plot && self.plot.rsc)
-                    self.plot.rsc();
+                self.$('#barochart').height(baroheight);
+                if (self.baroplot && self.baroplot.rsc)
+                    self.baroplot.rsc();
             }
             if (this.rsc)
                 $(window).off('resize', this.rsc);
@@ -204,15 +204,22 @@ define(function (require) {
             }
 
             if (data.temperature != undefined) {
-                this.tempRHplot.appendPoint({'name': 'T (' + data.unit.temperature + ')', 'value': data.temperature});
+                this.tempRHplot.appendPoint({'name': 'Temp (' + data.unit.temperature + ')', 'value': data.temperature});
+                this.$('#tempreading').html(data.temperature + '&nbsp;&deg;');
+            }
+            if (data.dew_point != undefined) {
+                this.tempRHplot.appendPoint({'name': 'Dew Point (' + data.unit.dew_point + ')', 'value': data.dew_point});
+                this.$('#dewpointreading').html(data.dew_point + '&nbsp;&deg;');
             }
 
             if (data.rel_humidity != undefined) {
                 this.tempRHplot.appendPoint({'name': 'RH (' + data.unit.rel_humidity + ')', 'value': data.rel_humidity});
+                this.$('#rhreading').html(data.rel_humidity + '&nbsp;' + data.unit.rel_humidity);
             }
 
             if (data.barometer != undefined) {
                 this.baroplot.appendPoint({'name': 'Baro (' + data.unit.barometer + ')', 'value': data.barometer});
+                this.$('#baroreading').html(data.barometer + '&nbsp;' + data.unit.barometer);
             }
 
 

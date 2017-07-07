@@ -108,7 +108,7 @@ a.plain:hover {
 .btn-responsive {
       margin-bottom: 4px;
 }
-  
+
 /* Similar to btn-sm, but adjusted to 7" tablets */
 @media (min-width: 600px) and (max-width: 992px) {
     .btn-responsive {
@@ -195,13 +195,16 @@ a.plain:hover {
 .bigreading {
     font-size: 5em;
     line-height: 1em;
-/*    font-weight: bold; */
 }
+
+.mediumreading {
+    font-size: 2.5em;
+    line-height: 1em;
+}
+
 
 .smallreading {
     font-size: 24px;
-    /* font-weight: bold;
-    float: right; */
 }
 
 .well h3 {
@@ -215,12 +218,12 @@ a.plain:hover {
   -moz-box-shadow: 0px 0px 20px rgba(0,136,204,0.8);
   box-shadow: 0px 0px 20px rgba(0,136,204,0.8);
 }
-    
-    
-    
+
+
+
 /**
  * My battery icon (original work by E. Lafargue.
- * 
+ *
  */
 
 .battery {
@@ -229,7 +232,7 @@ a.plain:hover {
         max-width: 150px;
         max-height: 66px;
         background-size: cover;
-        background-repeat: no-repeat;    
+        background-repeat: no-repeat;
 }
 
 .battery25-100 {
@@ -295,7 +298,7 @@ a.plain:hover {
 @font-face {
   font-family: "LCD5x8H";
   src: url('../fonts/lcd5x8h.ttf') format('truetype');
-    
+
 }
 
 
