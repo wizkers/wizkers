@@ -213,13 +213,14 @@ define(function (require) {
                 debug('Error: no active peripheral and asked to close?');
                 return;
             }
+            // First we unsubscribe from all characteristics we're listening to:
+            for (var i in subscribedCharacteristics) {
+                subscribedCharacteristics[i].unsubscribe();
+                subscribedCharacteristics[i].removeAllListeners('data');
+            }
+            subscribedCharacteristics = [];
             activePeripheral.disconnect(function (result) {
-                // We also need to clean up the listeners
-                for (var i in subscribedCharacteristics) {
-                    subscribedCharacteristics[i].removeAllListeners('data');
-                }
-                subscribedCharacteristics = [];
-                console.log(result);
+                debug('Peripheral closed');
                 portOpen = false;
                 self.emit('status', {
                     portopen: portOpen
@@ -230,9 +231,11 @@ define(function (require) {
         // Has to be called by the backend_driver to actually open the port.
         // This just connects to the device
         this.open = function () {
-
+            if (typeof noble.wizkersScanningCount == 'undefined')
+                noble.wizkersScanningCount = 0;
             // noble, the NodeJS we use, seems to require a scan to find
             // the device, then do the actual connect
+            noble.wizkersScanningCount++;
             noble.startScanning([], true);
 
             // Setup a callback in case we time out
@@ -253,8 +256,16 @@ define(function (require) {
                 debug('Peripheral found (' + peripheral.id + ') but not the one we want');
                 return;
             }
-            noble.removeAllListeners('discover');
-            noble.stopScanning();
+            // We might have several peripherals trying to connect at once,
+            // so we must not stop scanning before they have all either connected
+            // or given up
+            noble.wizkersScanningCount--;
+            debug('Number of scans going on now:', noble.wizkersScanningCount);
+            if (noble.wizkersScanningCount == 0) {
+                debug('Stop scanning');
+                noble.removeAllListeners('discover');
+                noble.stopScanning();
+            }
             debug('Found our peripheral, now connecting (' + peripheral.id + ')');
             activePeripheral = peripheral;
             peripheral.connect(trackConnect);
@@ -280,6 +291,7 @@ define(function (require) {
         var cleanDataListeners = function(c) {
             for (var i in subscribedCharacteristics) {
                 if (c.uuid == subscribedCharacteristics[i].uuid) {
+                    subscribedCharacteristics[i].unsubscribe();
                     subscribedCharacteristics[i].removeAllListeners('data');
                     subscribedCharacteristics.splice(i,1); // Remove old characteristic
                 }
@@ -329,7 +341,7 @@ define(function (require) {
 
         function trackError(err) {
             // This is called whenever we lose the connection
-            console.log(err);
+
             if (!portOpen) {
                 // if the port was not open and we got an error callback, this means
                 // we were not able to connect in the first place...
@@ -343,7 +355,7 @@ define(function (require) {
             } else {
                 // portOpen = false;
                 // Just keep reconnecting forever...
-                debug('Error while we were connected ???');
+                debug('Error while we were connected ???', err);
                 //self.emit('status', {
                 //    reconnecting: true
                 //});
@@ -361,8 +373,14 @@ define(function (require) {
         // the attempt
         function checkConnectDelay() {
             debug('Check connect delay timeout');
-            noble.stopScanning();
-            noble.removeAllListeners('discover');
+            // We might have several peripherals trying to connect at once,
+            // so we must not stop scanning before they have all either connected
+            // or given up
+            noble.wizkersScanningCount--;
+            if (noble.wizkersScanningCount == 0) {
+                noble.removeAllListeners('discover');
+                noble.stopScanning();
+            }
             if (!portOpen) {
                 self.close();
                 self.emit('status', {

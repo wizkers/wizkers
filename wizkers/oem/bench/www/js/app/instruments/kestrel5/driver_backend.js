@@ -222,7 +222,11 @@ define(function (require) {
         var openPort_app = function (insid) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
-            port = new btleConnection(ins.get('port'), portSettings());
+            if (port == null) {
+                port = new btleConnection(item.port, portSettings());
+            } else {
+                console.log("********** ALREADY HAVE DRIVERS INSTANCIATED ******");
+            }
             port.open();
             port.on('data', format);
             port.on('status', status);
@@ -230,7 +234,11 @@ define(function (require) {
 
         var openPort_server = function(insid) {
             dbs.instruments.get(insid, function(err,item) {
-                port = new btleConnection(item.port, portSettings());
+                if (port == null) {
+                    port = new btleConnection(item.port, portSettings());
+                } else {
+                    console.log("********** ALREADY HAVE DRIVERS INSTANCIATED ******");
+                }
                 port.on('data', format);
                 port.on('status', status);
                 port.open();

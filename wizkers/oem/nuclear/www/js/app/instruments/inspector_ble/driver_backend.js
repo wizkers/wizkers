@@ -161,7 +161,7 @@ define(function (require) {
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
-                    if (port.off)
+                    if (port.off) // If we're running on NodeJS, then we've gotta use removeListener
                         port.off('status', status);
                     else
                         port.removeListener('status', status);
@@ -213,7 +213,8 @@ define(function (require) {
 
         var openPort_server = function(insid) {
             dbs.instruments.get(insid, function(err,item) {
-                port = new btleConnection(item.port, portSettings());
+                if (port == null)
+                    port = new btleConnection(item.port, portSettings());
                 port.on('data', format);
                 port.on('status', status);
                 port.open();

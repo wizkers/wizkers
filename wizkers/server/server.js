@@ -736,12 +736,21 @@ io.sockets.on('connection', function (socket) {
         }
 
         noble.removeListener('discover', onDiscovered);
-        noble.startScanning();
+        if (typeof noble.wizkersScanningCount == 'undefined')
+            noble.wizkersScanningCount = 0;
+        noble.wizkersScanningCount++;
+        noble.startScanning([], true); // Using [],true to allow duplicates works better
         setTimeout(function () {
-            noble.stopScanning();
-            debug('Stopped scan');
-            noble.removeListener('discover', onDiscovered);
-            socket.emit('status', {scanning: false});
+            // We might have several peripherals trying to connect at once,
+            // so we must not stop scanning before they have all either connected
+            // or given up
+            noble.wizkersScanningCount--;
+            if (noble.wizkersScanningCount == 0) {
+                noble.stopScanning();
+                debug('Stopped scan');
+                noble.removeListener('discover', onDiscovered);
+                socket.emit('status', {scanning: false});
+            }
         }, 15000);
 
         function onDiscovered(peripheral) {
@@ -785,7 +794,7 @@ io.sockets.on('connection', function (socket) {
                 });
             } else if (ct == 'app/views/instrument/bluetooth') {
                 var filter = instrumentManager.getConnectionFilterFor(insType);
-                debug('Bluetooth LE scan not implemented!',filter);
+                debug('Scanning for Bluetooth LE peripherals',filter);
                 discoverBluetooth(filter);
             }
     });
