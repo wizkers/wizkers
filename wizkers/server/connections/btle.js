@@ -76,7 +76,8 @@ define(function (require) {
         // We want to keep a reference to the peripheral, services and characteristics
         var activePeripheral = null,
             activeServices = null,       // All found services
-            activeCharacteristics = null;
+            activeCharacteristics = null,
+            foundPeripheral = false;
 
         var subscribedCharacteristics = [];
 
@@ -176,6 +177,7 @@ define(function (require) {
             }
             s.discoverCharacteristics(cuid , function(err, c) {
                 debug('Found characteristics', c);
+                s.removeAllListeners('characteristicsDiscover'); // Workaround on a noble bug (?)
                 if (typeof c == 'undefined' ) {
                     debug('Error: could not find a matching characteristic');
                     self.emit('status', {
@@ -195,7 +197,7 @@ define(function (require) {
                     c[i].subscribe(trackError);
                     var makeOnData = function(uuid) {
                         return function(data, isNotification) {
-                            debug('Received data from BLE device', data, isNotification);
+                            // debug('Received data from BLE device', data, isNotification);
                             self.emit('data', { value: data, uuid: uuid });
                         }
                     }
@@ -235,6 +237,7 @@ define(function (require) {
                 noble.wizkersScanningCount = 0;
             // noble, the NodeJS we use, seems to require a scan to find
             // the device, then do the actual connect
+            foundPeripheral = false;
             noble.wizkersScanningCount++;
             noble.startScanning([], true);
 
@@ -256,6 +259,9 @@ define(function (require) {
                 debug('Peripheral found (' + peripheral.id + ') but not the one we want');
                 return;
             }
+            if (foundPeripheral)
+                return; // In case scan is still going on
+            foundPeripheral = true;
             // We might have several peripherals trying to connect at once,
             // so we must not stop scanning before they have all either connected
             // or given up
@@ -361,12 +367,6 @@ define(function (require) {
                 //});
             }
             return;
-        }
-
-        // This is where we get notifications
-        function onData(data, isNotification) {
-            debug('Received data from BLE device', data, isNotification);
-            self.emit('data', { value: data });
         }
 
         // Make sure that if after X seconds we have no connection, we cancel

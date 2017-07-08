@@ -86,7 +86,7 @@ define(function (require) {
                 debug('No value or uuid received');
                 return;
             }
-            console.log(data);
+            // console.log(data);
             var dv = new DataView(data.value);
             if (data.uuid ==  WX1_UUID.replace(/-/gi,'')) {
                 var windspeed = dv.getInt16(0, true);
@@ -100,13 +100,13 @@ define(function (require) {
                     rel_humidity: rh/100,
                     pressure: pressure/10,
                     compass_mag: compass,
-                    wind: { dir: compass, speed: windspeed/1000},
+                    wind: { dir: compass, speed: windspeed*1.94384/1000},
                     unit: {
                         temperature: 'celsius',
                         rel_humidity: '%',
                         barometer: 'mb',
                         compass_mag: 'degree',
-                        wind: { dir: 'degree', speed: 'm/s'}
+                        wind: { dir: 'degree', speed: 'knots'}
                     }
                 };
 
@@ -225,7 +225,7 @@ define(function (require) {
             if (port == null) {
                 port = new btleConnection(item.port, portSettings());
             } else {
-                console.log("********** ALREADY HAVE DRIVERS INSTANCIATED ******");
+                console.log("Already have a driver, reusing it");
             }
             port.open();
             port.on('data', format);
@@ -237,7 +237,7 @@ define(function (require) {
                 if (port == null) {
                     port = new btleConnection(item.port, portSettings());
                 } else {
-                    console.log("********** ALREADY HAVE DRIVERS INSTANCIATED ******");
+                    console.log("Already have a driver, reusing it.");
                 }
                 port.on('data', format);
                 port.on('status', status);
@@ -257,7 +257,6 @@ define(function (require) {
                 openPort_app(insid);
             }
         };
-
 
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port
@@ -303,63 +302,6 @@ define(function (require) {
             port.write(data);
         };
 
-        /**
-         *This is called by the serial parser (see 'format' above)
-         * For some mysterious reason, the bGeigie outputs an NMEA-like
-         * sentence, which is very 90's like, but mostly a pain.
-         *
-         * The Safecast API wants this NMEA data, so we will keep it intact
-         * in our own database for easy log export, but add a JSON copy for
-         * ease of use for a couple of fields.
-         */
-        this.onDataReady = function (data) {
-            // Remove any carriage return
-            data = data.replace('\r\n', '');
-            var fields = data.split(',');
-            if (fields[0] != '$BNRDD') {
-                console.log('Unknown bGeigie sentence');
-                self.trigger('data', { error: "Err. Data" });
-                return;
-            }
-
-            // Since we have a checksum, check it
-            var chk = 0;
-            for (var i = 1; i < data.indexOf('*'); i++) {
-                chk = chk ^ data.charCodeAt(i);
-            }
-            var sum = parseInt(data.substr(data.indexOf('*')+1), 16);
-            if ( chk != sum) {
-                self.trigger('data', { error: "Err. Checksum" });
-                return;
-            }
-
-
-            var cpm = parseInt(fields[3]);
-            var lat = parseDecDeg(fields[7], fields[8]);
-            var lng = parseDecDeg(fields[9], fields[10]);
-            var sats = parseInt(fields[13]);
-
-            var response = {
-                cpm: {
-                    value: cpm,
-                    count: parseInt(fields[5]),
-                    usv: cpm * conversionCoefficient,
-                    valid: fields[6] == 'A'
-                },
-                nmea: data,
-                batt_ok: false,
-                loc: {
-                    coords: {
-                        latitude: lat,
-                        longitude: lng
-                    },
-                    sats: sats
-                },
-                loc_status: (fields[12] == 'A') ? 'OK' : 'No GPS Lock'
-            };
-
-            self.trigger('data', response);
-        };
     }
 
     // On server side, we use the Node eventing system, whereas on the
