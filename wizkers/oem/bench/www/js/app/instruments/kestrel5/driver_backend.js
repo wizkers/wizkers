@@ -104,7 +104,7 @@ define(function (require) {
                     unit: {
                         temperature: 'celsius',
                         rel_humidity: '%',
-                        barometer: 'mb',
+                        pressure: 'mb',
                         compass_mag: 'degree',
                         wind: { dir: 'degree', speed: 'knots'}
                     }
@@ -133,7 +133,7 @@ define(function (require) {
                     headwind: hwind/1000,
 
                     unit: {
-                        compass2: 'degree',
+                        compass_true: 'degree',
                         altitude: 'm',
                         dens_altitude: 'm',
                         barometer: 'mb',

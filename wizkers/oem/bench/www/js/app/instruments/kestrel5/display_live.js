@@ -211,6 +211,18 @@ define(function (require) {
                 this.tempRHplot.appendPoint({'name': 'Dew Point (' + data.unit.dew_point + ')', 'value': data.dew_point});
                 this.$('#dewpointreading').html(data.dew_point + '&nbsp;&deg;');
             }
+            if (data.heat_index != undefined) {
+                this.tempRHplot.appendPoint({'name': 'Heat Index (' + data.unit.heat_index + ')', 'value': data.heat_index});
+                this.$('#heatindexreading').html(data.heat_index + '&nbsp;&deg;');
+            }
+            if (data.wetbulb != undefined) {
+                this.tempRHplot.appendPoint({'name': 'Wet Bulb (' + data.unit.wetbulb + ')', 'value': data.wetbulb});
+                this.$('#wetbulbreading').html(data.wetbulb + '&nbsp;&deg;');
+            }
+            if (data.wind_chill != undefined) {
+                this.tempRHplot.appendPoint({'name': 'Wind Chill (' + data.unit.wind_chill + ')', 'value': data.wind_chill});
+                this.$('#windchillreading').html(data.wind_chill + '&nbsp;&deg;');
+            }
 
             if (data.rel_humidity != undefined) {
                 this.tempRHplot.appendPoint({'name': 'RH (' + data.unit.rel_humidity + ')', 'value': data.rel_humidity});
@@ -220,6 +232,17 @@ define(function (require) {
             if (data.barometer != undefined) {
                 this.baroplot.appendPoint({'name': 'Baro (' + data.unit.barometer + ')', 'value': data.barometer});
                 this.$('#baroreading').html(data.barometer + '&nbsp;' + data.unit.barometer);
+            }
+            if (data.pressure != undefined) {
+                this.baroplot.appendPoint({'name': 'Pressure (' + data.unit.pressure + ')', 'value': data.pressure});
+                this.$('#pressurereading').html(data.pressure + '&nbsp;' + data.unit.pressure);
+            }
+
+            if (data.altitude != undefined) {
+                this.$('#altitudereading').html(data.altitude + '&nbsp;' + data.unit.altitude);
+            }
+            if (data.dens_altitude != undefined) {
+                this.$('#densaltitudereading').html(data.dens_altitude + '&nbsp;' + data.unit.dens_altitude);
             }
 
 
