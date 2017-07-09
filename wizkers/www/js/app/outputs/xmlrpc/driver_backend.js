@@ -129,7 +129,7 @@ define(function (require) {
         // TODO: refactor to get the processed stream from the radio, so that
         // we can support any type of transceiver, and not rely on Kenwood/Elecraft
         // vocabulary.
-        this.sendData = function (data) {
+        this.sendData = function (data, isAlarm) {
             if (typeof data != 'object')
                 return;
             if (data.vfoa) {

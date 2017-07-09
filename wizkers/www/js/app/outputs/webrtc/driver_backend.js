@@ -118,7 +118,7 @@ define(function (require) {
 
         // In this plugin, we just forward all the data coming from
         // the driver to the other end, as long as we are connected
-        this.sendData = function (data) {
+        this.sendData = function (data, isAlarm) {
             // Sending the data here
             if (activeConnection)
                 activeConnection.send(data);

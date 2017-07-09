@@ -106,7 +106,7 @@ define(function (require) {
 
         // In this plugin, we just keep track of the incoming data and
         // only send data upon request on the TCP server interface
-        this.sendData = function (data) {
+        this.sendData = function (data, isAlarm) {
             if (typeof data != 'object')
                 return;
 

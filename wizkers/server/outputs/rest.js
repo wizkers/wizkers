@@ -106,7 +106,7 @@ module.exports = function rest() {
 
 
 
-    this.sendData = function (data, idx, cb) {
+    this.sendData = function (data, idx, isAlarm, cb) {
         var self = this;
         var post_data = '';
 

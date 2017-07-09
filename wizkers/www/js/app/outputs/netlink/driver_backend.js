@@ -89,10 +89,10 @@ define(function (require) {
 
         // In this plugin, we are simply forwarding the data coming from the instrument
         // to the remote end, so we basically send 'data' over the TCP stream
-        this.sendData = function (data) {
+        this.sendData = function (data, isAlarm) {
             if (typeof data != 'object')
                 return;
-            
+
             // Write the incoming data into all our sockets:
             for (let i=0; i < openSockets.length; i++) {
                 // Write to channel zero for now.

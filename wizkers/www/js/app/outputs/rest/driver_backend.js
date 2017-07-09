@@ -105,7 +105,7 @@ define(function (require) {
             regexargs = decompUrl(settings.resturl).args;
         };
 
-        this.sendData = function (data) {
+        this.sendData = function (data, isAlarm) {
             var self = this;
             console.log("[REST Output plugin] Send data");
 

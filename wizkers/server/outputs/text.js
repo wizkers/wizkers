@@ -71,7 +71,7 @@ module.exports = function text() {
         return utils.JSONflatten(data)[mappings[key]];
     };
 
-    this.sendData = function (data, idx, cb) {
+    this.sendData = function (data, idx, isAlarm, cb) {
         var self = this;
         var post_data = '';
 

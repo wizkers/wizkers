@@ -255,8 +255,9 @@ define(function (require) {
         this.output = function (data) {
             for (var idx in this.activeOutputs) {
                 var output = this.activeOutputs[idx];
-                if (alarm(output, data) || regular(output) || output.config.get('wantsalldata')) {
-                    output.plugin.sendData(data);
+                var isAlarm = alarm(output, data);
+                if ( isAlarm || regular(output) || output.config.get('wantsalldata')) {
+                    output.plugin.sendData(data, isAlarm);
                     output.last = new Date().getTime();
                 }
             }

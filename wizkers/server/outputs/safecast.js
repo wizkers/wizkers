@@ -78,9 +78,10 @@ module.exports = function safecast() {
      * Ask the plugin to send data to the backend.
      * @param {Object}   data The data to send
      * @param {Number}   idx   The output index (required for the callback)
+     * @param {Boolean}  isAlarm if the output was triggered as an alarm
      * @param {Function} cb   Callback that is triggered after success or failure.
      */
-    this.sendData = function (data, idx, cb) {
+    this.sendData = function (data, idx, isAlarm, cb) {
         debug('Sending data to Safecast');
 
         // Step one: prepare the structure

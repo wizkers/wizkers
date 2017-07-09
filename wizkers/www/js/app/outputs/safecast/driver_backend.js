@@ -88,7 +88,7 @@ define(function(require) {
     };
 
 
-    this.sendData = function(data) {
+    this.sendData = function(data, isAlarm) {
         var self = this;
         console.log("[Safecast Output plugin] Send data to Safecast");
 
