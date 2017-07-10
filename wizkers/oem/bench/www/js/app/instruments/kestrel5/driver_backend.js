@@ -35,8 +35,7 @@ if (typeof define !== 'function') {
 define(function (require) {
     "use strict";
 
-    var Serialport = require('serialport'), // Used for parsing only
-        abutils = require('app/lib/abutils'),
+    var abutils = require('app/lib/abutils'),
         btleConnection = require('connections/btle');
 
 
@@ -55,18 +54,6 @@ define(function (require) {
         var WX1_UUID     = '03290310-eab4-dea1-b24e-44ec023874db';
         var WX2_UUID     = '03290320-eab4-dea1-b24e-44ec023874db';
         var WX3_UUID     = '03290330-eab4-dea1-b24e-44ec023874db';
-
-        // small utility to convert DDMM.MMM or DDDMM.MMM to decimal
-        var parseDecDeg = function (c, hemi) {
-            var i = c.indexOf('.');
-            var deg = c.substring(0, i - 2);
-            var decMin = c.substring(i - 2, c.length - 1);
-            var decDeg = parseInt(deg, 10) + (decMin / 60);
-            if (hemi === 'W' || hemi === 'S')
-                decDeg *= -1;
-            return decDeg;
-        };
-
 
         /////////////
         // Private methods

@@ -138,9 +138,9 @@ define(function(require) {
         showInput: function(data) {
 
             if (data.wind != undefined) {
-                this.plot.appendPoint({'name': 'Wind', 'value': data.wind});
+                this.plot.appendPoint({'name': 'Wind', 'value': data.wind });
                 this.windplot.appendPoint({'name': 'Wind (' + data.unit.wind.speed + ')', 'value': data.wind.speed });
-                this.$('#windspeed').html((data.wind.speed * 1.15078).toFixed(1)); // Knots to mph
+                this.$('#windspeed').html((data.wind.speed).toFixed(2) + '&nbsp;' + data.unit.wind.speed);
             }
 
         },

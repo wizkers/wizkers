@@ -128,6 +128,7 @@ define(function(require) {
         // Append a data point. Data should be in the form of
         // { name: "measurement_name", value: { dir: dir, speed: speed} } or
         // { name: "measurement_name", value:{ dir: dir, speed: speed}, timestamp: timestamp }
+        // We expect speed in knots
         fastAppendPoint: function(data) {
             if (this.settings.points) this.trimLiveData();
             var stamp = (data.timestamp) ? new Date(data.timestamp).getTime(): new Date().getTime();
