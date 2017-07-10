@@ -113,15 +113,18 @@ var io = require('socket.io')(server);
 
 app.use(cookieParser()); // passport authentication needs to read cookies
 app.use(favicon(__dirname + '/www/img/ico/favicon.png'));
-app.use(bodyParser({
-    keepExtensions: true
+app.use(bodyParser.urlencoded({
+    extended: true
 }));
+app.use(bodyParser.json());
 
 app.set('view engine', 'ejs'); // Setup templating for login forms
 
 // Configure Passport
 app.use(session({
-    secret: 'LKJQDHFGLKJHpiusdhfgpsidf!à§98769876654è§!ç'
+    secret: 'LKJQDHFGLKJHpiusdhfgpsidf!à§98769876654è§!ç',
+    resave: true,
+    saveUninitialized: true
 }));
 app.use(passport.initialize());
 app.use(passport.session()); // Persistent login sessions, makes user life easier
