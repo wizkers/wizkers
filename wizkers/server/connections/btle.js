@@ -194,7 +194,7 @@ define(function (require) {
                     // we need to remove the previous listener first, otherwise we'll get
                     // every even in double
                     cleanDataListeners(c[i]);
-                    c[i].subscribe(trackError);
+                    c[i].subscribe(trackCharacteristicError);
                     var makeOnData = function(uuid) {
                         return function(data, isNotification) {
                             // debug('Received data from BLE device', data, isNotification);
@@ -221,6 +221,7 @@ define(function (require) {
                 subscribedCharacteristics[i].removeAllListeners('data');
             }
             subscribedCharacteristics = [];
+            activePeripheral.removeAllListeners('connect'); // Just in case
             activePeripheral.disconnect(function (result) {
                 debug('Peripheral closed');
                 portOpen = false;
@@ -345,9 +346,13 @@ define(function (require) {
             });
         }
 
-        function trackError(err) {
-            // This is called whenever we lose the connection
+        function trackCharacteristicError(err) {
+            debug('Characteristic subscribe result:', err);
+        }
 
+        function trackError(err) {
+            activePeripheral.removeAllListeners('disconnect');
+            // This is called whenever we lose the connection
             if (!portOpen) {
                 // if the port was not open and we got an error callback, this means
                 // we were not able to connect in the first place...
