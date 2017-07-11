@@ -63,7 +63,6 @@ var SerialConnection = function(path, settings) {
         debug("Opening serial device at " + path);
         myPort = new SerialPort(path,
                                 settings,
-                                true,
                                 function(err, result) {
                                     if (err) {
                                         debug("Open attempt error: " + err);
