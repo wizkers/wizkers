@@ -233,9 +233,13 @@ define(function(require) {
         saveOutput: function () {
             var self = this;
             this.model.save(null, {
-                success: function (model) {
-                    utils.showAlert('Success', 'Configuration saved', 'alert-success');
-                    linkManager.setOutputs(instrumentManager.getInstrument().id);
+                success: function (response) {
+                    if (response.error != undefined) {
+                        utils.showAlert('Error', 'An error occurred while trying to save output config', 'alert-error');
+                    } else {
+                        utils.showAlert('Success', 'Configuration saved', 'alert-success');
+                        linkManager.setOutputs(instrumentManager.getInstrument().id);
+                    }
                 },
                 error: function () {
                     console.log('Output: error saving');

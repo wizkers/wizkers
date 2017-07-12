@@ -84,17 +84,32 @@ exports.addOutput = function(req, res) {
 };
 
 // Update an existing output
+// The server updates outputs regularly to keep the latest result,
+// so we will run into revision ID issues with PouchDB/CouchDB. For this
+// reason, we get/put rather than just put:
 exports.updateOutput = function(req, res) {
     var id = req.params.id;
     var output = req.body;
     debug('Updating output: ' + id);
-    dbs.outputs.put(req.body, function(err, result) {
-            if (err) {
-                debug('Error updating output: ' + err);
-                res.send({'error':'An error has occurred'});
-            } else {
-                res.send({ _id: result.id, _rev: result.rev} );
-            }
+    dbs.outputs.get(id, function(err,old_output) {
+        if (err) {
+            debug('Error - ' + err);
+            res.send({'error':'An error has occurred - ' + err});
+        } else {
+            // Preserve revision and also success data:
+            output._rev = old_output._rev;
+            output.last = old_output.last;
+            output.lastmessage = old_output.lastmessage;
+            output.lastsuccess = old_output.lastsuccess;
+            dbs.outputs.put(req.body, function(err, result) {
+                    if (err) {
+                        debug('Error updating output: ' + err);
+                        res.send({'error':'An error has occurred'});
+                    } else {
+                        res.send({ _id: result.id, _rev: result.rev} );
+                    }
+            });
+        }
     });
 }
 
