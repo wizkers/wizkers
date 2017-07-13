@@ -330,7 +330,7 @@ define(function (require) {
                 var suuids = [];
                 for (var service in services) {
                     // Todo: reformat UUID to include dashes ?
-                    suuids.push(services[service].uuid);
+                    suuids.push({ uuid: services[service].uuid} );
                 }
 
                 self.emit('status', {

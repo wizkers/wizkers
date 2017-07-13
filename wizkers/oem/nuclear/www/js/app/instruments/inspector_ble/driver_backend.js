@@ -34,8 +34,7 @@ if (typeof define !== 'function') {
 define(function (require) {
     "use strict";
 
-    var Serialport = require('serialport'), // Used for parsing only
-        abutils = require('app/lib/abutils'),
+    var abutils = require('app/lib/abutils'),
         btleConnection = require('connections/btle');
 
 

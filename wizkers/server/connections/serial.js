@@ -40,8 +40,7 @@
  *
  */
 
-var serialport = require('serialport'),
-    SerialPort = serialport.SerialPort,
+var SerialPort = require('serialport'),
     EventEmitter = require('events').EventEmitter,
     util = require('util'),
     debug = require('debug')('wizkers:connections:serial');

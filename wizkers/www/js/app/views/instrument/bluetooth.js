@@ -80,7 +80,7 @@ define(function (require) {
             // Now, reorder the list of devices by RSSI
             // when we are in Cordova mode (the RSSI is not returned
             // in Chrome mode)
-            if (vizapp.type == 'cordova') {
+            if (vizapp.type == 'cordova' || vizapp.type == 'server') {
                 this.ports = [ { address:'00:00:00:00:00:00', name: 'Select here...'}];
                 for (var i in devices) {
                     this.ports.push(devices[i]);

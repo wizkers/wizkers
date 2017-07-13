@@ -54,10 +54,7 @@ var vizapp = {
 /**
  *   Setup access to serial ports
  */
-var serialport = require('serialport');
-
-
-var    SerialPort = serialport.SerialPort,
+var SerialPort = require('serialport'),
     PouchDB = require('pouchdb'),
     ConnectionManager = require('./connectionmanager'),
     InstrumentManager = require('app/instruments/instrumentmanager'),
@@ -788,7 +785,7 @@ io.sockets.on('connection', function (socket) {
         socket_debug('Request for a list of ports for', insType);
         var ct = instrumentManager.getConnectionTypeFor(insType);
             if (ct == 'app/views/instrument/serialport') {
-                serialport.list(function (err, ports) {
+                SerialPort.list(function (err, ports) {
                     var portlist = [];
                     for (var i = 0; i < ports.length; i++) {
                         portlist.push(ports[i].comName);
