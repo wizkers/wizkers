@@ -85,6 +85,7 @@ define(function (require) {
                         hoverable: true
                     },
                     legend: {
+                        show: false,
                         position: "ne"
                     }
                 }
