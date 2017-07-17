@@ -78,7 +78,7 @@ define(function (require) {
             initialize: function () {
                 // If we run as a chrome app, the backbone indexeddb adapter also
                 // wants models to have the proper database and store properties defined
-                if (vizapp.type == "chrome") {
+                if (vizapp.type == "chrome" || vizapp.type == 'nwjs') {
                     this.database = logs_database;
                     this.storeName = "entries";
                 }
@@ -113,7 +113,7 @@ define(function (require) {
 
             initialize: function (models, options) {
 
-                if (vizapp.type == 'chrome') {
+                if (vizapp.type == 'chrome' || vizapp.type == "nwjs") {
                     this.database = logs_database;
                     this.storeName = 'entries';
                 }
@@ -143,7 +143,7 @@ define(function (require) {
             fetch: function (callback) {
                 console.log('[devicelogs.js] Should fetch all entries for logsessionid ' + this.logsessionid);
                 // Add a condition for the instrumentid
-                if (vizapp.type == 'chrome')
+                if (vizapp.type == 'chrome' || vizapp.type == "nwjs")
                     callback.conditions = {
                         logsessionid: this.logsessionid
                     };
@@ -187,7 +187,7 @@ define(function (require) {
 
                 // If we run as a chrome app, the backbone indexeddb adapter also
                 // wants models to have the proper database and store properties defined
-                if (vizapp.type == 'chrome') {
+                if (vizapp.type == 'chrome' || vizapp.type == "nwjs") {
                     this.database = logs_database;
                     this.storeName = 'logs';
                 }
@@ -248,7 +248,7 @@ define(function (require) {
                             }
                         });
                     }
-                } else if (vizapp.type == "chrome") {
+                } else if (vizapp.type == "chrome" || vizapp.type == "nwjs") {
                     // Also set the log session ID property of the entries
                     if (this.id != undefined)
                         this.entries.logsessionid = this.id;
@@ -329,7 +329,7 @@ define(function (require) {
 
             initialize: function (models, options) {
 
-                if (vizapp.type == "chrome") {
+                if (vizapp.type == "chrome" || vizapp.type == "nwjs") {
                     this.database = logs_database;
                     this.storeName = "logs";
                 }
@@ -343,7 +343,7 @@ define(function (require) {
             fetch: function (callback) {
                 console.log("[devicelogs.js] Should fetch all logs for instrumentid " + this.instrumentid);
                 // Add a condition for the instrumentid
-                if (vizapp.type == "chrome")
+                if (vizapp.type == "chrome" || vizapp.type == "nwjs")
                     callback.conditions = {
                         instrumentid: this.instrumentid
                     };

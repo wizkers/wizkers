@@ -11,7 +11,7 @@
     <content src="cordova.html" />
     <access origin="*" />
     <engine name="android" spec="^5.2.2" />
-
+    <preference name="DisallowOverscroll" value="true" />
     <icon src="icon.png" />
     <plugin name="fr.drangies.cordova.serial" spec="https://github.com/elafargue/cordovarduino.git" />
     <plugin name="cordova-plugin-chrome-apps-usb" spec="~1.2.0" />

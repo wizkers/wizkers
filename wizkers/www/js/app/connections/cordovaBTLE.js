@@ -58,6 +58,8 @@ define(function (require) {
             devAddress = path,
             timeoutCheckTimer = 0;
 
+        var subscribedChars = [];
+
         ///////////
         // Public methods
         ///////////
@@ -114,6 +116,7 @@ define(function (require) {
 
         /**
          * Subscribe to a service/characteristic
+         *  subscribeInfo can hold a list of characteristics for the service
          * @param {[[Type]]} subscribeInfo [[Description]]
          */
         this.subscribe = function (subscribeInfo) {
@@ -123,33 +126,67 @@ define(function (require) {
             // the driver asked for and subscribe to the characteristics
             // the driver wants.
 
-            var params = {
-                address: devAddress,
-                service: subscribeInfo.service_uuid,
-                characteristic: subscribeInfo.characteristic_uuid,
-                isNotification: true
-            };
-            bluetoothle.subscribe(subscribeSuccess, function (err) {
-                // We get a callback here both when subscribe fails and when the
-                // device disconnects - only take action when we have a subscribe
-                // fail, that's it.
-                if (err.error == 'isDisconnected')
-                    return; // don't take action, the disconnected message
-                // We didn't find the service we were looking for, this means
-                // this is probably not the right device. Tell the user!
-                stats.fullEvent('Cordova BLE', 'subscribe_error', err.message);
-                self.trigger('status', {
-                    openerror: true,
-                    reason: 'Could not connect to the BLE service',
-                    description: err.message
-                });
-                // Do a disconnect to make sure we end up in a sane state:
-                self.close();
-            }, params);
+            if (typeof subscribeInfo.characteristic_uuid == 'object') {
+                var cuid = [];
+                for (var i in subscribeInfo.characteristic_uuid ) {
+                    cuid.push(subscribeInfo.characteristic_uuid[i]);
+                }
+            } else {
+                var cuid = [ subscribeInfo.characteristic_uuid ]
+            }
+
+            subscribedChars = []; // Keep track of all subscribed characteristics
+
+            // Now subscribe to all the characteristics we're looking for
+            for (var i in cuid) {
+                var params = {
+                    address: devAddress,
+                    service: subscribeInfo.service_uuid,
+                    characteristic: cuid[i],
+                    isNotification: true
+                };
+
+                subscribedChars.push(params);
+
+                var makeOnNotification = function() {
+                    return function(chrc) {
+                        if (chrc.status == 'subscribedResult') {
+                            // Our drivers don't want this base64 stuff, sorry
+                            chrc.value = bluetoothle.encodedStringToBytes(chrc.value)
+                                // Pass it on to the driver
+                            self.trigger('data', chrc);
+                        }
+                    }
+                }
+
+                bluetoothle.subscribe(makeOnNotification(), function (err) {
+                    // We get a callback here both when subscribe fails and when the
+                    // device disconnects - only take action when we have a subscribe
+                    // fail, that's it.
+                    if (err.error == 'isDisconnected')
+                        return; // don't take action, the disconnected message
+
+                    // We didn't find the service we were looking for, this means
+                    // this is probably not the right device. Tell the user!
+                    stats.fullEvent('Cordova BLE', 'subscribe_error', err.message);
+                    self.trigger('status', {
+                        openerror: true,
+                        reason: 'Could not connect to the BLE service',
+                        description: err.message
+                    });
+                    // Do a disconnect to make sure we end up in a sane state:
+                    self.close();
+                }, params);
+            }
         }
 
         this.close = function () {
             console.log("[cordovaBTLE] Close BTLE connection");
+            // Make sure we unsubscribe to everything:
+            for (var i in subscribedChars) {
+                bluetoothle.unsubscribe(function(){}, function(){}, subscribedChars[i]);
+            }
+
             // We need to disconnect before closing, as per the doc
             bluetoothle.disconnect(function (result) {
                 // OK, we can now close the device:
@@ -186,7 +223,7 @@ define(function (require) {
         this.open = function () {
 
             // Setup a callback in case we time out
-            timeoutCheckTimer = setTimeout(checkConnectDelay, 15000);
+            timeoutCheckTimer = setTimeout(checkConnectDelay, 30000);
 
             // Callback once we know Bluetooth is enabled
             function doConnect(status) {

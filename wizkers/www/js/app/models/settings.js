@@ -39,7 +39,7 @@ define(function(require) {
     return Backbone.Model.extend({
 
         initialize: function () {
-            if (vizapp.type == "chrome") {
+            if (vizapp.type == "chrome" || vizapp.type == 'nwjs') {
                 this.chromeStorage =  new Backbone.ChromeStorage("org.aerodynes.vizapp.Settings");
             } else if (vizapp.type == "cordova") {
                 this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Settings");

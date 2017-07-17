@@ -221,7 +221,6 @@ define(function (require) {
             } else {
                 openPort_app(insid);
             }
-
         };
 
         this.closePort = function (data) {

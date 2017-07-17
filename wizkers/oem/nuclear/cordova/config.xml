@@ -10,7 +10,8 @@
 
     <content src="cordova.html" />
     <access origin="*" />
-        <icon src="icon.png" />
+    <icon src="icon.png" />
+    <preference name="DisallowOverscroll" value="true" />
     <plugin name="fr.drangies.cordova.serial" spec="https://github.com/elafargue/cordovarduino.git" />
     <plugin name="cordova-plugin-chrome-apps-usb" spec="~1.2.0" />
     <plugin name="com.mediamatrixdoo.keepscreenon" spec="https://github.com/zoxxx/PhoneGap-KeepScreenOn-plugin.git" />

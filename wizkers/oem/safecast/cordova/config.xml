@@ -10,6 +10,7 @@
     <icon src="icon.png" />
     <content src="cordova.html" />
     <access origin="*" />
+    <preference name="DisallowOverscroll" value="true" />
     <engine name="android" spec="^5.2.2" />
     <plugin name="fr.drangies.cordova.serial" spec="https://github.com/elafargue/cordovarduino.git" />
     <plugin name="com.mediamatrixdoo.keepscreenon" spec="https://github.com/zoxxx/PhoneGap-KeepScreenOn-plugin.git" />

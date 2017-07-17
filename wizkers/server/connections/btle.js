@@ -197,8 +197,8 @@ define(function (require) {
                     c[i].subscribe(trackCharacteristicError);
                     var makeOnData = function(uuid) {
                         return function(data, isNotification) {
-                            // debug('Received data from BLE device', data, isNotification);
-                            self.emit('data', { value: data, uuid: uuid });
+                            debug('Received data from BLE device', data, isNotification);
+                            self.emit('data', { value: data, characteristic: uuid });
                         }
                     }
                     c[i].on('data', makeOnData(c[i].uuid));

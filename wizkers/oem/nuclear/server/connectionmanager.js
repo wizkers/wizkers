@@ -49,6 +49,7 @@ var Dummy = require('./parsers/dummy.js');
 var RMYoung = require('./www/js/app/instruments/rmyoung/driver_backend.js');
 var Kestrel5 = require('./www/js/app/instruments/kestrel5/driver_backend.js');
 var InspectorBLE = require('./www/js/app/instruments/inspector_ble/driver_backend.js');
+var BGeigie = require('./www/js/app/instruments/bgeigie/driver_backend.js');
 
 var ConnectionManager = function () {
 
@@ -81,6 +82,8 @@ var ConnectionManager = function () {
             driver = new InspectorBLE();
         } else if (type == 'sample_instrument') {
             driver = new Dummy();
+        } else if (type == 'bgeigie') {
+            driver = new BGeigie();
         }
         return driver;
     }

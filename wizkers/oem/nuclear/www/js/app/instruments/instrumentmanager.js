@@ -96,7 +96,7 @@ define(function (require) {
                 type: 'app/instruments/kestrel5/kestrel5',
                 settings: 'app/instruments/kestrel5/settings',
                 connectionsettings: 'app/views/instrument/bluetooth',
-                connectionfilter: ['25f53393-63a1-472e-896a-3a73b4f80a22']
+                connectionfilter: ['03290000-eab4-dea1-b24e-44ec023874db']
             },
             'blue_onyx': {
                 name: 'Medcom Blue Onyx',

@@ -76,7 +76,7 @@ define(function(require) {
                  */
                 if (vizapp.type == "cordova") {
                     this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
-                } else if (vizapp.type == "chrome") {
+                } else if (vizapp.type == "chrome" || vizapp.type == "nwjs") {
                     this.chromeStorage = new Backbone.ChromeStorage("org.aerodynes.vizapp.Instrument");
                 } else {
                     this.urlRoot = "/instruments";
@@ -109,7 +109,7 @@ define(function(require) {
                 if (vizapp.type == "cordova") {
                     this.logs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
                     this.outputs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Outputs-" + this.id);
-                } else if (vizapp.type == "chrome") {
+                } else if (vizapp.type == "chrome" || vizapp.type == "nwjs") {
                     this.outputs.chromeStorage = new Backbone.ChromeStorage("org.aerodynes.vizapp.Outputs-" + this.id);
                     //this.logs.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
                     this.logs.database = logs_database;

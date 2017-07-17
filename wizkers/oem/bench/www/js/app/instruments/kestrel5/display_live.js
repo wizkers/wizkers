@@ -166,7 +166,7 @@ define(function (require) {
         },
 
         onClose: function () {
-            console.log("Kromek D3S live view closing...");
+            console.log("Kestrel live view closing...");
             linkManager.stopLiveStream();
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
@@ -179,7 +179,7 @@ define(function (require) {
         },
 
         updatestatus: function (data) {
-            console.log("Kromek D3S live display: link status update");
+            console.log("Kestrel live display: link status update");
             if (data.portopen && ! linkManager.isStreaming() ) {
                 linkManager.driver.serial();
                 linkManager.startLiveStream();

@@ -36,6 +36,7 @@ define(function (require) {
     "use strict";
 
     var abutils = require('app/lib/abutils'),
+        utils = require('app/utils'),
         btleConnection = require('connections/btle');
 
 
@@ -69,13 +70,13 @@ define(function (require) {
         // Format can act on incoming data from the device, and then
         // forwards the data to the app through a 'data' event.
         var format = function (data) {
-            if (!data.value || !data.uuid) {
-                debug('No value or uuid received');
+            if (!data.value || !data.characteristic) {
+                console.log('No value or characteristic uuid received');
                 return;
             }
-            // console.log(data);
-            var dv = new DataView(data.value);
-            if (data.uuid ==  WX1_UUID.replace(/-/gi,'')) {
+            //console.log(data);
+            var dv = new DataView(vizapp.type === 'server' ? data.value : data.value.buffer);
+            if (utils.sameUUID(data.characteristic, WX1_UUID)) {
                 var windspeed = dv.getInt16(0, true);
                 var temp = dv.getInt16(2, true);
                 var rh = dv.getInt16(6, true);
@@ -102,7 +103,7 @@ define(function (require) {
                 return;
             }
 
-            if (data.uuid ==  WX2_UUID.replace(/-/gi,'')) {
+            if (utils.sameUUID(data.characteristic, WX2_UUID)) {
                 var compass2 = dv.getInt16(0, true);
                 // Todo: byte 6 is probably part of altitude
                 var altitude = dv.getInt16(4, true);
@@ -135,7 +136,7 @@ define(function (require) {
                 return;
             }
 
-            if (data.uuid ==  WX3_UUID.replace(/-/gi,'')) {
+            if (utils.sameUUID(data.characteristic, WX3_UUID)) {
                 var dew_point = dv.getInt16(0, true);
                 var heat_index = dv.getInt16(2, true);
                 var wetbulb = dv.getInt16(16, true);
@@ -209,11 +210,7 @@ define(function (require) {
         var openPort_app = function (insid) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
-            if (port == null) {
-                port = new btleConnection(item.port, portSettings());
-            } else {
-                console.log("Already have a driver, reusing it");
-            }
+            port = new btleConnection(ins.get('port'), portSettings());
             port.open();
             port.on('data', format);
             port.on('status', status);
@@ -246,9 +243,12 @@ define(function (require) {
         };
 
         this.closePort = function (data) {
+            if (port == null) {
+                return;
+            }
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
-            if (port.off)
+            if (port && port.off)
                 port.off('data', format);
             else
                 port.removeListener('data', format);

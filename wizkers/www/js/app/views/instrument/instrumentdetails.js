@@ -57,7 +57,7 @@ define(function (require) {
                 instypes: instrumentManager.supportedInstruments
             })));
 
-            if (vizapp.type == "chrome")
+            if (vizapp.type == "chrome" || vizapp.type == "nwjs")
                 $('.hide-chrome', this.el).hide();
 
             if (vizapp.type == "cordova")

@@ -242,9 +242,6 @@ define(function (require) {
             var ct = instrumentManager.getConnectionTypeFor(insType);
             if (ct == 'app/views/instrument/serialport') {
                 switch (vizapp.type) {
-                case 'chrome':
-                    chrome.serial.getDevices(onGetDevices);
-                    break;
                 case 'cordova':
                     if (device.platform == 'iOS') {
                         self.trigger('ports', ['TCP/IP', 'Wizkers Netlink']);
@@ -252,6 +249,10 @@ define(function (require) {
                         // Android
                         self.trigger('ports', ['OTG Serial', 'TCP/IP', 'Bluetooth', 'Wizkers Netlink']);
                     }
+                    break;
+                case 'chrome':
+                default:
+                    chrome.serial.getDevices(onGetDevices);
                     break;
                 }
             } else if (ct == 'app/views/instrument/bluetooth') {
@@ -263,6 +264,8 @@ define(function (require) {
                 case 'cordova':
                     cordovaDiscoverBluetooth(filter);
                     break;
+                case 'nwjs':
+                    discoverBluetoothWebAPI(filter);
                 }
             } else {
                 self.trigger('ports', ["Not available"]);
@@ -364,13 +367,13 @@ define(function (require) {
             var device_names = {};
 
             var updateDeviceName = function (device) {
-                if (filter != undefined) {
-                    if (device.uuids.indexOf(filter) == -1)
-                        return;
-                }
-                device_names[device.address] = {
+                // if (filter != undefined) {
+                //    if (device.uuids.indexOf(filter) == -1)
+                //        return;
+                // }
+                device_names[device.id] = {
                     name: device.name,
-                    address: device.address
+                    address: device.id
                 };
                 console.log('New BT Device', device);
                 self.trigger('ports', device_names);

@@ -63,6 +63,8 @@ require.config({
         flot_resize: 'lib/flot-0.8.3/jquery.flot.resize',
         flot_selection: 'lib/flot-0.8.3/jquery.flot.selection',
         flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
+        flot_windrose: 'lib/jquery.flot.windrose',
+        flot_jumlib: 'lib/jquery.flot.JUMlib',
 
         // Analytics wrapper:
         ga_bundle: 'lib/google-analytics-bundle',
@@ -122,7 +124,7 @@ require.config({
         // The Flot library, along with our dependencies:
         'flot': {
             deps: ['jquery'],
-            exports: '$.plot',
+            exports: '$.plot'
         },
         'flot_time': {
             deps: ['flot']
@@ -136,6 +138,13 @@ require.config({
         'flot_fillbetween': {
             deps: ['flot']
         },
+        'flot_jumlib': {
+            deps: ['jquery', 'flot'],
+            exports: '$.plot.JUMlib'
+        },
+        'flot_windrose': {
+            deps: ['flot', 'flot_jumlib']
+        }
     }
 });
 

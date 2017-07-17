@@ -122,6 +122,12 @@ define(function (require) {
                 );
         },
 
+        sameUUID: function(uuid1, uuid2) {
+            uuid1 = uuid1.replace(/-/gi,'').toLowerCase();
+            uuid2 = uuid2.replace(/-/gi,'').toLowerCase();
+            return uuid1 === uuid2;
+        },
+
         /**
          * Distance between two points. Returns the difference in km
          * @param {Object} loc1 Location 1 {lat: XXX, lon:YYY}
