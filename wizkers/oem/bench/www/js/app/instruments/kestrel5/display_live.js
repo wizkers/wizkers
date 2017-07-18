@@ -191,17 +191,8 @@ define(function (require) {
         showInput: function (data) {
             var self = this;
 
-            if (this.showstream) {
-                // Update our raw data monitor
-                var i = $('#input', this.el);
-                var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-                // Keep max 50 lines:
-                if (scroll.length > 50) {
-                    scroll = scroll.slice(scroll.length - 50);
-                }
-                i.val(scroll.join('\n'));
-                // Autoscroll:
-                i.scrollTop(i[0].scrollHeight - i.height());
+            if (data.reconnecting != undefined ) {
+                this.$('#liveview_in').css('color', data.reconnecting ? '#a1a1a1' : '#000000');
             }
 
             if (data.temperature != undefined) {
