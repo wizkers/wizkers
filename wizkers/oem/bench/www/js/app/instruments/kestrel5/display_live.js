@@ -23,7 +23,7 @@
  */
 
 /*
- * Live view display of the output of the RM Young wind monitors
+ * Live view display of the output of the Kestrel weather stations
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -187,48 +187,108 @@ define(function (require) {
             }
         },
 
-        // We get there whenever we receive something from the serial port
-        showInput: function (data) {
-            var self = this;
+        clear: function () {
+            this.$('#tempRHchart').empty();
+            this.$('#barochart').empty();
+            this.addPlot();
+            this.suspendGraph = true;
+        },
 
-            if (data.reconnecting != undefined ) {
-                this.$('#liveview_in').css('color', data.reconnecting ? '#a1a1a1' : '#000000');
-            }
+        disp_wx: function (data, ts) {
+            var dp;
 
             if (data.temperature != undefined) {
-                this.tempRHplot.appendPoint({'name': 'Temp (' + data.unit.temperature + ')', 'value': data.temperature});
-                this.$('#tempreading').html(data.temperature + '&nbsp;&deg;');
+                dp = {'name': 'Temp (' + data.unit.temperature + ')',
+                         'value': data.temperature,
+                        'timestamp': ts};
+                if (typeof ts != 'undefined') {
+                    this.tempRHplot.fastAppendPoint(dp);
+                } else {
+                    this.tempRHplot.appendPoint(dp);
+                    this.$('#tempreading').html(data.temperature + '&nbsp;&deg;');
+                }
             }
             if (data.dew_point != undefined) {
-                this.tempRHplot.appendPoint({'name': 'Dew Point (' + data.unit.dew_point + ')', 'value': data.dew_point});
-                this.$('#dewpointreading').html(data.dew_point + '&nbsp;&deg;');
+                dp = {'name': 'Dew Point (' + data.unit.dew_point + ')',
+                      'value': data.dew_point,
+                      'timestamp': ts};
+                if (typeof ts != 'undefined') {
+                    this.tempRHplot.fastAppendPoint(dp);
+                } else {
+                    this.tempRHplot.appendPoint(dp);
+                    this.$('#dewpointreading').html(data.dew_point + '&nbsp;&deg;');
+                }
             }
             if (data.heat_index != undefined) {
-                this.tempRHplot.appendPoint({'name': 'Heat Index (' + data.unit.heat_index + ')', 'value': data.heat_index});
-                this.$('#heatindexreading').html(data.heat_index + '&nbsp;&deg;');
+                dp = {'name': 'Heat Index (' + data.unit.heat_index + ')',
+                      'value': data.heat_index,
+                      'timestamp': ts};
+                if (typeof ts != 'undefined') {
+                    this.tempRHplot.fastAppendPoint(dp);
+                } else {
+                    this.tempRHplot.appendPoint(dp);
+                    this.$('#heatindexreading').html(data.heat_index + '&nbsp;&deg;');
+                }
             }
             if (data.wetbulb != undefined) {
-                this.tempRHplot.appendPoint({'name': 'Wet Bulb (' + data.unit.wetbulb + ')', 'value': data.wetbulb});
-                this.$('#wetbulbreading').html(data.wetbulb + '&nbsp;&deg;');
+                dp = {'name': 'Wet Bulb (' + data.unit.wetbulb + ')',
+                      'value': data.wetbulb,
+                      'timestamp': ts};
+                if (typeof ts != 'undefined') {
+                    this.tempRHplot.fastAppendPoint(dp);
+                } else {
+                    this.tempRHplot.appendPoint(dp);
+                    this.$('#wetbulbreading').html(data.wetbulb + '&nbsp;&deg;');
+                }
             }
             if (data.wind_chill != undefined) {
-                this.tempRHplot.appendPoint({'name': 'Wind Chill (' + data.unit.wind_chill + ')', 'value': data.wind_chill});
-                this.$('#windchillreading').html(data.wind_chill + '&nbsp;&deg;');
+                dp = {'name': 'Wind Chill (' + data.unit.wind_chill + ')',
+                      'value': data.wind_chill,
+                      'timestamp': ts};
+                if (typeof ts != 'undefined') {
+                    this.tempRHplot.fastAppendPoint(dp);
+                } else {
+                    this.tempRHplot.appendPoint(dp);
+                    this.$('#windchillreading').html(data.wind_chill + '&nbsp;&deg;');
+                }
             }
 
             if (data.rel_humidity != undefined) {
-                this.tempRHplot.appendPoint({'name': 'RH (' + data.unit.rel_humidity + ')', 'value': data.rel_humidity});
-                this.$('#rhreading').html(data.rel_humidity + '&nbsp;' + data.unit.rel_humidity);
+                dp = {'name': 'RH (' + data.unit.rel_humidity + ')',
+                      'value': data.rel_humidity,
+                      'timestamp': ts};
+                if (typeof ts != 'undefined') {
+                    this.tempRHplot.fastAppendPoint(dp);
+                } else {
+                    this.tempRHplot.appendPoint(dp);
+                    this.$('#rhreading').html(data.rel_humidity + '&nbsp;' + data.unit.rel_humidity);
+                }
             }
 
             if (data.barometer != undefined) {
-                this.baroplot.appendPoint({'name': 'Baro (' + data.unit.barometer + ')', 'value': data.barometer});
-                this.$('#baroreading').html(data.barometer + '&nbsp;' + data.unit.barometer);
+                dp = {'name': 'Baro (' + data.unit.barometer + ')',
+                      'value': data.barometer,
+                      'timestamp': ts};
+                if (typeof ts != 'undefined') {
+                    this.baroplot.fastAppendPoint(dp);
+                } else {
+                    this.baroplot.appendPoint(dp);
+                    this.$('#baroreading').html(data.barometer + '&nbsp;' + data.unit.barometer);
+                }
             }
             if (data.pressure != undefined) {
-                this.baroplot.appendPoint({'name': 'Pressure (' + data.unit.pressure + ')', 'value': data.pressure});
-                this.$('#pressurereading').html(data.pressure + '&nbsp;' + data.unit.pressure);
+                dp = {'name': 'Pressure (' + data.unit.pressure + ')', 'value': data.pressure,
+                      'timestamp': ts};
+                if (typeof ts != 'undefined') {
+                    this.baroplot.fastAppendPoint(dp);
+                } else {
+                    this.baroplot.appendPoint(dp);
+                    this.$('#pressurereading').html(data.pressure + '&nbsp;' + data.unit.pressure);
+                }
             }
+
+            if (typeof ts != 'undefined')
+                return;
 
             if (data.altitude != undefined) {
                 this.$('#altitudereading').html(data.altitude + '&nbsp;' + data.unit.altitude);
@@ -236,8 +296,28 @@ define(function (require) {
             if (data.dens_altitude != undefined) {
                 this.$('#densaltitudereading').html(data.dens_altitude + '&nbsp;' + data.unit.dens_altitude);
             }
+        },
 
+        // We get there whenever we receive something from the serial port
+        showInput: function (data) {
+            var self = this;
 
+            if (data.replay_ts != undefined) {
+                this.suspend_graph = false;
+                this.disp_wx(data.data, data.replay_ts);
+                return;
+            }
+
+            // We're waiting for a data replay
+            if (this.suspend_graph)
+                return;
+
+            // Grey out readings if we lost connectivity to the Kestrel 5 unit
+            if (data.reconnecting != undefined ) {
+                this.$('#liveview_in').css('color', data.reconnecting ? '#a1a1a1' : '#000000');
+            }
+
+            this.disp_wx(data);
         },
     });
 

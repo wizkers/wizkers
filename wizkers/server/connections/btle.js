@@ -268,7 +268,7 @@ define(function (require) {
             // or given up
             noble.wizkersScanningCount--;
             debug('Number of scans going on now:', noble.wizkersScanningCount);
-            if (noble.wizkersScanningCount == 0) {
+            if (noble.wizkersScanningCount <= 0) {
                 debug('Stop scanning');
                 noble.removeAllListeners('discover');
                 noble.stopScanning();

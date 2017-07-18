@@ -165,7 +165,7 @@ var vizapp = {
     state: 'running',
 
     // Used in a couple of locations, lets us change the app name easily.
-    appname: 'Wizkers:Radio'
+    appname: 'Wizkers:Nuclear'
 
 };
 

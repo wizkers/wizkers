@@ -188,23 +188,22 @@ define(function (require) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
                 console.log('We found those services', stat.services);
-                // ToDo: depending on the services we found, we can subscribe
-                // to different service/characteristic UUIDs so that we can support
-                // multiple versions of the Bluetooth module.
                 port.subscribe({
                     service_uuid: KESTREL_SERVICE_UUID,
                     characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
                 });
-                // We remove the listener so that the serial port can be GC'ed
-                if (port_close_requested) {
-                    if (port.off)
-                        port.off('status', status);
-                    else
-                        port.removeListener('status', status);
-
-                    port_close_requested = false;
-                }
             }
+
+            // We remove the listener so that the serial port can be GC'ed
+            if (port_close_requested) {
+                if (port.off)
+                    port.off('status', status);
+                else
+                    port.removeListener('status', status);
+
+                port_close_requested = false;
+            }
+
         };
 
         var openPort_app = function (insid) {
