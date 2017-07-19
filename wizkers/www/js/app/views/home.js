@@ -194,7 +194,8 @@ define(function (require) {
                                 console.log('[Home view] Replaying previous datapoints');
                                 // Our instrument supports live view replay, so we ask for it:
                                 setTimeout(function () {
-                                    view.clear();
+                                    if (view.clear != undefined)
+                                        view.clear();
                                     linkManager.requestReplay();
                                 }, 500);
                             }

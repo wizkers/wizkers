@@ -53,6 +53,7 @@ define(function(require) {
             this.minreading_2 = -1;
             this.valid = false;
             this.validinit = false;
+            this.graph_cleared = false;
 
 
             // Get frequency and span if specified:
@@ -134,14 +135,54 @@ define(function(require) {
             }
         },
 
+        disp_wx: function(data,ts) {
+            if (data.wind != undefined) {
+                var dp = {'name': 'Wind',
+                     'value': data.wind,
+                      'timestamp': ts };
+                if (typeof ts != 'undefined') {
+                    this.plot.fastAppendPoint(dp);
+                    this.windplot.fastAppendPoint({'name': 'Wind (' + data.unit.wind.speed + ')', 'value': data.wind.speed, 'timestamp': ts });
+                } else {
+                    this.plot.appendPoint(dp);
+                    this.windplot.appendPoint({'name': 'Wind (' + data.unit.wind.speed + ')', 'value': data.wind.speed });
+                    this.$('#windspeed').html((data.wind.speed).toFixed(2) + '&nbsp;' + data.unit.wind.speed);
+                }
+
+            }
+        },
+
+        clear: function () {
+            this.$('.roseplot').empty();
+            this.$('#windspeedchart').empty();
+            this.addPlot();
+            this.suspendGraph = true;
+        },
 
         showInput: function(data) {
 
-            if (data.wind != undefined) {
-                this.plot.appendPoint({'name': 'Wind', 'value': data.wind });
-                this.windplot.appendPoint({'name': 'Wind (' + data.unit.wind.speed + ')', 'value': data.wind.speed });
-                this.$('#windspeed').html((data.wind.speed).toFixed(2) + '&nbsp;' + data.unit.wind.speed);
+            if (data.replay_ts != undefined) {
+                this.suspend_graph = false;
+                if (!this.graph_cleared) {
+                    this.graph_cleared = true;
+                    this.clear();
+                }
+                this.disp_wx(data.data, data.replay_ts);
+                return;
             }
+
+            // We're waiting for a data replay
+            if (this.suspend_graph)
+                return;
+
+            this.graph_cleared = false;
+
+            // Grey out readings if we lost connectivity to the Kestrel 5 unit
+            if (data.reconnecting != undefined ) {
+                this.$('#numview_in').css('color', data.reconnecting ? '#a1a1a1' : '#000000');
+            }
+
+            this.disp_wx(data);
 
         },
 
