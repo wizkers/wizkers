@@ -50,6 +50,7 @@ var RMYoung = require('./www/js/app/instruments/rmyoung/driver_backend.js');
 var Kestrel5 = require('./www/js/app/instruments/kestrel5/driver_backend.js');
 var InspectorBLE = require('./www/js/app/instruments/inspector_ble/driver_backend.js');
 var BGeigie = require('./www/js/app/instruments/bgeigie/driver_backend.js');
+var W433 = require('./parsers/w433.js');
 
 var ConnectionManager = function () {
 

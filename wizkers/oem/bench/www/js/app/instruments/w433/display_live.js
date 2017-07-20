@@ -37,7 +37,7 @@ define(function(require) {
         Backbone = require('backbone'),
         simpleplot = require('app/lib/flotplot'),
         roseplot = require('app/lib/flotwindrose'),
-        template = require('js/tpl/instruments/W433LiveView.js');
+        template = require('js/tpl/instruments/w433/W433LiveView.js');
 
     return Backbone.View.extend({
 

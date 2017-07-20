@@ -33,7 +33,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        template = require('js/tpl/instruments/W433NumView.js');
+        template = require('js/tpl/instruments/w433/W433NumView.js');
 
     return Backbone.View.extend({
 

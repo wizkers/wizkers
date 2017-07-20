@@ -35,7 +35,7 @@ define(function(require) {
     var $       = require('jquery'),
         _       = require('underscore'),
         Backbone = require('backbone'),
-        template = require('js/tpl/instruments/W433SettingsView.js');
+        template = require('js/tpl/instruments/w433/W433SettingsView.js');
 
     return Backbone.View.extend({
             initialize:function () {

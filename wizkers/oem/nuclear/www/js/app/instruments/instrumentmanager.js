@@ -143,6 +143,12 @@ define(function (require) {
                 settings: null,
                 connectionsettings: 'app/views/instrument/pinoccio'
             };
+            this.supportedInstruments["w433"] = {
+                name: "LaCrosse 433MHz weather sensors",
+                type: 'app/instruments/w433/w433',
+                settings: null,
+                connectionsettings: 'app/views/instrument/serialport'
+            };
         }
 
         // The instruments below are supported in both Chrome and Cordova mode

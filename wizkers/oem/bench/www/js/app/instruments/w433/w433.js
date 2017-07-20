@@ -34,9 +34,22 @@
 define(function(require) {
     "use strict";
 
-    var driver_frontend = require('app/instruments/w433/driver_frontend');
+    // Convenient function when views want to talk to each other: keep a central
+    // reference to those here
+    var current_liveview = null;
+    var current_numview = null;
 
     return function() {
+
+
+
+        this.liveViewRef = function () {
+            return current_liveview;
+        };
+
+        this.numViewRef = function () {
+            return current_numview;
+        };
 
         // Helper function: get driver capabilites.
         // returns a simple array of capabilities
@@ -50,19 +63,21 @@ define(function(require) {
                     return [ "temperature", "humidity", "rainfall", "wind" ];
         }
 
-
         // This has to be a Backbone view
-        this.getLiveDisplay = function(arg, callback) {
-            require(['app/instruments/w433/display_live'], function(view) {
-                callback(new view(arg));
+        // This is the full screen live view graph (not a small widget)
+        this.getLiveDisplay = function (arg, callback) {
+            require(['app/instruments/w433/display_live'], function (view) {
+                current_liveview = new view(arg);
+                callback(current_liveview);
             });
         };
 
-            // This is a Backbone view
+        // This is a Backbone view
         // This is a numeric display
-        this.getNumDisplay = function(arg, callback) {
-            require(['app/instruments/w433/display_numeric'], function(view) {
-                callback(new view(arg));
+        this.getNumDisplay = function (arg, callback) {
+            require(['app/instruments/w433/display_numeric'], function (view) {
+                current_numview = new view(arg);
+                callback(current_numview);
             });
         };
 
@@ -72,9 +87,12 @@ define(function(require) {
         };
 
         // The browser-side instrument driver
-        this.getDriver = function() {
-            return new driver_frontend();
-        };
+        // This is the front-end driver
+        this.getDriver = function(callback) {
+             require(['app/instruments/w433/driver_frontend'], function(d) {
+                callback(new d());
+             });
+        }
 
         // Return a Backbone view which is a mini graph
         this.getMiniLogview = function(arg, callback) {
