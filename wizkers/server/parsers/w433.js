@@ -261,7 +261,7 @@ var W433 = function() {
 
     };
 
-        /**
+    /**
      * The following two subroutines check two things
      * 1) Checksum OK (simple sum of bytes in packet)
      * 2) Redundant information OK within packet (different in
@@ -305,11 +305,13 @@ var W433 = function() {
     // for all practical purposes, this is really the init method of the
     // driver
     this.openPort = function(id) {
+        debug('Opening port for ins', id);
         instrumentid = id;
         dbs.instruments.get(id, function(err,item) {
             port = new serialconnection(item.port, portSettings());
             port.on('data', format);
             port.on('status', status);
+            port.open();
             // Save instrument contents:
             instrument = item;
             // Get the instrument's metadata too:
