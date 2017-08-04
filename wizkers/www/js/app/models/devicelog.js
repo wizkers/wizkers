@@ -44,7 +44,7 @@ define(function (require) {
 
     var bidb = null;
 
-    if (vizapp.type == "chrome") {
+    if (vizapp.type == "chrome" || vizapp.type == "nwjs") {
         require(['bbindexeddb'], function (bb) {
             bidb = bb;
         });
