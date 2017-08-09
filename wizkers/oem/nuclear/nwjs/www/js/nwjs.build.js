@@ -68,6 +68,57 @@
         mangle: true,
     },
 
+    shim: {
+        // Define Bootstrap's main JS, then all plugins which depend on it:
+        'bootstrap': {
+            deps: ['jquery']
+        },
+        'bootstrapslider': {
+            deps: ['bootstrap']
+        },
+        'bootstrapeditable': {
+            deps: ['bootstrap']
+        },
+        'utils': {
+            exports: 'utils'
+        },
+        'paper' : {
+            exports: 'paper'
+        },
+        'jquery_xmlrpc': {
+            deps: ['jquery']
+        },
+
+        'jquery_mousewheel': {
+            deps: [ 'jquery']
+        },
+
+        // The Flot library, along with our dependencies:
+        'flot': {
+            deps: ['jquery'],
+            exports: '$.plot',
+        },
+        'flot_time': {
+            deps: ['flot']
+        },
+        'flot_resize': {
+            deps: ['flot']
+        },
+        'flot_selection': {
+            deps: ['flot']
+        },
+        'flot_fillbetween': {
+            deps: ['flot']
+        },
+        'flot_jumlib': {
+            deps: ['jquery', 'flot'],
+            exports: '$.plot.JUMlib'
+        },
+        'flot_windrose': {
+            deps: ['flot', 'flot_jumlib']
+        }
+    },
+
     //If using Closure Compiler for script optimization, these config options
     //can be used to configure Closure Compiler. See the documentation for
     //Closure compiler for more information.

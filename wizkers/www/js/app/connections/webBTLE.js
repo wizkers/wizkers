@@ -116,7 +116,8 @@ define(function (require) {
                     // value is a DataView. Super cool but our drivers
                     // expect a Buffer
                     let value = event.target.value;
-                    self.trigger('data', { value: value.buffer});
+                    self.trigger('data', { value: value.buffer,
+                        characteristic: event.target.uuid });
                     }
                 }
 
@@ -132,14 +133,14 @@ define(function (require) {
                 for (var i in cuid) {
                     service.getCharacteristic(cuid[i])
                         .then( characteristic => {
-                            subscribedChars.push(characteristic);
-                            return characteristic.startNotifications();
-                        })
-                        .then( _ => {
-                            var mc = subscribedChars[subscribedChars.length-1];
-                            mc.addEventListener('characteristicvaluechanged',
-                                makeOnNotification());
+                            var c = characteristic;
+                            subscribedChars.push(c);
+                            c.startNotifications().then( _ => {
+                                c.addEventListener('characteristicvaluechanged',
+                                    makeOnNotification());
+                                });
                         });
+                        
                     }
             }).catch(error => {
                 console.error('Argh! ' + error);
@@ -193,6 +194,8 @@ define(function (require) {
                     .then(server => {
                         BTserver = server;
                         trackConnect();
+                    }).catch(error => {
+                        console.log(error);
                     })
                 });
             } else {

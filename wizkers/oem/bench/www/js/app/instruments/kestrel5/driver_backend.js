@@ -75,7 +75,7 @@ define(function (require) {
                 return;
             }
             //console.log(data);
-            var dv = new DataView(vizapp.type === 'server' ? data.value : data.value.buffer);
+            var dv = new DataView(vizapp.type === 'cordova' ? data.value.buffer : data.value);
             if (utils.sameUUID(data.characteristic, WX1_UUID)) {
                 var windspeed = dv.getInt16(0, true);
                 var temp = dv.getInt16(2, true);
@@ -209,7 +209,8 @@ define(function (require) {
         var openPort_app = function (insid) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
-            port = new btleConnection(ins.get('port'), portSettings());
+            if (port == null)
+                port = new btleConnection(ins.get('port'), portSettings());
             port.open();
             port.on('data', format);
             port.on('status', status);

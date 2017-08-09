@@ -94,7 +94,7 @@ require.config({
             'connections/serial': 'app/connections/chromeSerial',
             'connections/tcp': 'app/connections/chromeTcpSerial',
             'connections/hid': 'app/connections/usbhid',
-            'connections/btle': 'app/connections/nodeBTLE',
+            'connections/btle': 'app/connections/webBTLE',
             'connections/btspp': 'app/connections/cordovaBTSPP',
             'connections/webrtc': 'app/connections/webrtc',
             'connections/dummy': 'app/connections/dummy',
@@ -163,7 +163,7 @@ var vizapp = {
     //   - server : use a remote server for device connection & database
     //   - cordova: run as an embedded Cordova application on Android
     //   - others to be defined
-    type: "chrome",
+    type: "nwjs",
 };
 
 var router;
