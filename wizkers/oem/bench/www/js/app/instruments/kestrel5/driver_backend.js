@@ -340,48 +340,49 @@ define(function (require) {
 
             // Before anything else, we need to unescape the 0x7e escaped characters
             var idx = 7;
-            var date = parseLogDate(packet.subarray(idx,idx+7));
-            var compass_true = dv.getUint16(idx += 7, true);
-            var windspeed = dv.getUint16(idx += 2, true);  // To be validated
-            var wind2 = dv.getUint16(idx += 2, true);
-            var wind3 = dv.getUint16(idx += 2, true);
-            var temperature = dv.getUint16(idx += 3, true);
-            var wind_chill = dv.getUint16(idx += 2, true);
-            var rel_humidity = dv.getUint16( idx += 2, true);
-            var heat_index = dv.getUint16( idx += 2, true);
-            var dew_point = dv.getUint16( idx += 3, true);
-            var wetbulb = dv.getUint16( idx += 2, true);
-            var barometer = dv.getUint16( idx += 2, true); // TODO: check which is baro vs pressure
-            var pressure = dv.getUint16( idx += 2, true);
-            var altitude = dv.getUint16( idx += 2, true);  // TODO: account for 3rd byte
-            var dens_altitude = dv.getUint16( idx += 3, true);
-            var compass_mag = dv.getUint16( idx += 3, true);
+            while (idx < (packet.byteLength-43)) { // 1 record is 41 bytes long
+                var date = parseLogDate(packet.subarray(idx,idx+7));
+                var compass_true = dv.getUint16(idx += 7, true);
+                var windspeed = dv.getUint16(idx += 2, true);  // To be validated
+                var wind2 = dv.getUint16(idx += 2, true);
+                var wind3 = dv.getUint16(idx += 2, true);
+                var temperature = dv.getUint16(idx += 3, true);
+                var wind_chill = dv.getUint16(idx += 2, true);
+                var rel_humidity = dv.getUint16( idx += 2, true);
+                var heat_index = dv.getUint16( idx += 2, true);
+                var dew_point = dv.getUint16( idx += 3, true);
+                var wetbulb = dv.getUint16( idx += 2, true);
+                var barometer = dv.getUint16( idx += 2, true); // TODO: check which is baro vs pressure
+                var pressure = dv.getUint16( idx += 2, true);
+                var altitude = dv.getUint16( idx += 2, true);  // TODO: account for 3rd byte
+                var dens_altitude = dv.getUint16( idx += 3, true);
+                var compass_mag = dv.getUint16( idx += 3, true);
+                idx += 2;
 
-            var jsresp = { log: {
-                    timestamp: date,
-                    dew_point: dew_point/100,
-                    heat_index: heat_index/100,
-                    wetbulb: wetbulb/100,
-                    wind_chill: wind_chill/100,
-                    compass_true: compass_true,
-                    altitude: altitude/10,
-                    dens_altitude: dens_altitude/10,
-                    barometer: barometer /10,
-                    // crosswind: xwind/1000,
-                    // headwind: hwind/1000,
-                    temperature: temperature/100,
-                    rel_humidity: rel_humidity/100,
-                    pressure: pressure/10,
-                    compass_mag: compass_mag,
-                    wind: { dir: compass_true,
-                          speed: windspeed*1.94384/1000
+                var jsresp = { log: {
+                        timestamp: date,
+                        dew_point: dew_point/100,
+                        heat_index: heat_index/100,
+                        wetbulb: wetbulb/100,
+                        wind_chill: wind_chill/100,
+                        compass_true: compass_true,
+                        altitude: altitude/10,
+                        dens_altitude: dens_altitude/10,
+                        barometer: barometer /10,
+                        // crosswind: xwind/1000,
+                        // headwind: hwind/1000,
+                        temperature: temperature/100,
+                        rel_humidity: rel_humidity/100,
+                        pressure: pressure/10,
+                        compass_mag: compass_mag,
+                        wind: { dir: compass_true,
+                            speed: windspeed*1.94384/1000
+                        }
                     }
-                }
-            };
-            console.log(jsresp);
-            self.trigger('data', jsresp);
-
-
+                };
+                console.log(jsresp);
+                self.trigger('data', jsresp);
+            }
         }
 
         // Unescapes character 0x7d:

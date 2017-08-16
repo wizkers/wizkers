@@ -125,8 +125,6 @@ define(function (require) {
                     }
                 }
 
-            // subscribedChars = []; // Keep track of all subscribed characteristics
-
             // Web Bluetooth is super difficult in terms of the services
             // we are allowed to see - if they were not in the initial
             // 'settings' variable when initializing this object, we will never
