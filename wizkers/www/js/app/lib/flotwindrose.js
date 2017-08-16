@@ -121,7 +121,7 @@ define(function(require) {
 
         trimLiveData: function() {
             if (this.livedata.length >= this.settings.points) {
-                    this.livedata = this.livedata.shift();
+                    this.livedata.shift();
             }
         },
 

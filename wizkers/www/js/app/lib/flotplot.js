@@ -302,7 +302,7 @@ define(function (require) {
 
         trimLiveData: function (idx) {
             if (this.livedata[idx].length >= this.flotplot_settings.points) {
-                this.livedata[idx] = this.livedata[idx].slice(1);
+                this.livedata[idx].shift(); // Should be 40% faster than slice(1)
             }
         },
 
@@ -314,7 +314,7 @@ define(function (require) {
             for (var ld in this.livedata) {
                 if (this.livedata[ld].length && this.livedata[ld][0])
                     while (this.livedata[ld][0][0] < ts - this.flotplot_settings.duration*1000) {
-                        this.livedata[ld] = this.livedata[ld].slice(1);
+                        this.livedata[ld].shift();
                     }
             }
         },
