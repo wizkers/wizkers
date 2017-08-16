@@ -68,7 +68,7 @@ define(function (require) {
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "usbgeiger": {
-                name: "USB Geiger",
+                name: "Medcom GeigerLink",
                 type: 'app/instruments/usbgeiger/usb_geiger',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'

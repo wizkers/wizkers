@@ -1,0 +1,58 @@
+<div class="col-md-12">
+  <div class="row">
+      <div class="col-md-6">
+        <div class="well">
+            <h4>Memory statistics:</h4>
+            <strong>Number of records:</strong> <span id="memused">0</span>,
+            <br>
+            <strong>Log status: </strong> <span id="memdays">0</span> full,
+            <strong>Interval:</strong> <span id="meminterval">0</span>
+            <br>
+          </div>
+      </div>
+      <div class="col-md-6">
+          <div class="well">
+              <h4>Log download</h4>
+              <p>
+              <a href="#" role="button" class="btn btn-info downloadlog">Download device log</a>
+              </p>
+          </div>
+      </div>
+</div><!--/row-->
+<div class="row">
+    <div class="col-md-12">
+    <p>"Download Log" transfers the current log to the computer. The app can detect whether this is a new log, or if we should append to an existing log (same starting timestamp as an existing log on the computer).</p>
+
+    </div>
+</div>
+
+<!-- Log download modal -->
+<!-- Log download modal -->
+<div class="container">
+    <div id="logModal" class="modal" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="myModalLabel">Log download</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="horizontal">
+                        <span>Log name:&nbsp;</span>
+                        <input id="logname" name="logname" type="text" />
+                    </div>
+                    <div>Description:
+                        <textarea id="description" name="description" style="width: 90%;" rows="6"></textarea>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" arial-valuemin="0" aria-valuemax="100" id="downloadbar" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    <button class="btn start-download btn-primary">Start download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

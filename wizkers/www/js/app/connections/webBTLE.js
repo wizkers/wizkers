@@ -79,8 +79,12 @@ define(function (require) {
             if (!portOpen || info == undefined || callback == undefined)
                 return;
 
-            console.error('Web Bluetooth: write not implemented');
-
+            BTserver.getPrimaryService(info.service_uuid)
+                .then( service => service.getCharacteristic(info.characteristic_uuid))
+                .then( controlPoint => {
+                    controlPoint.writeValue(data);
+                    callback();
+                });
         };
 
         /**
@@ -121,7 +125,7 @@ define(function (require) {
                     }
                 }
 
-            subscribedChars = []; // Keep track of all subscribed characteristics
+            // subscribedChars = []; // Keep track of all subscribed characteristics
 
             // Web Bluetooth is super difficult in terms of the services
             // we are allowed to see - if they were not in the initial
@@ -140,7 +144,7 @@ define(function (require) {
                                     makeOnNotification());
                                 });
                         });
-                        
+
                     }
             }).catch(error => {
                 console.error('Argh! ' + error);
@@ -173,17 +177,24 @@ define(function (require) {
             // timeoutCheckTimer = setTimeout(checkConnectDelay, 15000);
 
             if (BTdevice == null) {
+                var self = this;
                 // Damn web bluetooth interface requires those user gestures
                 // which do not really make sense in the context of a NWJS app.
                 // This will be possible to avoid once the permissions model is implemented
                 // for Bluetooth on the Chromium runtime.
                 $('#BTModal').modal('show');
                 $('#btscan').on('click', function() {
+                    // settings can be either a string or an array
+                    // don't you love this fuzzy Javascript typing ?
+                    if (typeof settings.service_uuid == 'string')
+                            settings.service_uuid = [ settings.service_uuid];
+
                     navigator.bluetooth.requestDevice({
                         filters: [ {
                             name: devAddress, // devAddress in our case is the device name
-                            services: [ settings.service_uuid ] // Required otherwise we will never be able to subscribe to this service
-                        }]
+                            services: settings.service_uuid // Required otherwise we will never be able to subscribe to this service
+                        }],
+                        optionalServices: settings.optional_services || []
                     })
                     .then(device => {
                         BTdevice = device;
@@ -196,6 +207,11 @@ define(function (require) {
                         trackConnect();
                     }).catch(error => {
                         console.log(error);
+                        self.trigger('status', {
+                            openerror: true,
+                            reason: 'You did not pick a Bluetooth peripheral',
+                            description: ''
+                        });
                     })
                 });
             } else {
@@ -234,7 +250,7 @@ define(function (require) {
             }
 
             // For security reasons (?) we need to already know
-            // the services in order to scan for them. Go figure. 
+            // the services in order to scan for them. Go figure.
             // See https://webbluetoothcg.github.io/web-bluetooth/#dom-requestdeviceoptions-optionalservices
             // We want to get all the service available on the server
             BTserver.getPrimaryServices().

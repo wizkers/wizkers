@@ -51,7 +51,7 @@ define(function (require) {
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities
         this.getCaps = function () {
-            return ['LiveDisplay', 'NumDisplay', 'LogView', 'WizkersSettings',
+            return ['LiveDisplay', 'NumDisplay', 'LogView', 'WizkersSettings', 'LogManagementView',
                     'WantReplay', 'Recording'
                    ];
         };
@@ -79,6 +79,13 @@ define(function (require) {
                 callback(current_numview);
             });
         };
+
+        // Return a device log management view
+        this.getLogManagementView = function (arg, callback) {
+            require(['app/instruments/kestrel5/display_logmanager'], function (view) {
+                callback(new view(arg));
+            });
+        }
 
         // A smaller widget (just a graph)
         this.getLiveWidget = function (arg, callback) {
