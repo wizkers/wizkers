@@ -64,7 +64,7 @@ define(function (require) {
         var BTdevice = null;
         var BTserver = null;
 
-        var subscribedChars = [];
+        var subscribedChars = {};
 
         ///////////
         // Public methods
@@ -138,10 +138,16 @@ define(function (require) {
                     service.getCharacteristic(cuid[i])
                         .then( characteristic => {
                             var c = characteristic;
-                            subscribedChars.push(c);
                             c.startNotifications().then( _ => {
-                                c.addEventListener('characteristicvaluechanged',
-                                    makeOnNotification());
+                                // Make sure we never add multiple event
+                                // listeners for characteristics
+                                if (subscribedChars[c.uuid] == undefined) {
+                                    subscribedChars[c.uuid] = makeOnNotification();
+                                    c.addEventListener('characteristicvaluechanged',
+                                        subscribedChars[c.uuid]);
+                                    } else {
+                                        console.warn('Careful, we subscribed to the same characteristic twice');
+                                    }
                                 });
                         });
 
@@ -150,6 +156,37 @@ define(function (require) {
                 console.error('Argh! ' + error);
             });
         }
+
+
+        this.unsubscribe = function (subscribeInfo) {
+            if (!portOpen)
+                return;
+
+            if (typeof subscribeInfo.characteristic_uuid == 'object') {
+                var cuid = [];
+                for (var i in subscribeInfo.characteristic_uuid ) {
+                    cuid.push(subscribeInfo.characteristic_uuid[i]);
+                }
+            } else {
+                var cuid = [ subscribeInfo.characteristic_uuid ]
+            }
+
+            // Web Bluetooth is super difficult in terms of the services
+            // we are allowed to see - if they were not in the initial
+            // 'settings' variable when initializing this object, we will never
+            // be allowed to connect to them
+            BTserver.getPrimaryService(subscribeInfo.service_uuid)
+            .then( service => {
+                // Now subscribe to all the characteristics we're looking for
+                for (var i in cuid) {
+                    service.getCharacteristic(cuid[i])
+                        .then( characteristic => characteristic.stopNotifications());
+                    }
+            }).catch(error => {
+                console.error('Argh! ' + error);
+            });
+        }
+
 
         this.close = function () {
             console.log("[WebBTLE] Close BTLE connection");

@@ -204,7 +204,7 @@ define(function (require) {
         var processLogResponse = function(data) {
             if (data) { // we sometimes get called without data, to further process the
                         // existing buffer
-                // console.log("LLP: Received new data, appended at index " + ibIdx);
+                console.log('LLP: Received new data, appending at index', ibIdx);
                 inputBuffer.set(new Uint8Array(data.value), ibIdx);
                 ibIdx += data.value.byteLength;
             }
@@ -213,7 +213,7 @@ define(function (require) {
                 stop = -1;
             if (currentProtoState == P_IDLE) {
                 start = sync(inputBuffer, ibIdx, 0);
-                // console.info("Found Start", start);
+                console.info("Found Start at", start);
                 if (start > -1) {
                     currentProtoState = P_SYNC;
                     // Realign our buffer (we can copy over overlapping regions):
@@ -225,7 +225,7 @@ define(function (require) {
             }
             if (currentProtoState == P_SYNC) {
                 stop = sync(inputBuffer, ibIdx, 1);
-                // console.info("Found End of packet: " + stop);
+                console.info("Found End of packet: " + stop);
                 currentProtoState = P_IDLE;
             }
             if (stop == -1)
