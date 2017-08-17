@@ -44,6 +44,11 @@ define(function (require) {
             linkManager.on('input', this.showInput, this);
             this.deviceLogs = this.collection; // The logs are already loaded from the server
             this.instrument = instrumentManager.getInstrument();
+
+            // A couple of variables we need to keep track of incoming logs:
+            this.log_index = 0;
+            this.log_size = 0;
+            this.entries = [];
         },
 
         render: function () {
@@ -71,50 +76,22 @@ define(function (require) {
         },
 
         /**
-         * Not used yet
+         * Triggers the actual download
          */
         startDownload: function (event) {
-            var self = this;
-            this.currentLog = new Devicelog.Log();
-            this.currentLog.set('name', $('#logname', this.el).val());
-            this.currentLog.set('description', $('#description', this.el).val());
-            //this.currentLog.set('startstamp', this.logtoDownloadData.start);
-            //this.currentLog.set('endstamp', this.logtoDownloadData.end);
-            this.currentLog.set('logtype', 'devicelog');
-            this.deviceLogs.add(this.currentLog);
-            // Now, initiate log download:
-            this.currentLogIndex = 0;
-            this.currentLog.save(null, {
-                success: function () {
-                    self.currentLog.updateEntriesURL(); // Somehow this is required ??
-                    self.currentLog.entries.fetch({
-                        success: function () {
-                            linkManager.sendCommand({ command: 'download_log'});
-                        }
-                    });
-                }
-            });
+            linkManager.sendCommand({ command: 'download_log'});
             return false;
         },
 
-
-        showInput: function (data) {
-            if (data.log_size != undefined && data.log_size > 0) {
-                // We receive this message at start of log download
-                console.info('[Kestrel Log Manager] Start of log download', data.log_size);
-
-            }
-        },
-
-        saveLogSession: function (data) {
-            console.log("Log transfer incoming...");
+        saveLog: function (data) {
+            console.log("Saving Kestrel5 log");
             var self = this;
 
-            var points = data.log_data;
+            var points = this.entries;
             // Phase I: check if this log is already stored and we need to append to it, or if
             // this is a new log. We do this by checking the timestamp of the 1st
             // point, and see if it exists in the database:
-            var firststamp = new Date(points[0].time).getTime(); // Timestamps are stored as Javascript timestamps
+            var firststamp = new Date(points[0].timestamp).getTime(); // Timestamps are stored as Javascript timestamps
             var knownLog = this.deviceLogs.where({
                 startstamp: firststamp
             });
@@ -133,12 +110,12 @@ define(function (require) {
                 // We don't know this log: create a new session
                 currentLog = new Devicelog.Log();
                 this.deviceLogs.add(currentLog);
-                currentLog.set('startstamp', new Date(points[0].time).getTime());
+                currentLog.set('startstamp', new Date(points[0].timestamp).getTime());
                 // The type is purely arbitrary: we are using the type "onyxlog" for
                 // logs that are downloaded from the Onyx device
-                currentLog.set('logtype', 'onyxlog');
+                currentLog.set('logtype', 'kestrel5log');
             }
-            currentLog.set('endstamp', new Date(points[points.length - 1].time).getTime());
+            currentLog.set('endstamp', new Date(points[points.length - 1].timestamp).getTime());
             currentLog.save(null, {
                 success: function () {
                     // For some reason, the 'sync' Backbone even that is fired upon data
@@ -153,7 +130,7 @@ define(function (require) {
                             // Phase II: We now have our log ID, let's save all the log
                             // entries:
                             for (var i = 0; i < points.length; i++) {
-                                var pointStamp = new Date(points[i].time).getTime();
+                                var pointStamp = new Date(points[i].timestamp).getTime();
                                 // Don't overwrite existing entries:
                                 var logEntry = currentLog.entries.where({
                                     timestamp: pointStamp
@@ -162,7 +139,7 @@ define(function (require) {
                                     newPoints++;
                                     currentLog.entries.create({
                                         timestamp: pointStamp,
-                                        data: points[i],
+                                        data: points[i].data,
                                         // Note: logsessionid is only really necessary when running
                                         // in Chrome mode, because with indexeddb, we use one single large
                                         // DB for all log entries, with the log session ID so differentiate
@@ -180,5 +157,31 @@ define(function (require) {
         },
 
 
+        showInput: function (data) {
+            if (data.log_size != undefined && data.log_size > 0) {
+                // We receive this message at start of log download
+                console.info('[Kestrel Log Manager] Start of log download', data.log_size);
+                this.log_size = data.log_size;
+                this.log_index = 0;
+                return;
+            }
+
+            if (data.log != undefined) {
+                // We have an incoming log entry
+                // log entries are formatted as:
+                // log: { timestamp: date, data: { fields }}
+                $('#downloadbar', this.el).width(this.log_index++ / this.log_size * 100 + "%");
+                this.entries.push({
+                    timestamp: data.log.timestamp,
+                    data: data.log.data,
+                });
+                return;
+            }
+
+            if (data.log_xfer_done) {
+                this.saveLog();
+                $('.start-download', self.el).html("Done&nbsp;!").attr('disabled', 'disabled');
+            }
+        }
     });
 });

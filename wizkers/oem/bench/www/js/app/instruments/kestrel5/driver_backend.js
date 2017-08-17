@@ -202,18 +202,21 @@ define(function (require) {
 
         // Process a response to a log service packet
         var processLogResponse = function(data) {
+
+            ///////
+            // Start of a simple state machine to process incoming log data
+            ///////
             if (data) { // we sometimes get called without data, to further process the
                         // existing buffer
-                console.log('LLP: Received new data, appending at index', ibIdx);
+                // console.log('LLP: Received new data, appending at index', ibIdx);
                 inputBuffer.set(new Uint8Array(data.value), ibIdx);
                 ibIdx += data.value.byteLength;
             }
-
             var start = -1,
                 stop = -1;
             if (currentProtoState == P_IDLE) {
                 start = sync(inputBuffer, ibIdx, 0);
-                console.info("Found Start at", start);
+                // console.info("Found Start at", start);
                 if (start > -1) {
                     currentProtoState = P_SYNC;
                     // Realign our buffer (we can copy over overlapping regions):
@@ -225,19 +228,22 @@ define(function (require) {
             }
             if (currentProtoState == P_SYNC) {
                 stop = sync(inputBuffer, ibIdx, 1);
-                console.info("Found End of packet: " + stop);
+                // console.info("Found End of packet: " + stop);
                 currentProtoState = P_IDLE;
             }
             if (stop == -1)
                 return; // We are receiving a packet but have not reached the end of it yet
+            ///////
+            // End of state machine
+            ///////
 
-            // We have a complete packet: copy into a new buffer, and realign
+            // We now have a complete packet: copy into a new buffer, and realign
             // our input buffer
             var escapedPacket = inputBuffer.subarray(0, stop+1);
             var packet = unescape(escapedPacket);
             // console.info("New packet ready");
             packetList.push(packet);
-            setTimeout(processPacket, 0); // Make the processing asynchronous
+            setTimeout(processPacket, 0); // Make processing asynchronous
 
             inputBuffer.set(inputBuffer.subarray(stop+1));
             ibIdx -= stop+1;
@@ -269,14 +275,12 @@ define(function (require) {
                 switch (commandQueue[0].command) {
                     case 'get_total_records':
                         log_totalRecords = dv.getUint32(5, true); // We assume this is a Uint32 until proven otherwise
-                        console.info('This device as recorded', log_totalRecords, 'in its lifetime');
                         commandQueue[0].command = 'get_log_size'; // We replace to make sure this will be processed next
                         queue_busy = false;
                         break;
                     case 'get_log_size':
                         log_logRecords = dv.getUint32(5, true);
-                        console.info('This log contains', log_logRecords, 'entries');
-                        self.trigger('data', { 'log_size': log_logRecords});
+                        setTimeout(function() {self.trigger('data', { 'log_size': log_logRecords})},0);
                         commandQueue[0].command = 'get_log_structure';
                         queue_busy = false;
                         break;
@@ -299,7 +303,10 @@ define(function (require) {
                 commandQueue.shift();
                 queue_busy = false;
                 var packet = abutils.hextoab("7e04000200120074787e");
-                port.write(packet, {service_uuid: KESTREL_LOG_SERVICE, characteristic_uuid: KESTREL_LOG_CMD }, function(e){console.log("Log transfer closed")});
+                port.write(packet, {service_uuid: KESTREL_LOG_SERVICE, characteristic_uuid: KESTREL_LOG_CMD },
+                    function(e){console.log("Log transfer closed");
+                        self.trigger('data', { 'log_xfer_done': true})
+                });
             }
 
             if (packetList.length) {
@@ -313,7 +320,7 @@ define(function (require) {
                        "August", "September", "October", "November", "December"];
 
         /**
-         *
+         *  Turn a log entry date blob into a Javascript date object
          * @param {*Uint8Array} buffer
          */
         var parseLogDate = function(buffer) {
@@ -361,22 +368,24 @@ define(function (require) {
 
                 var jsresp = { log: {
                         timestamp: date,
-                        dew_point: dew_point/100,
-                        heat_index: heat_index/100,
-                        wetbulb: wetbulb/100,
-                        wind_chill: wind_chill/100,
-                        compass_true: compass_true,
-                        altitude: altitude/10,
-                        dens_altitude: dens_altitude/10,
-                        barometer: barometer /10,
-                        // crosswind: xwind/1000,
-                        // headwind: hwind/1000,
-                        temperature: temperature/100,
-                        rel_humidity: rel_humidity/100,
-                        pressure: pressure/10,
-                        compass_mag: compass_mag,
-                        wind: { dir: compass_true,
-                            speed: windspeed*1.94384/1000
+                        data: {
+                            dew_point: dew_point/100,
+                            heat_index: heat_index/100,
+                            wetbulb: wetbulb/100,
+                            wind_chill: wind_chill/100,
+                            compass_true: compass_true,
+                            altitude: altitude/10,
+                            dens_altitude: dens_altitude/10,
+                            barometer: barometer /10,
+                            // crosswind: xwind/1000,
+                            // headwind: hwind/1000,
+                            temperature: temperature/100,
+                            rel_humidity: rel_humidity/100,
+                            pressure: pressure/10,
+                            compass_mag: compass_mag,
+                            wind: { dir: compass_true,
+                                speed: windspeed*1.94384/1000
+                            }
                         }
                     }
                 };
