@@ -76,7 +76,7 @@ define(function (require) {
                 // we have to make sure we use "binary" encoding below,
                 // otherwise the parser will assume Unicode and mess up the
                 // values.
-                parser: new Serialport.parsers.Readline(),
+                parser: new Serialport.parsers.Readline({ delimiter: '\r\n' }),
             }
         };
 
