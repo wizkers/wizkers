@@ -42,6 +42,7 @@ define(function (require) {
     require('flot_time');
     require('flot_selection');
     require('flot_fillbetween');
+    require('flot_crosshair');
 
     return Backbone.View.extend({
 

@@ -81,6 +81,7 @@ require.config({
         flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
         flot_windrose: 'lib/jquery.flot.windrose',
         flot_jumlib: 'lib/jquery.flot.JUMlib',
+        flot_crosshair: 'lib/flot-0.8.3/jquery.flot.crosshair',
 
         xmlrpc: 'lib/xmlrpc/xmlrpc'
     },
@@ -150,6 +151,9 @@ require.config({
         },
         'flot_windrose': {
             deps: ['flot', 'flot_jumlib']
+        },
+        'flot_crosshair': {
+            deps: [ 'flot' ]
         }
     }
 });

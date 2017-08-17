@@ -34,7 +34,6 @@
 define(function (require) {
     "use strict";
 
-    var driver_frontend = require('app/instruments/usbgeiger/driver_frontend');
     var uploader_frontend = require('app/instruments/usbgeiger/uploader_frontend');
 
     return function () {
@@ -111,7 +110,9 @@ define(function (require) {
 
         // This has to be a link manager
         this.getDriver = function () {
-            return new driver_frontend();
+             require(['app/instruments/usbgeiger/driver_frontend'], function(d) {
+                callback(new d());
+             });
         };
 
         this.getUploader = function () {

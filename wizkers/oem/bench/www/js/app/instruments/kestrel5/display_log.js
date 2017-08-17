@@ -59,6 +59,9 @@ define(function (require) {
                         timeformat: "%H:%M",
                         timezone: settings.get("timezone")
                     },
+                    crosshair: {
+				        mode: "x"
+                    },
                     grid: {
                         hoverable: true
                     },
@@ -158,7 +161,62 @@ define(function (require) {
             this.rsc = rsc;
             $(window).on('resize', this.rsc);
             rsc();
+
+            // Last: listen to plot hover events from the crosshair to update
+            // the readings
+            // we need to bind to this object, otherwise the context will be the DOM element.
+            this.$('#tempRHchart').on('plothover', this.displayReadings.bind(this));
         },
+
+        // Callback for reading display, throttled
+        displayReadings: function(event, pos, item) {
+            this.latestPosition = pos;
+			if (!this.updateLegendTimeout) {
+				this.updateLegendTimeout = setTimeout(this.updateReadings.bind(this), 100);
+			}
+        },
+
+        // Actual update (async, throttled)
+        updateReadings: function(event, pos, item) {
+            // Source for this: http://www.flotcharts.org/flot/examples/tracking/index.html
+            this.updateLegendTimeout = null;
+            var pos = this.latestPosition;
+
+			var axes = this.tempRHplot.plot.getAxes();
+			if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||
+				pos.y < axes.yaxis.min || pos.y > axes.yaxis.max) {
+				return;
+			}
+
+			var i, j, dataset = this.tempRHplot.plot.getData();
+			for (i = 0; i < dataset.length; ++i) {
+
+				var series = dataset[i];
+
+				// Find the nearest points, x-wise
+				for (j = 0; j < series.data.length; ++j) {
+					if (series.data[j][0] > pos.x) {
+						break;
+					}
+				}
+
+				// Now Interpolate
+				var y,
+					p1 = series.data[j - 1],
+					p2 = series.data[j];
+				if (p1 == null) {
+					y = p2[1];
+				} else if (p2 == null) {
+					y = p1[1];
+				} else {
+					y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
+				}
+                this.$('#' + series.label).html(y.toFixed(1));
+
+			}
+
+        },
+
 
         // Depending on log type, we need to pack our data differently...
         packData: function () {
@@ -189,8 +247,10 @@ define(function (require) {
                 $(window).off('resize', this.rsc);
             if (this.plot)
                 this.plot.onClose();
-            if (this.tempRHplot)
+            if (this.tempRHplot) {
                 this.tempRHplot.onClose();
+                this.$('#tempRHchart').off('plothover', this.displayReadings);
+            }
         },
 
         clear: function () {
@@ -204,7 +264,7 @@ define(function (require) {
             var dp;
 
             if (data.temperature != undefined) {
-                dp = {'name': 'Temp',
+                dp = {'name': 'tempreading',
                          'value': data.temperature,
                         'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -215,7 +275,7 @@ define(function (require) {
                 }
             }
             if (data.dew_point != undefined) {
-                dp = {'name': 'Dew Point',
+                dp = {'name': 'dewpointreading',
                       'value': data.dew_point,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -226,7 +286,7 @@ define(function (require) {
                 }
             }
             if (data.heat_index != undefined) {
-                dp = {'name': 'Heat Index',
+                dp = {'name': 'heatindexreading',
                       'value': data.heat_index,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -237,7 +297,7 @@ define(function (require) {
                 }
             }
             if (data.wetbulb != undefined) {
-                dp = {'name': 'Wet Bulb',
+                dp = {'name': 'wetbulbreading',
                       'value': data.wetbulb,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -248,7 +308,7 @@ define(function (require) {
                 }
             }
             if (data.wind_chill != undefined) {
-                dp = {'name': 'Wind Chill',
+                dp = {'name': 'windchillreading',
                       'value': data.wind_chill,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -260,7 +320,7 @@ define(function (require) {
             }
 
             if (data.rel_humidity != undefined) {
-                dp = {'name': 'RH',
+                dp = {'name': 'rhreading',
                       'value': data.rel_humidity,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -272,7 +332,7 @@ define(function (require) {
             }
 
             if (data.barometer != undefined) {
-                dp = {'name': 'Baro',
+                dp = {'name': 'baroreading',
                       'value': data.barometer,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -283,7 +343,7 @@ define(function (require) {
                 }
             }
             if (data.pressure != undefined) {
-                dp = {'name': 'Pressure', 'value': data.pressure,
+                dp = {'name': 'pressurereading', 'value': data.pressure,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
                     this.baroplot.fastAppendPoint(dp);
