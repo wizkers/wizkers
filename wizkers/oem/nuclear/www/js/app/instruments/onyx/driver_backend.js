@@ -66,7 +66,7 @@ define(function (require) {
                 stopBits: 1,
                 dtr: true,
                 flowControl: false,
-                parser: Serialport.parsers.readline(),
+                parser: new Serialport.parsers.Readline(),
             }
         };
 
