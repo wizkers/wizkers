@@ -82,10 +82,19 @@ var SerialConnection = function(path, settings) {
         self.emit('status', {portopen: portOpen});
     });
 
+    // On Node-serialport 5 and onwards, the parser is not built-in anymore,
+    // we need to pipe the port data into the parser and listen to the parser:
+    if (settings.parser) {
+        myPort.pipe(settings.parser);
+        settings.parser.on('data', function (data) {
+                self.emit('data',data);
+        });
+    } else {
         // listen for new serial data:
-    myPort.on('data', function (data) {
-            self.emit('data',data);
-    });
+        myPort.on('data', function (data) {
+                self.emit('data',data);
+        });
+    }
 
     myPort.on('error', function(err) {
         debug("Serial port error: "  + err);

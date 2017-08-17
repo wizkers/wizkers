@@ -109,7 +109,7 @@ define(function (require) {
         };
 
         // This has to be a link manager
-        this.getDriver = function () {
+        this.getDriver = function (callback) {
              require(['app/instruments/usbgeiger/driver_frontend'], function(d) {
                 callback(new d());
              });

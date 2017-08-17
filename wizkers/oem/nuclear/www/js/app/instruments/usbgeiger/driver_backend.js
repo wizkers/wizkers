@@ -76,12 +76,14 @@ define(function (require) {
                 // we have to make sure we use "binary" encoding below,
                 // otherwise the parser will assume Unicode and mess up the
                 // values.
-                parser: Serialport.parsers.readline(),
+                parser: new Serialport.parsers.Readline(),
             }
         };
 
-        // Format can act on incoming data from the counter, and then
-        // forwards the data to the app through a 'serialEvent' event.
+        /**
+         *  Format can act on incoming data from the counter, and then
+         *  forwards the data to the app through a 'serialEvent' event.
+         */
         var format = function (data) {
 
             // All commands now return JSON
