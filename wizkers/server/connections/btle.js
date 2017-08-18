@@ -94,19 +94,7 @@ define(function (require) {
             if (!portOpen || info == undefined || callback == undefined)
                 return;
 
-            var encodedString = bluetoothle.bytesToEncodedString((data instanceof Uint8Array) ? data : new Uint8Array(data));
-            var params = {
-                value: encodedString,
-                address: devAddress,
-                service: info.service_uuid,
-                characteristic: info.characteristic_uuid,
-            };
-            if (info.type) {
-                params.type = info.type;
-            }
-            bluetoothle.write(callback,
-                              function(e) { console.error('BLE Write error', e)},
-                              params);
+            // TODO: Implement writes
         };
 
         /**
@@ -116,22 +104,7 @@ define(function (require) {
             if (!portOpen)
                 return;
 
-            var readError = function(e) {
-                console.log('[cordovaBTLE] Read error: ' + e);
-            };
-
-            var readSuccess = function(s) {
-                // Our drivers don't want this base64 stuff, sorry
-                s.value = bluetoothle.encodedStringToBytes(s.value)
-                    // Pass it on to the driver
-                self.emit('data', s);
-            };
-
-            bluetoothle.read(readSuccess,readError,{
-                'address': devAddress,
-                'service': service,
-                'characteristic': characteristic
-            });
+            // TODO: Implement reads
 
         }
 

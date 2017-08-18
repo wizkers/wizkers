@@ -89,8 +89,9 @@ var record = function (data, logID) {
     // ID system.
     db.put({
         data: data,
-        timestamp: ts
-    }, '' + ts, function (err, entry) {
+        timestamp: ts,
+        _id:  '' + ts
+    }, function (err, entry) {
         if (err)
             debug("Error saving entry: " + err + " ID is: " + ts);
         // Keep the number of log entries up to date in the log DB
