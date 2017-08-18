@@ -85,9 +85,6 @@ define(function(require) {
                     }
                 }
             };
-
-
-
             linkManager.on('input', this.showInput, this);
         },
 
@@ -148,7 +145,6 @@ define(function(require) {
                     this.windplot.appendPoint({'name': 'Wind (' + data.unit.wind.speed + ')', 'value': data.wind.speed });
                     this.$('#windspeed').html((data.wind.speed).toFixed(2) + '&nbsp;' + data.unit.wind.speed);
                 }
-
             }
         },
 

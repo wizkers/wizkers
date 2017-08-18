@@ -36,6 +36,7 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
+        roseplot = require('app/lib/flotwindrose'),
         template = require('js/tpl/instruments/kestrel5/LogView.js');
 
     return Backbone.View.extend({
@@ -133,6 +134,24 @@ define(function (require) {
                 this.$('#barochart').append(this.baroplot.el);
                 this.baroplot.render();
             }
+            this.dirplot = new roseplot({
+                model:this.model,
+                settings:this.plotoptions
+            });
+
+            if (this.dirplot != null) {
+                this.$('.roseplot').append(this.dirplot.el);
+                this.dirplot.render();
+            }
+
+            this.windplot = new simpleplot({
+                model: this.model,
+                settings: this.plotoptions
+            });
+            if (this.windplot != null) {
+                this.$('#windspeedchart').append(this.windplot.el);
+                this.windplot.render();
+            }
 
 
             // Haven't found a better way so far:
@@ -166,6 +185,8 @@ define(function (require) {
             // the readings
             // we need to bind to this object, otherwise the context will be the DOM element.
             this.$('#tempRHchart').on('plothover', this.displayReadings.bind(this));
+            this.$('#barochart').on('plothover', this.displayReadings.bind(this));
+            this.$('#windspeedchart').on('plothover', this.displayReadings.bind(this));
         },
 
         // Callback for reading display, throttled
@@ -179,41 +200,49 @@ define(function (require) {
         // Actual update (async, throttled)
         updateReadings: function(event, pos, item) {
             // Source for this: http://www.flotcharts.org/flot/examples/tracking/index.html
+            var self = this;
             this.updateLegendTimeout = null;
             var pos = this.latestPosition;
 
-			var axes = this.tempRHplot.plot.getAxes();
-			if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||
-				pos.y < axes.yaxis.min || pos.y > axes.yaxis.max) {
-				return;
-			}
+            // Sync the crosshairs on both plots
+            this.baroplot.plot.setCrosshair(pos);
+            this.tempRHplot.plot.setCrosshair(pos);
+            this.windplot.plot.setCrosshair(pos);
 
-			var i, j, dataset = this.tempRHplot.plot.getData();
-			for (i = 0; i < dataset.length; ++i) {
+            // Update readings on Temp plot
+            var update = function(plot) {
+                var axes = plot.plot.getAxes();
+                if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max)
+                    return;
 
-				var series = dataset[i];
-
-				// Find the nearest points, x-wise
-				for (j = 0; j < series.data.length; ++j) {
-					if (series.data[j][0] > pos.x) {
-						break;
-					}
-				}
-
-				// Now Interpolate
-				var y,
-					p1 = series.data[j - 1],
-					p2 = series.data[j];
-				if (p1 == null) {
-					y = p2[1];
-				} else if (p2 == null) {
-					y = p1[1];
-				} else {
-					y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
-				}
-                this.$('#' + series.label).html(y.toFixed(1));
-
-			}
+                var i, j, dataset = plot.plot.getData();
+                for (i = 0; i < dataset.length; ++i) {
+                    var series = dataset[i];
+                    // Find the nearest points, x-wise
+                    for (j = 0; j < series.data.length; ++j) {
+                        if (series.data[j][0] > pos.x) {
+                            break;
+                        }
+                    }
+                    var ts = new Date(series.data[j-1][0]);
+                    var tss = (settings.get("timezone") == "browser") ? ts.toString() : ts.toUTCString();
+                    self.$('#timestamp').html(tss);
+                    // Now Interpolate
+                    var y, p1 = series.data[j - 1],
+                        p2 = series.data[j];
+                    if (p1 == null) {
+                        y = p2[1];
+                    } else if (p2 == null) {
+                        y = p1[1];
+                    } else {
+                        y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
+                    }
+                    self.$('#' + series.label).html(y.toFixed(1));
+                }
+            }
+            update(this.tempRHplot);
+            update(this.baroplot);
+            update(this.windplot);
 
         },
 
@@ -235,9 +264,10 @@ define(function (require) {
                     this.disp_wx(entry.get('data'), ts);
                 }
             }
-
             this.tempRHplot.redraw();
             this.baroplot.redraw();
+            this.dirplot.redraw();
+            this.windplot.redraw();
             return data;
         },
 
@@ -251,13 +281,9 @@ define(function (require) {
                 this.tempRHplot.onClose();
                 this.$('#tempRHchart').off('plothover', this.displayReadings);
             }
-        },
+            this.$('#barochart').off('plothover', this.displayReadings);
+            this.$('#windspeedchart').off('plothover', this.displayReadings);
 
-        clear: function () {
-            this.$('#tempRHchart').empty();
-            this.$('#barochart').empty();
-            this.addPlot();
-            this.suspendGraph = true;
         },
 
         disp_wx: function (data, ts) {
@@ -267,90 +293,56 @@ define(function (require) {
                 dp = {'name': 'tempreading',
                          'value': data.temperature,
                         'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.tempRHplot.fastAppendPoint(dp);
-                } else {
-                    this.tempRHplot.appendPoint(dp);
-                    this.$('#tempreading').html(data.temperature + '&nbsp;&deg;');
-                }
+                this.tempRHplot.fastAppendPoint(dp);
             }
             if (data.dew_point != undefined) {
                 dp = {'name': 'dewpointreading',
                       'value': data.dew_point,
                       'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.tempRHplot.fastAppendPoint(dp);
-                } else {
-                    this.tempRHplot.appendPoint(dp);
-                    this.$('#dewpointreading').html(data.dew_point + '&nbsp;&deg;');
-                }
+                this.tempRHplot.fastAppendPoint(dp);
             }
             if (data.heat_index != undefined) {
                 dp = {'name': 'heatindexreading',
                       'value': data.heat_index,
                       'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.tempRHplot.fastAppendPoint(dp);
-                } else {
-                    this.tempRHplot.appendPoint(dp);
-                    this.$('#heatindexreading').html(data.heat_index + '&nbsp;&deg;');
-                }
+                this.tempRHplot.fastAppendPoint(dp);
             }
             if (data.wetbulb != undefined) {
                 dp = {'name': 'wetbulbreading',
                       'value': data.wetbulb,
                       'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.tempRHplot.fastAppendPoint(dp);
-                } else {
-                    this.tempRHplot.appendPoint(dp);
-                    this.$('#wetbulbreading').html(data.wetbulb + '&nbsp;&deg;');
-                }
+                this.tempRHplot.fastAppendPoint(dp);
             }
             if (data.wind_chill != undefined) {
                 dp = {'name': 'windchillreading',
                       'value': data.wind_chill,
                       'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.tempRHplot.fastAppendPoint(dp);
-                } else {
-                    this.tempRHplot.appendPoint(dp);
-                    this.$('#windchillreading').html(data.wind_chill + '&nbsp;&deg;');
-                }
+                this.tempRHplot.fastAppendPoint(dp);
             }
-
             if (data.rel_humidity != undefined) {
                 dp = {'name': 'rhreading',
                       'value': data.rel_humidity,
                       'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.tempRHplot.fastAppendPoint(dp);
-                } else {
-                    this.tempRHplot.appendPoint(dp);
-                    this.$('#rhreading').html(data.rel_humidity + '&nbsp;' + data.unit.rel_humidity);
-                }
+                this.tempRHplot.fastAppendPoint(dp);
             }
-
             if (data.barometer != undefined) {
                 dp = {'name': 'baroreading',
                       'value': data.barometer,
                       'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.baroplot.fastAppendPoint(dp);
-                } else {
-                    this.baroplot.appendPoint(dp);
-                    this.$('#baroreading').html(data.barometer + '&nbsp;' + data.unit.barometer);
-                }
+                this.baroplot.fastAppendPoint(dp);
             }
             if (data.pressure != undefined) {
                 dp = {'name': 'pressurereading', 'value': data.pressure,
                       'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.baroplot.fastAppendPoint(dp);
-                } else {
-                    this.baroplot.appendPoint(dp);
-                    this.$('#pressurereading').html(data.pressure + '&nbsp;' + data.unit.pressure);
-                }
+                this.baroplot.fastAppendPoint(dp);
+            }
+
+            if (data.wind != undefined) {
+                var dp = {'name': 'Wind',
+                     'value': data.wind,
+                      'timestamp': ts };
+                this.dirplot.fastAppendPoint(dp);
+                this.windplot.fastAppendPoint({'name': 'windspeed', 'value': data.wind.speed, 'timestamp': ts });
             }
 
             if (typeof ts != 'undefined')

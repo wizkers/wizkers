@@ -1,10 +1,14 @@
-<!-- this is added within a row area -->
-<div class="col-md-12" id="liveview_in">
+<div class="col-md-9" id="liveview_in">
     <div class="row" id="tempchart_row">
         <div class="col-md-8">
              <div class="chart" id="tempRHchart"></div>
         </div>
         <div class="col-md-4">
+            <div class="row">
+                <div class="col-xs-12">
+                    <em><span id="timestamp"></span></em>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-xs-6">
                         <span class="mediumreading" id="tempreading">00&nbsp;&deg;</span></br>
@@ -101,6 +105,24 @@
                     <small style="position:absolute; left: 10px;  bottom: -10px;">Density Altitude</small>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-3">
+    <div class="row" id="roseplot_row">
+        <div class="col-md-12">
+            <div class="roseplot chart"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p><a href="https://en.wikipedia.org/wiki/Wind_rose" target="_blank">Wind rose</a> in <a href="https://en.wikipedia.org/wiki/Beaufort_scale" target="_blank">Beaufort scale</a></p>
+            <p>Instant windspeed: <span id="windspeed">0</span></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="chart" id="windspeedchart" style="min-height: 250px"></div>
         </div>
     </div>
 </div>

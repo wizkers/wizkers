@@ -79,6 +79,7 @@ define(function (require) {
          * Triggers the actual download
          */
         startDownload: function (event) {
+            this.$('.start-download').text('Downloading').attr('disabled', true);
             linkManager.sendCommand({ command: 'download_log'});
             return false;
         },
