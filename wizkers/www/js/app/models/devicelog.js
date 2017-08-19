@@ -45,7 +45,7 @@ define(function (require) {
 
     var LogEntry = Backbone.Model.extend({
 
-            idAttribute: "_id",
+            idAttribute: '_id',
 
             initialize: function () {
                 // Separate by database for performance reasons (avoid a
@@ -96,15 +96,6 @@ define(function (require) {
 
             // Maintain our collection in order automatically by adding a comparator:
             comparator: 'timestamp',
-
-            // We override the fetch method so that in indexeddb mode, we add a query condition
-            // on the fetch - in server mode, that condition is part of the REST API and executed
-            // on the server.
-            fetch: function (callback) {
-                console.log('[devicelogs.js] Should fetch all entries for logsessionid ' + this.logsessionid);
-                // Add a condition for the instrumentid
-                Backbone.Collection.prototype.fetch.call(this, callback);
-            },
 
             // Get all points between date X1 and date X2 (both don't have to exactly match a
             // log record).
@@ -266,7 +257,7 @@ define(function (require) {
          */
         Logs = Backbone.Collection.extend({
 
-            idAttribute: "_id",
+            idAttribute: '_id',
             model: Log,
 
             initialize: function (models, options) {

@@ -36,7 +36,7 @@ define(function (require) {
 
     var Backbone = require('backbone'),
         Serialport = require('serialport'),
-        serialConnection = require('connections_serial'),
+        serialConnection = require('connections/serial'),
         abutils = require('app/lib/abutils');
 
     var parser = function (socket) {
@@ -66,7 +66,7 @@ define(function (require) {
                 stopBits: 1,
                 dtr: true,
                 flowControl: false,
-                parser: new Serialport.parsers.Readline(),
+                parser: new Serialport.parsers.Readline({ delimiter: '\r\n' }),
             }
         };
 

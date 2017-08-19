@@ -190,7 +190,6 @@ require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings'
     settings = new Settings({
         id: "mainsettings"
     });
-    settings.save();
 
     // Create our instrument manager: in charge of creating/deleting
     // instruments as necessary, as well as providing a list of
