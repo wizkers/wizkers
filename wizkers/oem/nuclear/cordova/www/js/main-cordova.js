@@ -45,7 +45,7 @@ require.config({
         backbone: 'lib/backbone-1.3.3',
         jquery_mousewheel: 'lib/jquery.mousewheel',
         jquery_xmlrpc: 'lib/jquery.xmlrpc',
-        localstorage: 'lib/backbone.localStorage-1.1.16',
+        localstorage: 'lib/backbone.localStorage-2.0.0',
         bbindexeddb: 'lib/backbone-indexeddb',
         pouchdb: 'lib/pouchdb-5.0.0',
         backbonepouch: 'lib/backbone-pouch',
@@ -195,7 +195,7 @@ document.addEventListener('deviceready', go, false);
 
 
 function go() {
-    require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'localstorage'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
+    require(['jquery', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager', 'app/outputs/outputmanager', 'app/models/instrument', 'stats'], function ($, Backbone, Router, Settings, InstrumentManager, LinkManager, OutputManager, Instrument, Analytics) {
 
         // Implement back button navigation as per Android app design guidelines.
         document.addEventListener("backbutton", function (b) {

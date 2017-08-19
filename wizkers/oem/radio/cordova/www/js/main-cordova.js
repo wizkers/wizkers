@@ -45,7 +45,7 @@ require.config({
         backbone: 'lib/backbone-1.3.3',
         jquery_mousewheel: 'lib/jquery.mousewheel',
         jquery_xmlrpc: 'lib/jquery.xmlrpc',
-        localstorage: 'lib/backbone.localStorage-1.1.16',
+        localstorage: 'lib/backbone.localStorage-2.0.0',
         bbindexeddb: 'lib/backbone-indexeddb',
         pouchdb: 'lib/pouchdb-5.0.0',
         backbonepouch: 'lib/backbone-pouch',

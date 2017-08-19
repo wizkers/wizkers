@@ -43,7 +43,7 @@ require.config({
         // we can upgrade easily
         jquery: 'lib/jquery-2.2.4',
         backbone: 'lib/backbone-1.3.3',
-        localstorage: 'lib/backbone.localStorage-1.1.16',
+        localstorage: 'lib/backbone.localStorage-2.0.0',
         bbindexeddb: 'lib/backbone-indexeddb',
         pouchdb: 'lib/pouchdb-5.4.5',
         backbonepouch: 'lib/backbone-pouch',

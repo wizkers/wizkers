@@ -35,7 +35,7 @@ define(function(require) {
         var $   = require('jquery'),
             Backbone = require('backbone'),
             Devicelog = require('app/models/devicelog'),
-            localStorage = require('backbone_localstorage'),
+            localStorage = require('localstorage'),
             LocalStorage = localStorage.LocalStorage,
             Output = require('app/models/output');
 
