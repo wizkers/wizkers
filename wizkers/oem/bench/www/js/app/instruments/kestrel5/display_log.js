@@ -73,6 +73,9 @@ define(function (require) {
                 }
             };
 
+            this.altitudereadings = [];
+            this.dens_altitudereadings = [];
+
             // Now fetch all the contents, then render
             var renderGraph = _.after(this.deviceLogs.length, this.render.bind(this));
             this.deviceLogs.each(function (log) {
@@ -243,6 +246,15 @@ define(function (require) {
             update(this.tempRHplot);
             update(this.baroplot);
             update(this.windplot);
+            // Now update the altitude/dens altitude readings:
+            var alt = this.altitudereadings.findIndex(function(elem) {
+                return elem[0] >= pos.x
+            });
+            this.$('#altitudereading').html(this.altitudereadings[alt][1]);
+            var dalt = this.dens_altitudereadings.findIndex(function(elem) {
+                return elem[0] >= pos.x
+            });
+            this.$('#densaltitudereading').html(this.dens_altitudereadings[dalt][1]);
 
         },
 
@@ -336,7 +348,6 @@ define(function (require) {
                       'timestamp': ts};
                 this.baroplot.fastAppendPoint(dp);
             }
-
             if (data.wind != undefined) {
                 var dp = {'name': 'Wind',
                      'value': data.wind,
@@ -345,14 +356,11 @@ define(function (require) {
                 this.windplot.fastAppendPoint({'name': 'windspeed', 'value': data.wind.speed, 'timestamp': ts });
             }
 
-            if (typeof ts != 'undefined')
-                return;
-
             if (data.altitude != undefined) {
-                this.$('#altitudereading').html(data.altitude + '&nbsp;' + data.unit.altitude);
+                this.altitudereadings.push([ts, data.altitude]);
             }
             if (data.dens_altitude != undefined) {
-                this.$('#densaltitudereading').html(data.dens_altitude + '&nbsp;' + data.unit.dens_altitude);
+                this.dens_altitudereadings.push([ts, data.dens_altitude]);
             }
         },
 

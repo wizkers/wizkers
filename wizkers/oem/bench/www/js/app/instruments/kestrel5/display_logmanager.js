@@ -80,6 +80,7 @@ define(function (require) {
          */
         startDownload: function (event) {
             this.$('.start-download').text('Downloading').attr('disabled', true);
+            this.$('#op_status').html('Opening device logs...');
             linkManager.sendCommand({ command: 'download_log'});
             return false;
         },
@@ -162,6 +163,7 @@ define(function (require) {
             if (data.log_size != undefined && data.log_size > 0) {
                 // We receive this message at start of log download
                 console.info('[Kestrel Log Manager] Start of log download', data.log_size);
+                this.$('#op_status').html('Receiving logs...');
                 this.log_size = data.log_size;
                 this.log_index = 0;
                 return;

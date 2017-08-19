@@ -35,6 +35,12 @@ define(function (require) {
         abu = require('app/lib/abutils');
 
 
+
+    var bootbox = require('bootbox'); // Required for Web Bluetooth
+
+    console.warn(bootbox);
+
+
     // TODO: accept a list of service UUIDs and a list of Characteristic UUIDs
     //       rather than a single value (work in progress, to be tested)
 
@@ -210,15 +216,13 @@ define(function (require) {
 
             // Setup a callback in case we time out
             // timeoutCheckTimer = setTimeout(checkConnectDelay, 15000);
-
             if (BTdevice == null) {
                 var self = this;
                 // Damn web bluetooth interface requires those user gestures
                 // which do not really make sense in the context of a NWJS app.
                 // This will be possible to avoid once the permissions model is implemented
                 // for Bluetooth on the Chromium runtime.
-                $('#BTModal').modal('show');
-                $('#btscan').on('click', function() {
+                var doOpen = function() {
                     // settings can be either a string or an array
                     // don't you love this fuzzy Javascript typing ?
                     if (typeof settings.service_uuid == 'string')
@@ -248,6 +252,11 @@ define(function (require) {
                             description: ''
                         });
                     })
+                }
+                bootbox.alert({
+                    title: "Use bluetooth",
+                    message: "OK for this app to use Bluetooth?",
+                    callback: doOpen
                 });
             } else {
                 // We already have a reference, great...
