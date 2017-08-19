@@ -364,7 +364,7 @@ define(function (require) {
         }
 
         var discoverBluetoothWebAPI = function(filter) {
-            var device_names = {};
+            var device_names = {'default': { address:'00:00:00:00:00:00', name: 'Select here...'}};
 
             var updateDeviceName = function (device) {
                 // if (filter != undefined) {
@@ -373,7 +373,7 @@ define(function (require) {
                 // }
                 device_names[device.id] = {
                     name: device.name,
-                    address: device.id
+                    address: device.name // The New Bluetooth API doesn't understand addresses right now (2017.08)
                 };
                 console.log('New BT Device', device);
                 self.trigger('ports', device_names);
