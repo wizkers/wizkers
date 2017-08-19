@@ -34,16 +34,23 @@ define(function(require) {
     "use strict";
 
     var $   = require('jquery'),
-        Backbone = require('backbone');
+        Backbone = require('backbone'),
+        PouchDB = require('pouchdb');
+
+
+    require('backbonepouch');
 
     return Backbone.Model.extend({
+        idAttribute: '_id',
 
         initialize: function () {
-            if (vizapp.type == "chrome" || vizapp.type == 'nwjs') {
-                this.chromeStorage =  new Backbone.ChromeStorage("org.aerodynes.vizapp.Settings");
-            } else if (vizapp.type == "cordova") {
-                this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Settings");
-            } else {
+            if (vizapp.type != "server") {
+                this.sync = BackbonePouch.sync({
+                            db: new PouchDB('settings',{
+                            adapter: 'websql'
+                    })
+                });
+        } else {
                 this.url = "/settings";
             }
         },

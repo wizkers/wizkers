@@ -34,6 +34,8 @@ define(function(require) {
 
     var $   = require('jquery'),
         Backbone = require('backbone'),
+        localStorage = require('backbone_localstorage'),
+        LocalStorage = localStorage.LocalStorage,
         Devicelog = require('app/models/devicelog'),
         Output = require('app/models/output');
 
@@ -74,10 +76,8 @@ define(function(require) {
                  * Depending on runmode, we are either defining a URL or
                  * relying on backbone localstorage
                  */
-                if (vizapp.type == "cordova") {
-                    this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
-                } else if (vizapp.type == "chrome" || vizapp.type == "nwjs") {
-                    this.chromeStorage = new Backbone.ChromeStorage("org.aerodynes.vizapp.Instrument");
+                if (vizapp.type != "server") {
+                    this.localStorage = new LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
                 } else {
                     this.urlRoot = "/instruments";
                 }
@@ -106,17 +106,9 @@ define(function(require) {
                  */
                 console.log("[Instrument.js] Updating output/log references for insID " + this.id);
 
-                if (vizapp.type == "cordova") {
+                if (vizapp.type != "server") {
                     this.logs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
                     this.outputs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Outputs-" + this.id);
-                } else if (vizapp.type == "chrome" || vizapp.type == "nwjs") {
-                    this.outputs.chromeStorage = new Backbone.ChromeStorage("org.aerodynes.vizapp.Outputs-" + this.id);
-                    //this.logs.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
-                    this.logs.database = logs_database;
-                    this.logs.storeName = "logs";
-                    // Also set the instrumentid property of the logs
-                    if (this.id != undefined)
-                        this.logs.instrumentid = this.id;
                 } else {
                     this.logs.url = "/instruments/" + this.id + "/logs/";
                     this.outputs.url = "/instruments/" + this.id + "/outputs/";
@@ -169,10 +161,8 @@ define(function(require) {
             model: Instrument,
 
             initialize: function() {
-                if (vizapp.type == "cordova") {
+                if (vizapp.type != "server") {
                     this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
-                } else if (vizapp.type =="chrome" || vizapp.type == 'nwjs') {
-                    this.chromeStorage = new Backbone.ChromeStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
                 } else {
                     this.url = "/instruments";
                 }

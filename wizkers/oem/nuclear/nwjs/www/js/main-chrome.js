@@ -47,7 +47,7 @@ require.config({
         backbone: 'lib/backbone-1.3.3',
         jquery_xmlrpc: 'lib/jquery.xmlrpc',
         jquery_mousewheel: 'lib/jquery.mousewheel',
-        chromestorage: 'lib/backbone.chromestorage',
+        backbone_localstorage: 'lib/backbone.localStorage-2.0.0',
         bbindexeddb: 'lib/backbone-indexeddb',
         pouchdb: 'lib/pouchdb-5.0.0',
         backbonepouch: 'lib/backbone-pouch',
@@ -123,7 +123,9 @@ require.config({
         'jquery_xmlrpc': {
             deps: ['jquery']
         },
-
+        'backbonepouch': {
+            deps: ['pouchdb']
+        },
         'jquery_mousewheel': {
             deps: [ 'jquery']
         },
@@ -173,7 +175,7 @@ var vizapp = {
 var router;
 
 require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager',
-         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'chromestorage'], function ($, _, Backbone, Router, Settings, InstrumentManager,
+         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle'], function ($, _, Backbone, Router, Settings, InstrumentManager,
     LinkManager, OutputManager, Instrument, Analytics) {
 
     // Initialize our Analytics object to get stats on app usage
@@ -186,8 +188,9 @@ require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings'
     // share them afterwards, rather than requesting it
     // everytime...
     settings = new Settings({
-        id: 1
+        id: "mainsettings"
     });
+    settings.save();
 
     // Create our instrument manager: in charge of creating/deleting
     // instruments as necessary, as well as providing a list of
@@ -204,7 +207,7 @@ require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings'
     linkManager = new LinkManager();
 
     settings.fetch({
-        success: function () {
+        success:function () {
             var insId = settings.get('currentInstrument');
             if (insId != null) {
                 router = new Router();

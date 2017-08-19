@@ -39,53 +39,18 @@ define(function (require) {
         PouchDB = require('pouchdb'),
         Backbone = require('backbone');
 
+
     // Defines BackbonePouch (someone said 'ugly' ?)
     require('backbonepouch');
-
-    var bidb = null;
-
-    if (vizapp.type == "chrome" || vizapp.type == "nwjs") {
-        require(['bbindexeddb'], function (bb) {
-            bidb = bb;
-        });
-    }
-
-    var logs_database = {
-        id: "wizkers-logs",
-        description: "Wizkers device logs",
-        nolog: true,
-        migrations: [{
-            version: 1,
-            migrate: function (transaction, next) {
-                var store = transaction.db.createObjectStore("logs");
-                store.createIndex("iidIndex", "instrumentid", {
-                    unique: false
-                });
-                store = transaction.db.createObjectStore("entries");
-                store.createIndex("lsiIndex", "logsessionid", {
-                    unique: false
-                });
-                next();
-            }
-        }]
-    };
-
 
     var LogEntry = Backbone.Model.extend({
 
             idAttribute: "_id",
 
             initialize: function () {
-                // If we run as a chrome app, the backbone indexeddb adapter also
-                // wants models to have the proper database and store properties defined
-                if (vizapp.type == "chrome" || vizapp.type == 'nwjs') {
-                    this.database = logs_database;
-                    this.storeName = "entries";
-                }
-
-                // Separate by database for performance reasons on mobile (avoid a
+                // Separate by database for performance reasons (avoid a
                 // mapreduce query, each log has it own database, massive difference).
-                if (vizapp.type == 'cordova') {
+                if (vizapp.type != 'server') {
                     this.sync = BackbonePouch.sync({
                         db: new PouchDB('logentries-' + this.get('logsessionid'), {
                             adapter: 'websql'
@@ -112,12 +77,7 @@ define(function (require) {
             logsessionid: null,
 
             initialize: function (models, options) {
-
-                if (vizapp.type == 'chrome' || vizapp.type == "nwjs") {
-                    this.database = logs_database;
-                    this.storeName = 'entries';
-                }
-                if (vizapp.type == 'cordova') {
+                if (vizapp.type != 'server') {
                     var self = this;
 
                     // The PouchDB query bundles the results in the 'rows' key,
@@ -125,7 +85,7 @@ define(function (require) {
                     this.parse = function (result) {
                         return _.pluck(result.rows, 'doc');
                     }
-                }
+                  }
             },
 
             // url: is not defined by default, LogEntries is
@@ -143,10 +103,6 @@ define(function (require) {
             fetch: function (callback) {
                 console.log('[devicelogs.js] Should fetch all entries for logsessionid ' + this.logsessionid);
                 // Add a condition for the instrumentid
-                if (vizapp.type == 'chrome' || vizapp.type == "nwjs")
-                    callback.conditions = {
-                        logsessionid: this.logsessionid
-                    };
                 Backbone.Collection.prototype.fetch.call(this, callback);
             },
 
@@ -184,13 +140,6 @@ define(function (require) {
 
             initialize: function () {
                 var self = this;
-
-                // If we run as a chrome app, the backbone indexeddb adapter also
-                // wants models to have the proper database and store properties defined
-                if (vizapp.type == 'chrome' || vizapp.type == "nwjs") {
-                    this.database = logs_database;
-                    this.storeName = 'logs';
-                }
 
                 // A log contains... entries (surprising, eh?). Nest
                 // the collection here:
@@ -231,9 +180,7 @@ define(function (require) {
                     return; // no need to update if not necessary!
 
                 console.log("Device Log: refreshing pointer to log entries " + this.entries.logsessionid + " URL for Log ID " + this.id);
-                if (vizapp.type == "cordova") {
-                    // this.entries.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.LogEntries-" + this.id);
-
+                if (vizapp.type != "server") {
                     if (this.id != undefined) {
                         this.entries.logsessionid = this.id;
                         this.entries.sync = BackbonePouch.sync({
@@ -248,11 +195,6 @@ define(function (require) {
                             }
                         });
                     }
-                } else if (vizapp.type == "chrome" || vizapp.type == "nwjs") {
-                    // Also set the log session ID property of the entries
-                    if (this.id != undefined)
-                        this.entries.logsessionid = this.id;
-
                 } else {
                     this.entries.url = "/logs/" + this.id + "/entries";
                 }
@@ -328,12 +270,6 @@ define(function (require) {
             model: Log,
 
             initialize: function (models, options) {
-
-                if (vizapp.type == "chrome" || vizapp.type == "nwjs") {
-                    this.database = logs_database;
-                    this.storeName = "logs";
-                }
-
             },
 
             // Depending on the run mode, the "Logs" collection might have
@@ -342,11 +278,6 @@ define(function (require) {
             // need to fetch only "log" models that match instrumentid
             fetch: function (callback) {
                 console.log("[devicelogs.js] Should fetch all logs for instrumentid " + this.instrumentid);
-                // Add a condition for the instrumentid
-                if (vizapp.type == "chrome" || vizapp.type == "nwjs")
-                    callback.conditions = {
-                        instrumentid: this.instrumentid
-                    };
                 Backbone.Collection.prototype.fetch.call(this, callback);
             },
 
