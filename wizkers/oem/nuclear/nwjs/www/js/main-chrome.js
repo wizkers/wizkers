@@ -188,7 +188,7 @@ require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings'
     // share them afterwards, rather than requesting it
     // everytime...
     settings = new Settings({
-        id: "mainsettings"
+        id: 1
     });
 
     // Create our instrument manager: in charge of creating/deleting

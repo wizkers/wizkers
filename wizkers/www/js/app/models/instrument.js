@@ -77,9 +77,9 @@ define(function(require) {
                      * relying on backbone localstorage
                      */
                     if (vizapp.type == "cordova" || vizapp.type == "nwjs") {
-                        this.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
+                        this.localStorage = new LocalStorage("org.aerodynes.vizapp.Instrument"); // Unique name within your app.
                     } else if (vizapp.type == "chrome" ) {
-                        this.chromeStorage = new Backbone.ChromeStorage("org.aerodynes.vizapp.Instrument");
+                        this.chromeStorage = new ChromeStorage("org.aerodynes.vizapp.Instrument");
                     } else {
                         this.urlRoot = "/instruments";
                     }
@@ -109,10 +109,10 @@ define(function(require) {
                     console.log("[Instrument.js] Updating output/log references for insID " + this.id);
 
                     if (vizapp.type == "cordova" || vizapp.type == "nwjs") {
-                        this.logs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
-                        this.outputs.localStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Outputs-" + this.id);
+                        this.logs.localStorage = new LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
+                        this.outputs.localStorage = new LocalStorage("org.aerodynes.vizapp.Outputs-" + this.id);
                     } else if (vizapp.type == "chrome" ) {
-                        this.outputs.chromeStorage = new Backbone.ChromeStorage("org.aerodynes.vizapp.Outputs-" + this.id);
+                        this.outputs.chromeStorage = new ChromeStorage("org.aerodynes.vizapp.Outputs-" + this.id);
                         //this.logs.chromeStorage = new Backbone.LocalStorage("org.aerodynes.vizapp.Logs-" + this.id);
                         this.logs.database = logs_database;
                         this.logs.storeName = "logs";

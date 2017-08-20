@@ -31,41 +31,36 @@
 
 define(function(require) {
 
-    "use strict";
+        "use strict";
 
-    var $   = require('jquery'),
-        Backbone = require('backbone'),
-        PouchDB = require('pouchdb');
+        var $   = require('jquery'),
+            Backbone = require('backbone'),
+            localStorage = require('localstorage'),
+            LocalStorage = localStorage.LocalStorage;
 
+        return Backbone.Model.extend({
 
-    require('backbonepouch');
+            initialize: function () {
+                if (vizapp.type == "chrome" ) {
+                    this.chromeStorage =  new Backbone.ChromeStorage("org.aerodynes.vizapp.Settings");
+                } else if (vizapp.type == "cordova" || vizapp.type == 'nwjs') {
+                    this.localStorage = new LocalStorage("org.aerodynes.vizapp.Settings");
+                } else {
+                    this.url = "/settings";
+                }
+            },
 
-    return Backbone.Model.extend({
-        idAttribute: '_id',
-
-        initialize: function () {
-            if (vizapp.type != "server") {
-                this.sync = BackbonePouch.sync({
-                            db: new PouchDB('settings',{
-                            adapter: 'websql'
-                    })
-                });
-        } else {
-                this.url = "/settings";
+            defaults: {
+                serialPort: null,
+                timezone: "browser",
+                cpmcolor: 0,
+                cpmscale: "linear",
+                itemsperpage: 10,
+                currentInstrument: null,
+                token: null,
+                showstream: false,
+                enablestats: true,
             }
-        },
+        });
 
-        defaults: {
-            serialPort: null,
-            timezone: "browser",
-            cpmcolor: 0,
-            cpmscale: "linear",
-            itemsperpage: 10,
-            currentInstrument: null,
-            token: null,
-            showstream: false,
-            enablestats: true,
-        }
     });
-
-});
