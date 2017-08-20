@@ -17,6 +17,7 @@
     <plugin name="com.mediamatrixdoo.keepscreenon" spec="https://github.com/wizkers/PhoneGap-KeepScreenOn-plugin.git" />
     <plugin name="cordova-plugin-bluetoothle" spec="^4.0.0" />
     <plugin name="cordova-plugin-file" spec="^4.1.1" />
+    <plugin name="cordova-plugin-geolocation" spec="^2.4.3" />
     <plugin name="cordova-plugin-file-transfer" spec="^1.5.0" />
     <plugin name="cordova-plugin-google-analytics" spec="^0.8.0" />
     <plugin name="cordova-plugin-whitelist" spec="^1.2.1" />
