@@ -193,24 +193,23 @@ define(function (require) {
             }
 
             // Add Tooltips
-            if (!this.flotplot_settings.showtips)
-                return;
+            if (this.flotplot_settings.showtips) {
+                $(".chart", this.el).bind("plothover", function (event, pos, item) {
+                    if (item) {
+                        $("#tooltip").remove();
+                        var x = item.datapoint[0],
+                            y = item.datapoint[1];
 
-            $(".chart", this.el).bind("plothover", function (event, pos, item) {
-                if (item) {
-                    $("#tooltip").remove();
-                    var x = item.datapoint[0],
-                        y = item.datapoint[1];
-
-                    self.showTooltip(item.pageX, item.pageY,
-                        "<small>" + ((self.plotOptions.xaxis.timezone) ?
-                            ((self.plotOptions.xaxis.timezone === 'UTC') ?
-                                new Date(x).toUTCString() :
-                                new Date(x).toString()) : x) + "</small><br>" + item.series.label + ": <strong>" + y + "</strong>");
-                } else {
-                    $("#tooltip").remove();
-                }
-            });
+                        self.showTooltip(item.pageX, item.pageY,
+                            "<small>" + ((self.plotOptions.xaxis.timezone) ?
+                                ((self.plotOptions.xaxis.timezone === 'UTC') ?
+                                    new Date(x).toUTCString() :
+                                    new Date(x).toString()) : x) + "</small><br>" + item.series.label + ": <strong>" + y + "</strong>");
+                    } else {
+                        $("#tooltip").remove();
+                    }
+                });
+            }
 
             // Connect overview and main charts
             if (this.flotplot_settings.selectable) {

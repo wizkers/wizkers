@@ -150,7 +150,7 @@ define(function (require) {
                                     c.addEventListener('characteristicvaluechanged',
                                         subscribedChars[c.uuid]);
                                     } else {
-                                        console.warn('Careful, we subscribed to the same characteristic twice');
+                                        console.warn('Careful, attempted to subscribe to the same characteristic twice');
                                     }
                                 });
                         });
@@ -264,7 +264,16 @@ define(function (require) {
                 .then(server => {
                         BTserver = server;
                         trackConnect();
-                });
+                }).catch(error => {
+                    console.log(error);
+                    self.trigger('status', {
+                        openerror: true,
+                        reason: 'Please try again',
+                        description: error
+                    });
+                    BTdevice = null;
+                    BTserver = null;
+                })
             }
         }
 

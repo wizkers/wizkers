@@ -45,29 +45,7 @@ define(function(require) {
 
 
     /**
-     * Calculate the initial crc value.
-     *
-     * \return     The initial crc value.
-     *****************************************************************************/
-    function crc_init()
-    {
-        return 0xf131;
-    }
-
-
-    /**
-     * Calculate the final crc value.
-     *
-     * \param crc  The current crc value.
-     * \return     The final crc value.
-     *****************************************************************************/
-    function crc_finalize(crc)
-    {
-        return crc ^ 0xffff;
-    }
-
-    /**
-     * Static table used for the table_driven implementation.
+     * CRC table for Fluke 289 serial protocol (X25 CRC-16 table)
      *****************************************************************************/
     var crcTable  = [
         0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf,
@@ -132,12 +110,12 @@ define(function(require) {
      * \param data      Buffer of \a data_len bytes.
      * \return         The updated crc value.
      *****************************************************************************/
-    function crc_update( crc, data)
+    function crc_update( crc, data, table)
     {
         var tbl_idx;
         for( var i = 0; i < data.length; i++) {
             tbl_idx = (crc ^ data[i]) & 0xff;
-            crc = (crcTable[tbl_idx] ^ (crc >> 8)) & 0xffff;
+            crc = (table[tbl_idx] ^ (crc >> 8)) & 0xffff;
         }
         return crc & 0xffff;
     }
@@ -153,9 +131,16 @@ define(function(require) {
 
     return {
         fluke_crc: function(data) {
-            var crc = crc_init();
-            crc = crc_update(crc, data);
-            crc =crc_finalize(crc);
+            var crc = 0xf131;
+            crc = crc_update(crc, data, crcTable);
+            crc ^= 0xffff;
+            return crc;
+        },
+
+        x25_crc: function(data) {
+            var crc = 0xffff;
+            crc = crc_update(crc, data, crcTable);
+            crc ^= 0xffff;
             return crc;
         }
 

@@ -205,17 +205,26 @@ require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings'
     // web socket. It is passed to all views that need it.
     linkManager = new LinkManager();
 
+    var bootstrap_wizkers = function() {
+        var insId = settings.get('currentInstrument');
+        if (insId != null) {
+            router = new Router();
+            router.switchinstrument(insId, false); // second argument prevents router from closing instrument
+            Backbone.history.start();
+        } else {
+            router = new Router();
+            Backbone.history.start();
+        }
+    }
+
     settings.fetch({
         success:function () {
-            var insId = settings.get('currentInstrument');
-            if (insId != null) {
-                router = new Router();
-                router.switchinstrument(insId, false); // second argument prevents router from closing instrument
-                Backbone.history.start();
-            } else {
-                router = new Router();
-                Backbone.history.start();
-            }
+            bootstrap_wizkers();
+        },
+        error: function(mode, response, options) {
+            // We will end up here with the localstorage adapter in case the record is not found
+            settings.save();
+            bootstrap_wizkers();
         }
     });
 });

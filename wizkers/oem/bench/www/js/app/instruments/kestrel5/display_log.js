@@ -52,6 +52,7 @@ define(function (require) {
             // config for the look and feel of the plot
             this.plotoptions = {
                 points: 0,
+                showtips: false,
                 vertical_stretch_parent: true,
                 plot_options: {
                     xaxis: {
