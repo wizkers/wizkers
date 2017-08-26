@@ -91,7 +91,6 @@ require.config({
             'connections/btspp': 'app/connections/cordovaBTSPP',
             'connections/webrtc': 'app/connections/webrtc',
             'serialport': 'app/lib/serialport',
-
         }
     },
 
