@@ -358,6 +358,7 @@ define(function (require) {
                 // discovery, so that we can then connect to the various
                 // services & characteristics. This is the Android call, the
                 // iPhone call will be different:
+                stats.fullEvent('Cordova BLE', 'open_success', '');
                 bluetoothle.discover(function (r) {
                     if (r.status != 'discovered')
                         return;
@@ -370,23 +371,22 @@ define(function (require) {
                         portopen: portOpen,
                         services: r.services
                     });
-                    stats.fullEvent('Cordova BLE', 'open_success', '');
+                    stats.fullEvent('Cordova BLE', 'discover_success', '');
                     // Need to send this to tell the front-end we're done reconnecting
                     // and back to normal
                     self.trigger('status', {
                         reconnecting: false
                     });
-
                 }, function (err) {
-                    console.log(err);
-                    stats.fullEvent('Cordova BLE', 'open_error', err.message);
+                    console.log('Discover error', err);
+                    stats.fullEvent('Cordova BLE', 'discover_error', err.message);
                 }, {
                     address: devAddress
                 });
                 return;
             }
             if (result.status == 'disconnected') {
-                console.log(result);
+                console.log('Disconnected message from trackConnect', result);
                 // OK, the device disappeared: we will try to
                 // reconnect as long as the user does not explicitely
                 // ask to close
@@ -405,10 +405,14 @@ define(function (require) {
 
         function trackError(err) {
             // This is called whenever we lose the connection
-            console.log(err);
+            console.log('Error message from trackError', err);
             if (!portOpen) {
                 // if the port was not open and we got an error callback, this means
                 // we were not able to connect in the first place...
+                if (timeoutCheckTimer) {
+                    clearTimeout(timeoutCheckTimer);
+                    timeoutCheckTimer = 0;
+                }
                 self.trigger('status', {
                     openerror: true,
                     reason: 'Device connection error',

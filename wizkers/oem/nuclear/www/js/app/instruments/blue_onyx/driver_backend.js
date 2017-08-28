@@ -113,7 +113,8 @@ define(function (require) {
             // operations and its value can only be obtained via notifications, so the
             // |value| field might be undefined here.
 
-            if (sameUuid(data.service,HEART_RATE_SERVICE_UUID) && sameUuid(data.characteristic,HEART_RATE_MEASUREMENT_UUID)) {
+            if (sameUuid(data.service,HEART_RATE_SERVICE_UUID) &&
+                sameUuid(data.characteristic,HEART_RATE_MEASUREMENT_UUID)) {
                 var valueBytes = new Uint8Array(data.value);
                 if (valueBytes.length < 2) {
                     console.log('Invalid Heart Rate Measurement value');
@@ -212,7 +213,16 @@ define(function (require) {
                 if (stat.description != undefined)
                     resp.description = stat.description;
                 self.trigger('data', resp);
-                return;
+                // We need to unsubscribe from data/status messages now
+                // since the port never opened.
+                if (port.off) { // If we're running on NodeJS, then we've gotta use removeListener
+                port.off('status', status);
+                port.off('data', format);
+            }  else {
+                port.removeListener('status', status);
+                port.removeListener('data', format);
+            }
+            return;
             }
 
             if (stat.reconnecting != undefined) {
@@ -262,10 +272,14 @@ define(function (require) {
             } else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
-                    port.off('status', stat);
+                    if (port.off) // If we're running on NodeJS, then we've gotta use removeListener
+                        port.off('status', status);
+                    else
+                        port.removeListener('status', status);
                     port_close_requested = false;
                     if (watchid != null)
                         navigator.geolocation.clearWatch(watchid);
+                        watchid = null;
                 }
             }
         };
@@ -312,7 +326,10 @@ define(function (require) {
         this.closePort = function (data) {
             // We need to remove all listeners otherwise the serial port
             // will never be GC'ed
-            port.off('data', format);
+            if (port.off)
+                port.off('data', format);
+            else
+                port.removeListener('data', format);
             port_close_requested = true;
             port.close();
         }

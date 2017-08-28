@@ -123,6 +123,15 @@ define(function (require) {
                 if (stat.description != undefined)
                     resp.description = stat.description;
                 self.trigger('data', resp);
+                // We need to unsubscribe from data/status messages now
+                // since the port never opened.
+                if (port.off) { // If we're running on NodeJS, then we've gotta use removeListener
+                    port.off('status', status);
+                    port.off('data', format);
+                }  else {
+                    port.removeListener('status', status);
+                    port.removeListener('data', format);
+                }
                 return;
             }
             if (stat.reconnecting != undefined) {
@@ -167,8 +176,10 @@ define(function (require) {
                     port_close_requested = false;
                     if (typeof navigator == 'undefined') // Note: Node.js requires using typeof
                         return;
-                    if (watchid != null)
+                    if (watchid != null) {
                         navigator.geolocation.clearWatch(watchid);
+                        watchid = null; // Nullify watchid otherwise we won't re-enable loc tracking at reopen
+                    }
                 }
             }
         };
