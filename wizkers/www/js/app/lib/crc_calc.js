@@ -40,6 +40,12 @@
  * Converted to Javascript by E.L.
  *****************************************************************************/
 
+ // Small trick to make this work both on NodeJS and in the browser/Cordova
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+}
+
+
 define(function(require) {
     "use strict";
 
