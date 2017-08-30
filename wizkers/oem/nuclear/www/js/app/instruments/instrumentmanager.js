@@ -131,6 +131,13 @@ define(function (require) {
 
         // The instruments below are only supported in Server runmode:
         if (vizapp.type == "server") {
+            this.supportedInstruments["pitemp"] = {
+                name: "Raspberry Pi built-in temperature",
+                type: 'app/instruments/pitemp/pitemp',
+                settings: null,
+                connectionsettings: null
+            };
+
             this.supportedInstruments["heliumgeiger"] = {
                 name: "Radius Hawk (Helium)",
                 type: 'app/instruments/heliumgeiger/heliumgeiger',
