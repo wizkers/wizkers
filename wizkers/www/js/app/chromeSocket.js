@@ -321,7 +321,8 @@ define(function (require) {
             function startScan() {
                 bluetoothle.startScan(startScanSuccess, startScanError, {
                     services: (filter_supported) ? filter : '',
-                    allowDuplicates: true
+                    allowDuplicates: true,
+                    scanMode: bluetoothle.SCAN_MODE_LOW_LATENCY, // Useful for many Samsung devices
                 });
             };
 

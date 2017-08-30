@@ -39,6 +39,7 @@ define(function(require) {
         render: function () {
             this.$el.html(template());
             if (vizapp.type == 'server') {
+                this.$('.hide-server').hide(); // Hide anything that is not relevant on server mode
                 // If we're running with a backend server, we need to hide some elements
                 // in case we are only a 'viewer'. This is not relevant if we're running as an app,
                 // since we're always an admin there

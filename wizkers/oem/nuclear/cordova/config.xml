@@ -15,7 +15,7 @@
     <plugin name="fr.drangies.cordova.serial" spec="https://github.com/elafargue/cordovarduino.git" />
     <plugin name="cordova-plugin-chrome-apps-usb" spec="~1.2.0" />
     <plugin name="com.mediamatrixdoo.keepscreenon" spec="https://github.com/wizkers/PhoneGap-KeepScreenOn-plugin.git" />
-    <plugin name="cordova-plugin-bluetoothle" spec="^4.3.3" />
+    <plugin name="cordova-plugin-bluetoothle" spec="^4.4.2" />
     <plugin name="cordova-plugin-file" spec="^4.3.3" />
     <plugin name="cordova-plugin-geolocation" spec="^2.4.3" />
     <plugin name="cordova-background-watchposition" spec="https://github.com/wizkers/cordova-background-watchposition.git" />

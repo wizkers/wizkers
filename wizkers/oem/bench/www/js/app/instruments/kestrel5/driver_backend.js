@@ -616,6 +616,15 @@ define(function (require) {
                 if (stat.description != undefined)
                     resp.description = stat.description;
                 self.trigger('data', resp);
+                // We need to unsubscribe from data/status messages now
+                // since the port never opened.
+                if (port.off) { // If we're running on NodeJS, then we've gotta use removeListener
+                    port.off('status', status);
+                    port.off('data', format);
+                }  else {
+                    port.removeListener('status', status);
+                    port.removeListener('data', format);
+                }
                 return;
             }
             if (stat.reconnecting != undefined) {

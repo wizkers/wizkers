@@ -60,6 +60,8 @@ define(function (require) {
 
         var subscribedChars = [];
 
+        var samsung_ble_bug_counter = 0;
+
         ///////////
         // Public methods
         ///////////
@@ -359,6 +361,7 @@ define(function (require) {
                 // services & characteristics. This is the Android call, the
                 // iPhone call will be different:
                 stats.fullEvent('Cordova BLE', 'open_success', '');
+                samsung_ble_bug_counter = 0;
                 bluetoothle.discover(function (r) {
                     if (r.status != 'discovered')
                         return;
@@ -413,13 +416,29 @@ define(function (require) {
                     clearTimeout(timeoutCheckTimer);
                     timeoutCheckTimer = 0;
                 }
-                self.trigger('status', {
-                    openerror: true,
-                    reason: 'Device connection error',
-                    description: 'Android error: ' + err.message
-                });
-                // Do a disconnect to make sure we end up in a sane state:
-                self.close();
+                // Many Samsung devices have shitty BLE stacks and have trouble connecting.
+                // Therfore if we get a connection error, retry a couple of times silently
+                if (err.message == "Connection failed" &&
+                    samsung_ble_bug_counter++ < 5) {
+                        console.log('Connect bug, retry silently');
+                        bluetoothle.close(function (result) {
+                            console.log('Closed after connect error', result);
+                            portOpen = false;
+                            setTimeout( self.open, Math.random()*1000);
+                        }, function (error) {}, {
+                            address: devAddress
+                        });
+                } else {
+                    samsung_ble_bug_counter = 0;
+                    self.trigger('status', {
+                        openerror: true,
+                        reason: 'Device connection error',
+                        description: 'Android error: ' + err.message
+                    });
+                    stats.fullEvent('Cordova BLE', 'connect_error', err.message);
+                        // Do a disconnect to make sure we end up in a sane state:
+                    self.close();
+                }
             } else {
                 portOpen = false;
                 // Just keep reconnecting forever...

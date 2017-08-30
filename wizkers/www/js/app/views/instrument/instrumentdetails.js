@@ -175,6 +175,12 @@ define(function (require) {
                 change[target.name] = target.value;
             }
 
+            if (target.name == "type") {
+                // Set the "friendly name" to the instrument model, which is a better
+                // default name
+                change['name'] = instrumentManager.supportedInstruments[target.value].name;
+            }
+
             this.model.set(change);
 
             // Run validation rule (if any) on changed item
