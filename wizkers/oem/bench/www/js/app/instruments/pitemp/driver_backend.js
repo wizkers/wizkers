@@ -65,7 +65,12 @@ define(function (require) {
         // Format can act on incoming data from the counter, and then
         // forwards the data to the app through a 'data' event.
         var format = function (data) {
-            self.trigger('data', data);
+            try {
+	       var t = parseFloat(data.value.split('=')[1]);
+               self.trigger('data', {temp:t});
+            } catch (err) {
+               debug('Data error', err);
+            }
         };
 
         // Status returns an object that is concatenated with the
