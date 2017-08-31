@@ -67,6 +67,7 @@ define(function (require) {
 
         var self = this,
             socket = socket,
+            instrumentid = null,
             streaming = true,
             port = null,
             port_close_requested = false,
@@ -216,6 +217,7 @@ define(function (require) {
 
         this.openPort = function (insid) {
             port_open_requested = true;
+            instrumentid = insid;
             if (vizapp.type == 'server') {
                 openPort_server(insid);
             } else {
@@ -242,7 +244,9 @@ define(function (require) {
             return port_open_requested;
         }
 
-        this.getInstrumentId = function (arg) {};
+        this.getInstrumentId = function (arg) {
+            return instrumentid;
+        };
 
         this.isStreaming = function () {
             return streaming;

@@ -43,6 +43,7 @@ define(function (require) {
 
         var self = this,
             socket = socket,
+            instrumentid = null,
             livePoller = null, // Reference to the live streaming poller
             streaming = false,
             uidrequested = false,
@@ -175,6 +176,7 @@ define(function (require) {
 
         this.openPort = function (insid) {
             port_open_requested = true;
+            instrumentid = insid;
             var ins = instrumentManager.getInstrument();
             port = new serialConnection(ins.get('port'), portSettings());
             port.open();
@@ -205,7 +207,9 @@ define(function (require) {
             return port_open_requested;
         }
 
-        this.getInstrumentId = function (arg) {};
+        this.getInstrumentId = function (arg) {
+            return instrumentid;
+        };
 
         this.isStreaming = function () {
             return streaming;

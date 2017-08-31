@@ -34,6 +34,7 @@ define(function (require) {
 
         var self = this,
             socket = socket,
+            instrumentid = null,
             streaming = true,
             port = null,
             port_close_requested = false,
@@ -314,6 +315,7 @@ define(function (require) {
 
         this.openPort = function (insid) {
             port_open_requested = true;
+            instrumentid = insid;
             var ins = instrumentManager.getInstrument();
             if (port == null) {
                 port = new btleConnection(ins.get('port'), portSettings());
@@ -342,7 +344,9 @@ define(function (require) {
             return port_open_requested;
         }
 
-        this.getInstrumentId = function (arg) {};
+        this.getInstrumentId = function (arg) {
+            return instrumentid;
+        };
 
         this.isStreaming = function () {
             return streaming;

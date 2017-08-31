@@ -56,6 +56,7 @@ define(function (require) {
     var parser = function (socket) {
 
         var socket = socket,
+            instrumentid = null,
             self = this;
         var serialport = null;
         var livePoller = null; // Reference to the live streaming poller
@@ -487,6 +488,7 @@ define(function (require) {
 
         this.openPort = function (insid) {
             port_open_requested = true;
+            instrumentid = insid;
             if (vizapp.type == 'server') {
                 openPort_server(insid);
             } else {
@@ -522,7 +524,9 @@ define(function (require) {
             return port_open_requested;
         }
 
-        this.getInstrumentId = function (arg) {};
+        this.getInstrumentId = function (arg) {
+            return instrumentid;
+        };
 
         this.isStreaming = function () {
             return streaming;

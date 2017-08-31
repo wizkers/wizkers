@@ -43,6 +43,7 @@ define(function (require) {
     var parser = function (socket) {
 
         var self = this,
+            instrumentid = null,
             socket = socket,
             livePoller = null, // Reference to the live streaming poller
             streaming = true,
@@ -113,6 +114,7 @@ define(function (require) {
         // until proven otherwise )
         this.openPort = function (insid) {
             port_open_requested = true;
+            instrumentid = insid;
             dbs.instruments.get(insid, function(err,item) {
                 port = new processConnection(item.port, portSettings());
                 port.on('data', format);
@@ -137,7 +139,9 @@ define(function (require) {
             return port_open_requested;
         }
 
-        this.getInstrumentId = function (arg) {};
+        this.getInstrumentId = function (arg) {
+            return instrumentid;
+        };
 
         this.isStreaming = function () {
             return streaming;
