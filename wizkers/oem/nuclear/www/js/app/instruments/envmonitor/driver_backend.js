@@ -59,67 +59,51 @@ define(function (require) {
             rmy = null;
 
         var wind = {};
+        var temperature = null;
+        var rel_humidity = null;
 
-        // Format is receiving JSON objects from the GeigerLink and the
+        // Format is receiving JSON objects from the radiation sensor and the
         // Wind monitor
         // Notes: we aggregate everything and rate-limit based on the
-        //        GeigerLink data which is slower
+        //        Radiation data which is slower
+        //
+        // Note (2): since we are receiving data from sub-drivers, we are
+        //           also going to receive their status messages here.
         var format = function (data) {
             if (data.wind) {
                 wind = data.wind;
+            }
+            if (data.temperature) {
+                // Note: WX sensors will normally send wind + temp + other
+                // in the same packet.
+                temperature = data.temperature;
+            }
+            if (data.rel_humidity) {
+                rel_humidity = data.rel_humidity;
                 return;
             }
+
             if (data.cpm) {
                 data.wind = wind;
-                // We enrich the data with more details
-                // on the sensors.
-                // TODO: should maybe move this to instrument
-                // settings to let people pick the channel
-                // they want for each probe type?
+                if (temperature != null) data.temperature = temperature;
+                if (rel_humidity != null) data.rel_humidity = rel_humidity;
                 data.cpm.unit = "CPM";
-                data.cpm.name = "Gamma - EC"
 
                 if (data.cpm2) {
                     data.cpm2.unit = "CPM";
-                    data.cpm2.name = "Beta/Gamma"
                 }
                 self.trigger('data', data);
-            }
-        };
-
-        // Status returns an object that is concatenated with the
-        // global server status
-        var status = function (stat) {
-            port_open_requested = false;
-            console.log('C10 Probe - Port status change', stat);
-            if (stat.openerror) {
-                // We could not open the port: warn through
-                // a 'data' messages
-                var resp = {
-                    openerror: true
-                };
-                if (stat.reason != undefined)
-                    resp.reason = stat.reason;
-                if (stat.description != undefined)
-                    resp.description = stat.description;
-                self.trigger('data', resp);
-                return;
-            }
-
-            isopen = stat.portopen;
-
-            if (isopen) {
-                // Should run any "onOpen" initialization routine here if
-                // necessary.
             } else {
-                // We remove the listener so that the serial port can be GC'ed
-                if (port_close_requested) {
-                    if (port.off)
-                        port.off('status', stat);
-                    else
-                        port.removeListener('status', status);
-                    port_close_requested = false;
+                // If we are here, we just received mostly
+                // either unexpected data packets, or status messages
+                // (see Note 2 above). We want to forward those status
+                // messages...
+                if (data.openerror) {
+                    // Got an open error on at least one of the two backend drivers: close everything
+                    self.closePort();
                 }
+
+                self.trigger('data', data);
             }
         };
 
@@ -160,9 +144,31 @@ define(function (require) {
             });
         };
 
+        // cb is important because ref is not passed by reference...
+        var open_subDriver = function(ref, id, cb) {
+            require(['app/models/instrument'], function (model) {
+                var ins = new model.Instrument({
+                    _id: id
+                });
+                ins.fetch({
+                    success: function () {
+                        instrumentManager.getBackendDriverFor(ins.get('type'), null , function(driver) {
+                            ref = driver;
+                            ref.on('data', format);
+                            ref.openPort(id, ins.get('port'));
+                            cb(ref);
+                        });
+                    }
+                });
+            });
+        }
+
         var openPort_app = function(insid) {
-            // Note: we do not support C10 probes in app mode for now,
-            // only in server mode.
+            var ins = instrumentManager.getInstrument();
+            var _gl = ins.get('geigerlink');
+            var _wm = ins.get('windmonitor');
+            open_subDriver(gl, _gl, function(ref) { gl = ref; });
+            open_subDriver(rmy, _wm, function(ref) { rmy = ref;});
         }
 
         /////////////
@@ -181,17 +187,23 @@ define(function (require) {
         this.closePort = function (data) {
             // We need to remove all listeners otherwise tons of stuff
             // will never be GC'ed
-            debug('Requesting to close the two backend instruments');
+            console.log('Requesting to close the two backend instruments');
 
             port_close_requested = true;
 
             if (gl) {
-                gl.removeListener('data', format);
+                if (gl.off)
+                    gl.off('data', format);
+                else
+                    gl.removeListener('data', format);
                 gl.closePort();
             }
 
             if (rmy) {
-                rmy.removeListener('data', format)
+                if (rmy.off)
+                    rmy.off('data', format);
+                else
+                    rmy.removeListener('data', format)
                 rmy.closePort();
             }
 
@@ -204,8 +216,10 @@ define(function (require) {
             return false;
         }
 
+        // We don't follow this for this driver, because we rely on two
+        // underlying subdrivers and tracking is not that important.
         this.isOpenPending = function () {
-            return port_open_requested;
+            return false;
         }
 
         this.getInstrumentId = function (arg) {};

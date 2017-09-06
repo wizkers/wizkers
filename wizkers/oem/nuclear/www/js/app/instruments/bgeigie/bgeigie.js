@@ -111,9 +111,7 @@ define(function (require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser or as a Cordova native app.
         this.getBackendDriver = function (arg, callback) {
-            require(['app/instruments/bgeigie/driver_backend'], function (driver) {
-                callback(new driver(arg));
-            });
+            this.getBackendDriverFor('bgeigie', arg, callback);
         };
 
         // Browser implementation of the backend firmware uploader, when we

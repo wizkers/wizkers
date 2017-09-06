@@ -60,7 +60,7 @@ define(function(require) {
 
         render:function () {
             var self = this;
-            console.log('Main render of C10 numeric view');
+            console.log('Main render of Env monitor numeric view');
             this.$el.html(template());
             // We need to force the Live view to resize the map at this
             // stage, becaure we just changed the size of the numview
@@ -72,7 +72,7 @@ define(function(require) {
         },
 
         onClose: function() {
-            console.log("C10 numeric view closing...");
+            console.log("Env monitor numeric view closing...");
             if (this.plot)
                 this.plot.onClose();
             linkManager.off('input', this.showInput, this);
@@ -97,7 +97,7 @@ define(function(require) {
 
             if (data.cpm) {
                 var cpm = parseFloat(data.cpm.value);
-                $('#livecpm', this.el).html(utils.round(cpm/1000,3));
+                $('#livecpm', this.el).html(cpm.toFixed(0));
                 //$('#liveusvh', this.el).html((cpm*0.00294).toFixed(3) + "&nbsp;&mu;Sv/h");
                 if (data.cpm.valid)
                      $('#readingvalid', this.el).removeClass('label-danger').addClass('label-success').html('VALID');
@@ -156,7 +156,13 @@ define(function(require) {
 
             if (data.wind != undefined) {
                 this.plot.appendPoint({'name': 'Wind', 'value': data.wind});
-                this.$('#windspeed').html((data.wind.speed * 1.15078).toFixed(1)); // Knots to mph
+                this.$('#windspeed').html((data.wind.speed).toFixed(1)); // Knots
+            }
+            if (data.temperature != undefined) {
+                this.$('#temperature').html(data.temperature);
+            }
+            if (data.rel_humidity != undefined) {
+                this.$('#rel_humidity').html(data.rel_humidity);
             }
 
         },

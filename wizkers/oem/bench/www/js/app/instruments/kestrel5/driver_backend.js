@@ -654,11 +654,11 @@ define(function (require) {
             }
         };
 
-        var openPort_app = function (insid) {
+        var openPort_app = function (insid, insport) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
             if (port == null)
-                port = new btleConnection(ins.get('port'), portSettings());
+                port = new btleConnection(insport ? insport : ins.get('port'), portSettings());
             port.open();
             port.on('data', format);
             port.on('status', status);
@@ -681,13 +681,13 @@ define(function (require) {
         // Public methods
         /////////////
 
-        this.openPort = function (insid) {
+        this.openPort = function (insid, insport) {
             instrumentid = insid;
             port_open_requested = true;
             if (vizapp.type == 'server') {
                 openPort_server(insid);
             } else {
-                openPort_app(insid);
+                openPort_app(insid, insport);
             }
         };
 

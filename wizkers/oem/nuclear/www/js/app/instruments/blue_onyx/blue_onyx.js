@@ -103,9 +103,7 @@ define(function (require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser or as a Cordova native app.
         this.getBackendDriver = function (arg, callback) {
-            require(['app/instruments/blue_onyx/driver_backend'], function (driver) {
-                callback(new driver(arg));
-            });
+            this.getBackendDriverFor('blue_onyx', arg, callback);
         };
 
         // Return a Backbone view which is a mini graph

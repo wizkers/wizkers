@@ -52,7 +52,7 @@ define(function (require) {
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities
         this.getCaps = function () {
-            return ["LiveDisplay", "NumDisplay",
+            return ["LiveDisplay", "NumDisplay", 'WizkersSettings',
                     "WantReplay"
                    ];
         };
@@ -65,7 +65,7 @@ define(function (require) {
 
         // This has to be a backbone view
         this.getSettings = function (arg, callback) {
-            require(['app/instruments/c10probe/settings'], function (view) {
+            require(['app/instruments/envmonitor/settings'], function (view) {
                 callback(new view(arg));
             });
         };
@@ -82,7 +82,7 @@ define(function (require) {
         // This is a Backbone view
         // This is a numeric display
         this.getNumDisplay = function (arg, callback) {
-            require(['app/instruments/c10probe/display_numeric'], function (view) {
+            require(['app/instruments/envmonitor/display_numeric'], function (view) {
                 current_numview = new view(arg);
                 callback(current_numview);
             });
@@ -102,7 +102,7 @@ define(function (require) {
 
         // This is the front-end driver
         this.getDriver = function(callback) {
-             require(['app/instruments/c10probe/driver_frontend'], function(d) {
+             require(['app/instruments/envmonitor/driver_frontend'], function(d) {
                 callback(new d());
              });
         };
@@ -110,9 +110,7 @@ define(function (require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser on as a Cordova native app.
         this.getBackendDriver = function (arg, callback) {
-            require(['app/instruments/c10probe/driver_backend'], function (driver) {
-                callback(new driver(arg));
-            });
+            this.getBackendDriverFor('envmonitor', arg, callback);
         };
 
 

@@ -64,36 +64,42 @@ define(function (require) {
             "onyx": {
                 name: "SafeCast Onyx",
                 type: 'app/instruments/onyx/onyx',
+                path: 'app/instruments/onyx',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "usbgeiger": {
                 name: "Medcom GeigerLink",
                 type: 'app/instruments/usbgeiger/usb_geiger',
+                path: 'app/instruments/usbgeiger',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "sigma25": {
                 name: "Kromek Sigma25",
                 type: 'app/instruments/sigma25/sigma25',
+                path: 'app/instruments/sigma25',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "gammarae": {
                 name: "RAE GammaRAE II",
                 type: 'app/instruments/gammarae/gammarae',
+                path: 'app/instruments/gammarae',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             "rmyoung": {
                 name: "RM Young wind sensor",
                 type: 'app/instruments/rmyoung/rmyoung',
+                path: 'app/instruments/rmyoung',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             'kestrel5': {
                 name: 'Kestrel 5 series',
                 type: 'app/instruments/kestrel5/kestrel5',
+                path: 'app/instruments/kestrel5',
                 settings: 'app/instruments/kestrel5/settings',
                 connectionsettings: 'app/views/instrument/bluetooth',
                 connectionfilter: ['03290000-eab4-dea1-b24e-44ec023874db']
@@ -101,12 +107,14 @@ define(function (require) {
             'blue_onyx': {
                 name: 'Medcom Blue Onyx',
                 type: 'app/instruments/blue_onyx/blue_onyx',
+                path: 'app/instruments/blue_onyx',
                 settings: 'app/instruments/blue_onyx/settings',
                 connectionsettings: 'app/views/instrument/bluetooth'
             },
             'inspector_ble': {
                 name: 'Medcom Inspector BLE',
                 type: 'app/instruments/inspector_ble/inspector_ble',
+                path: 'app/instruments/inspector_ble',
                 settings: null,
                 connectionsettings: 'app/views/instrument/bluetooth',
                 connectionfilter: [ '39b31fec-b63a-4ef7-b163-a7317872007f']
@@ -114,9 +122,17 @@ define(function (require) {
             'bgeigie': {
                 name: 'Safecast bGeigie',
                 type: 'app/instruments/bgeigie/bgeigie',
+                path: 'app/instruments/bgeigie',
                 settings: 'app/instruments/bgeigie/settings',
                 connectionsettings: 'app/views/instrument/bluetooth',
                 connectionfilter: ['ef080d8c-c3be-41ff-bd3f-05a5f4795d7f', '067978ac-b59f-4ec9-9c09-2ab6e5bdad0b']
+            },
+            'envmonitor': {
+                name: "Radiation/Weather monitoring Station",
+                type: 'app/instruments/envmonitor/envmonitor',
+                path: 'app/instruments/envmonitor',
+                settings: 'app/instruments/envmonitor/settings',
+                connectionsettings: null
             }
         };
 
@@ -137,18 +153,6 @@ define(function (require) {
                 settings: null,
                 connectionsettings: null
             };
-            this.supportedInstruments["envmonitor"] = {
-                name: "Radiation/Weather monitoring Station",
-                type: 'app/instruments/envmonitor/envmonitor',
-                settings: 'app/instruments/envmonitor/settings',
-                connectionsettings: null
-            };
-            this.supportedInstruments["heliumgeiger"] = {
-                name: "Radius Hawk (Helium)",
-                type: 'app/instruments/heliumgeiger/heliumgeiger',
-                settings: null,
-                connectionsettings: 'app/views/instrument/helium'
-            };
             this.supportedInstruments["w433"] = {
                 name: "LaCrosse 433MHz weather sensors",
                 type: 'app/instruments/w433/w433',
@@ -160,6 +164,16 @@ define(function (require) {
         // The instruments below are supported in both Chrome and Cordova mode
         if (vizapp.type == 'chrome' || vizapp.type == 'cordova') {
         }
+
+
+        /**
+         * Get a backend driver for a given instrument type
+         */
+        this.getBackendDriverFor = function (instrument, arg, callback) {
+            require([this.supportedInstruments[instrument].path + '/driver_backend'], function (driver) {
+                callback(new driver(arg));
+            });
+        };
 
         /**
          * Get a view that renders the instrument-specific port settings.
@@ -210,6 +224,11 @@ define(function (require) {
             current_instrument = null;
         }
 
+        /**
+         * Updates the current instrument references
+         * @instrument is a Backbone model (already fetched)
+         * This method is called from router.js
+         */
         this.setInstrument = function (instrument, cb) {
             var self = this;
             var type = instrument.get('type');

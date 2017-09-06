@@ -1,14 +1,14 @@
 <div class="row">
     <div class="col-md-12 col-xs-6">
-        <small style="position:absolute; left: 10px; bottom: -10px;">Gamma&nbsp;-&nbsp;Energy&nbsp;compensated</small>
+        <small style="position:absolute; left: 10px; bottom: -10px;">Sensor 1</small>
         <span class="label label-danger" id="readingvalid" style="position:absolute; right: 10px;">INVALID</span>
-        <span class="bigreading" id="livecpm">00</span>&nbsp;mR/hr</br>
+        <span class="bigreading" id="livecpm">00</span>&nbsp;CPM</br>
     </div>
     <div class="col-md-12 visible-lg visible-md" style="min-height: 30px;">
     </div>
     <div class="dual_input">
         <div class="col-md-12 col-xs-6">
-            <small style="position:absolute; left: 10px; bottom: -10px;">Beta/Gamma</small>
+            <small style="position:absolute; left: 10px; bottom: -10px;">Sensor 2</small>
             <span class="label label-danger" id="readingvalid_2" style="position:absolute;right:10px;">INVALID</span>
             <span class="bigreading" id="livecpm_2">00</span>&nbsp;CPM</br>
         </div>
@@ -21,8 +21,15 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12">
-        <p><a href="https://en.wikipedia.org/wiki/Wind_rose" target="_blank">Wind rose</a> in <a href="https://en.wikipedia.org/wiki/Beaufort_scale" target="_blank">Beaufort scale</a></p>
-        <p>Instant windspeed: <span id="windspeed">0</span>&nbsp;mph</p>
+    <div class="col-xs-6">
+        <p>Windspeed: <span id="windspeed">n.a.</span>&nbsp;kt</p>
+    </div>
+    <div class="col-xs-6">
+        <p>Temp: <span id="temperature">n.a.</span>&nbsp;&deg;C</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-6">
+        <p>Humidity: <span id="rel_humidity">n.a.</span>&nbsp;%</p>
     </div>
 </div>

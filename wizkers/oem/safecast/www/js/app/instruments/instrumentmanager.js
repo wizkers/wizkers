@@ -49,6 +49,7 @@ define(function (require) {
             "bgeigie": {
                 name: 'Safecast bGeigie',
                 type: 'app/instruments/bgeigie/bgeigie',
+                path: 'app/instruments/bgeigie',
                 settings: 'app/instruments/bgeigie/settings',
                 connectionsettings: 'app/views/instrument/bluetooth',
                 connectionfilter: ['ef080d8c-c3be-41ff-bd3f-05a5f4795d7f', '067978ac-b59f-4ec9-9c09-2ab6e5bdad0b']
@@ -56,15 +57,27 @@ define(function (require) {
             "onyx": {
                 name: "Safecast Onyx",
                 type: 'app/instruments/onyx/onyx',
+                path: 'app/instruments/onyx',
                 settings: null,
                 connectionsettings: 'app/views/instrument/serialport'
             },
             'blue_onyx': {
                 name: 'Medcom Blue Onyx',
                 type: 'app/instruments/blue_onyx/blue_onyx',
+                path: 'app/instruments/blue_onyx',
                 settings: 'app/instruments/blue_onyx/settings',
                 connectionsettings: 'app/views/instrument/bluetooth'
             }
+        };
+
+
+        /**
+         * Get a backend driver for a given instrument type
+         */
+        this.getBackendDriverFor = function (instrument, arg, callback) {
+            require([this.supportedInstruments[instrument].path + '/driver_backend'], function (driver) {
+                callback(new driver(arg));
+            });
         };
 
         /**

@@ -78,6 +78,7 @@ require.config({
     map: {
         '*': {
             'socketio': 'app/chromeSocket',
+            'connectionmanager': 'app/connections/connectionmanager',
             'connections/serial': 'app/connections/cordovaSerial',
             'connections/tcp': 'app/connections/chromeTcpSerial',
             'connections/hid': 'app/connections/usbhid',

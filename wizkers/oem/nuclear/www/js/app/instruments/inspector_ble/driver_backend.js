@@ -214,9 +214,16 @@ define(function (require) {
                 location_status = err.message;
         }
 
-        var openPort_app = function (insid) {
+        /**
+         *   Composite drivers (see envmonitor) pass the instrument port path
+         *  directly since the 'ins' reference returned by the instrument manager is the
+         *  composite instrument reference, not the one we actually want.
+         * @param {*} insid    Instrument ID (string)
+         * @param {*} insport  Instrument port path (string)
+         */
+        var openPort_app = function (insid, insport) {
             var ins = instrumentManager.getInstrument();
-            port = new btleConnection(ins.get('port'), portSettings());
+            port = new btleConnection(insport ? insport : ins.get('port'), portSettings());
             port.open();
             port.on('data', format);
             port.on('status', status);
@@ -237,13 +244,18 @@ define(function (require) {
         // Public methods
         /////////////
 
-        this.openPort = function (insid) {
+        /**
+         * insid : ID of the instrument (so that we can fetch its settings)
+         * insport: optional, pass the instrument port info for direct opening, used for
+         *          composite drivers in Cordova/app mode
+         */
+        this.openPort = function (insid, insport) {
             port_open_requested = true;
             instrumentid = insid;
             if (vizapp.type == 'server') {
                 openPort_server(insid);
             } else {
-                openPort_app(insid);
+                openPort_app(insid, insport);
             }
 
         };
@@ -309,6 +321,7 @@ define(function (require) {
                     cpm: {
                         value: cpm,
                         usv: cpm * 0.00294,
+                        name: 'Pancake',
                         valid: true
                     },
                     loc: current_loc,

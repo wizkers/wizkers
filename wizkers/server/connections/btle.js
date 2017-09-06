@@ -216,7 +216,10 @@ define(function (require) {
             noble.startScanning([], true);
 
             // Setup a callback in case we time out
-            timeoutCheckTimer = setTimeout(checkConnectDelay, 30000);
+            // The 45s duration is necessary for some super low power devices
+            // that advertise rarely ( <1s ) and cause some computers to struggle
+            // to find + connect
+            timeoutCheckTimer = setTimeout(checkConnectDelay, 45000);
 
             noble.on('discover', doConnect);
 

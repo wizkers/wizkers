@@ -87,9 +87,7 @@ define(function (require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser or as a Cordova native app.
         this.getBackendDriver = function (arg, callback) {
-            require(['app/instruments/gammarae/driver_backend'], function (driver) {
-                callback(new driver(arg));
-            });
+            this.getBackendDriverFor('gammarae', arg, callback);
         };
 
         // Render a log (or list of logs) for the device.

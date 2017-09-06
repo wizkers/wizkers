@@ -105,9 +105,7 @@ define(function (require) {
         // run the app fully in-browser on as a Cordova native app.
         //
         this.getBackendDriver = function (arg, callback) {
-            require(['app/instruments/sigma25/driver_backend'], function (view) {
-                callback(new view(arg));
-            });
+            this.getBackendDriverFor('sigma25', arg, callback);
         };
 
         // Return a Backbone view which is a mini graph

@@ -317,7 +317,7 @@ define(function (require) {
             var self = this;
             var p = page ? parseInt(page, 10) : 1;
             require(['app/models/instrument', 'app/views/instrument/instrumentlist'], function (model, view) {
-                stats.sendAppView('listintruments');
+                stats.sendAppView('listinstruments');
                 var instrumentList = new model.InstrumentCollection();
                 instrumentList.fetch({
                     success: function () {

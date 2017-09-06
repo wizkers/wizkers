@@ -89,7 +89,8 @@ require.config({
      */
     map: {
         '*': {
-            'socketio': '/socket.io/socket.io.js'
+            'socketio': '/socket.io/socket.io.js',
+            'connectionmanager': 'app/connections/connectionmanager',
         }
     },
 

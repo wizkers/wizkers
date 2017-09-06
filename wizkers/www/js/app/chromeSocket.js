@@ -37,7 +37,7 @@ define(function (require) {
     "use strict";
 
     var Backbone = require('backbone'),
-        ConnectionManager = require('app/connections/connectionmanager'),
+        ConnectionManager = require('connectionmanager'),
         bootbox = require('bootbox'); // Required for Web Bluetooth
 
     var socketImpl = function () {
