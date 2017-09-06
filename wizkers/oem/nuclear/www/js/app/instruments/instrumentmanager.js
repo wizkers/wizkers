@@ -137,18 +137,17 @@ define(function (require) {
                 settings: null,
                 connectionsettings: null
             };
-
+            this.supportedInstruments["envmonitor"] = {
+                name: "Radiation/Weather monitoring Station",
+                type: 'app/instruments/envmonitor/envmonitor',
+                settings: 'app/instruments/envmonitor/settings',
+                connectionsettings: null
+            };
             this.supportedInstruments["heliumgeiger"] = {
                 name: "Radius Hawk (Helium)",
                 type: 'app/instruments/heliumgeiger/heliumgeiger',
                 settings: null,
                 connectionsettings: 'app/views/instrument/helium'
-            };
-            this.supportedInstruments["hawknest"] = {
-                name: "Hawk Nest (Pinocc.io)",
-                type: 'app/instruments/hawknest/hawknest',
-                settings: null,
-                connectionsettings: 'app/views/instrument/pinoccio'
             };
             this.supportedInstruments["w433"] = {
                 name: "LaCrosse 433MHz weather sensors",

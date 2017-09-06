@@ -27,7 +27,6 @@
  *  This is a composite driver: it will in turn require
  *   a Radiation sensor driver, and a Weather station driver
  *
- *
  * @author Edouard Lafargue, ed@lafargue.name
  */
 
@@ -124,12 +123,11 @@ define(function (require) {
             }
         };
 
-
         var openPort_server = function(insid) {
             dbs.instruments.get(insid, function(err,item) {
 
                 // TODO: refactor this please!!!!
-                // Note: we can't require the COnnectionManager upon
+                // Note: we can't require the ConnectionManager upon
                 // creation because it requires this driver_backend.js file,
                 var ConnectionManager = require('connectionmanager');
                 var connectionManager = new ConnectionManager();

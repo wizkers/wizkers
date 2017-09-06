@@ -51,14 +51,15 @@ var Kestrel5 = require('./www/js/app/instruments/kestrel5/driver_backend.js');
 var InspectorBLE = require('./www/js/app/instruments/inspector_ble/driver_backend.js');
 var BGeigie = require('./www/js/app/instruments/bgeigie/driver_backend.js');
 var W433 = require('./parsers/w433.js');
-var PiTemp = require('./www/js/app/instruments/pitemp/driver_backend.js');
+var PiTemp =     require('./www/js/app/instruments/pitemp/driver_backend.js');
+var EnvMonitor = require('./www/js/app/instruments/envmonitor/driver_backend.js');
 
 var ConnectionManager = function () {
 
     // This is an object that keeps keys that are instrumentids, and values that are driver objects
     var openinstruments = {};
 
-    var getDriver = function (type) {
+    this.getDriver = function (type) {
         var driver;
         if (type == 'onyx') {
             driver = new Onyx();
@@ -88,6 +89,8 @@ var ConnectionManager = function () {
             driver = new BGeigie();
         } else if (type == 'pitemp') {
             driver = new PiTemp();
+        } else if (type == 'envmonitor') {
+            driver = new EnvMonitor();
         }
         return driver;
     }
@@ -170,6 +173,7 @@ var ConnectionManager = function () {
      * in charge of making sure it is authorized.
      */
     this.openInstrument = function (instrumentid, callback) {
+        var self = this;
         debug('Instrument open request for instrument ID ' + instrumentid);
         if (openinstruments.hasOwnProperty(instrumentid)) {
             debug('That instrument is already loaded');
@@ -185,7 +189,7 @@ var ConnectionManager = function () {
             // Create the relevant driver for the instrument, and ask to
             // open it:
             dbs.instruments.get(instrumentid, function (err, item) {
-                var driver = getDriver(item.type);
+                var driver = self.getDriver(item.type);
                 if (driver == undefined) {
                     // Something is very wrong here!
                     debug('Was asked to open an instrument with unknown driver:', item.type);
