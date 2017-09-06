@@ -1,0 +1,45 @@
+<p><strong>Instruments:</strong></p>
+<p>Please select the GeigerLink and the RM Young instruments that make up this C-10 probe:
+</p>
+
+<label for="geigerlink" class="col-md-3 control-label">GeigerLink:</label>
+<div class="col-md-9 col-xs-12">
+    <div class="row">
+        <div class="col-xs-12">
+            <select id="geigerlink" name="geigerlink" class="form-control">
+                <%
+                if (inslist.indexOf(geigerlink) == -1) { %>
+                    <option disabled selected value="<%= geigerlink %>"><%= geigerlink %></option>
+                <% }
+                %>
+                <% for(var i=0; i < inslist.length; i++) { %>
+                <option
+                    <%= geigerlink == inslist[i].id ? 'selected':'' %>
+                    value="<%= inslist[i].id %>"><%= inslist[i].get('name') %></option>
+                <% } %>
+            </select>
+        </div>
+   </div>
+</div>
+<label for="windmonitor" class="col-md-3 control-label">Wind monitor:</label>
+<div class="col-md-9 col-xs-12">
+    <div class="row">
+        <div class="col-xs-12">
+            <select id="windmonitor" name="windmonitor" class="form-control">
+                <%
+                if (inslist.indexOf(windmonitor) == -1) { %>
+                    <option disabled selected value="<%= windmonitor %>"><%= windmonitor %></option>
+                <% }
+                %>
+                <% for(var i=0; i < inslist.length; i++) { %>
+                <option
+                    <%= windmonitor == inslist[i].id ? 'selected':'' %>
+                    value="<%= inslist[i].id %>"><%= inslist[i].get('name') %></option>
+                <% } %>
+            </select>
+        </div>
+   </div>
+</div>
+
+
+
