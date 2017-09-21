@@ -80,7 +80,7 @@ define(function(require) {
             }
         };
 
-        post_options.path = post_options.path + '?api_key=' + settings.api_key
+        post_options.path = post_options.path + '?api_key=' + settings.apikey
         console.log(post_options);
 
     };

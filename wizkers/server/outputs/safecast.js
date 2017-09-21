@@ -53,8 +53,8 @@ module.exports = function safecast() {
         var safecast_host = 'dev.safecast.org';
         if (instance == 'production') {
             safecast_host = 'api.safecast.org';
-        } else if (instance == 'ttingest') {
-            safecast_host = 'ttingest.safecast.org';
+        } else if (instance == 'ttserve') {
+            safecast_host = 'tt.safecast.org';
         }
 
         // Prepare the post options:
@@ -69,7 +69,7 @@ module.exports = function safecast() {
             }
         };
 
-        post_options.path = post_options.path + '?api_key=' + settings.api_key
+        post_options.path = post_options.path + '?api_key=' + settings.apikey
         debug(post_options);
     };
 
