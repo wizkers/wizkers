@@ -62,12 +62,14 @@ module.exports = function safecast() {
             host: safecast_host,
             port: 80,
             method: 'POST',
-            path: '/measurements.json',
+            path: (instance == 'ttserve') ? '/scripts/index.php' : '/measurements.json',
             headers: {
-                'X-Datalogger': 'wizkers.io server-mode Safecast plugin',
-                'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Datalogger': 'wizkers.io Safecast plugin',
+            'Content-Type': 'application/json',
             }
         };
+
+        post_options.path = post_options.path + '?api_key=' + settings.api_key
         debug(post_options);
     };
 
@@ -122,19 +124,20 @@ module.exports = function safecast() {
         radiation = parseFloat(radiation).toFixed(3);
 
         var post_obj = {
-            'api_key': settings.apikey,
-            'measurement[captured_at]': new Date().toISOString(),
-            'measurement[unit]': unit,
-            'measurement[value]': radiation,
-            'measurement[latitude]': lat,
-            'measurement[longitude]': lon,
-        };
+            'longitude': lon,
+            'latitude': lat,
+            'value': radiation,
+            'unit': unit,
+            'captured_at': new Date().toISOString(),
+            'devicetype_id': 'Wizkers V1'
+        }
 
         // Add optional fields if they are there:
         if (devid != undefined)
-            post_obj['measurement[device_id]'] = devid;
+            post_obj['device_id'] = devid;
 
-        var post_data = querystring.stringify(post_obj);
+        //var post_data = httprequest.stringify(post_obj);
+        var post_data = JSON.stringify(post_obj);
 
         post_options.headers['Content-Length'] = post_data.length;
 

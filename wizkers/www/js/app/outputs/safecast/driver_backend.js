@@ -64,8 +64,8 @@ define(function(require) {
         var safecast_host = 'dev.safecast.org';
         if (instance == 'production') {
             safecast_host = 'api.safecast.org';
-        } else if (instance == 'ttingest') {
-            safecast_host = 'ttingest.safecast.org';
+        } else if (instance == 'ttserve') {
+            safecast_host = 'tt.safecast.org';
         }
 
         // Prepare the post options:
@@ -73,12 +73,14 @@ define(function(require) {
             host: safecast_host,
             port: 80,
             method: 'POST',
-            path: '/measurements.json',
+            path: (instance == 'ttserve') ? '/scripts/index.php' : '/measurements.json',
             headers: {
             'X-Datalogger': 'wizkers.io Safecast plugin',
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
             }
         };
+
+        post_options.path = post_options.path + '?api_key=' + settings.api_key
         console.log(post_options);
 
     };
@@ -116,6 +118,7 @@ define(function(require) {
         // Only keep three decimals on Radiation, more does not make sense
         radiation = parseFloat(radiation).toFixed(3);
 
+        /*
         var post_obj = {
             'api_key' :  settings.apikey,
             'measurement[captured_at]': new Date().toISOString(),
@@ -124,12 +127,23 @@ define(function(require) {
             'measurement[latitude]': lat,
             'measurement[longitude]': lon,
         };
+        */
+
+        var post_obj = {
+            'longitude': lon,
+            'latitude': lat,
+            'value': radiation,
+            'unit': unit,
+            'captured_at': new Date().toISOString(),
+            'devicetype_id': 'Wizkers V1'
+        }
 
         // Add optional fields if they are there:
         if (devid != undefined)
-            post_obj['measurement[device_id]'] = devid;
+            post_obj['device_id'] = devid;
 
-        var post_data = httprequest.stringify(post_obj);
+        //var post_data = httprequest.stringify(post_obj);
+        var post_data = JSON.stringify(post_obj);
 
         output_ref.save({'last': new Date().getTime()});
         var post_request = httprequest.request(post_options, function(res) {
