@@ -14,7 +14,8 @@
     <div class="input-group col-xs-6">
         <select name="instance" class="form-control">
             <option value="dev" <%= metadata['instance'] == 'dev' ?'selected':'' %>>Development</option>
-            <option value="production" <%= metadata['instance'] == 'production' ?'selected':'' %>>Production</option>
+            <option value="production" <%= metadata['instance'] == 'production' ?'selected':'' %>>API</option>
+            <option value="ttingest" <%= metadata['instance'] == 'ttingest' ?'selected':'' %>>Pointcast</option>
         </select>
     </div>
     </div>

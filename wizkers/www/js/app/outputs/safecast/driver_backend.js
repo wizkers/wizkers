@@ -61,9 +61,16 @@ define(function(require) {
 
         var instance = settings.instance; // can be "production" or "dev"
 
+        var safecast_host = 'dev.safecast.org';
+        if (instance == 'production') {
+            safecast_host = 'api.safecast.org';
+        } else if (instance == 'ttingest') {
+            safecast_host = 'ttingest.safecast.org';
+        }
+
         // Prepare the post options:
         post_options = {
-            host: (instance == 'production') ? 'api.safecast.org' : 'dev.safecast.org',
+            host: safecast_host,
             port: 80,
             method: 'POST',
             path: '/measurements.json',
