@@ -107,6 +107,7 @@ define(function(require) {
         var lat =  this.resolveMapping("latitude",data);
         var lon =  this.resolveMapping("longitude",data);
         var devid = this.resolveMapping("device_id", data);
+        var height = this.resolveMapping("height", data);
 
         // If any of those are empty, abort:
         if (unit == undefined || radiation == undefined || lat == undefined || lon == undefined) {
@@ -117,17 +118,6 @@ define(function(require) {
 
         // Only keep three decimals on Radiation, more does not make sense
         radiation = parseFloat(radiation).toFixed(3);
-
-        /*
-        var post_obj = {
-            'api_key' :  settings.apikey,
-            'measurement[captured_at]': new Date().toISOString(),
-            'measurement[unit]': unit,
-            'measurement[value]': radiation,
-            'measurement[latitude]': lat,
-            'measurement[longitude]': lon,
-        };
-        */
 
         var post_obj = {
             'longitude': lon,
@@ -141,6 +131,9 @@ define(function(require) {
         // Add optional fields if they are there:
         if (devid != undefined)
             post_obj['device_id'] = devid;
+
+        if (height != undefined)
+            post_obj['height'] = height;
 
         //var post_data = httprequest.stringify(post_obj);
         var post_data = JSON.stringify(post_obj);

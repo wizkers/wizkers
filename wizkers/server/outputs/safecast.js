@@ -99,6 +99,7 @@ module.exports = function safecast() {
         var lat = this.resolveMapping("latitude", data);
         var lon = this.resolveMapping("longitude", data);
         var devid = this.resolveMapping("device_id", data);
+        var height = this.resolveMapping('height', data);
 
         // If any of those are empty, abort:
         if (unit == undefined || radiation == undefined || lat == undefined || lon == undefined) {
@@ -135,6 +136,9 @@ module.exports = function safecast() {
         // Add optional fields if they are there:
         if (devid != undefined)
             post_obj['device_id'] = devid;
+
+        if ( height != undefined)
+            post_obj['height'] = height;
 
         //var post_data = httprequest.stringify(post_obj);
         var post_data = JSON.stringify(post_obj);
