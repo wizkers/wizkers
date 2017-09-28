@@ -144,7 +144,7 @@ define(function (require) {
             }
         };
 
-        // Format can act on incoming data from the device, and then
+        // Format acts on incoming data from the device, and then
         // forwards the data to the app through a 'data' event.
         var format = function (data) {
             if (!data.value || !data.characteristic) {
@@ -192,7 +192,7 @@ define(function (require) {
 
         // Returns starting index of 0x7e
         var sync = function(buffer, maxIndex, minIndex) {
-            for (var i = minIndex; i < maxIndex - 1; i++) {
+            for (var i = minIndex; i < maxIndex; i++) {
                 if (buffer[i] == 0x7e)
                     return i;
             }
@@ -210,6 +210,7 @@ define(function (require) {
                 // console.log('LLP: Received new data, appending at index', ibIdx);
                 inputBuffer.set(new Uint8Array(data.value), ibIdx);
                 ibIdx += data.value.byteLength;
+                // console.log('I', abutils.hexdump(new Uint8Array(data.value)));
             }
             var start = -1,
                 stop = -1;
@@ -236,13 +237,16 @@ define(function (require) {
             // End of state machine
             ///////
             console.info(abutils.hexdump(inputBuffer.subarray(0, stop+1))); // Display before escaping
-            // Now check our CRC (avoid creating a dataview just for this)
-            var receivedCRC = inputBuffer[stop-2] + (inputBuffer[stop-1] << 8);
 
             // We now have a complete packet: copy into a new buffer, and realign
             // our input buffer
             var escapedPacket = inputBuffer.subarray(0, stop+1);
             var packet = unescape(escapedPacket);
+
+            // The CRC bytes can also be escaped, careful not to compute before
+            // we unescape!
+            // Now check our CRC (avoid creating a dataview just for this)
+            var receivedCRC = packet[packet.length-3] + (packet[packet.length-2] << 8);
 
             // CRC is computed on the unescaped packet and includes everything but
             // the framing bytes and CRC itself (of course)
@@ -250,13 +254,16 @@ define(function (require) {
             // TODO: if computedCRC != receivedCRC, then send a NACK packet
             if (receivedCRC != computedCRC) {
                 console.error('CRC Mismatch! received/computed', receivedCRC, computedCRC);
-                console.info(abutils.hexdump(packet.subarray(1, packet.length-3)));
+                // TODO: should send a NACK at this stage?
+                // console.info(abutils.hexdump(packet.subarray(0, packet.length)));
+            } else {
+                // console.info("New packet ready");
+                packetList.push(packet);
+                //setTimeout(processPacket, 0); // Make processing asynchronous
+                processPacket();
             }
 
-            // console.info("New packet ready");
-            packetList.push(packet);
-            setTimeout(processPacket, 0); // Make processing asynchronous
-
+            // Realign our input buffer to remove what we just send to processing:
             inputBuffer.set(inputBuffer.subarray(stop+1));
             ibIdx -= stop+1;
 
@@ -446,13 +453,8 @@ define(function (require) {
             while (readIdx < buffer.length) {
                 tmpBuffer[writeIdx] = buffer[readIdx];
                 if (buffer[readIdx] == 0x7d) {
-                    if (buffer[readIdx+1] == 0x5d) {
-                        tmpBuffer[writeIdx] = 0x7d;
-                    } else if (buffer[readIdx+1] == 0x5e) {
-                        tmpBuffer[writeIdx] = 0x7e;
-                    } else {
-                        console.error('Unescape: got an unexpected escape situation:', buffer[readIdx+1]);
-                    }
+                    // console.log('Escaping byte', buffer[readIdx+1]);
+                    tmpBuffer[writeIdx] = buffer[readIdx+1] ^ 0x20;
                     readIdx++;
                 }
                 writeIdx++;
@@ -544,6 +546,9 @@ define(function (require) {
                 case 'generic_ack':
                     console.info('generic_ack');
                     packet = abutils.hextoab('7e04000200ffffed2e7e');
+                    break;
+                case 'generic_nack':
+
                     break;
                 default:
                     console.warn('Error, received a command we don\'t know how to process', cmd.command);
