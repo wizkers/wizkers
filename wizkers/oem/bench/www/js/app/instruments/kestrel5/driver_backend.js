@@ -1,7 +1,7 @@
 /**
  * This file is part of Wizkers.io
  *
- * The MIT License (MIT)
+ * The MIT License (MIT) with extension
  *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -46,9 +46,8 @@ define(function (require) {
 
     var abutils = require('app/lib/abutils'),
         utils = require('app/utils'),
-        crcCalc = require('app/lib/crc_calc'),
+        LinkProto = require('app/instruments/kestrel5/kestrel_link'),
         btleConnection = require('connections/btle');
-
 
     var parser = function (socket) {
 
@@ -59,24 +58,21 @@ define(function (require) {
             port = null,
             port_close_requested = false,
             port_open_requested = false,
+            linkProto = new LinkProto(this),
             isopen = false;
 
         // Command processing
         var commandQueue = [],
             queue_busy = false;
 
-        // Log download protocol
-        var log_totalRecords = 0;
-        var log_logRecords = 0;
-        // Binary buffer handling:
-        var P_SYNC = 0;
-        var P_IDLE = 3;
-        var currentProtoState = P_IDLE; // see protostate above
-        var inputBuffer = new Uint8Array(512); //  never sends more than 256 bytes
-        var ibIdx = 0;
-        var acked_cmd = -1; // Command that was last ACK'ed
-        var packetList = [];   // All packets ready for processing
-
+        // We want a callback reference for whoever is sending the commands/
+        // Typically:
+        // - If no callback reference, then just trigger a 'data' event to
+        //   forward the data to the frontend
+        // - If a callback reference exit, then send the data to it. An example
+        //   is the "log download" command that does a series of low level commands
+        //   and does not forward all of those to the front-end.
+        var data_callback = null;
 
         // We have to have those in lowercase
         var KESTREL_SERVICE_UUID  = '03290000-eab4-dea1-b24e-44ec023874db';
@@ -186,93 +182,9 @@ define(function (require) {
 
             // We are receiving a serial protocol response
             if (utils.sameUUID(data.characteristic, KESTREL_LOG_RSP)) {
-                processProtocol(data);
+                linkProto.processProtocol(data);
             }
         };
-
-        // Returns starting index of 0x7e
-        var sync = function(buffer, maxIndex, minIndex) {
-            for (var i = minIndex; i < maxIndex; i++) {
-                if (buffer[i] == 0x7e)
-                    return i;
-            }
-            return -1;
-        };
-
-        // Process a response to a LiNK protocol packet
-        var processProtocol = function(data) {
-
-            ///////
-            // Start of a simple state machine to process incoming log data
-            ///////
-            if (data) { // we sometimes get called without data, to further process the
-                        // existing buffer
-                // console.log('LLP: Received new data, appending at index', ibIdx);
-                inputBuffer.set(new Uint8Array(data.value), ibIdx);
-                ibIdx += data.value.byteLength;
-                // console.log('I', abutils.hexdump(new Uint8Array(data.value)));
-            }
-            var start = -1,
-                stop = -1;
-            if (currentProtoState == P_IDLE) {
-                start = sync(inputBuffer, ibIdx, 0);
-                // console.info("Found Start at", start);
-                if (start > -1) {
-                    currentProtoState = P_SYNC;
-                    // Realign our buffer (we can copy over overlapping regions):
-                    inputBuffer.set(inputBuffer.subarray(start));
-                    ibIdx -= start;
-                } else {
-                    return;
-                }
-            }
-            if (currentProtoState == P_SYNC) {
-                stop = sync(inputBuffer, ibIdx, 1);
-                // console.info("Found End of packet: " + stop);
-                currentProtoState = P_IDLE;
-            }
-            if (stop == -1)
-                return; // We are receiving a packet but have not reached the end of it yet
-            ///////
-            // End of state machine
-            ///////
-            console.info(abutils.hexdump(inputBuffer.subarray(0, stop+1))); // Display before escaping
-
-            // We now have a complete packet: copy into a new buffer, and realign
-            // our input buffer
-            var escapedPacket = inputBuffer.subarray(0, stop+1);
-            var packet = unescape(escapedPacket);
-
-            // The CRC bytes can also be escaped, careful not to compute before
-            // we unescape!
-            // Now check our CRC (avoid creating a dataview just for this)
-            var receivedCRC = packet[packet.length-3] + (packet[packet.length-2] << 8);
-
-            // CRC is computed on the unescaped packet and includes everything but
-            // the framing bytes and CRC itself (of course)
-            var computedCRC = crcCalc.x25_crc(packet.subarray(1, packet.length-3));
-            // TODO: if computedCRC != receivedCRC, then send a NACK packet
-            if (receivedCRC != computedCRC) {
-                console.error('CRC Mismatch! received/computed', receivedCRC, computedCRC);
-                // TODO: should send a NACK at this stage?
-                // console.info(abutils.hexdump(packet.subarray(0, packet.length)));
-            } else {
-                // console.info("New packet ready");
-                packetList.push(packet);
-                //setTimeout(processPacket, 0); // Make processing asynchronous
-                processPacket();
-            }
-
-            // Realign our input buffer to remove what we just send to processing:
-            inputBuffer.set(inputBuffer.subarray(stop+1));
-            ibIdx -= stop+1;
-
-            if (ibIdx > stop) {
-                processProtocol(); // We still have data to process, so we call ourselves recursively
-                return;
-            }
-            return;
-        }
 
         // Right now we assume a Kestrel 5500
         var CMD_GET_LOG_COUNT_AT  =  3,
@@ -289,203 +201,6 @@ define(function (require) {
             PKT_ACK           =  4,
             PKT_NACK          =  5;
 
-        /**
-         *  Process a Log protocol data packet once received.
-         *  Note that we receive the complete frame including framing
-         *  bytes.
-         */
-        var processPacket = function() {
-            console.info('Process packet');
-            var packet = packetList.shift();
-            if (!packet)
-                return;
-            var dv = new DataView(packet.buffer);
-            var pkt_type = dv.getUint16(1,true);
-            var len = dv.getUint16(3,true);
-            // Check that packet is complete
-            if (packet.byteLength != (len + 8)) {
-                console.error('Kestrel log protocol error, wrong packet length. Expected', len+8, 'got', packet.byteLength);
-                return;
-            }
-            if (pkt_type == PKT_COMMAND) {
-                var cmd_code = dv.getUint16(5, true);
-                // we are receiving a command from the device
-                if (cmd_code == CMD_END_OF_DATA ) { // end_of_data
-                    // This is the last packet of the log, we need to close the
-                    // protocol
-                    commandQueue.shift();
-                    queue_busy = false;
-                    var packet = abutils.hextoab("7e04000200120074787e"); // Manual ACK
-                    port.write(packet, {service_uuid: KESTREL_LOG_SERVICE, characteristic_uuid: KESTREL_LOG_CMD },
-                        function(e){console.log("Log transfer closed");
-                        // TODO: shall we unsubscribe to the characteristic ?
-                            self.trigger('data', { 'log_xfer_done': true})
-                    });
-                }
-            } else  if (pkt_type == PKT_ACK) {  // ACK
-                var cmd_code = dv.getUint16(5, true); // Command that is being ack'ed
-                acked_cmd = cmd_code; // We need to update this to understand the next packets we receive
-                console.info('ACK for', cmd_code.toString(16));
-            } else if (pkt_type == PKT_NACK) { // NACK
-                console.error('NACK for', dv.getUint16(5,true));
-                console.error('NACK reason is', dv.getUint16(7,true));
-            } else if (pkt_type == PKT_DATA) { // Data
-                switch (acked_cmd) {
-                    case CMD_TOTAL_RECORDS_WRITTEN:
-                        log_totalRecords = dv.getUint32(5, true); // We assume this is a Uint32 until proven otherwise
-                        commandQueue[0].command = 'get_log_size'; // We replace to make sure this will be processed next
-                        queue_busy = false;
-                        break;
-                    case CMD_GET_LOG_COUNT_AT:
-                        log_logRecords = dv.getUint32(5, true);
-                        setTimeout(function() {self.trigger('data', { 'log_size': log_logRecords})},0);
-                        commandQueue[0].command = 'get_log_data';
-                        queue_busy = false;
-                        break;
-                    case CMD_GET_LOG_DATA_AT:
-                        parseLogPacket(packet);
-                        queue_busy = false; // Do not pop the Command queue
-                                            // because we gotta keep calling this
-                                            // until the end of the log
-                        break;
-                    default:
-                        console.error('Unknown data response', acked_cmd);
-                }
-            } else if (pkt_type == PKT_METADATA || pkt_type == PKT_METADATA_CONT) {
-                if(acked_cmd == CMD_GET_LOG_DATA_AT) {
-                    // Process log structure. Eventually.
-
-                    // Acknowledge we got the data
-                    commandQueue[0].command = 'generic_ack';
-                    queue_busy = false;
-                }
-            }
-            if (packetList.length) {
-                setTimeout(processPacket, 0);
-            } else {
-                processQueue();
-            }
-        }
-
-        var monthNames = [ "January", "February", "March", "April", "May", "June", "July",
-                       "August", "September", "October", "November", "December"];
-
-        /**
-         *  Turn a log entry date blob into a Javascript date object
-         * @param {*Uint8Array} buffer
-         */
-        var parseLogDate = function(buffer) {
-            var ss = buffer[0];
-            var mm = buffer[1];
-            var hh = buffer[2];
-            var dd = buffer[3];
-            var MM = buffer[4]
-            var YY = (buffer[6] << 8) + buffer[5]; // No need to create a DataView for just this;
-            return new Date('' + hh + ':' + mm + ':' + ss + ' ' +
-                            dd + ' ' + monthNames[MM-1] + ' ' + YY
-                            );
-        }
-
-        // Parse a log packet. One packet can contain up to 6 log records.
-        // So far, only complete log entries have been seen in those packets, waiting for
-        // something to break in case we have more than three escaped 0x7e in the packet. No idea
-        // whether the Kestrel will send fewer log entries or split a log entry over two packets.
-        var parseLogPacket = function(packet) {
-            var dv = new DataView(packet.buffer);
-            var seq= dv.getUint16(5, true); // Packet sequence number
-            // TODO: check that we didn't miss a sequence - could this actually happen??
-            console.info('Log sequence #', seq);
-            var idx = 7;
-            while (idx < (packet.byteLength-43)) { // 1 record is 41 bytes long
-                var date = parseLogDate(packet.subarray(idx,idx+7));
-                var compass_true = dv.getUint16(idx += 7, true);
-                var windspeed = dv.getUint16(idx += 2, true);  // To be validated
-                var wind2 = dv.getUint16(idx += 2, true);
-                var wind3 = dv.getUint16(idx += 2, true);
-                var temperature = dv.getUint16(idx += 3, true);
-                var wind_chill = dv.getUint16(idx += 2, true);
-                var rel_humidity = dv.getUint16( idx += 2, true);
-                var heat_index = dv.getUint16( idx += 2, true);
-                var dew_point = dv.getUint16( idx += 3, true);
-                var wetbulb = dv.getUint16( idx += 2, true);
-                var barometer = dv.getUint16( idx += 2, true); // TODO: check which is baro vs pressure
-                var pressure = dv.getUint16( idx += 2, true);
-                var altitude = dv.getUint16( idx += 2, true);  // TODO: account for 3rd byte
-                var dens_altitude = dv.getUint16( idx += 3, true);
-                var compass_mag = dv.getUint16( idx += 3, true);
-                idx += 2;
-
-                var jsresp = { log: {
-                        timestamp: date,
-                        data: {
-                            dew_point: dew_point/100,
-                            heat_index: heat_index/100,
-                            wetbulb: wetbulb/100,
-                            wind_chill: wind_chill/100,
-                            compass_true: compass_true,
-                            altitude: altitude/10,
-                            dens_altitude: dens_altitude/10,
-                            barometer: barometer /10,
-                            // crosswind: xwind/1000,
-                            // headwind: hwind/1000,
-                            temperature: temperature/100,
-                            rel_humidity: rel_humidity/100,
-                            pressure: pressure/10,
-                            compass_mag: compass_mag,
-                            wind: { dir: compass_true,
-                                speed: windspeed*1.94384/1000
-                            }
-                        }
-                    }
-                };
-                self.trigger('data', jsresp);
-            }
-        }
-
-        // Unescapes character 0x7d:
-        // My understanding so far:
-        // - If we find a 0x7d, then look at next byte, if can be 0x5d or 0x5e
-        //   which translates into 0x7d and 0x7e respectively. Kinda weird ?
-        var unescape = function(buffer) {
-            var readIdx = 0;
-            var writeIdx = 0;
-            var tmpBuffer = new Uint8Array(buffer.length);
-            while (readIdx < buffer.length) {
-                tmpBuffer[writeIdx] = buffer[readIdx];
-                if (buffer[readIdx] == 0x7d) {
-                    // console.log('Escaping byte', buffer[readIdx+1]);
-                    tmpBuffer[writeIdx] = buffer[readIdx+1] ^ 0x20;
-                    readIdx++;
-                }
-                writeIdx++;
-                readIdx++;
-            }
-            // Now generate a recut buffer of the right size:
-            var retBuffer = new Uint8Array(tmpBuffer.buffer, 0, writeIdx);
-            return retBuffer;
-        }
-
-        // Escapes character 0x7e and 0x7d:
-        var escape = function(buffer) {
-            var readIdx = 0;
-            var writeIdx = 0;
-            var tmpBuffer = new Uint8Array(buffer.length*2); // Worst case, everything has to be escaped!
-            while (readIdx < buffer.length) {
-                tmpBuffer[writeIdx] = buffer[readIdx];
-                if (tmpBuffer[writeIdx] == 0x7d) {
-                    tmpBuffer[++writeIdx] = 0x5d;
-                } else if (tmpBuffer[writeIdx] == 0x7e) {
-                    tmpBuffer[writeIdx++] = 0x7d;
-                    tmpBuffer[writeIdx] = 0x5e;
-                }
-                readIdx++;
-                writeIdx++
-            }
-            // Now generate a recut buffer of the right size:
-            var retBuffer = new Uint8Array(tmpBuffer.buffer, 0, writeIdx);
-            return retBuffer;
-        }
-
         var startLogDownload = function() {
             // Three steps:
             // 1. ask Kestrel for overall # of records
@@ -497,111 +212,78 @@ define(function (require) {
                 characteristic_uuid: [ KESTREL_LOG_RSP ]
             });
             setTimeout( function() {
-                commandQueue.shift();
-                queue_busy = false;
-                ibIdx = 0;
                 self.output({command: 'get_total_records'});
             }, 3000);
 
         }
 
-        /**
-         * Verify the checksum on a received packet
-         */
-        var verifyChecksum = function(len) {
-            // TODO: right now we are only sending three fixed commands, so we
-            // are just skipping CRC calculations, sorry
-            return true;
-        };
-
+        this.shiftQueue = function() {
+            // Note: if we get ACKed for the get log data command,
+            // we should really wait until we get a END_OF_DATA command
+            // to shift/clear the queue.
+            console.info('Done with command', commandQueue.shift());
+            queue_busy = false;
+        }
 
         // Process the latest command in the queue.
-        // Overkill right now since we only have one command :)
+        //
+        // Queue contains Objects with:
+        //  - command: the command name
+        //  - arg    : (optional) the command argument as a hex string
         var processQueue = function() {
-            if (queue_busy || (commandQueue.length == 0))
+            if (commandQueue.length == 0)
                 return;
-            queue_busy = true;
             var packet;
             var cmd = commandQueue[0]; // Get the oldest command
-            switch(cmd.command) {
-                case 'download_log':
-                    startLogDownload();
+            // If we are asked to process a ACK, this means our last
+            // command was successful and we can shift the queue
+            // and set busy to false.
+            // One exception: if the ACK is a 0xffff then it means we're just
+            // an intermediate ACK and the command is not finished yet
+            if (cmd.command == 'ack') {
+                commandQueue.shift(); // Remove the ACK command from the queue
+                packet = linkProto.makeAck(cmd.arg);
+                if (cmd.arg != 0xffff) {
+                    // We end up here when we are ACK'ing the END_OF_DATA command
+                    // at the end of a data transfer.
+                    self.shiftQueue();
+                }
+            } else {
+                if (queue_busy)
                     return;
-                case 'get_total_records':
-                    // Note: the method below is not optimal in terms of speed but
-                    // much more readable
-                    //packet = abutils.hextoab('7e0000020038009bb67e');
-                    packet = makeCommand( CMD_TOTAL_RECORDS_WRITTEN, null);
-                    break;
-                case 'get_log_size':
-                    console.info('get_log_size');
-                    packet = makeCommand(CMD_GET_LOG_COUNT_AT, '0000000000000000');
-                    //packet = abutils.hextoab('7e00000a000300000000000000000054d57e');
-                    break;
-                case 'get_log_data':
-                    console.info('get_log_data');
-                    packet = makeCommand(CMD_GET_LOG_DATA_AT,'0000000000000000' );
-                    // packet = abutils.hextoab('7e00000a0005000000000000000000863d7e');
-                    break;
-                case 'generic_ack':
-                    console.info('generic_ack');
-                    packet = abutils.hextoab('7e04000200ffffed2e7e');
-                    break;
-                case 'generic_nack':
+                queue_busy = true;
+                switch(cmd.command) {
+                    case 'get_total_records':
+                        // Note: the method below is not optimal in terms of speed but
+                        // much more readable
+                        //packet = abutils.hextoab('7e0000020038009bb67e');
+                        packet = linkProto.makeCommand( CMD_TOTAL_RECORDS_WRITTEN, null);
+                        break;
+                    case 'get_log_size':
+                        console.info('get_log_size');
+                        packet = linkProto.makeCommand(CMD_GET_LOG_COUNT_AT, '0000000000000000');
+                        //packet = abutils.hextoab('7e00000a000300000000000000000054d57e');
+                        break;
+                    case 'get_log_data':
+                        console.info('get_log_data');
+                        packet = linkProto.makeCommand(CMD_GET_LOG_DATA_AT,'0000000000000000' );
+                        // packet = abutils.hextoab('7e00000a0005000000000000000000863d7e');
+                        break;
+                    case 'generic_nack':
 
-                    break;
-                default:
-                    console.warn('Error, received a command we don\'t know how to process', cmd.command);
-                    commandQueue.shift();
-                    queue_busy = false;
-                    break;
+                        break;
+                    default:
+                        console.warn('Error, received a command we don\'t know how to process', cmd.command);
+                        commandQueue.shift();
+                        queue_busy = false;
+                        break;
+                }
             }
             console.info('Sending packet', packet);
             port.write(packet, {service_uuid: KESTREL_LOG_SERVICE, characteristic_uuid: KESTREL_LOG_CMD }, function(e){});
             // We don't shift the queue at this stage, we wait to
             // receive & process the response
 
-        }
-
-        /**
-         *   Make a command packet (returns the framed command)
-         * @param {*Number} cmd_code
-         * @param {*String or Uint8Array} cmd_arg Hex string or Uint8Array
-         */
-        var makeCommand = function(cmd_code, cmd_arg) {
-            if (cmd_arg) {
-                if ( typeof cmd_arg == 'string') {
-                    cmd_arg = abutils.hextoab(cmd_arg);
-                }
-             } else {
-                cmd_arg = new Uint8Array(0);
-            }
-            var packet = new Uint8Array(cmd_arg.byteLength + 2);
-            var dv = new DataView(packet.buffer);
-            dv.setUint16(0, cmd_code, true);
-            packet.set(cmd_arg, 2);
-            console.info('Raw command', abutils.hexdump(packet));
-            return framePacket(PKT_COMMAND, packet);
-        }
-
-        /**
-         *   Returns a ready-to-send packet over the link
-         * @param {*Number} pkt_type
-         * @param {*Uint8Array} payload
-         */
-        var framePacket = function(pkt_type, payload) {
-            var escaped = escape(payload);
-            var packet = new Uint8Array(escaped.byteLength + 8);
-            var dv = new DataView(packet.buffer);
-            packet[0] = 0x7e;
-            packet[packet.length-1] = 0x7e;
-            dv.setUint16(1, pkt_type, true);
-            dv.setUint16(3, escaped.byteLength, true);
-            packet.set(escaped, 5);
-            var crc = crcCalc.x25_crc(packet.subarray(1,packet.length-3));
-            dv.setUint16(packet.length-3, crc, true);
-            console.info('Framed packet', abutils.hexdump(packet));
-            return packet;
         }
 
 
@@ -747,8 +429,12 @@ define(function (require) {
                 console.error('[Kestrel driver] Missing command in output request');
                 return;
             }
-            commandQueue.push(data);
-            processQueue();
+            if (data.command == 'download_log') {
+                startLogDownload();
+            } else {
+                commandQueue.push(data);
+                processQueue();
+            }
         };
 
     }
