@@ -104,6 +104,14 @@ define(function (require) {
                 connectionsettings: 'app/views/instrument/bluetooth',
                 connectionfilter: ['03290000-eab4-dea1-b24e-44ec023874db']
             },
+            'kestreldrop': {
+                name: 'Kestrel Drop',
+                type: 'app/instruments/kestreldrop/kestreldrop',
+                path: 'app/instruments/kestreldrop',
+                settings: 'app/instruments/kestrel5/settings',
+                connectionsettings: 'app/views/instrument/bluetooth',
+                connectionfilter: ['12630000-cc25-497d-9854-9b6c02c77054']
+            },
             'blue_onyx': {
                 name: 'Medcom Blue Onyx',
                 type: 'app/instruments/blue_onyx/blue_onyx',
