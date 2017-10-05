@@ -53,6 +53,7 @@ var BGeigie = require('./www/js/app/instruments/bgeigie/driver_backend.js');
 var W433 = require('./parsers/w433.js');
 var PiTemp =     require('./www/js/app/instruments/pitemp/driver_backend.js');
 var EnvMonitor = require('./www/js/app/instruments/envmonitor/driver_backend.js');
+var KestrelDrop = require('./www/js/app/instruments/kestreldrop/driver_backend.js');
 
 var ConnectionManager = function () {
 
@@ -91,6 +92,8 @@ var ConnectionManager = function () {
             driver = new PiTemp();
         } else if (type == 'envmonitor') {
             driver = new EnvMonitor();
+        } else if (type == 'kestreldrop') {
+            driver = new KestrelDrop();
         }
         return driver;
     }

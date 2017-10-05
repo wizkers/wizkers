@@ -36,7 +36,7 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     var vizapp = { type: 'server'},
-    DataView = require('buffer-dataview'), // Important for compatibility
+    // DataView = require('buffer-dataview'), // Important for compatibility
     events = require('events'),
     dbs = require('pouch-config');
 }
@@ -165,7 +165,7 @@ define(function (require) {
             var packet = packetList.shift();
             if (!packet)
                 return;
-            var dv = new DataView(packet.buffer);
+            var dv = new DataView(packet.buffer); // packet
             var pkt_type = dv.getUint16(1,true);
             var len = dv.getUint16(3,true);
             // Check that packet is complete
@@ -394,6 +394,7 @@ define(function (require) {
                 cmd_arg = new Uint8Array(0);
             }
             var packet = new Uint8Array(cmd_arg.byteLength + 2);
+            console.log(packet, packet. buffer);
             var dv = new DataView(packet.buffer);
             dv.setUint16(0, cmd_code, true);
             packet.set(cmd_arg, 2);
@@ -423,7 +424,7 @@ define(function (require) {
         _.extend(linkProtocol.prototype, Backbone.Events);
     } else {
         linkProtocol.prototype.__proto__ = events.EventEmitter.prototype;
-        linkProtocol.prototype.trigger = parser.prototype.emit;
+        linkProtocol.prototype.trigger = linkProtocol.prototype.emit;
     }
     return linkProtocol;
 });

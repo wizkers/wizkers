@@ -182,6 +182,49 @@ define(function (require) {
             return;
         }
 
+        /**
+         * UNSubscribe to a service/characteristic.
+         * You can unsubscribe to multiple characteristics within a service,
+         * but not across services
+         * @param {[[Type]]} subscribeInfo [[Description]]
+         */
+        this.unsubscribe = function (subscribeInfo) {
+            if (!portOpen)
+                return;
+            // Once we are connected, we want to select the service
+            // the driver asked for and subscribe to the characteristics
+            // the driver wants.
+
+            // It seems that Noble uses uuids without dashed
+            subscribeInfo.service_uuid = subscribeInfo.service_uuid.replace(/-/gi,'');
+            debug(subscribeInfo);
+
+            // Make sure we accept either a string or an array of strings:
+            if (typeof subscribeInfo.characteristic_uuid == 'object') { // Arrays are objects in Node
+                var cuid = [];
+                for (var i in subscribeInfo.characteristic_uuid ) {
+                    cuid.push(subscribeInfo.characteristic_uuid[i].replace(/-/gi,''));
+                }
+            } else {
+                var cuid = [ subscribeInfo.characteristic_uuid.replace(/-/gi,'') ]
+            }
+
+            for ( var i in cuid) {
+                for (var j in subscribedCharacteristics ) {
+                    if (subscribedCharacteristics[j] != undefined) { // since we splice as we go along, we can easily
+                                                                     // end up with an index over the max array index
+                        if (subscribedCharacteristics[j].uuid == cuid[i]) {
+                            cleanDataListeners(subscribedCharacteristics[j]);
+                            subscribedCharacteristics[j].unsubscribe(trackCharacteristicError);
+                            subscribedCharacteristics.splice(j,1);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         this.close = function () {
             debug("[nodeBTLE] Close BTLE connection");
             if (activePeripheral == null) {

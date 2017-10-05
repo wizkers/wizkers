@@ -193,14 +193,6 @@ define(function (require) {
             CMD_END_OF_DATA       = 18,
             CMD_TOTAL_RECORDS_WRITTEN = 0x38;
 
-        // Link level packets
-        var PKT_COMMAND       =  0,
-            PKT_METADATA      =  1,
-            PKT_METADATA_CONT =  2,
-            PKT_DATA          =  3,
-            PKT_ACK           =  4,
-            PKT_NACK          =  5;
-
         var startLogDownload = function() {
             // Three steps:
             // 1. ask Kestrel for overall # of records
@@ -254,9 +246,6 @@ define(function (require) {
                 queue_busy = true;
                 switch(cmd.command) {
                     case 'get_total_records':
-                        // Note: the method below is not optimal in terms of speed but
-                        // much more readable
-                        //packet = abutils.hextoab('7e0000020038009bb67e');
                         packet = linkProto.makeCommand( CMD_TOTAL_RECORDS_WRITTEN, null);
                         break;
                     case 'get_log_size':

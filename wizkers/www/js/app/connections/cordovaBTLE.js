@@ -182,6 +182,59 @@ define(function (require) {
             }
         }
 
+
+        /**
+         * Unsubscribe from a service/characteristic
+         *  unsubscribeInfo holds the list of characteristics for the service
+         */
+        this.unsubscribe = function(unsubscribeInfo) {
+            if (!portOpen)
+            return;
+            // Once we are connected, we want to select the service
+            // the driver asked for and subscribe to the characteristics
+            // the driver wants.
+
+            if (typeof subscribeInfo.characteristic_uuid == 'object') {
+                var cuid = [];
+                for (var i in subscribeInfo.characteristic_uuid ) {
+                    cuid.push(subscribeInfo.characteristic_uuid[i]);
+                }
+            } else {
+                var cuid = [ subscribeInfo.characteristic_uuid ]
+            }
+
+            // Now unsubscribe to all the characteristics we're looking for
+            for (var i in cuid) {
+                var params = {
+                    address: devAddress,
+                    service: unsubscribeInfo.service_uuid,
+                    characteristic: cuid[i]
+                };
+
+                // subscribedChars.push(params);
+
+                bluetoothle.unsubscribe(function (success) {
+                    console.log('Unsubscribed');
+                    for (var j in subscribedChars) {
+                        // That loop works because we know we only have one
+                        // element max that we can find.
+                        if (subscribedChars[j].characteristic == cuid[i]) {
+                            subscribedChars.splice(j,1);
+                            break;
+                        }
+                    }
+                } , function (err) {
+                    // We get a callback here both when subscribe fails and when the
+                    // device disconnects - only take action when we have a subscribe
+                    // fail, that's it.
+                    if (err.error == 'isDisconnected')
+                        return; // don't take action, the disconnected message
+                }, params);
+            }
+
+        }
+
+
         this.close = function () {
             console.log("[cordovaBTLE] Close BTLE connection");
             // Make sure we unsubscribe to everything:

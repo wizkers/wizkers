@@ -75,52 +75,47 @@ define(function (require) {
         var data_callback = null;
 
         // We have to have those in lowercase
-        var KESTREL_SERVICE_UUID  = '03290000-eab4-dea1-b24e-44ec023874db';
-        var WX1_UUID     = '03290310-eab4-dea1-b24e-44ec023874db';
-        var WX2_UUID     = '03290320-eab4-dea1-b24e-44ec023874db';
-        var WX3_UUID     = '03290330-eab4-dea1-b24e-44ec023874db';
-
+        var KESTREL_SERVICE_UUID  = '12630000-cc25-497d-9854-9b6c02c77054';
         var KESTREL_LOG_SERVICE = '85920000-0338-4b83-ae4a-ac1d217adb03';
         var KESTREL_LOG_CMD     = '85920200-0338-4b83-ae4a-ac1d217adb03';
         var KESTREL_LOG_RSP     = '85920100-0338-4b83-ae4a-ac1d217adb03';
+
+        var sensor_uuids = {
+            temperature: '12630001-cc25-497d-9854-9b6c02c77054',
+            rel_humidity: '12630002-cc25-497d-9854-9b6c02c77054',
+            heat_index: '12630003-cc25-497d-9854-9b6c02c77054',
+            dew_point: '12630004-cc25-497d-9854-9b6c02c77054',
+            wetbulb: '12630005-cc25-497d-9854-9b6c02c77054',
+            pressure: '12630007-cc25-497d-9854-9b6c02c77054',
+            barometer: '12630008-cc25-497d-9854-9b6c02c77054',
+            dens_altitude: '1263000a-cc25-497d-9854-9b6c02c77054'
+        };
 
         // The Kestrel Drop sends its readings over many characteristics.
         // We store them all in one object and only send the complete object
         // when receiving the last characteristic update
 
-        // TODO: this is hardcoded to the Kestrel 5500
+        // TODO: this is hardcoded to the Drop D3
         var readings = {
             temperature: 0,
             rel_humidity: 0,
             pressure: 0,
-            compass_mag: 0,
-            wind: { dir: 0, speed: 0},
-            compass_true: 0,
             altitude: 0,
             dens_altitude: 0,
             barometer: 0,
-            crosswind: 0,
-            headwind: 0,
             dew_point: 0,
             heat_index: 0,
             wetbulb: 0,
-            wind_chill: 0,
             unit: {
                 temperature: 'celsius',
                 rel_humidity: '%',
                 pressure: 'mb',
-                compass_mag: 'degree',
-                wind: { dir: 'degree', speed: 'knots'},
-                compass_true: 'degree',
                 altitude: 'm',
                 dens_altitude: 'm',
                 barometer: 'mb',
-                crosswind: 'm/s',
-                headwind: 'm/s',
                 dew_point: 'celsius',
                 heat_index: 'celsius',
                 wetbulb: 'celsius',
-                wind_chill: 'celsius'
             }
         };
 
@@ -136,9 +131,31 @@ define(function (require) {
                 service_uuid: [ KESTREL_SERVICE_UUID],
                 optional_services: [ KESTREL_LOG_SERVICE], // This is a service we need, but is
                                                            // not advertised by the device. WebBTLE needs this.
-                characteristic_uuid: WX1_UUID
+                characteristic_uuid: sensor_uuids.temperature
             }
         };
+
+        var checkSensorSupport = function(uuid, val) {
+            console.log('Sensor', uuid, 'support state:', val);
+            if ( !(val & 0x01) ) {
+                console.log('Sensor', uuid, 'not supported on this Drop');
+                port.unsubscribe({
+                    service_uuid: KESTREL_SERVICE_UUID,
+                    characteristic_uuid: [ uuid ]
+                });
+            }
+        };
+
+        // Hardcoded to Little endian
+        var getInt24 = function(buf, offset) {
+            var val = buf[offset+2] << 16;
+            val != buf[offset+1] << 8;
+            val != buf[offset];
+            var n = val & 0x800000;
+            if (!n)
+                return val;
+            return (0xffffff - val + 1) * -1;
+        }
 
         // Format acts on incoming data from the device, and then
         // forwards the data to the app through a 'data' event.
@@ -149,41 +166,43 @@ define(function (require) {
             }
             var dv = new DataView(vizapp.type === 'cordova' ? data.value.buffer : data.value);
 
-            // Only send one response every 3 packets with all
-            // readings in one go.
-            if (utils.sameUUID(data.characteristic, WX1_UUID)) {
-                readings.wind.speed = dv.getInt16(0, true)*1.94384/1000; // Convert to knots
-                readings.temperature = dv.getInt16(2, true)/100;
-                readings.rel_humidity = dv.getInt16(6, true)/100;
-                readings.pressure = dv.getInt16(8,true)/10;
-                readings.compass_mag = dv.getInt16(10,true);
-                return;
+            // Every characteristic in the DROP sends its data the same way, and tells us
+            // whether the sensor is supported as well in the first byte.
+            // If we receive the info that the sensor is not supported, we unsubscribe to it.
+
+            if (utils.sameUUID(data.characteristic, sensor_uuids.barometer)) {
+                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                readings.barometer = dv.getUint16(1,true) / 10; // mb
+            } else if (utils.sameUUID(data.characteristic, sensor_uuids.dens_altitude)) {
+                // This is a 24 bit signed integer, no standard JS support for that
+                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                var b = [dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)];
+                readings.dens_altitude = getInt24(b, 0) / 100; // m
+            } else if (utils.sameUUID(data.characteristic, sensor_uuids.dew_point)) {
+                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                readings.dew_point = dv.getInt16(1,true) / 100;
+            } else if (utils.sameUUID(data.characteristic, sensor_uuids.heat_index)) {
+                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                readings.heat_index = dv.getInt16(1,true) / 100;
+            } else if (utils.sameUUID(data.characteristic, sensor_uuids.pressure)) {
+                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                readings.pressure = dv.getUint16(1,true) / 10;
+            } else if (utils.sameUUID(data.characteristic, sensor_uuids.rel_humidity)) {
+                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                readings.rel_humidity = dv.getUint16(1,true) / 100;
+            } else if (utils.sameUUID(data.characteristic, sensor_uuids.temperature)) {
+                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                readings.temperature = dv.getInt16(1,true) / 100;
+            } else if (utils.sameUUID(data.characteristic, sensor_uuids.wetbulb)) {
+                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                readings.wetbulb = dv.getInt16(1,true) / 100;
             }
-
-            if (utils.sameUUID(data.characteristic, WX2_UUID)) {
-                readings.compass_true = dv.getInt16(0, true);
-                readings.altitude = dv.getInt16(4, true)/10; // TODO: Actually an Int24
-                readings.barometer = dv.getInt16(7, true)/10;
-                readings.crosswind = dv.getInt16(9, true)/1000;
-                readings.headwind = dv.getInt16(11, true)/1000;
-                readings.dens_altitude = dv.getInt16(14, true)/10;
-                return;
-            }
-
-            if (utils.sameUUID(data.characteristic, WX3_UUID)) {
-                readings.dew_point = dv.getInt16(0, true)/100;
-                readings.heat_index = dv.getInt16(2, true)/100; // TODO: Actually Int24
-                readings.wetbulb = dv.getInt16(16, true)/100;
-                readings.wind_chill = dv.getInt16(18, true)/100;
-
-                self.trigger('data', readings);
-                return;
-            }
-
             // We are receiving a serial protocol response
             if (utils.sameUUID(data.characteristic, KESTREL_LOG_RSP)) {
                 linkProto.processProtocol(data);
-            }
+            } else
+                self.trigger('data', readings);
+
         };
 
         // Right now we assume a Kestrel 5500
@@ -192,14 +211,6 @@ define(function (require) {
             CMD_GET_SERIAL_NUMBER =  6,
             CMD_END_OF_DATA       = 18,
             CMD_TOTAL_RECORDS_WRITTEN = 0x38;
-
-        // Link level packets
-        var PKT_COMMAND       =  0,
-            PKT_METADATA      =  1,
-            PKT_METADATA_CONT =  2,
-            PKT_DATA          =  3,
-            PKT_ACK           =  4,
-            PKT_NACK          =  5;
 
         var startLogDownload = function() {
             // Three steps:
@@ -254,9 +265,6 @@ define(function (require) {
                 queue_busy = true;
                 switch(cmd.command) {
                     case 'get_total_records':
-                        // Note: the method below is not optimal in terms of speed but
-                        // much more readable
-                        //packet = abutils.hextoab('7e0000020038009bb67e');
                         packet = linkProto.makeCommand( CMD_TOTAL_RECORDS_WRITTEN, null);
                         break;
                     case 'get_log_size':
@@ -286,6 +294,27 @@ define(function (require) {
 
         }
 
+        /**
+         * Called from the status() function when we get notified that the port
+         * is open and our services are available.
+         *  We subscribe to every possible sensor the DROP family can support,
+         *  and in format() we will decide if we unsubscribe if the DROP tells
+         *  us the sensor is not supported.
+         */
+        var dropQueryAndSubscribe = function() {
+            port.subscribe({
+                service_uuid: KESTREL_SERVICE_UUID,
+                characteristic_uuid: [ sensor_uuids.temperature,
+                                       sensor_uuids.barometer,
+                                       sensor_uuids.dens_altitude,
+                                       sensor_uuids.dew_point,
+                                       sensor_uuids.heat_index,
+                                       sensor_uuids.pressure,
+                                       sensor_uuids.rel_humidity,
+                                       sensor_uuids.wetbulb ]
+            });
+
+        }
 
 
         // Status returns an object that is concatenated with the
@@ -325,10 +354,7 @@ define(function (require) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
                 console.log('We found those services', stat.services);
-                port.subscribe({
-                    service_uuid: KESTREL_SERVICE_UUID,
-                    characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
-                });
+                dropQueryAndSubscribe();
             }
 
             // We remove the listener so that the serial port can be GC'ed
