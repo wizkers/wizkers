@@ -87,14 +87,31 @@ define(function (require) {
 
         /**
          * Send data
-         * @param {ArrayBuffer} data The command, already formatted for sending.
+         * @param {TypedArray} data The command, already formatted for sending.
          * @param {Object} info contains the service_uuid and characterictic_uuid to write to
          */
         this.write = function (data, info, callback) {
             if (!portOpen || info == undefined || callback == undefined)
                 return;
+            var s = findService(info.service_uuid);
+            s.discoverCharacteristics([ info.characteristic_uuid.replace(/-/gi,'') ], function(err, c) {
+                if (typeof c == 'undefined' ) {
+                    debug('Error: could not find a matching characteristic');
+                    self.emit('status', {
+                        openerror: true,
+                        reason: 'Could not connect to the BLE service',
+                        description: 'Did not find characteristic.'
+                    });
+                    self.close();
+                    return;
+                }
 
-            // TODO: Implement writes
+                //  Now we can write
+                var dab = Buffer.from(data);
+                debug('Writing this', dab);
+                debug('To this characteristic', c[0].uuid);
+                c[0].write(dab, true, function(err) {debug('writing result', err)});
+            });
         };
 
         /**
@@ -103,8 +120,6 @@ define(function (require) {
         this.read = function (service, characteristic) {
             if (!portOpen)
                 return;
-
-            // TODO: Implement reads
 
         }
 
@@ -121,24 +136,12 @@ define(function (require) {
             // the driver asked for and subscribe to the characteristics
             // the driver wants.
 
-            // It seems that Noble uses uuids without dashed
-            subscribeInfo.service_uuid = subscribeInfo.service_uuid.replace(/-/gi,'');
-            debug(subscribeInfo);
+            debug('Subscribing to', subscribeInfo);
 
             // With the way the Noble API works, we now need to discover
             // characteristics for the service we're looking for before
             // going further
-            var s = null;
-            for (var i in activeServices) {
-                if (activeServices[i].uuid == subscribeInfo.service_uuid) {
-                    s = activeServices[i];
-                    break;
-                }
-            }
-            if (s == null) {
-                this.close();
-                return;
-            }
+            var s = findService(subscribeInfo.service_uuid);
             debug('Found my service');
             if (typeof subscribeInfo.characteristic_uuid == 'object') { // Arrays are objects in Node
                 var cuid = [];
@@ -149,7 +152,6 @@ define(function (require) {
                 var cuid = [ subscribeInfo.characteristic_uuid.replace(/-/gi,'') ]
             }
             s.discoverCharacteristics(cuid , function(err, c) {
-                debug('Found characteristics', c);
                 s.removeAllListeners('characteristicsDiscover'); // Workaround on a noble bug (?)
                 if (typeof c == 'undefined' ) {
                     debug('Error: could not find a matching characteristic');
@@ -165,12 +167,13 @@ define(function (require) {
                 for (var i in c ) {
                     // If we were already subscribed to this characteristic in the past,
                     // we need to remove the previous listener first, otherwise we'll get
-                    // every even in double
+                    // every event in double
+                    debug('Subscribing to characteristic', c[i]);
                     cleanDataListeners(c[i]);
                     c[i].subscribe(trackCharacteristicError);
                     var makeOnData = function(uuid) {
                         return function(data, isNotification) {
-                            //debug('Received data from BLE device', data, isNotification);
+                            debug('Received data from BLE device', data, isNotification, 'for uuid', uuid);
                             self.emit('data', { value: data, characteristic: uuid });
                         }
                     }
@@ -211,19 +214,15 @@ define(function (require) {
 
             for ( var i in cuid) {
                 for (var j in subscribedCharacteristics ) {
-                    if (subscribedCharacteristics[j] != undefined) { // since we splice as we go along, we can easily
-                                                                     // end up with an index over the max array index
-                        if (subscribedCharacteristics[j].uuid == cuid[i]) {
-                            cleanDataListeners(subscribedCharacteristics[j]);
-                            subscribedCharacteristics[j].unsubscribe(trackCharacteristicError);
-                            subscribedCharacteristics.splice(j,1);
-                        }
+                    debug('Do we need to unsubscribe from', subscribedCharacteristics[j].uuid);
+                    if (subscribedCharacteristics[j].uuid == cuid[i]) {
+                        debug('Unsubscribing from', cuid[i]);
+                        cleanDataListeners(subscribedCharacteristics[j]);
+                        break;
                     }
                 }
             }
         }
-
-
 
         this.close = function () {
             debug("[nodeBTLE] Close BTLE connection");
@@ -272,6 +271,20 @@ define(function (require) {
         // Private methods
         /////////////
 
+        // Utilities to simplify service/characteristics read/write
+
+        // Return a service object for a given UUID
+        function findService(uuid) {
+            // It seems that Noble uses uuids without dashed
+            uuid = uuid.replace(/-/gi,'');
+            for (var i in activeServices) {
+                if (activeServices[i].uuid == uuid) {
+                    return activeServices[i];
+                }
+            }
+            self.close();
+            return null;
+        }
 
         // Callback once we have found a BLE peripheral
         function doConnect(peripheral) {
@@ -294,6 +307,7 @@ define(function (require) {
             }
             debug('Found our peripheral, now connecting (' + peripheral.id + ')');
             activePeripheral = peripheral;
+            debug('Here is what our active peripheral looks like', activePeripheral);
             peripheral.connect(trackConnect);
             peripheral.on('disconnect', trackError); // Track disconnects
         }

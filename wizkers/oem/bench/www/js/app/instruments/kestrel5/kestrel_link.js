@@ -77,6 +77,119 @@ define(function (require) {
         PKT_ACK           =  4,
         PKT_NACK          =  5;
 
+        // All data types we can find in a log:
+        var log_field_names = [
+            'timestamp',
+            'battery_percent',
+            'temperature',
+            'wetbulb',
+            '6in_globe_temperature',
+            'rel_humidity',
+            'barometer',
+            'altitude',
+            'pressure',
+            'windspeed',
+            'heat_index',
+            'dew_point',
+            'moisture_content',
+            'humidity_ratio',
+            'dens_altitude',
+            'rel_air_density',
+            'airflow',
+            'reserved',
+            'air_speed',
+            'empty',
+            'crosswind',
+            'evaporation_rate',
+            'headwind',
+            'compass_mag',
+            'naturally_aspired_wetbulb',
+            'compass_true',
+            'thermal_work_limit',
+            'wetbulb_globe_temperature',
+            'wind_chill',
+            'delta_t',
+            'air_density',
+            '1in_globe_temperature',
+            'humidity_temperature',
+            'humidity_thermistor_temperature',
+            'average_normal_force',
+            'relative_work_per_stroke',
+            'empty'
+        ];
+
+        var monthNames = [ "January", "February", "March", "April", "May", "June", "July",
+        "August", "September", "October", "November", "December"];
+
+        /**
+         *  Turn a log entry date blob into a Javascript date object
+         *  Called from a 'apply' call where 'this' is the dataview
+         * @param {*Uint8Array} buffer
+         */
+        var parseLogDate = function(idx) {
+            var ss = this.getUint8(idx++);
+            var mm = this.getUint8(idx++);
+            var hh = this.getUint8(idx++);
+            var dd = this.getUint8(idx++);
+            var MM = this.getUint8(idx++);
+            var YY = this.getUint16(idx,true);
+            return new Date('' + hh + ':' + mm + ':' + ss + ' ' +
+                            dd + ' ' + monthNames[MM-1] + ' ' + YY
+                            );
+        }
+
+        // Defined as an object because we skip a lot of indexes
+        // Each value is an array:
+        //   - name
+        //   - byte length
+        var log_unit_types = {
+            0: [ 1, DataView.prototype.getUint8, 'uint8'],
+            1: [ 1, DataView.prototype.getInt8, 'int8' ],
+            2: [ 2, DataView.prototype.getUint16, 'uint16'],
+            3: [ 2, DataView.prototype.getInt16, 'int16'],
+            4: [ 4, DataView.prototype.getUint32, 'uint32'],
+            5: [ 4, DataView.prototype.getInt32, 'int32'],
+            6: [ 8, DataView.prototype.getUint64, 'uint64'],
+            7: [ 8, DataView.prototype.getInt64, 'int64'],
+            8: [ 0, null, 'float'], // IEEE 754 Float
+            9: [ 0, null, 'double'], // Double
+            10: [ 0, null, 'string'], // ASCII String (not sure about format ?)
+            25: [0, null, 'seconds'], // Seconds (not sure about format)
+            26: [ 0, null, 'gps_time'], // GPS Time
+            27: [ 2, DataView.prototype.getUint16, 'percent'],
+            28: [ 2, DataView.prototype.getInt16, 'degrees*100'],
+            31: [ 2, DataView.prototype.getUint16, 'milibar*10'],
+            36: [ 7, parseLogDate, 'bluetooth_date_time'],
+            37: [ 3, null, 'meters (int24)'],
+            38: [ 3, null, 'g/Kg * 100 (uint24)'],
+            39: [2, DataView.prototype.getUint16, 'kg/m3 * 1000 (uint16)'],
+            40: [ 2, DataView.prototype.getInt16, 'Newtons * 10 (int16)'],
+            41: [2, DataView.prototype.getInt16, 'Arc Degrees * 100 (int16)'],
+            42: [2, DataView.prototype.getInt16, 'Arc Degrees / sec *100 (int16)'],
+            43: [2, DataView.prototype.getUint16, 'Milliseconds (uint16)'],
+            44: [3, null, 'm3/s * 1000 (uint24)'],
+            45: [2, DataView.prototype.getInt16, 'Joules * 10 (uint16)'],
+            46: [ 1, DataView.prototype.getInt8, 'Arc Degrees (int8)'],
+            47: [ 1, DataView.prototype.getUint8, 'Arc Degrees (uint8)'],
+            48: [ 2, DataView.prototype.getUint16, 'Watts * 10 (uint16)'],
+            53: [ 2, DataView.prototype.getUint16, 'kg/m2 /h * 100 (uint16)'],
+            56: [ 2, DataView.prototype.getUint16, 'm/s * 1000 (uint16)'],
+            57: [ 2, DataView.prototype.getUint16, 'Percent * 10 (uint16)'],
+            59: [ 2, DataView.prototype.getUint16, 'Degrees (direction)'],
+            60: [ 2, null, 'Meters * 10 (int24)'],
+            61: [ 2, DataView.prototype.getUint16, 'W/m2 * 10 (uint16)'],
+            62: [ 3, null, 'Degrees C * 100 (int24)'],
+            63: [ 3, null, 'm/s * 1000 (int24)'],
+            64: [ 2, DataView.prototype.getInt16, 'Diff. Degrees C * 100 (int16)' ],
+            65: [ 2, DataView.prototype.getUint16, 'Centimeters * 10 (uint16)'],
+            66: [ 3, null, 'Meters * 100 (uint24)'],
+            67: [ 2, null, 'Yards [no precision specified]'],
+            68: [ 3, null, 'Degrees * 1000 (int24)'],
+            69: [ 2, DataView.prototype.getInt16, 'Unitless * 100 (int16)'],
+        };
+
+
+         var log_template = [];
 
         /////////////
         // Private methods
@@ -151,8 +264,13 @@ define(function (require) {
             packet.set(escaped, 5);
             var crc = crcCalc.x25_crc(packet.subarray(1,packet.length-3));
             dv.setUint16(packet.length-3, crc, true);
+            // Last, pad to 20 bytes packets as required by Kestrel docs
+            if (packet.byteLength > 20)
+                debug('ERROR: command length does not fit in 20 bytes!');
+            var p2 = new Uint8Array(20);
+            p2.set(packet);
             // console.info('Framed packet', abutils.hexdump(packet));
-            return packet;
+            return p2;
         }
 
         /**
@@ -212,38 +330,58 @@ define(function (require) {
                     default:
                         console.error('Unknown data response', acked_cmd);
                 }
-            } else if (pkt_type == PKT_METADATA || pkt_type == PKT_METADATA_CONT) {
-                if(acked_cmd == CMD_GET_LOG_DATA_AT) {
-                    // Process log structure. Eventually.
-
-                    // Acknowledge we got the data
-                    driver.output({command:'ack', arg: 0xffff});
-                }
+            } else if (pkt_type == PKT_METADATA) {
+                // Process log structure.
+                parseMetadata(packet, true);
+                // Acknowledge we got the data
+                driver.output({command:'ack', arg: 0xffff});
+            } else if (pkt_type == PKT_METADATA_CONT) {
+                parseMetadata(packet, false);
+                // Acknowledge we got the data
+                driver.output({command:'ack', arg: 0xffff});
             }
+
             if (packetList.length) {
                 setTimeout(processPacket, 0);
             }
         }
 
-        var monthNames = [ "January", "February", "March", "April", "May", "June", "July",
-                       "August", "September", "October", "November", "December"];
 
         /**
-         *  Turn a log entry date blob into a Javascript date object
-         * @param {*Uint8Array} buffer
+         *  Parse a metadata packet, and populate the generic log packet format.
+         * @param {*Buffer} packet
          */
-        var parseLogDate = function(buffer) {
-            var ss = buffer[0];
-            var mm = buffer[1];
-            var hh = buffer[2];
-            var dd = buffer[3];
-            var MM = buffer[4]
-            var YY = (buffer[6] << 8) + buffer[5]; // No need to create a DataView for just this;
-            return new Date('' + hh + ':' + mm + ':' + ss + ' ' +
-                            dd + ' ' + monthNames[MM-1] + ' ' + YY
-                            );
+        var parseMetadata = function(packet, isStart) {
+            var dv = new DataView(packet.buffer);
+            if (isStart) {
+                // Clear existing log structure template
+                log_template = [];
+            } else
+                console.log('Metadata packet number:', dv.getUint16(5, true));
+            var idx = (isStart) ? 5 : 7;
+            while (idx < (packet.byteLength-3)) {
+                var fn = dv.getUint16(idx, true);
+                var fu = dv.getUint16(idx+2, true);
+                var fs = dv.getUint16(idx+4, true);
+                console.log('Field name:', fn, log_field_names[fn],
+                            'Field Unit:', fu, log_unit_types[fu],
+                            'Field Size:', fs);
+                log_template.push( [log_field_names[fn],
+                                   log_unit_types[fu],
+                                   fs]);
+                idx += 6;
+            }
         }
 
+        var parseLogFromTemplate = function(dv, idx) {
+            var data = {};
+            for (var i in log_template) {
+                data[log_template[i][0]] = log_template[i][1][1].apply(dv, [idx, dv]);
+                idx += log_template[i][2];
+            }
+            console.log(data);
+            return data;
+        }
         // Parse a log packet. One packet can contain up to 6 log records.
         // So far, only complete log entries have been seen in those packets, waiting for
         // something to break in case we have more than three escaped 0x7e in the packet. No idea
@@ -255,6 +393,9 @@ define(function (require) {
             console.info('Log sequence #', seq);
             var idx = 7;
             while (idx < (packet.byteLength-43)) { // 1 record is 41 bytes long
+                var data = parseLogFromTemplate(dv, idx);
+
+                /**
                 var date = parseLogDate(packet.subarray(idx,idx+7));
                 var compass_true = dv.getUint16(idx += 7, true);
                 var windspeed = dv.getUint16(idx += 2, true);  // To be validated
@@ -271,6 +412,7 @@ define(function (require) {
                 var altitude = dv.getUint16( idx += 2, true);  // TODO: account for 3rd byte
                 var dens_altitude = dv.getUint16( idx += 3, true);
                 var compass_mag = dv.getUint16( idx += 3, true);
+                */
                 idx += 2;
 
                 var jsresp = { log: {

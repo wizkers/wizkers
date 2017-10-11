@@ -162,6 +162,7 @@ define(function (require) {
 
             if (utils.sameUUID(data.characteristic, WX2_UUID)) {
                 readings.compass_true = dv.getInt16(0, true);
+                readings.wind.dir = readings.compass_true;
                 readings.altitude = dv.getInt16(4, true)/10; // TODO: Actually an Int24
                 readings.barometer = dv.getInt16(7, true)/10;
                 readings.crosswind = dv.getInt16(9, true)/1000;
@@ -199,6 +200,13 @@ define(function (require) {
             // 2. ask Kestrel for # of records on current log
             // 3. ask Kestrel for log structure
             // 4. Request log packets until finished
+
+            // First of all stop listening for data packets
+            port.unsubscribe({
+                service_uuid: KESTREL_SERVICE_UUID,
+                characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
+            });
+
             port.subscribe({
                 service_uuid: KESTREL_LOG_SERVICE,
                 characteristic_uuid: [ KESTREL_LOG_RSP ]

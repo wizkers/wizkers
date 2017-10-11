@@ -149,8 +149,8 @@ define(function (require) {
         // Hardcoded to Little endian
         var getInt24 = function(buf, offset) {
             var val = buf[offset+2] << 16;
-            val != buf[offset+1] << 8;
-            val != buf[offset];
+            val |= buf[offset+1] << 8;
+            val |= buf[offset];
             var n = val & 0x800000;
             if (!n)
                 return val;
