@@ -135,8 +135,11 @@ define(function (require) {
             }
         };
 
+        // It looks like we don't really need those since
+        // unsupported characteristics don't send notifications
+        // anyway
         var checkSensorSupport = function(uuid, val) {
-            console.log('Sensor', uuid, 'support state:', val);
+            // console.log('Sensor', uuid, 'support state:', val);
             if ( !(val & 0x01) ) {
                 console.log('Sensor', uuid, 'not supported on this Drop');
                 port.unsubscribe({
@@ -171,30 +174,30 @@ define(function (require) {
             // If we receive the info that the sensor is not supported, we unsubscribe to it.
 
             if (utils.sameUUID(data.characteristic, sensor_uuids.barometer)) {
-                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                // checkSensorSupport(data.characteristic, dv.getUint8(0));
                 readings.barometer = dv.getUint16(1,true) / 10; // mb
             } else if (utils.sameUUID(data.characteristic, sensor_uuids.dens_altitude)) {
                 // This is a 24 bit signed integer, no standard JS support for that
-                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                // checkSensorSupport(data.characteristic, dv.getUint8(0));
                 var b = [dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)];
                 readings.dens_altitude = getInt24(b, 0) / 100; // m
             } else if (utils.sameUUID(data.characteristic, sensor_uuids.dew_point)) {
-                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                // checkSensorSupport(data.characteristic, dv.getUint8(0));
                 readings.dew_point = dv.getInt16(1,true) / 100;
             } else if (utils.sameUUID(data.characteristic, sensor_uuids.heat_index)) {
-                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                // checkSensorSupport(data.characteristic, dv.getUint8(0));
                 readings.heat_index = dv.getInt16(1,true) / 100;
             } else if (utils.sameUUID(data.characteristic, sensor_uuids.pressure)) {
-                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                // checkSensorSupport(data.characteristic, dv.getUint8(0));
                 readings.pressure = dv.getUint16(1,true) / 10;
             } else if (utils.sameUUID(data.characteristic, sensor_uuids.rel_humidity)) {
-                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                // checkSensorSupport(data.characteristic, dv.getUint8(0));
                 readings.rel_humidity = dv.getUint16(1,true) / 100;
             } else if (utils.sameUUID(data.characteristic, sensor_uuids.temperature)) {
-                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                // checkSensorSupport(data.characteristic, dv.getUint8(0));
                 readings.temperature = dv.getInt16(1,true) / 100;
             } else if (utils.sameUUID(data.characteristic, sensor_uuids.wetbulb)) {
-                checkSensorSupport(data.characteristic, dv.getUint8(0));
+                // checkSensorSupport(data.characteristic, dv.getUint8(0));
                 readings.wetbulb = dv.getInt16(1,true) / 100;
             }
             // We are receiving a serial protocol response

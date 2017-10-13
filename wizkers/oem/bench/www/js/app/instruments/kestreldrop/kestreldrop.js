@@ -112,7 +112,7 @@ define(function (require) {
 
         // Render a log (or list of logs) for the device.
         this.getLogView = function (arg, callback) {
-            require(['app/instruments/kestrel5/display_log'], function (view) {
+            require(['app/instruments/kestreldrop/display_log'], function (view) {
                 callback(new view(arg));
             });
         }

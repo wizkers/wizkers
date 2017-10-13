@@ -185,9 +185,9 @@ define(function (require) {
 
         /**
          * Unsubscribe from a service/characteristic
-         *  unsubscribeInfo holds the list of characteristics for the service
+         *  subscribeInfo holds the list of characteristics for the service
          */
-        this.unsubscribe = function(unsubscribeInfo) {
+        this.unsubscribe = function(subscribeInfo) {
             if (!portOpen)
             return;
             // Once we are connected, we want to select the service
@@ -207,7 +207,7 @@ define(function (require) {
             for (var i in cuid) {
                 var params = {
                     address: devAddress,
-                    service: unsubscribeInfo.service_uuid,
+                    service: subscribeInfo.service_uuid,
                     characteristic: cuid[i]
                 };
 

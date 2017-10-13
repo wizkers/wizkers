@@ -264,6 +264,11 @@ define(function (require) {
                 }
             }
 
+            if (data.dens_altitude != undefined) {
+                this.$('#densaltitudereading').html(data.dens_altitude + '&nbsp;' + data.unit.dens_altitude);
+            }
+
+
         },
 
         // We get there whenever we receive something from the serial port

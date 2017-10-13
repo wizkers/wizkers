@@ -138,54 +138,81 @@ define(function (require) {
                             );
         }
 
+        // Hardcoded to Little endian
+        // Called from a 'apply' call where 'this' is the dataview
+        var getInt24 = function(offset) {
+            var val = this.getUint8(offset+2) << 16;
+            val |= this.getUint8(offset+1) << 8;
+            val |= this.getUint8(offset);
+            var n = val & 0x800000;
+            if (!n)
+                return val;
+            return (0xffffff - val + 1) * -1;
+        }
+
+        // Hardcoded to Little endian
+        // See above for arguments
+        var getUint24 = function(offset) {
+            var val = this.getUint8(offset+2) << 16;
+            val |= this.getUint8(offset+1) << 8;
+            val |= this.getUint8(offset);
+            return val;
+        }
+
+        var unsupportedType = function(offset) {
+            console.error("Unsupported type!");
+        }
+
         // Defined as an object because we skip a lot of indexes
         // Each value is an array:
-        //   - name
-        //   - byte length
+        //   - Function reference to parse the value
+        //   - Factor to apply (divide by). If 0, then don't touch the value (not a number)
+        //   - flag to tell if value is signed. Used for bad value detection
+        //   - Description
         var log_unit_types = {
-            0: [ 1, DataView.prototype.getUint8, 'uint8'],
-            1: [ 1, DataView.prototype.getInt8, 'int8' ],
-            2: [ 2, DataView.prototype.getUint16, 'uint16'],
-            3: [ 2, DataView.prototype.getInt16, 'int16'],
-            4: [ 4, DataView.prototype.getUint32, 'uint32'],
-            5: [ 4, DataView.prototype.getInt32, 'int32'],
-            6: [ 8, DataView.prototype.getUint64, 'uint64'],
-            7: [ 8, DataView.prototype.getInt64, 'int64'],
-            8: [ 0, null, 'float'], // IEEE 754 Float
-            9: [ 0, null, 'double'], // Double
-            10: [ 0, null, 'string'], // ASCII String (not sure about format ?)
-            25: [0, null, 'seconds'], // Seconds (not sure about format)
-            26: [ 0, null, 'gps_time'], // GPS Time
-            27: [ 2, DataView.prototype.getUint16, 'percent'],
-            28: [ 2, DataView.prototype.getInt16, 'degrees*100'],
-            31: [ 2, DataView.prototype.getUint16, 'milibar*10'],
-            36: [ 7, parseLogDate, 'bluetooth_date_time'],
-            37: [ 3, null, 'meters (int24)'],
-            38: [ 3, null, 'g/Kg * 100 (uint24)'],
-            39: [2, DataView.prototype.getUint16, 'kg/m3 * 1000 (uint16)'],
-            40: [ 2, DataView.prototype.getInt16, 'Newtons * 10 (int16)'],
-            41: [2, DataView.prototype.getInt16, 'Arc Degrees * 100 (int16)'],
-            42: [2, DataView.prototype.getInt16, 'Arc Degrees / sec *100 (int16)'],
-            43: [2, DataView.prototype.getUint16, 'Milliseconds (uint16)'],
-            44: [3, null, 'm3/s * 1000 (uint24)'],
-            45: [2, DataView.prototype.getInt16, 'Joules * 10 (uint16)'],
-            46: [ 1, DataView.prototype.getInt8, 'Arc Degrees (int8)'],
-            47: [ 1, DataView.prototype.getUint8, 'Arc Degrees (uint8)'],
-            48: [ 2, DataView.prototype.getUint16, 'Watts * 10 (uint16)'],
-            53: [ 2, DataView.prototype.getUint16, 'kg/m2 /h * 100 (uint16)'],
-            56: [ 2, DataView.prototype.getUint16, 'm/s * 1000 (uint16)'],
-            57: [ 2, DataView.prototype.getUint16, 'Percent * 10 (uint16)'],
-            59: [ 2, DataView.prototype.getUint16, 'Degrees (direction)'],
-            60: [ 2, null, 'Meters * 10 (int24)'],
-            61: [ 2, DataView.prototype.getUint16, 'W/m2 * 10 (uint16)'],
-            62: [ 3, null, 'Degrees C * 100 (int24)'],
-            63: [ 3, null, 'm/s * 1000 (int24)'],
-            64: [ 2, DataView.prototype.getInt16, 'Diff. Degrees C * 100 (int16)' ],
-            65: [ 2, DataView.prototype.getUint16, 'Centimeters * 10 (uint16)'],
-            66: [ 3, null, 'Meters * 100 (uint24)'],
-            67: [ 2, null, 'Yards [no precision specified]'],
-            68: [ 3, null, 'Degrees * 1000 (int24)'],
-            69: [ 2, DataView.prototype.getInt16, 'Unitless * 100 (int16)'],
+             0: [ DataView.prototype.getUint8, 1, false, 'uint8'],
+             1: [ DataView.prototype.getInt8, 1, true,  'int8' ],
+             2: [ DataView.prototype.getUint16, 1, false, 'uint16'],
+             3: [ DataView.prototype.getInt16, 1, true, 'int16'],
+             4: [ DataView.prototype.getUint32, 1, false, 'uint32'],
+             5: [ DataView.prototype.getInt32, 1, true, 'int32'],
+             6: [ DataView.prototype.getUint64, 1, false, 'uint64'],
+             7: [ DataView.prototype.getInt64, 1, true, 'int64'],
+             8: [ unsupportedType, 1, true, 'float'], // IEEE 754 Float
+             9: [ unsupportedType, 1, true, 'double'], // Double
+            10: [ unsupportedType, 0, false, 'string'], // ASCII String (not sure about format ?)
+            25: [ unsupportedType, 1, false, 'seconds'], // Seconds (not sure about format)
+            26: [ unsupportedType, 1, false, 'gps_time'], // GPS Time
+            27: [ DataView.prototype.getUint16, 100, false, 'percent * 100'],
+            28: [ DataView.prototype.getInt16, 100, true, 'degrees*100'],
+            31: [ DataView.prototype.getUint16, 10, true, 'milibar*10'],
+            36: [ parseLogDate, 0, false, 'bluetooth_date_time'],
+            37: [ getInt24, 100, true, 'meters * 100 (int24)'],
+            38: [ getUint24, 100, false, 'g/Kg * 100 (uint24)'],
+            39: [ DataView.prototype.getUint16, 1000, false, 'kg/m3 * 1000 (uint16)'],
+            40: [ DataView.prototype.getInt16, 10, true, 'Newtons * 10 (int16)'],
+            41: [ DataView.prototype.getInt16, 100, true, 'Arc Degrees * 100 (int16)'],
+            42: [ DataView.prototype.getInt16, 100, true, 'Arc Degrees / sec *100 (int16)'],
+            43: [ DataView.prototype.getUint16, 1, false, 'Milliseconds (uint16)'],
+            44: [ getUint24, 1000, false, 'm3/s * 1000 (uint24)'],
+            45: [ DataView.prototype.getInt16, 10, true, 'Joules * 10 (uint16)'],
+            46: [ DataView.prototype.getInt8, 1, true, 'Arc Degrees (int8)'],
+            47: [ DataView.prototype.getUint8, 1, false, 'Arc Degrees (uint8)'],
+            48: [ DataView.prototype.getUint16, 10, false, 'Watts * 10 (uint16)'],
+            53: [ DataView.prototype.getUint16, 100, false, 'kg/m2 /h * 100 (uint16)'],
+            56: [ DataView.prototype.getUint16,1000,  false, 'm/s * 1000 (uint16)'],
+            57: [ DataView.prototype.getUint16, 10, false, 'Percent * 10 (uint16)'],
+            59: [ DataView.prototype.getUint16, 1, false, 'Degrees (direction)'],
+            60: [ getInt24, 10, true, 'Meters * 10 (int24)'],
+            61: [ DataView.prototype.getUint16, 10, false, 'W/m2 * 10 (uint16)'],
+            62: [ getInt24, 100, true, 'Degrees C * 100 (int24)'],
+            63: [ getInt24, 1000, true, 'm/s * 1000 (int24)'],
+            64: [ DataView.prototype.getInt16, 100, true, 'Diff. Degrees C * 100 (int16)' ],
+            65: [ DataView.prototype.getUint16, 10, false, 'Centimeters * 10 (uint16)'],
+            66: [ getUint24, 100, false, 'Meters * 100 (uint24)'],
+            67: [ unsupportedType, 1, false, 'Yards [no precision specified]'],
+            68: [ getInt24, 1000, true, 'Degrees * 1000 (int24)'],
+            69: [ DataView.prototype.getInt16, 100, true, 'Unitless * 100 (int16)'],
         };
 
 
@@ -376,11 +403,24 @@ define(function (require) {
         var parseLogFromTemplate = function(dv, idx) {
             var data = {};
             for (var i in log_template) {
-                data[log_template[i][0]] = log_template[i][1][1].apply(dv, [idx, dv]);
-                idx += log_template[i][2];
+                var rawval = log_template[i][1][0].apply(dv, [idx, dv]);
+                // Detect whether we have a bad value, and skip if bad
+                var signed = log_template[i][1][2];
+                var l = log_template[i][2];
+                // Learned from experience:
+                var isBad = (
+                    (!signed && l == 2 && rawval == 0xffff) ||
+                    (!signed && l == 3 && rawval == 0xffffff) ||
+                    // (!signed && l == 4 && rawval == 0xffffffff) ||
+                    (signed && l == 2 && rawval == -32767) ||
+                    (signed && l == 3 && rawval == -8388607)
+                );
+                if (!isBad)
+                    data[log_template[i][0]] = log_template[i][1][1] ? rawval/log_template[i][1][1] : rawval;
+                idx += l;
             }
             console.log(data);
-            return data;
+            return { data:data, idx: idx};
         }
         // Parse a log packet. One packet can contain up to 6 log records.
         // So far, only complete log entries have been seen in those packets, waiting for
@@ -393,51 +433,13 @@ define(function (require) {
             console.info('Log sequence #', seq);
             var idx = 7;
             while (idx < (packet.byteLength-43)) { // 1 record is 41 bytes long
-                var data = parseLogFromTemplate(dv, idx);
-
-                /**
-                var date = parseLogDate(packet.subarray(idx,idx+7));
-                var compass_true = dv.getUint16(idx += 7, true);
-                var windspeed = dv.getUint16(idx += 2, true);  // To be validated
-                var wind2 = dv.getUint16(idx += 2, true);
-                var wind3 = dv.getUint16(idx += 2, true);
-                var temperature = dv.getUint16(idx += 3, true);
-                var wind_chill = dv.getUint16(idx += 2, true);
-                var rel_humidity = dv.getUint16( idx += 2, true);
-                var heat_index = dv.getUint16( idx += 2, true);
-                var dew_point = dv.getUint16( idx += 3, true);
-                var wetbulb = dv.getUint16( idx += 2, true);
-                var barometer = dv.getUint16( idx += 2, true); // TODO: check which is baro vs pressure
-                var pressure = dv.getUint16( idx += 2, true);
-                var altitude = dv.getUint16( idx += 2, true);  // TODO: account for 3rd byte
-                var dens_altitude = dv.getUint16( idx += 3, true);
-                var compass_mag = dv.getUint16( idx += 3, true);
-                */
-                idx += 2;
-
+                var parsed = parseLogFromTemplate(dv, idx);
                 var jsresp = { log: {
-                        timestamp: date,
-                        data: {
-                            dew_point: dew_point/100,
-                            heat_index: heat_index/100,
-                            wetbulb: wetbulb/100,
-                            wind_chill: wind_chill/100,
-                            compass_true: compass_true,
-                            altitude: altitude/10,
-                            dens_altitude: dens_altitude/10,
-                            barometer: barometer /10,
-                            // crosswind: xwind/1000,
-                            // headwind: hwind/1000,
-                            temperature: temperature/100,
-                            rel_humidity: rel_humidity/100,
-                            pressure: pressure/10,
-                            compass_mag: compass_mag,
-                            wind: { dir: compass_true,
-                                speed: windspeed*1.94384/1000
-                            }
+                        timestamp: parsed.data.timestamp ? parsed.data.timestamp : 'Unknown',
+                        data: parsed.data
                         }
-                    }
                 };
+                idx = parsed.idx;
                 driver.trigger('data', jsresp);
             }
         }
