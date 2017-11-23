@@ -7,7 +7,7 @@
     <author email="ed@wizkers.io" href="http://wizkers.io">
         Edouard Lafargue
     </author>
-
+    <engine name="android" spec="^6.3.0" />
     <content src="cordova.html" />
     <access origin="*" />
     <icon src="icon.png" />
@@ -17,7 +17,7 @@
     <plugin name="com.mediamatrixdoo.keepscreenon" spec="https://github.com/wizkers/PhoneGap-KeepScreenOn-plugin.git" />
     <plugin name="cordova-plugin-bluetoothle" spec="^4.4.2" />
     <plugin name="cordova-plugin-file" spec="^4.3.3" />
-    <plugin name="cordova-plugin-geolocation" spec="^2.4.3" />
+    <plugin name="cordova-plugin-geolocation" spec="^3.0.0" />
     <plugin name="cordova-background-watchposition" spec="https://github.com/wizkers/cordova-background-watchposition.git" />
     <plugin name="cordova-plugin-file-transfer" spec="^1.5.0" />
     <plugin name="cordova-plugin-google-analytics" spec="^0.8.0" />

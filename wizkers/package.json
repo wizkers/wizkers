@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "amdefine": "^1.0.1",
+    "android-versions": "^1.2.1",
     "bcrypt-nodejs": "latest",
     "body-parser": "^1.17.2",
     "buffer-dataview": "0.0.2",

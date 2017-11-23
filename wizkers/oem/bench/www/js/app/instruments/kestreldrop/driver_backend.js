@@ -98,14 +98,6 @@ define(function (require) {
         // TODO: this is hardcoded to the Drop D3
         var readings = {
             temperature: 0,
-            rel_humidity: 0,
-            pressure: 0,
-            altitude: 0,
-            dens_altitude: 0,
-            barometer: 0,
-            dew_point: 0,
-            heat_index: 0,
-            wetbulb: 0,
             unit: {
                 temperature: 'celsius',
                 rel_humidity: '%',
@@ -203,9 +195,11 @@ define(function (require) {
             // We are receiving a serial protocol response
             if (utils.sameUUID(data.characteristic, KESTREL_LOG_RSP)) {
                 linkProto.processProtocol(data);
-            } else
+            } else if (utils.sameUUID(data.characteristic, sensor_uuids.temperature)) {
+                // We only send an update once we get the temperature (present on every Kestrel
+                // Drop), so that we limit the number of redundant messages.
                 self.trigger('data', readings);
-
+            }
         };
 
         // Right now we assume a Kestrel 5500

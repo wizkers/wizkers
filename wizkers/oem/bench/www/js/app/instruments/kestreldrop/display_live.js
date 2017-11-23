@@ -205,7 +205,6 @@ define(function (require) {
                     this.tempRHplot.fastAppendPoint(dp);
                 } else {
                     this.tempRHplot.appendPoint(dp);
-                    this.$('#tempreading').html(data.temperature + '&nbsp;&deg;');
                 }
             }
             if (data.dew_point != undefined) {
@@ -216,7 +215,6 @@ define(function (require) {
                     this.tempRHplot.fastAppendPoint(dp);
                 } else {
                     this.tempRHplot.appendPoint(dp);
-                    this.$('#dewpointreading').html(data.dew_point + '&nbsp;&deg;');
                 }
             }
             if (data.heat_index != undefined) {
@@ -227,7 +225,6 @@ define(function (require) {
                     this.tempRHplot.fastAppendPoint(dp);
                 } else {
                     this.tempRHplot.appendPoint(dp);
-                    this.$('#heatindexreading').html(data.heat_index + '&nbsp;&deg;');
                 }
             }
             if (data.wetbulb != undefined) {
@@ -238,7 +235,6 @@ define(function (require) {
                     this.tempRHplot.fastAppendPoint(dp);
                 } else {
                     this.tempRHplot.appendPoint(dp);
-                    this.$('#wetbulbreading').html(data.wetbulb + '&nbsp;&deg;');
                 }
             }
             if (data.rel_humidity != undefined) {
@@ -249,7 +245,6 @@ define(function (require) {
                     this.tempRHplot.fastAppendPoint(dp);
                 } else {
                     this.tempRHplot.appendPoint(dp);
-                    this.$('#rhreading').html(data.rel_humidity + '&nbsp;' + data.unit.rel_humidity);
                 }
             }
 
@@ -260,14 +255,8 @@ define(function (require) {
                     this.baroplot.fastAppendPoint(dp);
                 } else {
                     this.baroplot.appendPoint(dp);
-                    this.$('#pressurereading').html(data.pressure + '&nbsp;' + data.unit.pressure);
                 }
             }
-
-            if (data.dens_altitude != undefined) {
-                this.$('#densaltitudereading').html(data.dens_altitude + '&nbsp;' + data.unit.dens_altitude);
-            }
-
 
         },
 

@@ -85,6 +85,11 @@ define(function(require) {
             }
             if (data.wetbulb != undefined) {
                 this.$('#wetbulbreading').html(data.wetbulb + '&nbsp;&deg;');
+            }  else {
+                if (this.$('#wetbulbreading').is(':visible')) {
+                    this.$('#wetbulbreading').parent().hide();
+                    instrumentManager.liveViewRef().rsc();
+                }
             }
             if (data.rel_humidity != undefined) {
                 this.$('#rhreading').html(data.rel_humidity + '&nbsp;' + data.unit.rel_humidity);
