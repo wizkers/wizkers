@@ -7498,7 +7498,7 @@ input[type="checkbox"]:disabled:checked:after,
   padding: 15px;
 }
 .list-group-item-text {
-  color: #bbbbbb;
+  color: #212121;
 }
 .well {
   border-radius: 0;
