@@ -151,7 +151,6 @@ define(function (require) {
         },
 
         render: function () {
-            var self = this;
             console.log('Main render of Log management view');
 
             // Sort the list of logs in chronological order
@@ -165,16 +164,14 @@ define(function (require) {
                 instrumentid: instrumentManager.getInstrument().id
             }));
 
-            // Depending on device capabilities, enable/disable "device logs" button
+            // Depending on device capabilities, hide the "manage device logs" button
             if (instrumentManager.getCaps().indexOf("LogManagementView") == -1 || !linkManager.isConnected()) {
-                $('.devicelogs', self.el).attr('disabled', true);
+                this.$('.devicelogs').hide();
             }
 
             // Now, we only want to scroll the table, not the whole page:
-            var tbheight = window.innerHeight - $('#id1', this.el).height() - $('.header .container').height() - 20;
-            $('#tablewrapper', this.el).css('max-height',
-                tbheight + 'px'
-            );
+            var tbheight = window.innerHeight - this.$('#id1').height() - $('.header .container').height() - 30;
+            this.$('#tablewrapper').css('max-height', tbheight + 'px');
 
             return this;
         },

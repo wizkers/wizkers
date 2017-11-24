@@ -172,7 +172,7 @@ define(function (require) {
                     }
                 }
 
-                debug('Subscribing to:', s_uuid, c_uuid);
+                // debug('Subscribing to:', s_uuid, c_uuid);
 
                 port.subscribe({
                     service_uuid: s_uuid,
@@ -201,7 +201,7 @@ define(function (require) {
 
         var openPort_server = function(insid) {
             dbs.instruments.get(insid, function(err,item) {
-                debug('BLEBee UUID', item.port);
+                // debug('BLEBee UUID', item.port);
                 if (port == null)
                     port = new btleConnection(item.port, portSettings());
                 port.on('data', format);
@@ -282,7 +282,7 @@ define(function (require) {
          */
         this.onDataReady = function (data) {
 
-            debug('onDataReady', data);
+            // debug('onDataReady', data);
             // Remove any carriage return
             data = data.replace('\r\n', '');
             var fields = data.split(',');

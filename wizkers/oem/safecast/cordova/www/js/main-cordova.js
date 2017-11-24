@@ -60,6 +60,7 @@ require.config({
         flot_resize: 'lib/flot-0.8.3/jquery.flot.resize',
         flot_selection: 'lib/flot-0.8.3/jquery.flot.selection',
         flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
+        flot_crosshair: 'lib/flot-0.8.3/jquery.flot.crosshair',
 
         // Analytics wrapper:
         ga_bundle: 'lib/google-analytics-bundle',
@@ -131,6 +132,9 @@ require.config({
         'flot_fillbetween': {
             deps: ['flot']
         },
+        'flot_crosshair': {
+            deps: [ 'flot' ]
+        }
     }
 });
 
