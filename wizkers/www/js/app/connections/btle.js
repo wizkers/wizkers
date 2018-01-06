@@ -256,7 +256,7 @@ define(function (require) {
                                             chrome.runtime.lastError.message);
                                         return;
                                     }
-
+                                    self.trigger('subscribed', chrc.uuid);
                                     console.log('Characteristics notifications enabled!');
                                 });
                             return;

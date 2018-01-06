@@ -150,7 +150,8 @@ define(function (require) {
 
                 subscribedChars.push(params);
 
-                var makeOnNotification = function() {
+                var makeOnNotification = function(uuid) {
+                    self.trigger('subscribed', uuid);
                     return function(chrc) {
                         if (chrc.status == 'subscribedResult') {
                             // Our drivers don't want this base64 stuff, sorry
@@ -161,7 +162,7 @@ define(function (require) {
                     }
                 }
 
-                bluetoothle.subscribe(makeOnNotification(), function (err) {
+                bluetoothle.subscribe(makeOnNotification(cuid[i]), function (err) {
                     // We get a callback here both when subscribe fails and when the
                     // device disconnects - only take action when we have a subscribe
                     // fail, that's it.

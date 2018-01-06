@@ -215,9 +215,10 @@ define(function (require) {
             // Reset the queue
             self.shiftQueue();
 
-            setTimeout( function() {
+            port.once('subscribed', function(uuid) {
+                console.info('Received notification success for uuid', uuid);
                 self.output({command: 'get_total_records'});
-            }, 6000);
+            });
 
         }
 

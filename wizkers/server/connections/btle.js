@@ -169,16 +169,21 @@ define(function (require) {
                     // every event in double
                     debug('Subscribing to characteristic', c[i].uuid, c[i].properties);
                     cleanDataListeners(c[i]);
-                    //c[i].subscribe(trackCharacteristicError);
-                    c[i].once('notify', function(error) { debug('Notifications enable success for ',c[i].uuid)});
-                    c[i].notify(true, function(error) { debug('Enabling notifications for characteristic');});
-                    var makeOnData = function(uuid) {
+                    var makeOnData = function(c) {
+                        var uuid = c.uuid;
+                        // We enable notifications from here, so that we use a static reference to the
+                        // characteristic - otherwise, 'i' has changed once the 'notify' event occurs and we
+                        // can't retrieve the correct uuid.
+                        c.notify(true, function(error) { 
+                            debug('Notifications enabled for characteristic', uuid);
+                            self.emit('subscribed', uuid);
+                        });
                         return function(data, isNotification) {
                             debug('Received data from BLE device', data, isNotification, 'for uuid', uuid);
                             self.emit('data', { value: data, characteristic: uuid });
                         }
                     }
-                    c[i].on('data', makeOnData(c[i].uuid));
+                    c[i].on('data', makeOnData(c[i]));
                     subscribedCharacteristics.push(c[i]);
                 }
                 debug('We now have those subscribed characteristics');
@@ -361,8 +366,7 @@ define(function (require) {
 
             // Right after we connect, we do a service
             // discovery, so that we can then connect to the various
-            // services & characteristics. This is the Android call, the
-            // iPhone call will be different:
+            // services & characteristics.
             activePeripheral.discoverServices( [], function (err, services) {
                 portOpen = true;
                 if (timeoutCheckTimer) {

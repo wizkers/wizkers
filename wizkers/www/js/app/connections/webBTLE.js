@@ -146,6 +146,7 @@ define(function (require) {
                                 // Make sure we never add multiple event
                                 // listeners for characteristics
                                 if (subscribedChars[c.uuid] == undefined) {
+                                    self.trigger('subscribed', c.uuid);
                                     subscribedChars[c.uuid] = makeOnNotification();
                                     c.addEventListener('characteristicvaluechanged',
                                         subscribedChars[c.uuid]);
