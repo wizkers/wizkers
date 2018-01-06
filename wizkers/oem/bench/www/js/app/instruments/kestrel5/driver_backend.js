@@ -211,9 +211,13 @@ define(function (require) {
                 service_uuid: KESTREL_LOG_SERVICE,
                 characteristic_uuid: [ KESTREL_LOG_RSP ]
             });
+
+            // Reset the queue
+            self.shiftQueue();
+
             setTimeout( function() {
                 self.output({command: 'get_total_records'});
-            }, 3000);
+            }, 6000);
 
         }
 
@@ -322,10 +326,7 @@ define(function (require) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
                 console.log('We found those services', stat.services);
-                port.subscribe({
-                    service_uuid: KESTREL_SERVICE_UUID,
-                    characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
-                });
+                self.startLiveStream();
             }
 
             // We remove the listener so that the serial port can be GC'ed
@@ -412,8 +413,16 @@ define(function (require) {
         this.sendUniqueID = function () {};
 
         // period in seconds
-        this.startLiveStream = function (period) {};
+        this.startLiveStream = function (period) {
+            if (port)
+                port.subscribe({
+                    service_uuid: KESTREL_SERVICE_UUID,
+                    characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
+                });
+        };
 
+
+        
         this.stopLiveStream = function (args) {};
 
         // This is where we receive commands from the front-end

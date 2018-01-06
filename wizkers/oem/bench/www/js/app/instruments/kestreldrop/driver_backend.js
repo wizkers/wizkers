@@ -215,13 +215,29 @@ define(function (require) {
             // 2. ask Kestrel for # of records on current log
             // 3. ask Kestrel for log structure
             // 4. Request log packets until finished
+            port.unsubscribe({
+                service_uuid: KESTREL_SERVICE_UUID,
+                characteristic_uuid: [ sensor_uuids.temperature,
+                                       sensor_uuids.barometer,
+                                       sensor_uuids.dens_altitude,
+                                       sensor_uuids.dew_point,
+                                       sensor_uuids.heat_index,
+                                       sensor_uuids.pressure,
+                                       sensor_uuids.rel_humidity,
+                                       sensor_uuids.wetbulb ]
+            });
+
             port.subscribe({
                 service_uuid: KESTREL_LOG_SERVICE,
                 characteristic_uuid: [ KESTREL_LOG_RSP ]
             });
+
+            // Reset the queue
+            self.shiftQueue();
+
             setTimeout( function() {
                 self.output({command: 'get_total_records'});
-            }, 3000);
+            }, 6000);
 
         }
 
@@ -291,29 +307,6 @@ define(function (require) {
 
         }
 
-        /**
-         * Called from the status() function when we get notified that the port
-         * is open and our services are available.
-         *  We subscribe to every possible sensor the DROP family can support,
-         *  and in format() we will decide if we unsubscribe if the DROP tells
-         *  us the sensor is not supported.
-         */
-        var dropQueryAndSubscribe = function() {
-            port.subscribe({
-                service_uuid: KESTREL_SERVICE_UUID,
-                characteristic_uuid: [ sensor_uuids.temperature,
-                                       sensor_uuids.barometer,
-                                       sensor_uuids.dens_altitude,
-                                       sensor_uuids.dew_point,
-                                       sensor_uuids.heat_index,
-                                       sensor_uuids.pressure,
-                                       sensor_uuids.rel_humidity,
-                                       sensor_uuids.wetbulb ]
-            });
-
-        }
-
-
         // Status returns an object that is concatenated with the
         // global server status
         var status = function (stat) {
@@ -351,7 +344,7 @@ define(function (require) {
                 // Should run any "onOpen" initialization routine here if
                 // necessary.
                 console.log('We found those services', stat.services);
-                dropQueryAndSubscribe();
+                self.startLiveStream();
             }
 
             // We remove the listener so that the serial port can be GC'ed
@@ -437,8 +430,29 @@ define(function (require) {
         // TODO: Returns the instrument GUID.
         this.sendUniqueID = function () {};
 
+
+        /**
+         * Called from the status() function when we get notified that the port
+         * is open and our services are available.
+         *  We subscribe to every possible sensor the DROP family can support,
+         *  and in format() we will decide if we unsubscribe if the DROP tells
+         *  us the sensor is not supported.
+         */
         // period in seconds
-        this.startLiveStream = function (period) {};
+        this.startLiveStream = function (period) {
+            if (port)
+                port.subscribe({
+                    service_uuid: KESTREL_SERVICE_UUID,
+                    characteristic_uuid: [ sensor_uuids.temperature,
+                                        sensor_uuids.barometer,
+                                        sensor_uuids.dens_altitude,
+                                        sensor_uuids.dew_point,
+                                        sensor_uuids.heat_index,
+                                        sensor_uuids.pressure,
+                                        sensor_uuids.rel_humidity,
+                                        sensor_uuids.wetbulb ]
+                });
+        };
 
         this.stopLiveStream = function (args) {};
 

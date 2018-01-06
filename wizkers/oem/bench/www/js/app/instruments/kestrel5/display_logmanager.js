@@ -64,8 +64,13 @@ define(function (require) {
         events: {
             "click .downloadlog": "downloadlog",
             "click .start-download": "startDownload",
+            "click .closedl": "closedownload"
         },
 
+
+        closedownload: function() {
+            linkManager.startLiveStream();
+        },
 
         /**
          * Display the log download modal and ask the device for its log
