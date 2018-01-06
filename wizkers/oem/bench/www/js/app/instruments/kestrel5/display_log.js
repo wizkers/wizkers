@@ -96,7 +96,9 @@ define(function (require) {
             $('#loadtext').html("Loaded: " + e.loaded + " bytes");
         },
 
-        events: {},
+        events: {
+            "click #download-csv": "downloadCSV"
+        },
 
         render: function () {
             var self = this;
@@ -192,6 +194,41 @@ define(function (require) {
             this.$('#barochart').on('plothover', this.displayReadings.bind(this));
             this.$('#windspeedchart').on('plothover', this.displayReadings.bind(this));
         },
+
+        downloadCSV: function () {
+            var self = this;
+            var csv = 'data:text/csv; charset=utf-8,\n';
+            for (var i = 0; i < this.deviceLogs.length; i++) {
+                var currentLog = this.deviceLogs.at(i);
+                var entries = currentLog.entries;
+                for (var j = 0; j < entries.length; j++) {
+                    var entry = entries.at(j);
+                    var data = entry.get('data');
+                    var keys = Object.keys(data);
+                    if (i == 0 && j == 0) {
+                        // Create the header if this is the 1st record
+                        csv += keys.join(',') + '\n';
+                    }
+                    keys.forEach(function(key) {
+                        if (key == 'timestamp') {
+                            var ts = new Date(data[key]).toISOString().replace(/[TZ]/g, ' ');
+                            csv += ts + ',';
+    
+                        } else {
+                            csv += data[key] + ',';
+                        }
+                    });
+                    // Our live data is packed a bit differently than onyxlog data
+                    // Note: I tried a generic "for key in data" but the order
+                    // the keys are returned can change randomly, leading to wrong outout, which is
+                    // why I am using explicit key names:
+                    csv += '\n';                    
+                }
+            }
+            console.info(csv);
+        },
+
+
 
         // Callback for reading display, throttled
         displayReadings: function(event, pos, item) {
