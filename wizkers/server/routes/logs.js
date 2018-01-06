@@ -206,7 +206,7 @@ exports.addLogEntry = function (req, res) {
     // Note: will create it if it does not exist
     var db = dbs.createDataPointDB(logID);
     debug(entry);
-    db.put(entry, '' + entry.timestamp, function (err, entry) {
+    db.post(entry, function (err, entry) {
         if (err) {
             debug("Error saving entry: " + err + " ID is: " + entry.timestamp);
             res.send({

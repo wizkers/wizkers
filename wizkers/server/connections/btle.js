@@ -108,9 +108,8 @@ define(function (require) {
 
                 //  Now we can write
                 var dab = Buffer.from(data);
-                debug('Writing this', dab);
-                debug('To this characteristic', c[0].uuid);
-                c[0].write(dab, true, function(err) {debug('writing result', err)});
+                var noresp = c[0].properties.indexOf('writeWithoutResponse') != -1;
+                c[0].write(dab, noresp, function(err) {debug('writing result', err)});
             });
         };
 
@@ -168,9 +167,11 @@ define(function (require) {
                     // If we were already subscribed to this characteristic in the past,
                     // we need to remove the previous listener first, otherwise we'll get
                     // every event in double
-                    debug('Subscribing to characteristic', c[i]);
+                    debug('Subscribing to characteristic', c[i].uuid, c[i].properties);
                     cleanDataListeners(c[i]);
-                    c[i].subscribe(trackCharacteristicError);
+                    //c[i].subscribe(trackCharacteristicError);
+                    c[i].once('notify', function(error) { debug('Notifications enable success for ',c[i].uuid)});
+                    c[i].notify(true, function(error) { debug('Enabling notifications for characteristic');});
                     var makeOnData = function(uuid) {
                         return function(data, isNotification) {
                             debug('Received data from BLE device', data, isNotification, 'for uuid', uuid);
@@ -180,13 +181,21 @@ define(function (require) {
                     c[i].on('data', makeOnData(c[i].uuid));
                     subscribedCharacteristics.push(c[i]);
                 }
+                debug('We now have those subscribed characteristics');
+                for (var i in subscribedCharacteristics) {
+                    debug('Service        :', subscribedCharacteristics[i]._serviceUuid);
+                    debug('Characteristic :', subscribedCharacteristics[i].uuid);
+                };
+                debug('----');
+                
+    
             });
 
             return;
         }
 
         /**
-         * UNSubscribe to a service/characteristic.
+         * Unsubscribe to a service/characteristic.
          * You can unsubscribe to multiple characteristics within a service,
          * but not across services
          * @param {[[Type]]} subscribeInfo [[Description]]
@@ -200,7 +209,7 @@ define(function (require) {
 
             // It seems that Noble uses uuids without dashed
             subscribeInfo.service_uuid = subscribeInfo.service_uuid.replace(/-/gi,'');
-            debug(subscribeInfo);
+            debug('Attempting to unsubscribe from', subscribeInfo);
 
             // Make sure we accept either a string or an array of strings:
             if (typeof subscribeInfo.characteristic_uuid == 'object') { // Arrays are objects in Node
@@ -232,7 +241,11 @@ define(function (require) {
             }
             // First we unsubscribe from all characteristics we're listening to:
             for (var i in subscribedCharacteristics) {
-                subscribedCharacteristics[i].unsubscribe();
+                try {
+                    subscribedCharacteristics[i].unsubscribe();
+                } catch (err) {
+                    debug('Noble bug - failure to unsubscribe inside Noble code ?', err);
+                }
                 subscribedCharacteristics[i].removeAllListeners('data');
             }
             subscribedCharacteristics = [];

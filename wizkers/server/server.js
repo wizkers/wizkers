@@ -689,7 +689,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('controllerCommand', function (data) {
-        socket_debug('Controller command: ' + data);
+        socket_debug('Controller command:', data);
         if (driver)
             driver.output(data);
     });
