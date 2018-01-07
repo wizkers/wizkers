@@ -213,7 +213,7 @@ define(function (require) {
                         if (key == 'timestamp') {
                             var ts = new Date(data[key]).toISOString().replace(/[TZ]/g, ' ');
                             csv += ts + ',';
-    
+
                         } else {
                             csv += data[key] + ',';
                         }
@@ -222,10 +222,29 @@ define(function (require) {
                     // Note: I tried a generic "for key in data" but the order
                     // the keys are returned can change randomly, leading to wrong outout, which is
                     // why I am using explicit key names:
-                    csv += '\n';                    
+                    csv += '\n';
                 }
             }
-            console.info(csv);
+            var uri = encodeURI(csv);
+            if (vizapp.type != 'cordova') {
+                var link = document.createElement("a");
+                link.download = 'kestrel_log.csv';
+                link.href = uri;
+                link.click();
+            } else {
+                var self = this;
+                // In Cordova mode, we create a file
+                var fname = 'onyxlog-' + new Date().getTime() + '.csv';
+                fileutils.newLogFile(fname, function (file) {
+                    file.createWriter(function (fileWriter) {
+                        fileWriter.write(csv);
+                        $('#errorreason', self.el).html('Log saved');
+                        $('#errordetail', self.el).html('Your logfile was saved on your device in "Wizkers/logs/' + fname + '"');
+                        $('#ErrorModal').modal();
+                    });
+                });
+            }
+
         },
 
 
