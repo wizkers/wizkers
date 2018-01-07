@@ -267,6 +267,7 @@ define(function (require) {
         // Has to be called by the backend_driver to actually open the port.
         // This just connects to the device
         this.open = function () {
+debug('*************************************** Noble is', noble);
             if (typeof noble.wizkersScanningCount == 'undefined')
                 noble.wizkersScanningCount = 0;
             // noble, the NodeJS we use, seems to require a scan to find
@@ -325,7 +326,7 @@ define(function (require) {
             }
             debug('Found our peripheral, now connecting (' + peripheral.id + ')');
             activePeripheral = peripheral;
-            debug('Here is what our active peripheral looks like', activePeripheral);
+            // debug('Here is what our active peripheral looks like', activePeripheral);
             peripheral.connect(trackConnect);
             peripheral.on('disconnect', trackError); // Track disconnects
         }
@@ -401,9 +402,14 @@ define(function (require) {
         }
 
         function trackError(err) {
+            // Noble is very bad at cleaning pending listeners in case an error occurs.
+            // If we don't do it here, we will get spontaneous callbacks on those events
+            // from previous sessions after we reconnect.
             activePeripheral.removeAllListeners('disconnect');
+            activePeripheral.removeAllListeners('servicesDiscover');
             // This is called whenever we lose the connection
             if (!portOpen) {
+                debug('Connection error while port not fully open yet.');
                 // if the port was not open and we got an error callback, this means
                 // we were not able to connect in the first place...
                 self.emit('status', {
@@ -419,12 +425,8 @@ define(function (require) {
                 // Do a disconnect to make sure we end up in a sane state:
                 self.close();
             } else {
-                // portOpen = false;
                 // Just keep reconnecting forever...
-                debug('Error while we were connected ???', err);
-                //self.emit('status', {
-                //    reconnecting: true
-                //});
+                debug('Error while connected: either device out of range, or user closed device.');
             }
             return;
         }
