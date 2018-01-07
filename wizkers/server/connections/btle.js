@@ -174,7 +174,7 @@ define(function (require) {
                         // We enable notifications from here, so that we use a static reference to the
                         // characteristic - otherwise, 'i' has changed once the 'notify' event occurs and we
                         // can't retrieve the correct uuid.
-                        c.notify(true, function(error) { 
+                        c.notify(true, function(error) {
                             debug('Notifications enabled for characteristic', uuid);
                             self.emit('subscribed', uuid);
                         });
@@ -192,8 +192,8 @@ define(function (require) {
                     debug('Characteristic :', subscribedCharacteristics[i].uuid);
                 };
                 debug('----');
-                
-    
+
+
             });
 
             return;
@@ -411,6 +411,11 @@ define(function (require) {
                     reason: 'Device connection error',
                     description: 'Device got disconnected'
                 });
+                // Also make sure the timeout timer is cleared
+                if (timeoutCheckTimer) {
+                    clearTimeout(timeoutCheckTimer);
+                    timeoutCheckTimer = 0;
+                }
                 // Do a disconnect to make sure we end up in a sane state:
                 self.close();
             } else {
