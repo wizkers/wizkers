@@ -194,11 +194,29 @@ define(function (require) {
             this.suspendGraph = true;
         },
 
+        // Make sure the color labels for each measurement
+        // match the graph color
+        update_colorlabels: function() {
+            var dataset = this.tempRHplot.plot.getData();
+            // Skip all this if we don't have new variables
+            // in our dataset that might require updating the label
+            // colors
+            if (dataset.length == this.datasetlength)
+                return;
+
+            var numView = instrumentManager.numViewRef();
+            this.datasetlength = dataset.length;
+            for (var i = 0; i < dataset.length; ++i) {
+                var series = dataset[i];
+                numView.$('#' + series.label + '-color').css('border', '5px solid ' + series.color);
+            }
+        },
+
         disp_wx: function (data, ts) {
             var dp;
 
             if (data.temperature != undefined) {
-                dp = {'name': 'Temp (' + data.unit.temperature + ')',
+                dp = {'name': 'tempreading',
                          'value': data.temperature,
                         'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -208,7 +226,7 @@ define(function (require) {
                 }
             }
             if (data.dew_point != undefined) {
-                dp = {'name': 'Dew Point (' + data.unit.dew_point + ')',
+                dp = {'name': 'dewpointreading',
                       'value': data.dew_point,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -218,7 +236,7 @@ define(function (require) {
                 }
             }
             if (data.heat_index != undefined) {
-                dp = {'name': 'Heat Index (' + data.unit.heat_index + ')',
+                dp = {'name': 'heatindexreading',
                       'value': data.heat_index,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -228,7 +246,7 @@ define(function (require) {
                 }
             }
             if (data.wetbulb != undefined) {
-                dp = {'name': 'Wet Bulb (' + data.unit.wetbulb + ')',
+                dp = {'name': 'wetbulbreading',
                       'value': data.wetbulb,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -238,7 +256,7 @@ define(function (require) {
                 }
             }
             if (data.rel_humidity != undefined) {
-                dp = {'name': 'RH (' + data.unit.rel_humidity + ')',
+                dp = {'name': 'rhreading',
                       'value': data.rel_humidity,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -257,6 +275,11 @@ define(function (require) {
                     this.baroplot.appendPoint(dp);
                 }
             }
+
+            if (ts != undefined)
+                return;
+
+            this.update_colorlabels();
 
         },
 

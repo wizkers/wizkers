@@ -48,6 +48,7 @@ define(function (require) {
             // Get frequency and span if specified:
             var span = this.model.get('liveviewspan'); // In seconds
             var period = this.model.get('liveviewperiod'); // Polling frequency
+            this.datasetlength = 0;
 
             var livepoints = 300; // 5 minutes @ 1 Hz
             if (span && period) {
@@ -194,11 +195,27 @@ define(function (require) {
             this.suspendGraph = true;
         },
 
+        // Make sure the color labels for each measurement
+        // match the graph color
+        update_colorlabels: function() {
+            var dataset = this.tempRHplot.plot.getData();
+            // Skip all this if we don't have new variables
+            // in our dataset that might require updating the label
+            // colors
+            if (dataset.length == this.datasetlength)
+                return;
+            this.datasetlength = dataset.length;
+            for (var i = 0; i < dataset.length; ++i) {
+                var series = dataset[i];
+                this.$('#' + series.label + '-color').css('border', '5px solid ' + series.color);
+            }
+        },
+
         disp_wx: function (data, ts) {
             var dp;
 
             if (data.temperature != undefined) {
-                dp = {'name': 'Temp (' + data.unit.temperature + ')',
+                dp = {'name': 'temperature',
                          'value': data.temperature,
                         'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -209,7 +226,7 @@ define(function (require) {
                 }
             }
             if (data.dew_point != undefined) {
-                dp = {'name': 'Dew Point (' + data.unit.dew_point + ')',
+                dp = {'name': 'dew_point',
                       'value': data.dew_point,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -220,7 +237,7 @@ define(function (require) {
                 }
             }
             if (data.heat_index != undefined) {
-                dp = {'name': 'Heat Index (' + data.unit.heat_index + ')',
+                dp = {'name': 'heat_index',
                       'value': data.heat_index,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -231,7 +248,7 @@ define(function (require) {
                 }
             }
             if (data.wetbulb != undefined) {
-                dp = {'name': 'Wet Bulb (' + data.unit.wetbulb + ')',
+                dp = {'name': 'wetbulb',
                       'value': data.wetbulb,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -242,7 +259,7 @@ define(function (require) {
                 }
             }
             if (data.wind_chill != undefined) {
-                dp = {'name': 'Wind Chill (' + data.unit.wind_chill + ')',
+                dp = {'name': 'wind_chill',
                       'value': data.wind_chill,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -254,7 +271,7 @@ define(function (require) {
             }
 
             if (data.rel_humidity != undefined) {
-                dp = {'name': 'RH (' + data.unit.rel_humidity + ')',
+                dp = {'name': 'rel_humidity',
                       'value': data.rel_humidity,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
@@ -289,6 +306,8 @@ define(function (require) {
 
             if (typeof ts != 'undefined')
                 return;
+
+            this.update_colorlabels();
 
             if (data.altitude != undefined) {
                 this.$('#altitudereading').html(data.altitude + '&nbsp;' + data.unit.altitude);

@@ -36,6 +36,7 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
+        fileutils = require('app/lib/fileutils'),
         roseplot = require('app/lib/flotwindrose'),
         template = require('js/tpl/instruments/kestrel5/LogView.js');
 
@@ -337,7 +338,24 @@ define(function (require) {
             this.baroplot.redraw();
             this.dirplot.redraw();
             this.windplot.redraw();
+            this.update_colorlabels();
             return data;
+        },
+
+                // Make sure the color labels for each measurement
+        // match the graph color
+        update_colorlabels: function() {
+            var dataset = this.tempRHplot.plot.getData();
+            // Skip all this if we don't have new variables
+            // in our dataset that might require updating the label
+            // colors
+            if (dataset.length == this.datasetlength)
+                return;
+            this.datasetlength = dataset.length;
+            for (var i = 0; i < dataset.length; ++i) {
+                var series = dataset[i];
+                this.$('#' + series.label + '-color').css('border', '5px solid ' + series.color);
+            }
         },
 
         onClose: function () {
