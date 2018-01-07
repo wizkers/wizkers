@@ -102,7 +102,7 @@ define(function (require) {
                 // we have to make sure we use "binary" encoding below,
                 // otherwise the parser will assume Unicode and mess up the
                 // values.
-                parser: Serialport.parsers.raw,
+                // parser: Serialport.parsers.raw,
             }
         };
 

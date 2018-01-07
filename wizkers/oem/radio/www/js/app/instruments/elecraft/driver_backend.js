@@ -60,6 +60,7 @@ define(function (require) {
     "use strict";
 
     var Serialport = require('serialport'),
+        abutils = require('app/lib/abutils'),
         serialConnection = require('connections/serial'),
         tcpConnection = require('connections/tcp'),
         btConnection = require('connections/btspp'),
@@ -84,11 +85,34 @@ define(function (require) {
             port_open_requested = true,
             isopen = false;
 
+        /**
+         *   We are redefining the parser here because we need it to work
+         * in both client mode and server mode (browser + cordova + node)
+         * @param {*} delimiter
+         * @param {*} encoding
+         */
+        var readline = function (delimiter, encoding) {
+            if (typeof delimiter === "undefined" || delimiter === null) { delimiter = "\r"; }
+            if (typeof encoding  === "undefined" || encoding  === null) { encoding  = "utf8"; }
+            // Delimiter buffer saved in closure
+            var data = "";
+            return function (emitter, buffer) {
+              // Collect data
+              data += abutils.ab2str(buffer);
+              // Split collected data by delimiter
+              var parts = data.split(delimiter);
+              data = parts.pop();
+              parts.forEach(function (part, i, array) {
+                emitter.onDataReady(part);
+              });
+            };
+        }
+
         // Because Elecraft radios are not 100% consistent with their protocols,
         // we need to use a pure raw parser for data input, and most of the time,
         // forward that data to a readline parser. But sometimes, we will need the
         // raw input, for instance for Bitmap requests
-        var second_parser = Serialport.parsers.readline(';', 'binary');
+        var second_parser = readline(';');
 
         // Flag to indicate we are receiving a bitmap
         var waiting_for_bmp = false;
@@ -128,7 +152,7 @@ define(function (require) {
                 // we have to make sure we use "binary" encoding below,
                 // otherwise the parser will assume Unicode and mess up the
                 // values.
-                parser: Serialport.parsers.raw,
+                // parser: Serialport.parsers.raw,
             }
         };
 

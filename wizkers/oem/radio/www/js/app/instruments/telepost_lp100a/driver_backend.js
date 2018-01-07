@@ -98,7 +98,7 @@ define(function (require) {
                 stopBits: 1,
                 dtr: false,
                 flowControl: false,
-                parser: Serialport.parsers.raw
+                // parser: Serialport.parsers.raw
             }
         };
 

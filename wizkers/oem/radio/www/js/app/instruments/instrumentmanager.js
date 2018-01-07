@@ -42,9 +42,15 @@ define(function (require) {
 
     "use strict";
 
-    var _ = require('underscore'),
-        Backbone = require('backbone'),
-        Instrument = require(['app/models/instrument']);
+    "use strict";
+
+    var _ = require('underscore');
+
+    // This works because of the way node and commonJS use 'require'
+    // differently...
+    if (typeof events == 'undefined') {
+        var Backbone = require('backbone');
+    }
 
     var InstrumentManager = function () {
 
@@ -202,6 +208,11 @@ define(function (require) {
             current_instrument = null;
         }
 
+        /**
+         * Updates the current instrument references
+         * @instrument is a Backbone model (already fetched)
+         * This method is called from router.js
+         */
         this.setInstrument = function (instrument, cb) {
             var self = this;
             var type = instrument.get('type');
@@ -244,7 +255,18 @@ define(function (require) {
 
     };
 
-    _.extend(InstrumentManager.prototype, Backbone.Events);
+    // On server side, we use the Node eventing system, whereas on the
+    // browser/app side, we use Bacbone's API:
+    // We cannot use vizapp.type here because we can be in a case
+    // where vizapp.type == 'server' and still use this file on
+    // client side!
+    if (typeof events == 'undefined') {
+        // Add event management to our parser, from the Backbone.Events class:
+        _.extend(InstrumentManager.prototype, Backbone.Events);
+    } else {
+        InstrumentManager.prototype.__proto__ = events.EventEmitter.prototype;
+        InstrumentManager.prototype.trigger = InstrumentManager.prototype.emit;
+    }
 
     return InstrumentManager;
 
