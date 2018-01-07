@@ -234,7 +234,7 @@ define(function (require) {
             } else {
                 var self = this;
                 // In Cordova mode, we create a file
-                var fname = 'onyxlog-' + new Date().getTime() + '.csv';
+                var fname = 'kestrel-' + new Date().getTime() + '.csv';
                 fileutils.newLogFile(fname, function (file) {
                     file.createWriter(function (fileWriter) {
                         fileWriter.write(csv);
