@@ -226,10 +226,6 @@ define(function (require) {
             update(this.tempRHplot);
             update(this.baroplot);
             // Now update the altitude/dens altitude readings:
-            var alt = this.altitudereadings.findIndex(function(elem) {
-                return elem[0] >= pos.x
-            });
-            this.$('#altitudereading').html(this.altitudereadings[alt][1]);
             var dalt = this.dens_altitudereadings.findIndex(function(elem) {
                 return elem[0] >= pos.x
             });
@@ -237,6 +233,22 @@ define(function (require) {
 
         },
 
+        // Make sure the color labels for each measurement
+        // match the graph color
+        update_colorlabels: function() {
+            var dataset = this.tempRHplot.plot.getData();
+            // Skip all this if we don't have new variables
+            // in our dataset that might require updating the label
+            // colors
+            if (dataset.length == this.datasetlength)
+                return;
+
+            this.datasetlength = dataset.length;
+            for (var i = 0; i < dataset.length; ++i) {
+                var series = dataset[i];
+                this.$('#' + series.label + '-color').css('border', '5px solid ' + series.color);
+            }
+        },
 
         // Depending on log type, we need to pack our data differently...
         packData: function () {
@@ -257,7 +269,7 @@ define(function (require) {
             }
             this.tempRHplot.redraw();
             this.baroplot.redraw();
-            this.dirplot.redraw();
+            this.update_colorlabels();
             return data;
         },
 
