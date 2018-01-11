@@ -207,15 +207,21 @@ define(function (require) {
                     var data = entry.get('data');
                     var keys = Object.keys(data);
                     if (i == 0 && j == 0) {
-                        // Create the header if this is the 1st record
-                        csv += keys.join(',') + '\n';
+                        keys.forEach(function(key){
+                            csv += (key == 'wind') ? 'windspeed' : key;
+                            csv += ',';
+
+                        });
+                        csv += '\n';
                     }
                     keys.forEach(function(key) {
                         if (key == 'timestamp') {
                             var ts = new Date(data[key]).toISOString().replace(/[TZ]/g, ' ');
                             csv += ts + ',';
 
-                        } else {
+                        } else if (key == 'wind') {
+                            csv += data[key].speed + ',';
+                        } else if (key != 'unit') {
                             csv += data[key] + ',';
                         }
                     });
