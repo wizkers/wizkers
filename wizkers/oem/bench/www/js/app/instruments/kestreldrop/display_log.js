@@ -95,7 +95,64 @@ define(function (require) {
             $('#loadtext').html("Loaded: " + e.loaded + " bytes");
         },
 
-        events: {},
+        events: {
+            "click #download-csv": "downloadCSV"
+        },
+
+        downloadCSV: function () {
+            var self = this;
+            var csv = 'data:text/csv; charset=utf-8,\n';
+            for (var i = 0; i < this.deviceLogs.length; i++) {
+                var currentLog = this.deviceLogs.at(i);
+                var entries = currentLog.entries;
+                for (var j = 0; j < entries.length; j++) {
+                    var entry = entries.at(j);
+                    var data = entry.get('data');
+                    var keys = Object.keys(data);
+                    if (i == 0 && j == 0) {
+                        keys.forEach(function(key){
+                            if (key != 'unit')
+                                csv += key + ',';
+                        });
+                        csv += '\n';
+                    }
+                    keys.forEach(function(key) {
+                        if (key == 'timestamp') {
+                            var ts = new Date(data[key]).toISOString().replace(/[TZ]/g, ' ');
+                            csv += ts + ',';
+
+                        } else if (key != 'unit') {
+                            csv += data[key] + ',';
+                        }
+                    });
+                    // Our live data is packed a bit differently than onyxlog data
+                    // Note: I tried a generic "for key in data" but the order
+                    // the keys are returned can change randomly, leading to wrong outout, which is
+                    // why I am using explicit key names:
+                    csv += '\n';
+                }
+            }
+            var uri = encodeURI(csv);
+            if (vizapp.type != 'cordova') {
+                var link = document.createElement("a");
+                link.download = 'kestrel_log.csv';
+                link.href = uri;
+                link.click();
+            } else {
+                var self = this;
+                // In Cordova mode, we create a file
+                var fname = 'kestrel-' + new Date().getTime() + '.csv';
+                fileutils.newLogFile(fname, function (file) {
+                    file.createWriter(function (fileWriter) {
+                        fileWriter.write(csv);
+                        $('#errorreason', self.el).html('Log saved');
+                        $('#errordetail', self.el).html('Your logfile was saved on your device in "Wizkers/logs/' + fname + '"');
+                        $('#ErrorModal').modal();
+                    });
+                });
+            }
+        },
+
 
         render: function () {
             var self = this;
