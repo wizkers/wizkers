@@ -97,12 +97,20 @@ define(function (require) {
                 connectionsettings: 'app/views/instrument/serialport'
             },
             'kestrel5': {
-                name: 'Kestrel 5 series',
+                name: 'Kestrel 5 series (Bluetooth)',
                 type: 'app/instruments/kestrel5/kestrel5',
                 path: 'app/instruments/kestrel5',
                 settings: 'app/instruments/kestrel5/settings',
                 connectionsettings: 'app/views/instrument/bluetooth',
                 connectionfilter: ['03290000-eab4-dea1-b24e-44ec023874db']
+            },
+            'kestrel5_usb': {
+                name: 'Kestrel 5 series (USB)',
+                type: 'app/instruments/kestrel5/kestrel5_usb',
+                path: 'app/instruments/kestrel5_usb',
+                settings: 'app/instruments/kestrel5/settings',
+                connectionsettings: 'app/views/instrument/usbhid',
+                connectionfilter: [{ vendorId: 0x1234, productId: 0x1234}]
             },
             'kestreldrop': {
                 name: 'Kestrel Drop',

@@ -64,6 +64,9 @@ var SerialPort = require('serialport'),
 if (process.env.ENABLE_NOBLE)
     var noble = require('noble');
 
+if (process.env.ENABLE_USBHID)
+    var HID = require('node-hid');
+
 
 // Utility function to get a Hex dump
 var Hexdump = require('./hexdump.js');
@@ -787,6 +790,44 @@ io.sockets.on('connection', function (socket) {
         noble.on('discover', onDiscovered);
     }
 
+    //////
+    // Utility for USB HID scanning - right now this is in the server code,
+    // though it might make sense eventually to move it to its own library
+    var discoverUSBHID = function (filter) {
+
+        var device_names = {};
+
+        if (!process.env.ENABLE_USBHID) {
+            device_names['Disabled'] = {
+                        name: 'USB HID support disabled',
+                        address: 0,
+                        rssi: 0
+                    };
+            socket.emit('ports', device_names);
+            return;
+        }
+
+        var devices = HID.devices();
+        var devlist = {};
+
+        if (filter) {
+            var deviceInfo = devices.find( function(d) {
+                return  d.vendorId===filter.vendorId && d.productId===filter.productId;
+            });
+            socket.emit('ports', {
+                name: deviceInfo.product,
+                address: deviceInfo.path
+            })
+        } else {
+            for ( var d in devices) {
+                socket.emit('ports', {
+                    name: devices[i].product,
+                    address: devices[i].path
+                });
+            }
+        }
+    }
+
 
     // Return a list of serial ports available on the
     // server
@@ -808,6 +849,10 @@ io.sockets.on('connection', function (socket) {
                 var filter = instrumentManager.getConnectionFilterFor(insType);
                 debug('Scanning for Bluetooth LE peripherals',filter);
                 discoverBluetooth(filter);
+            } else if (ct == 'app/views/instrument/usbhid') {
+                debug('USB HID is not available in server mode');
+                var filter = instrumentManager.getConnectionFilterFor(insType);
+                dicoverUSBHID(filter);
             }
     });
 
