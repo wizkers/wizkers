@@ -59,9 +59,10 @@ var SerialPort = require('serialport'),
     ConnectionManager = require('./connectionmanager'),
     InstrumentManager = require('app/instruments/instrumentmanager'),
     flash = require('connect-flash'),
-    noble = require('noble'),
     socket_debug = require('debug')('wizkers:server:socket');
 
+if (process.env.ENABLE_NOBLE)
+    var noble = require('noble');
 
 
 // Utility function to get a Hex dump
@@ -729,6 +730,17 @@ io.sockets.on('connection', function (socket) {
     var discoverBluetooth = function (filter) {
 
         var device_names = {};
+
+        if (!process.env.ENABLE_NOBLE) {
+            device_names['Disabled'] = {
+                        name: 'Bluetooth support disabled',
+                        address: 0,
+                        rssi: 0
+                    };
+            socket.emit('ports', device_names);
+            return;
+        }
+
         if (filter) {
             // Not implemented yet
             // device_names = { 'auto': { name: 'Autoconnect', address: filter, rssi: 100 }};

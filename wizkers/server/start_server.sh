@@ -11,4 +11,7 @@ fi
 
 export DEBUG=wizkers:*
 
+# Set the variable ENABLE_NOBLE to "1" to enable Bluetooth support in server mode
+export ENABLE_NOBLE=1
+
 node server.js
