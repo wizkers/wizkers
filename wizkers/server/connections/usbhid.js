@@ -94,8 +94,7 @@ var HIDConnection = function(path, settings) {
 
         // listen for new serial data:
         myPort.on('data', function (data) {
-
-            debug('Received data', data);
+            // debug('Received data', data);
             // The first byte is the data length, we need to
             // extract it, the upper level driver usually
             // is not interested
@@ -130,7 +129,7 @@ var HIDConnection = function(path, settings) {
             // is not a straightforward Javascript array, hence the Array.from
             // below.
             myPort.write(Array.from(data));
-            debug('Wrote', data);
+            // debug('Wrote', data);
         } catch (err) {
             debug('Port write error! ' + err);
         }
@@ -147,7 +146,7 @@ var HIDConnection = function(path, settings) {
     this.sendFeatureReport = function(data) {
         try {
             myPort.sendFeatureReport(data);
-            debug('Wrote feature report', data);
+            // debug('Wrote feature report', data);
         } catch (err) {
             debug('Port write error! ' + err);
         }

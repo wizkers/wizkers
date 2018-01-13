@@ -278,29 +278,29 @@ define(function (require) {
                     this.tempRHplot.fastAppendPoint(dp);
                 } else {
                     this.tempRHplot.appendPoint(dp);
-                    this.$('#rhreading').html(data.rel_humidity + '&nbsp;' + data.unit.rel_humidity);
+                    this.$('#rhreading').html(data.rel_humidity + '&nbsp;%');
                 }
             }
 
             if (data.barometer != undefined) {
-                dp = {'name': 'Baro (' + data.unit.barometer + ')',
+                dp = {'name': 'barometer',
                       'value': data.barometer,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
                     this.baroplot.fastAppendPoint(dp);
                 } else {
                     this.baroplot.appendPoint(dp);
-                    this.$('#baroreading').html(data.barometer + '&nbsp;' + data.unit.barometer);
+                    this.$('#baroreading').html(data.barometer + '&nbsp;mb');
                 }
             }
             if (data.pressure != undefined) {
-                dp = {'name': 'Pressure (' + data.unit.pressure + ')', 'value': data.pressure,
+                dp = {'name': 'pressure', 'value': data.pressure,
                       'timestamp': ts};
                 if (typeof ts != 'undefined') {
                     this.baroplot.fastAppendPoint(dp);
                 } else {
                     this.baroplot.appendPoint(dp);
-                    this.$('#pressurereading').html(data.pressure + '&nbsp;' + data.unit.pressure);
+                    this.$('#pressurereading').html(data.pressure + '&nbsp;mb');
                 }
             }
 
@@ -310,10 +310,10 @@ define(function (require) {
             this.update_colorlabels();
 
             if (data.altitude != undefined) {
-                this.$('#altitudereading').html(data.altitude + '&nbsp;' + data.unit.altitude);
+                this.$('#altitudereading').html(data.altitude + '&nbsp;m');
             }
             if (data.dens_altitude != undefined) {
-                this.$('#densaltitudereading').html(data.dens_altitude + '&nbsp;' + data.unit.dens_altitude);
+                this.$('#densaltitudereading').html(data.dens_altitude + '&nbsp;m');
             }
         },
 

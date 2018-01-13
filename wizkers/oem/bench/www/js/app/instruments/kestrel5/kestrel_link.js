@@ -63,11 +63,12 @@ define(function (require) {
 
 
         // Right now we assume a Kestrel 5500
-        var CMD_GET_LOG_COUNT_AT  =  3,
-        CMD_GET_LOG_DATA_AT   =  5,
-        CMD_GET_SERIAL_NUMBER =  6,
-        CMD_END_OF_DATA       = 18,
-        CMD_TOTAL_RECORDS_WRITTEN = 0x38;
+        var CMD_GET_DATA_SNAPSHOT = 0,
+            CMD_GET_LOG_COUNT_AT  =  3,
+            CMD_GET_LOG_DATA_AT   =  5,
+            CMD_GET_SERIAL_NUMBER =  6,
+            CMD_END_OF_DATA       = 18,
+            CMD_TOTAL_RECORDS_WRITTEN = 0x38;
 
         // Link level packets
         var PKT_COMMAND       =  0,
@@ -354,6 +355,11 @@ define(function (require) {
                         parseLogPacket(packet);
                         driver.output({command:'ack', arg: 0xffff});
                         break;
+                    case CMD_GET_DATA_SNAPSHOT:
+                        var parsed = parseLogFromTemplate(new DataView(packet.buffer),
+                                                            5);
+                        driver.trigger('data', parsed.data);
+                        break;
                     default:
                         console.error('Unknown data response', acked_cmd);
                 }
@@ -400,6 +406,12 @@ define(function (require) {
             }
         }
 
+        /**
+         *  Parse a data packed based on the current
+         *  log_template.
+         * @param {*DataView} dv
+         * @param {*int} idx
+         */
         var parseLogFromTemplate = function(dv, idx) {
             var data = {};
             for (var i in log_template) {

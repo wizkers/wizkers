@@ -79,46 +79,6 @@ define(function (require) {
         //   and does not forward all of those to the front-end.
         var data_callback = null;
 
-        // The Kestrel 5500 sends its readings over three characteristics.
-        // We store them all in one object and only send the complete object
-        // when receiving the last characteristic update - WX3_UUID
-
-        // TODO: this is hardcoded to the Kestrel 5500
-        var readings = {
-            temperature: 0,
-            rel_humidity: 0,
-            pressure: 0,
-            compass_mag: 0,
-            wind: { dir: 0, speed: 0},
-            compass_true: 0,
-            altitude: 0,
-            dens_altitude: 0,
-            barometer: 0,
-            crosswind: 0,
-            headwind: 0,
-            dew_point: 0,
-            heat_index: 0,
-            wetbulb: 0,
-            wind_chill: 0,
-            unit: {
-                temperature: 'celsius',
-                rel_humidity: '%',
-                pressure: 'mb',
-                compass_mag: 'degree',
-                wind: { dir: 'degree', speed: 'knots'},
-                compass_true: 'degree',
-                altitude: 'm',
-                dens_altitude: 'm',
-                barometer: 'mb',
-                crosswind: 'm/s',
-                headwind: 'm/s',
-                dew_point: 'celsius',
-                heat_index: 'celsius',
-                wetbulb: 'celsius',
-                wind_chill: 'celsius'
-            }
-        };
-
         /////////////
         // Private methods
         /////////////
@@ -337,8 +297,6 @@ define(function (require) {
             // 38400, 8, N, 1
             port.sendFeatureReport([0x50, 0x00, 0x00, 0x96, 0x00, 0x00, 0x00, 0x03  ]);
 
-            // Send a couple of bytes to wake up the Kestrel.
-            port.write([0x03, 0x0a, 0x0a, 0x0a]);
         }
 
         /////////////
@@ -394,6 +352,9 @@ define(function (require) {
         // period in seconds
         this.startLiveStream = function (period) {
             if (port) {
+                // Send a couple of bytes to wake up the Kestrel.
+                port.write([0x03, 0x0a, 0x0a, 0x0a]);
+
                 live_poller = setInterval( function() {
                     self.output({command: 'get_data_snapshot'});
                 }, 1000);
