@@ -28,7 +28,15 @@
  * Opens at create, sends 'data' events,
  * and 'status' events.
  *
- * Supports a "write" method.
+ * HID has a concept (with varying incompatible terminology) of
+ *   "feature" reports usually for configuration, and "output" report,
+ *   usually for data.
+ *
+ *   Most of the time, "feature" reports are output as "control" transfers,
+ *   and "output" reports as "interrupt" transfers
+ *
+ * The "write" command for this driver does output/interrupt transfers.
+ * The sendFeatureReport command does "feature/control" transfers.
  *
  * (c) 2018 Edouard Lafargue, ed@lafargue.name
  * All rights reserved.
@@ -55,7 +63,7 @@ var HIDConnection = function(path, settings) {
 
     /**
      * Open the device.
-     * 
+     *
      *  Right now we open by vendorId / productId
      * Pro: no explicit choice by user required, the device just autoconnects
      * Con: we can only support _one_ device at a time
@@ -86,8 +94,15 @@ var HIDConnection = function(path, settings) {
 
         // listen for new serial data:
         myPort.on('data', function (data) {
-                debug('Received data', data);
-                self.emit('data',data);
+
+            debug('Received data', data);
+            // The first byte is the data length, we need to
+            // extract it, the upper level driver usually
+            // is not interested
+            self.emit('data',{
+                        length: data.readUInt8(0),
+                        value: data.slice(1,data.byteLength)
+                     });
         });
 
         myPort.on('error', function(err) {
@@ -98,13 +113,45 @@ var HIDConnection = function(path, settings) {
 
     };
 
+    /**
+     *  Write to the HID device. Defaults to an "output" report,
+     *  which is automatically translated into a control or interrupt transfer
+     *  depending on how the HID device descriptors are configured (no need to worry
+     *  about it).
+     *
+     *  Note: The first byte of 'data' has to the report number.
+     *
+     * @param {*Uint8Array} data
+     */
     this.write = function(data) {
         try {
-            myPort.write(data);
+            // The node-hid library does not understand typed
+            // arrays and just doesn't write anything if the type of 'data'
+            // is not a straightforward Javascript array, hence the Array.from
+            // below.
+            myPort.write(Array.from(data));
             debug('Wrote', data);
         } catch (err) {
             debug('Port write error! ' + err);
         }
+    }
+
+    /**
+     * Write a feature report to the HID device.
+     * This is usually translated into a control transfer (depends on the device
+     * descriptors).
+     *
+     * Note: the first byte of 'data' has to be the report number
+     * @param {*Buffer} data
+     */
+    this.sendFeatureReport = function(data) {
+        try {
+            myPort.sendFeatureReport(data);
+            debug('Wrote feature report', data);
+        } catch (err) {
+            debug('Port write error! ' + err);
+        }
+
     }
 
     this.close = function() {

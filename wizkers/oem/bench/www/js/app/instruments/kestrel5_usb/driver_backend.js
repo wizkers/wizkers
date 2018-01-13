@@ -28,7 +28,11 @@
 
 
 /**
- *  Low level driver for Kestrel devices.
+ *  Low level driver for Kestrel devices. This is the iLink over USB HID
+ * infrared cable version.
+ *
+ * Note: eventually, more of this driver should move towards the iLink library,
+ * so that there is less code overlap between the USB/Serial and BLE drivers.
  */
 
 
@@ -225,7 +229,15 @@ define(function (require) {
                 }
             }
             console.info('Sending packet', packet);
-            port.write(packet, function(e){});
+
+            // The Kestrel USB to IR cable HID protocol requires appending the
+            // length of the packet as the first byte - this is actually the report
+            // number, but the Silabs converter considers report number 0x00 to 0x3f to be
+            // data transfers, with the report number being the number of bytes to transfer.
+            var hidpacket = new Uint8Array(packet.byteLength +1 );
+            hidpacket[0] = packet.byteLength;
+            hidpacket.set(packet,1);
+            port.write(hidpacket, function(e){});
             // We don't shift the queue at this stage, we wait to
             // receive & process the response
 
@@ -267,6 +279,7 @@ define(function (require) {
             }
             isopen = stat.portopen;
             if (isopen ) {
+                initIRCable();
                 self.startLiveStream();
             }
 
@@ -302,6 +315,31 @@ define(function (require) {
                 port.open();
             });
         };
+
+        /**
+         * Configure the Infrared cable for speaking to the Kestrel.
+         *
+         * The Kestrel infrared cable is apparently a Silabs HID
+         * to UART converter. It needs to be configured before being
+         * about to speak to the Kestrel.
+         *
+         * See Silabs app note AN434 for details.
+         *
+         * The config steps are:
+         *   - Enable UART (report 0x41, data: 0x01)
+         *   - Set UART config to 38400 Baud, no parity, 8 bits, no flow control
+         */
+        var initIRCable = function() {
+
+            // Enable UART
+            port.sendFeatureReport([0x41, 0x01]);
+
+            // 38400, 8, N, 1
+            port.sendFeatureReport([0x50, 0x00, 0x00, 0x96, 0x00, 0x00, 0x00, 0x03  ]);
+
+            // Send a couple of bytes to wake up the Kestrel.
+            port.write([0x03, 0x0a, 0x0a, 0x0a]);
+        }
 
         /////////////
         // Public methods
@@ -356,14 +394,13 @@ define(function (require) {
         // period in seconds
         this.startLiveStream = function (period) {
             if (port) {
-                console.log('TODO: start a regular poll of \'data snapshot\' over the Link protocol');
                 live_poller = setInterval( function() {
                     self.output({command: 'get_data_snapshot'});
                 }, 1000);
             }
         };
 
-        
+
         this.stopLiveStream = function (args) {
             if (live_poller)
                 clearInterval(live_poller);
