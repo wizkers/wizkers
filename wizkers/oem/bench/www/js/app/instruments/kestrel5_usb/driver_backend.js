@@ -59,6 +59,7 @@ define(function (require) {
             port_close_requested = false,
             port_open_requested = false,
             linkProto = new LinkProto(this),
+            live_poller = null,
             isopen = false;
 
         // Command processing
@@ -118,67 +119,30 @@ define(function (require) {
         // Private methods
         /////////////
 
-        // Info required at port creating. Really only used by the
-        // Web Bluetooth driver, other drivers are not demanding at this
-        // stage
+        // Info required at port creation.
+        // THis vendorId/productId pair is the official Kestrel IR to USB
+        // interface.
         var portSettings = function () {
             return {
-                service_uuid: [ KESTREL_SERVICE_UUID],
-                optional_services: [ KESTREL_LOG_SERVICE], // This is a service we need, but is
-                                                           // not advertised by the device. WebBTLE needs this.
-                characteristic_uuid: WX1_UUID
+                vendorId: 4292,
+                productId: 2194,
             }
         };
 
         // Format acts on incoming data from the device, and then
         // forwards the data to the app through a 'data' event.
         var format = function (data) {
-            if (!data.value || !data.characteristic) {
-                console.log('No value or characteristic uuid received');
+            if (!data.value) {
+                console.log('No value received');
                 return;
             }
-            var dv = new DataView(vizapp.type === 'cordova' ? data.value.buffer : data.value);
-
-            // Only send one response every 3 packets with all
-            // readings in one go.
-            if (utils.sameUUID(data.characteristic, WX1_UUID)) {
-                readings.wind.speed = dv.getInt16(0, true)*1.94384/1000; // Convert to knots
-                readings.temperature = dv.getInt16(2, true)/100;
-                readings.rel_humidity = dv.getInt16(6, true)/100;
-                readings.pressure = dv.getInt16(8,true)/10;
-                readings.compass_mag = dv.getInt16(10,true);
-                return;
-            }
-
-            if (utils.sameUUID(data.characteristic, WX2_UUID)) {
-                readings.compass_true = dv.getInt16(0, true);
-                readings.wind.dir = readings.compass_true;
-                readings.altitude = dv.getInt16(4, true)/10; // TODO: Actually an Int24
-                readings.barometer = dv.getInt16(7, true)/10;
-                readings.crosswind = dv.getInt16(9, true)/1000;
-                readings.headwind = dv.getInt16(11, true)/1000;
-                readings.dens_altitude = dv.getInt16(14, true)/10;
-                return;
-            }
-
-            if (utils.sameUUID(data.characteristic, WX3_UUID)) {
-                readings.dew_point = dv.getInt16(0, true)/100;
-                readings.heat_index = dv.getInt16(2, true)/100; // TODO: Actually Int24
-                readings.wetbulb = dv.getInt16(16, true)/100;
-                readings.wind_chill = dv.getInt16(18, true)/100;
-
-                self.trigger('data', readings);
-                return;
-            }
-
-            // We are receiving a serial protocol response
-            if (utils.sameUUID(data.characteristic, KESTREL_LOG_RSP)) {
-                linkProto.processProtocol(data);
-            }
+            // On the infrared port, we only speak the link protocol
+            linkProto.processProtocol(data);
         };
 
         // Right now we assume a Kestrel 5500
-        var CMD_GET_LOG_COUNT_AT  =  3,
+        var CMD_DATA_SNAPSHOT = 0,
+            CMD_GET_LOG_COUNT_AT  =  3,
             CMD_GET_LOG_DATA_AT   =  5,
             CMD_GET_SERIAL_NUMBER =  6,
             CMD_END_OF_DATA       = 18,
@@ -191,24 +155,10 @@ define(function (require) {
             // 3. ask Kestrel for log structure
             // 4. Request log packets until finished
 
-            // First of all stop listening for data packets
-            port.unsubscribe({
-                service_uuid: KESTREL_SERVICE_UUID,
-                characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
-            });
-
-            port.subscribe({
-                service_uuid: KESTREL_LOG_SERVICE,
-                characteristic_uuid: [ KESTREL_LOG_RSP ]
-            });
-
             // Reset the queue
             self.shiftQueue();
 
-            port.once('subscribed', function(uuid) {
-                console.info('Received notification success for uuid', uuid);
-                self.output({command: 'get_total_records'});
-            });
+            self.output({command: 'get_total_records'});
 
         }
 
@@ -248,6 +198,9 @@ define(function (require) {
                     return;
                 queue_busy = true;
                 switch(cmd.command) {
+                    case 'get_data_snapshot':
+                        packet = linkProto.makeCommand( CMD_DATA_SNAPSHOT, null);
+                        break;
                     case 'get_total_records':
                         packet = linkProto.makeCommand( CMD_TOTAL_RECORDS_WRITTEN, null);
                         break;
@@ -272,7 +225,7 @@ define(function (require) {
                 }
             }
             console.info('Sending packet', packet);
-            port.write(packet, {service_uuid: KESTREL_LOG_SERVICE, characteristic_uuid: KESTREL_LOG_CMD }, function(e){});
+            port.write(packet, function(e){});
             // We don't shift the queue at this stage, we wait to
             // receive & process the response
 
@@ -313,10 +266,7 @@ define(function (require) {
                 return;
             }
             isopen = stat.portopen;
-            if (isopen && stat.services) {
-                // Should run any "onOpen" initialization routine here if
-                // necessary.
-                console.log('We found those services', stat.services);
+            if (isopen ) {
                 self.startLiveStream();
             }
 
@@ -334,7 +284,7 @@ define(function (require) {
             port_open_requested = true;
             var ins = instrumentManager.getInstrument();
             if (port == null)
-                port = new btleConnection(insport ? insport : ins.get('port'), portSettings());
+                port = new usbConnection(insport ? insport : ins.get('port'), portSettings());
             port.open();
             port.on('data', format);
             port.on('status', status);
@@ -343,7 +293,7 @@ define(function (require) {
         var openPort_server = function(insid) {
             dbs.instruments.get(insid, function(err,item) {
                 if (port == null) {
-                    port = new btleConnection(item.port, portSettings());
+                    port = new usbConnection(item.port, portSettings());
                 } else {
                     console.log("Already have a driver, reusing it.");
                 }
@@ -405,16 +355,19 @@ define(function (require) {
 
         // period in seconds
         this.startLiveStream = function (period) {
-            if (port)
-                port.subscribe({
-                    service_uuid: KESTREL_SERVICE_UUID,
-                    characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
-                });
+            if (port) {
+                console.log('TODO: start a regular poll of \'data snapshot\' over the Link protocol');
+                live_poller = setInterval( function() {
+                    self.output({command: 'get_data_snapshot'});
+                }, 1000);
+            }
         };
 
-
         
-        this.stopLiveStream = function (args) {};
+        this.stopLiveStream = function (args) {
+            if (live_poller)
+                clearInterval(live_poller);
+        };
 
         // This is where we receive commands from the front-end
         // So far we are not sending anything, since we are subscribing

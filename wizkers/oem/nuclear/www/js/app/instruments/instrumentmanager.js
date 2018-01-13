@@ -106,7 +106,7 @@ define(function (require) {
             },
             'kestrel5_usb': {
                 name: 'Kestrel 5 series (USB)',
-                type: 'app/instruments/kestrel5/kestrel5_usb',
+                type: 'app/instruments/kestrel5_usb/kestrel5_usb',
                 path: 'app/instruments/kestrel5_usb',
                 settings: 'app/instruments/kestrel5/settings',
                 connectionsettings: 'app/views/instrument/usbhid',

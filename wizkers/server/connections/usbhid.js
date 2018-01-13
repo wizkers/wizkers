@@ -53,62 +53,55 @@ var HIDConnection = function(path, settings) {
     var myPort;
 
 
+    /**
+     * Open the device.
+     * 
+     *  Right now we open by vendorId / productId
+     * Pro: no explicit choice by user required, the device just autoconnects
+     * Con: we can only support _one_ device at a time
+     */
     this.open = function() {
-        debug("Opening HID device at " + path);
-        myPort = new SerialPort(path,
-                                settings,
-                                function(err, result) {
-                                    if (err) {
-                                        debug("Open attempt error: " + err);
-                                        self.emit('status', {
-                                            portopen: false,
-                                            openerror: true,
-                                            reason: 'Port open error',
-                                            description: '' + err
-                                        });
-                                    }
-                                });
-        // Callback once the port is actually open:
-    myPort.on('open', function () {
-        myPort.flush(function(err,result){ debug(err + " - " + result); });
-        myPort.resume();
+        debug("Opening HID device with " , settings);
+        var devices = HID.devices();
+        var myDev = devices.find( function(d) {
+            return  d.vendorId===settings.vendorId && d.productId===settings.productId;
+        });
+        debug('Found those devices', myDev);
+        if (myDev == undefined) {
+            debug('Error: too many or too few USB/IR adapters found!', myDev.length);
+            self.emit('status', {
+                portopen: false,
+                openerror: true,
+                reason: 'Port open error',
+                description: myDev.length ? 'More than one adapter found, we only support one at a time' : 'No USB/IR adapter found'
+            });
+            return;
+        }
+
+        myPort = new HID.HID(myDev.path);
+        // Open is synchronous on this library:
         portOpen = true;
         debug('Port open');
         self.emit('status', {portopen: portOpen});
-    });
 
-    // On Node-serialport 5 and onwards, the parser is not built-in anymore,
-    // we need to pipe the port data into the parser and listen to the parser:
-    if (settings.parser) {
-        myPort.pipe(settings.parser);
-        settings.parser.on('data', function (data) {
-                self.emit('data',data);
-        });
-    } else {
         // listen for new serial data:
         myPort.on('data', function (data) {
+                debug('Received data', data);
                 self.emit('data',data);
         });
-    }
 
-    myPort.on('error', function(err) {
-        debug("Serial port error: "  + err);
-        portOpen = false;
-        self.emit('status', {portopen: portOpen, error: true});
-    });
-
-    myPort.on('close', function() {
-        debug('Port closing');
-        debug(myPort);
-        portOpen = false;
-        self.emit('status', {portopen: portOpen});
-    });
+        myPort.on('error', function(err) {
+            debug("USB HID error: "  + err);
+            portOpen = false;
+            self.emit('status', {portopen: portOpen, error: true});
+        });
 
     };
 
     this.write = function(data) {
         try {
             myPort.write(data);
+            debug('Wrote', data);
         } catch (err) {
             debug('Port write error! ' + err);
         }
@@ -116,6 +109,9 @@ var HIDConnection = function(path, settings) {
 
     this.close = function() {
         myPort.close();
+        debug('Port closing');
+        portOpen = false;
+        self.emit('status', {portopen: portOpen});
     }
 
     return this;
