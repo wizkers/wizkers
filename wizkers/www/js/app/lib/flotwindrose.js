@@ -110,7 +110,7 @@ define(function(require) {
         addPlot: function() {
             var d1 = [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
             var data = [
-                { label: "8+",  color:"red", data: d1, rose: {show: true } },
+                { label: "8+ bft",  color:"red", data: d1, rose: {show: true } },
                 { label: "4-7", color:"orange", data: d1, rose: {show: true } },
                 { label: "1-3", color:"green", data: d1, rose: {show: true} }
             ];
@@ -172,7 +172,7 @@ define(function(require) {
             }
             // Last, format it nicely;
             var data = [
-                { label: "8+",   color:"red", data: force8p, rose: {show: true } },
+                { label: "8+ bft",   color:"red", data: force8p, rose: {show: true } },
                 { label: "4-7",  color:"orange", data: force47, rose: {show: true } },
                 { label: "1-3",  color:"green", data: force13, rose: {show: true} },
                 { color:"blue", data: [ latest ], rose: {show: this.settings.instant, pointer: true} }

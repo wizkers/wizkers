@@ -176,8 +176,8 @@ define(function (require) {
             // Haven't found a better way so far:
             var self = this;
             var rsc = function () {
-                // We want the chart to be 30% of the screen
-                self.$('#tempRHchart').height(window.innerHeight * 0.3);
+                // We want the chart to be 40% of the screen
+                self.$('#tempRHchart').height(window.innerHeight * 0.4);
                 if (self.tempRHplot && self.tempRHplot.rsc)
                     self.tempRHplot.rsc();
                 var chartheight = self.$('#tempchart_row').outerHeight();
@@ -364,6 +364,8 @@ define(function (require) {
             this.baroplot.plot.getOptions().xaxes[0].panRange = [mints, maxts];
             this.baroplot.plot.setupGrid();
 
+            this.windplot.plot.getOptions().xaxes[0].panRange = [mints, maxts];
+            this.windplot.plot.setupGrid();
 
             this.tempRHplot.redraw();
             this.baroplot.redraw();
@@ -463,6 +465,14 @@ define(function (require) {
                       'timestamp': ts };
                 this.dirplot.fastAppendPoint(dp);
                 this.windplot.fastAppendPoint({'name': 'windspeed', 'value': data.wind.speed, 'timestamp': ts });
+            }
+            if (data.windspeed != undefined) {
+                this.windplot.fastAppendPoint({'name': 'windspeed', 'value': data.windspeed, 'timestamp': ts });
+                if (data.compass_true != undefined) {
+                    this.dirplot.fastAppendPoint({'name': 'Wind',
+                    'value': {speed: data.windspeed, dir: data.compass_true },
+                     'timestamp': ts });
+                }
             }
 
             if (data.altitude != undefined) {
