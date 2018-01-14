@@ -155,6 +155,9 @@ define(function (require) {
                                     });
                                 }
                             }
+                            // Last: save our log again, because we now have updated it
+                            // witht he right number of entries.
+                            currentLog.save(null);
                             $('#logModal .modal-body', self.el).html('<p>Log downloaded.</p><p>New data points:' + newPoints + '.</p>');
                             $('#logDismissOK', self.el).removeAttr('disabled');
                         }

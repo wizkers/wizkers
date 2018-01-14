@@ -26,8 +26,9 @@
  * Where we define the device log data
  * @author Edouard Lafargue, ed@lafargue.name
  *
- * This model uses indexeddb in Chrome mode, because localstorage cannot
- * cope with large amounts of data - nor is it designed for that purpose
+ * This model uses PouchDB in app mode. Not idea for time series
+ * data, and will need to evolve pretty soon, especially since it relies
+ * on the websql driver which is officially deprecated.
  */
 
 
@@ -70,15 +71,18 @@ define(function (require) {
 
         /**
          * A collection of log entries that go together because
-         * they all have the same logsessionid
+         * they all have the same logsessionid.
          */
         LogEntries = Backbone.Collection.extend({
 
             logsessionid: null,
 
+            // Need to always set the logsession in the options
             initialize: function (models, options) {
                 if (vizapp.type != 'server') {
                     var self = this;
+
+                    this.logsession = options.logsession;
 
                     // The PouchDB query bundles the results in the 'rows' key,
                     // so return the content of this key, rather that "results"
@@ -134,7 +138,7 @@ define(function (require) {
 
                 // A log contains... entries (surprising, eh?). Nest
                 // the collection here:
-                this.entries = new LogEntries();
+                this.entries = new LogEntries(null, { logsession: this});
                 this.updateEntriesURL();
 
                 // Watch our entries so that we can update the datapoints entry
@@ -159,7 +163,9 @@ define(function (require) {
                 this.set('datapoints', points);
                 this.set('startstamp', this.entries.getLogStart());
                 this.set('endstamp', this.entries.getLogEnd());
-                this.save();
+                // Do not autosave, this is a massive performance hit. We have to make
+                // sure that we save our log after inserting entries
+                // this.save();
             },
 
             updateEntriesURL: function () {

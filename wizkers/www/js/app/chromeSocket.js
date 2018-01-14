@@ -138,6 +138,7 @@ define(function (require) {
                 logsessionid: currentLog.id,
                 data: data
             });
+            currentLog.save(null); // Make sure the metadata is saved
         }
 
         var portStatus = function (insid) {

@@ -75,7 +75,10 @@ exports.findByInstrumentId = function (req, res) {
                         return;
                     }
                     item.doc.datapoints = info.doc_count;
-                    // A simple consistency check:
+                    // TODO: also add latest log entry timestamp!
+
+                    // A simple consistency check to clear the recording flag
+                    // if the log is not referenced by the recorder:
                     item.doc.isrecording = (item.doc._id == recorder.logID(id));
                     resp.push(item.doc);
                     af();
@@ -242,7 +245,7 @@ exports.addLog = function (req, res) {
 };
 
 // Update the contents of a log
-exports.updateEntry = function (req, res) {
+exports.updateLog = function (req, res) {
     var id = req.params.id;
     var iid = req.params.iid;
     var entry = req.body;
@@ -251,18 +254,23 @@ exports.updateEntry = function (req, res) {
 
     // TODO: error checking on structure !!!
     //  -> CouchDB validation
-    dbs.logs.put(entry, function (err, result) {
-        if (err) {
-            debug('Error updating log session entry: ' + err);
-            res.send({
-                'error': 'An error has occurred'
-            });
-        } else {
-            res.send({
-                _id: result.id,
-                _rev: result.rev
-            });
-        }
+    dbs.logs.get(id).then(function(doc) {
+        entry._rev = doc._rev;
+        dbs.logs.put(entry, function (err, result) {
+            if (err) {
+                debug('Error updating log session entry: ' + err);
+                res.send({
+                    'error': 'An error has occurred'
+                });
+            } else {
+                res.send({
+                    _id: result.id,
+                    _rev: result.rev
+                });
+            }
+        })
+    }).catch(function(err) {
+        debug('Error finding the log we wanted to update', err);
     });
 };
 
