@@ -40,6 +40,8 @@ define(function (require) {
         roseplot = require('app/lib/flotwindrose'),
         template = require('js/tpl/instruments/kestrel5/LogView.js');
 
+        require('flot_navigate');
+
     return Backbone.View.extend({
 
         initialize: function (options) {
@@ -60,7 +62,11 @@ define(function (require) {
                         mode: "time",
                         show: true,
                         timeformat: "%H:%M",
-                        timezone: settings.get("timezone")
+                        timezone: settings.get("timezone"),
+                    },
+                    yaxis: {
+                        zoomRange: false,
+                        panRange: false
                     },
                     crosshair: {
 				        mode: "x"
@@ -71,6 +77,12 @@ define(function (require) {
                     legend: {
                         show: false,
                         position: "ne"
+                    },
+                    zoom: {
+                        interactive: true
+                    },
+                    pan: {
+                        interactive: true
                     }
                 }
             };
@@ -321,29 +333,46 @@ define(function (require) {
 
         },
 
-
-        // Depending on log type, we need to pack our data differently...
         packData: function () {
             var self = this;
             // Create a table of Y values with the x values from our collection
             var data = [];
             var logs = this.deviceLogs;
+            var mints = null;
+            var maxts = null;
             // At this stage we know the logs are already fetched, btw
             for (var j = 0; j < logs.length; j++) {
                 var ret = [];
                 var value = logs.at(j).entries;
-                var type = logs.at(j).get('logtype');
                 for (var i = 0; i < value.length; i++) {
                     var entry = value.at(i);
                     var ts = new Date(entry.get('timestamp')).getTime();
+                    if (ts < mints || mints == null)
+                        mints = ts;
+                    if (ts > maxts || maxts == null)
+                        maxts = ts;
                     this.disp_wx(entry.get('data'), ts);
                 }
             }
+
+            // Adjust the max pan range on X axis
+            // Need to toiuch xaxes direct because of the way the navigate plugin is
+            // written
+            this.tempRHplot.plot.getOptions().xaxes[0].panRange = [mints, maxts];
+            this.tempRHplot.plot.setupGrid();
+
+            this.baroplot.plot.getOptions().xaxes[0].panRange = [mints, maxts];
+            this.baroplot.plot.setupGrid();
+
+
             this.tempRHplot.redraw();
             this.baroplot.redraw();
             this.dirplot.redraw();
             this.windplot.redraw();
             this.update_colorlabels();
+
+
+
             return data;
         },
 
