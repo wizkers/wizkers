@@ -79,7 +79,8 @@ define(function (require) {
                         position: "ne"
                     },
                     zoom: {
-                        interactive: true
+                        interactive: true,
+                        amount: 1.2
                     },
                     pan: {
                         interactive: true
