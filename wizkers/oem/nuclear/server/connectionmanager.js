@@ -48,6 +48,7 @@ var SimpleSerial = require('./parsers/simple_serial.js');
 var Dummy = require('./parsers/dummy.js');
 var RMYoung = require('./www/js/app/instruments/rmyoung/driver_backend.js');
 var Kestrel5 = require('./www/js/app/instruments/kestrel5/driver_backend.js');
+var BlueOnyx = require('./www/js/app/instruments/blue_onyx/driver_backend.js');
 var InspectorBLE = require('./www/js/app/instruments/inspector_ble/driver_backend.js');
 var BGeigie = require('./www/js/app/instruments/bgeigie/driver_backend.js');
 var W433 = require('./parsers/w433.js');
@@ -85,6 +86,8 @@ var ConnectionManager = function () {
             driver = new Kestrel5();
         } else if (type == 'inspector_ble') {
             driver = new InspectorBLE();
+        } else if (type == 'blue_onyx') {
+            driver = new BlueOnyx();
         } else if (type == 'sample_instrument') {
             driver = new Dummy();
         } else if (type == 'bgeigie') {

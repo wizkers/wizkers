@@ -22,11 +22,21 @@
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+
+// This detects whether we are in a server situation and act accordingly:
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+    var vizapp = { type: 'server'},
+    events = require('events'),
+    dbs = require('pouch-config');
+}
+
+
 define(function (require) {
     "use strict";
 
-    var Backbone = require('backbone'),
-        abutils = require('app/lib/abutils'),
+    var abutils = require('app/lib/abutils'),
+        utils = require('app/utils'),
         btleConnection = require('connections/btle');
 
 
@@ -73,24 +83,6 @@ define(function (require) {
         // Private methods
         /////////////
 
-        /**
-         * Compare two BLE UUIDs in long and short (16 bit) formats
-         */
-        var sameUuid = function(u1, u2) {
-            u1 = u1.toLowerCase();
-            u2 = u2.toLowerCase();
-            if (u1 == u2)
-                return true;
-
-            if (u1 == u2.substr(4,4))
-                return true;
-
-            if (u2 == u1.substr(4,4))
-                return true;
-
-            return false;
-        }
-
         var portSettings = function () {
             return {
                 service_uuid: HEART_RATE_SERVICE_UUID,
@@ -114,8 +106,8 @@ define(function (require) {
             // operations and its value can only be obtained via notifications, so the
             // |value| field might be undefined here.
 
-            if (sameUuid(data.service,HEART_RATE_SERVICE_UUID) &&
-                sameUuid(data.characteristic,HEART_RATE_MEASUREMENT_UUID)) {
+            if (utils.sameUUID(data.service,HEART_RATE_SERVICE_UUID) &&
+                utils.sameUUID(data.characteristic,HEART_RATE_MEASUREMENT_UUID)) {
                 var valueBytes = new Uint8Array(data.value);
                 if (valueBytes.length < 2) {
                     console.log('Invalid Heart Rate Measurement value');
@@ -154,7 +146,7 @@ define(function (require) {
                 };
 
                 self.trigger('data', response);
-            } else if (sameUuid(data.service, DEV_INFO) && sameUuid(data.characteristic, SERIAL_NUMBER)) {
+            } else if (utils.sameUUID(data.service, DEV_INFO) && utils.sameUUID(data.characteristic, SERIAL_NUMBER)) {
                 // The SN of the Blue Onyx is the MAC
                 var res = '';
                 for (var i in data.value) {
@@ -264,6 +256,9 @@ define(function (require) {
 
                 // Now regularly ask the navigator for current position and refresh map
                 if (watchid == null) {
+                    current_loc = null;
+                    if (typeof navigator == 'undefined') // Note: Node.js requires using typeof
+                    return;
                     watchid = navigator.geolocation.watchPosition(newLocation, geolocationError, {
                         maximumAge: 10000,
                         timeout: 20000,
@@ -278,6 +273,8 @@ define(function (require) {
                     else
                         port.removeListener('status', status);
                     port_close_requested = false;
+                    if (typeof navigator == 'undefined') // Note: Node.js requires using typeof
+                        return;
                     if (watchid != null)
                         navigator.geolocation.clearWatch(watchid);
                         watchid = null;
@@ -309,20 +306,50 @@ define(function (require) {
                 location_status = err.message;
         }
 
+        /**
+         *   Composite drivers (see envmonitor) pass the instrument port path
+         *  directly since the 'ins' reference returned by the instrument manager is the
+         *  composite instrument reference, not the one we actually want.
+         * @param {*} insid    Instrument ID (string)
+         * @param {*} insport  Instrument port path (string)
+         */
+        var openPort_app = function (insid, insport) {
+            var ins = instrumentManager.getInstrument();
+            port = new btleConnection(insport ? insport : ins.get('port'), portSettings());
+            port.open();
+            port.on('data', format);
+            port.on('status', status);
+        };
+
+        var openPort_server = function(insid) {
+            dbs.instruments.get(insid, function(err,item) {
+                if (port == null)
+                    port = new btleConnection(item.port, portSettings());
+                port.on('data', format);
+                port.on('status', status);
+                port.open();
+            });
+        };
+
+
         /////////////
         // Public methods
         /////////////
 
-        this.openPort = function (insid) {
+        /**
+         * insid : ID of the instrument (so that we can fetch its settings)
+         * insport: optional, pass the instrument port info for direct opening, used for
+         *          composite drivers in Cordova/app mode
+         */
+        this.openPort = function (insid, insport) {
             port_open_requested = true;
             instrumentid = insid;
-            var ins = instrumentManager.getInstrument();
-            if (port == null) {
-                port = new btleConnection(ins.get('port'), portSettings());
-                port.on('data', format);
-                port.on('status', status);
+            if (vizapp.type == 'server') {
+                openPort_server(insid);
+            } else {
+                openPort_app(insid, insport);
             }
-            port.open();
+
         };
 
         this.closePort = function (data) {
@@ -374,6 +401,14 @@ define(function (require) {
         };
     }
 
-    _.extend(parser.prototype, Backbone.Events);
+    // On server side, we use the Node eventing system, whereas on the
+    // browser/app side, we use Bacbone's API:
+    if (vizapp.type != 'server') {
+        // Add event management to our parser, from the Backbone.Events class:
+        _.extend(parser.prototype, Backbone.Events);
+    } else {
+        parser.prototype.__proto__ = events.EventEmitter.prototype;
+        parser.prototype.trigger = parser.prototype.emit;
+    }
     return parser;
 });

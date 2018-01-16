@@ -169,8 +169,9 @@ define(function (require) {
                     // every event in double
                     debug('Subscribing to characteristic', c[i].uuid, c[i].properties);
                     cleanDataListeners(c[i]);
-                    var makeOnData = function(c) {
+                    var makeOnData = function(c, s) {
                         var uuid = c.uuid;
+                        var suuid = s;
                         // We enable notifications from here, so that we use a static reference to the
                         // characteristic - otherwise, 'i' has changed once the 'notify' event occurs and we
                         // can't retrieve the correct uuid.
@@ -180,10 +181,12 @@ define(function (require) {
                         });
                         return function(data, isNotification) {
                             debug('Received data from BLE device', data, isNotification, 'for uuid', uuid);
-                            self.emit('data', { value: data, characteristic: uuid });
+                            self.emit('data', { value: data, characteristic: uuid,
+                                service: suuid
+                             });
                         }
                     }
-                    c[i].on('data', makeOnData(c[i]));
+                    c[i].on('data', makeOnData(c[i], subscribeInfo.service_uuid));
                     subscribedCharacteristics.push(c[i]);
                 }
                 debug('We now have those subscribed characteristics');
