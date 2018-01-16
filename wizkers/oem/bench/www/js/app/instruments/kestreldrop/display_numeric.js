@@ -75,16 +75,16 @@ define(function(require) {
 
         disp_wx: function(data,ts) {
             if (data.temperature != undefined) {
-                this.$('#tempreading').html(data.temperature + '&nbsp;&deg;');
+                this.$('#tempreading').html(utils.round(data.temperature,1) + '&nbsp;&deg;');
             }
             if (data.dew_point != undefined) {
-                this.$('#dewpointreading').html(data.dew_point + '&nbsp;&deg;');
+                this.$('#dewpointreading').html(utils.round(data.dew_point,1) + '&nbsp;&deg;');
             }
             if (data.heat_index != undefined) {
-                this.$('#heatindexreading').html(data.heat_index + '&nbsp;&deg;');
+                this.$('#heatindexreading').html(utils.round(data.heat_index,1) + '&nbsp;&deg;');
             }
             if (data.wetbulb != undefined) {
-                this.$('#wetbulbreading').html(data.wetbulb + '&nbsp;&deg;');
+                this.$('#wetbulbreading').html(utils.round(data.wetbulb,1) + '&nbsp;&deg;');
             }  else {
                 if (this.$('#wetbulbreading').is(':visible')) {
                     this.$('#wetbulbreading').parent().hide();
@@ -92,13 +92,13 @@ define(function(require) {
                 }
             }
             if (data.rel_humidity != undefined) {
-                this.$('#rhreading').html(data.rel_humidity + '&nbsp;' + data.unit.rel_humidity);
+                this.$('#rhreading').html(utils.round(data.rel_humidity,0) + '&nbsp;%');
             }
             if (data.pressure != undefined) {
-                this.$('#pressurereading').html(data.pressure + '&nbsp;' + data.unit.pressure);
+                this.$('#pressurereading').html(utils.round(data.pressure,0) + '&nbsp;<small>mb</small>');
             }
             if (data.dens_altitude != undefined) {
-                this.$('#densaltitudereading').html(data.dens_altitude + '&nbsp;' + data.unit.dens_altitude);
+                this.$('#densaltitudereading').html(utils.round(data.dens_altitude,0) + '&nbsp;<small>m</small>');
             }
 
         },
