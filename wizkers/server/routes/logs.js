@@ -43,7 +43,14 @@ exports.findByInstrumentId = function (req, res) {
     var id = req.params.id;
     debug('Retrieving Logs for Instrument ID: ' + id);
 
-    dbs.logs.query('by_instrument', {
+    // 2018.01: for some reason, using design documents stopped working
+    // at some point, still debugging. In the mean time, using inline queries
+    // is fine since we are only dealing with a couple of dozen or hundred logs per instrument
+    // for now.
+    dbs.logs.query(
+        function(doc,emit) {
+            emit(doc.instrumentid);
+        }, {
         key: id,
         include_docs: true
     }, function (err, items) {
