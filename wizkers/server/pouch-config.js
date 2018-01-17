@@ -30,9 +30,8 @@
 
 var PouchDB = require('pouchdb');
 var bcrypt = require('bcrypt-nodejs');
-var debug = require('debug')('wizkers:pouchdb');
+var debug = require('debug')('pouchdb');
 
-// PouchDB.plugin(require('pouchdb-find'));
 
 /**
  * Top level configuration: we can decide to either use local PouchDB
@@ -96,7 +95,7 @@ var logs = new PouchDB(logsDB, {
  * View of logs by instrument ID
  */
 var logByInstrument = {
-    _id: '_design/log_queries',
+    _id: '_design/by_instrument',
     views: {
         'by_instrument': {
             map: function (doc) {

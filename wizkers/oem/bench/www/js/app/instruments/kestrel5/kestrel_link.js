@@ -476,12 +476,21 @@ define(function (require) {
                 stop = -1;
             if (currentProtoState == P_IDLE) {
                 start = sync(inputBuffer, ibIdx, 0);
-                // console.info("Found Start at", start);
+                //console.info("Found Start at", start);
                 if (start > -1) {
                     currentProtoState = P_SYNC;
+                    // Edge case: it is possible to have two 0x7e one after another:
+                    // this is when we start receiving data, and we get the tail end of
+                    // the previous packet, in which case we will get the first 0x7e as the
+                    // last byte of the incomplete packet, then 0x7e as the first byte of the
+                    // next packet. So if we find out that we have two consecutive 0x72, we
+                    // realign on the second one.
+                    if (inputBuffer[start+1] == 0x7e)
+                        start++;
                     // Realign our buffer (we can copy over overlapping regions):
                     inputBuffer.set(inputBuffer.subarray(start));
                     ibIdx -= start;
+                    // console.log('Input buffer is now', inputBuffer);
                 } else {
                     return;
                 }

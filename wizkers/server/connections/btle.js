@@ -270,7 +270,6 @@ define(function (require) {
         // Has to be called by the backend_driver to actually open the port.
         // This just connects to the device
         this.open = function () {
-debug('*************************************** Noble is', noble);
             if (typeof noble.wizkersScanningCount == 'undefined')
                 noble.wizkersScanningCount = 0;
             // noble, the NodeJS we use, seems to require a scan to find
@@ -355,6 +354,7 @@ debug('*************************************** Noble is', noble);
                 if (c.uuid == subscribedCharacteristics[i].uuid) {
                     subscribedCharacteristics[i].unsubscribe();
                     subscribedCharacteristics[i].removeAllListeners('data');
+                    self.emit('unsubscribed',c.uuid);
                     subscribedCharacteristics.splice(i,1); // Remove old characteristic
                 }
             }

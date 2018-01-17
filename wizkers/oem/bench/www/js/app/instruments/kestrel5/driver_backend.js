@@ -201,23 +201,43 @@ define(function (require) {
             // 3. ask Kestrel for log structure
             // 4. Request log packets until finished
 
+            // Reset the queue
+            self.shiftQueue();
+
+            var ctr = 0;
+            port.on('unsubscribed', function unsub(uuid) {
+                ctr++
+                if (ctr == 3) {
+                    console.log('Unsubscribed from all');
+                    if (port.off)
+                        port.off('unsubscribed');
+                    else
+                        port.removeListener('unsubscribed', unsub);
+                    port.once('subscribed', function(uuid) {
+                        console.info('Received notification success for uuid', uuid);
+                        // In case of Cordova: due to bugs on the Cordova BLE driver,
+                        // we need to wait before sending the first command, otherwise we
+                        // will miss the first bytes.
+                        if (vizapp.type == 'cordova') {
+                            setTimeout(function() {
+                                self.output({command: 'get_total_records'});
+                            }, 2000);
+                        } else
+                            self.output({command: 'get_total_records'});
+                    });
+
+                    console.log('Subscribing');
+                    port.subscribe({
+                        service_uuid: KESTREL_LOG_SERVICE,
+                        characteristic_uuid: [ KESTREL_LOG_RSP ]
+                    });
+                    }
+            });
+
             // First of all stop listening for data packets
             port.unsubscribe({
                 service_uuid: KESTREL_SERVICE_UUID,
                 characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
-            });
-
-            port.subscribe({
-                service_uuid: KESTREL_LOG_SERVICE,
-                characteristic_uuid: [ KESTREL_LOG_RSP ]
-            });
-
-            // Reset the queue
-            self.shiftQueue();
-
-            port.once('subscribed', function(uuid) {
-                console.info('Received notification success for uuid', uuid);
-                self.output({command: 'get_total_records'});
             });
 
         }
@@ -423,7 +443,7 @@ define(function (require) {
         };
 
 
-        
+
         this.stopLiveStream = function (args) {};
 
         // This is where we receive commands from the front-end

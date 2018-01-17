@@ -212,19 +212,26 @@ define(function (require) {
                     characteristic: cuid[i]
                 };
 
-                // subscribedChars.push(params);
-
-                bluetoothle.unsubscribe(function (success) {
-                    console.log('Unsubscribed');
-                    for (var j in subscribedChars) {
-                        // That loop works because we know we only have one
-                        // element max that we can find.
-                        if (subscribedChars[j].characteristic == cuid[i]) {
-                            subscribedChars.splice(j,1);
-                            break;
+                // Use this callback so that we can pass the characteristic UUID
+                // (using cuid[i] in the callback won't work because i will have
+                // changed by the time we get the success callback)
+                function makeUnsubscribe(uuid) {
+                    return function (success) {
+                        console.log('Unsubscribed from', uuid);
+                        self.trigger('unsubscribed', uuid);
+                        for (var j in subscribedChars) {
+                            // That loop works because we know we only have one
+                            // element max that we can find.
+                            if (subscribedChars[j].characteristic == uuid) {
+                                subscribedChars.splice(j,1);
+                                break;
+                            }
                         }
                     }
-                } , function (err) {
+                }
+
+                bluetoothle.unsubscribe(makeUnsubscribe(cuid[i])
+                 , function (err) {
                     // We get a callback here both when subscribe fails and when the
                     // device disconnects - only take action when we have a subscribe
                     // fail, that's it.
