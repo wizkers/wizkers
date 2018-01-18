@@ -37,12 +37,16 @@ define(function (require) {
         utils = require('app/utils'),
         template = require('js/tpl/instruments/mifare/LiveView.js');
 
+    require('lib/bootstrap-treeview');
+
     return Backbone.View.extend({
 
         initialize: function (options) {
 
             this.update_count = 0;
             this.datasetlength = 0;
+
+            this.readers = [];
 
             if (vizapp.type == 'cordova') {
                 var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
@@ -70,7 +74,12 @@ define(function (require) {
             var self = this;
             console.log('Main render of Mifare view');
             this.$el.html(template());
+
+            // Initialize a reader tree view
+            this.$('#readers').treeview({ data:this.readers});
+
             linkManager.requestStatus();
+            linkManager.getUniqueID(); // Actually gets the list of readers
             return this;
         },
 
@@ -93,6 +102,17 @@ define(function (require) {
         // We get there whenever we receive something from the serial port
         showInput: function (data) {
             var self = this;
+
+            if (data.device) {
+                // Old school loops are still the fastest
+                for (var i = 0; i < this.readers.length; i++) {
+                    if (this.readers[i].text == data.device)
+                        return;
+                }
+                // Didn't find the device
+                this.readers.push({ text: data.device});
+                this.$('#readers').treeview({ data:this.readers});
+            }
 
             console.log('Data', data);
 

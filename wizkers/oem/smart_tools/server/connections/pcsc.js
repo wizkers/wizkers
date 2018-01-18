@@ -24,7 +24,7 @@
 
 /**
  *  A PC/SC smart card / NFC driver.
- * 
+ *
  * API is very specific to the PC/SC world, not a simple read/write like
  * most other instrument drivers.
  *
@@ -55,17 +55,16 @@ var PCSCConnection = function(path, settings) {
 
     this.open = function() {
         debug("Opening PCSC device at " + path);
-        myPort = new pcsc();
+        // The PCSC layer auto-opens, no callback
+        portOpen = true;
+        self.emit('status', {portopen: portOpen, error: false});
 
-        debug(myPort);
+        myPort = new pcsc();
 
         // Callback once the port is actually open:
         myPort.on('reader', function (reader) {
-            debug('Reader detected', reader);
-
             var state = 0;
-
-            self.emit('status', {reader: reader.name});
+            self.emit('status', {device: reader.name});
             debug(this);
 
             reader.on('status', function(status) {
@@ -80,8 +79,8 @@ var PCSCConnection = function(path, settings) {
                         self.emit('status', {reader: reader.name, status: 'card_inserted', atr: status.atr});
                     }
                 }
-            });       
-    
+            });
+
         });
 
 
@@ -90,11 +89,6 @@ var PCSCConnection = function(path, settings) {
             portOpen = false;
             self.emit('status', {portopen: portOpen, error: true});
         });
-
-        // The PCSC layer auto-opens, no callback
-        portOpen = true;
-        self.emit('status', {portopen: portOpen, error: false});
-
 
     };
 

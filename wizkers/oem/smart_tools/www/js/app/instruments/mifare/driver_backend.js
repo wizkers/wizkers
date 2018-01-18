@@ -23,9 +23,9 @@
  */
 
 /*
- * Browser-side Parser for RM Young wind monitors.
+ * Browser-side Parser for PCSC readers)
  *
- * This Browser-side parser is used when running as a Chrome or Cordova app.
+ * Used for both browser side and server side.
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -62,21 +62,13 @@ define(function (require) {
         var portSettings = function () {
             return {};
         };
-    
+
+        var readers = [];
+
 
         // Format can act on incoming data from the PC/CS layer, and then
         // forwards the data to the app through
         var format = function (data) {
-            if (data.length < 10)
-                return;
-            var arr = data.split(' ');
-            var jsresp = {
-                wind: {
-                    speed: utils.round(parseInt(arr[0]) * 0.09526, 3), // Convert wind speed to knots
-                    unit: { dir: '°', speed:'knot'},
-                    dir: parseInt(arr[1])/10
-                }
-            };
             self.trigger('data', jsresp);
         };
 
@@ -99,13 +91,12 @@ define(function (require) {
                 return;
             }
 
-            isopen = stat.portopen;
+            if (stat.portopen)
+                isopen = stat.portopen;
 
-            if (isopen) {
-                // Should run any "onOpen" initialization routine here if
-                // necessary.
+            if (isopen)
                 handleReaderStatus(stat);
-            } else {
+            else {
                 // We remove the listener so that the serial port can be GC'ed
                 if (port_close_requested) {
                     if (port.off)
@@ -122,17 +113,14 @@ define(function (require) {
          */
         var handleReaderStatus = function(stat) {
             console.log('PC/SC Status message');
-            switch (stat.state) {
-                case 18:
-                    break;
-                case 34:
-                    break;
-                default:
-                    self.trigger('data', { status: 'Unknown'})
+            if (stat.device) {
+                // PCSC device detected
+                if (readers.indexOf(stat.device) == -1)
+                    readers.push(stat.device);
+                self.trigger('data', stat);
+                return;
             }
         }
-
-
 
         var openPort_server = function(insid) {
             dbs.instruments.get(insid, function(err,item) {
@@ -206,9 +194,11 @@ define(function (require) {
         //
         // Returns the Geiger counter GUID.
         this.sendUniqueID = function () {
-            self.trigger('data', {
-                uniqueID: '00000000 (n.a.)'
-            });
+            // We cheat a bit here this is used to send
+            // the list of existing readers
+            for (var i =0; i < readers.length; i++) {
+                self.trigger('data', { device: readers[i]});
+            }
         };
 
         this.isStreaming = function () {
@@ -217,7 +207,8 @@ define(function (require) {
 
 
         // period in seconds
-        this.startLiveStream = function (period) {};
+        this.startLiveStream = function (period) {
+        };
 
         this.stopLiveStream = function (args) {};
 
