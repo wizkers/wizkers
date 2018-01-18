@@ -65,10 +65,9 @@ var PCSCConnection = function(path, settings) {
         myPort.on('reader', function (reader) {
             var state = 0;
             self.emit('status', {device: reader.name});
-            debug(this);
 
             reader.on('status', function(status) {
-                debug('Reader Status', status, ' State:', status.state.toString(16));
+                debug('Reader Status', status, ' State: 0x', status.state.toString(16));
                 var changes = state ^ status.state;
                 if (changes) {
                     if ((changes & this.SCARD_STATE_EMPTY) && (status.state & this.SCARD_STATE_EMPTY)) {

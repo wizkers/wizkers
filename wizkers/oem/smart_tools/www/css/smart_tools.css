@@ -1,0 +1,9 @@
+/* Styles for the smart card reader tree */
+
+.readertree {
+    font-size: 12px;
+}
+
+.readertree li {
+    padding: 4px;
+}

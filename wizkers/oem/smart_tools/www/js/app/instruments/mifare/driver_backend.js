@@ -117,9 +117,8 @@ define(function (require) {
                 // PCSC device detected
                 if (readers.indexOf(stat.device) == -1)
                     readers.push(stat.device);
-                self.trigger('data', stat);
-                return;
             }
+            self.trigger('data', stat);
         }
 
         var openPort_server = function(insid) {

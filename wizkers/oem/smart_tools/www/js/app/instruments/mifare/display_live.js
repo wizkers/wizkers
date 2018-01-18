@@ -35,6 +35,7 @@ define(function (require) {
         _ = require('underscore'),
         Backbone = require('backbone'),
         utils = require('app/utils'),
+        abutils = require('app/lib/abutils'),
         template = require('js/tpl/instruments/mifare/LiveView.js');
 
     require('lib/bootstrap-treeview');
@@ -98,6 +99,10 @@ define(function (require) {
             console.log('Clear');
         },
 
+        formatAtr: function(atr) {
+            return abutils.ui8tohex(new Uint8Array(atr));
+        },
+
 
         // We get there whenever we receive something from the serial port
         showInput: function (data) {
@@ -110,8 +115,28 @@ define(function (require) {
                         return;
                 }
                 // Didn't find the device
-                this.readers.push({ text: data.device});
+                this.readers.push({ text: data.device, nodes: []});
                 this.$('#readers').treeview({ data:this.readers});
+                return;
+            }
+
+            // Present when card inserted/removed
+            if (data.status) {
+                if (data.status == 'card_inserted') {
+                    for (var i = 0; i < this.readers.length; i++) {
+                        if (this.readers[i].text == data.reader) {
+                            this.readers[i].nodes.push({text:this.formatAtr(data.atr)});
+                        }
+                    }
+                } else if (data.status == 'card_removed') {
+                    for (var i = 0; i < this.readers.length; i++) {
+                        if (this.readers[i].text == data.reader) {
+                            this.readers[i].nodes = [];
+                        }
+                    }
+                }
+                this.$('#readers').treeview({ data:this.readers});
+
             }
 
             console.log('Data', data);
