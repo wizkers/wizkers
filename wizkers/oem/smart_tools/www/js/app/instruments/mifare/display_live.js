@@ -48,7 +48,7 @@ define(function (require) {
             this.update_count = 0;
             this.datasetlength = 0;
 
-            this.readers = [];
+            this.readerlist = [];
 
             if (vizapp.type == 'cordova') {
                 var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
@@ -78,7 +78,7 @@ define(function (require) {
             this.$el.html(template());
 
             // Initialize a reader tree view
-            this.$('#readers').treeview({ data:this.readers});
+            this.$('#readers').treeview({ data:this.readerlist});
 
             linkManager.requestStatus();
             linkManager.getUniqueID(); // Actually gets the list of readers
@@ -113,32 +113,39 @@ define(function (require) {
 
             if (data.device) {
                 // Old school loops are still the fastest
-                for (var i = 0; i < this.readers.length; i++) {
-                    if (this.readers[i].text == data.device)
-                        return;
+                for (var i = 0; i < this.readerlist.length; i++) {
+                    if (this.readerlist[i].text == data.device) {
+                        if (data.action == 'removed') {
+                            this.readerlist.splice(i,1);
+                            this.$('#readers').treeview({ data:this.readerlist});
+                            return;
+                        }
+                    }
                 }
+                if (data.action != 'added')
+                    return;``
                 // Didn't find the device
-                this.readers.push({ text: data.device, nodes: []});
-                this.$('#readers').treeview({ data:this.readers});
+                this.readerlist.push({ text: data.device, nodes: []});
+                this.$('#readers').treeview({ data:this.readerlist});
                 return;
             }
 
             // Present when card inserted/removed
             if (data.status) {
                 if (data.status == 'card_inserted') {
-                    for (var i = 0; i < this.readers.length; i++) {
-                        if (this.readers[i].text == data.reader) {
-                            this.readers[i].nodes.push({text:this.formatAtr(data.atr)});
+                    for (var i = 0; i < this.readerlist.length; i++) {
+                        if (this.readerlist[i].text == data.reader) {
+                            this.readerlist[i].nodes.push({text:this.formatAtr(data.atr)});
                         }
                     }
                 } else if (data.status == 'card_removed') {
-                    for (var i = 0; i < this.readers.length; i++) {
-                        if (this.readers[i].text == data.reader) {
-                            this.readers[i].nodes = [];
+                    for (var i = 0; i < this.readerlist.length; i++) {
+                        if (this.readerlist[i].text == data.reader) {
+                            this.readerlist[i].nodes = [];
                         }
                     }
                 }
-                this.$('#readers').treeview({ data:this.readers});
+                this.$('#readers').treeview({ data:this.readerlist});
 
             }
 

@@ -64,7 +64,7 @@ var PCSCConnection = function(path, settings) {
         // Callback once the port is actually open:
         myPort.on('reader', function (reader) {
             var state = 0;
-            self.emit('status', {device: reader.name});
+            self.emit('status', {device: reader.name, action: 'added'});
 
             reader.on('status', function(status) {
                 debug('Reader Status', status, ' State: 0x', status.state.toString(16));
@@ -76,6 +76,9 @@ var PCSCConnection = function(path, settings) {
                     } else if ((changes & this.SCARD_STATE_PRESENT) && (status.state & this.SCARD_STATE_PRESENT)) {
                         debug("card inserted");
                         self.emit('status', {reader: reader.name, status: 'card_inserted', atr: status.atr});
+                    } else if ((changes & this.SCARD_STATE_UNKNOWN) && (status.state & this.SCARD_STATE_UNKNOWN)) {
+                        debug("Reader removed");
+                        self.emit('status', {device: reader.name, action: 'removed' });
                     }
                 }
             });

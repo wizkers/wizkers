@@ -196,7 +196,7 @@ define(function (require) {
             // We cheat a bit here this is used to send
             // the list of existing readers
             for (var i =0; i < readers.length; i++) {
-                self.trigger('data', { device: readers[i]});
+                self.trigger('data', { device: readers[i], action: 'added'});
             }
         };
 
