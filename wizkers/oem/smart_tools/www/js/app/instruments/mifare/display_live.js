@@ -36,6 +36,7 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         abutils = require('app/lib/abutils'),
+        cardident = require('js/app/instruments/mifare/card_identifier.js'),
         template = require('js/tpl/instruments/mifare/LiveView.js');
 
     require('lib/bootstrap-treeview');
@@ -100,6 +101,8 @@ define(function (require) {
         },
 
         formatAtr: function(atr) {
+            var atrinfo = cardident.parseATR(atr);
+            this.$('#atrinfo').html(atrinfo);
             return abutils.ui8tohex(new Uint8Array(atr));
         },
 

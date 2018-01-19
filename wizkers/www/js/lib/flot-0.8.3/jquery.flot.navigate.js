@@ -141,20 +141,24 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
         
         var prevCursor = 'default', prevPageX = 0, prevPageY = 0,
-            panTimeout = null;
+            panTimeout = null, evCache = [];
 
+        
         function onDragStart(e) {
-            if (e.which != 1)  // only accept left-click
-                return false;
             var c = plot.getPlaceholder().css('cursor');
             if (c)
                 prevCursor = c;
             plot.getPlaceholder().css('cursor', plot.getOptions().pan.cursor);
             prevPageX = e.pageX;
             prevPageY = e.pageY;
+            evCache.push(e);
         }
-        
+
         function onDrag(e) {
+
+            if (evCache.length < 1)
+                return;
+
             var frameRate = plot.getOptions().pan.frameRate;
             if (panTimeout || !frameRate)
                 return;
@@ -178,6 +182,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.pan({ left: prevPageX - e.pageX,
                        top: prevPageY - e.pageY });
+            evCache.pop();
         }
         
         function bindEvents(plot, eventHolder) {
@@ -188,9 +193,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             }
 
             if (o.pan.interactive) {
-                eventHolder.bind("dragstart", { distance: 10 }, onDragStart);
-                eventHolder.bind("drag", onDrag);
-                eventHolder.bind("dragend", onDragEnd);
+                eventHolder.bind("pointerdown", { distance: 10 }, onDragStart);
+                eventHolder.bind("pointermove", onDrag);
+                eventHolder.bind("pointerup", onDragEnd);
             }
         }
 

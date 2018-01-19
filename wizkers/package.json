@@ -27,6 +27,7 @@
     "passport-google-oauth": "~0.1.5",
     "passport-local": "latest",
     "passport-twitter": "~1.0.2",
+    "pcsclite": "^0.6.0",
     "pouchdb": "^6.4.1",
     "pouchdb-find": "^6.4.1",
     "serialport": "~5.0.*",
