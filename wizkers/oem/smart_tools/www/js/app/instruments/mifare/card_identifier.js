@@ -40,6 +40,7 @@ define(function(require) {
     "use strict";
 
     var abutils = require('app/lib/abutils');
+    var SCList = require('./smartcard_list.js');
 
     var counter = 1;
     var T = 0;
@@ -78,34 +79,19 @@ define(function(require) {
     * Reads card info from the hidden "carddb" inner frame
     */
     function getCard(atr) {
-        // cross-browser method to get access a inner frame DOM element
-        var oIframe = document.getElementById('carddb');
-        var oDoc = (oIframe.contentWindow || oIframe.contentDocument);
-        if (oDoc.document) {
-            oDoc = oDoc.document;
-        }
-        var atr_list = oDoc.getElementsByTagName('p');
-        for (candidate in atr_list) {
-            var el = $(atr_list[candidate]);
-            var pattern = el.text();
-            if (atr.match(pattern)) {
-                // we found the atr
-                // build result
-                var card = {
-                    "dummy" : ""
+        var a1 = abutils.ui8tohex(new Uint8Array(atr)).replace(/(.{2})/g,"$1 ").toUpperCase();
+        a1 = a1.slice(0,-1); // Remove last space
+        var hits = [];
+        for (var card in SCList) {
+            for (atr in SCList[card].atrs) {
+                if (a1.match(SCList[card].atrs[atr])) {
+                    SCList[card].candidates.forEach(function(c) {
+                        hits.push(c);
+                    });
                 }
-                //var namediv = el.parentNode.nextSibling.nextSibling
-                var namediv = $(el).parent().next();
-                card["name"] = namediv.html();
-                try {
-                    // this may not be present
-                    var nxt = namediv.next();
-                    card["xplorer"] = nxt.text();
-                } catch (e) {}
-                return card;
             }
         }
-        return undefined
+        return hits;
     }
 
     /*
@@ -130,20 +116,20 @@ define(function(require) {
         
         if (Y1 & 0x01) {
             // analyse TA
-            result += analyse_ta(atr);
+            result += analyze_ta(atr);
         }
         
         if (Y1 & 0x02) {
             // analyse TB
-            result += analyse_tb(atr);
+            result += analyze_tb(atr);
         }
         if (Y1 & 0x04) {
             // analyse TC
-            result += analyse_tc(atr);
+            result += analyze_tc(atr);
         }
         if (Y1 & 0x08) {
             // analyse TD
-            result += analyse_td(atr);
+            result += analyze_td(atr);
         }
         
         // TCK is present?
@@ -169,10 +155,12 @@ define(function(require) {
         if (atr.length + 1 < K) {
             result += " ERROR! ATR is truncated: " + (K - atr.length - 1) + " byte(s) is/are missing<br>";
         }
-        result += analyse_historical_bytes(atr);
+        result += analyze_historical_bytes(atr);
         result += TCK;
+
+        var hits = getCard(atr_ab);
         
-        return result;
+        return { atr_desc: result, candidates: hits };
 
         //
         // LEGACY CODE: used to load the ExtJS card-specific parser
@@ -207,7 +195,7 @@ define(function(require) {
         }
     }
 
-    function analyse_ta(atr) {
+    function analyze_ta(atr) {
         var result = "";
         var value = atr.shift();
         result += "TA(" + counter + ")=" + Hex(value) + " --> ";
@@ -261,7 +249,7 @@ define(function(require) {
         return result;
     }
 
-    function analyse_tb(atr) {
+    function analyze_tb(atr) {
         
         var result = "";
         var value = atr.shift();
@@ -298,7 +286,7 @@ define(function(require) {
         return result;
     }
 
-    function analyse_tc(atr) {
+    function analyze_tc(atr) {
         
         var value = atr.shift();
         var result = "<br>  TC(" + counter + ") = " + Hex(value) + " --> ";
@@ -329,7 +317,7 @@ define(function(require) {
         return result + "<br>";
     }
 
-    function analyse_td(atr) {
+    function analyze_td(atr) {
         
         var value = atr.shift();
         var result = "";
@@ -348,27 +336,27 @@ define(function(require) {
         if (atr.length == 0)
             return result;
         if (Y & 0x1)
-            result += analyse_ta(atr);
+            result += analyze_ta(atr);
         
         if (atr.length == 0)
             return result;
         if (Y & 0x2)
-            result += analyse_tb(atr);
+            result += analyze_tb(atr);
         
         if (atr.length == 0)
             return result;
         if (Y & 0x4)
-            result += analyse_tc(atr);
+            result += analyze_tc(atr);
         
         if (atr.length == 0)
             return result;
         if (Y & 0x8)
-            result += analyse_td(atr);
+            result += analyze_td(atr);
         
         return result;
     }
 
-    function analyse_historical_bytes(atr) {
+    function analyze_historical_bytes(atr) {
         var hb_category = atr.shift();
         
         // return if we have NO historical bytes
@@ -469,7 +457,7 @@ define(function(require) {
         case 0x3:
             var cs = atr.shift();
             result += " (card service data byte)<br>";
-            if (cs == '') {
+            if (cs == '' || cs == undefined) {
                 result += "      Error in the ATR: expecting 1 byte and got 0<br>";
                 break;
             }

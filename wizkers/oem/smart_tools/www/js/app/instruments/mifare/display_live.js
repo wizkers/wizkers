@@ -102,7 +102,13 @@ define(function (require) {
 
         formatAtr: function(atr) {
             var atrinfo = cardident.parseATR(atr);
-            this.$('#atrinfo').html(atrinfo);
+            this.$('#atrinfo').html(atrinfo.atr_desc);
+            var hits = '<ul>';
+            for (var i = 0; i < atrinfo.candidates.length; i++) {
+                hits += '<li>' + atrinfo.candidates[i] + '</li>';
+            }
+            hits += '</ul>';
+            this.$('#candidates').html(hits);
             return abutils.ui8tohex(new Uint8Array(atr));
         },
 
