@@ -101,8 +101,7 @@ define(function (require) {
             // Empty the tab
             $(e.currentTarget).parent().parent().remove()
             this.$('#' + utility).remove();
-
-
+            this.$('#utilities a:first').tab('show');
         },
 
         updatestatus: function (data) {

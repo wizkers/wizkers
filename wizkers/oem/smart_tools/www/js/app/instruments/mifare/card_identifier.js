@@ -72,11 +72,27 @@ define(function(require) {
                 if (a1.match(SCList[card].atrs[atr])) {
                     SCList[card].candidates.forEach(function(c) {
                         hits.push(c);
+                        lookForUtilities(c);
                     });
                 }
             }
         }
         return hits;
+    }
+
+    function lookForUtilities(desc) {
+        if (desc.match(/calypso/i)) {
+            available_utils.push('calypso');
+        }
+        if (desc.match(/mobib/i)) {
+            available_utils.push('calypso');
+        }
+        if (desc.match(/ultralight/i)) {
+            available_utils.push('mifare_ul');
+        } else if (desc.match(/mifare/i)) {
+            available_utils.push('mifare');
+        }
+
     }
 
     /*
@@ -147,7 +163,7 @@ define(function(require) {
         var hits = getCard(atr_ab);
         var resp = { atr_desc: result, candidates: hits };
         if (available_utils.length > 0)
-            resp.utilities = available_utils;
+            resp.utilities = Array.from(new Set(available_utils)); // Deduped array
         
         return resp;
 
