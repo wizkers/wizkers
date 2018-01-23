@@ -26,7 +26,7 @@
  * These utilities do ATR parsing for many types of ATR, including
  * PCSC 2.0 Contactless ATR parsing
  *
- * (c) Edouard Lafargue 2008, edouard@lafargue.name
+ * (c) Edouard Lafargue 2018, edouard@lafargue.name
  * Based on original work by Ludovic Rousseau
  *
  */
@@ -49,31 +49,16 @@ define(function(require) {
     ts[0x3B] = "Direct Convention";
     ts[0x3F] = "Inverse Convention";
     var Fi = [372, 372, 558, 744, 1116, 1488, 1860, "RFU", "RFU", 512, 768, 1024, 1536, 2048, "RFU", "RFU"];
-    var Di = ["RFU", 1, 2, 4, 8, 16, 32, "RFU", 12, 20, "RFU", "RFU", "RFU", "RFU", "RFU", "RFU"];
+    var Di = ["RFU", 1, 2, 4, 8, 16, 32, 64, 12, 20, "RFU", "RFU", "RFU", "RFU", "RFU", "RFU"];
+    var Fmax = [4, 5, 6, 8, 12, 16, 20, "RFU", "RFU", 5, 7.5, 10, 15, 20, "RFU", "RFU"];
     var XI = ["not supported", "state L", "state H", "no preference"];
     var UI = ["A only (5V)", "B only (3V)", "A and B", "RFU"];
 
-    // Kept as a memory. I was young
-    /*
-    function Hex(dec) {
-        var hexa = "0123456789ABCDEF";
-        var hex = "";
-        while (dec > 15) {
-            t = dec - (Math.floor(dec / 16)) * 16;
-            hex = hexa.charAt(t) + hex;
-            dec = Math.floor(dec / 16);
-        }
-        hex = hexa.charAt(dec) + hex;
-        if (hex == 0) {
-            return "00"
-        }
-        return hex;
-    } */
+    var available_utils = [];
 
     function Hex(dec) {
         return ("00" + dec.toString(16)).slice(-2).toUpperCase();
     }
-
 
     /*
     * Reads card info from the hidden "carddb" inner frame
@@ -98,6 +83,7 @@ define(function(require) {
     * Parses an ATR
     */
     function parseATR(atr_ab) {
+        available_utils = []; // Reset it
         var atr = [].slice.call(new Uint8Array(atr_ab)); // Make an array of bytes
         var result = "ATR: <tt>" + abutils.ui8tohex(new Uint8Array(atr_ab)) + "</tt><br>";
         
@@ -159,8 +145,11 @@ define(function(require) {
         result += TCK;
 
         var hits = getCard(atr_ab);
+        var resp = { atr_desc: result, candidates: hits };
+        if (available_utils.length > 0)
+            resp.utilities = available_utils;
         
-        return { atr_desc: result, candidates: hits };
+        return resp;
 
         //
         // LEGACY CODE: used to load the ExtJS card-specific parser
@@ -205,7 +194,8 @@ define(function(require) {
             var D = value % 16;
             (Di[D] != "RFU") ? value = Fi[F] / Di[D] : '';
             result += " Fi=" + Fi[F] + ", Di=" + Di[D] + ", " + value + " cycles/ETU";
-            result += " (" + 3571200 / value + "bits/s at 3.57 MHz)<br>";
+            result += " (" + 4000000 / value + "bits/s at 4 MHz)<br>";
+            result += " (" + Fmax[F]*1000000/value + "bits/s at fmax: " + Fmax[F] + " MHz)<br>";
         }
         if (counter == 2) {
             var F = value >> 4;
@@ -331,7 +321,7 @@ define(function(require) {
         }
         
         counter++;
-        result += "<br>-----<br>";
+        result += "<br>";
         
         if (atr.length == 0)
             return result;
@@ -627,6 +617,16 @@ define(function(require) {
             result += "SS: " + Hex(SSindex) + " -> " + SS[SSindex] + " (card standard)<br>";
             var NNindex = atr.shift() + atr.shift();
             result += "NN: " + Hex(NNindex) + " -> " + NN[NNindex] + " (card name)<br>";
+            // For Mifare cards, add a hint on what utilities should be available
+            switch (NNindex) {
+                case 1:
+                case 2:
+                    available_utils.push("mifare");
+                    break;
+                case 3:
+                    available_utils.push("mifare_ul");
+                    break;
+            }
         }
         atr.splice(0, len - 8);
         return result;

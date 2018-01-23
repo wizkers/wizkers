@@ -39,6 +39,8 @@ define(function (require) {
         cardident = require('js/app/instruments/mifare/card_identifier.js'),
         template = require('js/tpl/instruments/mifare/LiveView.js');
 
+    // Need to load these, but no related variables.
+    require('bootstrap');
     require('lib/bootstrap-treeview');
 
     return Backbone.View.extend({
@@ -70,7 +72,9 @@ define(function (require) {
         },
 
 
-        events: {},
+        events: {
+            'click .utility_close': 'closeUtil'
+        },
 
         render: function () {
             var self = this;
@@ -92,6 +96,15 @@ define(function (require) {
             linkManager.off('input', this.showInput);
         },
 
+        closeUtil: function(e) {
+            var utility = $(e.currentTarget).data("utility");
+            // Empty the tab
+            $(e.currentTarget).parent().parent().remove()
+            this.$('#' + utility).remove();
+
+
+        },
+
         updatestatus: function (data) {
             console.log("Mifare live display: link status update");
         },
@@ -109,6 +122,22 @@ define(function (require) {
             }
             hits += '</ul>';
             this.$('#candidates').html(hits);
+
+            // Add a new tab if there are available utilities
+            if (atrinfo.utilities != undefined) {
+                for (var i = 0; i < atrinfo.utilities.length; i++) {
+                    var un = atrinfo.utilities[i];
+                    // Add a unique ID for the tab
+                    var t = new Date().getTime();
+                    this.$('#utilities').append('<li role="presentation"><a href="#' + un + t + '" role="tab" data-toggle="tab">' + un +
+                    '&nbsp;<span data-utility="' + un + t + '" class="glyphicon glyphicon-remove utility_close" aria-hidden="true"></span></a></li>'
+                    );
+                    this.$('#utilities_content').append('<div role="tabpanel" class="tab-pane active" id="' + un + t + '"><h5>Utility: ' + un + '</h5></div>');
+                    $('#utilities a:last').tab('show');
+                    $('#utilities a:first').tab('show');
+                }
+            }
+
             return abutils.ui8tohex(new Uint8Array(atr));
         },
 
@@ -150,6 +179,11 @@ define(function (require) {
                             this.readerlist[i].nodes = [];
                         }
                     }
+                    // TODO: THIS ASSUMES WE ONLY HAVE ONE CARD CONNECTED AT ONE GIVEN TIME
+                    // Remove ATR:
+                    this.$('#atrinfo').empty();
+                    this.$('#candidates').empty();
+
                 }
                 this.$('#readers').treeview({ data:this.readerlist});
 

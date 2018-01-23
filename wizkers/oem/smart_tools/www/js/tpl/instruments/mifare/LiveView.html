@@ -1,6 +1,6 @@
 <div class="col-md-12">
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="row">
                 <div class="col-md-12">
                     <div class="readertree" id="readers"></div>
@@ -13,16 +13,20 @@
             </div>
         
         </div>
-        <div class="col-md-9">
+        <div class="col-md-8">
             <div class="row">
                 <div class="col-md-12">
-                    <h5>Potential candidates:</h5>
-                    <div id="candidates"></div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-
+                    <ul class="nav nav-tabs" id="utilities" role="tablist">
+                        <li role="presentation" class="active">
+                            <a href="#card_candidates" aria-controls="home" role="tab" data-toggle="tab">ATR Analysis</a>
+                        </li>
+                        </ul>
+                    <div class="tab-content" id="utilities_content">
+                        <div role="tabpanel" class="tab-pane active" id="card_candidates">
+                                <h5>Potential candidates:</h5>
+                                <div id="candidates"></div>                
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
