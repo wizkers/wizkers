@@ -41,7 +41,7 @@ var dbs = require('./pouch-config'),
 
 
 // Preload the parsers we know about:
-var Mifare = require('./www/js/app/instruments/mifare/driver_backend.js');
+var Pcsc = require('./www/js/app/instruments/pcsc/driver_backend.js');
 
 var ConnectionManager = function () {
 
@@ -50,8 +50,8 @@ var ConnectionManager = function () {
 
     this.getDriver = function (type) {
         var driver;
-        if (type == 'mifare') {
-            driver = new Mifare();
+        if (type == 'pcsc') {
+            driver = new Pcsc();
         }
         return driver;
     }

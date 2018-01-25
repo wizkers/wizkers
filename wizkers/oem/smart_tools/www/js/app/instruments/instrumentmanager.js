@@ -61,11 +61,11 @@ define(function (require) {
 
         // Instruments supported in all runmodes:
         this.supportedInstruments = {
-            'mifare': {
-                name: 'Mifare card reader/writer',
-                type: 'app/instruments/mifare/mifare',
-                path: 'app/instruments/mifare',
-                settings: 'app/instruments/mifare/settings',
+            'pcsc': {
+                name: 'PC/SC card utilities',
+                type: 'app/instruments/pcsc/pcsc',
+                path: 'app/instruments/pcsc',
+                settings: 'app/instruments/pcsc/settings',
                 connectionsettings: null,
                 connectionfilter: null
             },

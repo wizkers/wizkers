@@ -23,7 +23,7 @@
  */
 
 /*
- * Live view display of the output of the Kestrel weather stations
+ * Live view display of PCSC Card readers
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -36,8 +36,8 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         abutils = require('app/lib/abutils'),
-        cardident = require('js/app/instruments/mifare/card_identifier.js'),
-        template = require('js/tpl/instruments/mifare/LiveView.js');
+        cardident = require('js/app/instruments/pcsc/card_identifier.js'),
+        template = require('js/tpl/instruments/pcsc/LiveView.js');
 
     // Need to load these, but no related variables.
     require('bootstrap');
@@ -81,11 +81,10 @@ define(function (require) {
             console.log('Main render of Mifare view');
             this.$el.html(template());
 
-            // Initialize a reader tree view
-            this.$('#readers').treeview({ data:this.readerlist});
-
             linkManager.requestStatus();
             linkManager.getUniqueID(); // Actually gets the list of readers
+            // Initialize a reader tree view
+            // this.$('#readers').treeview({ data:this.readerlist});
             return this;
         },
 
@@ -112,7 +111,7 @@ define(function (require) {
             console.log('Clear');
         },
 
-        formatAtr: function(atr) {
+        formatAtr: function(reader, atr) {
             var atrinfo = cardident.parseATR(atr);
             this.$('#atrinfo').html(atrinfo.atr_desc);
             var hits = '<ul>';
@@ -124,20 +123,46 @@ define(function (require) {
 
             // Add a new tab if there are available utilities
             if (atrinfo.utilities != undefined) {
+                var ut_names = {
+                    mifare: 'Mifare',
+                    mifare_ul: 'Mifare Ultralight',
+                    calypso: 'Calypso'
+                }
                 for (var i = 0; i < atrinfo.utilities.length; i++) {
                     var un = atrinfo.utilities[i];
                     // Add a unique ID for the tab
                     var t = new Date().getTime();
-                    this.$('#utilities').append('<li role="presentation"><a href="#' + un + t + '" role="tab" data-toggle="tab">' + un +
+                    this.$('#utilities').append('<li role="presentation"><a href="#' + un + t + '" role="tab" data-toggle="tab">' + ut_names[un] +
                     '&nbsp;<span data-utility="' + un + t + '" class="glyphicon glyphicon-remove utility_close" aria-hidden="true"></span></a></li>'
                     );
-                    this.$('#utilities_content').append('<div role="tabpanel" class="tab-pane active" id="' + un + t + '"><h5>Utility: ' + un + '</h5></div>');
+                    this.$('#utilities_content').append('<div role="tabpanel" class="tab-pane active" id="' + un + t + '"></div>');
                     $('#utilities a:last').tab('show');
+                    this.loadExplorer(un, un + t, reader, atr);
                     $('#utilities a:first').tab('show');
                 }
             }
 
-            return abutils.ui8tohex(new Uint8Array(atr));
+        },
+
+        loadExplorer: function(explorer_name, divid, reader, atr) {
+            var self = this;
+            // For now, this is not completely dynamic, we don't have enough explorers to justify this
+            if (explorer_name == 'mifare') {
+                require(['app/instruments/pcsc/mifare_explorer'], function(view) {
+                    var ex = new view();
+                    self.$('#' + divid).append(ex.el);
+                    ex.render(reader, atr);
+                 });     
+            } else if (explorer_name == 'mifare_ul') {
+
+            } else if (explorer_name == 'calypso') {
+
+            } else if (explorer_name == 'pkcs15') {
+
+            } else {
+                console.error('Unknown explorer');
+            }
+
         },
 
 
@@ -169,7 +194,8 @@ define(function (require) {
                 if (data.status == 'card_inserted') {
                     for (var i = 0; i < this.readerlist.length; i++) {
                         if (this.readerlist[i].text == data.reader) {
-                            this.readerlist[i].nodes.push({text:this.formatAtr(data.atr)});
+                            this.readerlist[i].nodes.push({text:abutils.ui8tohex(new Uint8Array(data.atr))});
+                            this.formatAtr(data.reader, data.atr);
                         }
                     }
                 } else if (data.status == 'card_removed') {

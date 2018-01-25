@@ -63,7 +63,7 @@ define(function (require) {
         // This has to be a Backbone view
         // This is the full screen live view graph (not a small widget)
         this.getLiveDisplay = function (arg, callback) {
-            require(['app/instruments/mifare/display_live'], function (view) {
+            require(['app/instruments/pcsc/display_live'], function (view) {
                 current_liveview = new view(arg);
                 callback(current_liveview);
             });
@@ -71,7 +71,7 @@ define(function (require) {
 
         // This is the numeric display
         this.getNumDisplay = function (arg, callback) {
-            require(['app/instruments/mifare/display_numeric'], function (view) {
+            require(['app/instruments/pcsc/display_numeric'], function (view) {
                 current_numview = new view(arg);
                 callback(current_numview);
             });
@@ -79,7 +79,7 @@ define(function (require) {
 
         // This is the front-end driver
         this.getDriver = function(callback) {
-             require(['app/instruments/mifare/driver_frontend'], function(d) {
+             require(['app/instruments/pcsc/driver_frontend'], function(d) {
                 callback(new d());
              });
         };
@@ -87,12 +87,12 @@ define(function (require) {
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser or as a Cordova native app.
         this.getBackendDriver = function (arg, callback) {
-            this.getBackendDriverFor('mifare', arg, callback);
+            this.getBackendDriverFor('pcsc', arg, callback);
         };
 
         // Render a log (or list of logs) for the device.
         this.getLogView = function (arg, callback) {
-            require(['app/instruments/mifare/display_log'], function (view) {
+            require(['app/instruments/pcsc/display_log'], function (view) {
                 callback(new view(arg));
             });
         }
@@ -101,7 +101,7 @@ define(function (require) {
         // for the Wizkers app, not the instrument itself (those are done on the DiagDisplay
         // screen).
         this.getWizkersSettings = function(arg, callback) {
-            require(['app/instruments/mifare/settings_wizkers'], function(view) {
+            require(['app/instruments/pcsc/settings_wizkers'], function(view) {
                 callback(new view(arg));
             });
         };
