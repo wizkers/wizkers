@@ -265,9 +265,9 @@ define(function (require) {
                 data: "",
                 le: ""
             };
-            var r = sc_transmit_apdu(apdu,myApduPanel);
+            var r = port.transmit_apdu(apdu,reader);
             if (r === null) {
-                logD("APDU transmit failed",myApduPanel);
+                debug("APDU transmit failed");
                 return "Error";
             }
             return apdu.resp;
