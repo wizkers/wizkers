@@ -25,7 +25,6 @@
 /**
  * Mifare card reader/writer
  *
- * @author Edouard Lafargue, ed@lafargue.name
  */
 
 define(function (require) {

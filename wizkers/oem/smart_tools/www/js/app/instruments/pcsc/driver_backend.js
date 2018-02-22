@@ -35,6 +35,7 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     var vizapp = { type: 'server'},
     events = require('events'),
+    abutils = require('app/lib/abutils'),
     dbs = require('pouch-config');
 }
 
@@ -68,9 +69,11 @@ define(function (require) {
 
 
         // Format can act on incoming data from the PC/CS layer, and then
-        // forwards the data to the app through
+        // forwards the data to the app
         var format = function (data) {
-            self.trigger('data', jsresp);
+            // Transform the data into a hex string (it's a buffer when it comes in)
+            var datastr = abutils.ui8tohex(new Uint8Array(data))
+            self.trigger('data', { data: datastr} );
         };
 
         // Status returns an object that is concatenated with the
@@ -537,11 +540,10 @@ define(function (require) {
         // Called when the app needs a unique identifier.
         // this is a standardized call across all drivers.
         //
-        // Returns the Geiger counter GUID.
         this.sendUniqueID = function () {
             // We cheat a bit here this is used to send
             // the list of existing readers
-            for (var i =0; i < readers.length; i++) {
+             for (var i =0; i < readers.length; i++) {
                 self.trigger('data', { device: readers[i], action: 'added'});
             }
         };
@@ -566,7 +568,13 @@ define(function (require) {
                     devicetag: 'Not supported'
                 });
             }
-            port.write(data + '\n');
+            // Do a bit of reformatting on some commands
+            if (data.cmd == 'transmit') {
+                var apdu_ab = abutils.hextoab(data.arg.apdu);
+                var apdu_arr = [].slice.call(new Uint8Array(apdu_ab)); // Make an array of bytes
+                data.arg.apdu = apdu_arr;        
+            }
+            port.write(data);
         };
 
     }

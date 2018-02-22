@@ -50,7 +50,7 @@ var PCSCConnection = function(path, settings) {
     var self = this;
     var myPort;
 
-    var myReaders = [];
+    var myReaders = {};
 
 
     this.open = function() {
@@ -65,6 +65,7 @@ var PCSCConnection = function(path, settings) {
         myPort.on('reader', function (reader) {
             var state = 0;
             self.emit('status', {device: reader.name, action: 'added'});
+            myReaders[reader.name] = { ref: reader };
 
             reader.on('status', function(status) {
                 debug('Reader Status', status, ' State: 0x', status.state.toString(16));
@@ -79,12 +80,12 @@ var PCSCConnection = function(path, settings) {
                     } else if ((changes & this.SCARD_STATE_UNKNOWN) && (status.state & this.SCARD_STATE_UNKNOWN)) {
                         debug("Reader removed");
                         self.emit('status', {device: reader.name, action: 'removed' });
+                        delete myReaders[reader.name];
                     }
                 }
             });
 
         });
-
 
         myPort.on('error', function(err) {
             debug("PCSC error: "  + err);
@@ -94,12 +95,82 @@ var PCSCConnection = function(path, settings) {
 
     };
 
+    /**
+     *  The Write command is not simply a buffer or string, but an object with
+     * the command and arguments
+     * @param {Object} data 
+     */
     this.write = function(data) {
+        debug('Data to write', data);
+        switch (data.cmd) {
+            case 'connect':
+                connectReader(data.arg);
+                break;
+            case 'transmit':
+                transmitAPDU(data.arg);
+                break;
+            case 'disconnect':
+                disconnectReader(data.arg);
+                break;
+        }
     }
 
     this.close = function() {
         myPort.close();
     }
+
+    var connectReader = function(reader) {
+        if (!myReaders[reader]) {
+            debug('Connect: Unknown reader');
+            return;
+        }
+        var readerRef = myReaders[reader].ref;
+        if (!readerRef)
+            return;
+        debug('PCSC Ref', pcsc.SCARD_SHARE_SHARED);
+        readerRef.connect({ share_mode : pcsc.SCARD_SHARE_SHARED }, function(err, protocol) {
+            if (err) {
+                debug(err);
+            } else {
+                debug('Protocol(', readerRef.name, '):', protocol);
+                myReaders[reader].protocol = protocol;
+                self.emit('status', {reader: readerRef.name, status: 'connected' });
+            }
+        });
+    }
+
+    var disconnectReader = function(reader) {
+        if (!myReaders[reader]) {
+            debug('Disconnect: Unknown reader');
+            return;
+        }
+        var readerRef = myReaders[reader].ref;
+        if (!readerRef)
+            return;
+        debug('Closing reader', readerRef.name);
+        readerRef.disconnect(pcsc.SCARD_UNPOWER_CARD, function(err) {
+            if (err)
+                debug('Error disconnecting', err);
+            myReaders[reader].protocol = -1;
+            self.emit('status', {reader: readerRef.name, status: 'disconnected' });    
+        });
+    }
+
+    var transmitAPDU = function(arg) {
+        var readerRef = myReaders[arg.reader].ref;
+        if (!readerRef)
+            return;
+        var apdu = arg.apdu
+        readerRef.transmit(new Buffer(apdu), 256, myReaders[arg.reader].protocol, function(err, data) {
+            if (err) {
+                debug(err);
+            } else {
+                debug('Data received', data);
+                self.emit('data', data);                
+            }
+        });
+    }
+
 
     return this;
 }

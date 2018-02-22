@@ -51,6 +51,7 @@ define(function (require) {
             this.datasetlength = 0;
 
             this.readerlist = [];
+            this.currentReader = undefined;
 
             if (vizapp.type == 'cordova') {
                 var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
@@ -73,26 +74,33 @@ define(function (require) {
 
 
         events: {
-            'click .utility_close': 'closeUtil'
+            'click .utility_close': 'closeUtil',
+            'click #apdusend': 'apduSend',
+            'click #connectcard': 'connectCard',
         },
 
         render: function () {
             var self = this;
-            console.log('Main render of Mifare view');
+            console.log('Main render of PCSC view');
             this.$el.html(template());
 
             linkManager.requestStatus();
             linkManager.getUniqueID(); // Actually gets the list of readers
-            // Initialize a reader tree view
-            // this.$('#readers').treeview({ data:this.readerlist});
             return this;
         },
 
         onClose: function () {
-            console.log("Mifare live view closing...");
+            console.log("PCSC live view closing...");
             linkManager.stopLiveStream();
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
+        },
+
+        appendToResponse: function(str) {
+            var i = this.$('#cardresponse');
+            i.val(i.val() + str );
+            // Autoscroll:
+            i.scrollTop(i[0].scrollHeight - i.height());
         },
 
         closeUtil: function(e) {
@@ -103,8 +111,38 @@ define(function (require) {
             this.$('#utilities a:first').tab('show');
         },
 
+        selectCard: function(event, data) {
+            // console.log($('.treeview').treeview('getSelected')[0].parentId);
+            console.log(event, data);
+            if (data.parentId == undefined)
+                return;
+            var reader = this.$('#readers').treeview('getNode', data.parentId).text;
+            this.currentReader = reader;
+            this.formatAtr(reader, data.text);
+        },
+
+        connectCard: function() {
+            if (this.$('#connectcard').html() == 'Disconnect') {
+                linkManager.sendCommand({ cmd: 'disconnect', arg: this.currentReader});
+            } else {
+                linkManager.sendCommand({ cmd:'connect', arg: this.currentReader});
+            }
+        },
+
+        apduSend: function() {
+            var apdu = this.$('#apdu').val().replace(/\s/g,'');
+            if (apdu.length %2 != 0) {
+                this.appendToResponse("Error, byte string not an even number of characters\n");
+                return;
+            }
+            linkManager.sendCommand({ cmd:'transmit', arg: {
+                reader: this.currentReader,
+                apdu: apdu
+            }});
+        },
+
         updatestatus: function (data) {
-            console.log("Mifare live display: link status update");
+            console.log("PCSC live display: link status update");
         },
 
         clear: function () {
@@ -177,25 +215,44 @@ define(function (require) {
                         if (data.action == 'removed') {
                             this.readerlist.splice(i,1);
                             this.$('#readers').treeview({ data:this.readerlist});
+                            this.$('#readers').on('nodeSelected', this.selectCard.bind(this));                            return;
+                        } else if (data.action == 'added') {
+                            // we are getting another 'added' message for an existing reader
+                            // that we already knew. We get this when connecting/disconnectino
+                            // from a smart card, so we just give up and return
                             return;
                         }
                     }
                 }
                 if (data.action != 'added')
-                    return;``
+                    return;
                 // Didn't find the device
                 this.readerlist.push({ text: data.device, nodes: []});
                 this.$('#readers').treeview({ data:this.readerlist});
+                this.$('#readers').on('nodeSelected', this.selectCard.bind(this));
+                return;
+            }
+
+            if (data.data) {
+                this.appendToResponse('\n' + data.data);
                 return;
             }
 
             // Present when card inserted/removed
             if (data.status) {
+                if (data.status == 'connected') {
+                    this.$('#connectcard').html('Disconnect');
+                    return;
+                } else if (data.status == 'disconnected') {
+                    this.$('#connectcard').html('Connect');
+                    return;
+                }
                 if (data.status == 'card_inserted') {
                     for (var i = 0; i < this.readerlist.length; i++) {
                         if (this.readerlist[i].text == data.reader) {
+                            if (this.readerlist[i].nodes.length)
+                                return; // We got a new 'insert' on the same card
                             this.readerlist[i].nodes.push({text:abutils.ui8tohex(new Uint8Array(data.atr))});
-                            this.formatAtr(data.reader, data.atr);
                         }
                     }
                 } else if (data.status == 'card_removed') {
@@ -211,7 +268,7 @@ define(function (require) {
 
                 }
                 this.$('#readers').treeview({ data:this.readerlist});
-
+                this.$('#readers').on('nodeSelected', this.selectCard.bind(this));
             }
 
             console.log('Data', data);

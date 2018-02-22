@@ -64,7 +64,11 @@ define(function(require) {
     * Reads card info from the hidden "carddb" inner frame
     */
     function getCard(atr) {
-        var a1 = abutils.ui8tohex(new Uint8Array(atr)).replace(/(.{2})/g,"$1 ").toUpperCase();
+        if (typeof atr == 'string') {
+            var a1 = atr.replace(/(.{2})/g,"$1 ").toUpperCase();
+        } else {
+            var a1 = abutils.ui8tohex(new Uint8Array(atr)).replace(/(.{2})/g,"$1 ").toUpperCase();
+        } 
         a1 = a1.slice(0,-1); // Remove last space
         var hits = [];
         for (var card in SCList) {
@@ -100,6 +104,8 @@ define(function(require) {
     */
     function parseATR(atr_ab) {
         available_utils = []; // Reset it
+        if (typeof atr_ab == 'string')
+            atr_ab = abutils.hextoab(atr_ab);
         var atr = [].slice.call(new Uint8Array(atr_ab)); // Make an array of bytes
         var result = "ATR: <tt>" + abutils.ui8tohex(new Uint8Array(atr_ab)) + "</tt><br>";
         
