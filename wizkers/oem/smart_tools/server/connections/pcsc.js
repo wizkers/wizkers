@@ -161,7 +161,7 @@ var PCSCConnection = function(path, settings) {
         if (!readerRef)
             return;
         var apdu = arg.apdu
-        readerRef.transmit(new Buffer(apdu), 256, myReaders[arg.reader].protocol, function(err, data) {
+        readerRef.transmit(new Buffer(apdu), 1024, myReaders[arg.reader].protocol, function(err, data) {
             if (err) {
                 debug(err);
             } else {
