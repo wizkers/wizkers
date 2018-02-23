@@ -102,15 +102,15 @@ var PCSCConnection = function(path, settings) {
      */
     this.write = function(data) {
         debug('Data to write', data);
-        switch (data.cmd) {
+        switch (data.command) {
             case 'connect':
-                connectReader(data.arg);
+                connectReader(data.reader);
                 break;
             case 'transmit':
-                transmitAPDU(data.arg);
+                transmitAPDU(data.reader, data.apdu);
                 break;
             case 'disconnect':
-                disconnectReader(data.arg);
+                disconnectReader(data.reader);
                 break;
         }
     }
@@ -156,21 +156,19 @@ var PCSCConnection = function(path, settings) {
         });
     }
 
-    var transmitAPDU = function(arg) {
-        var readerRef = myReaders[arg.reader].ref;
+    var transmitAPDU = function(reader, apdu) {
+        var readerRef = myReaders[reader].ref;
         if (!readerRef)
             return;
-        var apdu = arg.apdu
-        readerRef.transmit(new Buffer(apdu), 1024, myReaders[arg.reader].protocol, function(err, data) {
+        readerRef.transmit(new Buffer(apdu), 1024, myReaders[reader].protocol, function(err, data) {
             if (err) {
                 debug(err);
             } else {
                 debug('Data received', data);
-                self.emit('data', data);                
+                self.emit('data', { resp: data });                
             }
         });
     }
-
 
     return this;
 }

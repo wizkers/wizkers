@@ -43,6 +43,7 @@ define(function (require) {
     "use strict";
 
     var utils = require('app/utils'),
+        storageCommands = require('app/instruments/pcsc/commands_storage'),
         pcscConnection = require('connections/pcsc');
 
     var parser = function (socket) {
@@ -67,13 +68,22 @@ define(function (require) {
         var readers = [];
         var myReader = ''; // Currently selected reader
 
+        // Command processing
+        var commandQueue = [],
+        queue_busy = false,
+        wd = null;
+        
+    
 
         // Format can act on incoming data from the PC/CS layer, and then
         // forwards the data to the app
         var format = function (data) {
+            clearTimeout(wd);
+            console.info('Done with command', commandQueue.shift());
             // Transform the data into a hex string (it's a buffer when it comes in)
-            var datastr = abutils.ui8tohex(new Uint8Array(data))
+            var datastr = abutils.ui8tohex(new Uint8Array(data.resp))
             self.trigger('data', { data: datastr} );
+            queue_busy = false;
         };
 
         // Status returns an object that is concatenated with the
@@ -125,6 +135,14 @@ define(function (require) {
             self.trigger('data', stat);
         }
 
+        /**
+         * Format a json APDU into a hex string
+         */
+        var apdu2str = function(apdu) {
+            return apdu.cla + apdu.ins + apdu.p1 + apdu.p2 +
+                      apdu.lc + apdu.data + apdu.le;
+        }
+
         var openPort_server = function(insid) {
             dbs.instruments.get(insid, function(err,item) {
                 port = new pcscConnection(item.port, portSettings());
@@ -155,349 +173,67 @@ define(function (require) {
             port.open();
         }
 
-        /* Loads a keypair into a reader memory slot
-        This software uses slot 00 for key A
-            and slot 1 for key B (this is arbitrary, it assumes
-            that the reader has at least 2 slots for keys).
+        // Process the latest command in the queue.
+        //
+        // Queue contains Objects with:
+        //  - command: the command name
+        //  - arg    : (optional) the command argument as a hex string
+        var processQueue = function() {
+            if (commandQueue.length == 0)
+                return;
+            var cmd = commandQueue[0]; // Get the oldest command
 
-            FF 82 20 00 06 FF FF FF FF FF FF
-                ||        ||
-            Slot      Value
-        *
-        * Note: it seems some readers require volatile memory storage
-        *       whether others require non-volatile...
-        */
-        var loadKey = function(key_a,key_b){
+            if (queue_busy)
+                return;
+            queue_busy = true;
 
-            // Be nice and output the full-text errors:
-            var loadErrors = new Array();
-            loadErrors[0x6300] = "No information given";
-            // SCM Micro used v1.07 of the PC/SC 2 spec, which
-            // forgot the SW1 value in the table, and incorrectly
-            // assumed that SW1=63, whereas it should be 69 !
-            loadErrors[0x6382] = "Card key not supported";
-            loadErrors[0x6383] = "Reader key not supported";
-            loadErrors[0x6384] = "Plain transmission not supported";
-            loadErrors[0x6385] = "Secured transmission not supported";
-            loadErrors[0x6386] = "Volatile memory is not available";
-            loadErrors[0x6387] = "Non volatile memory is not available";
-            loadErrors[0x6388] = "Key number not valid";
-            loadErrors[0x6389] = "Key length is not correct";
-            // Omnikey actually understands the principle:
-            loadErrors[0x6982] = "Card key not supported";
-            loadErrors[0x6983] = "Reader key not supported";
-            loadErrors[0x6984] = "Plain transmission not supported";
-            loadErrors[0x6985] = "Secured transmission not supported";
-            loadErrors[0x6986] = "Volatile memory is not available";
-            loadErrors[0x6987] = "Non volatile memory is not available";
-            loadErrors[0x6988] = "Key number not valid";
-            loadErrors[0x6989] = "Key length is not correct";
+            var data = {};
+            data.reader = cmd.reader;
 
-            /* If myReader is a Omnikey, then the key needs to be
-            * loaded in non-volatile memory (code 0x20).
-            * If it is a SCM, on the other hand, it needs to be
-            * loaded in volatile memory (code 0x00).
-            *
-            * Moreover, SCM interprets P2 (key number) as the
-            * key type (mifare A or B, 0x60 or 0x61) whereas Omnikey interprets
-            * it as a key slot number... talk about standards-compliance!
-            */
-            var keyStructure = "20"; // non-volatile
-            var keyNumber1 = "00";
-            var keyNumber2 = "01";
-            if ((myReader.indexOf("SCM") != -1)||(myReader.indexOf("SDI010") !=-1)) {
-                keyStructure = "00";
-                keyNumber1 = "60";
-                keyNumber2 = "61";
-            } else if (myReader.indexOf("Gemalto") != -1) {
-                // GemProx uses 0x00 to 0x0F for Key A
-                // and 0x10 to 0x1F for key B
-                keyNumber2 = "10";
-            }
-
-            var apdu = {
-                cla: "FF",
-                ins: "82",
-                p1: keyStructure,
-                p2: keyNumber1,
-                lc: "06",
-                data: key_a,
-                le: ""
-            };
-            var r = sc_transmit_apdu(apdu,myApduPanel);
-            if (r === null) {
-                debug("APDU transmit failed",myApduPanel);
-                return false;
-            }
-            if(apdu.sw1 != "90") {
-                debug("Error: " + loadErrors[parseInt(apdu.sw1+apdu.sw2,16)],myApduPanel);
-                return false;
-            }
-
-            var apdu = {
-                cla: "FF",
-                ins: "82",
-                p1: keyStructure,
-                p2: keyNumber2,
-                lc: "06",
-                data: key_b,
-                le: ""
-            };
-            var r = sc_transmit_apdu(apdu,myApduPanel);
-            if (r === null) {
-                debug("APDU transmit failed",myApduPanel);
-                return false;
-            }
-            if(apdu.sw1 != "90") {
-                debug("Error: " + loadErrors[parseInt(apdu.sw1+apdu.sw2,16)],myApduPanel);
-                return false;
-            }
-
-            return true;	 
-        }
-
-        /* Gets the card's UID
-    	 */
-	    var getUID = function() {
-            var apdu = {
-                cla: "FF",
-                ins: "CA",
-                p1: "00",
-                p2: "00",
-                lc: "00",
-                data: "",
-                le: ""
-            };
-            var r = port.transmit_apdu(apdu,reader);
-            if (r === null) {
-                debug("APDU transmit failed");
-                return "Error";
-            }
-            return apdu.resp;
-    	}
-
-
-        /* Authenticates in the card for a given block
-        - sector: sector number
-        - block : block number
-        - key_type: "0" is key A, "1" is key B
-
-        Returns 'true' if auth successful, 'false' otherwise
-
-        APDU: 60 is Mifare key A
-            61 is Mifare key B
-            00 is Inside Contactless or iClass Kd
-            01 is Inside Contactless or iClass Kc
-            FF is Unknown or not necessary
-
-        Example: Authenticate using key A and read 16 bytes:
-            FF 88 00 00 60 00
-            FF B0 00 00 10
-
-        */
-        var authenticateBlock = function(sector,block,key_type){
-            // Be nice and output the full-text errors:
-            var authErrors = new Array();
-            authErrors[0x6300] = "No information given";
-            authErrors[0x6581] = "Memory failure, addressed by P1-P2 does not exist";
-            authErrors[0x6982] = "Security status not satisfied";
-            authErrors[0x6983] = "Authentication cannot be done";
-            authErrors[0x6984] = "Reference key now useable";
-            authErrors[0x6986] = "Key type not known";
-            authErrors[0x6988] = "Key number not valid";
-            if (sector < 32) {
-                var blockNum = sector * 4 + block;
-            } else {
-                // Mifare 4K
-                var blockNum = 128 + (sector-32) * 16 + block;
-            }
-            (blockNum < 16) ? blockNum = "0" + blockNum.toString(16): blockNum = blockNum.toString(16);
-            var keyType = 0x60 + parseInt(key_type);
-            var key_number = "0" + key_type;
-            if (myReader.indexOf("Gemalto") != -1) {
-                // The GemProx implementation requires "00"
-                // and the reader computes the key slot itself
-                key_number = "00";
-                var apdu = {
-                    cla: "FF",
-                    ins: "86",
-                    p1: "00",
-                    p2: "00",
-                    lc: "05",
-                    le: ""
-                };
-                apdu.data = "0100" + blockNum + keyType.toString(16) + key_number;
-            } else {
-                var apdu = {
-                    cla: "FF",
-                    ins: "88",
-                    p1: "00",
-                    p2: blockNum,
-                    lc: keyType.toString(16),
-                    data: key_number,
-                    le: ""
-                };
-            }
-            var r = sc_transmit_apdu(apdu,myApduPanel);
-            if (r === null) {
-                logD("APDU transmit failed",myApduPanel);
-                return false;
-            }
-            if(apdu.sw1 == "90") {
-                return true;
-            }
-            logD("Error: " + authErrors[parseInt(apdu.sw1+apdu.sw2,16)],myApduPanel);
-            return false;
-        };
-
-        /* Read binary: reads a Mifare block (16 bytes)
-        *
-        * Needs to be authenticated before (see authenticateBlock)
-        *
-        * sector  : Sector number 
-        * block   : Block number inside the sector
-        *
-        * 	FF B0 00 00 10
-        */
-        var readBinary = function(sector, block){
-            var readErrors = new Array();
-            readErrors[0x6281] = "Part of returned data may be corrupted";
-            readErrors[0x6282] = "End of file reached before reading expected number of bytes";
-            readErrors[0x6981] = "Command incompatible";
-            readErrors[0x6982] = "Security status not satisfied";
-            readErrors[0x6986] = "Command not allowed";
-            readErrors[0x6A81] = "Function not supported";
-            readErrors[0x6A82] = "File not found / Addressed block or byte does not exist";
-            if (sector < 32) {
-                var blockNum = sector * 4 + block;
-            } else {
-                // Mifare 4K
-                var blockNum = 128 + (sector-32) * 16 + block;
-            }
-            (blockNum < 16) ? blockNum = "0" + blockNum.toString(16): blockNum = blockNum.toString(16);
-            var apdu = {
-                cla: "FF",
-                ins: "B0",
-                p1: "00",
-                p2: blockNum,
-                lc: "",
-                data: "",
-                le: "10"
-            };
-
-            var r = sc_transmit_apdu(apdu,myApduPanel);
-            if (r === null) {
-                logD("APDU transmit failed",myApduPanel);
-                return "";
-            }		
-            if(apdu.sw1 != "90") {
-                logD("Error: " + readErrors[parseInt(apdu.sw1+apdu.sw2,16)],myApduPanel);
-                return "";
-            }
-            return apdu.resp;
-        };
-
-        /*
-        * Writes a Mifare card block
-        *
-        * sector  : Sector number 
-        * block   : Block number inside the sector
-        * data    : hex string containing the data to be written
-        *	     data shall be either 16 or 4 bytes long
-        *
-        * 	FF D6 ABLM ABLL 10 DATA
-        *  Where: ABLM: address block MSB (0x00)
-        *         ABLL: address block LSB (0x00 to 0xFF)
-        *
-        *  Requires a general authenticate before doing the operation.
-        *
-        * Note for UL cards: when using a GemProx-DU reader, only the first 4
-        * bytes are written (one page), we follow the recommendations and set the
-        * remaining bytes to zero
-        */
-        var updateBinary = function(sector, block, data){
-            var readErrors = new Array();
-            readErrors[0x6281] = "Part of returned data may be corrupted";
-            readErrors[0x6282] = "End of file reached before reading expected number of bytes";
-            readErrors[0x6981] = "Command incompatible";
-            readErrors[0x6982] = "Security status not satisfied";
-            readErrors[0x6986] = "Command not allowed";
-            readErrors[0x6A81] = "Function not supported";
-            readErrors[0x6A82] = "File not found / Addressed block or byte does not exist";
-            if (sector < 32) {
-                var blockNum = sector * 4 + block;
-            } else {
-                // Mifare 4K
-                var blockNum = 128 + (sector-32) * 16 + block;
-            }
-            (blockNum < 16) ? blockNum = "0" + blockNum.toString(16): blockNum = blockNum.toString(16);
-            switch (data.length) {
-                case 32:
+            switch(cmd.command) {
+                case 'getUID':
+                    data.command = 'transmit';
+                    var t = storageCommands.getUID();
+                    data.apdu = apdu2str(t.apdu);
+                    cmd.errors = t.errors; // Add error messages if we have any
                     break;
-                case 8:
-                    data = data + "000000000000000000000000";
+                case 'getATS':
+                    data.command = 'transmit';
+                    var t = storageCommands.getATS();
+                    data.apdu = apdu2str(t.apdu);
+                    cmd.errors = t.errors;
                     break;
+                case 'transmit':
+                    data.command = cmd.command;
+                    data.apdu = cmd.apdu;
+                    break;
+                case 'connect':
+                case 'disconnect':
+                    commandQueue.shift(); // Those commands don't reply on the 'format' channel
+                    queue_busy = false;
                 default:
-                    logD("Error: data length incorrect, aborting", myApduPanel);
-                    return false;
+                    data.command = cmd.command;
+                    break;
             }
-            var apdu = {
-                cla: "FF",
-                ins: "D6",
-                p1: "00",
-                p2: blockNum,
-                lc: "10",
-                data: data,
-                le: ""
-            };
 
-            var r = sc_transmit_apdu(apdu,myApduPanel);
-            if (r === null) {
-                logD("APDU transmit failed",myApduPanel);
-                return false;
-            }		
-            if(apdu.sw1 != "90") {
-                logD("Error: " + readErrors[parseInt(apdu.sw1+apdu.sw2,16)],myApduPanel);
-                return false;
+            console.info('Sending command', data);
+            if (data.command == 'transmit') {
+                // Do a bit of reformatting
+                data.apdu = [].slice.call(abutils.hextoab(data.apdu)); // Make it an array of bytes
             }
-            return true;
-        };
+            port.write(data);
 
-        /* Reads a card page (Mifare Ultralight only)
-        * A page is 4 bytes long, but some readers require larger minimum read sizes.
-        * for this reason, we initialize "le" to "00" and just get the 4 first bytes.
-        */
-        var readPage = function(page) {
-            var readErrors = new Array();
-            readErrors[0x6281] = "Part of returned data may be corrupted";
-            readErrors[0x6282] = "End of file reached before reading expected number of bytes";
-            readErrors[0x6981] = "Command incompatible";
-            readErrors[0x6982] = "Security status not satisfied";
-            readErrors[0x6986] = "Command not allowed";
-            readErrors[0x6A81] = "Function not supported";
-            readErrors[0x6A82] = "File not found / Addressed block or byte does not exist";
-            page = "0" + page.toString(16);
-            var apdu = {
-                cla: "FF",
-                ins: "B0",
-                p1: "00",
-                p2: page,
-                lc: "",
-                data: "",
-                le: "00"
-            };
-            var r = sc_transmit_apdu(apdu,myApduPanel);
-            if (r === null) {
-                logD("APDU transmit failed",myApduPanel);
-                return "";
+            if (queue_busy) {
+                wd = setTimeout(function() {
+                    queue_busy = false;
+                    commandQueue.shift();
+                });
             }
-            if(apdu.sw1 != "90") {
-                logD("Error: " + readErrors[parseInt(apdu.sw1+apdu.sw2,16)],myApduPanel);
-                return "";
-            }
-            return apdu.resp.substr(0,8);
-        };
+            
+            // We don't shift the queue at this stage, we wait to
+            // receive & process the response
 
+        }
 
 
         /////////////
@@ -567,13 +303,10 @@ define(function (require) {
                     devicetag: 'Not supported'
                 });
             }
-            // Do a bit of reformatting on some commands
-            if (data.cmd == 'transmit') {
-                var apdu_ab = abutils.hextoab(data.arg.apdu);
-                var apdu_arr = [].slice.call(new Uint8Array(apdu_ab)); // Make it an array of bytes
-                data.arg.apdu = apdu_arr;        
-            }
-            port.write(data);
+
+            commandQueue.push(data);
+            processQueue();
+
         };
 
     }

@@ -123,9 +123,9 @@ define(function (require) {
 
         connectCard: function() {
             if (this.$('#connectcard').html() == 'Disconnect') {
-                linkManager.sendCommand({ cmd: 'disconnect', arg: this.currentReader});
+                linkManager.sendCommand({ command: 'disconnect', reader: this.currentReader});
             } else {
-                linkManager.sendCommand({ cmd:'connect', arg: this.currentReader});
+                linkManager.sendCommand({ command:'connect', reader: this.currentReader});
             }
         },
 
@@ -135,10 +135,10 @@ define(function (require) {
                 this.appendToResponse("Error, byte string not an even number of characters\n");
                 return;
             }
-            linkManager.sendCommand({ cmd:'transmit', arg: {
+            linkManager.sendCommand({ command:'transmit', 
                 reader: this.currentReader,
                 apdu: apdu
-            }});
+            });
         },
 
         updatestatus: function (data) {
