@@ -552,7 +552,6 @@ define(function (require) {
             return true;
         };
 
-
         // period in seconds
         this.startLiveStream = function (period) {
         };
@@ -571,7 +570,7 @@ define(function (require) {
             // Do a bit of reformatting on some commands
             if (data.cmd == 'transmit') {
                 var apdu_ab = abutils.hextoab(data.arg.apdu);
-                var apdu_arr = [].slice.call(new Uint8Array(apdu_ab)); // Make an array of bytes
+                var apdu_arr = [].slice.call(new Uint8Array(apdu_ab)); // Make it an array of bytes
                 data.arg.apdu = apdu_arr;        
             }
             port.write(data);
