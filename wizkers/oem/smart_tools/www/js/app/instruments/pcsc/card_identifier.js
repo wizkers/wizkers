@@ -41,6 +41,9 @@ define(function(require) {
     var available_utils = [];
     var byte_index = 0; // Index for parsing multiple TA/TB/TC bytes (TA1, TA2, etc);
     var K = 0; // Number of historical bytes
+    var g_Fi = 0;
+    var g_F = 0;
+    var g_Fmax = 0;
 
     /**
      * Formatting of a number as a hex byte
@@ -205,9 +208,21 @@ define(function(require) {
     // Parse TC
     var parseTC = function(atr) {
         let T = atr.shift();
-        let r = '<b>TC' + byte_index + ': ' + hexbyte(TC) + '</b><br>    ';
+        let r = '<b>TC' + byte_index + ': ' + hexbyte(T) + '</b><br>    ';
+        switch (byte_index) {
+            case 1:
+                r += 'Extra guard time:' + hexbyte(T);
+                if (T == 255) {
+                    r += ' - special value, character guard time fixed to 11';
+                }
+                break;
+            case 2:
+                r += 'Waiting time (WI): ' + hexbyte(T);
+                break;
+            default:
+                r += 'TC' + byte_index + ' is not supported by this parser';
+        }
 
-        r += 'To be implemented...'
         return r + '<br>';    
     }
 
@@ -287,7 +302,8 @@ define(function(require) {
                 break;
 
             case 0x10:
-
+                r += 'DIR data reference)</b><br>';
+                r += '        DIR data reference: ' + hexbyte(atr.shift());
                 break;
 
             case 0x80:
@@ -393,7 +409,7 @@ define(function(require) {
                 break;
             case 4:
                 r += 'initial access data) - first command  expected after ATR<br>';
-                r += '    Value: ' + cc.substr(0,len*2) + '<br>';
+                r += '        Value: ' + cc.substr(0,len*2) + '<br>';
                 if (len == 0x0f) {
                     // Special case: if len is 0xf, we parse it as an AID
                     r += parseAID(atr);
@@ -401,8 +417,21 @@ define(function(require) {
                     atr.splice(0,len);
                 }
                 break;
+            case 5:
+                r += 'Card issuer\'s data)<br>';
+                r += '        Issuer data:' + cc.substr(0, len*2);
+                atr.splice(0,len);
+                break;
+            case 6:
+                
+                break;
+            case 0x0f:
+                r += 'application identifier)<br>';
+                r += '        AID: ' + cc.substr(0, len*2);
+                atr.splice(0,len);
+                break;
             default:
-                r += 'unknown tag)<br>        ';
+                r += 'unknown tag)<br>            ';
                 r += 'Value: ' + cc.substr(0,len*2) + '<br>';
                 atr.splice(0,len);
         }
