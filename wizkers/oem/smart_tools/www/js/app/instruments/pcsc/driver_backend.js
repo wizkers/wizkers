@@ -72,8 +72,180 @@ define(function (require) {
         var commandQueue = [],
         queue_busy = false,
         wd = null;
+
+        // Great big table of return codes
+        // Check https://www.eftlab.co.uk/index.php/site-map/knowledge-base/118-apdu-response-list
+        // for a longer list, below is 7816-4 and PC/SC mostly
+        const codes_sw1 = {
+            "61": { 
+                'sw1': "SW2 indicates the number of response bytes still available (see text below)",
+                'sw2': {}
+            },
+            "62": {
+                "sw1": "State of non-volatile memory unchanged",
+                "sw2": {
+                    "00": "No information given",
+                    "81": "Part of returned data may be corrupted",
+                    "82": "End of file/record reached before reading Le bytes",
+                    "83": "Selected file invalidated",
+                    "84": "FCI not formatted according to ISO7816-4"
+                }     
+            },
+            "63": { 
+                "sw1": "State of non-volatile memory changed",
+                "sw2": {
+                    "00": "No information given",
+                    "81": "File filled up by the last byte",
+                    "82": "Card key not supported (PC/SC)",
+                    "83": "Reader key not supported (PC/SC)",
+                    "84": "Plain transmission not supported (PC/SC)",
+                    "85": "Secured transmission not supported (PC/SC)",
+                    "86": "Volatile memory is not available (PC/SC)",
+                    "87": "Non volatile memory is not available (PC/SC)",
+                    "88": "Key number not valid (PC/SC)",
+                    "89": "Key length is not correct (PC/SC)",
+                    "C0": "Verify fail, no try left",
+                    "C1": "Verify fail, 1 try left",
+                    "C2": "Verify fail, 2 tries left",
+                    "C3": "Verify fail, 3 tries left",
+                  // CX	The counter has reached the value 'x' (0 = x = 15)
+                    "F1": "More data expected",
+                    "F2": "More data expected and proactive command pending"        
+                }
+            },
+            "64": {
+                "sw1": "State of non-volatile memory unchanged",
+                "sw2": {
+                    "00": "State of non-volatile memory unchanged"
+                }
+            },
+            "65": {
+                "sw1": "State of non-volatile memory changed",
+                "sw2": {
+                    "00": "No information given",
+                    "81": "Memory failure"        
+                }
+            },
+            "66": {
+                "sw1":  "Reserved for security-related issues",
+                "sw2": {
+                    "00": "Error while receiving (timeout)",
+                    "01": "Error while receiving (character parity error)",
+                    "02": "Wrong checksum",
+                    "03": "The current DF file without FCI",
+                    "04": "No SF or KF under the current DF",
+                    "69": "Incorrect Encryption/Decryption Padding"
+                }
+            },
+            "67": {
+                "sw1": "Wrong length",
+                "sw2": {
+                }
+            },
+            "68": {
+                "sw1": "Functions in CLA not supported",
+                "sw2": {
+                    "00": "No information given",
+                    "81": "Logical channel not supported",
+                    "82": "Secure messaging not supported",
+                    "83": "Last command of the chain expected",
+                    "84": "Command chaining not supported",
+                }
+            },
+            "69": {
+                "sw1": "Command not allowed",
+                "sw2": {
+                    "00": "No information given",
+                    "01": "Command not accepted (inactive state)",
+                    "81": "Command incompatible with file structure",
+                    "82": "Security status not satisfied / Card key not supported (PC/SC)",
+                    "83": "Authentication method blocked / Reader key not supported (PC/SC)",
+                    "84": "Referenced data invalidated / Plain transmission not supported (PC/SC) / Reference key or data not useable",
+                    "85": "Conditions of use not satisfied / Secured transmission not supported (PC/SC)",
+                    "86": "Command not allowed (no current EF) / Volatile memory is not available  / Key type not known (PC/SC)",
+                    "87": "Expected SM data objects missing / Non volatile memory is not available (PC/SC)",
+                    "88": "SM data objects incorrect / Key number not valid (PC/SC)",
+                    "89": "Key length is not correct (PC/SC)",
+                    "96": "Data must be updated again",
+                    "E1": "POL1 of the currently Enabled Profile prevents this action.",
+                    "F0": "Permission Denied",
+                    "F1": "Permission Denied - Missing Privilege"
+                }
+            },
+            "6A": {
+                "sw1":  "Wrong parameter(s) P1-P2",
+                "sw2": {
+                    "00": "No information given",
+                    "80": "Incorrect parameters in the data field",
+                    "81": "Function not supported",
+                    "82": "File not found /  Addressed block or byte does not exist (PC/SC)",
+                    "83": "Record not found",
+                    "84": "Not enough memory space in the file",
+                    "85": "Lc inconsistent with TLV structure",
+                    "86": "Incorrect parameters P1-P2",
+                    "87": "Lc inconsistent with P1-P2",
+                    "88": "Referenced data not found",
+                    "89": "File already exists",
+                    "8A": "DF name already exists",
+                    "F0": "Wrong parameter value",
+                }
+            },
+            "6B": {
+                "sw1": "Wrong parameter(s) P1-P2",
+                "sw2": {
+
+                }
+            },
+            "6C": {
+                "sw1":  "Wrong length Le: SW2 indicates the correct length",
+                "sw2": {
+                    "00": "Incorrect P3 length"
+
+                }
+            },
+            "6D": {
+                "sw1": "Instruction code not supported or invalid",
+                "sw2": {
+
+                }
+            },
+            "6E": {
+                "sw1": "Class not supported",
+                "sw2": {
+                    "00": "Invalid class"
+                }
+            },
+            "6F": {
+                "sw1": "No precise diagnostic",
+                "sw2": {
+                }
+            },
+            "90": {
+                "sw1": "No further qualification",
+                "sw2": {
+                    "00": "Command successful",
+                    "04": "PIN not successfully verified, 3 or more PIN tries left",
+                    "08": "Key/file not found",
+                    "80": "Unblock tru counter has reached zero"
+                }
+            },
+
+        };
         
-    
+        var buildStatusDesc = function(sw1, sw2) {
+            let r = '';
+            sw1 = ("00" + sw1.toString(16)).slice(-2).toUpperCase();
+            sw2 = ("00" + sw2.toString(16)).slice(-2).toUpperCase();
+            if (codes_sw1[sw1] != undefined) {
+                r += codes_sw1[sw1].sw1 + ' / ';
+                if (codes_sw1[sw1].sw2[sw2] != undefined) {
+                    r += codes_sw1[sw1].sw2[sw2];
+                }
+            } else {
+                r += 'Status code unknown'; 
+            }
+            return r;
+        }
 
         // Format can act on incoming data from the PC/CS layer, and then
         // forwards the data to the app
@@ -81,8 +253,12 @@ define(function (require) {
             clearTimeout(wd);
             console.info('Done with command', commandQueue.shift());
             // Transform the data into a hex string (it's a buffer when it comes in)
-            var datastr = abutils.ui8tohex(new Uint8Array(data.resp))
-            self.trigger('data', { data: datastr} );
+            var datastr = abutils.ui8tohex(new Uint8Array(data.resp));
+            // Add comments on last 2 bytes status code
+            let sw1 = data.resp[data.resp.length-2];
+            let sw2 = data.resp[data.resp.length-1];
+            let sw1sw2 = buildStatusDesc(sw1, sw2);
+            self.trigger('data', { data: datastr, sw1sw2: sw1sw2} );
             queue_busy = false;
         };
 

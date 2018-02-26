@@ -240,9 +240,9 @@ define(function(require) {
         } else {
             r += 'Transmission protocol: ' + T;
             if (T == 15) {
-                r += '<br>    Interface for all protocols next';
+                r += '<br>    Interface specs for all protocols are next';
             } else {
-                r += '<br>    Interface specs for T=' + T + ' next';
+                r += '<br>    Interface specs for T=' + T + ' are next';
             }
         }
 
@@ -370,23 +370,23 @@ define(function(require) {
             case 3:
                 r += 'card service data byte)<br>';
                 if (len != 1) {
-                    r += 'Error on tag, expected a length of 1';
+                    r += '        Error on tag, expected a length of 1<br>';
                     return r;
                 }
-                let val = atr.shift();
-                if (val & 0x80) {
+                let csdb = atr.shift();
+                if (csdb & 0x80) {
                     r += '        - Application selection by full DF name<br>';
                 }
-                if (val & 0x40) {
+                if (csdb & 0x40) {
                     r += '        - Application selection by partial DF name<br>'
                 }
-                if (val & 0x20) {
+                if (csdb & 0x20) {
                     r += '        - BER-TLV data objects available in EF.DIR<br>';
                 }
-                if (val & 0x10) {
+                if (csdb & 0x10) {
                     r += '        - BER-TLV data objects available in EF.ATR<br>';
                 }
-                switch (val & 0x0e) {
+                switch (csdb & 0x0e) {
                     case 8:
                         r += '        - EF.DIR and ER.ATR access services by the READ BINARY command (transparent structure)<br>';
                         break;
@@ -399,10 +399,10 @@ define(function(require) {
                     default:
                         r += '        - unkown bit combination encountered for bits 2 to 4';
                 }
-                if (val & 0x01) {
-                    r += '        - Card with MF';
-                } else {
+                if (csdb & 0x01) {
                     r += '        - Card without MF';
+                } else {
+                    r += '        - Card with MF';
                 }
                 
                 r += '<br>';
@@ -419,11 +419,73 @@ define(function(require) {
                 break;
             case 5:
                 r += 'Card issuer\'s data)<br>';
-                r += '        Issuer data:' + cc.substr(0, len*2);
+                r += '        Data:' + cc.substr(0, len*2);
                 atr.splice(0,len);
                 break;
             case 6:
-                
+                r += 'pre-issuing data)<br>';
+                r += '        Data:' + cc.substr(0, len*2) + '<br>';
+                atr.splice(0,len);
+                break;
+            case 7:
+                r += 'card capabilities)<br>';
+                var cardcaps;
+                for (var i=0; i < len; i++) {
+                    cardcaps = atr.shift(); 
+                    r += '        Byte ' + i+1;
+                    switch (i) {
+                        case 1:
+                            r += '        Selection methods:<br>';
+                            if (cardcaps & 0x80) {
+                                r += '           DF Selection by full DF name<br>';
+                            }
+                            if (cardcaps & 0x40) {
+                                r += '           DF Selection by partial DF name<br>';
+                            }
+                            if (cardcaps & 0x20) {
+                                r += '           DF Selection by path<br>';
+                            }
+                            if ( cardcaps & 0x10) {
+                                r += '           DF Selection by file identifier<br>';
+                            }
+                            if ( cardcaps & 0x08) {
+                                r += '           Implicit DF selection<br>';
+                            }
+                            if ( cardcaps & 0x04) {
+                                r += '           Short EF identifier supported<br>';
+                            }
+                            if (cardcaps & 0x02) {
+                                r += '           Record number supported<br>';
+                            }
+                            if (cardcaps & 0x01) {
+                                r += '           Record identifier supported<br>';
+                            }
+                            break;
+                        case 2:
+                            r += '        Data coding byte:<br>';
+                            r +- '           Value: ' + hexbyte(cardcaps);
+                            break;
+                        case 3:
+                            r += '        command chaining, length fields and logical channels:<br>';
+                            r +- '           Value: ' + hexbyte(cardcaps);
+                            break;
+                    }
+                }
+                break;
+            case 8:
+                r += 'status indicator)<br>';
+                switch (len) {
+                    case 1:
+                        r += '        LCS: ' + hexbyte(atr.shift()) + '<br>';
+                        break;
+                    case 2:
+                        r += '         SW: ' + ("00" + (atr.shift() << 8 + atr.shift()).toString(16)).slice(-4) + '<br>';
+                        break;
+                    case 3:
+                        r += '        LCS: ' + hexbyte(atr.shift()) + '<br>';
+                        r += '         SW: ' + ("00" + (atr.shift() << 8 + atr.shift()).toString(16)).slice(-4) + '<br>';
+                        break;
+                }
                 break;
             case 0x0f:
                 r += 'application identifier)<br>';

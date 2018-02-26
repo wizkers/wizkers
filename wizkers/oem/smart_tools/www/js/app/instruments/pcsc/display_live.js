@@ -235,6 +235,9 @@ define(function (require) {
 
             if (data.data) {
                 this.appendToResponse('\n' + data.data);
+                if (data.sw1sw2) {
+                    this.appendToResponse('\n' + data.sw1sw2);                    
+                }
                 return;
             }
 
