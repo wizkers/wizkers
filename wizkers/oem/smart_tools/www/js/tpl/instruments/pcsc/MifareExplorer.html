@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" style="padding-top:10px">
     <div class="col-md-3">
         <div class="panel panel-default">
             <div class="panel-body">
@@ -7,16 +7,42 @@
             </div>
         </div>
     </div>
-    <div class="col-md-9">
+    <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-body">
-                <div class="input-group">
-                    <span class="input-group-addon" id="basic-addon1">Key A</span>
-                    <input type="text" class="form-control" placeholder="A0A1A2A3A4A5" >
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Read key</span>
+                    <select class="form-control" id="readKey">
+                        <option value="A">Key A</option>
+                        <option value="B">Key B</option>
+                    </select>
+                </div>     
+                <div class="input-group input-group-sm">
+                        <span class="input-group-addon">Write key</span>
+                        <select class="form-control" id="writeKey">
+                            <option value="A">Key A</option>
+                            <option value="B">Key B</option>
+                        </select>
+                    </div>     
                 </div>
-                <div class="input-group">
-                    <span class="input-group-addon" id="basic-addon1">Key B</span>
-                    <input type="text" class="form-control" placeholder="B0B1B2B3B4B5" >
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Key A</span>
+                    <input type="text" id="keyA" class="form-control" placeholder="A0A1A2A3A4A5" >
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" id="loadKeyA">Load</button>
+                    </span>
+                </div>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Key B</span>
+                    <input type="text" id="keyB" class="form-control" placeholder="B0B1B2B3B4B5" >
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" id="loadKeyB">Load</button>
+                    </span>
                 </div>                                          
             </div>
         </div>            

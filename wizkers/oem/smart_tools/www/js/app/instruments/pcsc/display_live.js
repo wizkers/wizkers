@@ -119,6 +119,7 @@ define(function (require) {
             var reader = this.$('#readers').treeview('getNode', data.parentId).text;
             this.currentReader = reader;
             this.formatAtr(reader, data.text);
+            this.connectCard();
         },
 
         connectCard: function() {
@@ -130,6 +131,7 @@ define(function (require) {
         },
 
         apduSend: function() {
+            this.appendToResponse('\n-> ' + this.$('#apdu').val());
             var apdu = this.$('#apdu').val().replace(/\s/g,'');
             if (apdu.length %2 != 0) {
                 this.appendToResponse("Error, byte string not an even number of characters\n");
@@ -187,7 +189,8 @@ define(function (require) {
             // For now, this is not completely dynamic, we don't have enough explorers to justify this
             if (explorer_name == 'mifare') {
                 require(['app/instruments/pcsc/mifare_explorer'], function(view) {
-                    var ex = new view();
+                    var ex = new view({ currentReader: self.currentReader,
+                                        parent: self});
                     self.$('#' + divid).append(ex.el);
                     ex.render(reader, atr);
                  });     
@@ -215,7 +218,8 @@ define(function (require) {
                         if (data.action == 'removed') {
                             this.readerlist.splice(i,1);
                             this.$('#readers').treeview({ data:this.readerlist});
-                            this.$('#readers').on('nodeSelected', this.selectCard.bind(this));                            return;
+                            this.$('#readers').on('nodeSelected', this.selectCard.bind(this));
+                            return;
                         } else if (data.action == 'added') {
                             // we are getting another 'added' message for an existing reader
                             // that we already knew. We get this when connecting/disconnectino
@@ -259,6 +263,10 @@ define(function (require) {
                         }
                     }
                 } else if (data.status == 'card_removed') {
+                    if (data.reader == this.currentReader) {
+                        this.currentReader = null;
+                        this.$('#connectcard').html('Connect');
+                    }
                     for (var i = 0; i < this.readerlist.length; i++) {
                         if (this.readerlist[i].text == data.reader) {
                             this.readerlist[i].nodes = [];

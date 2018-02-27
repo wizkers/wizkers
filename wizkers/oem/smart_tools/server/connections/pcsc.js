@@ -74,6 +74,12 @@ var PCSCConnection = function(path, settings) {
                     if ((changes & this.SCARD_STATE_EMPTY) && (status.state & this.SCARD_STATE_EMPTY)) {
                         debug("card removed");/* card removed */
                         self.emit('status', {reader: reader.name, status: 'card_removed'});
+                        reader.disconnect(pcsc.SCARD_UNPOWER_CARD, function(err) {
+                            if (err)
+                                debug('Error disconnecting', err);
+                            myReaders[reader.name].protocol = -1;
+                            self.emit('status', {reader: reader.name, status: 'disconnected' });    
+                        });                
                     } else if ((changes & this.SCARD_STATE_PRESENT) && (status.state & this.SCARD_STATE_PRESENT)) {
                         debug("card inserted");
                         self.emit('status', {reader: reader.name, status: 'card_inserted', atr: status.atr});

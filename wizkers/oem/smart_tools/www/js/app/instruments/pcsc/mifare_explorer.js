@@ -46,11 +46,16 @@ define(function (require) {
 
         initialize: function (options) {
 
+            this.currentReader = options.currentReader;
+            this.parent = options.parent; // used to pass data to the APDU scripter windows
+
             linkManager.on('input', this.showInput, this);
         },
 
         events: {
-            'click .node-selected': 'sectorClick'
+            'click .node-selected': 'sectorClick',
+            'click #loadKeyA': 'loadKeyA',
+            'click #loadKeyB': 'loadKeyB'
         },
 
         render: function (reader, atr) {
@@ -94,6 +99,18 @@ define(function (require) {
             this.$('#memmap').treeview({ data:memmap });
             this.$('#memmap').off('nodeSelected');
             this.$('#memmap').on('nodeSelected', this.sectorClick);
+        },
+
+        loadKeyA: function() {
+            var keyval = this.$('#keyA').val();
+            linkManager.sendCommand({ command: 'loadkey', reader: this.currentReader,
+                                        keyname: 'A', keyvalue: keyval});
+        },
+
+        loadKeyB: function() {
+            var keyval = this.$('#keyB').val();
+            linkManager.sendCommand({ command: 'loadkey', reader: this.currentReader,
+                                        keyname: 'B', keyvalue: keyval});
         },
 
         /*
@@ -158,12 +175,25 @@ define(function (require) {
 
         sectorClick: function(e, data) {
             console.log(data);
+            var sector = data.nodeId;
+
         },
 
         // We get there whenever we receive something from the serial port
         showInput: function (data) {
             var self = this;
             console.log('Data', data);
+
+            if (data.command) {
+                if (data.command.command == 'loadkey') {
+                    if (data.data == "9000") {
+                        this.$('#key' + data.command.keyname).css('background-color', '#d9eeda');
+                    } else {
+                        this.$('#key' + data.command.keyname).css('background-color','#f2dede');
+                    }
+
+                }
+            }
         },
 
 

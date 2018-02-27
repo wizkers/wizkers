@@ -251,14 +251,17 @@ define(function (require) {
         // forwards the data to the app
         var format = function (data) {
             clearTimeout(wd);
-            console.info('Done with command', commandQueue.shift());
+            var cmd = commandQueue.shift();
+            console.info('Done with command', cmd);
             // Transform the data into a hex string (it's a buffer when it comes in)
             var datastr = abutils.ui8tohex(new Uint8Array(data.resp));
             // Add comments on last 2 bytes status code
             let sw1 = data.resp[data.resp.length-2];
             let sw2 = data.resp[data.resp.length-1];
             let sw1sw2 = buildStatusDesc(sw1, sw2);
-            self.trigger('data', { data: datastr, sw1sw2: sw1sw2} );
+            self.trigger('data', { data: datastr, 
+                                 sw1sw2: sw1sw2,
+                                command: cmd } );
             queue_busy = false;
         };
 
@@ -370,18 +373,26 @@ define(function (require) {
                 case 'getUID':
                     data.command = 'transmit';
                     var t = storageCommands.getUID();
-                    data.apdu = apdu2str(t.apdu);
-                    cmd.errors = t.errors; // Add error messages if we have any
+                    data.apdu = apdu2str(t);
                     break;
                 case 'getATS':
                     data.command = 'transmit';
                     var t = storageCommands.getATS();
-                    data.apdu = apdu2str(t.apdu);
-                    cmd.errors = t.errors;
+                    data.apdu = apdu2str(t);
+                    break;
+                case 'loadkey':
+                    data.command = 'transmit';
+                    var t = storageCommands.loadKey(cmd.reader, cmd.keyname, cmd.keyvalue);
+                    data.apdu = apdu2str(t);
                     break;
                 case 'transmit':
                     data.command = cmd.command;
                     data.apdu = cmd.apdu;
+                    break;
+                case 'authenticateBlock':
+                    data.command = 'transmit';
+                    var t = storageCommands.authenticateBlock(myReader, cmnd.sector,cmd.block,cmd.key_type);
+                    data.apdu = apdu2str(t);
                     break;
                 case 'connect':
                 case 'disconnect':
@@ -403,7 +414,7 @@ define(function (require) {
                 wd = setTimeout(function() {
                     queue_busy = false;
                     commandQueue.shift();
-                });
+                }, 1000 );
             }
             
             // We don't shift the queue at this stage, we wait to

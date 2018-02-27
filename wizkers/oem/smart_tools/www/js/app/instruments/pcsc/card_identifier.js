@@ -432,10 +432,10 @@ define(function(require) {
                 var cardcaps;
                 for (var i=0; i < len; i++) {
                     cardcaps = atr.shift(); 
-                    r += '        Byte ' + i+1;
+                    r += '        Byte ' + (i+1) + ': ';
                     switch (i) {
-                        case 1:
-                            r += '        Selection methods:<br>';
+                        case 0:
+                            r += 'Selection methods:<br>';
                             if (cardcaps & 0x80) {
                                 r += '           DF Selection by full DF name<br>';
                             }
@@ -461,13 +461,13 @@ define(function(require) {
                                 r += '           Record identifier supported<br>';
                             }
                             break;
-                        case 2:
-                            r += '        Data coding byte:<br>';
-                            r +- '           Value: ' + hexbyte(cardcaps);
+                        case 1:
+                            r += 'Data coding byte:<br>';
+                            r += '           Value: ' + hexbyte(cardcaps) + '<br>';
                             break;
-                        case 3:
-                            r += '        command chaining, length fields and logical channels:<br>';
-                            r +- '           Value: ' + hexbyte(cardcaps);
+                        case 2:
+                            r += 'command chaining, length fields and logical channels:<br>';
+                            r += '           Value: ' + hexbyte(cardcaps)  + '<br>';
                             break;
                     }
                 }
