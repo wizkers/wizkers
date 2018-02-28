@@ -215,6 +215,7 @@ define(function (require) {
                                         key_type: this.$('#readKey').val()
                                     });
             this.$('#hexdump').html('');
+            this.hexdumpContents = '<pre style="line-height:0.7">';
 
         },
 
@@ -233,11 +234,14 @@ define(function (require) {
                 }
                 if (data.command.command == 'readbinary') {
                     if (data.data.slice(-4) == "9000") {
-                        this.$('#hexdump').html(this.$('#hexdump').html() + '<br>Sector: ' + data.command.sector + ' / Block: ' + data.command.block + '<br><pre>' +
-                                                abutils.hexdump(abutils.hextoab(data.data.substr(0,data.data.length-4))) + '</pre>');
+                        this.hexdumpContents += abutils.hexdump(abutils.hextoab(data.data.substr(0,data.data.length-4))) + '\n';                                                
                         if (data.command.block == 3) {
-                            this.$('#hexdump').html(this.$('#hexdump').html() + '<br>' +
-                                        this.decodeTrailer(data.data.substr(0,data.data.length-4)));
+                            this.hexdumpContents += '</pre><br>' +
+                                        this.decodeTrailer(data.data.substr(0,data.data.length-4));
+                            this.$('#hexdump').html(this.hexdumpContents);
+                        } else if (this.commandQueue.length == 0) {
+                            this.hexdumpContents += '</pre>';
+                            this.$('#hexdump').html(this.hexdumpContents);
                         }
                     }
                 }
