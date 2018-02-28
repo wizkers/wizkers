@@ -131,7 +131,7 @@ define(function (require) {
         /* Authenticates in the card for a given block
         - sector: sector number
         - block : block number
-        - key_type: "0" is key A, "1" is key B
+        - key_type: "A" is key A, "B" is key B
 
         Returns 'true' if auth successful, 'false' otherwise
 
@@ -142,20 +142,22 @@ define(function (require) {
             FF is Unknown or not necessary
 
         Example: Authenticate using key A and read 16 bytes:
-            FF 88 00 00 60 00
+            FF 86 00 00 05 01 00 60 00
             FF B0 00 00 10
 
         */
-        this.authenticateBlock = function(myReader, sector,block,key_type){
+        this.authenticateBlock = function(myReader, sector, block, key_type){
             if (sector < 32) {
                 var blockNum = sector * 4 + block;
             } else {
                 // Mifare 4K
                 var blockNum = 128 + (sector-32) * 16 + block;
             }
-            (blockNum < 16) ? blockNum = "0" + blockNum.toString(16): blockNum = blockNum.toString(16);
-            var keyType = 0x60 + parseInt(key_type);
-            var key_number = "0" + key_type;
+            console.log(key_type);
+            key_type = key_type.toUpperCase();
+            blockNum =( "00" + blockNum.toString(16)).slice(-2);
+            var keyType = (key_type == 'A') ? "60" : "61";
+            var key_number = (key_type == 'A') ? "00" : "01";
             if (myReader.indexOf("Gemalto") != -1) {
                 // The GemProx implementation requires "00"
                 // and the reader computes the key slot itself
@@ -168,8 +170,9 @@ define(function (require) {
                     lc: "05",
                     le: ""
                 };
-                apdu.data = "0100" + blockNum + keyType.toString(16) + key_number;
+                apdu.data = "0100" + blockNum + keyType + key_number;
             } else {
+                // Obsolete PCSC Block authenticate command
                 var apdu = {
                     cla: "FF",
                     ins: "88",
@@ -192,15 +195,7 @@ define(function (require) {
         *
         * 	FF B0 00 00 10
         */
-        this.readBinary = function(sector, block){
-            var readErrors = {};
-            readErrors["6281"] = "Part of returned data may be corrupted";
-            readErrors["6282"] = "End of file reached before reading expected number of bytes";
-            readErrors["6981"] = "Command incompatible";
-            readErrors["6982"] = "Security status not satisfied";
-            readErrors["6986"] = "Command not allowed";
-            readErrors["6A81"] = "Function not supported";
-            readErrors["6A82"] = "File not found / Addressed block or byte does not exist";
+        this.readBinary = function(myReader, sector, block){
             if (sector < 32) {
                 var blockNum = sector * 4 + block;
             } else {
@@ -218,7 +213,7 @@ define(function (require) {
                 le: "10"
             };
 
-            return { apdu: apdu, errors: readErrors} ;
+            return apdu;
         };
 
         /*

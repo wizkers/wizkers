@@ -389,9 +389,14 @@ define(function (require) {
                     data.command = cmd.command;
                     data.apdu = cmd.apdu;
                     break;
-                case 'authenticateBlock':
+                case 'authenticateblock':
                     data.command = 'transmit';
-                    var t = storageCommands.authenticateBlock(myReader, cmnd.sector,cmd.block,cmd.key_type);
+                    var t = storageCommands.authenticateBlock(cmd.reader, cmd.sector,cmd.block,cmd.key_type);
+                    data.apdu = apdu2str(t);
+                    break;
+                case 'readbinary':
+                    data.command = 'transmit';
+                    var t = storageCommands.readBinary(cmd.reader, cmd.sector,cmd.block);
                     data.apdu = apdu2str(t);
                     break;
                 case 'connect':

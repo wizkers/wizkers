@@ -45,15 +45,14 @@ define(function (require) {
     return Backbone.View.extend({
 
         initialize: function (options) {
-
             this.currentReader = options.currentReader;
             this.parent = options.parent; // used to pass data to the APDU scripter windows
-
+            // Because we're all async, we need to maintain a command queue...
+            this.commandQueue = [];
             linkManager.on('input', this.showInput, this);
         },
 
         events: {
-            'click .node-selected': 'sectorClick',
             'click #loadKeyA': 'loadKeyA',
             'click #loadKeyB': 'loadKeyB'
         },
@@ -93,12 +92,20 @@ define(function (require) {
 
         makeMemoryMap: function() {
             var memmap = [];
+            var blk;
             for (var i = 0; i < this.mifareCardSectors; i++) {
-                memmap.push({ text: 'Sector ' + i});
+                memmap.push({ text: 'Sector ' + i,  id: 'S' + i, nodes: []});
+                (i>31) ? blk = 16: blk = 4; // Mifare 4K
+                for (var j=0; j<blk;j++) {
+                    memmap[memmap.length-1].nodes.push({
+                            text: "Block " + j,
+                            id: "S" + i + "B" + j,
+                        });
+                }
             }
-            this.$('#memmap').treeview({ data:memmap });
+            this.$('#memmap').treeview({ data:memmap }).treeview('collapseAll', { silent: true });;
             this.$('#memmap').off('nodeSelected');
-            this.$('#memmap').on('nodeSelected', this.sectorClick);
+            this.$('#memmap').on('nodeSelected', this.sectorClick.bind(this));
         },
 
         loadKeyA: function() {
@@ -154,11 +161,11 @@ define(function (require) {
             var b2acl = ((b7 & 0x40) >>> 4) + ((b8 & 0x4) >>> 1) + ((b8 & 0x40) >>> 6);
             var b3acl = ((b7 & 0x80) >>> 5) + ((b8 & 0x8) >>> 2) + ((b8 & 0x80) >>> 7);
 
-            var aclTable = "<table class='mifareACLTable'><tr><th colspan=2></th><th colspan=4>Access Condition for</th><th></th></tr><tr><th>Block number</th><th>ACL</th><th>Read</th><th>Write</th><th>Increment</th><th>Decrement,<br>transfer,<br>restore</th><th>Remark</th></tr>";
+            var aclTable = "<table class='table table-striped'><tr><th colspan=2></th><th colspan=4>Access Condition for</th><th></th></tr><tr><th>Block number</th><th>ACL</th><th>Read</th><th>Write</th><th>Increment</th><th>Decrement,<br>transfer,<br>restore</th><th>Remark</th></tr>";
             aclTable += "<tr><td>Block 0</td><td>" + b0acl.toString(2) + "</td>" + blockReadableTable[b0acl] + "</tr>";
             aclTable += "<tr><td>Block 1</td><td>" + b1acl.toString(2) + "</td>" + blockReadableTable[b1acl] + "</tr>";
             aclTable += "<tr><td>Block 2</td><td>" + b2acl.toString(2) + "</td>" + blockReadableTable[b2acl] + "</tr></table>";
-            aclTable += "<br><table class='mifareACLTable'><tr><th rowspan=3>Trailer<br>Access bits<br>value</th><th colspan=6>Access Condition for</th><th rowspan=3>Remark</th></tr>";
+            aclTable += "<br><table class='table table-striped'><tr><th rowspan=3>Trailer<br>Access bits<br>value</th><th colspan=6>Access Condition for</th><th rowspan=3>Remark</th></tr>";
             aclTable += "<tr><th colspan=2>Key A</th><th colspan=2>Access bits</th><th colspan=2>Key B</th>";
             aclTable += "<tr><th>read</th><th>write</th><th>read</th><th>write</th><th>read</th><th>write</th>";
             aclTable += "<tr><td>" + b3acl.toString(2) + "</td>" + trailerReadableTable[b3acl] + "</tr></table>";
@@ -175,7 +182,39 @@ define(function (require) {
 
         sectorClick: function(e, data) {
             console.log(data);
-            var sector = data.nodeId;
+            // Extracts sector in sb[1] and block in sb[2]
+            var sb = data.id.match(/S([0-9]*)B?([0-9]*)/);
+            var fullBlock = sb[2] == '';
+            var block = parseInt(sb[2] || "0");
+            var sector = parseInt(sb[1]);
+
+            // First authenticate to the block.
+            // then upon callback read it.
+            // We do that by preloading the callback into the 
+            // queue.
+            if (fullBlock) {
+                var bMax = (sector > 31) ? 16 : 4; // Mifare 4K or 1K
+                for (var i = 0; i < bMax; i++) {
+                    this.commandQueue.push({  command: 'readbinary',
+                                            reader: this.currentReader,
+                                            sector: sector,
+                                            block: i
+                                            });
+                }
+            } else {
+                this.commandQueue.push({  command: 'readbinary',
+                                        reader: this.currentReader,
+                                        sector: sector,
+                                        block: block
+                                        });
+            }
+            linkManager.sendCommand( {  command: 'authenticateblock',
+                                        reader: this.currentReader,
+                                        sector: sector,
+                                        block: block,
+                                        key_type: this.$('#readKey').val()
+                                    });
+            this.$('#hexdump').html('');
 
         },
 
@@ -191,8 +230,21 @@ define(function (require) {
                     } else {
                         this.$('#key' + data.command.keyname).css('background-color','#f2dede');
                     }
-
                 }
+                if (data.command.command == 'readbinary') {
+                    if (data.data.slice(-4) == "9000") {
+                        this.$('#hexdump').html(this.$('#hexdump').html() + '<br>Sector: ' + data.command.sector + ' / Block: ' + data.command.block + '<br><pre>' +
+                                                abutils.hexdump(abutils.hextoab(data.data.substr(0,data.data.length-4))) + '</pre>');
+                        if (data.command.block == 3) {
+                            this.$('#hexdump').html(this.$('#hexdump').html() + '<br>' +
+                                        this.decodeTrailer(data.data.substr(0,data.data.length-4)));
+                        }
+                    }
+                }
+            }
+
+            if (this.commandQueue.length) {
+                linkManager.sendCommand(this.commandQueue.shift());
             }
         },
 

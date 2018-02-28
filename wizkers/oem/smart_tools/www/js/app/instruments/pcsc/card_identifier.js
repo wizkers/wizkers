@@ -136,7 +136,7 @@ define(function(require) {
             for (var i = 1; i < original_atr.length; i++) {
                 tck_calc ^= original_atr[i];
             }
-            var tck_result = 'Checksum: ' + tck_val;
+            var tck_result = '<b>Checksum:</b> ' + tck_val;
             tck_result += (tck_calc == 0) ? '- OK' : '- Wrong, expected ' + hexbyte(tck_val ^ tck_calc);
         }
 
@@ -144,7 +144,7 @@ define(function(require) {
         if (K > 0)
             result += parseHistorical(atr);
 
-        result += tck_result;
+        result += '----<br>' + tck_result;
 
         // Last, identify the card
         var hits = getCard(atr_str);
@@ -326,10 +326,11 @@ define(function(require) {
             case 0x8D:
             case 0x8E:
             case 0x8F:
-                r += "reserved for future use)</b>";
+                r += "reserved for future use)</b><br>";
                 break;
             default:
-                r += "proprietary format)</b>";
+                r += "proprietary format)</b><br>";
+                r += abutils.hexdump(atr);
                 
         }
 
