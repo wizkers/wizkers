@@ -40,6 +40,10 @@ module.exports = function safecast() {
     var output_ref = null;
     var post_options = {};
 
+    var request_pending = false; // Set to true while we have a request pending
+                                 // so that we never hammer the API with multiple requests
+                                 // in case it is too slow.
+
     // Load the settings for this plugin
     this.setup = function (output) {
 
@@ -66,7 +70,8 @@ module.exports = function safecast() {
             headers: {
             'X-Datalogger': 'wizkers.io Safecast plugin',
             'Content-Type': 'application/json',
-            }
+            },
+            timeout: 15000 // 15s timeout
         };
 
         post_options.path = post_options.path + '?api_key=' + settings.apikey
@@ -185,6 +190,22 @@ module.exports = function safecast() {
             // We were not able to send the data - the output manager will retry
             cb(false, idx);
         });
+
+        post_request.on('timeout', function (err) {
+            output_ref.lastmessage = 'Error:' + err;
+            dbs.outputs.get(output_ref._id, function (err, result) {
+                if (err) {
+                    debug('API request timeout', err);
+                    debug('Our output reference was', output_ref);
+                    return;
+                }
+                output_ref._rev = result._rev;
+                dbs.outputs.put(output_ref, function (err, result) {});
+            });
+            // We were not able to send the data - the output manager will retry
+            cb(false, idx);
+        });
+        
 
 
         debug('Sending data to', post_options.host);
