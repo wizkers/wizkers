@@ -294,7 +294,7 @@ gulp.task('nwjs', ['build', 'nwjs_copy_build'], function () {
 gulp.task('nwjs_bin', ['nwjs_optimize'], function () {
     var nw = new NwBuilder({
         files: paths.nwjs_dist + '**/**', // use the glob format
-        platforms: ['osx64'],
+        platforms: ['osx64', 'win64'],
         // version: '0.18.1-mas',
         downloadUrl: 'https://dl.nwjs.io/',
         flavor: 'normal',
