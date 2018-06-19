@@ -163,6 +163,10 @@ var PCSCConnection = function(path, settings) {
     }
 
     var transmitAPDU = function(reader, apdu) {
+        if (!myReaders[reader]) {
+            debug('transmitAPDU: Unknown reader');
+            return;
+        }
         var readerRef = myReaders[reader].ref;
         if (!readerRef)
             return;

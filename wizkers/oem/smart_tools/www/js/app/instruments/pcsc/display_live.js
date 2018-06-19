@@ -249,9 +249,11 @@ define(function (require) {
             if (data.status) {
                 if (data.status == 'connected') {
                     this.$('#connectcard').html('Disconnect');
+                    this.$('#apdusend').removeAttr('disabled');
                     return;
                 } else if (data.status == 'disconnected') {
                     this.$('#connectcard').html('Connect');
+                    this.$('#apdusend').attr('disabled', true);
                     return;
                 }
                 if (data.status == 'card_inserted') {
