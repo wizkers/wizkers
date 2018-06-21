@@ -411,7 +411,15 @@ define(function (require) {
             console.info('Sending command', data);
             if (data.command == 'transmit') {
                 // Do a bit of reformatting
-                data.apdu = [].slice.call(abutils.hextoab(data.apdu)); // Make it an array of bytes
+                try {
+                    data.apdu = [].slice.call(abutils.hextoab(data.apdu)); // Make it an array of bytes
+                } catch (e) {
+                    queue_busy = false;
+                    commandQueue.shift();
+                    self.trigger('data', { data: '', 
+                        sw1sw2: 'Error, odd number of characters in APDU',
+                       command: cmd } );
+                }
             }
             port.write(data);
 

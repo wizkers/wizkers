@@ -38,24 +38,24 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 
-define(function(require) {
+define(function (require) {
 
     "use strict";
 
-    function to_hex( number ) {
-            var r = number.toString(16);
-            if( r.length < 2 ) {
-                return "0" + r;
-            } else {
-                return r;
-            }
+    function to_hex(number) {
+        var r = number.toString(16);
+        if (r.length < 2) {
+            return "0" + r;
+        } else {
+            return r;
+        }
     };
 
-    function dump_chunk( chunk ) {
+    function dump_chunk(chunk) {
         var dumped = "";
-        for( var i = 0; i < 4; i++ ) {
-            if( i < chunk.length ) {
-                dumped += to_hex( chunk.charCodeAt( i ) );
+        for (var i = 0; i < 4; i++) {
+            if (i < chunk.length) {
+                dumped += to_hex(chunk.charCodeAt(i));
             } else {
                 dumped += "..";
             }
@@ -63,19 +63,19 @@ define(function(require) {
         return dumped;
     };
 
-    function dump_block( block ) {
+    function dump_block(block) {
         var dumped = "";
-        var chunks = block.match( /[\s\S.]{1,4}/g );
-        for( var i = 0; i < 4; i++ ) {
-            if( i < chunks.length ) {
-                dumped += dump_chunk( chunks[i] );
+        var chunks = block.match(/[\s\S.]{1,4}/g);
+        for (var i = 0; i < 4; i++) {
+            if (i < chunks.length) {
+                dumped += dump_chunk(chunks[i]);
             } else {
                 dumped += "........";
             }
             dumped += " ";
         }
 
-        dumped += "    " + block.replace( /[\x00-\x1F]/g, "." );
+        dumped += "    " + block.replace(/[\x00-\x1F]/g, ".");
 
         return dumped;
     };
@@ -103,25 +103,25 @@ define(function(require) {
         // Note: we assume ISO-8859 encoding here, not UTF-8 (see previous note above)
 
         // Convert string to ArrayBuffer.
-        str2ab: function(str) {
-        //  some drivers already give us an Uint8Buffer, because they
-        // handle binary data. in that case
-        // this makes our job easier:
+        str2ab: function (str) {
+            //  some drivers already give us an Uint8Buffer, because they
+            // handle binary data. in that case
+            // this makes our job easier:
             if (str.buffer)
                 return str.buffer;
 
             if (enc_ok)
                 return encoder.encode(str).buffer;
 
-            var buf=new ArrayBuffer(str.length);
-            var bufView=new Uint8Array(buf);
-            for (var i=0, j=str.length; i<j; i++) {
-                bufView[i]=str.charCodeAt(i);
+            var buf = new ArrayBuffer(str.length);
+            var bufView = new Uint8Array(buf);
+            for (var i = 0, j = str.length; i < j; i++) {
+                bufView[i] = str.charCodeAt(i);
             }
             return buf;
         },
 
-        ab2str: function(buf) {
+        ab2str: function (buf) {
             // Implementation using the TextDecoder API
             // if present
             if (enc_ok) {
@@ -130,53 +130,103 @@ define(function(require) {
                 // null terminated strings properly, hence this:
                 var str = decoder.decode(buf);
                 var i = str.indexOf(nullstring);
-                return str.substr(0, (i != -1) ? i :  str.length);
+                return str.substr(0, (i != -1) ? i : str.length);
             }
             // The below will fail on very large buffers by blowing the stack size:
             //return String.fromCharCode.apply(null, new Uint8Array(buf));
             // This will work with any buffer size:
-            return [].reduce.call(new Uint8Array(buf),function(p,c){return p+String.fromCharCode(c)},'');
+            return [].reduce.call(new Uint8Array(buf), function (p, c) { return p + String.fromCharCode(c) }, '');
         },
 
 
         /// Converts a Hex string to a UInt8Array
         // For instance "010203efab23" as input
-        hextoab: function(str) {
-            if (str.length%2 != 0)
+        hextoab: function (str) {
+            if (str.length % 2 != 0)
                 throw "Not an even number of characters"; // We need an even number
-            var ab = new Uint8Array(str.length/2);
-            for (var i=0;  i < str.length; i +=2) {
-                ab[i/2] = parseInt(str.substr(i,2), 16);
+            var ab = new Uint8Array(str.length / 2);
+            for (var i = 0; i < str.length; i += 2) {
+                ab[i / 2] = parseInt(str.substr(i, 2), 16);
             }
             return ab;
         },
 
         // Convert Uint8Array to hex string
-        ui8tohex: function(ui8) {
+        ui8tohex: function (ui8) {
             var str = '';
-            for (var i=0; i < ui8.length; i++) {
+            for (var i = 0; i < ui8.length; i++) {
                 str += ('0' + ui8[i].toString(16)).slice(-2);
             }
             return str;
         },
 
+        /*
+        * Converts a hexadecimal string to a ascii string
+        */
+        hexAsciiToAscii(myHexAscii) {	 
+            var iLoop;
+            var ascii = "";
+            var current; 
+            for (iLoop = 0; iLoop < ((myHexAscii.length) / 2); iLoop++) {
+                current = parseInt(myHexAscii.substr(iLoop * 2, 2), 16);
+                if ((current >= 0x20) && (current < 0x7f)) {
+                    ascii += String.fromCharCode(parseInt(myHexAscii.substr(iLoop * 2, 2), 16));
+                }
+                else {
+                    ascii += "\\x" + myHexAscii.substr(iLoop * 2, 2);
+                }
+            }	
+        return ascii;
+        },
+
         // Create an Uint8Array from an ASCII string
-        str2ui8: function(str) {
-            var bufView=new Uint8Array(str.length);
-            for (var i=0, j=str.length; i<j; i++) {
-                bufView[i]=str.charCodeAt(i);
+        str2ui8: function (str) {
+            var bufView = new Uint8Array(str.length);
+            for (var i = 0, j = str.length; i < j; i++) {
+                bufView[i] = str.charCodeAt(i);
             }
             return bufView;
         },
 
+        /*
+         * Converts a hexadecimal string to a UTF8 string
+        */
+        hexAsciiToUTF8(myHexAscii) {
+            var string = "";
+            var i = 0,
+                c = 0,
+                c2 = 0;
+
+            while (i < myHexAscii.length) {
+                c = parseInt(myHexAscii.substr(i, 2), 16);
+                if (c < 128) {
+                    string += String.fromCharCode(c);
+                    i += 2;
+                }
+                else if ((c > 191) && (c < 224)) {
+                    c2 = parseInt(myHexAscii.substr(i + 2, 2), 16);
+                    string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+                    i += 4;
+                }
+                else {
+                    c2 = parseInt(myHexAscii.substr(i + 2, 2), 16);
+                    c3 = parseInt(myHexAscii.substr(i + 4, 2), 16);
+                    string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+                    i += 6;
+                }
+            }
+            return string;
+        },
+
+
         // Dump a binary string or Uint8Array
-        hexdump: function( s ) {
+        hexdump: function (s) {
             var dumped = "";
             if (typeof s != "string")
                 s = String.fromCharCode.apply(null, new Uint8Array(s));
-            var blocks = s.match( /[\s\S.]{1,16}/g );
-            for( var block in blocks ) {
-                dumped += dump_block( blocks[block] ) + "\r\n";
+            var blocks = s.match(/[\s\S.]{1,16}/g);
+            for (var block in blocks) {
+                dumped += dump_block(blocks[block]) + "\r\n";
             }
 
             return dumped;
@@ -187,11 +237,11 @@ define(function(require) {
 
             if (buf.byteLength % padding == 0)
                 return buf;
-            var missing = padding - (buf.byteLength%padding);
+            var missing = padding - (buf.byteLength % padding);
             // Now extend the buffer by the missing characters:
             var b2 = new Uint8Array(buf.byteLength + missing);
             b2.set(buf);
-            for (var i=buf.byteLength; i < b2.byteLength; i++) {
+            for (var i = buf.byteLength; i < b2.byteLength; i++) {
                 b2[i] = 0xff;
             }
             return b2;

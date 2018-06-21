@@ -76,7 +76,9 @@ define(function (require) {
             var keyStructure = "20"; // non-volatile
             var keyNumber1 = "00";
             var keyNumber2 = "01";
-            if ((myReader.indexOf("SCM") != -1)||(myReader.indexOf("SDI010") !=-1)) {
+            if ((myReader.indexOf("SCM") != -1)||
+                (myReader.indexOf("SDI010") !=-1) ||
+                (myReader.indexOf("uTRust") != -1)) {
                 keyStructure = "00";
                 keyNumber1 = "60";
                 keyNumber2 = "61";

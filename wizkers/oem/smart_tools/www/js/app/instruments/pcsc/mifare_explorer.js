@@ -243,6 +243,11 @@ define(function (require) {
                             this.hexdumpContents += '</pre>';
                             this.$('#hexdump').html(this.hexdumpContents);
                         }
+                    } else {
+                        // We were not able to read the sector, tell the user
+                        var c = this.$('#hexdump').html();
+                        this.$('#hexdump').html(c + '<br>' + 'Sector: ' + data.command.sector +
+                        ' Block:' + data.command.block + ' - ' + data.sw1sw2 );
                     }
                 }
             }

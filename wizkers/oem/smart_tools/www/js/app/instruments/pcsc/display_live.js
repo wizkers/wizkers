@@ -34,8 +34,8 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        utils = require('app/utils'),
         abutils = require('app/lib/abutils'),
+        ASN1 = require('app/lib/asn1'),
         cardident = require('js/app/instruments/pcsc/card_identifier.js'),
         template = require('js/tpl/instruments/pcsc/LiveView.js');
 
@@ -49,6 +49,7 @@ define(function (require) {
 
             this.update_count = 0;
             this.datasetlength = 0;
+            this.asn1 = new ASN1();
 
             this.readerlist = [];
             this.currentReader = undefined;
@@ -195,6 +196,7 @@ define(function (require) {
                     ex.render(reader, atr);
                  });     
             } else if (explorer_name == 'mifare_ul') {
+                var tmp = ASN1('Gabuzo');
 
             } else if (explorer_name == 'calypso') {
 
@@ -241,6 +243,22 @@ define(function (require) {
                 this.appendToResponse('\n' + data.data);
                 if (data.sw1sw2) {
                     this.appendToResponse('\n' + data.sw1sw2);                    
+                }
+                if (data.data.substr(-4) == "9000") {
+                    // Attempt to parse the output as ASN.1
+                    if (this.$("#asn1dec").is(":checked")) {
+                        try {
+                            this.appendToResponse('\n' + this.asn1.decode(data.data));
+                        } catch (e) {
+                            try {
+                                // Attempt to decode using first 2 bytes as length
+                                var len = parseInt(data.data.substr(0,4), 16);
+                                this.appendToResponse('\nASN.1 decoding:\n' + this.asn1.decode(data.data.substr(4, len*2)));
+                            } catch (e) {
+                                this.appendToResponse('\nASN.1 decoding error: ' + e.err + '\nPartial decoding (might be garbage):\n' + e.partial );
+                            }
+                        }
+                    }
                 }
                 return;
             }
