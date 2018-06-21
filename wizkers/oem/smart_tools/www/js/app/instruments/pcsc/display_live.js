@@ -78,12 +78,29 @@ define(function (require) {
             'click .utility_close': 'closeUtil',
             'click #apdusend': 'apduSend',
             'click #connectcard': 'connectCard',
+            'shown.bs.tab a[data-toggle="tab"]': "tab_shown",
+        },
+
+        tab_shown: function (e) {
+            if (this.rsc)
+                this.rsc();
         },
 
         render: function () {
             var self = this;
             console.log('Main render of PCSC view');
             this.$el.html(template());
+            var rsc = function () {
+                var xplorerheight = window.innerHeight - self.$el.offset().top - 55;
+                self.$('#pcscview').css('height', xplorerheight + 'px');
+                var cardreponseheight = xplorerheight - $('#cardresponse').offset().top;
+                self.$('#cardresponse').css('height', cardreponseheight + 'px' );
+            }
+            if (this.rsc)
+                $(window).off('resize', this.rsc);
+            this.rsc = rsc;
+            $(window).on('resize', this.rsc);
+            rsc();
 
             linkManager.requestStatus();
             linkManager.getUniqueID(); // Actually gets the list of readers
@@ -95,6 +112,8 @@ define(function (require) {
             linkManager.stopLiveStream();
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
+            if (this.rsc)
+                $(window).off('resize', this.rsc);
         },
 
         appendToResponse: function(str) {

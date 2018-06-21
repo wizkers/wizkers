@@ -553,6 +553,7 @@ define(function (require) {
         while (point < data.length) {
 
             // Detecting TAG field (Multi octet supported)
+            var ntag10 = 0;
             var tag10 = parseInt("0x" + data.substr(point, 2));
             var tag16 = "(" + "0x" + data.substr(point, 2) + ")";
             var isSeq = tag10 & 32;
@@ -661,6 +662,7 @@ define(function (require) {
         while (point < data.length) {
 
             // Detecting TAG field (Multi octet supported)
+            var ntag10;
             var tag10 = parseInt("0x" + data.substr(point, 2));
             var tag16 = "(" + "0x" + data.substr(point, 2) + ")";
             var isSeq = tag10 & 32;
@@ -805,6 +807,7 @@ define(function (require) {
         while (point < data.length) {
 
             // Detecting TAG field (Multi octet supported)
+            var ntag10;
             var tag10 = parseInt("0x" + data.substr(point, 2));
             var tag16 = "(" + "0x" + data.substr(point, 2) + ")";
             var isSeq = tag10 & 32;
@@ -945,6 +948,7 @@ define(function (require) {
             indefinite = false;
 
             // Detecting TAG field (Multi octet supported)
+            var ntag10;
             var tag10 = parseInt("0x" + data.substr(point, 2));
             var tag16 = "(" + "0x" + data.substr(point, 2) + ")";
             var isSeq = tag10 & 32;
@@ -1049,6 +1053,7 @@ define(function (require) {
         var ret = "", indefinite;
 
         // Detecting TAG field (Multi octet supported)
+        var ntag10;
         var tag10 = parseInt("0x" + data.substr(point, 2));
         var tag16 = "(" + "0x" + data.substr(point, 2) + ")";
         var isSeq = tag10 & 32;
@@ -1153,6 +1158,7 @@ define(function (require) {
         while (point < data.length) {
 
             // Detecting TAG field (Multi octet supported)
+            var ntag10;
             var tag10 = parseInt("0x" + data.substr(point, 2));
             var tag16 = "(" + "0x" + data.substr(point, 2) + ")";
             var isSeq = tag10 & 32;
@@ -1255,6 +1261,7 @@ define(function (require) {
         var ret = "", indefinite;
 
         // Detecting TAG field (Multi octet supported)
+        var ntag10;
         var tag10 = parseInt("0x" + data.substr(point, 2));
         var tag16 = "(" + "0x" + data.substr(point, 2) + ")";
         var isSeq = tag10 & 32;
