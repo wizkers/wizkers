@@ -372,6 +372,10 @@ define(function (require) {
 
         // End of ISO7816-6 interindustry tags
 
+        // Additional known tags
+        this.ID["Calypso FCI information"] = 0x85;
+
+
 
         this.setContext(this.context);
 
@@ -425,6 +429,7 @@ define(function (require) {
         // Should only code for context-specific tags (above 0x7F)
         switch (context) {
             case "FCI":
+            case 0x6f: // Use the numeric tag for FCI too (See ISO7816-4)
                 this.ID['Short File Identifier'] = 0x88;
                 this.ID['Card serial number, formatted as Primary Account Number (PAN)'] = 0x5A;
                 this.ID['Security Attributes in proprietary format'] = 0xA1;
@@ -442,6 +447,7 @@ define(function (require) {
                 this.ID["Key definitions"] = 0xC2;
                 break;
             case "Calypso":
+            case 0x85:
                 this.ID["Calypso FCI information"] = 0x85;
                 this.ID["Application Serial Number"] = 0xC7;
                 this.ID["FCI Issuer Discretionary Data"] = 0xBF0C;
@@ -688,7 +694,7 @@ define(function (require) {
             }
 
             if (isContext) {
-                var tagName = tag16 + " " + this.NAME[tag10] + " [" + tag + "]:";
+                var tagName = tag16 + " " + (this.NAME[tag10] ? this.NAME[tag10] : "Context-specific") + " [" + tag + "]:";
                 tag = tag10;
             } else if (isApplication) {
                 var tagName = tag16 + " " + this.NAME[tag10] + ": ";
@@ -751,7 +757,6 @@ define(function (require) {
             }
 
             // Detecting VALUE
-
             var val = "";
             var tab = this.TAB.substr(0, this.TAB_num * 6);
 
@@ -773,7 +778,7 @@ define(function (require) {
             }
             else {
                 if (isSeq) {
-                    this.pushContext(this.subContextArray.pop());
+                    this.pushContext(tag);
                 }
                 ret += (isSeq) ? "{\n" + this.readASN1(val) + tab + "}" : this.getValue(tag, val);
                 ret += "\n";
@@ -1470,10 +1475,11 @@ define(function (require) {
                 ret = data;
                 break;
             case 0x85:
-                if (this.context != "Calypso") {
-                    ret = data;
-                    break;
-                }
+            // Assume that 0x85 is unique to Calypso...
+//                if (this.context != "Calypso") {
+//                    ret = data;
+//                    break;
+//                }
                 var EFType = new Array();
                 var SFI = new Array();
                 var SFIName = new Array();
@@ -1497,20 +1503,21 @@ define(function (require) {
                 Status[49] = "Two wrong PIN verification, card files invalidated";
                 Status[112] = "PIN blocked, card files valid";
                 Status[113] = "PIN blocked, card files invalidated";
-                ret = "\n" + tab + "SFI: 0x" + data.substr(0, 2) + " - " + SFIName[data.substr(0, 2)] + "\n" + tab;
-                ret += "Type: " + SFI[data.substr(2, 2)] + " (" + data.substr(2, 2) + ")\n" + tab;
-                ret += "EFType: " + EFType[data.substr(4, 2)] + " (" + data.substr(4, 2) + ")\n" + tab;
+                ret = "\n" + tab + tab + "SFI: 0x" + data.substr(0, 2) + " - " + SFIName[data.substr(0, 2)] + "\n" + tab+ tab;
+                ret += "Type: " + SFI[data.substr(2, 2)] + " (" + data.substr(2, 2) + ")\n" + tab+ tab;
+                ret += "EFType: " + EFType[data.substr(4, 2)] + " (" + data.substr(4, 2) + ")\n" + tab+ tab;
                 ret += "RecSize: 0x" + data.substr(6, 2) + " / ";
-                ret += "NumRec: 0x" + data.substr(8, 2) + "\n" + tab;
-                ret += "AC: 0x" + data.substr(10, 8) + " / " + tab;
-                ret += "NKey: 0x" + data.substr(18, 8) + "\n" + tab;
-                ret += "Status: " + Status[parseInt(data.substr(26, 2), 16)] + " (0x" + data.substr(26, 2) + ")\n" + tab;
-                ret += "KVC1: 0x" + data.substr(28, 2) + " / KVC2: 0x" + data.substr(30, 2) + " / KVC3: 0x" + data.substr(32, 2) + "\n" + tab;
+                ret += "NumRec: 0x" + data.substr(8, 2) + "\n" + tab+ tab;
+                ret += "AC: 0x" + data.substr(10, 8) + " / " + tab+ tab;
+                ret += "NKey: 0x" + data.substr(18, 8) + "\n" + tab+ tab;
+                ret += "Status: " + Status[parseInt(data.substr(26, 2), 16)] + " (0x" + data.substr(26, 2) + ")\n" + tab+ tab;
+                ret += "KVC1: 0x" + data.substr(28, 2) + " / KVC2: 0x" + data.substr(30, 2) + " / KVC3: 0x" + data.substr(32, 2) + "\n" + tab+ tab;
                 ret += "RFU: 0x" + data.substr(34, 6) + " / RFU: 0x" + data.substr(40, 6);
                 break;
             case 0x8A:
                 ret = data + " ";
-                if (this.context != "FCI") {
+                if (this.context != "FCI" &&
+                    this.context != 0x6f ) {
                     break;
                 }
                 switch (parseInt(data, 16)) {

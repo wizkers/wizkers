@@ -102,6 +102,8 @@ define(function (require) {
          * @param {Function} callback   Callback
          */
         this.getConnectionSettingsFor = function (instrument, arg, callback) {
+            if (!this.supportedInstruments[instrument].connectionsettings)
+                return;
             require([this.supportedInstruments[instrument].connectionsettings], function (view) {
                 callback(new view(arg));
             });
