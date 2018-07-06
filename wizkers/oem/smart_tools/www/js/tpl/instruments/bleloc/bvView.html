@@ -1,0 +1,18 @@
+<div id="<%= mac %>" class="panel">
+    <div class="panel-heading">
+        <%= address %>
+    </div>
+    <div class="panel-body">
+        
+          <%
+          for (var i in rssi) {
+              %>
+              <span class="rssi <%= i %>"><%= i %>:&nbsp;<%= rssi[i] %>
+              </span>
+            <%
+          }
+          %>
+        
+    </div>
+    </div>
+</div>

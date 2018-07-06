@@ -69,6 +69,14 @@ define(function (require) {
                 connectionsettings: null,
                 connectionfilter: null
             },
+            'bleloc': {
+                name: 'BLE Locator',
+                type: 'app/instruments/bleloc/bleloc',
+                path: 'app/instruments/bleloc',
+                settings: 'app/instruments/bleloc/settings',
+                connectionsettings: null,
+                connectionfilter: null
+            },
         };
 
         // The instruments below are only supported in Server runmode:

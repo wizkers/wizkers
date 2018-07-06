@@ -2,7 +2,7 @@
  * This file is part of Wizkers.io
  *
  * The MIT License (MIT)
- *  Copyright (c) 2016 Edouard Lafargue, ed@wizkers.io
+ *  Copyright (c) 2018 Edouard Lafargue, ed@wizkers.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -42,6 +42,8 @@ var dbs = require('./pouch-config'),
 
 // Preload the parsers we know about:
 var Pcsc = require('./www/js/app/instruments/pcsc/driver_backend.js');
+var BLELoc = require ('./www/js/app/instruments/bleloc/driver_backend.js');
+
 
 var ConnectionManager = function () {
 
@@ -52,6 +54,8 @@ var ConnectionManager = function () {
         var driver;
         if (type == 'pcsc') {
             driver = new Pcsc();
+        } else if (type == 'bleloc') {
+            driver = new BLELoc();
         }
         return driver;
     }

@@ -98,7 +98,7 @@ var ConnectionManager = function () {
             driver = new Powerlog();
         } else if (type == 'sample_instrument') {
             driver = new Dummy();
-        }
+        } 
         return driver;
     }
 
