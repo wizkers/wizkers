@@ -369,13 +369,7 @@ define(function (require) {
         this.ID['Secure messaging template'] = 0x7D;
         this.ID['Display control'] = 0x7F20;
         this.ID['Cardholder certificate'] = 0x7F21;
-
         // End of ISO7816-6 interindustry tags
-
-        // Additional known tags
-        this.ID["Calypso FCI information"] = 0x85;
-
-
 
         this.setContext(this.context);
 
@@ -423,11 +417,27 @@ define(function (require) {
             this.NAME[i] = 'Context-specific';
         }
 
+        // Define tags above 0x80 we know about:
+
+        // Global Platform tags
+        this.ID['Key information template'] = 0xe0;
+
+        // Additional known tags
+        this.ID["Calypso FCI information"] = 0x85;
+        this.ID['JCOP Identify'] = 0xfe;
+
+
         if (!savePrevious) {
             this.subContextArray = new Array();
         }
         // Should only code for context-specific tags (above 0x7F)
         switch (context) {
+            case 0xe0: // GP Key information template
+                this.ID['Key information data'] = 0xc0;
+                break;
+            case 0xfe: // JCOP Identify
+                this.ID['Module identification data (JCOP)'] = 0xdf28;
+                break;
             case "FCI":
             case 0x6f: // Use the numeric tag for FCI too (See ISO7816-4)
                 this.ID['Short File Identifier'] = 0x88;
@@ -445,6 +455,9 @@ define(function (require) {
                 this.ID["File Control Information (FCI) Proprietary Template"] = 0xA5;
                 this.ID["PIN definitions"] = 0xC1;
                 this.ID["Key definitions"] = 0xC2;
+                break;
+            case 0xa5: // FCI Proprietary template
+                this.ID['Max length of data field in command message'] = 0x9f65;
                 break;
             case "Calypso":
             case 0x85:
@@ -759,7 +772,6 @@ define(function (require) {
             // Detecting VALUE
             var val = "";
             var tab = this.TAB.substr(0, this.TAB_num * 6);
-
 
             if (len) {
                 if (indefinite) {
@@ -1474,6 +1486,10 @@ define(function (require) {
                 }
                 ret = data;
                 break;
+
+// Below this, we are on non application specific tags, there is usually
+// no overlap fortunately
+
             case 0x85:
             // Assume that 0x85 is unique to Calypso...
 //                if (this.context != "Calypso") {
@@ -1534,6 +1550,10 @@ define(function (require) {
                     default:
                         ret += "Unknown";
                 }
+                break;
+            case 0xdf28:
+                ret = "ToDo: decode JCOP chip ID data here\n";
+                ret += data;
                 break;
             default:
                 if (this.NAME[tag] != null) {

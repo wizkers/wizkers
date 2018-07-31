@@ -26,7 +26,7 @@
  * We now use require.js: these are the mappings of our application.
  *
  * This is the version of the require mappings that is used when compiling
- * for Chrome
+ * for NWJS
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -81,7 +81,8 @@ require.config({
         flot_fillbetween: 'lib/flot-0.8.3/jquery.flot.fillbetween',
         flot_windrose: 'lib/jquery.flot.windrose',
         flot_jumlib: 'lib/jquery.flot.JUMlib',
-
+        flot_crosshair: 'lib/flot-0.8.3/jquery.flot.crosshair',
+        
         xmlrpc: 'lib/xmlrpc/xmlrpc'
     },
 
@@ -164,19 +165,19 @@ var vizapp = {
     //   - server : use a remote server for device connection & database
     //   - cordova: run as an embedded Cordova application on Android
     //   - others to be defined
-    type: "chrome",
+    type: "nwjs",
 };
 
 var router;
 
 require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager',
-         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle', 'chromestorage'], function ($, _, Backbone, Router, Settings, InstrumentManager,
+         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle' ], function ($, _, Backbone, Router, Settings, InstrumentManager,
     LinkManager, OutputManager, Instrument, Analytics) {
 
     // Populate the standard MacOS menus:
-    var m = new nw.Menu({type:"menubar"});
-    m.createMacBuiltin("Wizkers:Radio");
-    nw.Window.get().menu = m;
+//    var m = new nw.Menu({type:"menubar"});
+//    m.createMacBuiltin("Wizkers:Radio");
+//    nw.Window.get().menu = m;
 
     // Initialize our Analytics object to get stats on app usage
     stats = new Analytics();
@@ -205,17 +206,27 @@ require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings'
     // web socket. It is passed to all views that need it.
     linkManager = new LinkManager();
 
+    var bootstrap_wizkers = function() {
+        var insId = settings.get('currentInstrument');
+        if (insId != null) {
+            router = new Router();
+            router.switchinstrument(insId, false); // second argument prevents router from closing instrument
+            Backbone.history.start();
+        } else {
+            router = new Router();
+            Backbone.history.start();
+        }
+    }
+
     settings.fetch({
-        success: function () {
-            var insId = settings.get('currentInstrument');
-            if (insId != null) {
-                router = new Router();
-                router.switchinstrument(insId, false); // second argument prevents router from closing instrument
-                Backbone.history.start();
-            } else {
-                router = new Router();
-                Backbone.history.start();
-            }
+        success:function () {
+            bootstrap_wizkers();
+        },
+        error: function(mode, response, options) {
+            // We will end up here with the localstorage adapter in case the record is not found
+            settings.save();
+            bootstrap_wizkers();
         }
     });
+
 });

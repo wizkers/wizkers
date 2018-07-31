@@ -4,7 +4,6 @@
   "icon": "icon.png",
   "version": "m0.3.5",
   "nodejs": true,
-  "chromium-args": "--disable-devtools",
   "window": {
     "width": 1280,
     "height": 800
