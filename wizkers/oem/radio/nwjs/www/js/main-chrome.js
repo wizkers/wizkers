@@ -82,7 +82,7 @@ require.config({
         flot_windrose: 'lib/jquery.flot.windrose',
         flot_jumlib: 'lib/jquery.flot.JUMlib',
         flot_crosshair: 'lib/flot-0.8.3/jquery.flot.crosshair',
-        
+
         xmlrpc: 'lib/xmlrpc/xmlrpc'
     },
 
@@ -175,9 +175,9 @@ require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings'
     LinkManager, OutputManager, Instrument, Analytics) {
 
     // Populate the standard MacOS menus:
-//    var m = new nw.Menu({type:"menubar"});
-//    m.createMacBuiltin("Wizkers:Radio");
-//    nw.Window.get().menu = m;
+    var m = new nw.Menu({type:"menubar"});
+    m.createMacBuiltin("Wizkers:Radio");
+    nw.Window.get().menu = m;
 
     // Initialize our Analytics object to get stats on app usage
     stats = new Analytics();
