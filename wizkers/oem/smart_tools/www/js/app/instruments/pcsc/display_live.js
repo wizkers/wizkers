@@ -321,6 +321,10 @@ define(function (require) {
                 this.$('#readers').on('nodeSelected', this.selectCard.bind(this));
             }
 
+            if (data.error) {
+                // Bubble up low level communication errors that happened on APDU operations
+                this.appendToResponse(data.error);
+            }
             console.log('Data', data);
 
         },

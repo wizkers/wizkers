@@ -284,6 +284,15 @@ define(function (require) {
                 return;
             }
 
+            if (stat.error) {
+                // Received a low level error during normal operation,
+                // tell the front-end through a 'data' message
+                var resp = {
+                    error: stat.error
+                };
+                self.trigger('data', resp);
+            }
+
             if (stat.portopen)
                 isopen = stat.portopen;
 

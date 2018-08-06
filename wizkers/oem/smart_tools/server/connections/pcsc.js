@@ -173,6 +173,7 @@ var PCSCConnection = function(path, settings) {
         readerRef.transmit(new Buffer(apdu), 1024, myReaders[reader].protocol, function(err, data) {
             if (err) {
                 debug(err);
+                self.emit('status', { error: err}); // Forward the transmit error so that the UI can warn the user
             } else {
                 debug('Data received', data);
                 self.emit('data', { resp: data });                
