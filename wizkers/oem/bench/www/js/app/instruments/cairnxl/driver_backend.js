@@ -13,11 +13,7 @@
  *
  * 1. The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
- * 2. All Kestrel® communication protocol commands are used under license from
- * Nielsen-Kellerman Co. Do not use for any purpose other than connecting a
- * Kestrel® instrument to the Wizkers framework without permission.
- *
+*
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,7 +24,7 @@
 
 
 /**
- *  Low level driver for Kestrel devices.
+ *  Low level driver for Cairn XL devices.
  */
 
 
@@ -46,7 +42,7 @@ define(function (require) {
 
     var abutils = require('app/lib/abutils'),
         utils = require('app/utils'),
-        LinkProto = require('app/instruments/kestrel5/kestrel_link'),
+        crc_calc = require('app/lib/crc_calc'),
         btleConnection = require('connections/btle');
 
     var parser = function (socket) {
@@ -58,7 +54,6 @@ define(function (require) {
             port = null,
             port_close_requested = false,
             port_open_requested = false,
-            linkProto = new LinkProto(this),
             isopen = false;
 
         // Command processing
@@ -75,54 +70,9 @@ define(function (require) {
         var data_callback = null;
 
         // We have to have those in lowercase
-        var KESTREL_SERVICE_UUID  = '03290000-eab4-dea1-b24e-44ec023874db';
-        var WX1_UUID     = '03290310-eab4-dea1-b24e-44ec023874db';
-        var WX2_UUID     = '03290320-eab4-dea1-b24e-44ec023874db';
-        var WX3_UUID     = '03290330-eab4-dea1-b24e-44ec023874db';
-
-        var KESTREL_LOG_SERVICE = '85920000-0338-4b83-ae4a-ac1d217adb03';
-        var KESTREL_LOG_CMD     = '85920200-0338-4b83-ae4a-ac1d217adb03';
-        var KESTREL_LOG_RSP     = '85920100-0338-4b83-ae4a-ac1d217adb03';
-
-        // The Kestrel 5500 sends its readings over three characteristics.
-        // We store them all in one object and only send the complete object
-        // when receiving the last characteristic update - WX3_UUID
-
-        // TODO: this is hardcoded to the Kestrel 5500
-        var readings = {
-            temperature: 0,
-            rel_humidity: 0,
-            pressure: 0,
-            compass_mag: 0,
-            wind: { dir: 0, speed: 0},
-            compass_true: 0,
-            altitude: 0,
-            dens_altitude: 0,
-            barometer: 0,
-            crosswind: 0,
-            headwind: 0,
-            dew_point: 0,
-            heat_index: 0,
-            wetbulb: 0,
-            wind_chill: 0,
-            unit: {
-                temperature: 'celsius',
-                rel_humidity: '%',
-                pressure: 'mb',
-                compass_mag: 'degree',
-                wind: { dir: 'degree', speed: 'knots'},
-                compass_true: 'degree',
-                altitude: 'm',
-                dens_altitude: 'm',
-                barometer: 'mb',
-                crosswind: 'm/s',
-                headwind: 'm/s',
-                dew_point: 'celsius',
-                heat_index: 'celsius',
-                wetbulb: 'celsius',
-                wind_chill: 'celsius'
-            }
-        };
+        var CAIRNXL_SERVICE_UUID  = '69400001-b5a3-f393-e0a9-e50e24dcca99';
+        var CAIRNXL_WRITE_CHAR    = '69400002-b5a3-f393-e0a9-e50e24dcca99';
+        var CAIRNXL_NOTIFY_CHAR   = '69400003-b5a3-f393-e0a9-e50e24dcca99';
 
         /////////////
         // Private methods
@@ -133,10 +83,8 @@ define(function (require) {
         // stage
         var portSettings = function () {
             return {
-                service_uuid: [ KESTREL_SERVICE_UUID],
-                optional_services: [ KESTREL_LOG_SERVICE], // This is a service we need, but is
-                                                           // not advertised by the device. WebBTLE needs this.
-                characteristic_uuid: WX1_UUID
+                service_uuid: [ CAIRNXL_SERVICE_UUID],
+                characteristic_uuid: CAIRNXL_NOTIFY_CHAR
             }
         };
 
@@ -147,100 +95,37 @@ define(function (require) {
                 console.log('No value or characteristic uuid received');
                 return;
             }
+
             var dv = new DataView(vizapp.type === 'cordova' ? data.value.buffer : data.value);
 
-            // Only send one response every 3 packets with all
-            // readings in one go.
-            if (utils.sameUUID(data.characteristic, WX1_UUID)) {
-                readings.wind.speed = dv.getInt16(0, true)*1.94384/1000; // Convert to knots
-                readings.temperature = dv.getInt16(2, true)/100;
-                readings.rel_humidity = dv.getInt16(6, true)/100;
-                readings.pressure = dv.getInt16(8,true)/10;
-                readings.compass_mag = dv.getInt16(10,true);
+            // Since we have a CRC, check it
+            var dataArray = new Uint8Array(data.value);
+            var crc = crc_calc.crc8_crc(dataArray.subarray(0,dataArray.length-1));
+            if (crc != dataArray[dataArray.length-1]) {
+                console.log("Invalid CRC on data packet, discarding");
                 return;
             }
 
-            if (utils.sameUUID(data.characteristic, WX2_UUID)) {
-                readings.compass_true = dv.getInt16(0, true);
-                readings.wind.dir = readings.compass_true;
-                readings.altitude = dv.getInt16(4, true)/10; // TODO: Actually an Int24
-                readings.barometer = dv.getInt16(7, true)/10;
-                readings.crosswind = dv.getInt16(9, true)/1000;
-                readings.headwind = dv.getInt16(11, true)/1000;
-                readings.dens_altitude = dv.getInt16(14, true)/10;
+            if (dataArray[0] != 170 && dataArray[1] != 85) {
+                console.log("Invalid packet header, discarding");
                 return;
             }
 
-            if (utils.sameUUID(data.characteristic, WX3_UUID)) {
-                readings.dew_point = dv.getInt16(0, true)/100;
-                readings.heat_index = dv.getInt16(2, true)/100; // TODO: Actually Int24
-                readings.wetbulb = dv.getInt16(16, true)/100;
-                readings.wind_chill = dv.getInt16(18, true)/100;
-
-                self.trigger('data', readings);
+            var l = dataArray[2];
+            if (dataArray.length != l + 3) {
+                console.log("Invalid packet length, discarding");
                 return;
             }
+            var response = {raw: dataArray};
+            var cmd = dataArray[3];
 
-            // We are receiving a serial protocol response
-            if (utils.sameUUID(data.characteristic, KESTREL_LOG_RSP)) {
-                linkProto.processProtocol(data);
+            switch (cmd) {
+
             }
+
+            self.trigger('data', response);
+
         };
-
-        // Right now we assume a Kestrel 5500
-        var CMD_GET_LOG_COUNT_AT  =  3,
-            CMD_GET_LOG_DATA_AT   =  5,
-            CMD_GET_SERIAL_NUMBER =  6,
-            CMD_END_OF_DATA       = 18,
-            CMD_TOTAL_RECORDS_WRITTEN = 0x38;
-
-        var startLogDownload = function() {
-            // Three steps:
-            // 1. ask Kestrel for overall # of records
-            // 2. ask Kestrel for # of records on current log
-            // 3. ask Kestrel for log structure
-            // 4. Request log packets until finished
-
-            // Reset the queue
-            self.shiftQueue();
-
-            var ctr = 0;
-            port.on('unsubscribed', function unsub(uuid) {
-                ctr++
-                if (ctr == 3) {
-                    console.log('Unsubscribed from all');
-                    if (port.off)
-                        port.off('unsubscribed');
-                    else
-                        port.removeListener('unsubscribed', unsub);
-                    port.once('subscribed', function(uuid) {
-                        console.info('Received notification success for uuid', uuid);
-                        // In case of Cordova: due to bugs on the Cordova BLE driver,
-                        // we need to wait before sending the first command, otherwise we
-                        // will miss the first bytes.
-                        if (vizapp.type == 'cordova') {
-                            setTimeout(function() {
-                                self.output({command: 'get_total_records'});
-                            }, 2000);
-                        } else
-                            self.output({command: 'get_total_records'});
-                    });
-
-                    console.log('Subscribing');
-                    port.subscribe({
-                        service_uuid: KESTREL_LOG_SERVICE,
-                        characteristic_uuid: [ KESTREL_LOG_RSP ]
-                    });
-                    }
-            });
-
-            // First of all stop listening for data packets
-            port.unsubscribe({
-                service_uuid: KESTREL_SERVICE_UUID,
-                characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
-            });
-
-        }
 
         this.shiftQueue = function() {
             // Note: if we get ACKed for the get log data command,
@@ -260,55 +145,29 @@ define(function (require) {
                 return;
             var packet;
             var cmd = commandQueue[0]; // Get the oldest command
-            // If we are asked to process a ACK, this means our last
-            // command was successful and we can shift the queue
-            // and set busy to false.
-            // One exception: if the ACK is a 0xffff then it means we're just
-            // an intermediate ACK and the command is not finished yet
-            if (cmd.command == 'ack') {
-                commandQueue.shift(); // Remove the ACK command from the queue
-                packet = linkProto.makeAck(cmd.arg);
-                if (cmd.arg != 0xffff) {
-                    // We end up here when we are ACK'ing the END_OF_DATA command
-                    // at the end of a data transfer.
-                    self.shiftQueue();
-                }
-            } else {
-                if (queue_busy)
-                    return;
-                queue_busy = true;
-                switch(cmd.command) {
-                    case 'get_total_records':
-                        packet = linkProto.makeCommand( CMD_TOTAL_RECORDS_WRITTEN, null);
-                        break;
-                    case 'get_log_size':
-                        console.info('get_log_size');
-                        packet = linkProto.makeCommand(CMD_GET_LOG_COUNT_AT, '0000000000000000');
-                        //packet = abutils.hextoab('7e00000a000300000000000000000054d57e');
-                        break;
-                    case 'get_log_data':
-                        console.info('get_log_data');
-                        packet = linkProto.makeCommand(CMD_GET_LOG_DATA_AT,'0000000000000000' );
-                        // packet = abutils.hextoab('7e00000a0005000000000000000000863d7e');
-                        break;
-                    case 'generic_nack':
 
-                        break;
-                    default:
-                        console.warn('Error, received a command we don\'t know how to process', cmd.command);
-                        commandQueue.shift();
-                        queue_busy = false;
-                        break;
-                }
+            if (queue_busy)
+                return;
+            queue_busy = true;
+            switch(cmd.command) {
+                case 'raw':
+                    var buf = "AA55" + 
+                      ("00" + (cmd.arg.length/2 + 1).toString(16)).slice(-2) + cmd.arg;
+                    buf += ("00" + crc_calc.crc8_crc(abutils.hextoab(buf)).toString(16)).slice(-2);
+                    console.log("Packet to send", buf);
+                    packet = abutils.hextoab(buf);
+                    break;
+                default:
+                    console.warn('Error, received a command we don\'t know how to process', cmd.command);
+                    commandQueue.shift();
+                    queue_busy = false;
+                    break;
             }
             console.info('Sending packet', packet);
-            port.write(packet, {service_uuid: KESTREL_LOG_SERVICE, characteristic_uuid: KESTREL_LOG_CMD }, function(e){});
-            // We don't shift the queue at this stage, we wait to
-            // receive & process the response
-
+            port.write(packet, {service_uuid: CAIRNXL_SERVICE_UUID, characteristic_uuid: CAIRNXL_WRITE_CHAR }, function(e){});
+            commandQueue.shift();
+            queue_busy = false;
         }
-
-
 
         // Status returns an object that is concatenated with the
         // global server status
@@ -437,12 +296,10 @@ define(function (require) {
         this.startLiveStream = function (period) {
             if (port)
                 port.subscribe({
-                    service_uuid: KESTREL_SERVICE_UUID,
-                    characteristic_uuid: [ WX1_UUID, WX2_UUID, WX3_UUID ]
+                    service_uuid: CAIRNXL_SERVICE_UUID,
+                    characteristic_uuid: [ CAIRNXL_NOTIFY_CHAR ]
                 });
         };
-
-
 
         this.stopLiveStream = function (args) {};
 
@@ -453,15 +310,12 @@ define(function (require) {
         // We are getting simple commands here, not raw packets
         this.output = function (data) {
             if (data.command == undefined) {
-                console.error('[Kestrel driver] Missing command in output request');
+                console.error('[Cairn XL driver] Missing command in output request');
                 return;
             }
-            if (data.command == 'download_log') {
-                startLogDownload();
-            } else {
-                commandQueue.push(data);
-                processQueue();
-            }
+
+            commandQueue.push(data);
+            processQueue();
         };
 
     }

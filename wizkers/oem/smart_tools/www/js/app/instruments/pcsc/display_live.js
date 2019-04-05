@@ -263,7 +263,9 @@ define(function (require) {
                 if (data.sw1sw2) {
                     this.appendToResponse('\n' + data.sw1sw2);                    
                 }
-                if (data.data.substr(-4) == "9000") {
+                if (data.data.substr(-4) == "9000" ||
+                    data.data.length > 4) { // That second check because some cards (JCOP) can return other
+                                              // status codes on some commands while still returning valid data
                     // Attempt to parse the output as ASN.1
                     if (this.$("#asn1dec").is(":checked")) {
                         try {
@@ -275,6 +277,7 @@ define(function (require) {
                                 this.appendToResponse('\nASN.1 decoding:\n' + this.asn1.decode(data.data.substr(4, len*2)));
                             } catch (e) {
                                 this.appendToResponse('\nASN.1 decoding error: ' + e.err + '\nPartial decoding (might be garbage):\n' + e.partial );
+                                this.appendToResponse('\n Raw data:\n' + data.data);
                             }
                         }
                     }

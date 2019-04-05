@@ -1,0 +1,10 @@
+{
+  "name": "imi-gateway",
+  "main": "main.js",
+  "version": "0.6.0",
+  "nodejs": true,
+  "window": {
+    "width": 1280,
+    "height": 800
+  }
+}
