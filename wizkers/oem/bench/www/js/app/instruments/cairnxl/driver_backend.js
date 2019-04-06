@@ -149,13 +149,13 @@ define(function (require) {
             if (queue_busy)
                 return;
             queue_busy = true;
+            var buf = "AA55";
             switch(cmd.command) {
                 case 'raw':
-                    var buf = "AA55" + 
-                      ("00" + (cmd.arg.length/2 + 1).toString(16)).slice(-2) + cmd.arg;
-                    buf += ("00" + crc_calc.crc8_crc(abutils.hextoab(buf)).toString(16)).slice(-2);
-                    console.log("Packet to send", buf);
-                    packet = abutils.hextoab(buf);
+                    buf += ("00" + (cmd.arg.length/2 + 1).toString(16)).slice(-2) + cmd.arg;
+                    break;
+                case 'power':
+                    buf += "0301" + (cmd.arg ? "01" : "02");
                     break;
                 default:
                     console.warn('Error, received a command we don\'t know how to process', cmd.command);
@@ -163,7 +163,9 @@ define(function (require) {
                     queue_busy = false;
                     break;
             }
-            console.info('Sending packet', packet);
+            buf += ("00" + crc_calc.crc8_crc(abutils.hextoab(buf)).toString(16)).slice(-2);
+            console.log("Packet to send", buf);
+            packet = abutils.hextoab(buf);
             port.write(packet, {service_uuid: CAIRNXL_SERVICE_UUID, characteristic_uuid: CAIRNXL_WRITE_CHAR }, function(e){});
             commandQueue.shift();
             queue_busy = false;

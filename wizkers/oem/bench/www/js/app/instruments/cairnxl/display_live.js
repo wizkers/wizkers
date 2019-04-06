@@ -36,24 +36,19 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
+        Beehive = require('beehive'),
         template = require('js/tpl/instruments/cairnxl/LiveView.js');
+
+    // Need to load these, but no related variables.
+    require('bootstrap');
+    require('bootstrapslider');
 
     return Backbone.View.extend({
 
         initialize: function (options) {
 
             this.showstream = settings.get('showstream');
-
-            this.update_count = 0;
-            // Get frequency and span if specified:
-            var span = this.model.get('liveviewspan'); // In seconds
-            var period = this.model.get('liveviewperiod'); // Polling frequency
-            this.datasetlength = 0;
-
-            var livepoints = 300; // 5 minutes @ 1 Hz
-            if (span && period) {
-                livepoints = span / period;
-            }
+            this.beehive = new Beehive();
 
             if (vizapp.type == 'cordova') {
                 var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
@@ -69,29 +64,6 @@ define(function (require) {
                 }
             }
 
-            // Here are all the options we can define, to pass as "settings" when creating the view:
-            // We will pass this when we create plots, this is the global
-            // config for the look and feel of the plot
-            this.plotoptions = {
-                points: livepoints,
-                vertical_stretch_parent: true,
-                plot_options: {
-                    xaxis: {
-                        mode: "time",
-                        show: true,
-                        timeformat: "%H:%M",
-                        timezone: settings.get("timezone")
-                    },
-                    grid: {
-                        hoverable: true
-                    },
-                    legend: {
-                        show: false,
-                        position: "ne"
-                    }
-                }
-            };
-
             linkManager.on('status', this.updatestatus, this);
             linkManager.on('input', this.showInput, this);
 
@@ -99,17 +71,23 @@ define(function (require) {
 
 
         events: {
-            "click #cmd-raw-send": "raw_send"
+            "click #cmd-raw-send": "raw_send",
+            "click #cmd-turnon": "turn_on",
+            "click #cmd-turnoff": "turn_off",
+            "click .beehive-picker": "pick_color"
         },
 
         render: function () {
             var self = this;
             console.log('Main render of Cairn XL view');
             this.$el.html(template());
+            this.$("#brightness-control").slider();
+
+            this.beehive.Picker(this.$('#beehive')[0]);
 
             // Hide the raw data stream if we don't want it
             if (!this.showstream) {
-                $('#showstream', this.el).css('visibility', 'hidden');
+                this.$('#showstream').css('visibility', 'hidden');
             }
 
             linkManager.requestStatus();
@@ -133,10 +111,23 @@ define(function (require) {
         clear: function () {
         },
 
+        pick_color: function(e) {
+            var cc = this.beehive.getColorCode(e.currentTarget);
+            linkManager.sendCommand({command: 'color', arg: cc});
+        },
+
         raw_send: function() {
             var cmd = this.$("#cmd-raw-input").val();
             linkManager.sendCommand({command:'raw', arg: cmd});
 
+        },
+
+        turn_on: function() {
+            linkManager.sendCommand({command:'power', arg: true});
+        },
+
+        turn_off: function() {
+            linkManager.sendCommand({command:'power', arg: false});
         },
 
         // We get there whenever we receive something from the serial port

@@ -51,6 +51,7 @@ require.config({
         backbonepouch: 'lib/backbone-pouch',
         underscore: 'lib/underscore-1.8.3',
         snap: 'lib/snap.svg-0.4.1',
+        beehive: 'lib/beehive_picker',
         text: 'lib/text',
         paper: 'lib/paperjs-v0.10.2/dist/paper-core',
 
