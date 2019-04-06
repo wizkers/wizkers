@@ -120,7 +120,11 @@ define(function (require) {
             var cmd = dataArray[3];
 
             switch (cmd) {
-
+                case 0x12: // Brightness
+                    response.brightness = dataArray[4];
+                    break;
+                default:
+                    response.hex = abutils.ui8tohex(dataArray);
             }
 
             self.trigger('data', response);
@@ -158,14 +162,16 @@ define(function (require) {
                     buf += "0301" + (cmd.arg ? "01" : "02");
                     break;
                 case 'color':
-                    var r = cmd.arg.substr(1,2);
-                    var g = cmd.arg.substr(3,2);
-                    var b = cmd.arg.substr(5,3);
-                    // ToDo: there is probably some scaling going on
-                    buf += "0603" + g + r + b + "05";
+                    var r = ("00" + (parseInt(cmd.arg.substr(1,2),16)*100/255).toString(16)).slice(-2);
+                    var g = ("00" + (parseInt(cmd.arg.substr(3,2),16)*100/255).toString(16)).slice(-2);
+                    var b = ("00" + (parseInt(cmd.arg.substr(5,2),16)*100/255).toString(16)).slice(-2);
+                    // The RGB values are rescaled on a 1-100 scale for some reason
+                    buf += "0603" + g + r + b;
+                    // ToDo: we can have an extra byte afterwards, but no idea what that byte
+                    // means
                     break;
                 case 'brightness':
-                    var b = ("00" + parseInt(cmd.arg, 16)).slice(-2);
+                    var b = ("00" + cmd.arg.toString(16)).slice(-2);
                     buf += "0302" + b;
                     break;
                 default:
