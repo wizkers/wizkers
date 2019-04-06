@@ -74,7 +74,8 @@ define(function (require) {
             "click #cmd-raw-send": "raw_send",
             "click #cmd-turnon": "turn_on",
             "click #cmd-turnoff": "turn_off",
-            "click .beehive-picker": "pick_color"
+            "click .beehive-picker": "pick_color",
+            "slideStop #brightness-control": "change_brightness"
         },
 
         render: function () {
@@ -128,6 +129,10 @@ define(function (require) {
 
         turn_off: function() {
             linkManager.sendCommand({command:'power', arg: false});
+        },
+
+        change_brightness: function(e) {
+            linkManager.sendCommand({command:'brightness', arg: e.value});
         },
 
         // We get there whenever we receive something from the serial port

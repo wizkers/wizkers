@@ -157,16 +157,33 @@ define(function (require) {
                 case 'power':
                     buf += "0301" + (cmd.arg ? "01" : "02");
                     break;
+                case 'color':
+                    var r = cmd.arg.substr(1,2);
+                    var g = cmd.arg.substr(3,2);
+                    var b = cmd.arg.substr(5,3);
+                    // ToDo: there is probably some scaling going on
+                    buf += "0603" + g + r + b + "05";
+                    break;
+                case 'brightness':
+                    var b = ("00" + parseInt(cmd.arg, 16)).slice(-2);
+                    buf += "0302" + b;
+                    break;
                 default:
                     console.warn('Error, received a command we don\'t know how to process', cmd.command);
                     commandQueue.shift();
                     queue_busy = false;
                     break;
             }
-            buf += ("00" + crc_calc.crc8_crc(abutils.hextoab(buf)).toString(16)).slice(-2);
-            console.log("Packet to send", buf);
-            packet = abutils.hextoab(buf);
-            port.write(packet, {service_uuid: CAIRNXL_SERVICE_UUID, characteristic_uuid: CAIRNXL_WRITE_CHAR }, function(e){});
+            var regexp = /^[0-9a-fA-F]+$/;
+            // Check that the buffer is valid hex, just in case
+            if (regexp.test(buf)) {
+                buf += ("00" + crc_calc.crc8_crc(abutils.hextoab(buf)).toString(16)).slice(-2);
+                console.log("Packet to send", buf);
+                packet = abutils.hextoab(buf);
+                port.write(packet, {service_uuid: CAIRNXL_SERVICE_UUID, characteristic_uuid: CAIRNXL_WRITE_CHAR }, function(e){});    
+            } else {
+                console.log("Packet invalid, the incoming arguments were corrupt");
+            }
             commandQueue.shift();
             queue_busy = false;
         }
