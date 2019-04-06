@@ -47,6 +47,7 @@ require.config({
         jquery_xmlrpc: 'lib/jquery.xmlrpc',
         localstorage: 'lib/backbone.localStorage-2.0.0',
         bbindexeddb: 'lib/backbone-indexeddb',
+        beehive: 'lib/beehive_picker',
         pouchdb: 'lib/pouchdb-5.0.0',
         backbonepouch: 'lib/backbone-pouch',
         underscore: 'lib/underscore-1.8.3',
