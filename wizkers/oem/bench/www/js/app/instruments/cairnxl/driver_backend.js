@@ -166,7 +166,7 @@ define(function (require) {
                     var g = ("00" + (parseInt(cmd.arg.substr(3,2),16)*100/255).toString(16)).slice(-2);
                     var b = ("00" + (parseInt(cmd.arg.substr(5,2),16)*100/255).toString(16)).slice(-2);
                     // The RGB values are rescaled on a 1-100 scale for some reason
-                    buf += "0603" + g + r + b;
+                    buf += "0603" + g + r + b + "10";
                     // ToDo: we can have an extra byte afterwards, but no idea what that byte
                     // means
                     break;

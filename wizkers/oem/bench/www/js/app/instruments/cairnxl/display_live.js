@@ -113,7 +113,11 @@ define(function (require) {
         },
 
         pick_color: function(e) {
+            if (!$(e.currentTarget).parent().hasClass("beehive-picker-detail")) {
+                this.beehive.pickerClick(e.currentTarget, e);
+            }
             var cc = this.beehive.getColorCode(e.currentTarget);
+            
             linkManager.sendCommand({command: 'color', arg: cc});
         },
 

@@ -33,8 +33,8 @@ define(function (require) {
 
     return (function() {
 
-    var pickerClick = function(element, e){
-        var parentElement = element.parentElement;
+    this.pickerClick = function(element, e){
+        var parentElement = element.parentElement.parentElement;
         var beehiveID = parentElement.getAttribute('beehive-id');
         var style = window.getComputedStyle(e.target, null);
         if(!e.target.className.match(/(?:^|\s)beehive-picker(?:\s|$)/)){ return; }
