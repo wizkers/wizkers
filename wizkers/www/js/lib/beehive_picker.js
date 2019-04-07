@@ -29,15 +29,20 @@ if (typeof define !== 'function') {
 
 define(function (require) {
 
-    var chroma = require('chroma');
+    // var chroma = require('chroma');
 
     "use strict";
 
     return (function() {
 
     this.pickerClick = function(element, e){
-        var parentElement = element.parentElement.parentElement.parentElement.parentElement; // Ugly
+        var beehiveID = null;
+        var parentElement = element.parentElement;
         var beehiveID = parentElement.getAttribute('beehive-id');
+        while (beehiveID == null) {
+            parentElement = parentElement.parentElement;
+            beehiveID = parentElement.getAttribute('beehive-id');
+        }
         var style = window.getComputedStyle(e.target, null);
         if(!e.target.className.match(/(?:^|\s)beehive-picker-hex(?:\s|$)/)){ return; }
         var rgb = style.backgroundColor.match(/[0-9]+/g).map(function(n){ return Number(n); });
@@ -46,17 +51,17 @@ define(function (require) {
         rgb[0] = rgb[1] = rgb[2] = 127;
         centerColor = 'rgb(127,127,127)';
         }
-        var r = 255 - rgb[0] === 0 ? 0 : (255 - rgb[0]) / 5;
-        var g = 255 - rgb[1] === 0 ? 0 : (255 - rgb[1]) / 5;
-        var b = 255 - rgb[2] === 0 ? 0 : (255 - rgb[2]) / 5;
-        var left_rgbs =[0,1,2,3,4].map(function(n){ 
+        var r = 255 - rgb[0] === 0 ? 0 : (255 - rgb[0]) / 6;
+        var g = 255 - rgb[1] === 0 ? 0 : (255 - rgb[1]) / 6;
+        var b = 255 - rgb[2] === 0 ? 0 : (255 - rgb[2]) / 6;
+        var left_rgbs =[1,2,3,4,5].map(function(n){ 
         return [Math.round(255 - (r * n)),
                 Math.round(255 - (g * n)),
                 Math.round(255 - (b * n))]; });
-        r = 0 + rgb[0] === 0 ? 0 : (0 + rgb[0]) / 5;
-        g = 0 + rgb[1] === 0 ? 0 : (0 + rgb[1]) / 5;
-        b = 0 + rgb[2] === 0 ? 0 : (0 + rgb[2]) / 5;
-        var right_rgbs =[4,3,2,1,0].map(function(n){ 
+        r = 0 + rgb[0] === 0 ? 0 : (0 + rgb[0]) / 6;
+        g = 0 + rgb[1] === 0 ? 0 : (0 + rgb[1]) / 6;
+        b = 0 + rgb[2] === 0 ? 0 : (0 + rgb[2]) / 6;
+        var right_rgbs =[5,4,3,2,1].map(function(n){ 
         return [Math.round(0 + (r * n)),
                 Math.round(0 + (g * n)),
                 Math.round(0 + (b * n))]; });
