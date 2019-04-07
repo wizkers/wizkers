@@ -29,15 +29,17 @@ if (typeof define !== 'function') {
 
 define(function (require) {
 
+    var chroma = require('chroma');
+
     "use strict";
 
     return (function() {
 
     this.pickerClick = function(element, e){
-        var parentElement = element.parentElement.parentElement;
+        var parentElement = element.parentElement.parentElement.parentElement.parentElement; // Ugly
         var beehiveID = parentElement.getAttribute('beehive-id');
         var style = window.getComputedStyle(e.target, null);
-        if(!e.target.className.match(/(?:^|\s)beehive-picker(?:\s|$)/)){ return; }
+        if(!e.target.className.match(/(?:^|\s)beehive-picker-hex(?:\s|$)/)){ return; }
         var rgb = style.backgroundColor.match(/[0-9]+/g).map(function(n){ return Number(n); });
         var centerColor = style.backgroundColor;
         if((rgb[0] === 255 && rgb[1] === 255 && rgb[2] === 255) || (rgb[0] === 0 && rgb[1] === 0 && rgb[2] === 0)){ 
@@ -70,12 +72,8 @@ define(function (require) {
         });
         var divs = '', styles = '';
         for(var i = 0; i < colors.length; i++){
-        divs += '<div class="beehive-picker beehive-picker5 beehive-picker-2-' + beehiveID + '-' + i + '"></div>';
-        styles += '.beehive-picker.beehive-picker-2-' + beehiveID + '-' + i + ' { background-color: ' + colors[i] +'; } ';
-        styles += '.beehive-picker.beehive-picker-2-' + beehiveID + '-' + i + ':before { ';
-        styles += 'bottom: 100%; border-bottom: 4.04px solid ' + colors[i] + '; } ';
-        styles += '.beehive-picker.beehive-picker-2-' + beehiveID + '-' + i + ':after { ';
-        styles += 'top: 100%; width: 0; border-top: 4.04px solid ' + colors[i] + '; } ';
+        divs += '<div class="beehive-picker beehive-picker6"><div class="beehive-picker-hex beehive-picker-2-' + beehiveID + '-' + i + '"></div></div>';
+        styles += '.beehive-picker-hex.beehive-picker-2-' + beehiveID + '-' + i + ' { background-color: ' + colors[i] +'; } ';
         }
         var style = document.getElementById('beehive-picker-style-' + beehiveID);
         style.innerHTML = styles;
@@ -88,7 +86,7 @@ define(function (require) {
     */
     this.Picker = function(dom, id){
         if(!id){ id = 1; }
-        var picker = '<div class="beehive-picker-main" beehive-id="' + id + '"><div class="beehive-pickers">';
+        var picker = '<div class="beehive-picker-main" beehive-id="' + id + '"><div class="beehive-pickers"><div class="beehive-pickers-inside">';
         var colorCount = 0;
         [7,8,9,10,11,12,13,12,11,10,9,8,7].forEach(function(n){
         var cl = n === 7 ? 'beehive-picker1' :
@@ -99,12 +97,12 @@ define(function (require) {
                 n === 12 ? 'beehive-picker6' : 'beehive-picker7';
         for(var i = 0; i < n; i++){
             var next = i === 0 ? 'beehive-picker-next' : '';
-            var div = '<div class="beehive-picker beehive-picker-color' + colorCount + ' ' + cl + ' ' + next + '"></div>';
+            var div = '<div class="beehive-picker ' + next + ' ' + cl + '"><div class="beehive-picker-hex beehive-picker-color' + colorCount + '"></div></div>';
             colorCount++;
             picker += div;
         }
         });
-        picker += '</div><div class="beehive-picker-detail"></div>'
+        picker += '</div></div><div class="beehive-picker-detail"></div>'
         picker += '</div>';
         dom.innerHTML = picker;
         if(document.getElementById('beehive-picker-style-' + id)){ return; }
@@ -119,7 +117,7 @@ define(function (require) {
     this.getColorCode = function(element){
         var style = window.getComputedStyle(element, null);
         var rgb = style.backgroundColor
-        if(!element.className.match(/(?:^|\s)beehive-picker(?:\s|$)/)){ return null; }
+        if(!element.className.match(/(?:^|\s)beehive-picker-hex(?:\s|$)/)){ return null; }
         var ret = eval(rgb.replace(/rgb/,"((").replace(/,/ig,")*256+")).toString(16);
         return "#" + (("000000" + ret).substring( 6 + ret.length - 6));
     };
@@ -127,18 +125,24 @@ define(function (require) {
     /*
     * Create beehive-picker style
     */
+
     var style = '';
-    style += '.beehive-picker-main{ height: 200px; } ';
-    style += '.beehive-pickers{ height: 177px; } ';
-    style += '.beehive-picker { position: relative; width: 14px; height: 8.08px; margin: 2.0px 0; float: left; } ';
-    style += '.beehive-picker:before,.beehive-picker:after { content: ""; position: absolute; width: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; left: 0px; } ';
-    style += '.beehive-picker.beehive-picker-next { clear: both; } .beehive-picker.beehive-picker1 { left: 42px; } ';
-    style += '.beehive-picker.beehive-picker2 { left: 35px; } ';
-    style += '.beehive-picker.beehive-picker3 { left: 28px; } ';
-    style += '.beehive-picker.beehive-picker4 { left: 21px; } ';
-    style += '.beehive-picker.beehive-picker5 { left: 14px;} ';
-    style += '.beehive-picker.beehive-picker6 { left: 7px; } ';
-    style += '.beehive-picker.beehive-picker7 { left: 0px; } ';
+    style += '.beehive-picker-main{ height: 400px; } ';
+    style += '.beehive-pickers{ width: 90%; position: relative;} ';
+    style += '.beehive-pickers:after {content: ""; display: block; padding-bottom: 100%; }';
+    style += '.beehive-pickers-inside{ position: absolute; width: 100%; height: 100%; }';
+    // Hexagon width/height ratio of sqr(3)/2
+    style += '.beehive-picker { position: relative; float: left; width: 7.69230769231%; padding: 0 0 8.88231183368% 0; -o-transform: rotate(-60deg) skewY(30deg); -moz-transform: rotate(-60deg) skewY(30deg); -webkit-transform: rotate(-60deg) skewY(30deg); -ms-transform: rotate(-60deg) skewY(30deg);transform: rotate(-60deg) skewY(30deg); overflow: hidden;visibility: visible;}';
+    style += '.beehive-picker-hex { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -o-transform: skewY(-30deg) rotate(60deg); -moz-transform: skewY(-30deg) rotate(60deg);  -webkit-transform: skewY(-30deg) rotate(60deg); -ms-transform: skewY(-30deg) rotate(60deg); transform: skewY(-30deg) rotate(60deg); overflow: hidden; } ';
+    style += '.beehive-picker.beehive-picker-next { clear: both; } ';
+    var spacing = 100/13;
+    style += '.beehive-picker.beehive-picker1 { left: ' + spacing*3 + '%; margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
+    style += '.beehive-picker.beehive-picker2 { left: ' + spacing*5/2 + '%; margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
+    style += '.beehive-picker.beehive-picker3 { left: ' + spacing*2 + '%; margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
+    style += '.beehive-picker.beehive-picker4 { left: ' + spacing*3/2 + '%; margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
+    style += '.beehive-picker.beehive-picker5 { left: ' + spacing + '%;  margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
+    style += '.beehive-picker.beehive-picker6 { left: ' + spacing/2 + '%;  margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
+    style += '.beehive-picker.beehive-picker7 { left: 0px; margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
     var colors = ["#003366","#336699","#3366CC","#003399","#000099","#0000CC","#000066",
                   "#006666","#006699","#0099CC","#0066CC","#0033CC","#0000FF","#3333FF",
                   "#333399","#669999","#009999","#33CCCC","#00CCFF","#0099FF","#0066FF",
@@ -158,11 +162,7 @@ define(function (require) {
                   "#996633","#CC9900","#FF9900","#CC6600","#FF3300","#FF0000","#CC0000",
                   "#990033","#663300","#996600","#CC3300","#993300","#990000","#800000","#993333"];
     for(var i = 0; i< colors.length; i++){
-        style += '.beehive-picker.beehive-picker-color' + i + ' { background-color: ' + colors[i] +'; } ';
-        style += '.beehive-picker.beehive-picker-color' + i + ':before { ';
-        style += 'bottom: 100%; border-bottom: 4.04px solid ' + colors[i] + '; } ';
-        style += '.beehive-picker.beehive-picker-color' + i + ':after { ';
-        style += 'top: 100%; width: 0; border-top: 4.04px solid ' + colors[i] + '; } ';
+        style += '.beehive-picker-hex.beehive-picker-color' + i + ' { background-color: ' + colors[i] +'; } ';
     }
     var st  = document.createElement('style');
     st.setAttribute('id', 'beehive-picker-style');

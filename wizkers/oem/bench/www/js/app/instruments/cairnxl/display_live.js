@@ -74,7 +74,7 @@ define(function (require) {
             "click #cmd-raw-send": "raw_send",
             "click #cmd-turnon": "turn_on",
             "click #cmd-turnoff": "turn_off",
-            "click .beehive-picker": "pick_color",
+            "click .beehive-picker-hex": "pick_color",
             "slideStop #brightness-control": "change_brightness"
         },
 
