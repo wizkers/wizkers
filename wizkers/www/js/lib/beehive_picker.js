@@ -77,7 +77,7 @@ define(function (require) {
         });
         var divs = '', styles = '';
         for(var i = 0; i < colors.length; i++){
-        divs += '<div class="beehive-picker beehive-picker6"><div class="beehive-picker-hex beehive-picker-2-' + beehiveID + '-' + i + '"></div></div>';
+        divs += '<div class="beehive-picker beehive-picker5"><div class="beehive-picker-hex beehive-picker-2-' + beehiveID + '-' + i + '"></div></div>';
         styles += '.beehive-picker-hex.beehive-picker-2-' + beehiveID + '-' + i + ' { background-color: ' + colors[i] +'; } ';
         }
         var style = document.getElementById('beehive-picker-style-' + beehiveID);
@@ -107,8 +107,8 @@ define(function (require) {
             picker += div;
         }
         });
-        picker += '</div></div><div class="beehive-picker-detail"></div>'
-        picker += '</div>';
+        picker += '<div class="beehive-picker-detail"></div>'
+        picker += '</div></div></div>';
         dom.innerHTML = picker;
         if(document.getElementById('beehive-picker-style-' + id)){ return; }
         var st2 = document.createElement('style');
@@ -133,9 +133,10 @@ define(function (require) {
 
     var style = '';
     style += '.beehive-picker-main{ height: 400px; } ';
-    style += '.beehive-pickers{ width: 90%; position: relative;} ';
-    style += '.beehive-pickers:after {content: ""; display: block; padding-bottom: 100%; }';
-    style += '.beehive-pickers-inside{ position: absolute; width: 100%; height: 100%; }';
+    style += '.beehive-pickers{ width: 90%; position: relative; margin: auto;} ';
+    style += '.beehive-pickers:after {content: ""; display: block; padding-bottom: 100%;} ';
+    style += '.beehive-pickers-inside{ position: absolute; width: 100%; height: 100%;} ';
+    style += '.beehive-picker-detail { position: absolute; width: 100%; bottom: 0px; clear:both; margin: auto; margin-bottom: 3%} ';
     // Hexagon width/height ratio of sqr(3)/2
     style += '.beehive-picker { position: relative; float: left; width: 7.69230769231%; padding: 0 0 8.88231183368% 0; -o-transform: rotate(-60deg) skewY(30deg); -moz-transform: rotate(-60deg) skewY(30deg); -webkit-transform: rotate(-60deg) skewY(30deg); -ms-transform: rotate(-60deg) skewY(30deg);transform: rotate(-60deg) skewY(30deg); overflow: hidden;visibility: visible;}';
     style += '.beehive-picker-hex { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -o-transform: skewY(-30deg) rotate(60deg); -moz-transform: skewY(-30deg) rotate(60deg);  -webkit-transform: skewY(-30deg) rotate(60deg); -ms-transform: skewY(-30deg) rotate(60deg); transform: skewY(-30deg) rotate(60deg); overflow: hidden; } ';
