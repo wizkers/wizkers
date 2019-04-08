@@ -29,7 +29,7 @@ if (typeof define !== 'function') {
 
 define(function (require) {
 
-    // var chroma = require('chroma');
+    var chroma = require('chroma');
 
     "use strict";
 
@@ -117,6 +117,47 @@ define(function (require) {
     };
 
     /*
+     * Set color scale
+     */
+    this.SetWhiteTemp = function() {
+        var colors = [];
+        for (var i=1000; i < 6080; i+=40) {
+            colors.push(chroma.temperature(i).hex());
+        }
+
+        // var colors = chroma.bezier(['yellow', 'red', 'black'])
+        // .scale()
+        // .colors(127);
+
+        makeColorCss(colors);
+    }
+
+    /*
+     * Set color scale
+     */
+    this.SetRgb = function() {
+        var colors = ["#003366","#336699","#3366CC","#003399","#000099","#0000CC","#000066",
+                    "#006666","#006699","#0099CC","#0066CC","#0033CC","#0000FF","#3333FF",
+                    "#333399","#669999","#009999","#33CCCC","#00CCFF","#0099FF","#0066FF",
+                    "#3366FF","#3333CC","#666699","#339966","#00CC99","#00FFCC","#00FFFF",
+                    "#33CCFF","#3399FF","#6699FF","#6666FF","#6600FF","#6600CC","#339933",
+                    "#00CC66","#00FF99","#66FFCC","#66FFFF","#66CCFF","#99CCFF","#9999FF",
+                    "#9966FF","#9933FF","#9900FF","#006600","#00CC00","#00FF00","#66FF99",
+                    "#99FFCC","#CCFFFF","#CCCCFF","#CC99FF","#CC66FF","#CC33FF","#CC00FF",
+                    "#9900CC","#003300","#009933","#33CC33","#66FF66","#99FF99","#CCFFCC",
+                    "#FFFFFF","#FFCCFF","#FF99FF","#FF66FF","#FF00FF","#CC00CC","#660066",
+                    "#336600","#009900","#66FF33","#99FF66","#CCFF99","#FFFFCC","#FFCCCC",
+                    "#FF99CC","#FF66CC","#FF33CC","#CC0099","#993399","#333300","#669900",
+                    "#99FF33","#CCFF66","#FFFF99","#FFCC99","#FF9999","#FF6699","#FF3399",
+                    "#CC3399","#990099","#666633","#99CC00","#CCFF33","#FFFF66","#FFCC66",
+                    "#FF9966","#FF6666","#FF0066","#CC6699","#993366","#999966","#CCCC00",
+                    "#FFFF00","#FFCC00","#FF9933","#FF6600","#FF5050","#CC0066","#660033",
+                    "#996633","#CC9900","#FF9900","#CC6600","#FF3300","#FF0000","#CC0000",
+                    "#990033","#663300","#996600","#CC3300","#993300","#990000","#800000","#993333"];
+        makeColorCss(colors);
+    }
+
+    /*
     * getColorCode
     */
     this.getColorCode = function(element){
@@ -124,8 +165,22 @@ define(function (require) {
         var rgb = style.backgroundColor
         if(!element.className.match(/(?:^|\s)beehive-picker-hex(?:\s|$)/)){ return null; }
         var ret = eval(rgb.replace(/rgb/,"((").replace(/,/ig,")*256+")).toString(16);
-        return "#" + (("000000" + ret).substring( 6 + ret.length - 6));
+        return "#" + (("000000" + ret).slice(-6));
     };
+
+    var makeColorCss = function(colors) {
+        var style = '';
+        for(var i = 0; i< colors.length; i++){
+            style += '.beehive-picker-hex.beehive-picker-color' + i + ' { background-color: ' + colors[i] +'; } ';
+        }
+        if(document.getElementById('beehive-picker-style-colors')) {
+            document.getElementById('beehive-picker-style-colors').remove();
+        }
+        var st  = document.createElement('style');
+        st.setAttribute('id', 'beehive-picker-style-colors');
+        st.innerHTML = style;
+        document.head.insertBefore(st,null);
+    }
 
     /*
     * Create beehive-picker style
@@ -138,8 +193,8 @@ define(function (require) {
     style += '.beehive-pickers-inside{ position: absolute; width: 100%; height: 100%;} ';
     style += '.beehive-picker-detail { position: absolute; width: 100%; bottom: 0px; clear:both; margin: auto; margin-bottom: 3%} ';
     // Hexagon width/height ratio of sqr(3)/2
-    style += '.beehive-picker { position: relative; float: left; width: 7.69230769231%; padding: 0 0 8.88231183368% 0; -o-transform: rotate(-60deg) skewY(30deg); -moz-transform: rotate(-60deg) skewY(30deg); -webkit-transform: rotate(-60deg) skewY(30deg); -ms-transform: rotate(-60deg) skewY(30deg);transform: rotate(-60deg) skewY(30deg); overflow: hidden;visibility: visible;}';
-    style += '.beehive-picker-hex { position: absolute; top: 0; left: 0; width: 100%; height: 100%; -o-transform: skewY(-30deg) rotate(60deg); -moz-transform: skewY(-30deg) rotate(60deg);  -webkit-transform: skewY(-30deg) rotate(60deg); -ms-transform: skewY(-30deg) rotate(60deg); transform: skewY(-30deg) rotate(60deg); overflow: hidden; } ';
+    style += '.beehive-picker { pointer-events:none; position: relative; float: left; width: 7.69230769231%; padding: 0 0 8.88231183368% 0; -o-transform: rotate(-60deg) skewY(30deg); -moz-transform: rotate(-60deg) skewY(30deg); -webkit-transform: rotate(-60deg) skewY(30deg); -ms-transform: rotate(-60deg) skewY(30deg);transform: rotate(-60deg) skewY(30deg); overflow: hidden;visibility: visible;}';
+    style += '.beehive-picker-hex {pointer-events:all;  position: absolute; top: 0; left: 0; width: 100%; height: 100%; -o-transform: skewY(-30deg) rotate(60deg); -moz-transform: skewY(-30deg) rotate(60deg);  -webkit-transform: skewY(-30deg) rotate(60deg); -ms-transform: skewY(-30deg) rotate(60deg); transform: skewY(-30deg) rotate(60deg); overflow: hidden; } ';
     style += '.beehive-picker.beehive-picker-next { clear: both; } ';
     var spacing = 100/13;
     style += '.beehive-picker.beehive-picker1 { left: ' + spacing*3 + '%; margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
@@ -149,31 +204,12 @@ define(function (require) {
     style += '.beehive-picker.beehive-picker5 { left: ' + spacing + '%;  margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
     style += '.beehive-picker.beehive-picker6 { left: ' + spacing/2 + '%;  margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
     style += '.beehive-picker.beehive-picker7 { left: 0px; margin-top: -1.19001064449%; margin-bottom: -1.19001064449%; } ';
-    var colors = ["#003366","#336699","#3366CC","#003399","#000099","#0000CC","#000066",
-                  "#006666","#006699","#0099CC","#0066CC","#0033CC","#0000FF","#3333FF",
-                  "#333399","#669999","#009999","#33CCCC","#00CCFF","#0099FF","#0066FF",
-                  "#3366FF","#3333CC","#666699","#339966","#00CC99","#00FFCC","#00FFFF",
-                  "#33CCFF","#3399FF","#6699FF","#6666FF","#6600FF","#6600CC","#339933",
-                  "#00CC66","#00FF99","#66FFCC","#66FFFF","#66CCFF","#99CCFF","#9999FF",
-                  "#9966FF","#9933FF","#9900FF","#006600","#00CC00","#00FF00","#66FF99",
-                  "#99FFCC","#CCFFFF","#CCCCFF","#CC99FF","#CC66FF","#CC33FF","#CC00FF",
-                  "#9900CC","#003300","#009933","#33CC33","#66FF66","#99FF99","#CCFFCC",
-                  "#FFFFFF","#FFCCFF","#FF99FF","#FF66FF","#FF00FF","#CC00CC","#660066",
-                  "#336600","#009900","#66FF33","#99FF66","#CCFF99","#FFFFCC","#FFCCCC",
-                  "#FF99CC","#FF66CC","#FF33CC","#CC0099","#993399","#333300","#669900",
-                  "#99FF33","#CCFF66","#FFFF99","#FFCC99","#FF9999","#FF6699","#FF3399",
-                  "#CC3399","#990099","#666633","#99CC00","#CCFF33","#FFFF66","#FFCC66",
-                  "#FF9966","#FF6666","#FF0066","#CC6699","#993366","#999966","#CCCC00",
-                  "#FFFF00","#FFCC00","#FF9933","#FF6600","#FF5050","#CC0066","#660033",
-                  "#996633","#CC9900","#FF9900","#CC6600","#FF3300","#FF0000","#CC0000",
-                  "#990033","#663300","#996600","#CC3300","#993300","#990000","#800000","#993333"];
-    for(var i = 0; i< colors.length; i++){
-        style += '.beehive-picker-hex.beehive-picker-color' + i + ' { background-color: ' + colors[i] +'; } ';
-    }
     var st  = document.createElement('style');
     st.setAttribute('id', 'beehive-picker-style');
     st.innerHTML = style;
     document.head.insertBefore(st,null);
+
+    this.SetRgb();
 
     });
 });

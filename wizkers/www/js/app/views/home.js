@@ -160,7 +160,8 @@ define(function (require) {
                 this.$('.ctrl-diag').hide();
             }
             if (instrumentManager.getCaps && instrumentManager.getCaps().indexOf("Recording") == -1) {
-                this.ctrlrecord.hide();
+                //this.ctrlrecord.hide();
+                this.ctrlrecord.css('cssText', 'display: none !important');
             }
 
             if (vizapp.type == 'server') {

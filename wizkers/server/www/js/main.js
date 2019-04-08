@@ -70,7 +70,7 @@ require.config({
         webrtc_adapter: 'lib/webrtc_adapter',
 
         bootstrap: 'lib/bootstrap',
-        bootstrapslider: 'lib/bootstrap-slider-2.0.0',
+        bootstrapslider: 'lib/bootstrap-slider-10.6.1',
         bootstrapeditable: 'lib/bootstrap-editable',
         bootbox: 'lib/bootbox',
         flot: 'lib/flot-0.8.3/jquery.flot',

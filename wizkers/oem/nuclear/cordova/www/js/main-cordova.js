@@ -54,9 +54,10 @@ require.config({
         snap: 'lib/snap.svg-0.4.1',
         text: 'lib/text',
         paper: 'lib/paperjs-v0.10.2/dist/paper-core',
+        chroma: 'lib/chroma',
 
         bootstrap: 'lib/bootstrap',
-        bootstrapslider: 'lib/bootstrap-slider-2.0.0',
+        bootstrapslider: 'lib/bootstrap-slider-10.6.1',
         bootstrapeditable: 'lib/bootstrap-editable',
         bootbox: 'lib/bootbox',
         flot: 'lib/flot-0.8.3/jquery.flot',

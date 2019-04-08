@@ -71,11 +71,12 @@ define(function (require) {
 
 
         events: {
-            "click #cmd-raw-send": "raw_send",
             "click #cmd-turnon": "turn_on",
             "click #cmd-turnoff": "turn_off",
-            "click .beehive-picker-hex": "pick_color",
-            "slideStop #brightness-control": "change_brightness"
+            "click #cmd-rgb": "set_rgb",
+            "click #cmd-warm": "set_warm",
+            "click .beehive-picker-hex": "pick_color",            
+            "slide #brightness-control": "change_brightness"
         },
 
         render: function () {
@@ -112,6 +113,14 @@ define(function (require) {
         clear: function () {
         },
 
+        set_rgb: function() {
+            this.beehive.SetRgb();
+        },
+
+        set_warm: function() {
+            this.beehive.SetWhiteTemp();
+        },
+
         pick_color: function(e) {
             if (!$(e.currentTarget).parent().parent().hasClass("beehive-picker-detail")) {
                 this.beehive.pickerClick(e.currentTarget, e);
@@ -119,12 +128,6 @@ define(function (require) {
             var cc = this.beehive.getColorCode(e.currentTarget);
             
             linkManager.sendCommand({command: 'color', arg: cc});
-        },
-
-        raw_send: function() {
-            var cmd = this.$("#cmd-raw-input").val();
-            linkManager.sendCommand({command:'raw', arg: cmd});
-
         },
 
         turn_on: function() {
@@ -142,19 +145,6 @@ define(function (require) {
         // We get there whenever we receive something from the serial port
         showInput: function (data) {
             var self = this;
-
-            if (this.showstream) {
-                // Update our raw data monitor
-                var i = $('#input',this.el);
-                var scroll = (i.val() + JSON.stringify(data) + '\n').split('\n');
-                // Keep max 50 lines:
-                if (scroll.length > 50) {
-                    scroll = scroll.slice(scroll.length-50);
-                }
-                i.val(scroll.join('\n'));
-                // Autoscroll:
-                i.scrollTop(i[0].scrollHeight - i.height());
-            }
 
             if (data.replay_ts != undefined) {
                 this.suspend_graph = false;

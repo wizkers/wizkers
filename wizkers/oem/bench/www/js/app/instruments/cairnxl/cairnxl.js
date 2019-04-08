@@ -51,8 +51,7 @@ define(function (require) {
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities
         this.getCaps = function () {
-            return ['LiveDisplay'
-                   ];
+            return ['LiveDisplay', 'DiagDisplay'];
         };
 
         // Return the type of data reading that this instrument generates. Can be used
@@ -82,6 +81,13 @@ define(function (require) {
              });
         };
 
+        // A diagnostics/device setup screen
+        this.getDiagDisplay = function(arg, callback) {
+            require(['app/instruments/cairnxl/display_diag'], function(view) {
+                callback(new view(arg));
+            });
+        };
+        
         // This is a browser implementation of the backend driver, when we
         // run the app fully in-browser or as a Cordova native app.
         this.getBackendDriver = function (arg, callback) {

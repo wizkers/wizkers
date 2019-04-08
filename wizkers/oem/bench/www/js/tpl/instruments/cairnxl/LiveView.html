@@ -1,42 +1,25 @@
 <!-- this is added within a row area -->
 <div class="col-md-12" id="liveview_in">
-    <div class="row">
+    <div class="row" style="padding-top: 15px;">
         <div class="col-md-6">
-            <p>Cairn XL</p>
             <button type="button" class="btn btn-sm btn-primary" id='cmd-turnon' >Turn on</button>
-            <button type="button" class="btn btn-sm btn-primary" id='cmd-turnoff' >Turn off</button>            
-        </div>
-        <div class="col-md-6">
-             <div class="input-group input-group-sm input-margin">
-                 <span class="input-group-addon">Raw command:</span>
-                 <input id="cmd-raw-input" class="form-control" value="" type="text" maxlength="80">
-                 <span class="input-group-btn"><button type="button" class="btn" id="cmd-raw-send"><span class="glyphicon glyphicon-check"></span></button>
-                 </span>
-            </div>
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-turnoff' >Turn off</button>
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-strobe' >Strobe</button>
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-rgb' >RGB</button>
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-warm' >Warm</button>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6" style="margin-top:15px;">
             <div class="input-group input-group-sm input-margin">
-                <span class="input-group-addon">Brightness</span>
+                <span class="input-group-addon">White brightness</span>
                 <div class="form-control">
-                    <input type="text" id="brightness-control" data-slider-value="0" data-slider-min="0" data-slider-max="100" data-slider-step="1">
+                    <input type="text" id="brightness-control" data-slider-value="2" data-slider-min="2" data-slider-max="100" data-slider-step="1">
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6" style="margin-top:15px;">
             <div id="beehive"></div>
-        </div>
-    </div>
-
-    <div class="row" id="showstream">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="well">
-                    <h6>Raw data stream</h6>
-                    <textarea id="input" style="height:150px; width:98%;"></textarea>
-                </div>
-            </div>
         </div>
     </div>
 </div>
