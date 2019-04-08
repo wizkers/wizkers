@@ -36,6 +36,7 @@ define(function (require) {
         Backbone = require('backbone'),
         utils = require('app/utils'),
         simpleplot = require('app/lib/flotplot'),
+        chroma = require('chroma'),
         Beehive = require('beehive'),
         template = require('js/tpl/instruments/cairnxl/LiveView.js');
 
@@ -126,6 +127,7 @@ define(function (require) {
                 this.beehive.pickerClick(e.currentTarget, e);
             }
             var cc = this.beehive.getColorCode(e.currentTarget);
+            // cc = chroma(cc).darken(4).hex();
             
             linkManager.sendCommand({command: 'color', arg: cc});
         },

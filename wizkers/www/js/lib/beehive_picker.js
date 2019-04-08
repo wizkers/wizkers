@@ -47,24 +47,30 @@ define(function (require) {
         if(!e.target.className.match(/(?:^|\s)beehive-picker-hex(?:\s|$)/)){ return; }
         var rgb = style.backgroundColor.match(/[0-9]+/g).map(function(n){ return Number(n); });
         var centerColor = style.backgroundColor;
+        // var colors = chroma.scale([centerColor, chroma(centerColor).darken(4)]).mode('lab').colors(11);
         if((rgb[0] === 255 && rgb[1] === 255 && rgb[2] === 255) || (rgb[0] === 0 && rgb[1] === 0 && rgb[2] === 0)){ 
-        rgb[0] = rgb[1] = rgb[2] = 127;
-        centerColor = 'rgb(127,127,127)';
+            rgb[0] = rgb[1] = rgb[2] = 127;
+            centerColor = 'rgb(127,127,127)';
         }
         var r = 255 - rgb[0] === 0 ? 0 : (255 - rgb[0]) / 6;
         var g = 255 - rgb[1] === 0 ? 0 : (255 - rgb[1]) / 6;
         var b = 255 - rgb[2] === 0 ? 0 : (255 - rgb[2]) / 6;
-        var left_rgbs =[1,2,3,4,5].map(function(n){ 
-        return [Math.round(255 - (r * n)),
-                Math.round(255 - (g * n)),
-                Math.round(255 - (b * n))]; });
-        r = 0 + rgb[0] === 0 ? 0 : (0 + rgb[0]) / 6;
-        g = 0 + rgb[1] === 0 ? 0 : (0 + rgb[1]) / 6;
-        b = 0 + rgb[2] === 0 ? 0 : (0 + rgb[2]) / 6;
-        var right_rgbs =[5,4,3,2,1].map(function(n){ 
-        return [Math.round(0 + (r * n)),
-                Math.round(0 + (g * n)),
-                Math.round(0 + (b * n))]; });
+        // var left_rgbs =[1,2,3,4,5].map(function(n){ 
+        var left_rgbs =[4,5].map(function(n){ 
+            return [Math.round(255 - (r * n)),
+                    Math.round(255 - (g * n)),
+                    Math.round(255 - (b * n))];
+            }
+        );
+        r = 0 + rgb[0] === 0 ? 0 : (0 + rgb[0]) / 9;
+        g = 0 + rgb[1] === 0 ? 0 : (0 + rgb[1]) / 9;
+        b = 0 + rgb[2] === 0 ? 0 : (0 + rgb[2]) / 9;
+        var right_rgbs =[8,7,6,5,4,3,2,1].map(function(n){ 
+            return [Math.round(0 + (r * n)),
+                    Math.round(0 + (g * n)),
+                    Math.round(0 + (b * n))];
+            }
+        );
         var colors = '';
         var i = 0;
         var colors = [];
@@ -77,8 +83,8 @@ define(function (require) {
         });
         var divs = '', styles = '';
         for(var i = 0; i < colors.length; i++){
-        divs += '<div class="beehive-picker beehive-picker5"><div class="beehive-picker-hex beehive-picker-2-' + beehiveID + '-' + i + '"></div></div>';
-        styles += '.beehive-picker-hex.beehive-picker-2-' + beehiveID + '-' + i + ' { background-color: ' + colors[i] +'; } ';
+            divs += '<div class="beehive-picker beehive-picker5"><div class="beehive-picker-hex beehive-picker-2-' + beehiveID + '-' + i + '"></div></div>';
+            styles += '.beehive-picker-hex.beehive-picker-2-' + beehiveID + '-' + i + ' { background-color: ' + colors[i] +'; } ';
         }
         var style = document.getElementById('beehive-picker-style-' + beehiveID);
         style.innerHTML = styles;
