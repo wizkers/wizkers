@@ -34,8 +34,6 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        utils = require('app/utils'),
-        simpleplot = require('app/lib/flotplot'),
         chroma = require('chroma'),
         Beehive = require('beehive'),
         template = require('js/tpl/instruments/cairnxl/LiveView.js');
@@ -50,6 +48,9 @@ define(function (require) {
 
             this.showstream = settings.get('showstream');
             this.beehive = new Beehive();
+
+            this.candle = false;
+            this.candleIndex = 2;
 
             if (vizapp.type == 'cordova') {
                 var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
@@ -76,6 +77,7 @@ define(function (require) {
             "click #cmd-rgb": "set_rgb",
             "click #cmd-warm": "set_warm",
             "click #cmd-strobe": "set_strobe",
+            "click #cmd-candle": "set_candle",
             "click #cmd-red": "set_red",
             "click .beehive-picker-hex": "pick_color",
             "slide #brightness-control": "change_brightness"
@@ -129,6 +131,23 @@ define(function (require) {
 
         set_strobe: function() {
             linkManager.sendCommand({command: 'strobe', arg: true});
+        },
+
+        set_candle: function() {
+            this.candle = !this.candle;
+            if (this.candle) {
+                setTimeout(this.flicker.bind(this), 300);
+            }
+        },
+
+        flicker: function() {
+            this.candleIndex += Math.random()*1.75-0.875;
+            if (this.candleIndex > 10) this.candleIndex -= Math.random()*2;
+            if (this.candleIndex < 2)  this.candleIndex += Math.random()*2;
+            linkManager.sendCommand({command:'brightness', arg: this.candleIndex});
+            if (this.candle) {
+                setTimeout(this.flicker.bind(this), 500 + Math.random()*100 - 50);
+            }
         },
 
         pick_color: function(e) {

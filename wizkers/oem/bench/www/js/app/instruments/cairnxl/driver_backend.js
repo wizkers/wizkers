@@ -171,7 +171,7 @@ define(function (require) {
                     // means
                     break;
                 case 'brightness':
-                    var b = ("00" + cmd.arg.toString(16)).slice(-2);
+                    var b = ("00" + Math.floor(cmd.arg).toString(16)).slice(-2);
                     buf += "0302" + b;
                     break;
                 case 'strobe':
