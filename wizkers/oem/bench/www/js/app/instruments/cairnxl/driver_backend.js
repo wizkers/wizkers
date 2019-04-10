@@ -174,6 +174,9 @@ define(function (require) {
                     var b = ("00" + cmd.arg.toString(16)).slice(-2);
                     buf += "0302" + b;
                     break;
+                case 'strobe':
+                    buf += "030401"; // Enable strobe
+                    break;
                 default:
                     console.warn('Error, received a command we don\'t know how to process', cmd.command);
                     commandQueue.shift();

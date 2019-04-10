@@ -130,11 +130,14 @@ define(function (require) {
         for (var i=1000; i < 6080; i+=40) {
             colors.push(chroma.temperature(i).hex());
         }
+        makeColorCss(colors);
+    }
 
-        // var colors = chroma.bezier(['yellow', 'red', 'black'])
-        // .scale()
-        // .colors(127);
-
+    this.SetRed = function() {
+        var colors = [];
+        for (var i=255; i > 2; i-=2) {
+            colors.push('#' + ('00' + Math.floor(i).toString(16)).slice(-2) + '0000');
+        }
         makeColorCss(colors);
     }
 

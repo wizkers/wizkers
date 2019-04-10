@@ -29,12 +29,15 @@
 define(function (require) {
     "use strict";
 
+    var abutils = require('app/lib/abutils');
+
     var template = require('js/tpl/instruments/cairnxl/DiagView.js');
 
     return Backbone.View.extend({
 
         initialize: function () {
-            // Don't stop the live stream anymore because we use it
+            // linkManager.startLiveStream();
+            linkManager.on('input', this.showInput, this);
         },
 
         render: function () {
@@ -45,6 +48,7 @@ define(function (require) {
 
         onClose: function () {
             console.log("Cairn XL diagnostics view closing...");
+            // linkManager.stopLiveStream();
             linkManager.off('input', this.showInput, this);
         },
 
@@ -62,7 +66,7 @@ define(function (require) {
             if (data.raw != undefined) {
                 // Update our raw data monitor
                 var i = $('#input', this.el);
-                var scroll = (i.val() + data.raw + '\n').split('\n');
+                var scroll = (i.val() + abutils.ui8tohex(data.raw) + '\n').split('\n');
                 // Keep max 50 lines:
                 if (scroll.length > 50) {
                     scroll = scroll.slice(scroll.length - 50);

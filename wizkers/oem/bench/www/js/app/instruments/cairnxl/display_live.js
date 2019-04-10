@@ -67,7 +67,6 @@ define(function (require) {
 
             linkManager.on('status', this.updatestatus, this);
             linkManager.on('input', this.showInput, this);
-
         },
 
 
@@ -76,7 +75,9 @@ define(function (require) {
             "click #cmd-turnoff": "turn_off",
             "click #cmd-rgb": "set_rgb",
             "click #cmd-warm": "set_warm",
-            "click .beehive-picker-hex": "pick_color",            
+            "click #cmd-strobe": "set_strobe",
+            "click #cmd-red": "set_red",
+            "click .beehive-picker-hex": "pick_color",
             "slide #brightness-control": "change_brightness"
         },
 
@@ -99,7 +100,7 @@ define(function (require) {
 
         onClose: function () {
             console.log("Cairn XL live view closing...");
-            linkManager.stopLiveStream();
+            // linkManager.stopLiveStream();
             linkManager.off('status', this.updatestatus);
             linkManager.off('input', this.showInput);
         },
@@ -120,6 +121,14 @@ define(function (require) {
 
         set_warm: function() {
             this.beehive.SetWhiteTemp();
+        },
+
+        set_red: function() {
+            this.beehive.SetRed();
+        },
+
+        set_strobe: function() {
+            linkManager.sendCommand({command: 'strobe', arg: true});
         },
 
         pick_color: function(e) {
