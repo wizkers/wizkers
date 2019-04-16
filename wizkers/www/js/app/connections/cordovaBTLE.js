@@ -307,10 +307,19 @@ define(function (require) {
                 // then do an Autoconnect
                 if (devAddress.length > 99)
                     autoConnect(devAddress.split(','));
-                else
+                else {
+                    // Experiment - 2019.04 : start a quick scan for 5 seconds
+                    // to improve changes of connecting quick, since a lot of BLE
+                    // devices seem to only connect well after responsing to a scan
+                    // request.
+                    bluetoothle.startScan(function(status) {
+                        console.log(status);
+                    }, function() { bluetoothle.stopScan()}, {});
+                    setTimeout(function() {console.log('Stopping scan'); bluetoothle.stopScan()}, 5000);
                     bluetoothle.connect(trackConnect, trackError, {
                         address: devAddress
                     });
+                }
 
             }
 
