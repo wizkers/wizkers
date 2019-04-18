@@ -330,6 +330,7 @@ define(function(require) {
                 break;
             default:
                 r += "proprietary format)</b><br>";
+                atr.unshift(category);
                 r += abutils.hexdump(atr);
                 
         }
