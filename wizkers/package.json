@@ -30,7 +30,7 @@
     "pcsclite": "^0.6.0",
     "pouchdb": "^6.4.3",
     "pouchdb-find": "^6.4.3",
-    "serialport": "~5.0.*",
+    "serialport": "^7.1.5",
     "serve-favicon": "^2.5.0",
     "socket.io": "^2.1.0",
     "socketio-jwt": "latest",

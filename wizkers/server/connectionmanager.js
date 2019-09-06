@@ -56,6 +56,9 @@ var HawkNest = require('./parsers/hawknest.js');
 var SimpleSerial = require('./parsers/simple_serial.js');
 var Powerlog = require('./parsers/powerlog_1.js');
 var Dummy = require('./parsers/dummy.js');
+var PiTemp = require('./www/js/app/instruments/pitemp/driver_backend.js');
+var NMEA = require('./www/js/app/instruments/nmea/driver_backend.js');
+
 
 var ConnectionManager = function () {
 
@@ -98,7 +101,12 @@ var ConnectionManager = function () {
             driver = new Powerlog();
         } else if (type == 'sample_instrument') {
             driver = new Dummy();
-        } 
+        } else if (type == 'pitemp') {
+            driver = new PiTemp();
+        } else if (type == 'nmea') {
+            driver = new NMEA();
+        }
+
         return driver;
     }
 

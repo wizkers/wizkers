@@ -1,0 +1,11 @@
+[Unit]
+Description=Wizkers Service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/wizkers-private/wizkers/dist/server
+ExecStart=/home/pi/wizkers-private/wizkers/dist/server/wizkers
+
+[Install]
+WantedBy=multi-user.target
+DefaultInstance=1

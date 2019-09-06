@@ -30,7 +30,6 @@
 define(function(require) {
     "use strict";
 
-    var driver_frontend = require('app/instruments/nmea/driver_frontend');
     // Convenient function when views want to talk to each other: keep a central
     // reference to those here
     var current_liveview = null;
@@ -49,7 +48,7 @@ define(function(require) {
         // Helper function: get driver capabilites for display.
         // returns a simple array of capabilities
         this.getCaps = function() {
-            return ["LiveDisplay", "NumDisplay"
+            return ["LiveDisplay", "NumDisplay", "WizkersSettings"
                    ];
         };
 
@@ -97,8 +96,10 @@ define(function(require) {
         };
 
         // This has to be a link manager
-        this.getDriver = function() {
-            return new driver_frontend();
+        this.getDriver = function(callback) {
+            require(['app/instruments/nmea/driver_frontend'], function(d) {
+                callback(new d());
+             });
         };
 
         this.getUploader = function() {

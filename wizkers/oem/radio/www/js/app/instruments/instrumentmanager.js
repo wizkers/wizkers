@@ -153,8 +153,29 @@ define(function (require) {
                 settings: 'app/instruments/sark110/settings',
                 connectionsettings: 'app/views/instrument/usbhid'
             };
-
         }
+
+        // Raspberry Pi server mode only support
+        if (vizapp.type == 'server') {
+            this.supportedInstruments['pitemp'] = {
+                name: 'Raspberry Pi built-in temperature',
+                type: 'app/instruments/pitemp/pitemp',
+                settings: null,
+                connectionsettings: null
+            };
+            this.supportedInstruments['udrc'] = {
+                name: 'Raspberry Pi DRAWS station',
+                type: 'app/instruments/udrc/udrc',
+                settings: null,
+                connectionsettings: null
+            };
+            this.supportedInstruments['nmea'] = {
+                name: 'GPS Monitor',
+                type: 'app/instruments/nmea/nmea',
+                settings: 'app/instruments/nmea/settings',
+                connectionsettings: 'app/views/instrument/serialport'
+            };
+        }           
 
         // The instruments below are only supported in Chrome runmode:
         if (vizapp.type == 'chrome') {

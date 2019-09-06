@@ -598,7 +598,8 @@ io.sockets.on('connection', function (socket) {
             connectionmanager.openInstrument(insid, function (d) {
                 driver = d;
                 currentInstrumentid = insid;
-                // Listen for data coming in from our driver
+                // Listen for data coming in from our driver if we are not already
+                driver.removeListener('data', sendDataToFrontEnd);
                 driver.on('data', sendDataToFrontEnd);
             });
         } else
@@ -843,6 +844,7 @@ io.sockets.on('connection', function (socket) {
                     for (var i = 0; i < ports.length; i++) {
                         portlist.push(ports[i].comName);
                     }
+                    portlist.push('TCP/IP'); // We also support virtual ports over TCP/IP
                     socket.emit('ports', portlist);
                 });
             } else if (ct == 'app/views/instrument/bluetooth') {
