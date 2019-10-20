@@ -467,7 +467,7 @@ define(function (require) {
     }
 
     // On server side, we use the Node eventing system, whereas on the
-    // browser/app side, we use Bacbone's API:
+    // browser/app side, we use Backbone's API:
     if (vizapp.type != 'server') {
         // Add event management to our parser, from the Backbone.Events class:
         _.extend(parser.prototype, Backbone.Events);

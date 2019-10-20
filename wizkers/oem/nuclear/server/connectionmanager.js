@@ -56,6 +56,7 @@ var PiTemp =     require('./www/js/app/instruments/pitemp/driver_backend.js');
 var EnvMonitor = require('./www/js/app/instruments/envmonitor/driver_backend.js');
 var KestrelDrop = require('./www/js/app/instruments/kestreldrop/driver_backend.js');
 var KestrelUSB = require('./www/js/app/instruments/kestrel5_usb/driver_backend.js');
+var CairnXL = require('./www/js/app/instruments/cairnxl/driver_backend.js');
 
 var ConnectionManager = function () {
 
@@ -100,6 +101,8 @@ var ConnectionManager = function () {
             driver = new KestrelDrop();
         } else if (type == 'kestrel5_usb') {
             driver = new KestrelUSB();
+        } else if (type == 'cairnxl') {
+            driver = new CairnXL();
         }
         return driver;
     }

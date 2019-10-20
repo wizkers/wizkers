@@ -157,16 +157,22 @@ define(function (require) {
                 lng: ''
             };
 
+            var latneg = coord.lat < 0;
+            var lngneg = coord.lng < 0;
+
+            coord.lat = Math.abs(coord.lat);
+            coord.lng = Math.abs(coord.lng);
+
             var deg = Math.floor(coord.lat);
             var min = (Math.abs(coord.lat - deg) * 60);
             var sec = (min - Math.floor(min));
-            ret.lat = ((deg < 100) ? '&nbsp;' : '') + ((deg < 10) ? '&nbsp;' : '') +
+            ret.lat = (latneg ? '-' : '') + ((deg < 100) ? '&nbsp;' : '') + ((deg < 10) ? '&nbsp;' : '') +
                 deg + '&deg;&nbsp;' + Math.floor(min) + '\'&nbsp;' + (sec * 60).toFixed(3) + '"&nbsp;' + ((deg >= 0) ? 'N' : 'S');
 
             deg = Math.floor(coord.lng);
             min = (Math.abs(coord.lng - deg) * 60);
             sec = (min - Math.floor(min));
-            ret.lng = ((deg < 100) ? '&nbsp;' : '') + ((deg < 100) ? '&nbsp;' : '') +
+            ret.lng = (lngneg ? '-': '') + ((deg < 100) ? '&nbsp;' : '') + ((deg < 100) ? '&nbsp;' : '') +
                 deg + '&deg;&nbsp;' + Math.floor(min) + '\'&nbsp;' + (sec * 60).toFixed(3) + '"&nbsp;' + ((deg >= 0) ? 'E' : 'W');
 
             return ret;

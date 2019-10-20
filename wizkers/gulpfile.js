@@ -78,6 +78,8 @@ var paths = {
     nwjs_dist:     'dist/nwjs/',
     electron_debug:    'dist/electron-debug/',
     electron_dist:     'dist/electron/',
+    browser_debug:    'dist/browser-debug/',
+    browser_dist:     'dist/browser/',
 
     // Application paths: (need to be in arrays)
     templates: ['www/js/tpl/**/*.html'],
@@ -95,7 +97,8 @@ var paths = {
     chrome_files:  [oem_directory + '/chrome/**/*'],
     cordova_files: [oem_directory + '/cordova/**/*'],
     nwjs_files:    [oem_directory + '/nwjs/**/*'],
-    electron_files:    [oem_directory + '/electron/**/*']
+    electron_files:    [oem_directory + '/electron/**/*'],
+    browser_files:    [oem_directory + '/browser/**/*']
 }
 
 console.log(paths.templates);
@@ -307,6 +310,23 @@ gulp.task('nwjs_bin', ['nwjs_optimize'], function () {
     return nw.build();
 })
 
+gulp.task('nwjs_sdk_bin', ['nwjs_optimize'], function () {
+    var nw = new NwBuilder({
+        files: paths.nwjs_dist + '**/**', // use the glob format
+        platforms: ['osx64', 'win64'],
+        // version: '0.18.1-mas',
+        downloadUrl: 'https://dl.nwjs.io/',
+        flavor: 'sdk',
+        buildDir: 'dist',
+        cacheDir: 'build/cache',
+        macPlist: oem_directory + '/nwjs/Info.plist',
+        macIcns: paths.nwjs_dist + 'app.icns'
+    });
+    nw.on('log',  console.log);
+    return nw.build();
+})
+
+
 /*
  * Copy the build files to the Electron directory
  */
@@ -322,10 +342,33 @@ gulp.task('electron_copy_build', ['build'], function () {
  */
 gulp.task('electron', ['build', 'electron_copy_build'], function () {
     return gulp.src(paths.electron_files, {
-            base: oem_directory + '/electron`'
+            base: oem_directory + '/electron'
         })
         .pipe(gulp.dest(paths.electron_dist))
         .pipe(gulp.dest(paths.electron_debug));
+});
+
+/*
+ * Copy the build files to the Browser directory
+ * (for running directly in Chrome with a standard http server or file://)
+ * Nearly identical to nwjs
+ */
+gulp.task('browser_copy_build', ['build'], function () {
+    return gulp.src([paths.build + '/www/**/*'], {
+            base: paths.build
+        })
+        .pipe(gulp.dest(paths.browser_debug));
+});
+
+/**
+ * Build the Browser app
+ */
+gulp.task('browser', ['build', 'browser_copy_build'], function () {
+    return gulp.src(paths.browser_files, {
+            base: oem_directory + '/browser'
+        })
+        .pipe(gulp.dest(paths.browser_dist))
+        .pipe(gulp.dest(paths.browser_debug));
 });
 
 

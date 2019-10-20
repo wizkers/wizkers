@@ -184,11 +184,13 @@ define(function (require) {
             this.model.set(change);
 
             // Run validation rule (if any) on changed item
-            var check = this.model.validateItem(target.id);
-            if (check.isValid === false) {
-                utils.addValidationError(target.id, check.message);
-            } else {
-                utils.removeValidationError(target.id);
+            if (target.id != "") {
+                var check = this.model.validateItem(target.id);
+                if (check.isValid === false) {
+                    utils.addValidationError(target.id, check.message);
+                } else {
+                    utils.removeValidationError(target.id);
+                }
             }
 
             // If we changed the plugin type, we need to reset the view:

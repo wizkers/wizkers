@@ -20,7 +20,8 @@
     "ftp": "^0.3.10",
     "jsonwebtoken": "^7.4.1",
     "msgpack5": "^1.3.5",
-    "noble": "git+https://github.com/wizkers/noble.git",
+    "noble": "^1.9.1",
+    "noble-mac": "git+https://github.com/Timeular/noble-mac.git",
     "node-hid": "^0.7.2",
     "passport": "latest",
     "passport-facebook": "~1.0.2",
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "amd-optimize": "^0.6.1",
+    "electron": "^3.0.6",
     "gulp": "^3.9.1",
     "gulp-change": "^1.0.0",
     "gulp-concat": "^2.6.1",
@@ -56,7 +58,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "electron": "electron ."
   },
   "author": "",
   "license": "ISC"

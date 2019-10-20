@@ -84,7 +84,7 @@ define(function (require) {
         /////////////
 
         // Info required at port creation.
-        // THis vendorId/productId pair is the official Kestrel IR to USB
+        // This vendorId/productId pair is the official Kestrel IR to USB
         // interface.
         var portSettings = function () {
             return {

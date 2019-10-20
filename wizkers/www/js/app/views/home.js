@@ -86,6 +86,7 @@ define(function (require) {
             "click .ctrl-connect-sm": "ctrlConnect",
             "click .ctrl-diag": "ctrlDiag",
             "click .ctrl-record": "ctrlRecord",
+            "click .ctrl-record-sm": "ctrlRecord",
             "click .start-record": "startRecord",
             "click a": "handleaclicks",
         },
@@ -157,10 +158,12 @@ define(function (require) {
             // New in 2015.11: completely hide it rather than just disable it.
             // (careful, getCaps is only defined once an instrument is loaded)
             if (instrumentManager.getCaps && instrumentManager.getCaps().indexOf("DiagDisplay") == -1) {
-                this.$('.ctrl-diag').hide();
+                this.$('.ctrl-diag').css('cssText', 'display: none !important');
             }
             if (instrumentManager.getCaps && instrumentManager.getCaps().indexOf("Recording") == -1) {
-                this.ctrlrecord.hide();
+                //this.$('.ctrl-record').hide();
+                // this.ctrlrecord.hide();
+                this.ctrlrecord.css('cssText', 'display: none !important');
             }
 
             if (vizapp.type == 'server') {

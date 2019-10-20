@@ -252,6 +252,9 @@ define(function (require) {
                         self.trigger('ports', ['OTG Serial', 'TCP/IP', 'Bluetooth', 'Wizkers Netlink']);
                     }
                     break;
+                case 'electron':
+                // TODO
+                    break;
                 case 'chrome':
                 default:
                     chrome.serial.getDevices(onGetDevices);
@@ -268,6 +271,12 @@ define(function (require) {
                     break;
                 case 'nwjs':
                     discoverBluetoothWebAPI(filter);
+                    break;
+                case 'electron':
+                    discoverBluetoothNode(filter);
+                    break;
+                default:
+                    self.trigger('ports', ['Not available']);
                 }
             } else {
                 self.trigger('ports', ["Not available"]);

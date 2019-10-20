@@ -1,0 +1,30 @@
+<!-- this is added within a row area -->
+<div class="col-md-12" id="liveview_in">
+    <div class="row" style="padding-top: 15px;">
+        <div class="col-md-6" style="margin-bottom: 5px;">
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-turnon' >On</button>
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-turnoff' >Off</button>
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-strobe' >Strobe</button>
+        </div>
+        <div class="col-md-6">
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-rgb' >RGB</button>
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-warm' >Warm</button>
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-red' >Red</button>
+            <button type="button" class="btn btn-sm btn-primary" id='cmd-candle' >Candle</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6" style="margin-top:15px;">
+            <div class="input-group input-group-sm input-margin">
+                <span class="input-group-addon">White brightness</span>
+                <div class="form-control">
+                    <input type="text" id="brightness-control" data-slider-value="2" data-slider-min="2" data-slider-max="100" data-slider-step="1">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6" style="margin-top:15px;">
+            <div id="beehive"></div>
+        </div>
+    </div>
+</div>
+

@@ -195,7 +195,8 @@ define(function (require) {
             var string = "";
             var i = 0,
                 c = 0,
-                c2 = 0;
+                c2 = 0,
+                c3 = 0;
 
             while (i < myHexAscii.length) {
                 c = parseInt(myHexAscii.substr(i, 2), 16);

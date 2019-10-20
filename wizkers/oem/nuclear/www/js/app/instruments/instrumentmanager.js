@@ -149,7 +149,16 @@ define(function (require) {
                 path: 'app/instruments/envmonitor',
                 settings: 'app/instruments/envmonitor/settings',
                 connectionsettings: null
+            },
+            'cairnxl': {
+                name: "Cairn XL lantern",
+                type: 'app/instruments/cairnxl/cairnxl',
+                path: 'app/instruments/cairnxl',
+                settings: 'app/instruments/cairnxl/settings',
+                connectionsettings: 'app/views/instrument/bluetooth',
+                connectionfilter: ['69400001-b5a3-f393-e0a9-e50e24dcca99']
             }
+
         };
 
         if (false) {

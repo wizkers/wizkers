@@ -51,6 +51,7 @@ require.config({
         backbonepouch: 'lib/backbone-pouch',
         underscore: 'lib/underscore-1.8.3',
         snap: 'lib/snap.svg-0.4.1',
+        beehive: 'lib/beehive_picker',
         text: 'lib/text',
         paper: 'lib/paperjs-v0.10.2/dist/paper-core',
 
@@ -69,7 +70,7 @@ require.config({
         webrtc_adapter: 'lib/webrtc_adapter',
 
         bootstrap: 'lib/bootstrap',
-        bootstrapslider: 'lib/bootstrap-slider-2.0.0',
+        bootstrapslider: 'lib/bootstrap-slider-10.6.1',
         bootstrapeditable: 'lib/bootstrap-editable',
         bootbox: 'lib/bootbox',
         flot: 'lib/flot-0.8.3/jquery.flot',
