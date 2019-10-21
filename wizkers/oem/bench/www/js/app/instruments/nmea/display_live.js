@@ -82,7 +82,7 @@ define(function (require) {
         },
 
         disp_prn: function (data) {
-            var constellations = [ 'GPS', 'Unknown - 1', 'Galileo', 'Beidou', 'Unknown - 4', 'QZSS', 'GLONASS'];
+            var constellations = [ 'GPS', 'SBAS', 'Galileo', 'Beidou', 'IMES', 'QZSS', 'GLONASS'];
             var line = this.$('#prntable #PRN' + data.PRN);
             if (line.length) {
                 // Update an existing table line
