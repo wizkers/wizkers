@@ -80,6 +80,7 @@ define(function (require) {
             '1.2.840.113549.1.9.5': "signingTime",
             '1.2.840.113549.2.2'  : "md2",
             '1.2.840.113549.2.5'  : "md5",
+            '1.2.840.114283.1': 'GlobalPlatform',
             '2.16.840.1.101.3.4.2.4' : "sha224",
             '2.16.840.1.101.3.4.2.1': "sha256",
             '2.16.840.1.101.3.4.2.2': "sha384",
@@ -1467,11 +1468,17 @@ define(function (require) {
                 }
 
                 break;
+            case 0x4f: // Application identifier
+                ret = data;
+                var block = abutils.hexAsciiToAscii(data);
+                ret += " [ " + block + " ]";
+                break;
             case 0x50: // Application Label
             case 12: // UTF 8 String
                 ret = abutils.hexAsciiToUTF8(data);
                 break;
 
+            case 0x17: // UTCTime
             case 0x18: // GeneralizedTime
             case 18: // NumericString
             case 27: // GeneralString
@@ -1524,7 +1531,7 @@ define(function (require) {
                 ret += "EFType: " + EFType[data.substr(4, 2)] + " (" + data.substr(4, 2) + ")\n" + tab+ tab;
                 ret += "RecSize: 0x" + data.substr(6, 2) + " / ";
                 ret += "NumRec: 0x" + data.substr(8, 2) + "\n" + tab+ tab;
-                ret += "AC: 0x" + data.substr(10, 8) + " / " + tab+ tab;
+                ret += "AC: 0x" + data.substr(10, 8) + " / ";
                 ret += "NKey: 0x" + data.substr(18, 8) + "\n" + tab+ tab;
                 ret += "Status: " + Status[parseInt(data.substr(26, 2), 16)] + " (0x" + data.substr(26, 2) + ")\n" + tab+ tab;
                 ret += "KVC1: 0x" + data.substr(28, 2) + " / KVC2: 0x" + data.substr(30, 2) + " / KVC3: 0x" + data.substr(32, 2) + "\n" + tab+ tab;

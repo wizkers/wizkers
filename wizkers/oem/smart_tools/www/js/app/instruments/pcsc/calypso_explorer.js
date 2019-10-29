@@ -34,8 +34,8 @@ define(function (require) {
     var $ = require('jquery'),
         _ = require('underscore'),
         Backbone = require('backbone'),
-        utils = require('app/utils'),
         bootbox = require('bootbox'),
+        Intercode2 = require('app/lib/intercode2'),
         IsoCodes = require('app/lib/iso-codes'),
         abutils = require('app/lib/abutils'),
         template = require('js/tpl/instruments/pcsc/DesfireExplorer.js');
@@ -44,24 +44,6 @@ define(function (require) {
     require('bootstrap');
     require('lib/bootstrap-treeview');
 
-    var knownAIDs = {
-        "000000": "PICC Master application",
-        "FFFFFF": "General Issuer Info",
-        "5354FF": "Identiv TS access control",
-        "F48120": "Gallagher access control",
-        "F48121": "Gallagher access control",
-        "F48122": "Gallagher access control",
-        "F48123": "Gallagher access control",
-        "F48124": "Gallagher access control",
-        "F48125": "Gallagher access control",
-        "F48126": "Gallagher access control",
-        "F48127": "Gallagher access control",
-        "F48128": "Gallagher access control",
-        "F48129": "Gallagher access control",
-        "F4812A": "Gallagher access control",
-        "F4812B": "Gallagher access control",
-        "F4812F": "Gallagher Card Application Directory"
-    };
 
     return Backbone.View.extend({
 

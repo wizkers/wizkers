@@ -31,16 +31,11 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     var vizapp = { type: 'server'},
-    events = require('events'),
-    abutils = require('app/lib/abutils'),
-    dbs = require('pouch-config');
+    events = require('events');
 }
 
 define(function (require) {
     "use strict";
-
-    var abutils = require('app/lib/abutils'),
-        utils = require('app/utils');
 
     var storageCommands = function (driver) {
 
@@ -278,8 +273,11 @@ define(function (require) {
         /* Reads a card page (Mifare Ultralight only)
         * A page is 4 bytes long, but some readers require larger minimum read sizes.
         * for this reason, we initialize "le" to "00" and just get the 4 first bytes.
+        * 
+        * 2019: It looks like current PCSC drivers now correctly want only 4 bytes and will
+        *       error otherwise.
         */
-        this.readPage = function(page) {
+        this.readPage = function(reader, page) {
             var readErrors = {};
             readErrors["6281"] = "Part of returned data may be corrupted";
             readErrors["6282"] = "End of file reached before reading expected number of bytes";
@@ -293,12 +291,12 @@ define(function (require) {
                 cla: "FF",
                 ins: "B0",
                 p1: "00",
-                p2: page,
+                p2: ("00" + page.toString(16)).slice(-2),
                 lc: "",
                 data: "",
-                le: "00"
+                le: "04"
             };
-            return { apdu: apdu, errors: readErrors};
+            return apdu;
         };
 
 

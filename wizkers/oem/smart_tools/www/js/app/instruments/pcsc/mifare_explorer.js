@@ -59,7 +59,7 @@ define(function (require) {
 
         render: function (reader, atr) {
             var self = this;
-            this.atr = abutils.ui8tohex(new Uint8Array(atr)).toUpperCase();;
+            this.atr = atr.toUpperCase();;
             console.log('Main render of Mifare explorer');
             console.log(atr);
             this.$el.html(template());
@@ -87,21 +87,33 @@ define(function (require) {
             }
             this.makeMemoryMap();
 
+            // Now get a bit more info on the card, since the ATR does not
+            // include all we need FFCA000000
+            linkManager.sendCommand({ command:'pcsc_getUID',
+                reader: this.currentReader,
+            });
+            linkManager.sendCommand({ command:'pcsc_getATS',
+                reader: this.currentReader,
+            });
             return this;
         },
 
         makeMemoryMap: function() {
             var memmap = [];
             var blk;
-            for (var i = 0; i < this.mifareCardSectors; i++) {
-                memmap.push({ text: 'Sector ' + i,  id: 'S' + i, nodes: []});
-                (i>31) ? blk = 16: blk = 4; // Mifare 4K
-                for (var j=0; j<blk;j++) {
-                    memmap[memmap.length-1].nodes.push({
-                            text: "Block " + j,
-                            id: "S" + i + "B" + j,
-                        });
+            if (this.mifareCardType == "1K" || this.mifareCardType == "4K") {
+                for (var i = 0; i < this.mifareCardSectors; i++) {
+                    memmap.push({ text: 'Sector ' + i,  id: 'S' + i, nodes: []});
+                    (i>31) ? blk = 16: blk = 4; // Mifare 4K
+                    for (var j=0; j<blk;j++) {
+                        memmap[memmap.length-1].nodes.push({
+                                text: "Block " + j,
+                                id: "S" + i + "B" + j,
+                            });
+                    }
                 }
+            } else if (this.mifareCardType == "Ultralight") {
+                memmap.push({ text: 'Memory',  id: 'S' + i, nodes: []});
             }
             this.$('#memmap').treeview({ data:memmap }).treeview('collapseAll', { silent: true });;
             this.$('#memmap').off('nodeSelected');
@@ -188,18 +200,32 @@ define(function (require) {
             var block = parseInt(sb[2] || "0");
             var sector = parseInt(sb[1]);
 
+            this.$('#hexdump').html('');
+            this.hexdumpContents = '<pre style="line-height:0.7">';
             // First authenticate to the block.
             // then upon callback read it.
             // We do that by preloading the callback into the 
             // queue.
             if (fullBlock) {
-                var bMax = (sector > 31) ? 16 : 4; // Mifare 4K or 1K
-                for (var i = 0; i < bMax; i++) {
-                    this.commandQueue.push({  command: 'readbinary',
-                                            reader: this.currentReader,
-                                            sector: sector,
-                                            block: i
-                                            });
+                if (this.mifareCardType == "Ultralight") {
+                    for (var i = 0; i < 16; i++) {
+                        linkManager.sendCommand({  command: 'readULpage',
+                                                reader: this.currentReader,
+                                                block: i
+                                                });
+                    }
+                    this.hexdumpContents = "<b>Mifare Ultralight - 15 sectors</b>";
+                    this.hexdumpContents += '<pre style="line-height:0.7">';
+                } else {
+                    // this.hexdumpContents = "";
+                    var bMax = (sector > 31) ? 16 : 4; // Mifare 4K or 1K
+                    for (var i = 0; i < bMax; i++) {
+                        this.commandQueue.push({  command: 'readbinary',
+                                                reader: this.currentReader,
+                                                sector: sector,
+                                                block: i
+                                                });
+                    }
                 }
             } else {
                 this.commandQueue.push({  command: 'readbinary',
@@ -208,14 +234,14 @@ define(function (require) {
                                         block: block
                                         });
             }
-            linkManager.sendCommand( {  command: 'authenticateblock',
-                                        reader: this.currentReader,
-                                        sector: sector,
-                                        block: block,
-                                        key_type: this.$('#readKey').val()
-                                    });
-            this.$('#hexdump').html('');
-            this.hexdumpContents = '<pre style="line-height:0.7">';
+            if (this.mifareCardType != "Ultralight") {
+                linkManager.sendCommand( {  command: 'authenticateblock',
+                                            reader: this.currentReader,
+                                            sector: sector,
+                                            block: block,
+                                            key_type: this.$('#readKey').val()
+                                        });
+            }
 
         },
 
@@ -223,6 +249,12 @@ define(function (require) {
         showInput: function (data) {
             var self = this;
             console.log('Data', data);
+            if (data.status == 'disconnected') {
+                // Card was removed: stop listening to future messages
+                console.log('Card remove, stop listening to data');
+                linkManager.off('input', this.showInput);
+                this.$el.css('opacity',0.6);
+            }
 
             if (data.command) {
                 if (data.command.command == 'loadkey') {
@@ -232,15 +264,22 @@ define(function (require) {
                         this.$('#key' + data.command.keyname).css('background-color','#f2dede');
                     }
                 }
-                if (data.command.command == 'readbinary') {
+                if (data.command.command == 'readbinary' ||
+                    data.command.command == 'readULpage') {
                     if (data.data.slice(-4) == "9000") {
-                        this.hexdumpContents += abutils.hexdump(abutils.hextoab(data.data.substr(0,data.data.length-4))) + '\n';                                                
-                        if (data.command.block == 3) {
+                        this.hexdumpContents += abutils.hexdump(abutils.hextoab(data.data.substr(0,data.data.length-4))).replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;") + '\n';
+                        if (data.command.block == 3 && this.mifareCardType != "Ultralight") {
                             this.hexdumpContents += '</pre><br>' +
                                         this.decodeTrailer(data.data.substr(0,data.data.length-4));
                             this.$('#hexdump').html(this.hexdumpContents);
                         } else if (this.commandQueue.length == 0) {
-                            this.hexdumpContents += '</pre>';
+                            if (this.mifareCardType != "Ultralight" ||
+                                (this.mifareCardSectors == "Ultralight" && data.command.block == 15))
+                                this.hexdumpContents += '</pre>';
                             this.$('#hexdump').html(this.hexdumpContents);
                         }
                     } else {

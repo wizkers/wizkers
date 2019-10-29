@@ -16916,5 +16916,11 @@ return [
 	candidates: [ "Tivu' Sat (Italy) CAM card www.tivu.tv",
 		]
 	}
+,
+	{
+	atrs: ["3B 8E 80 01 43 61 72 64 61 78 20 44 65 73 66 69 72 65 48", ],
+	candidates: [ "Gallagher Desfire physical access control card",
+		]
+	}
 ,]
 });

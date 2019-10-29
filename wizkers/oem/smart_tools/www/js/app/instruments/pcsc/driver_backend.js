@@ -23,9 +23,10 @@
  */
 
 /*
- * Browser-side Parser for PCSC readers)
+ * Driver for PCSC readers
  *
- * Used for both browser side and server side.
+ * Used for both browser side and server side. Note: only implemented
+ * and tested server-side so far.
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -43,7 +44,9 @@ define(function (require) {
     "use strict";
 
     var utils = require('app/utils'),
+        CryptoJS = require('crypto-js'),
         storageCommands = require('app/instruments/pcsc/commands_storage'),
+        desfireCommands = require('app/instruments/pcsc/commands_desfire'),
         pcscConnection = require('connections/pcsc');
 
     var parser = function (socket) {
@@ -229,7 +232,33 @@ define(function (require) {
                     "80": "Unblock tru counter has reached zero"
                 }
             },
-
+            "91": { // Valid for Desfire ops (wrapped APDUs), maybe others
+                "sw1": "DESfire",
+                "sw2": {
+                    "00": "Command successful",
+                    "0C": "No changes done to backup file",
+                    "0E": "Out of EEPROM Error, insufficient memory to complete command",
+                    "1C": "ILLEGAL_COMMAND_CODE - command code not supported",
+                    "1E": "INTEGRITY_ERROR - CRC or MAC does not match data, or padding bytes not valid",
+                    "40": "NO_SUCH_KEY - Invalid key number specified",
+                    "7E": "LENGTH_ERROR - Length of command string invalid",
+                    "9D": "PERMISSION_DENIED - Current configuration / status does not allow the requested command",
+                    "9E": "PARAMETER_ERROR - Value of the parameter(s) invalid",
+                    "A0": "APPLICATION_NOT_FOUND - requested AID not present on PICC",
+                    "A1": "APPL_INTEGRITY_ERROR - Unrecoverale error within application, app will be disabled (card is probably damaged)",
+                    "AE": "AUTHENTICATION_ERROR - Current authentication status does not allow the requested command",
+                    "AF": "ADDITIONAL_FRAME - Additional data frame is expected to be sent",
+                    "BE": "BOUNDARY_ERROR - Attempt to read/write data from/to beyond the file limits",
+                    "C1": "PICC_INTEGRITY_ERRPR - Unrecoverable error within PICC, PICC will be disabled (good bye)",
+                    "CA": "COMMAND_ABORTED - Previous commanbd was not fully completed",
+                    "CD": "PICC_DISABLED - PICC was disabled by an unrecoverable error",
+                    "CE": "COUNT_ERROR - Number of applications limited to 28, no additional CreateApplication possible",
+                    "DE": "DUPLICATE_ERROR - Creation of file/applications failed because file/application witht same number already exists",
+                    "EE": "EEPROM_ERROR - Could not complete NV-write operation due to loss of power, internal backup/rollback mechanism activated",
+                    "F0": "FILE_NOT_FOUND - Specified file number does not exist",
+                    "F1": "FILE_INTEGRITY_ERROR - Unrecoverable error within file, file will be disabled"
+                }
+            }
         };
         
         var buildStatusDesc = function(sw1, sw2) {
@@ -253,16 +282,38 @@ define(function (require) {
             clearTimeout(wd);
             var cmd = commandQueue.shift();
             console.info('Done with command', cmd);
+
+            // Some commands require processing on the driver side, in particular this is
+            // where we implement all the crypto. This is debatable, since this means that
+            // we end up sending decrypted plaintext data between the server and the browser
+            // but this would best be addresses with encrypted communications between the
+            // server and the browser, rather than do DES or AES in the browser. to be
+            // continued...
+            if (cmd.command == 'desfire_AuthenticateAES') {
+                debug('Reply to AUthenticateAES');
+            }
+
             // Transform the data into a hex string (it's a buffer when it comes in)
             var datastr = abutils.ui8tohex(new Uint8Array(data.resp));
-            // Add comments on last 2 bytes status code
-            let sw1 = data.resp[data.resp.length-2];
-            let sw2 = data.resp[data.resp.length-1];
-            let sw1sw2 = buildStatusDesc(sw1, sw2);
-            self.trigger('data', { data: datastr, 
-                                 sw1sw2: sw1sw2,
-                                command: cmd } );
+            if (datastr.length < 4) {
+                self.trigger('data', { data: datastr, 
+                sw1sw2: 'Error, short response, cannot process',
+               command: cmd } );
+            } else {
+                // Add comments on last 2 bytes status code
+                let sw1 = data.resp[data.resp.length-2];
+                let sw2 = data.resp[data.resp.length-1];
+                let sw1sw2 = buildStatusDesc(sw1, sw2);
+                self.trigger('data', { data: datastr, 
+                                    sw1sw2: sw1sw2,
+                                    command: cmd } );
+            }
             queue_busy = false;
+            // If we have commands left in the queue, now is the time to process them
+            if (commandQueue.length) {
+                processQueue();
+            }
+
         };
 
         // Status returns an object that is concatenated with the
@@ -288,7 +339,7 @@ define(function (require) {
                 // Received a low level error during normal operation,
                 // tell the front-end through a 'data' message
                 var resp = {
-                    error: stat.error
+                    error: stat.error.message
                 };
                 self.trigger('data', resp);
             }
@@ -314,12 +365,14 @@ define(function (require) {
          * Handle PC/SC specific status messages
          */
         var handleReaderStatus = function(stat) {
-            console.log('PC/SC Status message');
+            debug('PC/SC Status message', stat);
             if (stat.device) {
                 // PCSC device detected
                 if (readers.indexOf(stat.device) == -1)
                     readers.push(stat.device);
             }
+            if (stat.error)
+                return; // PC/SC errors are already handled in the 'status' handler
             self.trigger('data', stat);
         }
 
@@ -379,12 +432,12 @@ define(function (require) {
             data.reader = cmd.reader;
 
             switch(cmd.command) {
-                case 'getUID':
+                case 'pcsc_getUID':
                     data.command = 'transmit';
                     var t = storageCommands.getUID();
                     data.apdu = apdu2str(t);
                     break;
-                case 'getATS':
+                case 'pcsc_getATS':
                     data.command = 'transmit';
                     var t = storageCommands.getATS();
                     data.apdu = apdu2str(t);
@@ -408,6 +461,36 @@ define(function (require) {
                     var t = storageCommands.readBinary(cmd.reader, cmd.sector,cmd.block);
                     data.apdu = apdu2str(t);
                     break;
+                case 'readULpage':
+                    data.command = 'transmit';
+                    var t = storageCommands.readPage(cmd.reader, cmd.block);
+                    data.apdu = apdu2str(t);
+                    break;
+                case 'desfire_GetApplicationIDs':
+                    data.command = 'transmit';
+                    var t = desfireCommands.getApplicationIDs();
+                    data.apdu = apdu2str(t);
+                    break;
+                case 'desfire_SelectApplication':
+                    data.command = 'transmit';
+                    var t = desfireCommands.selectApplication(cmd.aid);
+                    data.apdu = apdu2str(t);
+                    break;
+                case 'desfire_DeleteApplication':
+                    data.command = 'transmit';
+                    var t = desfireCommands.deleteApplication(cmd.aid);
+                    data.apdu = apdu2str(t);
+                    break;
+                case 'desfire_GetKeySettings':
+                    data.command = 'transmit';
+                    var t = desfireCommands.getKeySettings();
+                    data.apdu = apdu2str(t);
+                    break;
+                case 'desfire_GetKeyVersion':
+                    data.command = 'transmit';
+                    var t = desfireCommands.getKeyVersion(cmd.key);
+                    data.apdu = apdu2str(t);
+                    break;
                 case 'connect':
                 case 'disconnect':
                     commandQueue.shift(); // Those commands don't reply on the 'format' channel
@@ -417,6 +500,7 @@ define(function (require) {
                     break;
             }
 
+            cmd.apdu = data.apdu; // Tell front-end what we sent.
             console.info('Sending command', data);
             if (data.command == 'transmit') {
                 // Do a bit of reformatting

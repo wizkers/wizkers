@@ -1,0 +1,19 @@
+#
+#    smartcard_list.txt
+#
+# This list contains a match between an ATR and a card type
+# The list is sorted for edition purposes
+#
+# This is a list of additional ATRs not present in the online version
+
+# syntax:
+# ATR in regular expression form
+# \t descriptive text
+# \t descriptive text
+# \t descriptive text
+# empty line
+
+3B 8E 80 01 43 61 72 64 61 78 20 44 65 73 66 69 72 65 48
+	Gallagher Desfire physical access control card
+
+# do not delete

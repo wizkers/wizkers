@@ -93,8 +93,11 @@ define(function(require) {
             available_utils.push('mifare_ul');
         } else if (desc.match(/mifare/i)) {
             available_utils.push('mifare');
+        } else if (desc.match(/model\s3/i)) {
+            available_utils.push('model3nfc');
+        } else if (desc.match(/Gallagher Desfire/i)) {
+            available_utils.push('desfire');
         }
-
     }
 
     /**
