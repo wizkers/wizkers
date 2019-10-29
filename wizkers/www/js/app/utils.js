@@ -39,6 +39,8 @@ define(function (require) {
 
     "use strict";
 
+//    var $ = require('jquery');
+
     return {
 
         // Returns an array with unique elements from an array

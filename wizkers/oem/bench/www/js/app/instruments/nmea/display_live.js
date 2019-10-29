@@ -46,6 +46,7 @@ define(function (require) {
             this.deviceinitdone = false;
             this.display_map = false;
             this.prnlist = {};
+            this.showstream = settings.get('showstream');
 
             if (vizapp.type == 'cordova') {
                 var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');

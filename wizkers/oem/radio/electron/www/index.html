@@ -3,13 +3,19 @@
 
 <head>
     <meta charset="utf-8">
-    <title>IMI Gateway</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wizkers:Radio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="E. Lafargue, edouard@lafargue.name">
 
+    <!-- Enable all requests  and inline-styles-->
+    <!-- All the Google URLs are required for making the Google Maps API work
+         on Phonegap javascript apps -->
+
+   <meta http-equiv="Content-Security-Policy" content="default-src * gap://ready file:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src * 'unsafe-inline' 'unsafe-eval'">
+
+
     <link href="css/bootstrap-material.css" rel="stylesheet" media="screen">
-    <!--<link href="css/magic-bootstrap.css" rel="stylesheet" media="screen">-->
     <style type="text/css">
         body {
             padding-top: 55px;
@@ -21,7 +27,7 @@
     <link href="css/cards-carousel.css" rel="stylesheet" />
     <link href="css/slider.css" rel="stylesheet" />
     <link href="css/styles.css" rel="stylesheet" />
-    <link href="css/medcom_styles.css" rel="stylesheet"> <!-- Apply my OEM styles last -->
+    <link href="css/radio-styles.css" rel="stylesheet" />
     <!-- Apply my own styles last ! -->
 
     <!-- Fav and touch icons -->
@@ -34,6 +40,7 @@
 </head>
 
 <body>
+
     <!-- Header contents loaded by the application (menubar) -->
     <div class="header"></div>
 
@@ -41,28 +48,17 @@
     <div class="container-fluid">
         <div class="row" id="content">
             <!-- The div below is where the application runs -->
-            <p style="text-align:center;">IMI Gateway</p>
-
+            <p style="text-align:center;">Wizkers:Radio Beta version</p>
+            <p>&nbsp;</p>
+            <img style="display: block; width: 30%; margin-left: auto; margin-right: auto;" src="img/tiger.png">
             <p style="text-align:center;">Loading...</p>
         </div>
     </div>
-    <footer class="navbar navbar-fixed-bottom" style="z-index: -100; opacity: 0.3;">
-        <div class="container-fluid" style="text-align:right;">
-            <br/>
-            <br/>&copy; Ed Lafargue 2013-2016 ed@wizkers.io</p>
-        </div>
-    </footer>
-    <script>
-var node_req = window.require;
-window.require = function(data) {
-    return (typeof data === 'string' ? node_req : window.requirejs).apply(window, arguments);
-}
-</script>
     <script data-main="js/main-chrome" src="js/lib/require.js"></script>
-    <div class="screen-xs visible-xs"></div>
-    <div class="screen-sm visible-sm"></div>
-    <div class="screen-md visible-md"></div>
-    <div class="screen-lg visible-lg"></div>
+        <div class="screen-xs visible-xs"></div>
+        <div class="screen-sm visible-sm"></div>
+        <div class="screen-md visible-md"></div>
+        <div class="screen-lg visible-lg"></div>
 
 </body>
 

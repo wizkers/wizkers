@@ -26,7 +26,7 @@
  * We now use require.js: these are the mappings of our application.
  *
  * This is the version of the require mappings that is used when compiling
- * for Chrome
+ * for NWJS
  *
  * @author Edouard Lafargue, ed@lafargue.name
  */
@@ -43,7 +43,7 @@ require.config({
 
         // Below we manage our versions explicitely, so that
         // we can upgrade easily
-        jquery: 'lib/jquery-3.3.1.min',
+        jquery: 'lib/jquery-2.2.4',
         backbone: 'lib/backbone-1.3.3',
         jquery_xmlrpc: 'lib/jquery.xmlrpc',
         jquery_mousewheel: 'lib/jquery.mousewheel',
@@ -52,7 +52,7 @@ require.config({
         pouchdb: 'lib/pouchdb-5.0.0',
         backbonepouch: 'lib/backbone-pouch',
         underscore: 'lib/underscore-1.8.3',
-        snap: 'lib/snap.svg-0.4.1',
+        snap: 'lib/snap.svg-0.5.1',
         text: 'lib/text',
         paper: 'lib/paperjs-v0.10.2/dist/paper-core',
 
@@ -70,7 +70,7 @@ require.config({
         peerjs: 'lib/peer-0.3.14',
         webrtc_adapter: 'lib/webrtc_adapter',
 
-        bootstrap: 'lib/bootstrap.min',
+        bootstrap: 'lib/bootstrap',
         bootstrapslider: 'lib/bootstrap-slider-2.0.0',
         bootstrapeditable: 'lib/bootstrap-editable',
         bootbox: 'lib/bootbox',
@@ -96,21 +96,18 @@ require.config({
             'connections/serial': 'app/connections/chromeSerial',
             'connections/tcp': 'app/connections/chromeTcpSerial',
             'connections/hid': 'app/connections/usbhid',
-            'connections/btle': 'app/connections/webBTLE',
+            'connections/btle': 'app/connections/btle',
             'connections/btspp': 'app/connections/cordovaBTSPP',
             'connections/webrtc': 'app/connections/webrtc',
             'connections/dummy': 'app/connections/dummy',
             'serialport': 'app/lib/serialport',
-        },
+        }
     },
 
     shim: {
         // Define Bootstrap's main JS, then all plugins which depend on it:
         'bootstrap': {
             deps: ['jquery']
-        },
-        'bootbox': {
-            deps: ['bootstrap']
         },
         'bootstrapslider': {
             deps: ['bootstrap']
@@ -155,9 +152,6 @@ require.config({
         },
         'flot_windrose': {
             deps: ['flot', 'flot_jumlib']
-        },
-        'flot_crosshair': {
-            deps: [ 'flot' ]
         }
     }
 });
@@ -176,19 +170,16 @@ var vizapp = {
 
 var router;
 
-
 require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings', 'app/instruments/instrumentmanager', 'app/linkmanager',
-         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle'], function ($, _, Backbone, Router, Settings, InstrumentManager,
+         'app/outputs/outputmanager', 'app/models/instrument', 'stats', 'ga_bundle' ], function ($, _, Backbone, Router, Settings, InstrumentManager,
     LinkManager, OutputManager, Instrument, Analytics) {
 
-    // Populate the standard MacOS menus:
-    // We need to check this because it just creates a crash on Windows
-    // if the "createmacBuiltin" is used there.
-    // if (navigator.platform.startsWith("Mac")) {
-    //     var m = new nw.Menu({type:"menubar"});
-    //     m.createMacBuiltin("IMI Gateway");
-    //     nw.Window.get().menu = m;
-    // }
+    window.$ = window.jQuery = $;
+
+        // Populate the standard MacOS menus:
+    // var m = new nw.Menu({type:"menubar"});
+    // m.createMacBuiltin("Wizkers:Radio");
+    // nw.Window.get().menu = m;
 
     // Initialize our Analytics object to get stats on app usage
     stats = new Analytics();
@@ -239,4 +230,5 @@ require(['jquery', 'underscore', 'backbone', 'app/router', 'app/models/settings'
             bootstrap_wizkers();
         }
     });
+
 });
