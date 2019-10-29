@@ -35,7 +35,7 @@
     "socket.io": "^2.1.0",
     "socketio-jwt": "latest",
     "underscore": "latest",
-    "underscore.string": "^2.4.0"
+    "underscore.string": "^3.3.5"
   },
   "engines": {
     "node": "0.10.33",
