@@ -54,6 +54,9 @@ define(function (require) {
             this.readerlist = [];
             this.currentReader = undefined;
 
+            this.utilities_list = [];
+            this.utilities = [];
+
             if (vizapp.type == 'cordova') {
                 var wz_settings = instrumentManager.getInstrument().get('wizkers_settings');
                 if (wz_settings) {
@@ -102,6 +105,18 @@ define(function (require) {
             $(window).on('resize', this.rsc);
             rsc();
 
+            // Now populate the list of available explorers:
+            var explorers = [
+                { text: "Mifare explorer", data: "mifare", nodes:[]},
+                { text: "Desfire explorer", data: "desfire", nodes:[]},
+                { text: "Calypso explorer", data: "calypso", nodes:[]}
+            ];
+            for (var i in explorers) {
+                this.utilities_list.push(explorers[i]);
+            }
+            this.$('#tool-list').treeview({ data:this.utilities_list});
+            this.$('#tool-list').on('nodeSelected', this.forceLoadExplorer.bind(this));
+
             linkManager.requestStatus();
             linkManager.getUniqueID(); // Actually gets the list of readers
             return this;
@@ -128,6 +143,7 @@ define(function (require) {
             // Empty the tab
             $(e.currentTarget).parent().parent().remove()
             this.$('#' + utility).remove();
+            this.utilities[utility].onClose();
             this.$('#utilities a:first').tab('show');
         },
 
@@ -138,6 +154,7 @@ define(function (require) {
                 return;
             var reader = this.$('#readers').treeview('getNode', data.parentId).text;
             this.currentReader = reader;
+            this.currentATR = data.text;
             this.formatAtr(reader, data.text);
             this.connectCard();
         },
@@ -151,7 +168,7 @@ define(function (require) {
         },
 
         apduSend: function() {
-            this.appendToResponse('\n-> ' + this.$('#apdu').val());
+            // this.appendToResponse('\n-> ' + this.$('#apdu').val());
             var apdu = this.$('#apdu').val().replace(/\s/g,'');
             if (apdu.length %2 != 0) {
                 this.appendToResponse("Error, byte string not an even number of characters\n");
@@ -186,7 +203,8 @@ define(function (require) {
                 var ut_names = {
                     mifare: 'Mifare',
                     mifare_ul: 'Mifare Ultralight',
-                    calypso: 'Calypso'
+                    calypso: 'Calypso',
+                    desfire: "Desfire"
                 }
                 for (var i = 0; i < atrinfo.utilities.length; i++) {
                     var un = atrinfo.utilities[i];
@@ -204,21 +222,48 @@ define(function (require) {
 
         },
 
+        forceLoadExplorer: function(event, data) {
+            var un = new Date().getTime() + data.data;
+            // Add a unique ID for the tab
+            this.$('#utilities').append('<li role="presentation"><a href="#' + un + '" role="tab" data-toggle="tab">' + data.text +
+                    '&nbsp;<span data-utility="' + un + '" class="glyphicon glyphicon-remove utility_close" aria-hidden="true"></span></a></li>'
+                    );
+                    this.$('#utilities_content').append('<div role="tabpanel" class="tab-pane active" id="' + un + '"></div>');
+                    $('#utilities a:last').tab('show');
+                    this.loadExplorer(data.data, un , this.currentReader, this.currentATR );
+                    $('#utilities a:first').tab('show');
+        },
+
         loadExplorer: function(explorer_name, divid, reader, atr) {
             var self = this;
             // For now, this is not completely dynamic, we don't have enough explorers to justify this
-            if (explorer_name == 'mifare') {
+            if (explorer_name == 'mifare' || explorer_name == 'mifare_ul') {
                 require(['app/instruments/pcsc/mifare_explorer'], function(view) {
                     var ex = new view({ currentReader: self.currentReader,
                                         parent: self});
                     self.$('#' + divid).append(ex.el);
+                    // Keep a reference to this utility to later on remove it cleanly
+                    self.utilities[divid] = ex;
                     ex.render(reader, atr);
-                 });     
-            } else if (explorer_name == 'mifare_ul') {
-                var tmp = ASN1('Gabuzo');
-
+                 });
+            } else if (explorer_name == 'desfire') {
+                require(['app/instruments/pcsc/desfire_explorer'], function(view) {
+                    var ex = new view({ currentReader: self.currentReader,
+                                        parent: self});
+                    self.$('#' + divid).append(ex.el);
+                    // Keep a reference to this utility to later on remove it cleanly
+                    self.utilities[divid] = ex;
+                    ex.render(reader, atr);
+                 });
             } else if (explorer_name == 'calypso') {
-
+                require(['app/instruments/pcsc/calypso_explorer'], function(view) {
+                    var ex = new view({ currentReader: self.currentReader,
+                                        parent: self});
+                    self.$('#' + divid).append(ex.el);
+                    // Keep a reference to this utility to later on remove it cleanly
+                    self.utilities[divid] = ex;
+                    ex.render(reader, atr);
+                });
             } else if (explorer_name == 'pkcs15') {
 
             } else {
@@ -258,10 +303,14 @@ define(function (require) {
                 return;
             }
 
+            if (data.command && data.command.apdu) {
+                this.appendToResponse('\n-> ' + data.command.apdu);
+            }
+
             if (data.data) {
-                this.appendToResponse('\n' + data.data);
+                this.appendToResponse('\n<- ' + data.data);
                 if (data.sw1sw2) {
-                    this.appendToResponse('\n' + data.sw1sw2);                    
+                    this.appendToResponse(' - ' + data.sw1sw2);
                 }
                 if (data.data.substr(-4) == "9000" ||
                     data.data.length > 4) { // That second check because some cards (JCOP) can return other
@@ -326,7 +375,7 @@ define(function (require) {
 
             if (data.error) {
                 // Bubble up low level communication errors that happened on APDU operations
-                this.appendToResponse(data.error);
+                this.appendToResponse('\n' +  data.error);
             }
             console.log('Data', data);
 

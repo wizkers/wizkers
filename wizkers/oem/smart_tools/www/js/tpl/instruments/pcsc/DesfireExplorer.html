@@ -1,0 +1,72 @@
+<div class="row" style="padding-top:10px">
+    <div class="col-md-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <button class="btn btn-info btn-sm" id="desfire-info">Get Card info</button>
+                <button class="btn btn-info btn-sm" id="aid-list">AID list</button>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="readertree" id="memmap" style="max-height:310px; overflow-y:scroll;">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h5>Contents</h5>
+                <div id="hexdump">
+                    <p>Notes: Authentication is not supported yet, you can only browse data that is open on the cards.</p>
+                    <p>Pres "Get Card Info" to get started.</p>
+                </div>
+            </div>
+        </div>            
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Key A</span>
+                    <input type="text" id="keyA" class="form-control" placeholder="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" >
+                </div>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Key B</span>
+                    <input type="text" id="keyB" class="form-control" placeholder="00000000000000000000000000000000" >
+                </div>                                          
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Key C</span>
+                    <input type="text" id="keyC" class="form-control" placeholder="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" >
+                </div>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Key D</span>
+                    <input type="text" id="keyD" class="form-control" placeholder="00000000000000000000000000000000" >
+                </div>                                          
+            </div>
+        </div>            
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table class="table">
+                    <tr><th>Crypto</th><th>Required key length</th></tr>
+                    <tr><td>DES</td><td>8</td></tr>
+                    <tr><td>3K3DES</td><td>24</td></tr>
+                    <tr><td>AES</td><td>16</td></tr>
+                </table>
+            </div>
+        </div>        
+    </div>
+</div>
+    
