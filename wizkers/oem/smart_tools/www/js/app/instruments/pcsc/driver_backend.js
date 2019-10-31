@@ -291,7 +291,7 @@ define(function (require) {
 
         // data has to be a hex string
         // Relies on good state of auth_ivect and auth_keyval
-        var encipher_data = function(data) {
+        var encipher_data_aes = function(data) {
             var enc = CryptoJS.AES.encrypt(CryptoJS.enc.Hex.parse(data),auth_keyval,{ mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.NoPadding, iv: CryptoJS.enc.Hex.parse(auth_ivect) }).ciphertext.toString();
             auth_ivect = enc.slice(-32); // Last block of 16 bytes
             return enc;
@@ -310,7 +310,7 @@ define(function (require) {
 
         // Needs auth_ivect to be initialized, as well as auth_keyval
         // 
-        var decipher_data = function(data) {
+        var decipher_data_aes = function(data) {
             var block_size = auth_keyval.toString().length;
             debug('Block size', block_size);
             var r = new RegExp(".{1,"+block_size+"}","g")
@@ -378,7 +378,7 @@ define(function (require) {
                     var challenge = datastr.substring(0, datastr.length - 4);
                     debug('Encrypted challenge', challenge);
                     // Step 1: decipher the challenge w/ the auth key (decChallenge is a hex string)
-                    var decChallenge = decipher_data(challenge);
+                    var decChallenge = decipher_data_aes(challenge);
                     debug('Decrypted challenge', decChallenge);
                     auth_RndB = decChallenge;
                     var rotChallenge = decChallenge.substring(2,decChallenge.length) + decChallenge.substring(0,2);
@@ -389,7 +389,7 @@ define(function (require) {
                     var response = ourChallenge + rotChallenge;
                     debug('RndA + RndB\'       ', response);
                     // Step 3: encipher the response
-                    var encResponse = encipher_data(response);
+                    var encResponse = encipher_data_aes(response);
                     // var encResponse = CryptoJS.AES.encrypt(CryptoJS.enc.Hex.parse(response),auth_keyval,{ mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.NoPadding, iv: CryptoJS.enc.Hex.parse(challenge.ciphertext.toString()) }).ciphertext.toString();
                     debug('Response           ', encResponse);
                     // // TODO: save our iVect: it _should_ be the last encrypted block (last 16 bytes) of response
@@ -410,12 +410,10 @@ define(function (require) {
                     command: cmd } );
 
                 } else {
-                    // var response = CryptoJS.lib.CipherParams.create({ ciphertext: CryptoJS.enc.Hex.parse(datastr.substring(0, datastr.length - 4))});
-                    // debug('Encrypted response', response.ciphertext.toString());
-                    // // Step 1: decrypt the response
-                    // var decResponse = CryptoJS.AES.decrypt(response,auth_keyval,{ mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.NoPadding, iv: CryptoJS.enc.Hex.parse(auth_ivect) }).toString();
                     var response = datastr.substring(0, datastr.length - 4);
-                    var decResponse = decipher_data(response);
+                    debug('Encrypted response', response);
+                    // Step 1: decrypt the response
+                    var decResponse = decipher_data_aes(response);
                     decResponse = decResponse.slice(-2) + decResponse.slice(0,-2); // Rotate the response back
                     debug('Decrypted response', decResponse);
                     debug('ivect             ', auth_ivect);
@@ -427,6 +425,10 @@ define(function (require) {
                         self.trigger('data', { data: '', 
                             sw1sw2: 'Authentication success',
                             command: cmd } );
+                        // Last: save our session key
+                        // AES session key := RndA byte 0..3 + RndB byte 0..3 + RndA byte 12..15 + RndB byte 12..15
+                        auth_keysession = auth_RndA.substring(0,8) + auth_RndB.substring(0,8) + auth_RndA.substring(24) + auth_RndB.substring(24);
+                        debug('Session key', auth_keysession, 'length:', auth_keysession.length);
                     } else {
                         self.trigger('data', { data: '', 
                             sw1sw2: 'Authentication fail',
@@ -506,8 +508,12 @@ define(function (require) {
          * Format a json APDU into a hex string
          */
         var apdu2str = function(apdu) {
-            return apdu.cla + apdu.ins + apdu.p1 + apdu.p2 +
-                      apdu.lc + apdu.data + apdu.le;
+            try {
+                return apdu.cla + apdu.ins + apdu.p1 + apdu.p2 +
+                        apdu.lc + apdu.data + apdu.le;
+            } catch (e) {
+                return '';
+            }
         }
 
         var openPort_server = function(insid) {
@@ -615,6 +621,11 @@ define(function (require) {
                 case 'desfire_GetKeyVersion':
                     data.command = 'transmit';
                     var t = desfireCommands.getKeyVersion(cmd.key);
+                    data.apdu = apdu2str(t);
+                    break;
+                case 'desfire_createApplication':
+                    data.command = 'transmit';
+                    var t = desfireCommands.createApplication(cmd.aid, cmd.keysettings1, cmd.keysettings2);
                     data.apdu = apdu2str(t);
                     break;
                 case 'desfire_AESAuthenticate':

@@ -88,4 +88,83 @@
         </div>        
     </div>
 </div>
-    
+
+<!-- Preconfigured modals for various operations -->
+<div class="container">
+    <div id="appCreateModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="myModalLabel">Create application</h3>
+                </div>
+                <div class="modal-body">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-addon">Application AID</span>
+                            <input  id="applicationAID" placeholder="000000" type="text" class="form-control" maxlength="6"></p>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-addon">Key change key</span>
+                            <select class="form-control" id="keyChangeKey">
+                                <option value="0">PICC Master</option>
+                                <option value="1">Key 1</option>
+                                <option value="2">Key 2</option>
+                                <option value="3">Key 3</option>
+                                <option value="4">Key 4</option>
+                                <option value="5">Key 5</option>
+                                <option value="6">Key 6</option>
+                                <option value="7">Key 7</option>
+                                <option value="8">Key 8</option>
+                                <option value="9">Key 9</option>
+                                <option value="10">Key 10</option>
+                                <option value="11">Key 11</option>
+                                <option value="12">Key 12</option>
+                                <option value="13">Key 13</option>
+                                <option value="14">Same key</option>
+                                <option value="15">Keys Frozen</option>
+                            </select>                
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-addon">
+                                <input type="checkbox" id="configChange" checked>
+                            </span>
+                            <span class="form-control">Config changeable with application master key</span>
+                        </div>    
+                        <div class="input-group input-group-sm">
+                                <span class="input-group-addon">
+                                    <input type="checkbox" id="createDelete" checked>
+                                </span>
+                                <span class="form-control">Create/Delete file without application master key</span>
+                        </div>
+                        <div class="input-group input-group-sm">
+                                <span class="input-group-addon">
+                                    <input type="checkbox" id="directoryList" checked>
+                                </span>
+                                <span class="form-control">Directory list access without application master key</span>
+                        </div>
+                        <div class="input-group input-group-sm">
+                                <span class="input-group-addon">
+                                    <input type="checkbox" id="masterKeyChange" checked>
+                                </span>
+                                <span class="form-control">Allow change master key</span>
+                        </div>
+                        <div class="input-group input-group-sm">
+                                <span class="input-group-addon">Number of keys</span>
+                                <input  id="keysInApp" value="1" type="number" min="1" max="14" class="form-control"></p>
+                        </div>
+                        <div class="input-group input-group-sm">
+                                <span class="input-group-addon">Key algorithm</span>
+                                <select class="form-control" id="keyAlgo">
+                                    <option value="0">DES/2KDES</option>
+                                    <option value="1">3KDES</option>
+                                    <option value="2">AES</option>
+                                </select>                
+                        </div>
+                        <div class="modal-footer">
+                    <button class="btn btn-primary" id="desfire-createapp2">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        
+        

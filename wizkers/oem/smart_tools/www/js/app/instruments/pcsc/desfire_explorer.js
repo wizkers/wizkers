@@ -100,7 +100,10 @@ define(function (require) {
             'click #desfire-info': 'getCardInfo',
             'click #aid-list': 'requestAIDs',
             'click #desfire-deleteapp': 'deleteApp',
-            'click #key0Auth' : 'keyAuth'
+            'click #desfire-createapp': 'createApp',
+            'click #desfire-createapp2': 'createApp2',
+            'click #key0Auth' : 'keyAuth',
+            'change #key0': 'updateUsableKeys'
         },
 
         render: function (reader, atr) {
@@ -135,6 +138,42 @@ define(function (require) {
                 }
             });
             return false; // stop propagation
+        },
+
+        createApp: function() {
+            this.$('#appCreateModal').modal('show');
+        },
+
+        createApp2: function() {
+            var aid = this.$('#applicationAID').val();
+            var kck = parseInt(this.$('#keyChangeKey').val());
+            var cch = this.$('#configChange').prop('checked');
+            var cdl = this.$('#createDelete').prop('checked');
+            var dir = this.$('#directoryList').prop('checked');
+            var mch = this.$('#masterKeyChange').prop('checked');
+
+            var keySettings1 = kck << 4;
+            if (cch) keySettings1 |= 0b1000;
+            if (cdl) keySettings1 |= 0b0100;
+            if (dir) keySettings1 |= 0b0010;
+            if (mch) keySettings1 |= 0b0001;
+            console.log('Key settings 1', keySettings1.toString(2));
+
+            var knb = parseInt(this.$('#keysInApp').val());
+            var kal = parseInt(this.$('#keyAlgo').val());
+            var keySettings2 = knb;
+            keySettings2 |= kal << 6;
+            console.log('Key settings 2', keySettings2.toString(2));
+
+            // Note: we don't support ISO file ID / DF name for now, maybe later ?
+            linkManager.sendCommand({
+                command:'desfire_createApplication',
+                reader: this.currentReader,
+                aid: aid,
+                keysettings1: keySettings1,
+                keysettings2: keySettings2
+            });
+
         },
 
         requestAIDs: function() {
@@ -370,7 +409,6 @@ define(function (require) {
 
         },
 
-
         // Parse file info and also trigger file content read if possible
         parseFileInfo: function(data) {
             var c = "<b>File information</b></br>";
@@ -440,6 +478,16 @@ define(function (require) {
             }
 
             if (data.command) {
+                if( data.command.command == 'desfire_createApplication') {
+                    if (data.data.slice(-4) != "9100") {
+                        this.$('#desfire-createapp2').addClass('btn-danger');
+                        return;
+                    } else {
+                        // Success! Close the dialog and refresh AIDs
+                        this.$('#appCreateModal').modal('hide');
+                        this.requestAIDs();
+                    }
+                }
                 if (data.command.command == 'loadkey') {
                     if (data.data == "9000") {
                         this.$('#key' + data.command.keyname).css('background-color', '#d9eeda');

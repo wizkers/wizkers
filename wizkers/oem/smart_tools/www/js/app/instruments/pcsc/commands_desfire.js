@@ -97,7 +97,28 @@ define(function (require) {
             return apdu;
         }
 
+        // aid : hex string
+        // keysettings 1/2 : number
+        this.createApplication = function(aid, keysettings1, keysettings2) {
+            if (aid.length != 6)
+                return;
+            if (keysettings1 > 255 || keysettings2 > 255)
+                return;
+            var apdu = {
+                cla: "90",
+                ins: "CA",
+                p1: "00",
+                p2: "00",
+                lc: "05",
+                data: aid + ("00" + keysettings1.toString(16)).slice(-2) + ("00" + keysettings2.toString(16)).slice(-2),
+                le: "00"
+            };
+            return apdu;
+        }
+
         this.deleteApplication = function(aid) {
+            if (aid.length != 6)
+                return;
             var apdu = {
                 cla: "90",
                 ins: "DA",
