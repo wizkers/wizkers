@@ -31,19 +31,28 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
     var vizapp = { type: 'server'},
-    events = require('events');
+    events = require('events'),
+    crypto = require('crypto');
+
 }
 
 define(function (require) {
     "use strict";
+    
 
     var desfireCommands = function (driver) {
 
-        /////////////
-        // Private methods
-        /////////////
-
         var self = this;
+
+// Crypto functions
+        this.encipher = function() {
+
+        }
+
+        this.decipher = function () {
+
+        }
+
 
         /* Gets the card application IDs
          * 906A000000
@@ -129,6 +138,36 @@ define(function (require) {
                 le: "00"
             };
             return apdu;
+        }
+
+        this.requestAESAuth = function(keynum) {
+            var apdu = {
+                cla: "90",
+                ins: "AA",
+                p1: "00",
+                p2: "00",
+                lc: "01",
+                data: ("00" + keynum.toString(16)).slice(-2),
+                le: "00"
+            };
+            return apdu;
+        }
+
+        // resp is a 32 byte ( 64 hex characters) string
+        this.replyAESAuth = function(resp) {
+            if (resp.length != 64)
+                console.error("Wrong response for AES Authentication");
+            var apdu = {
+                cla: "90",
+                ins: "AF",
+                p1: "00",
+                p2: "00",
+                lc: "20",
+                data: resp.toUpperCase(),
+                le: "00"
+            };
+            return apdu;
+
         }
 
 

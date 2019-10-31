@@ -38,6 +38,7 @@ if (typeof define !== 'function') {
     events = require('events'),
     abutils = require('app/lib/abutils'),
     dbs = require('pouch-config');
+    crypto = require('crypto');
 }
 
 define(function (require) {
@@ -75,6 +76,18 @@ define(function (require) {
         var commandQueue = [],
         queue_busy = false,
         wd = null;
+
+        // Variables related to authentication.
+        // We can only be authenticated with one key at at time
+        var AUTH = { IDLE:0, CHAL:1, RESP: 2, EST: 3};
+        var CIPHER = { ToPICC: 0, FromPICC: 1, Encrypt: 2, Decrypt: 3};
+        var auth_keynum =0,
+            auth_keyval = '',
+            auth_RndA = '',
+            auth_RndB =  '',
+            auth_ivect = '',
+            auth_keysession = '',
+            auth_state = AUTH.IDLE;
 
         // Great big table of return codes
         // Check https://www.eftlab.co.uk/index.php/site-map/knowledge-base/118-apdu-response-list
@@ -276,22 +289,52 @@ define(function (require) {
             return r;
         }
 
+        // data has to be a hex string
+        // Relies on good state of auth_ivect and auth_keyval
+        var encipher_data = function(data) {
+            var enc = CryptoJS.AES.encrypt(CryptoJS.enc.Hex.parse(data),auth_keyval,{ mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.NoPadding, iv: CryptoJS.enc.Hex.parse(auth_ivect) }).ciphertext.toString();
+            auth_ivect = enc.slice(-32); // Last block of 16 bytes
+            return enc;
+        }
+
+        // XOR two hex strings. Slow.
+        var xor = function(str1, str2) {
+            var c = '';
+            for(var i = 0; i < str1.length; i+=2) {
+                var s1 = parseInt(str1.substring(i,i+2),16);
+                var s2 = parseInt(str2.substring(i,i+2),16);
+                c += ("00" + (s1 ^ s2).toString(16)).slice(-2);
+            }
+            return c;
+        }
+
+        // Needs auth_ivect to be initialized, as well as auth_keyval
+        // 
+        var decipher_data = function(data) {
+            var block_size = auth_keyval.toString().length;
+            debug('Block size', block_size);
+            var r = new RegExp(".{1,"+block_size+"}","g")
+            var blocks = data.match(r);
+            var res = '';
+            for (var i in blocks) {
+                var d = blocks[i];
+                var ovect = d;
+                var ct = CryptoJS.lib.CipherParams.create({ ciphertext: CryptoJS.enc.Hex.parse(d)});
+                // Note: ZeroPadding might not work 100% with Desfire spec, to be verified
+                var dec = CryptoJS.AES.decrypt(ct,auth_keyval,{ mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.ZeroPadding}).toString();
+                res += xor(dec, auth_ivect);
+                auth_ivect = ovect;
+            }
+            return res;
+        }
+
+
         // Format can act on incoming data from the PC/CS layer, and then
         // forwards the data to the app
         var format = function (data) {
             clearTimeout(wd);
             var cmd = commandQueue.shift();
             console.info('Done with command', cmd);
-
-            // Some commands require processing on the driver side, in particular this is
-            // where we implement all the crypto. This is debatable, since this means that
-            // we end up sending decrypted plaintext data between the server and the browser
-            // but this would best be addresses with encrypted communications between the
-            // server and the browser, rather than do DES or AES in the browser. to be
-            // continued...
-            if (cmd.command == 'desfire_AuthenticateAES') {
-                debug('Reply to AUthenticateAES');
-            }
 
             // Transform the data into a hex string (it's a buffer when it comes in)
             var datastr = abutils.ui8tohex(new Uint8Array(data.resp));
@@ -309,6 +352,89 @@ define(function (require) {
                                     command: cmd } );
             }
             queue_busy = false;
+
+            // Some commands require processing on the driver side, in particular this is
+            // where we implement all the crypto. This is debatable, since this means that
+            // we end up sending decrypted plaintext data between the server and the browser
+            // but this would best be addresses with encrypted communications between the
+            // server and the browser, rather than do DES or AES in the browser. to be
+            // continued...
+            if (cmd.command == 'desfire_AESAuthenticate') {
+                cmd.key = auth_keynum; // Needed by frontend to understand what's going on
+                debug('Reply to AESAuthenticate');
+                if (datastr.slice(-4) != "91af") {
+                    debug("Error, did not receive expected response");
+                    self.trigger('data', { data: '', 
+                    sw1sw2: 'Authentication fail',
+                    command: cmd } );
+                } else {
+                    auth_ivect = "00000000000000000000000000000000";
+                    // var challenge = CryptoJS.lib.CipherParams.create({ ciphertext: CryptoJS.enc.Hex.parse(datastr.substring(0, datastr.length - 4))});
+                    // debug('Encrypted challenge', challenge.ciphertext.toString());
+                    // // Step 1: decipher the challenge w/ the auth key (decChallenge is a hex string)
+                    // var decChallenge = CryptoJS.AES.decrypt(challenge,auth_keyval,{ mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.NoPadding, iv: CryptoJS.enc.Hex.parse(auth_ivect) }).toString();
+                    // auth_ivect = CryptoJS.enc.Hex.parse(challenge.ciphertext.toString());
+                    // debug('Decrypted challenge', decChallenge);
+                    var challenge = datastr.substring(0, datastr.length - 4);
+                    debug('Encrypted challenge', challenge);
+                    // Step 1: decipher the challenge w/ the auth key (decChallenge is a hex string)
+                    var decChallenge = decipher_data(challenge);
+                    debug('Decrypted challenge', decChallenge);
+                    auth_RndB = decChallenge;
+                    var rotChallenge = decChallenge.substring(2,decChallenge.length) + decChallenge.substring(0,2);
+                    debug('Rotated   challenge', rotChallenge);
+                    // Step 2: add our own random challenge 
+                    var ourChallenge = crypto.randomBytes(16).toString('hex'); // NOTE: on browser-side, woudl have to use 'crypto.getRandomValue(new Uint8Array(16))
+                    auth_RndA = ourChallenge;
+                    var response = ourChallenge + rotChallenge;
+                    debug('RndA + RndB\'       ', response);
+                    // Step 3: encipher the response
+                    var encResponse = encipher_data(response);
+                    // var encResponse = CryptoJS.AES.encrypt(CryptoJS.enc.Hex.parse(response),auth_keyval,{ mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.NoPadding, iv: CryptoJS.enc.Hex.parse(challenge.ciphertext.toString()) }).ciphertext.toString();
+                    debug('Response           ', encResponse);
+                    // // TODO: save our iVect: it _should_ be the last encrypted block (last 16 bytes) of response
+                    // auth_ivect = encResponse.substring(32);
+                    self.output({
+                        reader: cmd.reader,
+                        command: 'desfire_AESAuthenticate_Response',
+                        r: encResponse
+                    });
+                }
+            } else if (cmd.command == 'desfire_AESAuthenticate_Response') {
+                cmd.key = auth_keynum; // Needed by frontend to understand what's going on
+                debug("Last phase of AES Authenticate");
+                if (datastr.slice(-4) != "9100") {
+                    debug("Error, did not receive expected response");
+                    self.trigger('data', { data: '', 
+                    sw1sw2: 'Authentication fail',
+                    command: cmd } );
+
+                } else {
+                    // var response = CryptoJS.lib.CipherParams.create({ ciphertext: CryptoJS.enc.Hex.parse(datastr.substring(0, datastr.length - 4))});
+                    // debug('Encrypted response', response.ciphertext.toString());
+                    // // Step 1: decrypt the response
+                    // var decResponse = CryptoJS.AES.decrypt(response,auth_keyval,{ mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.NoPadding, iv: CryptoJS.enc.Hex.parse(auth_ivect) }).toString();
+                    var response = datastr.substring(0, datastr.length - 4);
+                    var decResponse = decipher_data(response);
+                    decResponse = decResponse.slice(-2) + decResponse.slice(0,-2); // Rotate the response back
+                    debug('Decrypted response', decResponse);
+                    debug('ivect             ', auth_ivect);
+                    debug('Our RndA          ', auth_RndA);
+                    // Step 2: check that the decrypted response matches our RndA
+                    delete cmd.r;
+                    delete cmd.apdu;
+                    if (decResponse == auth_RndA) {
+                        self.trigger('data', { data: '', 
+                            sw1sw2: 'Authentication success',
+                            command: cmd } );
+                    } else {
+                        self.trigger('data', { data: '', 
+                            sw1sw2: 'Authentication fail',
+                            command: cmd } );
+                    }
+                }
+            }
+
             // If we have commands left in the queue, now is the time to process them
             if (commandQueue.length) {
                 processQueue();
@@ -489,6 +615,21 @@ define(function (require) {
                 case 'desfire_GetKeyVersion':
                     data.command = 'transmit';
                     var t = desfireCommands.getKeyVersion(cmd.key);
+                    data.apdu = apdu2str(t);
+                    break;
+                case 'desfire_AESAuthenticate':
+                    // Track our auth state
+                    auth_keynum = cmd.key;
+                    auth_keyval = CryptoJS.enc.Hex.parse(cmd.keyval);
+                    debug('Initializing AES crypto', auth_keynum, auth_keyval);
+                    cmd.keyval = '<hidden>';
+                    data.command = 'transmit';
+                    var t = desfireCommands.requestAESAuth(cmd.key);
+                    data.apdu = apdu2str(t);
+                    break;
+                case 'desfire_AESAuthenticate_Response':
+                    data.command = 'transmit';
+                    var t = desfireCommands.replyAESAuth(cmd.r);
                     data.apdu = apdu2str(t);
                     break;
                 case 'connect':

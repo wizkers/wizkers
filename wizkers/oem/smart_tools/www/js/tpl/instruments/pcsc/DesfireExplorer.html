@@ -30,13 +30,19 @@
         <div class="panel panel-default">
             <div class="panel-body">
                 <div class="input-group input-group-sm">
-                    <span class="input-group-addon">Key A</span>
-                    <input type="text" id="keyA" class="form-control" placeholder="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" >
+                    <span class="input-group-addon">Key 0</span>
+                    <input type="text" id="key0" class="form-control" placeholder="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" >
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" id="key0Auth" type="button">Auth</button>
+                    </span>
                 </div>
                 <div class="input-group input-group-sm">
-                    <span class="input-group-addon">Key B</span>
-                    <input type="text" id="keyB" class="form-control" placeholder="00000000000000000000000000000000" >
-                </div>                                          
+                    <span class="input-group-addon">Key 1</span>
+                    <input type="text" id="key1" class="form-control" placeholder="00000000000000000000000000000000" >
+                    <span class="input-group-btn">
+                            <button class="btn btn-default" id="key1Auth" type="button">Auth</button>
+                        </span>
+                    </div>                                          
             </div>
         </div>
     </div>
@@ -44,13 +50,26 @@
         <div class="panel panel-default">
             <div class="panel-body">
                 <div class="input-group input-group-sm">
-                    <span class="input-group-addon">Key C</span>
-                    <input type="text" id="keyC" class="form-control" placeholder="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" >
-                </div>
+                    <span class="input-group-addon">Key 2</span>
+                    <input type="text" id="key2" class="form-control" placeholder="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" >
+                    <span class="input-group-btn">
+                            <button class="btn btn-default" id="key2Auth" type="button">Auth</button>
+                        </span>
+                    </div>
                 <div class="input-group input-group-sm">
-                    <span class="input-group-addon">Key D</span>
-                    <input type="text" id="keyD" class="form-control" placeholder="00000000000000000000000000000000" >
-                </div>                                          
+                    <span class="input-group-addon">Key 3</span>
+                    <input type="text" id="key3" class="form-control" placeholder="00000000000000000000000000000000" >
+                    <span class="input-group-btn">
+                            <button class="btn btn-default" id="key3Auth" type="button">Auth</button>
+                        </span>
+                    </div>                                          
+            </div>
+        </div>            
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Note: up to 14 keys could be defined, but we only support 0-3 for now, more keys are rarely used...
             </div>
         </div>            
     </div>

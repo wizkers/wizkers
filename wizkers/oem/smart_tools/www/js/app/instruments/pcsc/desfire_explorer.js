@@ -46,6 +46,7 @@ define(function (require) {
 
     var knownAIDs = {
         "000000": "PICC Master application",
+        "010000": "NDEF Application",
         "FFFFFF": "General Issuer Info",
         "5354FF": "Identiv TS access control",
         "F48120": "Gallagher access control",
@@ -60,7 +61,25 @@ define(function (require) {
         "F48129": "Gallagher access control",
         "F4812A": "Gallagher access control",
         "F4812B": "Gallagher access control",
-        "F4812F": "Gallagher Card Application Directory"
+        "F4812F": "Gallagher Card Application Directory",
+        // See NXP AN10957 for details
+        "F531C0": "Siemens access control",
+        "F532F0": "Generic physical access control",
+        "F532F1": "Generic physical access control",
+        "F532F2": "Generic physical access control",
+        "F532F3": "Generic physical access control",
+        "F532F4": "Generic physical access control",
+        "F532F5": "Generic physical access control",
+        "F532F6": "Generic physical access control",
+        "F532F7": "Generic physical access control",
+        "F532F8": "Generic physical access control",
+        "F532F9": "Generic physical access control",
+        "F532FA": "Generic physical access control",
+        "F532FB": "Generic physical access control",
+        "F532FC": "Generic physical access control",
+        "F532FD": "Generic physical access control",
+        "F532FE": "Generic physical access control",
+        "F532FF": "Generic physical access control"
     };
 
     return Backbone.View.extend({
@@ -73,25 +92,37 @@ define(function (require) {
             this.tree = {};
             this.currentAID = null;
             this.currentFile = null;
+            this.cryptoType = 0;
             linkManager.on('input', this.showInput, this);
         },
 
         events: {
-            'click #loadKeyA': 'loadKeyA',
-            'click #loadKeyB': 'loadKeyB',
             'click #desfire-info': 'getCardInfo',
             'click #aid-list': 'requestAIDs',
-            'click #desfire-deleteapp': 'deleteApp'
+            'click #desfire-deleteapp': 'deleteApp',
+            'click #key0Auth' : 'keyAuth'
         },
 
         render: function (reader, atr) {
-            var self = this;
             this.atr = abutils.ui8tohex(new Uint8Array(atr)).toUpperCase();;
             console.log('Main render of Desfire explorer');
             console.log(atr);
             this.$el.html(template());
             this.reader = reader;
             return this;
+        },
+
+        keyAuth: function(event) {
+            var keys = [ "key0Auth", "key1Auth", "key2Auth", "key3Auth"];
+            var keyvals = [ "key0", "key1", "key2", "key3"];
+            var keyval = this.$("#" + keyvals[keys.indexOf(event.target.id)]).val();
+
+            linkManager.sendCommand({ command:'desfire_AESAuthenticate',
+                reader: this.currentReader,
+                crytoType: this.cryptoType,
+                key: keys.indexOf(event.target.id),
+                keyval: keyval
+            });
         },
 
         deleteApp: function (event) {
@@ -111,7 +142,8 @@ define(function (require) {
             // on it
             linkManager.sendCommand({ command:'desfire_SelectApplication', 
                 reader: this.currentReader,
-                aid: "000000"
+                aid: "000000",
+                dontgetfids: true
             });
 
             linkManager.sendCommand({ command:'desfire_GetApplicationIDs', 
@@ -266,11 +298,35 @@ define(function (require) {
             this.cryptoType = d[1] >>6; // Save if we want to authenticate later on
             this.updateUsableKeys();
 
-            c += "<br>";
-            c += ( d[0] & 0b0001) ? "Master key can be changed<br>" : "Master key cannot be changed<br>";
-            c += ( d[0] & 0b0010) ? "Master key not required for directory list<br>" : "Master key required for directory list<br>";
-            c += ( d[0] & 0b0100) ? "Master key not required for create/delete<br>" : "Master key required for create/delete<br>";
-            c += ( d[0] & 0b1000) ? "Key configuration changeable<br>" : "Key configuration not changeable<br>";
+            c += "<br>Key settings value: 0x" + d[0].toString(16) + "<br>";
+            if (this.currentAID != "000000") {
+                // Bits 5 to 7 are only meaningful for AID != 0x00
+                switch (d[0] & 0xb11110000) {
+                    case 0x0:
+                        c += "Application master key authentication is necessary to change any key (default)";
+                        break;
+                    case 0xe:
+                        c += "Authentication with the key to be changed (same KeyNo) is necessary to change a key";
+                        break;
+                    case 0xf:
+                        c += "All keys (except application master key, see \"configuration changeable below\") within this application are frozen";
+                        break;
+                    default:
+                        c += "Authentication with key 0x" + (d[0] & 0xb11110000).toString() + " is necessary to change any key. Master key and key 0x"
+                        + (d[0] & 0xb11110000).toString() + " can only be changed after master key auythentication";
+                        break;
+                }
+                c += "<br>";
+            }
+
+            this.currentAID == "000000" ? c += "PICC" : "Application";
+            c += ( d[0] & 0b0001) ? " Master key can be changed<br>" : " Master key cannot be changed<br>";
+            this.currentAID == "000000" ? c += "PICC" : "Application";
+            c += ( d[0] & 0b0010) ? " Master key not required for directory list<br>" : " Master key required for directory list<br>";
+            this.currentAID == "000000" ? c += "PICC" : "Application";
+            c += ( d[0] & 0b0100) ? " Master key not required for create/delete " : " Master key required for create/delete ";
+            this.currentAID == "000000" ? c += "applications<br>" : "files<br>";
+            c += ( d[0] & 0b1000) ? "Key configuration changeable if authenticated by " + (this.currentAID == "000000" ? "PICC" : "Application") + " master key" : "Key configuration not changeable (frozen)<br>";
             c += "<div id=\"keyvers\"></div>";
 
             this.$('#hexdump').html(c);
@@ -289,7 +345,7 @@ define(function (require) {
         updateUsableKeys: function() {
             // Loop over all our key slots, and color the ones that can be used for the current required crypto
             // in the right color
-            var slots = ['#keyA', '#keyB', '#keyC', '#keyD'];
+            var slots = ['#key0', '#key1', '#key2', '#key3'];
             for (var key in slots) {
                 var slot = this.$(slots[key]);
                 var val = slot.val();
@@ -419,7 +475,7 @@ define(function (require) {
                     }
                     this.currentAID = data.command.aid;
                     // Populate info about the AID
-                    if (data.command.dontgetfids == undefined)
+                    if (data.command.dontgetfids == undefined) {
                         // Ask to get the key settings for that application
                         linkManager.sendCommand({ command: 'desfire_GetKeySettings',
                             reader: this.currentReader,
@@ -430,6 +486,7 @@ define(function (require) {
                             aid: data.command.aid,
                             apdu: "906F000000"
                         });
+                    }
                 }
                 if (data.command.command == 'desfire_GetKeySettings') {
                     if (data.data.slice(-4) != "9100") {
@@ -445,7 +502,9 @@ define(function (require) {
                         return;
                     }
                     var c  = this.$('#keyvers').html();
-                    c += "<br>Key " + data.command.key + " version:" + parseInt(data.data.substr(0,2), 16);
+                    c += "<br>Key " + data.command.key;
+                    (data.command.key == 0) ? c += " (Master key)" : "";
+                    c +=  " version:" + parseInt(data.data.substr(0,2), 16);
                     this.$('#keyvers').html(c);
                 }
 
@@ -498,6 +557,13 @@ define(function (require) {
                     this.currentFile = data.command.fid;
                     this.parseFileInfo(data.data);
 
+                }
+                if (data.command.command == 'desfire_AESAuthenticate_Response') {
+                    if (data.sw1sw2 && data.sw1sw2 == 'Authentication success') {
+                        this.$('#key' + data.command.key + 'Auth').addClass('btn-success').removeClass('btn-danger');
+                    } else {
+                        this.$('#key' + data.command.key + 'Auth').addClass('btn-danger').removeClass('btn-success');
+                    }
                 }
             }
 
