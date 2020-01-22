@@ -224,6 +224,7 @@ define(function (require) {
 
         forceLoadExplorer: function(event, data) {
             var un = new Date().getTime() + data.data;
+            this.$('#tool-list').treeview('unselectNode', data.nodeId);
             // Add a unique ID for the tab
             this.$('#utilities').append('<li role="presentation"><a href="#' + un + '" role="tab" data-toggle="tab">' + data.text +
                     '&nbsp;<span data-utility="' + un + '" class="glyphicon glyphicon-remove utility_close" aria-hidden="true"></span></a></li>'

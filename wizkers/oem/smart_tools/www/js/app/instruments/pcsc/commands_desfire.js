@@ -97,6 +97,19 @@ define(function (require) {
             return apdu;
         }
 
+        this.getDFNames = function() {
+            var apdu = {
+                cla: "90",
+                ins: "6D",
+                p1: "00",
+                p2: "00",
+                lc: "00",
+                data: "",
+                le: ""
+            };
+            return apdu;
+        }
+
         // aid : hex string
         // keysettings 1/2 : number
         this.createApplication = function(aid, keysettings1, keysettings2) {

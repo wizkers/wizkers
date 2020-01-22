@@ -363,6 +363,8 @@ define(function (require) {
                 cmd.key = auth_keynum; // Needed by frontend to understand what's going on
                 debug('Reply to AESAuthenticate');
                 if (datastr.slice(-4) != "91af") {
+                    delete cmd.r;
+                    delete cmd.apdu; // The front-end already received it...
                     debug("Error, did not receive expected response");
                     self.trigger('data', { data: '', 
                     sw1sw2: 'Authentication fail',
@@ -404,11 +406,12 @@ define(function (require) {
                 cmd.key = auth_keynum; // Needed by frontend to understand what's going on
                 debug("Last phase of AES Authenticate");
                 if (datastr.slice(-4) != "9100") {
+                    delete cmd.r;
+                    delete cmd.apdu; // The front-end already received it...
                     debug("Error, did not receive expected response");
                     self.trigger('data', { data: '', 
                     sw1sw2: 'Authentication fail',
                     command: cmd } );
-
                 } else {
                     var response = datastr.substring(0, datastr.length - 4);
                     debug('Encrypted response', response);
@@ -623,6 +626,11 @@ define(function (require) {
                     var t = desfireCommands.getKeyVersion(cmd.key);
                     data.apdu = apdu2str(t);
                     break;
+                case 'desfire_GetDFNames':
+                        data.command = 'transmit';
+                        var t = desfireCommands.getDFNames();
+                        data.apdu = apdu2str(t);
+                        break;    
                 case 'desfire_createApplication':
                     data.command = 'transmit';
                     var t = desfireCommands.createApplication(cmd.aid, cmd.keysettings1, cmd.keysettings2);

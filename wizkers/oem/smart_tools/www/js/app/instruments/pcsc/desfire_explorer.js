@@ -103,7 +103,8 @@ define(function (require) {
             'click #desfire-createapp': 'createApp',
             'click #desfire-createapp2': 'createApp2',
             'click #key0Auth' : 'keyAuth',
-            'change #key0': 'updateUsableKeys'
+            'change #key0': 'updateUsableKeys',
+            'click #desfire-createfile': 'createDatafile'
         },
 
         render: function (reader, atr) {
@@ -176,6 +177,10 @@ define(function (require) {
 
         },
 
+        createDatafile: function (event) {
+            console.log("Create data file - to be implemented");
+        },
+
         requestAIDs: function() {
             // If the card is open enough, then it will return a list of AIDs present
             // on it
@@ -185,16 +190,31 @@ define(function (require) {
                 dontgetfids: true
             });
 
+            this.currentAIDList = ""; // Reset the list
+            this.currentDFList = "";
+            
             linkManager.sendCommand({ command:'desfire_GetApplicationIDs', 
                 reader: this.currentReader,
                 meta: "desfire_getaids"
             });
+
+            // Reset the auth settings & colors
+            var slots = ['#key0', '#key1', '#key2', '#key3'];
+            for (var key in slots) {
+                var slot = this.$(slots[key]);
+                var button = this.$(slots[key]+"Auth");
+                slot.css('background-color', '');
+                button.removeClass('btn-success').removeClass('btn-danger');
+            }
         },
 
-        makeAIDMap: function(data) {
+        makeAIDMap: function(data, dfs) {
+
+            // Process the list of DFs and index it by AID index
+            // TODO
+
             this.tree = [];
             this.tree.push({ text: 'AID: 000000 (PICC)',  id: "000000", nodes: []});
-            data = data.slice(0,-4); // Remove final response
             var c = "<b>Card applications</b><br><table class=\"table table-striped\"><tr><th>AID</th><th>Description</th></tr>";
             for (var i = 0; i < data.length/6; i++) {
                 var aid = data.substr(i*6,6).toUpperCase();
@@ -245,6 +265,8 @@ define(function (require) {
                         c += "<button class=\"btn btn-info btn-sm\" id=\"desfire-createapp\">Create application</button>";
                     } else {
                         c += "<button class=\"btn btn-danger btn-sm\" id=\"desfire-deleteapp\">Delete application</button>";
+                        c += "<button class=\"btn btn-info btn-sm\" id=\"desfire-createfile\" disabled >Create  Data file</button>";
+                        c += "<button class=\"btn btn-info btn-sm\" id=\"desfire-createvaluefile\" disabled >Create  Value file</button>";
                     }
                     c += "</br>";
                     this.$('#hexdump').html(c);
@@ -488,13 +510,6 @@ define(function (require) {
                         this.requestAIDs();
                     }
                 }
-                if (data.command.command == 'loadkey') {
-                    if (data.data == "9000") {
-                        this.$('#key' + data.command.keyname).css('background-color', '#d9eeda');
-                    } else {
-                        this.$('#key' + data.command.keyname).css('background-color','#f2dede');
-                    }
-                }
                 if (data.command.meta == 'desfire_getversion_1') {
                     if (data.data.slice(-4) != "91af" && data.data.slice(-4) != "9100") {
                         this.$('#hexdump').html('Error sending GetVersion command');
@@ -514,7 +529,40 @@ define(function (require) {
                         this.$('#hexdump').html('Error sending Get Application IDs command');
                         return;
                     }
-                    this.makeAIDMap(data.data);
+                    if (data.data.slice(-4) == '91af') {
+                        this.currentAIDList += data.data.slice(0,-4);
+                        linkManager.sendCommand({ command:'transmit', 
+                            reader: this.currentReader,
+                            apdu: "90AF000000",
+                            meta: 'desfire_getaids'
+                        });
+                    } else {
+                        this.currentAIDList += data.data.slice(0,-4);   
+                        // WARNING: no support for multiple bocks of DFs
+                        linkManager.sendCommand({ command:'desfire_GetDFNames', 
+                        reader: this.currentReader,
+                        meta: 'desfire_getdfnames'
+                        });    
+                    }
+
+                    return;
+                }
+                if (data.command.meta == 'desfire_getdfnames') {
+                    if (data.data.slice(-4) != "9100") {
+                        return;
+                    }
+                    if (data.data.slice(-4) == '91af') {
+                        this.currentDFList += data.data.slice(0,-4);
+                        linkManager.sendCommand({ command:'transmit', 
+                            reader: this.currentReader,
+                            apdu: "90AF000000",
+                            meta: 'desfire_getdfnames'
+                        });
+                    } else {
+                        this.currentDFList += data.data.slice(0,-4);
+                        this.makeAIDMap(this.currentAIDList, this.currentDFList);
+                    }
+                    return;
                 }
                 if (data.command.command == "desfire_SelectApplication") {
                     if (data.data.slice(-4) != "9100") {
@@ -543,7 +591,6 @@ define(function (require) {
                     }
                     this.parseKeySettings(data.data);
                 }
-
                 if (data.command.command == 'desfire_GetKeyVersion') {
                     if (data.data.slice(-4) != "9100") {
                         this.$('#hexdump').html('Error getting key settings');
@@ -555,8 +602,14 @@ define(function (require) {
                     c +=  " version:" + parseInt(data.data.substr(0,2), 16);
                     this.$('#keyvers').html(c);
                 }
-
-
+                if (data.command.command == 'desfire_DeleteApplication') {
+                    if (data.data.slice(-4) != "9100") {
+                        bootbox.alert("Error deleting application:<br>" + data.sw1sw2);
+                        return;
+                    }
+                    this.requestAIDs();
+                    return;
+                }
                 if (data.command.meta == "desfire_readbinary") {
                     var c = this.$('#hexdump').html();
                     if (data.data.slice(-4) != "9100") {

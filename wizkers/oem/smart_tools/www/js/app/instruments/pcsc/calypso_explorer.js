@@ -38,7 +38,7 @@ define(function (require) {
         Intercode2 = require('app/lib/intercode2'),
         IsoCodes = require('app/lib/iso-codes'),
         abutils = require('app/lib/abutils'),
-        template = require('js/tpl/instruments/pcsc/DesfireExplorer.js');
+        template = require('js/tpl/instruments/pcsc/CalypsoExplorer.js');
 
     // Need to load these, but no related variables.
     require('bootstrap');
@@ -59,33 +59,17 @@ define(function (require) {
         },
 
         events: {
-            'click #loadKeyA': 'loadKeyA',
-            'click #loadKeyB': 'loadKeyB',
-            'click #desfire-info': 'getCardInfo',
-            'click #aid-list': 'requestAIDs',
-            'click #desfire-deleteapp': 'deleteApp'
+            'click #calypso-info': 'getCardInfo',
         },
 
         render: function (reader, atr) {
             var self = this;
             this.atr = abutils.ui8tohex(new Uint8Array(atr)).toUpperCase();;
-            console.log('Main render of Desfire explorer');
+            console.log('Main render of Calypso explorer');
             console.log(atr);
             this.$el.html(template());
             this.reader = reader;
             return this;
-        },
-
-        deleteApp: function (event) {
-            var self = this;
-            // Use Bootbox for a quick OK/Cancel confirmation
-            bootbox.confirm("Are you sure you want to delete this application?<br>AID: " + this.currentAID, function (result) {
-                if (result) {
-                    linkManager.sendCommand({ command: 'desfire_DeleteApplication', reader: self.currentReader,
-                    aid: self.currentAID});
-                }
-            });
-            return false; // stop propagation
         },
 
         requestAIDs: function() {
@@ -138,7 +122,7 @@ define(function (require) {
         },
 
         onClose: function () {
-            console.log("Mifare explorer view closing...");
+            console.log("Calypso explorer view closing...");
             linkManager.off('input', this.showInput);
             this.$('#memmap').off('nodeSelected');
         },
@@ -153,9 +137,7 @@ define(function (require) {
                     c += "</b></br>";
                     if (aid == "000000") {
                         // This is the master AID, insert possible actions here
-                        c += "<button class=\"btn btn-info btn-sm\" id=\"desfire-createapp\">Create application</button>";
                     } else {
-                        c += "<button class=\"btn btn-danger btn-sm\" id=\"desfire-deleteapp\">Delete application</button>";
                     }
                     c += "</br>";
                     this.$('#hexdump').html(c);
@@ -268,35 +250,6 @@ define(function (require) {
 
         },
 
-        updateUsableKeys: function() {
-            // Loop over all our key slots, and color the ones that can be used for the current required crypto
-            // in the right color
-            var slots = ['#keyA', '#keyB', '#keyC', '#keyD'];
-            for (var key in slots) {
-                var slot = this.$(slots[key]);
-                var val = slot.val();
-                var len = 0;
-                if (val != undefined) {
-                    len = val.length
-                }
-                var bg;
-                switch (this.cryptoType) {
-                    case 0: // DES
-                        (len == 16) ? bg ='#d9eeda' : bg = '#f2dede';
-                        break;
-                    case 1: // 3KDES
-                        (len == 16) ? bg ='#d9eeda' : bg = '#f2dede';
-                        break;
-                    case 2: // AES
-                        (len == 32) ? bg ='#d9eeda' : bg = '#f2dede';
-                        break;
-                }
-                slot.css('background-color', bg);
-            }
-
-        },
-
-
         // Parse file info and also trigger file content read if possible
         parseFileInfo: function(data) {
             var c = "<b>File information</b></br>";
@@ -366,27 +319,6 @@ define(function (require) {
             }
 
             if (data.command) {
-                if (data.command.command == 'loadkey') {
-                    if (data.data == "9000") {
-                        this.$('#key' + data.command.keyname).css('background-color', '#d9eeda');
-                    } else {
-                        this.$('#key' + data.command.keyname).css('background-color','#f2dede');
-                    }
-                }
-                if (data.command.meta == 'desfire_getversion_1') {
-                    if (data.data.slice(-4) != "91af" && data.data.slice(-4) != "9100") {
-                        this.$('#hexdump').html('Error sending GetVersion command');
-                        return;
-                    }
-                    this.parseVersion(1, data.data);
-                }
-                if (data.command.meta == 'desfire_getversion_3') {
-                    if (data.data.slice(-4) != "9100") {
-                        this.$('#hexdump').html('Error sending GetVersion command');
-                        return;
-                    }
-                    this.parseVersion(2, data.data);
-                }
                 if (data.command.meta == 'desfire_getaids') {
                     if (data.data.slice(-4) != "9100") {
                         this.$('#hexdump').html('Error sending Get Application IDs command');
@@ -413,25 +345,6 @@ define(function (require) {
                             apdu: "906F000000"
                         });
                 }
-                if (data.command.command == 'desfire_GetKeySettings') {
-                    if (data.data.slice(-4) != "9100") {
-                        this.$('#hexdump').html('Error getting key settings');
-                        return;
-                    }
-                    this.parseKeySettings(data.data);
-                }
-
-                if (data.command.command == 'desfire_GetKeyVersion') {
-                    if (data.data.slice(-4) != "9100") {
-                        this.$('#hexdump').html('Error getting key settings');
-                        return;
-                    }
-                    var c  = this.$('#keyvers').html();
-                    c += "<br>Key " + data.command.key + " version:" + parseInt(data.data.substr(0,2), 16);
-                    this.$('#keyvers').html(c);
-                }
-
-
                 if (data.command.meta == "desfire_readbinary") {
                     var c = this.$('#hexdump').html();
                     if (data.data.slice(-4) != "9100") {
@@ -470,15 +383,6 @@ define(function (require) {
                     this.$('#memmap').treeview({ data:this.tree });
                     this.$('#memmap').off('nodeSelected');
                     this.$('#memmap').on('nodeSelected', this.aidClick.bind(this));        
-
-                }
-                if (data.command.meta == 'desfire_getfilesettings') {
-                    if (data.data.length== 4) {
-                        this.$('#hexdump').html("Error getting file settings");
-                        return;
-                    }
-                    this.currentFile = data.command.fid;
-                    this.parseFileInfo(data.data);
 
                 }
             }
