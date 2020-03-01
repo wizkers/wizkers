@@ -226,7 +226,7 @@ function go() {
         // Initialize our Analytics object to get stats on app usage
         stats = new Analytics();
         // Stats for the Wizkers:Radio app
-        stats.init('UA-66729721-6');
+        // stats.init('UA-66729721-6');
 
         // Get our settings here, and
         // share them afterwards, rather than requesting it

@@ -70,7 +70,7 @@ define(function (require) {
         };
 
         this.sendAppView = function (description) {
-            window.analytics.trackView(description);
+            //window.analytics.trackView(description);
         }
 
         this.setTrackingEnabled = function (en) {
@@ -88,17 +88,17 @@ define(function (require) {
         this.instrumentEvent = function (action, label) {
             // category / action / label
             // window.analytics.trackEvent('Category', 'Action', 'Label', Value)
-            window.analytics.trackEvent('Instrument', action, label);
+            //window.analytics.trackEvent('Instrument', action, label);
         }
 
         this.fullEvent = function (category, action, label) {
             // category / action / label
-            window.analytics.trackEvent(category, action, label);
+            //window.analytics.trackEvent(category, action, label);
         }
 
         // Dimension 1 is setup in the analytics report suite as the instrument type
         this.setInstrumentType = function (instype) {
-            window.analytics.addCustomDimension(1, instype);
+            //window.analytics.addCustomDimension(1, instype);
         }
 
         //////

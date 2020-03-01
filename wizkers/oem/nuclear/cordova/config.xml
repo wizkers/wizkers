@@ -7,7 +7,7 @@
     <author email="ed@wizkers.io" href="http://wizkers.io">
         Edouard Lafargue
     </author>
-    <engine name="android" spec="^6.3.0" />
+<!--    <engine name="android" spec="^6.3.0" /> -->
     <content src="cordova.html" />
     <access origin="*" />
     <icon src="icon.png" />
@@ -15,15 +15,15 @@
     <plugin name="fr.drangies.cordova.serial" spec="https://github.com/elafargue/cordovarduino.git" />
     <plugin name="cordova-plugin-chrome-apps-usb" spec="~1.2.0" />
     <plugin name="com.mediamatrixdoo.keepscreenon" spec="https://github.com/wizkers/PhoneGap-KeepScreenOn-plugin.git" />
-    <plugin name="cordova-plugin-bluetoothle" spec="^4.4.2" />
-    <plugin name="cordova-plugin-file" spec="^4.3.3" />
+    <plugin name="cordova-plugin-bluetoothle" spec="^4.5.7" />
+    <plugin name="cordova-plugin-file" spec="^6.0.2" />
     <plugin name="cordova-plugin-geolocation" spec="^3.0.0" />
     <plugin name="cordova-background-watchposition" spec="https://github.com/wizkers/cordova-background-watchposition.git" />
-    <plugin name="cordova-plugin-file-transfer" spec="^1.5.0" />
-    <plugin name="cordova-plugin-google-analytics" spec="^0.8.0" />
+    <plugin name="cordova-plugin-file-transfer" spec="^1.7.1" />
+    <plugin name="cordova-plugin-google-analytics" spec="^1.8.6" />
     <plugin name="cordova-plugin-whitelist" spec="^1.2.1" />
-    <plugin name="cordova-plugin-background-mode" spec="https://github.com/katzer/cordova-plugin-background-mode.git" />
-    <plugin name="cordova-plugin-device" spec="^1.1.1" />
+    <plugin name="cordova-plugin-background-mode" spec="https://github.com/wizkers/cordova-plugin-background-mode.git" />
+    <plugin name="cordova-plugin-device" spec="^2.0.3" />
     <plugin name="cordova-plugin-inappbrowser" spec="^1.3.0" />
     <plugin name="cordova-plugin-backbutton" spec="^0.3.0" />
     <plugin name="cordova-plugin-bluetooth-serial" spec="~0.4.5" />
