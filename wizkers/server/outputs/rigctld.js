@@ -37,6 +37,7 @@
  */
 
 var net = require('net');
+var debug = require('debug')('wizkers:output:rigctld');
 
 module.exports = function rigctld() {
 
@@ -45,6 +46,7 @@ module.exports = function rigctld() {
     var output_ref = null;
     var rigserver = null;
     var previouscmd = '';
+    var driver = null;
 
     // A few driver variables: we keep track of a few things
     // here for our bare-bones rigctld implementation.
@@ -62,18 +64,19 @@ module.exports = function rigctld() {
     var radio_modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
 
     // Load the settings for this plugin
-    this.setup = function (output) {
+    this.setup = function (output, dr) {
 
-        console.log("[Rigctld Output plugin] Setup a new instance");
+        debug("[Rigctld Output plugin] Setup a new instance");
         output_ref = output;
         mappings = output.mappings;
         settings = output.metadata;
 
         debug(output);
+	driver = dr;
 
         // Query the radio for basic frequency info, so that
         // we populate our frequency variables:
-        // linkManager.sendCommand('FA;FB;BW;'); // Query VFO B and VFOA Display
+        driver.output('FA;FB;BW;'); // Query VFO B and VFOA Display
 
 
         // Create a rigserver:
@@ -92,7 +95,7 @@ module.exports = function rigctld() {
 
     this.onClose = function () {
         if (rigserver) {
-            console.log('[Rigctld] Closing existing server');
+            debug('[Rigctld] Closing existing server');
             rigserver.disconnect();
         }
     }
@@ -166,7 +169,7 @@ module.exports = function rigctld() {
                 data = parts.pop();
                 if (parts.length)
                     parts.forEach(function (part, i, array) {
-                        callback(part, tcpConnection);
+                        callback(part, socket);
                     });
             };
         };
@@ -193,9 +196,9 @@ module.exports = function rigctld() {
 
     // RIGCTLD Emulation - super light, but does the trick for fldigi...
     var rigctl_command = function (data, c) {
-        //console.log("[rig cmd] " + data);
+        debug("[rig cmd] " + data);
         var tmpstr = [];
-        var cmd = (data.substr(0, 1) == "\\") ? data.substr(0, 2) : data.substr(0, 1);
+        var cmd = (data.substr(0, 1) == "\\") ? data.substr(0) : data.substr(0, 1);
         // makes communication more reliable if we start missing data,
         // but sometimes, software sends "T" commands twice in a row, hence the
         // test below:
@@ -203,54 +206,56 @@ module.exports = function rigctld() {
         //    return;
         previouscmd = cmd;
         switch (cmd) {
-        case "\\d": // "mp_state":
+        case "\\dump_state":
             // No f**king idea what this means, but it makes hamlib happy.
-            c.sendMessage(hamlib_init);
+            c.write(hamlib_init);
             break;
         case "f":
-            c.sendMessage(vfoa_frequency + "\n");
+            c.write(vfoa_frequency + "\n");
             break;
         case "F": // Set Frequency (VFOA):  F 14069582.000000
             var freq = ("00000000000" + parseFloat(data.substr(2)).toString()).slice(-11); // Nifty, eh ?
-            console.log("Rigctld emulation: set frequency to " + freq);
-            linkManager.driver.setVFO(freq, 'a');
-            c.sendMessage("RPRT 0\n");
+            debug("Rigctld emulation: set frequency to " + freq);
+            driver.output({ cmd: 'setVFO', freq: freq, vfo: 'a'});
+            c.write("RPRT 0\n");
             break;
         case "m":
-            c.sendMessage("USB\n500");
+            c.write("USB\n500");
             break;
         case "M": // Set mode
             // Not implemented yet
             tmpstr = data.split(' ');
             radio_mode = tmpstr[1];
-            c.sendMessage("RPRT 0\n");
+            c.write("RPRT 0\n");
             break;
         case "q":
-            // TODO: we should close the socket here ?
-            console.log("Rigctld emulation: quit");
-            c.close();
+            debug("Rigctld emulation: quit");
+            c.end();
             break;
         case "v": // Which VFO ?
-            c.sendMessage("VFOA\n");
+            c.write("VFOA\n");
             break;
         case "s": // "Get Split VFO" -> VFOB
-            c.sendMessage("0\nVFOA\n");
+            c.write("0\nVFOA\n");
             break;
         case 't':
-            c.sendMessage("" + xmit + "\n");
+            c.write("" + xmit + "\n");
             break;
         case "T":
             if (data.substr(2) == "1") {
-                linkManager.driver.ptt(true);
-                    xmit = 1;
+                driver.output("TX;");
+                xmit = 1;
             } else {
-                linkManager.driver.ptt(false);
+                driver.output("RX;");
                 xmit = 0;
             }
-            c.sendMessage("RPRT 0\n");
+            c.write("RPRT 0\n");
             break;
+	case "\\chk_vfo":
+	    c.write("CHKVFO 0\n");
+	    break;
         default:
-            console.log("Unknown command: " + data);
+            debug("Unknown command: " + data);
 
         }
 

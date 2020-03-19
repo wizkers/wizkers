@@ -102,7 +102,7 @@ var output = function (data, insid) {
     for (var idx in active) {
         var output = active[idx];
         var isAlarm = alarm(output,data);
-        if ( isAlarm || regular(output)) {
+        if ( isAlarm || regular(output) || output.config.wantsalldata ) {
             debug('Output triggered with this data', data);
             // We need to pass the index to the sendData call, so that it can be passed
             // back for the callback: this is because by the time the callback is called,
@@ -220,7 +220,9 @@ module.exports = {
                         var plugin = new pluginType();
                         // The plugin needs its metadata and the mapping for the data,
                         // the output manager will take care of the alarms/regular output
-                        plugin.setup(out.doc);
+			// The driver reference is passed for output plugins who want to also send data to the
+			// instrument (Ham radio interfaces for instance)
+                        plugin.setup(out.doc, driver);
                         activeOutputs[insid].push({
                             "plugin": plugin,
                             "config": out.doc,

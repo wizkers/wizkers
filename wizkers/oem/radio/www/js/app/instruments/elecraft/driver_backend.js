@@ -451,10 +451,40 @@ define(function (require) {
             self.trigger('data', resp);
         }
 
+	 var setVFO = function (f, vfo) {
+            var freq;
+            if (typeof f == 'string') {
+                freq = f;
+            } else {
+                freq = ("00000000000" + (parseInt(f*1e6 ).toString())).slice(-11); // Nifty, eh ?
+            }
+            if (freq.indexOf("N") > -1) { // detect "NaN" in the string
+                console.warn("Invalid VFO spec");
+                self.output((vfo == 'A' ||  vfo == 'a') ? 'FA;' : 'FB;');
+            } else {
+                //console.log("VFO" + vfo + ": " + freq);
+                self.output(((vfo == 'A' ||  vfo == 'a') ? 'FA' : 'FB') + freq + ';');
+            }
+            self.output('BN;'); // Refresh band number (radio does not send it automatically)
+        };
+
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
         // HTML interface.
+	// 2020.03: In order to make the backend driver smarter, also allow
+	//          passing a JSON object with a more complex command
         this.output = function (data) {
+
+	    if (typeof data == 'object') {
+             switch (data.cmd) {
+	         case 'setVFO':
+	             setVFO(data.freq, data.vfo);
+		     break;
+	         default:
+		     break;
+	     }
+             return;
+	    }
 
             if (data.indexOf("@N3TL1NK,start_stream;") > -1) {
                 this.startLiveStream(500);
