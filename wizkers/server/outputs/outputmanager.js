@@ -39,6 +39,7 @@ var dbs = require('../pouch-config'),
 var Safecast = require('./safecast.js');
 var Rest = require('./rest.js');
 var Text = require('./text.js');
+var Rigctld = require('./rigctld.js');
 
 /////////////////
 // Private variales
@@ -49,7 +50,8 @@ var activeOutputs = {};
 var availableOutputs = {
     "safecast": Safecast,
     "rest": Rest,
-    "text": Text
+    "text": Text,
+    "rigctld": Rigctld,
 };
 
 ////////////////
@@ -213,7 +215,7 @@ module.exports = {
                     // Now we need to configure the output and put it into our activeOutputs list
                     var pluginType = availableOutputs[out.doc.type];
                     if (pluginType == undefined) {
-                        debug("***** WARNING ***** we were asked to enable an output plugin that is not supported but this server");
+                        debug("***** WARNING ***** we were asked to enable an output plugin that is not supported but this server", out.doc.type);
                     } else {
                         var plugin = new pluginType();
                         // The plugin needs its metadata and the mapping for the data,

@@ -37,7 +37,7 @@
  *  - No jQuery dependency is allowed
  *  - Detection code for NodeJS mode at very beginning
  *  - The Open method is different on app and node modes
- *  - Even hookup is different
+ *  - Event hookup is different
  *  - the serial port API on node does not support an 'off' method
  *  - rename the Node 'emit' method to 'trigger' when initializing events so
  *    that we use the Backbone convention everywhere
