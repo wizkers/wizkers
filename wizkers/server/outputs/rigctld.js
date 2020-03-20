@@ -59,6 +59,7 @@ module.exports = function rigctld() {
     var vfoa_bandwidth = 0;
     var pwr_level_kxpa = 0;
     var pwr_level_kx3 = 0;
+    var split_mode = 0;
     var radio_mode = "RTTY";
     var xmit = 0;     // 0 is RX, 1 is TX
     var radio_modes = ["LSB", "USB", "CW", "FM", "AM", "DATA", "CW-REV", 0, "DATA-REV"];
@@ -76,7 +77,7 @@ module.exports = function rigctld() {
 
         // Query the radio for basic frequency info, so that
         // we populate our frequency variables:
-        driver.output('FA;FB;BW;'); // Query VFO B and VFOA Display
+        driver.output('FA;FB;BW;FT;'); // Query VFO B and VFOA Display
 
 
         // Create a rigserver:
@@ -143,6 +144,9 @@ module.exports = function rigctld() {
             case "IF":
                 radio_mode = radio_modes[parseInt(data.raw.substr(29,1))-1];
                 break;
+	    case "FT":
+		split_mode = parseInt(data.raw.substr(2));
+		break;
             }
         }
     };
@@ -219,10 +223,17 @@ module.exports = function rigctld() {
             driver.output({ cmd: 'setVFO', freq: freq, vfo: 'a'});
             c.write("RPRT 0\n");
             break;
+	case "I": // Set split frequency (Assume VFOB)
+            var freq = ("00000000000" + parseFloat(data.substr(2)).toString()).slice(-11); // Nifty, eh ?
+            debug("Rigctld emulation: set VFOB frequency to " + freq);
+            driver.output({ cmd: 'setVFO', freq: freq, vfo: 'b'});
+            c.write("RPRT 0\n");
+            break;
         case "m":
             c.write("USB\n500");
             break;
         case "M": // Set mode
+        case "X":
             // Not implemented yet
             tmpstr = data.split(' ');
             radio_mode = tmpstr[1];
@@ -236,8 +247,21 @@ module.exports = function rigctld() {
             c.write("VFOA\n");
             break;
         case "s": // "Get Split VFO" -> VFOB
-            c.write("0\nVFOA\n");
+	    if (split_mode) {
+	        c.write("1\nVFOB\n");
+	    } else {
+                c.write("0\nVFOA\n");
+	    }
             break;
+	case "S": // Set Split VFO mode
+	    debug("Set Split mode");
+	    var mode = parseInt(data.substr(2,1));
+	    var vfo = data.substr(4);
+	    debug("Mode:",mode, "vfo", vfo);
+	    driver.output({ cmd: 'setSplit', state: mode, vfo: vfo} );
+	    split_mode = mode;
+	    c.write("RPRT 0\n");
+	    break;
         case 't':
             c.write("" + xmit + "\n");
             break;

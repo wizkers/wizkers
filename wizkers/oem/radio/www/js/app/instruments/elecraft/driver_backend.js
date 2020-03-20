@@ -451,6 +451,8 @@ define(function (require) {
             self.trigger('data', resp);
         }
 
+	 // Higher level function implemented backend-side so that output plugins
+	 // can also use it
 	 var setVFO = function (f, vfo) {
             var freq;
             if (typeof f == 'string') {
@@ -468,6 +470,14 @@ define(function (require) {
             self.output('BN;'); // Refresh band number (radio does not send it automatically)
         };
 
+	var setSplit = function (state, vfo) {
+           if (state) {
+		   self.output('FT1;'); // Enable Split VFO
+           } else {
+		   self.output('FR0;');
+	   }
+	}
+
         // output should return a string, and is used to format
         // the data that is sent on the serial port, coming from the
         // HTML interface.
@@ -479,6 +489,9 @@ define(function (require) {
              switch (data.cmd) {
 	         case 'setVFO':
 	             setVFO(data.freq, data.vfo);
+		     break;
+	         case 'setSplit':
+	             setSplit(data.state, data.vfo);
 		     break;
 	         default:
 		     break;
