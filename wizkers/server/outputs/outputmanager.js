@@ -195,12 +195,16 @@ module.exports = {
         debug('Retrieving Outputs for Instrument ID: ' + insid);
 
         // Before anything else, clear the current outputs.
+	if (activeOutputs[insid]) {
         while (activeOutputs[insid].length) {
             // Some plugins want to be told when they are getting closed:
             var out = activeOutputs[insid].pop();
             if (out.plugin.onClose)
                 out.plugin.onClose();
         }
+	} else {
+	activeOutputs[insid] = [];
+	}
 
         // TODO: use persistent queries before going to prod
         dbs.outputs.query(function (doc) {
