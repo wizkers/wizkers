@@ -47,6 +47,7 @@ module.exports = function rigctld() {
     var rigserver = null;
     var previouscmd = '';
     var driver = null;
+    var clients = [];
 
     // A few driver variables: we keep track of a few things
     // here for our bare-bones rigctld implementation.
@@ -73,7 +74,7 @@ module.exports = function rigctld() {
         settings = output.metadata;
 
         debug(output);
-	driver = dr;
+	    driver = dr;
 
         // Query the radio for basic frequency info, so that
         // we populate our frequency variables:
@@ -82,7 +83,7 @@ module.exports = function rigctld() {
 
         // Create a rigserver:
         if (rigserver) {
-            rigserver.close();
+            this.onClose();
         }
         rigserver = new net.Server();
 
@@ -96,8 +97,15 @@ module.exports = function rigctld() {
 
     this.onClose = function () {
         if (rigserver) {
-            debug('[Rigctld] Closing existing server');
-            rigserver.disconnect();
+            debug('[rigctld] Closing existing server');
+            for (var i in clients) {
+                clients[i].destroy();
+            }
+            clients = [];
+            rigserver.close(function () {
+                debug('[rigctld] server closed');
+                rigserver.unref();
+            });
         }
     }
 
@@ -158,6 +166,7 @@ module.exports = function rigctld() {
 
     var onAcceptCallback = function (socket) {
         debug("New connection", socket);
+        clients.push(socket);
 
         // We are going to use a small line parser
         var parserCreator = function (callback) {
@@ -189,6 +198,10 @@ module.exports = function rigctld() {
         });
 
         socket.on('error', onError);
+
+        socket.on('close', function () {
+            clients.splice(clients.indexOf(socket), 1);
+        });
     };
 
     /**
@@ -198,7 +211,7 @@ module.exports = function rigctld() {
 
     };
 
-    // RIGCTLD Emulation - super light, but does the trick for fldigi...
+    // RIGCTLD Emulation - super light, but does the trick for fldigi anc wsjtx...
     var rigctl_command = function (data, c) {
         debug("[rig cmd] " + data);
         var tmpstr = [];
@@ -223,7 +236,7 @@ module.exports = function rigctld() {
             driver.output({ cmd: 'setVFO', freq: freq, vfo: 'a'});
             c.write("RPRT 0\n");
             break;
-	case "I": // Set split frequency (Assume VFOB)
+	    case "I": // Set split frequency (Assume VFOB)
             var freq = ("00000000000" + parseFloat(data.substr(2)).toString()).slice(-11); // Nifty, eh ?
             debug("Rigctld emulation: set VFOB frequency to " + freq);
             driver.output({ cmd: 'setVFO', freq: freq, vfo: 'b'});
@@ -247,21 +260,21 @@ module.exports = function rigctld() {
             c.write("VFOA\n");
             break;
         case "s": // "Get Split VFO" -> VFOB
-	    if (split_mode) {
-	        c.write("1\nVFOB\n");
-	    } else {
-                c.write("0\nVFOA\n");
-	    }
+            if (split_mode) {
+                c.write("1\nVFOB\n");
+            } else {
+                    c.write("0\nVFOA\n");
+            }
             break;
-	case "S": // Set Split VFO mode
-	    debug("Set Split mode");
-	    var mode = parseInt(data.substr(2,1));
-	    var vfo = data.substr(4);
-	    debug("Mode:",mode, "vfo", vfo);
-	    driver.output({ cmd: 'setSplit', state: mode, vfo: vfo} );
-	    split_mode = mode;
-	    c.write("RPRT 0\n");
-	    break;
+    	case "S": // Set Split VFO mode
+            debug("Set Split mode");
+            var mode = parseInt(data.substr(2,1));
+            var vfo = data.substr(4);
+            debug("Mode:",mode, "vfo", vfo);
+            driver.output({ cmd: 'setSplit', state: mode, vfo: vfo} );
+            split_mode = mode;
+            c.write("RPRT 0\n");
+            break;
         case 't':
             c.write("" + xmit + "\n");
             break;
@@ -275,14 +288,13 @@ module.exports = function rigctld() {
             }
             c.write("RPRT 0\n");
             break;
-	case "\\chk_vfo":
-	    c.write("CHKVFO 0\n");
-	    break;
+    	case "\\chk_vfo": // We emulate rigctld with out the "--vfo" options
+            c.write("CHKVFO 0\n");
+            break;
         default:
             debug("Unknown command: " + data);
 
         }
-
     };
 
     var hamlib_init = "0\n" +
