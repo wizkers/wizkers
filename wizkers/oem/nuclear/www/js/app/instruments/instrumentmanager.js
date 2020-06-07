@@ -120,6 +120,13 @@ define(function (require) {
                 connectionsettings: 'app/views/instrument/bluetooth',
                 connectionfilter: ['12630000-cc25-497d-9854-9b6c02c77054']
             },
+            'weatherflow': {
+                name: 'Weatherflow Tempest',
+                type: 'app/instruments/weatherflow/weatherflow',
+                path: 'app/instruments/weatherflow',
+                settings: 'app/instruments/weatherflow/settings',
+                connectionsettings: 'app/views/instrument/bluetooth'
+            },
             'blue_onyx': {
                 name: 'Medcom Blue Onyx',
                 type: 'app/instruments/blue_onyx/blue_onyx',
