@@ -136,58 +136,11 @@ function makeSrc(dir, glob) {
  *  Tasks
  */
 
-
-gulp.task('build', ['css', 'libs', 'jsapp', 'oem_www_overlay', 'templates', 'oem_templates']);
-
-/**
- * Copies all files for the OEM into the build destination, before
- * doing the template calculation.
- *
- * We want to overlay after we copied all the original CSS and Javasscript.
- */
-gulp.task('oem_www_overlay', ['css', 'jsapp'], function () {
-    return gulp.src(paths.oem_www_files, {
-            base: oem_directory
-        })
-        .pipe(gulp.dest(paths.build));
-});
-
-/**
- * Compile all OEM templates and (potentially) overwrites original templates, so
- * it has to happen after the 'templates' task
- */
-gulp.task('oem_templates', ['templates'], function () {
-    return gulp.src(paths.oem_www_templates, {
-            base: oem_directory
-        })
-        .pipe(change(compileTemplate))
-        // .pipe(debug())
-        .pipe(rename(function (path) {
-            path.extname = '.js';
-        }))
-        .pipe(gulp.dest(path.join(paths.build)));
-});
-
-/**
- * Compile all templates and copy them to the various dist directories
- */
-gulp.task('templates', function () {
-    return gulp.src(paths.templates, {
-            base: '.'
-        })
-        .pipe(change(compileTemplate))
-        // .pipe(debug())
-        .pipe(rename(function (path) {
-            path.extname = '.js';
-        }))
-        .pipe(gulp.dest(path.join(paths.build)));
-});
-
-/**
+ /**
  * Copy all CSS files
  * TODO: Minimize for distribution
  */
-gulp.task('css', function () {
+gulp.task('css', function() {
     return gulp.src(paths.css, {
             base: '.'
         })
@@ -211,90 +164,139 @@ gulp.task('jsapp', function () {
         .pipe(gulp.dest(paths.build));
 });
 
+
+/**
+ * Copies all files for the OEM into the build destination, before
+ * doing the template calculation.
+ *
+ * We want to overlay after we copied all the original CSS and Javasscript.
+ */
+gulp.task('oem_www_overlay', gulp.series('css', 'jsapp', function () {
+    return gulp.src(paths.oem_www_files, {
+            base: oem_directory
+        })
+        .pipe(gulp.dest(paths.build));
+}));
+
+/**
+ * Compile all templates and copy them to the various dist directories
+ */
+gulp.task('templates', function () {
+    return gulp.src(paths.templates, {
+            base: '.'
+        })
+        .pipe(change(compileTemplate))
+        // .pipe(debug())
+        .pipe(rename(function (path) {
+            path.extname = '.js';
+        }))
+        .pipe(gulp.dest(path.join(paths.build)));
+});
+
+/**
+ * Compile all OEM templates and (potentially) overwrites original templates, so
+ * it has to happen after the 'templates' task
+ */
+gulp.task('oem_templates', gulp.series('templates', function () {
+    return gulp.src(paths.oem_www_templates, {
+            base: oem_directory
+        })
+        .pipe(change(compileTemplate))
+        // .pipe(debug())
+        .pipe(rename(function (path) {
+            path.extname = '.js';
+        }))
+        .pipe(gulp.dest(path.join(paths.build)));
+}));
+
+gulp.task('build', gulp.series('css', 'libs', 'jsapp', 'oem_www_overlay', 'templates', 'oem_templates'));
+
 /**
  * Copy the build files to the Chrome directory
  */
-gulp.task('chrome_copy_build', ['build'], function () {
+gulp.task('chrome_copy_build', gulp.series('build', function () {
     return gulp.src([paths.build + '/www/**/*'], {
             base: paths.build
         })
         .pipe(gulp.dest(paths.chrome_debug));
-});
+}));
 
 /**
  * Build the Chrome app (debug, not minified)
  * This first does a build of the app, then
  * overlays all the files in paths.chrome_files
  */
-gulp.task('chrome', ['build', 'chrome_copy_build'], function () {
+gulp.task('chrome', gulp.series('build', 'chrome_copy_build', function () {
     return gulp.src(paths.chrome_files, {
             base: oem_directory + '/chrome'
         })
         .pipe(gulp.dest(paths.chrome_dist))
         .pipe(gulp.dest(paths.chrome_debug));
-});
+}));
 
 /**
  * Copy the build files to the Cordova directory
  */
-gulp.task('cordova_copy_build', ['build'], function () {
+gulp.task('cordova_copy_build', gulp.series('build', function () {
     return gulp.src([paths.build + '/www/**/*'], {
             base: paths.build
         })
         .pipe(gulp.dest(paths.cordova_debug));
-});
+}));
 
 
 /**
  * Build the Cordova app
  */
-gulp.task('cordova', ['build', 'cordova_copy_build'], function () {
+gulp.task('cordova', gulp.series('build', 'cordova_copy_build', function () {
     return gulp.src(paths.cordova_files, {
             base: oem_directory + '/cordova'
         })
         .pipe(gulp.dest(paths.cordova_dist))
         .pipe(gulp.dest(paths.cordova_debug));
-});
+}));
 
 /**
  * Copy the build files to the Node Webkit directory
  */
-gulp.task('nwjs_copy_build', ['build'], function () {
+gulp.task('nwjs_copy_build', gulp.series('build', function () {
     return gulp.src([paths.build + '/www/**/*'], {
             base: paths.build
         })
         .pipe(gulp.dest(paths.nwjs_debug));
-});
+}));
 
-/**
- * Optimize the files for production
- */
-gulp.task('nwjs_optimize', ['nwjs'], function(cb) {
-    exec('./build-tools/build-nwjs.sh', function (err, stdout, stderr) {
-        console.log(stdout);
-        console.log(stderr);
-        cb(err);
-    });
-});
 
 /**
  * Build the NWJS app:
  *  - Makes sure the javascript is built
  *  - copy the additional files from the OEM directory into dist and debug
  */
-gulp.task('nwjs', ['build', 'nwjs_copy_build'], function () {
+gulp.task('nwjs', gulp.series('build', 'nwjs_copy_build', function () {
     return gulp.src(paths.nwjs_files, {
             base: oem_directory + '/nwjs'
         })
         .pipe(gulp.dest(paths.nwjs_dist))
         .pipe(gulp.dest(paths.nwjs_debug));
 
-});
+}));
+
+/**
+ * Optimize the files for production
+ */
+gulp.task('nwjs_optimize', gulp.series('nwjs', function(cb) {
+    exec('./build-tools/build-nwjs.sh', function (err, stdout, stderr) {
+        console.log(stdout);
+        console.log(stderr);
+        cb(err);
+    });
+}));
+
 
 /**
  * Assemble a NWJS binary
  */
-gulp.task('nwjs_bin', ['nwjs_optimize'], function () {
+gulp.task('nwjs_bin', gulp.series('nwjs_optimize', function () {
     var nw = new NwBuilder({
         files: paths.nwjs_dist + '**/**', // use the glob format
         platforms: ['osx64', 'win64'],
@@ -308,9 +310,9 @@ gulp.task('nwjs_bin', ['nwjs_optimize'], function () {
     });
     nw.on('log',  console.log);
     return nw.build();
-})
+}));
 
-gulp.task('nwjs_sdk_bin', ['nwjs_optimize'], function () {
+gulp.task('nwjs_sdk_bin', gulp.series('nwjs_optimize', function () {
     var nw = new NwBuilder({
         files: paths.nwjs_dist + '**/**', // use the glob format
         platforms: ['osx64', 'win64'],
@@ -324,81 +326,83 @@ gulp.task('nwjs_sdk_bin', ['nwjs_optimize'], function () {
     });
     nw.on('log',  console.log);
     return nw.build();
-})
+}));
 
 
 /*
  * Copy the build files to the Electron directory
  */
-gulp.task('electron_copy_build', ['build'], function () {
+gulp.task('electron_copy_build', gulp.series('build', function () {
     return gulp.src([paths.build + '/www/**/*'], {
             base: paths.build
         })
         .pipe(gulp.dest(paths.electron_debug));
-});
+}));
 
 /**
  * Build the Electron app
  */
-gulp.task('electron', ['build', 'electron_copy_build'], function () {
+gulp.task('electron', gulp.series('build', 'electron_copy_build', function () {
     return gulp.src(paths.electron_files, {
             base: oem_directory + '/electron'
         })
         .pipe(gulp.dest(paths.electron_dist))
         .pipe(gulp.dest(paths.electron_debug));
-});
+}));
 
 /*
  * Copy the build files to the Browser directory
  * (for running directly in Chrome with a standard http server or file://)
  * Nearly identical to nwjs
  */
-gulp.task('browser_copy_build', ['build'], function () {
+gulp.task('browser_copy_build', gulp.series('build', function () {
     return gulp.src([paths.build + '/www/**/*'], {
             base: paths.build
         })
         .pipe(gulp.dest(paths.browser_debug));
-});
+}));
 
 /**
  * Build the Browser app
  */
-gulp.task('browser', ['build', 'browser_copy_build'], function () {
+gulp.task('browser', gulp.series('build', 'browser_copy_build', function () {
     return gulp.src(paths.browser_files, {
             base: oem_directory + '/browser'
         })
         .pipe(gulp.dest(paths.browser_dist))
         .pipe(gulp.dest(paths.browser_debug));
-});
-
+}));
 
 
 /**
  * Build the Server app. Note: the server overlay can overwrite some files, but won't
  * delete any.
  */
-gulp.task('server', ['server_original', 'oem_server_overlay']);
-
-gulp.task('oem_server_overlay', ['server_original'], function () {
-    return gulp.src(paths.oem_server_files, {
-            base: oem_directory + '/server'
-        })
-        .pipe(gulp.dest(paths.server_dist));
-});
-
 /**
  * Copy the build files to the server directory
  */
-gulp.task('server_copy_build', ['build'], function () {
+gulp.task('server_copy_build', gulp.series('build', function () {
     return gulp.src([paths.build + '/www/**/*'], {
             base: paths.build
         })
         .pipe(gulp.dest(paths.server_dist));
-});
+}));
 
-gulp.task('server_original', ['build', 'server_copy_build'], function () {
+gulp.task('server_original', gulp.series('build', 'server_copy_build', function () {
     return gulp.src(paths.server_files, {
             base: 'server'
         })
         .pipe(gulp.dest(paths.server_dist));
-});
+}));
+
+gulp.task('oem_server_overlay', gulp.series('server_original', function () {
+    return gulp.src(paths.oem_server_files, {
+            base: oem_directory + '/server'
+        })
+        .pipe(gulp.dest(paths.server_dist));
+}));
+
+gulp.task('server', gulp.series('server_original', 'oem_server_overlay'));
+
+
+

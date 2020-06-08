@@ -62,7 +62,7 @@ var SerialPort = require('serialport'),
     socket_debug = require('debug')('wizkers:server:socket');
 
 if (process.env.ENABLE_NOBLE)
-    var noble = require('noble');
+    var noble = require('@abandonware/noble');
 
 if (process.env.ENABLE_USBHID)
     var HID = require('node-hid');

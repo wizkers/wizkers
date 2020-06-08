@@ -47,7 +47,7 @@ define(function (require) {
         abu = require('app/lib/abutils');
 
     if (process.env.ENABLE_NOBLE)
-        var noble = require('noble-mac');
+        var noble = require('@abandonware/noble');
 
 
     // TODO: accept a list of service UUIDs and a list of Characteristic UUIDs

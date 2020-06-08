@@ -47,6 +47,9 @@ define(function (require) {
         util = require('util'),
         abu = require('app/lib/abutils');
 
+    if (process.env.ENABLE_NOBLE)
+        var noble = require('@abandonware/noble');
+
 
     // TODO: accept a list of service UUIDs and a list of Characteristic UUIDs
     //       rather than a single value.
@@ -326,11 +329,12 @@ define(function (require) {
                 noble.removeAllListeners('discover');
                 noble.stopScanning();
             }
+
             debug('Found our peripheral, now connecting (' + peripheral.id + ')');
             activePeripheral = peripheral;
             // debug('Here is what our active peripheral looks like', activePeripheral);
+            peripheral.on('disconnect', trackError); // Track disconnects    
             peripheral.connect(trackConnect);
-            peripheral.on('disconnect', trackError); // Track disconnects
         }
 
 

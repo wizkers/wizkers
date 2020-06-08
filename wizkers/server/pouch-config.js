@@ -29,7 +29,7 @@
 
 
 var PouchDB = require('pouchdb');
-var bcrypt = require('bcrypt-nodejs');
+var bcrypt = require('bcrypt');
 var debug = require('debug')('pouchdb');
 
 
