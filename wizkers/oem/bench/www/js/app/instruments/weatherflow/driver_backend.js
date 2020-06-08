@@ -46,7 +46,6 @@ define(function (require) {
 
     var abutils = require('app/lib/abutils'),
         utils = require('app/utils'),
-        LinkProto = require('app/instruments/kestrel5/kestrel_link'),
         btleConnection = require('connections/btle');
 
     var parser = function (socket) {
@@ -58,7 +57,6 @@ define(function (require) {
             port = null,
             port_close_requested = false,
             port_open_requested = false,
-            linkProto = new LinkProto(this),
             isopen = false;
 
         // Command processing
@@ -75,21 +73,21 @@ define(function (require) {
         var data_callback = null;
 
         // We have to have those in lowercase
-        var WEATHERFLOW_SERVICE_UUID  = '6a223201-4f03-41b0-ce48-7b3880d357d6';
+        var WEATHERFLOW_SERVICE_UUID  =  '6a223200-4f03-41b0-ce48-7b3880d357d6';
         var WX1_UUID     = '6a223201-4f03-41b0-ce48-7b3880d357d6';
 
         // The Weatherflow base station sends readings over several packets with
         // the same timestamp, starting with 0x52, 0x53 and 0x54 - merge them
         // into the same JSON structure and send to front-end after receiving 0x54
 
-        // TODO: this is hardcoded to the Kestrel 5500
+        // TODO: Weatherflow does not have all of those values - work out a way to
+        // tag non-existing values to avoid displaying them
         var readings = {
             temperature: 0,
             rel_humidity: 0,
             pressure: 0,
             compass_mag: 0,
-            wind: { dir: 0, speed: 0},
-            wind_gust: 0,
+            wind: { dir: 0, speed: 0, gust: 0},
             compass_true: 0,
             altitude: 0,
             dens_altitude: 0,
@@ -103,13 +101,13 @@ define(function (require) {
             brightness: 0,
             uv_index: 0,
             solar_radiation: 0,
+            sensor_voltage: 0,
             unit: {
                 temperature: 'celsius',
                 rel_humidity: '%',
                 pressure: 'mb',
                 compass_mag: 'degree',
-                wind: { dir: 'degree', speed: 'knots'},
-                wind_gust: 'm/s',
+                wind: { dir: 'degree', speed: 'knots', gust: 'knots'},
                 compass_true: 'degree',
                 altitude: 'm',
                 dens_altitude: 'm',
@@ -122,7 +120,8 @@ define(function (require) {
                 wind_chill: 'celsius',
                 brightness: 'lux',
                 uv_index: '',
-                solar_radiation: "W/m2"
+                solar_radiation: "W/m2",
+                sensor_voltage: "V"
             }
         };
 
@@ -149,19 +148,57 @@ define(function (require) {
             }
             var dv = new DataView(vizapp.type === 'cordova' ? data.value.buffer : data.value);
 
-            // Only send one response every 3 packets with all
-            // readings in one go.
-            if (utils.sameUUID(data.characteristic, WX1_UUID)) {
-                readings.wind.speed = dv.getInt16(0, true)*1.94384/1000; // Convert to knots
-                readings.temperature = dv.getInt16(2, true)/100;
-                readings.rel_humidity = dv.getInt16(6, true)/100;
-                readings.pressure = dv.getInt16(8,true)/10;
-                readings.compass_mag = dv.getInt16(10,true);
-                self.trigger('data', readings);
-                return;
+            try {
+                // Only send one response every 3 packets with all
+                // readings in one go.
+                if (utils.sameUUID(data.characteristic, WX1_UUID)) {
+                    parseWeatherFlowBLE(dv);
+                    return;
+                }
+            } catch (e) {
+                console.error('Data parsing error, skipping', e);
             }
 
         };
+
+        // Parse a Weatherflow BLE packet, and send data to front-end if necessary
+        var parseWeatherFlowBLE = function(dv) {
+            var ptype = dv.getInt8(0);
+            switch (ptype) {
+                case 0x1a:
+                    readings.sensor_voltage = dv.getInt16(18,true) / 100;
+                    break;
+                case 0x52:
+                    readings.brightness = dv.getUint32(7, true);
+                    readings.uv_index = dv.getUint16(11, true);
+                    readings.solar_radiation = dv.getUint16(17, true);
+                    break;
+                case 0x53:
+                    readings.wind.speed_avg = dv.getInt16(7, true) *1.94384/100; // Convert to knots
+                    readings.wind.dir_avg = dv.getInt16(9, true);
+                    readings.wind.gust = dv.getInt16(13,true) * 1.94384/100;
+                    readings.wind.other = dv.getInt16(15, true);
+                    readings.wind.lull = dv.getInt16(11,true) * 1.94384/100;
+                    readings.wind.avg_period = dv.getInt8(17);
+                    break;
+                case 0x54:
+                    readings.temperature = dv.getInt16(7,true) / 100;
+                    readings.rel_humidity = dv.getInt16(9,true) / 100;
+                    readings.pressure = dv.getUint32(14,true) / 100;
+                    break;
+                case 0x18:
+                    readings.wind.speed  = dv.getInt16(7, true)*1.94384/100; // Instant wind direction
+                    readings.wind.dir = dv.getInt16(9, true);
+                    break;
+                default:
+                    break;
+
+            }
+            // TODO: we should be able to send partial updates to save on data
+            if (ptype == 0x54 || ptype == 0x18)
+                self.trigger('data', readings);
+
+        }
 
         this.shiftQueue = function() {
             // Note: if we get ACKed for the get log data command,
@@ -340,7 +377,7 @@ define(function (require) {
         this.startLiveStream = function (period) {
             if (port)
                 port.subscribe({
-                    service_uuid: KESTREL_SERVICE_UUID,
+                    service_uuid: WEATHERFLOW_SERVICE_UUID,
                     characteristic_uuid: [ WX1_UUID ]
                 });
 
