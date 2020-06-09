@@ -35,15 +35,6 @@ define(function (require) {
 
     "use strict";
 
-    function to_hex(number) {
-        var r = number.toString(16);
-        if (r.length < 2) {
-            return "0" + r;
-        } else {
-            return r;
-        }
-    };
-
     return {
 
         // t in degrees Celcius
@@ -53,6 +44,13 @@ define(function (require) {
             return 243.04 * v1/(17.625-v1);
         },
 
+        // Source: https://www.weather.gov/media/epz/wxcalc/heatIndex.pdf
+        heat_index: function(t, rh) {
+            return  -8.78469475556 + 1.61139411*t + 2.33854883889*rh
+                    - -0.14611605*t*rh - 0.012308094*t*t
+                    - -0.0164248277778*rh*rh + 0.002211732*t*t*rh
+                    + 0.00072546*t*rh*rh -  0.000003582*t*t*rh*rh;
+        }
     }
 
 });

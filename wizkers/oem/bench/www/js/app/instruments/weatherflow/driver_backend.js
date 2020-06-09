@@ -187,6 +187,7 @@ define(function (require) {
                     readings.rel_humidity = dv.getInt16(9,true) / 100;
                     readings.pressure = dv.getUint32(14,true) / 100;
                     readings.dew_point = Math.round(wxutils.dew_point(readings.temperature , readings.rel_humidity )*100)/100;
+                    // readings.heat_index = Math.round(wxutils.heat_index(readings.temperature , readings.rel_humidity )*100)/100;
                     break;
                 case 0x18:
                     readings.wind.speed  = Math.round(dv.getInt16(7, true)*1.94384)/100; // Instant wind direction

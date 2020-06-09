@@ -236,40 +236,6 @@ define(function (require) {
                     this.$('#dewpointreading').html(data.dew_point + '&nbsp;&deg;');
                 }
             }
-            if (data.heat_index != undefined) {
-                dp = {'name': 'heat_index',
-                      'value': data.heat_index,
-                      'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.tempRHplot.fastAppendPoint(dp);
-                } else {
-                    this.tempRHplot.appendPoint(dp);
-                    this.$('#heatindexreading').html(data.heat_index + '&nbsp;&deg;');
-                }
-            }
-            if (data.wetbulb != undefined) {
-                dp = {'name': 'wetbulb',
-                      'value': data.wetbulb,
-                      'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.tempRHplot.fastAppendPoint(dp);
-                } else {
-                    this.tempRHplot.appendPoint(dp);
-                    this.$('#wetbulbreading').html(data.wetbulb + '&nbsp;&deg;');
-                }
-            }
-            if (data.wind_chill != undefined) {
-                dp = {'name': 'wind_chill',
-                      'value': data.wind_chill,
-                      'timestamp': ts};
-                if (typeof ts != 'undefined') {
-                    this.tempRHplot.fastAppendPoint(dp);
-                } else {
-                    this.tempRHplot.appendPoint(dp);
-                    this.$('#windchillreading').html(data.wind_chill + '&nbsp;&deg;');
-                }
-            }
-
             if (data.rel_humidity != undefined) {
                 dp = {'name': 'rel_humidity',
                       'value': data.rel_humidity,
@@ -301,15 +267,15 @@ define(function (require) {
             if (data.uv_index != undefined) {
                 this.$('#uvindex').html((data.uv_index).toFixed(1));
                 if (data.uv_index < 2) {
-                    this.$('#uvdiv').css('background', 'green');
-                } else if (data.uv_index < 5) {
-                    this.$('#uvdiv').css('background', 'orange');
+                    this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #4caf50 0%, #4caf50 63%,transparent 97%)');
+                } else if (data.uv_index < 5) { 
+                    this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #f57f20 0%, #f57f20 63%,transparent 97%)');
                 }  else if (data.uv_index < 7) {
-                    this.$('#uvdiv').css('background', 'red');
+                    this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #e51c23 0%, #e51c23 63%,transparent 97%)');
                 } else if (data.uv_index < 10) {
-                    this.$('#uvdiv').css('background', 'purple');
+                    this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #7d33f5 0%, #7d33f5 63%,transparent 97%)');
                 } else {
-                    this.$('#uvdiv').css('background', 'blue');
+                    this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #518cf7 0%, #518cf7 63%,transparent 97%)');
                 }
             }
         },
