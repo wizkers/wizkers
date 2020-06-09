@@ -65,7 +65,7 @@ define(function (require) {
         // This has to be a Backbone view
         // This is the full screen live view graph (not a small widget)
         this.getLiveDisplay = function (arg, callback) {
-            require(['app/instruments/kestrel5/display_live'], function (view) {
+            require(['app/instruments/weatherflow/display_live'], function (view) {
                 current_liveview = new view(arg);
                 callback(current_liveview);
             });

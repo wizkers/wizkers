@@ -1,0 +1,99 @@
+<!-- this is added within a row area -->
+<div class="col-md-12" id="liveview_in">
+    <div class="row" id="tempchart_row">
+        <div class="col-md-8">
+             <div class="chart" id="tempRHchart"></div>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col-xs-6">
+                        <span class="mediumreading" id="tempreading">00&nbsp;&deg;</span></br>
+                        <div style="position:absolute; left: 10px;  bottom: -15px;">
+                            <div style="border:1px solid #ccc;padding:1px; display:inline-block">
+                                <div id="temperature-color" style="width:4px;height:0;border:5px solid rgb(200, 200, 200);overflow:hidden"></div>
+                            </div>
+                            <small>Temperature</small>
+                        </div>
+                </div>
+                <div class="col-xs-6">
+                    <span class="mediumreading" id="rhreading">00&nbsp;%</span></br>
+                        <div style="position:absolute; left: 10px;  bottom: -15px;">
+                            <div style="border:1px solid #ccc;padding:1px; display:inline-block">
+                                <div id="rel_humidity-color" style="width:4px;height:0;border:5px solid rgb(200, 200, 200);overflow:hidden"></div>
+                            </div>
+                            <small>Rel. Humidity</small>
+                        </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px;">
+                <div class="col-xs-6">
+                    <span class="mediumreading" id="windchillreading">00&nbsp;&deg;</span></br>
+                        <div style="position:absolute; left: 10px;  bottom: -15px;">
+                            <div style="border:1px solid #ccc;padding:1px; display:inline-block">
+                                <div id="wind_chill-color" style="width:4px;height:0;border:5px solid rgb(200, 200, 200);overflow:hidden"></div>
+                            </div>
+                            <small>Wind Chill</small>
+                        </div>
+                </div>
+                <div class="col-xs-6">
+                    <span class="mediumreading" id="heatindexreading">00&nbsp;&deg;</span></br>
+                        <div style="position:absolute; left: 10px;  bottom: -15px;">
+                            <div style="border:1px solid #ccc;padding:1px; display:inline-block">
+                                <div id="heat_index-color" style="width:4px;height:0;border:5px solid rgb(200, 200, 200);overflow:hidden"></div>
+                            </div>
+                        <small>Heat Index</small>
+                        </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px;">
+                <div class="col-xs-6">
+                    <span class="mediumreading" id="dewpointreading">00&nbsp;&deg;</span></br>
+                        <div style="position:absolute; left: 10px;  bottom: -15px;">
+                            <div style="border:1px solid #ccc;padding:1px; display:inline-block">
+                                <div id="dew_point-color" style="width:4px;height:0;border:5px solid rgb(200, 200, 200);overflow:hidden"></div>
+                            </div>
+                        <small>Dew Point</small>
+                        </div>
+                </div>
+                <div class="col-xs-6">
+                    <span class="mediumreading" id="wetbulbreading">00&nbsp;&deg;</span></br>
+                        <div style="position:absolute; left: 10px;  bottom: -15px;">
+                            <div style="border:1px solid #ccc;padding:1px; display:inline-block">
+                                <div id="wetbulb-color" style="width:4px;height:0;border:5px solid rgb(200, 200, 200);overflow:hidden"></div>
+                            </div>
+                        <small>Wet Bulb</small>
+                        </div>
+                </div>
+                <div class="hidden-md" style="margin-top:20px;">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="hidden-md" style="margin-top:20px;">
+                &nbsp;
+            </div>
+
+        </div>
+    </div>
+    <div class="row" id="barochart_row">
+        <div class="col-md-8">
+             <div class="chart" id="barochart"></div>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col-xs-6 col-md-12">
+                    <span class="mediumreading" id="pressurereading">00&nbsp;mb</span><br>
+                    <small style="position:absolute; left: 10px;  bottom: -10px;">Pressure</small>
+                </div>
+                <div class="hidden-xs" style="margin-top:30px;">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6 col-md-12" id="uvdiv">
+                    <span class="mediumreading" id="uvindex">00</span><br>
+                    <small style="position:absolute; left: 10px;  bottom: -10px;">UV Index</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

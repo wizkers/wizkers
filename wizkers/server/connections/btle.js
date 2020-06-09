@@ -144,7 +144,7 @@ define(function (require) {
             // characteristics for the service we're looking for before
             // going further
             var s = findService(subscribeInfo.service_uuid);
-            debug('Found my service');
+            debug('Found my service', s);
             if (typeof subscribeInfo.characteristic_uuid == 'object') { // Arrays are objects in Node
                 var cuid = [];
                 for (var i in subscribeInfo.characteristic_uuid ) {

@@ -46,6 +46,7 @@ define(function (require) {
 
     var abutils = require('app/lib/abutils'),
         utils = require('app/utils'),
+        wxutils = require('app/lib/wxutils'),
         btleConnection = require('connections/btle');
 
     var parser = function (socket) {
@@ -166,28 +167,29 @@ define(function (require) {
             var ptype = dv.getInt8(0);
             switch (ptype) {
                 case 0x1a:
-                    readings.sensor_voltage = dv.getInt16(18,true) / 100;
+                    readings.sensor_voltage = dv.getInt16(17,true) / 1000;
                     break;
                 case 0x52:
                     readings.brightness = dv.getUint32(7, true);
-                    readings.uv_index = dv.getUint16(11, true);
+                    readings.uv_index = dv.getUint16(11, true) / 100;
                     readings.solar_radiation = dv.getUint16(17, true);
                     break;
                 case 0x53:
-                    readings.wind.speed_avg = dv.getInt16(7, true) *1.94384/100; // Convert to knots
+                    readings.wind.speed_avg = Math.round(dv.getInt16(7, true) *1.94384)/100; // Convert to knots
                     readings.wind.dir_avg = dv.getInt16(9, true);
-                    readings.wind.gust = dv.getInt16(13,true) * 1.94384/100;
+                    readings.wind.gust = Math.round(dv.getInt16(13,true) * 1.94384)/100;
                     readings.wind.other = dv.getInt16(15, true);
-                    readings.wind.lull = dv.getInt16(11,true) * 1.94384/100;
+                    readings.wind.lull = Math.round(dv.getInt16(11,true) * 1.94384)/100;
                     readings.wind.avg_period = dv.getInt8(17);
                     break;
                 case 0x54:
                     readings.temperature = dv.getInt16(7,true) / 100;
                     readings.rel_humidity = dv.getInt16(9,true) / 100;
                     readings.pressure = dv.getUint32(14,true) / 100;
+                    readings.dew_point = Math.round(wxutils.dew_point(readings.temperature , readings.rel_humidity )*100)/100;
                     break;
                 case 0x18:
-                    readings.wind.speed  = dv.getInt16(7, true)*1.94384/100; // Instant wind direction
+                    readings.wind.speed  = Math.round(dv.getInt16(7, true)*1.94384)/100; // Instant wind direction
                     readings.wind.dir = dv.getInt16(9, true);
                     break;
                 default:
