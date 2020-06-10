@@ -267,17 +267,27 @@ define(function (require) {
             if (data.uv_index != undefined) {
                 this.$('#uvindex').html((data.uv_index).toFixed(1));
                 if (data.uv_index < 2) {
-                    this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #4caf50 0%, #4caf50 63%,transparent 97%)');
+                    // this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #4caf50 0%, #4caf50 63%,transparent 97%)');
+                    this.$('#uvdiv').css('background', '#4caf50');
                 } else if (data.uv_index < 5) { 
-                    this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #f57f20 0%, #f57f20 63%,transparent 97%)');
+                    this.$('#uvdiv').css('background', '#ffd715');
                 }  else if (data.uv_index < 7) {
-                    this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #e51c23 0%, #e51c23 63%,transparent 97%)');
+                    this.$('#uvdiv').css('background', '#f57f20');
                 } else if (data.uv_index < 10) {
-                    this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #7d33f5 0%, #7d33f5 63%,transparent 97%)');
+                    this.$('#uvdiv').css('background', '#e51c23');
                 } else {
-                    this.$('#uvdiv').css('background', 'linear-gradient(to bottom, #518cf7 0%, #518cf7 63%,transparent 97%)');
+                    this.$('#uvdiv').css('background', '#7d33f5');
                 }
             }
+
+            if(data.brightness != undefined) {
+                this.$('#brightness').html((data.brightness));
+            }
+            if(data.solar_radiation != undefined) {
+                this.$('#solar_radiation').html((data.solar_radiation));
+            }
+
+
         },
 
         // We get there whenever we receive something from the serial port

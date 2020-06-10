@@ -192,13 +192,15 @@ define(function (require) {
                 case 0x18:
                     readings.wind.speed  = Math.round(dv.getInt16(7, true)*1.94384)/100; // Instant wind direction
                     readings.wind.dir = dv.getInt16(9, true);
+                    // Trigger a limited packet
+                    self.trigger('data', { wind: { speed: readings.wind.speed, dir: readings.wind.dir}, unit: { wind: { speed: 'knots', dir: 'degree'}}});
                     break;
                 default:
                     break;
 
             }
             // TODO: we should be able to send partial updates to save on data
-            if (ptype == 0x54 || ptype == 0x18)
+            if (ptype == 0x54)
                 self.trigger('data', readings);
 
         }

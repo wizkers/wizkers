@@ -131,6 +131,38 @@ a.plain:hover {
 }
 
 /**
+ * Nice display cards for readings using flex layouts - "fl"
+ */
+.fl-reading-card {
+    display: flex;
+    /* box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4); */
+}
+
+.fl-reading-card p {
+    margin: 0 0 0 0;
+}
+
+.fl-reading-main {
+    flex-grow: 3;
+}
+
+/* .fl-reading-sub {
+} */
+
+.fl-reading-secondary {
+    text-align: center;
+    flex-grow: 1;
+}
+
+.fl-label {
+
+}
+
+.fl-value {
+
+}
+
+/**
  * Flot charts styling
  */
 
