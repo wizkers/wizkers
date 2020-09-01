@@ -90,7 +90,7 @@ define(function (require) {
             $('#fw_dl', this.el).html('Downloading...').addClass('btn-warning');
             var xhr = new XMLHttpRequest();
             // Version 2.0.1
-            xhr.open('GET', 'https://www.dropbox.com/s/aqnxixx32hl6kz8/BLEBee-Firmware-BLE113-2.0.1-BLE-SDK1.3.2-b122.ota?dl=1', true);
+            xhr.open('GET', 'https://github.com/michaelkroll/BLEbee/blob/master/firmware/BLEbee-v2.0.1/BLEBee-Firmware-BLE113-2.0.1-BLE-SDK1.3.2-b122.ota', true);
             // Version 2.0.0
             //xhr.open('GET', 'https://www.dropbox.com/s/uh22hgfmxjp6n18/BLEBee-Firmware-BLE113-2.0.0-BLE-SDK1.3.2-b122.ota?dl=1', true);
             xhr.responseType = 'arraybuffer';
