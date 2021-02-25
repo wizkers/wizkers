@@ -839,14 +839,16 @@ io.sockets.on('connection', function (socket) {
         socket_debug('Request for a list of ports for', insType);
         var ct = instrumentManager.getConnectionTypeFor(insType);
             if (ct == 'app/views/instrument/serialport') {
-                SerialPort.list(function (err, ports) {
+                SerialPort.list().then(
+                    ports => {
                     var portlist = [];
                     for (var i = 0; i < ports.length; i++) {
                         portlist.push(ports[i].comName);
                     }
                     portlist.push('TCP/IP'); // We also support virtual ports over TCP/IP
-                    socket.emit('ports', portlist);
-                });
+                    socket.emit('ports', portlist); },
+                    err => console.error(err)
+                );
             } else if (ct == 'app/views/instrument/bluetooth') {
                 var filter = instrumentManager.getConnectionFilterFor(insType);
                 debug('Scanning for Bluetooth LE peripherals',filter);
