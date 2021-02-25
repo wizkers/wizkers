@@ -1,0 +1,76 @@
+<!-- this is added within a row area -->
+<div class="col-md-12" id="liveview_in">
+    <div class="row" id="tempchart_row">
+        <div class="col-md-8">
+             <div class="chart" id="tempRHchart"></div>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col-xs-6">
+                        <span class="mediumreading" id="tempreading">00&nbsp;&deg;</span></br>
+                        <div style="position:absolute; left: 10px;  bottom: -15px;">
+                            <div style="border:1px solid #ccc;padding:1px; display:inline-block">
+                                <div id="temperature-color" style="width:4px;height:0;border:5px solid rgb(200, 200, 200);overflow:hidden"></div>
+                            </div>
+                            <small>Temperature</small>
+                        </div>
+                </div>
+                <div class="col-xs-6">
+                    <span class="mediumreading" id="rhreading">00&nbsp;%</span></br>
+                        <div style="position:absolute; left: 10px;  bottom: -15px;">
+                            <div style="border:1px solid #ccc;padding:1px; display:inline-block">
+                                <div id="rel_humidity-color" style="width:4px;height:0;border:5px solid rgb(200, 200, 200);overflow:hidden"></div>
+                            </div>
+                            <small>Rel. Humidity</small>
+                        </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px;">
+                <div class="col-xs-6">
+                    <span class="mediumreading" id="dewpointreading">00&nbsp;&deg;</span></br>
+                        <div style="position:absolute; left: 10px;  bottom: -15px;">
+                            <div style="border:1px solid #ccc;padding:1px; display:inline-block">
+                                <div id="dew_point-color" style="width:4px;height:0;border:5px solid rgb(200, 200, 200);overflow:hidden"></div>
+                            </div>
+                        <small>Dew Point</small>
+                        </div>
+                </div>
+                <div class="hidden-md" style="margin-top:20px;">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="hidden-md" style="margin-top:20px;">
+                &nbsp;
+            </div>
+
+        </div>
+    </div>
+    <div class="row" id="barochart_row">
+        <div class="col-md-8">
+             <div class="chart" id="barochart"></div>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col-xs-6 col-md-12">
+                    <span class="mediumreading" id="pressurereading">00&nbsp;mb</span><br>
+                    <small style="position:absolute; left: 10px;  bottom: -10px;">Pressure</small>
+                </div>
+                <div style="margin-top:20px;">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 fl-reading-card" id="uvdiv">
+                    <span class="mediumreading fl-reading-main" id="uvindex">00</span><br>
+                    <div class="fl-reading-secondary">
+                        <p>Brightness</p><p id="brightness">000000</p>
+                    </div>
+                    <div class="fl-reading-secondary">
+                        <p>Solar radiation</p><p id="solar_radiation">000 W/m2</p>
+                    </div>
+                    <small style="position:absolute; left: 10px;  bottom: -10px;">UV Index</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -144,7 +144,7 @@ define(function (require) {
             // characteristics for the service we're looking for before
             // going further
             var s = findService(subscribeInfo.service_uuid);
-            debug('Found my service');
+            debug('Found my service', s);
             if (typeof subscribeInfo.characteristic_uuid == 'object') { // Arrays are objects in Node
                 var cuid = [];
                 for (var i in subscribeInfo.characteristic_uuid ) {
@@ -251,6 +251,7 @@ define(function (require) {
                 return;
             }
             // First we unsubscribe from all characteristics we're listening to:
+            debug("Unsubscribing from all subscribed characteristics");
             for (var i in subscribedCharacteristics) {
                 try {
                     subscribedCharacteristics[i].unsubscribe();
@@ -261,18 +262,43 @@ define(function (require) {
             }
             subscribedCharacteristics = [];
             activePeripheral.removeAllListeners('connect'); // Just in case
-            activePeripheral.disconnect(function (result) {
-                debug('Peripheral closed');
+            debug("Disconnecting BLE link");
+            if ( portOpen && activePeripheral.state == 'connected') {
+                debug(activePeripheral);
+                activePeripheral.disconnect(function (result) {
+                    activePeripheral.removeAllListeners('disconnect'); // Re. trackError
+                    debug('Peripheral closed');
+                    portOpen = false;
+                    self.emit('status', {
+                        portopen: portOpen
+                    });
+                });
+            } else {
+                // Sometimes a BLE open will just hang, and we end up closing without
+                // the portOpen status ever going to true, so catch that edge case here
+                debug('Peripheral closed from half-open or already disconnected state');
                 portOpen = false;
                 self.emit('status', {
                     portopen: portOpen
                 });
-            });
+            }
+
         };
 
         // Has to be called by the backend_driver to actually open the port.
         // This just connects to the device
         this.open = function () {
+            // Can't open if the adapted is not in powerOn state
+            if (noble.state != 'poweredOn') {
+                self.emit('status', {
+                    openerror: true,
+                    portopen: false,
+                    reason: 'Device connection error',
+                    description: 'Bluetooth is not enabled'
+                });
+                return;
+            }
+
             if (typeof noble.wizkersScanningCount == 'undefined')
                 noble.wizkersScanningCount = 0;
             // noble, the NodeJS we use, seems to require a scan to find
@@ -322,6 +348,12 @@ define(function (require) {
             // We might have several peripherals trying to connect at once,
             // so we must not stop scanning before they have all either connected
             // or given up
+
+            // Also make sure the timeout timer is cleared
+            if (timeoutCheckTimer) {
+                clearTimeout(timeoutCheckTimer);
+                timeoutCheckTimer = 0;
+            }
             noble.wizkersScanningCount--;
             debug('Number of scans going on now:', noble.wizkersScanningCount);
             if (noble.wizkersScanningCount <= 0) {
@@ -433,6 +465,7 @@ define(function (require) {
                 self.close();
             } else {
                 // Just keep reconnecting forever...
+                // Note: this is also reached when we close the peripheral
                 debug('Error while connected: either device out of range, or user closed device.');
             }
             return;

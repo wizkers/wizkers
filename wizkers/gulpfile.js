@@ -381,12 +381,12 @@ gulp.task('browser', gulp.series('build', 'browser_copy_build', function () {
 /**
  * Copy the build files to the server directory
  */
-gulp.task('server_copy_build', gulp.series('build', function () {
+gulp.task('server_copy_build', function () {
     return gulp.src([paths.build + '/www/**/*'], {
             base: paths.build
         })
         .pipe(gulp.dest(paths.server_dist));
-}));
+});
 
 gulp.task('server_original', gulp.series('build', 'server_copy_build', function () {
     return gulp.src(paths.server_files, {
@@ -395,12 +395,12 @@ gulp.task('server_original', gulp.series('build', 'server_copy_build', function 
         .pipe(gulp.dest(paths.server_dist));
 }));
 
-gulp.task('oem_server_overlay', gulp.series('server_original', function () {
+gulp.task('oem_server_overlay', function () {
     return gulp.src(paths.oem_server_files, {
             base: oem_directory + '/server'
         })
         .pipe(gulp.dest(paths.server_dist));
-}));
+});
 
 gulp.task('server', gulp.series('server_original', 'oem_server_overlay'));
 
