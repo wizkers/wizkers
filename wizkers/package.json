@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "amd-optimize": "^0.6.1",
-    "electron": "^3.0.6",
+    "electron": "^9.4.0",
     "gulp": "^4.0.2",
     "gulp-change": "^1.0.2",
     "gulp-concat": "^2.6.1",
