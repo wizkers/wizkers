@@ -27,7 +27,6 @@ var debug = require('gulp-debug');
 var tap = require('gulp-tap');
 var change = require('gulp-change');
 var rename = require('gulp-rename');
-var amdOptimize = require('amd-optimize');
 var concat = require('gulp-concat');
 
 var fs = require('fs');
