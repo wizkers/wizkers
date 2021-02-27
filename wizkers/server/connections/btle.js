@@ -43,7 +43,6 @@ define(function (require) {
     "use strict";
 
     var EventEmitter = require('events').EventEmitter,
-        noble = require('noble'),
         util = require('util'),
         abu = require('app/lib/abutils');
 
@@ -264,7 +263,6 @@ define(function (require) {
             activePeripheral.removeAllListeners('connect'); // Just in case
             debug("Disconnecting BLE link");
             if ( portOpen && activePeripheral.state == 'connected') {
-                debug(activePeripheral);
                 activePeripheral.disconnect(function (result) {
                     activePeripheral.removeAllListeners('disconnect'); // Re. trackError
                     debug('Peripheral closed');
