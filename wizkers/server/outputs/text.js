@@ -99,6 +99,7 @@ module.exports = function text() {
                 dbs.outputs.put(output_ref, function (err, result) {});
             });
             cb(false, idx);
+            return;
         }
 
         if (settings.writemode == 'append') {
@@ -106,6 +107,10 @@ module.exports = function text() {
         }
 
         var bytes = fs.writeSync(fh, contents);
+        fs.close(fh, (err) => {
+            if (err)
+                debug("Error closing the text file");
+        });
         if (bytes == 0) {
             output_ref.lastmessage = 'Error: file write error for ' + contents;
             dbs.outputs.get(output_ref._id, function (err, result) {

@@ -143,6 +143,10 @@ define(function (require) {
             // characteristics for the service we're looking for before
             // going further
             var s = findService(subscribeInfo.service_uuid);
+            if (s == null) {
+                debug('Did not find the service we were looking for, aborting.');
+                return;
+            }
             debug('Found my service', s);
             if (typeof subscribeInfo.characteristic_uuid == 'object') { // Arrays are objects in Node
                 var cuid = [];
